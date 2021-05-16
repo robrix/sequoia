@@ -1,0 +1,75 @@
+cabal-version:      2.4
+name:               focalized
+version:            0.0.0.0
+synopsis:
+
+-- A longer description of the package.
+-- description:
+homepage:
+
+-- A URL where users can report bugs.
+-- bug-reports:
+license:            BSD-3-Clause
+-- license-file:       LICENSE
+author:             Rob Rix
+maintainer:         rob.rix@me.com
+
+-- A copyright notice.
+-- copyright:
+category:           Language
+-- extra-source-files: CHANGELOG.md
+
+common common
+  default-language: Haskell2010
+  ghc-options:
+    -Weverything
+    -Wno-all-missed-specialisations
+    -Wno-implicit-prelude
+    -Wno-missed-specialisations
+    -Wno-missing-import-lists
+    -Wno-missing-local-signatures
+    -Wno-monomorphism-restriction
+    -Wno-name-shadowing
+    -Wno-safe
+    -Wno-unsafe
+  if (impl(ghc >= 8.8))
+    ghc-options: -Wno-missing-deriving-strategies
+  if (impl(ghc >= 8.10))
+    ghc-options:
+      -Wno-missing-safe-haskell-mode
+      -Wno-prepositive-qualified-module
+  default-extensions:
+    DeriveTraversable
+    DerivingStrategies
+    DerivingVia
+    DisambiguateRecordFields
+    DuplicateRecordFields
+    EmptyCase
+    FlexibleContexts
+    FlexibleInstances
+    GeneralizedNewtypeDeriving
+    KindSignatures
+    LambdaCase
+    MultiParamTypeClasses
+    MultiWayIf
+    NamedFieldPuns
+    RankNTypes
+    StandaloneDeriving
+    TupleSections
+    TypeApplications
+    TypeOperators
+    ViewPatterns
+
+library
+  import: common
+  exposed-modules:
+    Focalized.Proof
+
+  -- Modules included in this library but not exported.
+  -- other-modules:
+
+  -- LANGUAGE extensions used by modules in this package.
+  -- other-extensions:
+  build-depends:
+    , base ^>=4.14.1.0
+  hs-source-dirs:   src
