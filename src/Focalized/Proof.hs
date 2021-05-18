@@ -8,6 +8,7 @@ module Focalized.Proof
 ) where
 
 import Control.Applicative (Alternative(..))
+
 runDerivation :: Derivation a b -> [b]
 runDerivation (Derivation m) = m Nil
 
