@@ -1,6 +1,6 @@
 module Focalized.Proof
-( runDerivation
-, Derivation(..)
+( runProof
+, Proof(..)
 , (:|-:)(..)
 , contradiction
 , assert
@@ -11,10 +11,10 @@ module Focalized.Proof
 import Control.Applicative (Alternative(..))
 import Prelude hiding (init)
 
-runDerivation :: Derivation a b -> [b]
-runDerivation (Derivation m) = m Nil
+runProof :: Proof a b -> [b]
+runProof (Proof m) = m Nil
 
-newtype Derivation a b = Derivation (Γ a |- Δ b)
+newtype Proof a b = Proof (Γ a |- Δ b)
 
 type Γ = Snoc
 type Δ = []
