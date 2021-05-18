@@ -10,11 +10,12 @@ module Focalized.Proof
 , init
 ) where
 
+import           Control.Carrier.NonDet.Church
 import qualified Control.Category as C
-import           Data.Sequence
+import qualified Data.Sequence as S
 import           Prelude hiding (init)
 
-runProof :: Proof a b -> Seq b
+runProof :: Proof a b -> S.Seq b
 runProof (Proof m) = m empty
 
 newtype Proof a b = Proof (Γ a |- Δ b)
@@ -23,8 +24,8 @@ instance C.Category Proof where
   id = Proof id
   Proof bc . Proof ab = Proof $ bc . ab
 
-type Γ = Seq
-type Δ = Seq
+type Γ = S.Seq
+type Δ = S.Seq
 type (|-) = (->)
 
 
