@@ -16,3 +16,5 @@ data Context a
   = Nil
   | Context a :> a
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+
+infixl 5 :>
