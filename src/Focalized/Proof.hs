@@ -73,5 +73,5 @@ axiom :: a :|-: b -> Rule a b
 axiom s = [] :---: s
 
 
-init :: a -> a :|-: a
-init a = pure a :|-: pure a
+init :: a -> Rule a a
+init a = axiom $ pure a :|-: pure a
