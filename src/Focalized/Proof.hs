@@ -20,6 +20,10 @@ data Snoc a
 
 infixl 5 :>
 
+instance Semigroup (Snoc a) where
+  as <> Nil       = as
+  as <> (bs :> b) = (as <> bs) :> b
+
 
 data a :|-: b = Γ a :|-: Δ b
 
