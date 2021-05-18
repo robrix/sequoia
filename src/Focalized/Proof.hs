@@ -50,7 +50,7 @@ instance Monad Snoc where
 
 data a :|-: b = Γ a :|-: Δ b
 
-infix 1 :|-:
+infix 2 :|-:
 
 
 contradiction :: a :|-: b
