@@ -2,6 +2,7 @@ module Focalized.Proof
 ( runDerivation
 , Derivation(..)
 , (:|-:)(..)
+, contradiction
 ) where
 
 runDerivation :: Derivation a b -> [b]
@@ -40,3 +41,7 @@ instance Monad Snoc where
 data a :|-: b = Γ a :|-: Δ b
 
 infix 1 :|-:
+
+
+contradiction :: a :|-: b
+contradiction = Nil :|-: []
