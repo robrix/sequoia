@@ -9,13 +9,13 @@ runDerivation (Derivation m) = m Nil
 
 newtype Derivation a b = Derivation (Γ a |- Δ b)
 
-type Γ = Context
+type Γ = Snoc
 type Δ = []
 type (|-) = (->)
 
-data Context a
+data Snoc a
   = Nil
-  | Context a :> a
+  | Snoc a :> a
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
 infixl 5 :>
