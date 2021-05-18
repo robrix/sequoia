@@ -24,6 +24,9 @@ instance Semigroup (Snoc a) where
   as <> Nil       = as
   as <> (bs :> b) = (as <> bs) :> b
 
+instance Monoid (Snoc a) where
+  mempty = Nil
+
 
 data a :|-: b = Γ a :|-: Δ b
 
