@@ -3,6 +3,7 @@ module Focalized.Proof
 , Derivation(..)
 , (:|-:)(..)
 , contradiction
+, assert
 ) where
 
 runDerivation :: Derivation a b -> [b]
@@ -45,3 +46,6 @@ infix 1 :|-:
 
 contradiction :: a :|-: b
 contradiction = Nil :|-: []
+
+assert :: b -> a :|-: b
+assert b = Nil :|-: [b]
