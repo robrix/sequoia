@@ -11,22 +11,23 @@ module Focalized.Proof
 ) where
 
 import           Control.Carrier.NonDet.Church
+import           Control.Carrier.Reader
 import qualified Control.Category as C
+import           Data.Functor.Identity
 import qualified Data.Sequence as S
 import           Prelude hiding (init)
 
-runProof :: Proof a b -> Δ b
-runProof (Proof m) = m empty
+runProof :: Γ a -> Proof a b -> Δ b
+runProof hyp (Proof m) = run (runNonDetA (runReader hyp m))
 
-newtype Proof a b = Proof (Γ a |- Δ b)
+newtype Proof a b = Proof (ReaderC (Γ a) (NonDetC Identity) b)
 
 instance C.Category Proof where
-  id = Proof id
-  Proof bc . Proof ab = Proof $ bc . ab
+  id = Proof (ReaderC oneOf)
+  Proof bc . ab = Proof $ ReaderC $ \ h -> runReader (runProof h ab) bc
 
 type Γ = S.Seq
 type Δ = S.Seq
-type (|-) = (->)
 
 
 data a :|-: b = Γ a :|-: Δ b
