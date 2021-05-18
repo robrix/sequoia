@@ -1,2 +1,5 @@
 module Focalized.Proof
-() where
+( Derivation(..)
+) where
+
+newtype Derivation a = Derivation a
