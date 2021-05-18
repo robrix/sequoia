@@ -7,6 +7,7 @@ module Focalized.Proof
 , refute
 ) where
 
+import Control.Applicative (Alternative(..))
 runDerivation :: Derivation a b -> [b]
 runDerivation (Derivation m) = m Nil
 
@@ -34,6 +35,10 @@ instance Applicative Snoc where
   pure a = Nil :> a
   Nil     <*> _  = Nil
   fs :> f <*> as = (fs <*> as) <> (f <$> as)
+
+instance Alternative Snoc where
+  empty = mempty
+  (<|>) = (<>)
 
 instance Monad Snoc where
   Nil     >>= _ = Nil
