@@ -22,3 +22,5 @@ infixl 5 :>
 
 
 data a :|-: b = Γ a :|-: Δ b
+
+infix 1 :|-:
