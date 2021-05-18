@@ -5,6 +5,7 @@ module Focalized.Proof
 , contradiction
 , assert
 , refute
+, Rule(..)
 , init
 ) where
 
@@ -61,6 +62,11 @@ assert b = empty :|-: pure b
 
 refute :: a -> a :|-: b
 refute a = pure a :|-: empty
+
+
+data Rule a b = [a :|-: b] :---: (a :|-: b)
+
+infix 1 :---:
 
 
 init :: a -> a :|-: a
