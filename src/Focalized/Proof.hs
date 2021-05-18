@@ -5,9 +5,11 @@ module Focalized.Proof
 , contradiction
 , assert
 , refute
+, init
 ) where
 
 import Control.Applicative (Alternative(..))
+import Prelude hiding (init)
 
 runDerivation :: Derivation a b -> [b]
 runDerivation (Derivation m) = m Nil
@@ -59,3 +61,7 @@ assert b = empty :|-: pure b
 
 refute :: a -> a :|-: b
 refute a = pure a :|-: empty
+
+
+init :: a -> a :|-: a
+init a = pure a :|-: pure a
