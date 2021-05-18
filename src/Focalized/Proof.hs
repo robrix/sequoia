@@ -4,9 +4,11 @@ module Focalized.Proof
 ) where
 
 import Control.Carrier.NonDet.Church
-import Data.Functor.Identity
 
 runDerivation :: Derivation a -> [a]
-runDerivation (Derivation m) = run (runNonDetA m)
+runDerivation (Derivation m) = runNonDetA m []
 
-newtype Derivation a = Derivation (NonDetC Identity a)
+type Prop = String
+type Context = [Prop]
+
+newtype Derivation a = Derivation (NonDetC ((->) Context) a)
