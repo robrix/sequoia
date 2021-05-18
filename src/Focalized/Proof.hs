@@ -27,6 +27,11 @@ instance Semigroup (Snoc a) where
 instance Monoid (Snoc a) where
   mempty = Nil
 
+instance Applicative Snoc where
+  pure a = Nil :> a
+  Nil     <*> _  = Nil
+  fs :> f <*> as = (fs <*> as) <> (f <$> as)
+
 
 data a :|-: b = Γ a :|-: Δ b
 
