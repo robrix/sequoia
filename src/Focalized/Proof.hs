@@ -32,6 +32,10 @@ instance Applicative Snoc where
   Nil     <*> _  = Nil
   fs :> f <*> as = (fs <*> as) <> (f <$> as)
 
+instance Monad Snoc where
+  Nil     >>= _ = Nil
+  as :> a >>= f = (as >>= f) <> f a
+
 
 data a :|-: b = Γ a :|-: Δ b
 
