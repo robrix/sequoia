@@ -15,7 +15,7 @@ import qualified Control.Category as C
 import qualified Data.Sequence as S
 import           Prelude hiding (init)
 
-runProof :: Proof a b -> S.Seq b
+runProof :: Proof a b -> Δ b
 runProof (Proof m) = m empty
 
 newtype Proof a b = Proof (Γ a |- Δ b)
