@@ -51,10 +51,10 @@ infix 1 :|-:
 
 
 contradiction :: a :|-: b
-contradiction = Nil :|-: []
+contradiction = empty :|-: empty
 
 assert :: b -> a :|-: b
-assert b = Nil :|-: [b]
+assert b = empty :|-: pure b
 
 refute :: a -> a :|-: b
-refute a = Nil :> a :|-: []
+refute a = pure a :|-: empty
