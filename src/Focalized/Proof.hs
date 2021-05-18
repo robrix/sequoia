@@ -1,6 +1,7 @@
 module Focalized.Proof
 ( runDerivation
 , Derivation(..)
+, (:|-:)(..)
 ) where
 
 runDerivation :: Derivation a b -> [b]
@@ -18,3 +19,6 @@ data Context a
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
 infixl 5 :>
+
+
+data a :|-: b = Γ a :|-: Δ b
