@@ -10,13 +10,18 @@ module Focalized.Proof
 , init
 ) where
 
-import Data.Sequence
-import Prelude hiding (init)
+import qualified Control.Category as C
+import           Data.Sequence
+import           Prelude hiding (init)
 
 runProof :: Proof a b -> Seq b
 runProof (Proof m) = m empty
 
 newtype Proof a b = Proof (Γ a |- Δ b)
+
+instance C.Category Proof where
+  id = Proof id
+  Proof bc . Proof ab = Proof $ bc . ab
 
 type Γ = Seq
 type Δ = Seq
