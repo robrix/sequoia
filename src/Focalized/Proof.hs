@@ -3,13 +3,12 @@ module Focalized.Proof
 , Derivation(..)
 ) where
 
-runDerivation :: Derivation a -> [a]
+runDerivation :: Derivation a b -> [b]
 runDerivation (Derivation m) = m Nil
 
-type Prop = String
-type Context = Snoc Prop
+type Context = Snoc
 
-newtype Derivation a = Derivation (Context -> [a])
+newtype Derivation a b = Derivation (Context a -> [b])
 
 
 data Snoc a
