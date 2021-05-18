@@ -72,5 +72,6 @@ library
   -- other-extensions:
   build-depends:
     , base ^>=4.14.1.0
+    , containers
     , fused-effects
   hs-source-dirs:   src
