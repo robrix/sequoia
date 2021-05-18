@@ -3,15 +3,13 @@ module Focalized.Proof
 , Derivation(..)
 ) where
 
-import Control.Carrier.NonDet.Church
-
 runDerivation :: Derivation a -> [a]
-runDerivation (Derivation m) = runNonDetA m Nil
+runDerivation (Derivation m) = m Nil
 
 type Prop = String
 type Context = Snoc Prop
 
-newtype Derivation a = Derivation (NonDetC ((->) Context) a)
+newtype Derivation a = Derivation (Context -> [a])
 
 
 data Snoc a
