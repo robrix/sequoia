@@ -52,6 +52,9 @@ data Context f a
 
 infixr 5 :<>:
 
+instance Semigroup (Context f a) where
+  (<>) = (:<>:)
+
 pattern Γ, Γ', Δ, Δ' :: Context f String
 pattern Γ = C (M "Γ")
 pattern Γ' = C (M "Γ′")
