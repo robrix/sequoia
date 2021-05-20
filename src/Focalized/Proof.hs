@@ -1,8 +1,11 @@
+{-# LANGUAGE PatternSynonyms #-}
 module Focalized.Proof
 ( runProof
 , Proof(..)
 , Entry(..)
 , Context(..)
+, pattern Γ
+, pattern Δ
 , (:|-:)(..)
 , contradiction
 , assert
@@ -38,6 +41,10 @@ data Context f a
   | Context f a :<>: Context f a
 
 infixr 5 :<>:
+
+pattern Γ, Δ :: Context f String
+pattern Γ = C (M "Γ")
+pattern Δ = C (M "Δ")
 
 
 data a :|-: b = Γ a :|-: Δ b
