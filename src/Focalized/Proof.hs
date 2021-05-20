@@ -2,6 +2,7 @@ module Focalized.Proof
 ( runProof
 , Proof(..)
 , Entry(..)
+, Context(..)
 , (:|-:)(..)
 , contradiction
 , assert
@@ -30,6 +31,12 @@ type Δ = S.Seq
 data Entry f a
   = M a
   | J (f a)
+
+data Context f a
+  = C (Entry f a)
+  | Context f a :<>: Context f a
+
+infixr 5 :<>:
 
 
 data a :|-: b = Γ a :|-: Δ b
