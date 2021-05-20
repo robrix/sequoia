@@ -25,6 +25,7 @@ module Focalized.Proof
 , truR
 , conjL
 , conjR
+, disjL
 , disjR1
 , disjR2
 ) where
@@ -151,6 +152,12 @@ conjR p q =
   [ Just Γ :|-: Just (p <| Δ), Just Γ' :|-: Just (q <| Δ') ]
   :---:
   Just (Γ <> Γ') :|-: Just (P (p :/\: q) <| Δ <> Δ')
+
+disjL :: Prop FOL String -> Prop FOL String -> Rule (Prop FOL) g String
+disjL p q =
+  [ Just (Γ |> p) :|-: Just Δ, Just (Γ |> q) :|-: Just Δ ]
+  :---:
+  Just (Γ |> P (p :\/: q)) :|-: Just Δ
 
 disjR1, disjR2 :: Prop FOL String -> Prop FOL String -> Rule f (Prop FOL) String
 
