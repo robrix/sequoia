@@ -144,6 +144,15 @@ infixr 6 :=>:
 infixr 7 :\/:
 infixr 8 :/\:
 
+(\/), (/\), (==>) :: Prop FOL a -> Prop FOL a -> Prop FOL a
+p \/ q = P (p :\/: q)
+p /\ q = P (p :/\: q)
+p ==> q = P (p :=>: q)
+
+infixr 6 ==>
+infixr 7 \/
+infixr 8 /\
+
 flsL :: Rule (Prop FOL) g String
 flsL = axiom $ Γ |> P Fls :|-: Δ
 
@@ -154,40 +163,40 @@ conjL :: Prop FOL String -> Prop FOL String -> Rule (Prop FOL) g String
 conjL p q =
   [ Γ |> p |> q :|-: Δ ]
   :---:
-  Γ |> P (p :/\: q) :|-: Δ
+  Γ |> p /\ q :|-: Δ
 
 conjR :: Prop FOL String -> Prop FOL String -> Rule f (Prop FOL) String
 conjR p q =
   [ Γ :|-: p <| Δ, Γ' :|-: q <| Δ' ]
   :---:
-  Γ <> Γ' :|-: P (p :/\: q) <| Δ <> Δ'
+  Γ <> Γ' :|-: p /\ q <| Δ <> Δ'
 
 disjL :: Prop FOL String -> Prop FOL String -> Rule (Prop FOL) g String
 disjL p q =
   [ Γ |> p :|-: Δ, Γ |> q :|-: Δ ]
   :---:
-  Γ |> P (p :\/: q) :|-: Δ
+  Γ |> p \/ q :|-: Δ
 
 disjR1, disjR2 :: Prop FOL String -> Prop FOL String -> Rule f (Prop FOL) String
 
 disjR1 p q =
   [ Γ :|-: p <| Δ ]
   :---:
-  Γ :|-: P (p :\/: q) <| Δ
+  Γ :|-: p \/ q <| Δ
 
 disjR2 p q =
   [ Γ :|-: q <| Δ ]
   :---:
-  Γ :|-: P (p :\/: q) <| Δ
+  Γ :|-: p \/ q <| Δ
 
 implL :: Prop FOL String -> Prop FOL String -> Rule (Prop FOL) (Prop FOL) String
 implL p q =
   [ Γ :|-: p <| Δ, Γ' |> q :|-: Δ' ]
   :---:
-  Γ <> Γ' |> P (p :=>: q) :|-: Δ <> Δ'
+  Γ <> Γ' |> p ==> q :|-: Δ <> Δ'
 
 implR :: Prop FOL String -> Prop FOL String -> Rule (Prop FOL) (Prop FOL) String
 implR p q =
   [ Γ |> p :|-: q <| Δ ]
   :---:
-  Γ :|-: P (p :=>: q) <| Δ
+  Γ :|-: p ==> q <| Δ
