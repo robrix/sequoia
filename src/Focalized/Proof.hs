@@ -28,6 +28,7 @@ module Focalized.Proof
 , disjL
 , disjR1
 , disjR2
+, implL
 ) where
 
 import           Control.Carrier.NonDet.Church
@@ -170,3 +171,9 @@ disjR2 p q =
   [ Just Γ :|-: Just (q <| Δ) ]
   :---:
   Just Γ :|-: Just (P (p :\/: q) <| Δ)
+
+implL :: Prop FOL String -> Prop FOL String -> Rule (Prop FOL) (Prop FOL) String
+implL p q =
+  [ Just Γ :|-: Just (p <| Δ), Just (Γ' |> q) :|-: Just Δ' ]
+  :---:
+  Just (Γ <> Γ' |> P (p :=>: q)) :|-: Just (Δ <> Δ')
