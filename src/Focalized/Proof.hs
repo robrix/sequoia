@@ -6,6 +6,10 @@ module Focalized.Proof
 , Context(..)
 , pattern Γ
 , pattern Δ
+, (<|)
+, viewl
+, (|>)
+, viewr
 , (:|-:)(..)
 , contradiction
 , assert
@@ -45,6 +49,33 @@ infixr 5 :<>:
 pattern Γ, Δ :: Context f String
 pattern Γ = C (M "Γ")
 pattern Δ = C (M "Δ")
+
+
+(<|) :: f a -> Context f a -> Context f a
+e <| c = C (J e) :<>: c
+
+infixr 5 <|
+
+viewl :: Context f a -> (Entry f a, Maybe (Context f a))
+viewl = \case
+  C e      -> (e, Nothing)
+  l :<>: r -> go l r where
+    go l r = case l of
+      C e        -> (e, Just r)
+      l1 :<>: l2 -> go l1 (l2 :<>: r)
+
+(|>) :: Context f a -> f a -> Context f a
+c |> e = c :<>: C (J e)
+
+infixl 5 |>
+
+viewr :: Context f a -> (Maybe (Context f a), Entry f a)
+viewr = \case
+  C e -> (Nothing, e)
+  l :<>: r -> go l r where
+    go l = \case
+      C e        -> (Just l, e)
+      r1 :<>: r2 -> go (l :<>: r1) r2
 
 
 data a :|-: b = Γ a :|-: Δ b
