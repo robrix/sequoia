@@ -146,6 +146,6 @@ conjL p q =
 
 conjR :: Prop FOL String -> Prop FOL String -> Rule f (Prop FOL) String
 conjR p q =
-  [ Just Γ :|-: Just (p <| Δ), Just Γ :|-: Just (q <| Δ) ]
+  [ Just Γ :|-: Just (p <| Δ), Just Γ' :|-: Just (q <| Δ') ]
   :---:
-  Just Γ :|-: Just (P (p :/\: q) <| Δ)
+  Just (Γ <> Γ') :|-: Just (P (p :/\: q) <| Δ <> Δ')
