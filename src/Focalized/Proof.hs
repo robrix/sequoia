@@ -61,15 +61,15 @@ infixr 5 :<>:
 instance Semigroup (Context f a) where
   (<>) = (:<>:)
 
-pattern Γ, Γ', Δ, Δ' :: Context f String
-pattern Γ = C (M "Γ")
-pattern Γ' = C (M "Γ′")
-pattern Δ = C (M "Δ")
-pattern Δ' = C (M "Δ′")
+pattern Γ, Γ', Δ, Δ' :: Maybe (Context f String)
+pattern Γ = Just (C (M "Γ"))
+pattern Γ' = Just (C (M "Γ′"))
+pattern Δ = Just (C (M "Δ"))
+pattern Δ' = Just (C (M "Δ′"))
 
 
-(<|) :: f a -> Context f a -> Context f a
-e <| c = C (J e) :<>: c
+(<|) :: f a -> Maybe (Context f a) -> Maybe (Context f a)
+e <| c = Just (C (J e)) <> c
 
 infixr 5 <|
 
@@ -81,8 +81,8 @@ viewl = \case
       C e        -> (e, Just r)
       l1 :<>: l2 -> go l1 (l2 :<>: r)
 
-(|>) :: Context f a -> f a -> Context f a
-c |> e = c :<>: C (J e)
+(|>) :: Maybe (Context f a) -> f a -> Maybe (Context f a)
+c |> e = c <> Just (C (J e))
 
 infixl 5 |>
 
@@ -123,9 +123,9 @@ init a = axiom $ pure (C (J a)) :|-: pure (C (J a))
 
 cut :: f String -> Rule f f String
 cut a =
-  [ Just Γ :|-: Just (a <| Δ), Just (Γ' |> a) :|-: Just Δ' ]
+  [ Γ :|-: (a <| Δ), (Γ' |> a) :|-: Δ' ]
   :---:
-  Just (Γ <> Γ') :|-: Just (Δ <> Δ')
+  Γ <> Γ' :|-: Δ <> Δ'
 
 
 data Prop f a
@@ -145,49 +145,49 @@ infixr 7 :\/:
 infixr 8 :/\:
 
 flsL :: Rule (Prop FOL) g String
-flsL = axiom $ Just (Γ |> P Fls) :|-: Just Δ
+flsL = axiom $ Γ |> P Fls :|-: Δ
 
 truR :: Rule f (Prop FOL) String
-truR = axiom $ Just Γ :|-: Just (P Tru <| Δ)
+truR = axiom $ Γ :|-: P Tru <| Δ
 
 conjL :: Prop FOL String -> Prop FOL String -> Rule (Prop FOL) g String
 conjL p q =
-  [ Just (Γ |> p |> q) :|-: Just Δ ]
+  [ Γ |> p |> q :|-: Δ ]
   :---:
-  Just (Γ |> P (p :/\: q)) :|-: Just Δ
+  Γ |> P (p :/\: q) :|-: Δ
 
 conjR :: Prop FOL String -> Prop FOL String -> Rule f (Prop FOL) String
 conjR p q =
-  [ Just Γ :|-: Just (p <| Δ), Just Γ' :|-: Just (q <| Δ') ]
+  [ Γ :|-: p <| Δ, Γ' :|-: q <| Δ' ]
   :---:
-  Just (Γ <> Γ') :|-: Just (P (p :/\: q) <| Δ <> Δ')
+  Γ <> Γ' :|-: P (p :/\: q) <| Δ <> Δ'
 
 disjL :: Prop FOL String -> Prop FOL String -> Rule (Prop FOL) g String
 disjL p q =
-  [ Just (Γ |> p) :|-: Just Δ, Just (Γ |> q) :|-: Just Δ ]
+  [ Γ |> p :|-: Δ, Γ |> q :|-: Δ ]
   :---:
-  Just (Γ |> P (p :\/: q)) :|-: Just Δ
+  Γ |> P (p :\/: q) :|-: Δ
 
 disjR1, disjR2 :: Prop FOL String -> Prop FOL String -> Rule f (Prop FOL) String
 
 disjR1 p q =
-  [ Just Γ :|-: Just (p <| Δ) ]
+  [ Γ :|-: p <| Δ ]
   :---:
-  Just Γ :|-: Just (P (p :\/: q) <| Δ)
+  Γ :|-: P (p :\/: q) <| Δ
 
 disjR2 p q =
-  [ Just Γ :|-: Just (q <| Δ) ]
+  [ Γ :|-: q <| Δ ]
   :---:
-  Just Γ :|-: Just (P (p :\/: q) <| Δ)
+  Γ :|-: P (p :\/: q) <| Δ
 
 implL :: Prop FOL String -> Prop FOL String -> Rule (Prop FOL) (Prop FOL) String
 implL p q =
-  [ Just Γ :|-: Just (p <| Δ), Just (Γ' |> q) :|-: Just Δ' ]
+  [ Γ :|-: p <| Δ, Γ' |> q :|-: Δ' ]
   :---:
-  Just (Γ <> Γ' |> P (p :=>: q)) :|-: Just (Δ <> Δ')
+  Γ <> Γ' |> P (p :=>: q) :|-: Δ <> Δ'
 
 implR :: Prop FOL String -> Prop FOL String -> Rule (Prop FOL) (Prop FOL) String
 implR p q =
-  [ Just (Γ |> p) :|-: Just (q <| Δ) ]
+  [ Γ |> p :|-: q <| Δ ]
   :---:
-  Just Γ :|-: Just (P (p :=>: q) <| Δ)
+  Γ :|-: P (p :=>: q) <| Δ
