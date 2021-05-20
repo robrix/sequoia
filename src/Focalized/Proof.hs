@@ -19,6 +19,7 @@ module Focalized.Proof
 , Rule(..)
 , axiom
 , init
+, cut
 , Prop(..)
 , FOL(..)
 , flsL
@@ -119,6 +120,12 @@ axiom s = [] :---: s
 
 init :: f a -> Rule f f a
 init a = axiom $ pure (C (J a)) :|-: pure (C (J a))
+
+cut :: f String -> Rule f f String
+cut a =
+  [ Just Γ :|-: Just (a <| Δ), Just (Γ' |> a) :|-: Just Δ' ]
+  :---:
+  Just (Γ <> Γ') :|-: Just (Δ <> Δ')
 
 
 data Prop f a
