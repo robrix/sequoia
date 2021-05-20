@@ -1,6 +1,7 @@
 module Focalized.Proof
 ( runProof
 , Proof(..)
+, Entry(..)
 , (:|-:)(..)
 , contradiction
 , assert
@@ -24,6 +25,11 @@ newtype Proof a b = Proof (ReaderC (Γ a) (NonDetC Identity) b)
 
 type Γ = S.Seq
 type Δ = S.Seq
+
+
+data Entry f a
+  = M a
+  | J (f a)
 
 
 data a :|-: b = Γ a :|-: Δ b
