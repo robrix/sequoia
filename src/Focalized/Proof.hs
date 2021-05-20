@@ -157,9 +157,9 @@ disjR1, disjR2 :: Prop FOL String -> Prop FOL String -> Rule f (Prop FOL) String
 disjR1 p q =
   [ Just Γ :|-: Just (p <| Δ) ]
   :---:
-  Just Γ :|-: Just (P (p :/\: q) <| Δ)
+  Just Γ :|-: Just (P (p :\/: q) <| Δ)
 
 disjR2 p q =
   [ Just Γ :|-: Just (q <| Δ) ]
   :---:
-  Just Γ :|-: Just (P (p :/\: q) <| Δ)
+  Just Γ :|-: Just (P (p :\/: q) <| Δ)
