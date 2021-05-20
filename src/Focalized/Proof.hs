@@ -19,6 +19,8 @@ module Focalized.Proof
 , init
 , Prop(..)
 , FOL(..)
+, flsL
+, truR
 ) where
 
 import           Control.Carrier.NonDet.Church
@@ -120,3 +122,9 @@ data FOL a
 infixr 6 :=>:
 infixr 7 :\/:
 infixr 8 :/\:
+
+flsL :: Rule (Prop FOL) g String
+flsL = axiom $ Just (Γ |> P Fls) :|-: Just Δ
+
+truR :: Rule f (Prop FOL) String
+truR = axiom $ Just Γ :|-: Just (P Tru <| Δ)
