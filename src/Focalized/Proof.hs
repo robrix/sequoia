@@ -11,6 +11,7 @@ module Focalized.Proof
 , axiom
 , init
 , Prop(..)
+, FOL(..)
 ) where
 
 import           Control.Carrier.NonDet.Church
@@ -66,14 +67,17 @@ init :: a -> Rule a a
 init a = axiom $ pure a :|-: pure a
 
 
-data Prop a
+data Prop f a
   = V a
-  | Fls
+  | P (f (Prop f a))
+
+data FOL a
+  = Fls
   | Tru
-  | Prop a :\/: Prop a
-  | Prop a :/\: Prop a
-  | Not (Prop a)
-  | Prop a :=>: Prop a
+  | a :\/: a
+  | a :/\: a
+  | Not a
+  | a :=>: a
 
 infixr 6 :=>:
 infixr 7 :\/:
