@@ -5,7 +5,9 @@ module Focalized.Proof
 , Entry(..)
 , Context(..)
 , pattern Γ
+, pattern Γ'
 , pattern Δ
+, pattern Δ'
 , (<|)
 , viewl
 , (|>)
@@ -50,9 +52,11 @@ data Context f a
 
 infixr 5 :<>:
 
-pattern Γ, Δ :: Context f String
+pattern Γ, Γ', Δ, Δ' :: Context f String
 pattern Γ = C (M "Γ")
+pattern Γ' = C (M "Γ′")
 pattern Δ = C (M "Δ")
+pattern Δ' = C (M "Δ′")
 
 
 (<|) :: f a -> Context f a -> Context f a
