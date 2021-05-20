@@ -10,7 +10,7 @@ module Focalized.Proof
 , viewl
 , (|>)
 , viewr
-, (:|-:)(..)
+, Sequent(..)
 , contradiction
 , assert
 , refute
@@ -78,31 +78,31 @@ viewr = \case
       r1 :<>: r2 -> go (l :<>: r1) r2
 
 
-data a :|-: b = Γ a :|-: Δ b
+data Sequent f g a = Maybe (Context f a) :|-: Maybe (Context g a)
 
 infix 2 :|-:
 
 
-contradiction :: a :|-: b
+contradiction :: Sequent f g a
 contradiction = empty :|-: empty
 
-assert :: b -> a :|-: b
-assert b = empty :|-: pure b
+assert :: g a -> Sequent f g a
+assert b = empty :|-: pure (C (J b))
 
-refute :: a -> a :|-: b
-refute a = pure a :|-: empty
+refute :: f a -> Sequent f g a
+refute a = pure (C (J a)) :|-: empty
 
 
-data Rule a b = [a :|-: b] :---: (a :|-: b)
+data Rule f g a = [Sequent f g a] :---: (Sequent f g a)
 
 infix 1 :---:
 
-axiom :: a :|-: b -> Rule a b
+axiom :: Sequent f g a -> Rule f g a
 axiom s = [] :---: s
 
 
-init :: a -> Rule a a
-init a = axiom $ pure a :|-: pure a
+init :: f a -> Rule f f a
+init a = axiom $ pure (C (J a)) :|-: pure (C (J a))
 
 
 data Prop f a
