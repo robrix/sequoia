@@ -22,6 +22,7 @@ module Focalized.Proof
 , flsL
 , truR
 , conjL
+, conjR
 ) where
 
 import           Control.Carrier.NonDet.Church
@@ -135,3 +136,9 @@ conjL p q =
   [ Just (Γ |> p |> q) :|-: Just Δ ]
   :---:
   Just (Γ |> P (p :/\: q)) :|-: Just Δ
+
+conjR :: Prop FOL String -> Prop FOL String -> Rule f (Prop FOL) String
+conjR p q =
+  [ Just Γ :|-: Just (p <| Δ), Just Γ :|-: Just (q <| Δ) ]
+  :---:
+  Just Γ :|-: Just (P (p :/\: q) <| Δ)
