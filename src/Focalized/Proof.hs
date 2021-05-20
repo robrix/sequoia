@@ -67,7 +67,7 @@ init a = axiom $ pure a :|-: pure a
 
 
 data Prop a
-  = Var a
+  = V a
   | Fls
   | Tru
   | Prop a :\/: Prop a
