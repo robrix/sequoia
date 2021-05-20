@@ -62,6 +62,6 @@ data Prop a
   | Not (Prop a)
   | Prop a :=>: Prop a
 
-infixr 5 :=>:
-infixr 6 :\/:
-infixr 7 :/\:
+infixr 6 :=>:
+infixr 7 :\/:
+infixr 8 :/\:
