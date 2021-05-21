@@ -38,17 +38,17 @@ module Focalized.Proof
 import           Control.Carrier.NonDet.Church
 import           Control.Carrier.Reader
 import           Data.Functor.Identity
-import qualified Data.Sequence as S
+import qualified Data.Set as S
 import           Focalized.B
 import           Prelude hiding (init)
 
-runProof :: Γ a -> Proof a b -> Δ b
-runProof hyp (Proof m) = run (runNonDetA (runReader hyp m))
+runProof :: Ord b => Γ a -> Proof a b -> Δ b
+runProof hyp (Proof m) = run (runNonDetM S.singleton (runReader hyp m))
 
 newtype Proof a b = Proof (ReaderC (Γ a) (NonDetC Identity) b)
 
-type Γ = S.Seq
-type Δ = S.Seq
+type Γ = S.Set
+type Δ = S.Set
 
 
 data Entry f a
