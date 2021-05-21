@@ -90,7 +90,7 @@ refute :: f a -> Sequent f g a
 refute a = pure (J a) :|-: empty
 
 
-data Rule f g a = [Sequent f g a] :---: (Sequent f g a)
+data Rule f g a = [Sequent f g a] :---: Sequent f g a
 
 infix 1 :---:
 
