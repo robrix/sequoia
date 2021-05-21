@@ -4,6 +4,7 @@ module Focalized.Proof
 , Proof(..)
 , Entry(..)
 , Context
+, Name
 , pattern Γ
 , pattern Γ'
 , pattern Δ
@@ -54,8 +55,9 @@ data Entry f a
   | J (f a)
 
 type Context f a = B (Entry f a)
+type Name = String
 
-pattern Γ, Γ', Δ, Δ' :: Context f String
+pattern Γ, Γ', Δ, Δ' :: Context f Name
 pattern Γ = Leaf (M "Γ")
 pattern Γ' = Leaf (M "Γ′")
 pattern Δ = Leaf (M "Δ")
@@ -96,10 +98,10 @@ axiom :: Sequent f g a -> Rule f g a
 axiom s = [] :---: s
 
 
-init :: f String -> Rule f f String
+init :: f Name -> Rule f f Name
 init a = axiom $ Γ |> a :|-: a <| Δ
 
-cut :: f String -> Rule f f String
+cut :: f Name -> Rule f f Name
 cut a =
   [ Γ :|-: (a <| Δ), (Γ' |> a) :|-: Δ' ]
   :---:
@@ -131,31 +133,31 @@ infixr 6 ==>
 infixr 7 \/
 infixr 8 /\
 
-flsL :: Rule (Prop FOL) g String
+flsL :: Rule (Prop FOL) g Name
 flsL = axiom $ Γ |> P Fls :|-: Δ
 
-truR :: Rule f (Prop FOL) String
+truR :: Rule f (Prop FOL) Name
 truR = axiom $ Γ :|-: P Tru <| Δ
 
-conjL :: Prop FOL String -> Prop FOL String -> Rule (Prop FOL) g String
+conjL :: Prop FOL Name -> Prop FOL Name -> Rule (Prop FOL) g Name
 conjL p q =
   [ Γ |> p |> q :|-: Δ ]
   :---:
   Γ |> p /\ q :|-: Δ
 
-conjR :: Prop FOL String -> Prop FOL String -> Rule f (Prop FOL) String
+conjR :: Prop FOL Name -> Prop FOL Name -> Rule f (Prop FOL) Name
 conjR p q =
   [ Γ :|-: p <| Δ, Γ' :|-: q <| Δ' ]
   :---:
   Γ <> Γ' :|-: p /\ q <| Δ <> Δ'
 
-disjL :: Prop FOL String -> Prop FOL String -> Rule (Prop FOL) g String
+disjL :: Prop FOL Name -> Prop FOL Name -> Rule (Prop FOL) g Name
 disjL p q =
   [ Γ |> p :|-: Δ, Γ |> q :|-: Δ ]
   :---:
   Γ |> p \/ q :|-: Δ
 
-disjR1, disjR2 :: Prop FOL String -> Prop FOL String -> Rule f (Prop FOL) String
+disjR1, disjR2 :: Prop FOL Name -> Prop FOL Name -> Rule f (Prop FOL) Name
 
 disjR1 p q =
   [ Γ :|-: p <| Δ ]
@@ -167,7 +169,7 @@ disjR2 p q =
   :---:
   Γ :|-: p \/ q <| Δ
 
-implL, implR :: Prop FOL String -> Prop FOL String -> Rule (Prop FOL) (Prop FOL) String
+implL, implR :: Prop FOL Name -> Prop FOL Name -> Rule (Prop FOL) (Prop FOL) Name
 
 implL p q =
   [ Γ :|-: p <| Δ, Γ' |> q :|-: Δ' ]
@@ -179,7 +181,7 @@ implR p q =
   :---:
   Γ :|-: p ==> q <| Δ
 
-notL, notR :: Prop FOL String -> Rule (Prop FOL) (Prop FOL) String
+notL, notR :: Prop FOL Name -> Rule (Prop FOL) (Prop FOL) Name
 
 notL p =
   [ Γ :|-: p <| Δ ]
