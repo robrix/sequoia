@@ -64,6 +64,7 @@ library
   import: common
   exposed-modules:
     Focalized.Proof
+    Focalized.Snoc
 
   -- Modules included in this library but not exported.
   -- other-modules:
