@@ -63,6 +63,7 @@ common common
 library
   import: common
   exposed-modules:
+    Focalized.B
     Focalized.Proof
     Focalized.Snoc
 
