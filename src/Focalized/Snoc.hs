@@ -17,3 +17,6 @@ instance Show a => Show (Snoc a) where
 instance Semigroup (Snoc a) where
   a <> Nil       = a
   a <> (bs :> b) = (a <> bs) :> b
+
+instance Monoid (Snoc a) where
+  mempty = Nil
