@@ -1,5 +1,6 @@
 module Focalized.B
 ( B(..)
+, viewl
 ) where
 
 import Control.Applicative (Alternative(..))
@@ -37,3 +38,12 @@ instance Monad B where
   Nil        >>= _ = Nil
   Leaf a     >>= f = f a
   al :<>: ar >>= f = (al >>= f) <> (ar >>= f)
+
+
+viewl :: Alternative m => B a -> m (a, B a)
+viewl = go Nil
+  where
+  go k = \case
+    Nil      -> empty
+    Leaf a   -> pure (a, k)
+    l :<>: r -> go l (k <> r)
