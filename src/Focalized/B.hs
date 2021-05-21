@@ -20,3 +20,10 @@ instance Semigroup (B a) where
 
 instance Monoid (B a) where
   mempty = Nil
+
+instance Applicative B where
+  pure = Leaf
+
+  Nil        <*> _ = Nil
+  Leaf f     <*> a = f <$> a
+  fl :<>: fr <*> a = (fl <*> a) <> (fr <*> a)
