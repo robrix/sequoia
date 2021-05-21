@@ -43,9 +43,9 @@ instance Monad B where
 
 
 viewl :: Alternative m => B a -> m (a, B a)
-viewl = go Nil
-  where
-  go k = \case
-    Nil      -> empty
-    Leaf a   -> pure (a, k)
-    l :<>: r -> go l (k <> r)
+viewl = \case
+  Nil               -> empty
+  Leaf a            -> pure (a, Nil)
+  Nil :<>: r        -> viewl r
+  Leaf a :<>: r     -> pure (a, r)
+  (l :<>: m) :<>: r -> viewl (l :<>: (m :<>: r))
