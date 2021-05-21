@@ -111,6 +111,7 @@ cut a =
 data Prop f a
   = V a
   | P (f (Prop f a))
+  deriving (Functor)
 
 data FOL a
   = Fls
