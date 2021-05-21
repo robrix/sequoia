@@ -113,6 +113,12 @@ data Prop f a
   | P (f (Prop f a))
   deriving (Functor)
 
+instance Functor f => Applicative (Prop f) where
+  pure = V
+
+  V f <*> a = f <$> a
+  P f <*> a = P ((<*> a) <$> f)
+
 data FOL a
   = Fls
   | Tru
