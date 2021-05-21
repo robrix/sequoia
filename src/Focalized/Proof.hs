@@ -96,8 +96,8 @@ axiom :: Sequent f g a -> Rule f g a
 axiom s = [] :---: s
 
 
-init :: f a -> Rule f f a
-init a = axiom $ pure (J a) :|-: pure (J a)
+init :: f String -> Rule f f String
+init a = axiom $ Γ |> a :|-: a <| Δ
 
 cut :: f String -> Rule f f String
 cut a =
