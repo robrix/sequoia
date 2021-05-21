@@ -3,7 +3,7 @@ module Focalized.Proof
 ( runProof
 , Proof(..)
 , Entry(..)
-, Context(..)
+, Context
 , pattern Γ
 , pattern Γ'
 , pattern Δ
@@ -37,6 +37,7 @@ import           Control.Carrier.NonDet.Church
 import           Control.Carrier.Reader
 import           Data.Functor.Identity
 import qualified Data.Sequence as S
+import           Focalized.B
 import           Prelude hiding (init)
 
 runProof :: Γ a -> Proof a b -> Δ b
@@ -52,15 +53,7 @@ data Entry f a
   = M a
   | J (f a)
 
-data Context f a
-  = Nil
-  | Leaf (Entry f a)
-  | Context f a :<>: Context f a
-
-infixr 5 :<>:
-
-instance Semigroup (Context f a) where
-  (<>) = (:<>:)
+type Context f a = B (Entry f a)
 
 pattern Γ, Γ', Δ, Δ' :: Context f String
 pattern Γ = Leaf (M "Γ")
