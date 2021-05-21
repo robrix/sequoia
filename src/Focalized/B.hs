@@ -13,7 +13,7 @@ data B a
 infixr 5 :<>:
 
 instance Show a => Show (B a) where
-  showsPrec p = showParen (p > 10) . showList . toList
+  showsPrec _ = showList . toList
 
 instance Semigroup (B a) where
   (<>) = (:<>:)
