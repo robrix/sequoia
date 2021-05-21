@@ -54,7 +54,7 @@ data Entry f a
 
 data Context f a
   = Nil
-  | C (Entry f a)
+  | Leaf (Entry f a)
   | Context f a :<>: Context f a
 
 infixr 5 :<>:
@@ -63,19 +63,19 @@ instance Semigroup (Context f a) where
   (<>) = (:<>:)
 
 pattern Γ, Γ', Δ, Δ' :: Context f String
-pattern Γ = C (M "Γ")
-pattern Γ' = C (M "Γ′")
-pattern Δ = C (M "Δ")
-pattern Δ' = C (M "Δ′")
+pattern Γ = Leaf (M "Γ")
+pattern Γ' = Leaf (M "Γ′")
+pattern Δ = Leaf (M "Δ")
+pattern Δ' = Leaf (M "Δ′")
 
 
 (<|) :: f a -> Context f a -> Context f a
-e <| c = C (J e) <> c
+e <| c = Leaf (J e) <> c
 
 infixr 5 <|
 
 (|>) :: Context f a -> f a -> Context f a
-c |> e = c <> C (J e)
+c |> e = c <> Leaf (J e)
 
 infixl 5 |>
 
@@ -89,10 +89,10 @@ contradiction :: Sequent f g a
 contradiction = Nil :|-: Nil
 
 assert :: g a -> Sequent f g a
-assert b = Nil :|-: C (J b)
+assert b = Nil :|-: Leaf (J b)
 
 refute :: f a -> Sequent f g a
-refute a = C (J a) :|-: Nil
+refute a = Leaf (J a) :|-: Nil
 
 
 data Rule f g a = [Sequent f g a] :---: (Sequent f g a)
@@ -104,7 +104,7 @@ axiom s = [] :---: s
 
 
 init :: f a -> Rule f f a
-init a = axiom $ C (J a) :|-: C (J a)
+init a = axiom $ Leaf (J a) :|-: Leaf (J a)
 
 cut :: f String -> Rule f f String
 cut a =
