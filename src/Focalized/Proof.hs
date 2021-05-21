@@ -189,13 +189,13 @@ disjR2 p q =
   :---:
   Γ :|-: p \/ q <| Δ
 
-implL :: Prop FOL String -> Prop FOL String -> Rule (Prop FOL) (Prop FOL) String
+implL, implR :: Prop FOL String -> Prop FOL String -> Rule (Prop FOL) (Prop FOL) String
+
 implL p q =
   [ Γ :|-: p <| Δ, Γ' |> q :|-: Δ' ]
   :---:
   Γ <> Γ' |> p ==> q :|-: Δ <> Δ'
 
-implR :: Prop FOL String -> Prop FOL String -> Rule (Prop FOL) (Prop FOL) String
 implR p q =
   [ Γ |> p :|-: q <| Δ ]
   :---:
