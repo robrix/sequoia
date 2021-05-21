@@ -11,3 +11,6 @@ infixr 5 :<>:
 
 instance Semigroup (B a) where
   (<>) = (:<>:)
+
+instance Monoid (B a) where
+  mempty = Nil
