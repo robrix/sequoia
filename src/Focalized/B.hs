@@ -1,2 +1,10 @@
 module Focalized.B
-() where
+( B(..)
+) where
+
+data B a
+  = Nil
+  | Leaf a
+  | B a :<>: B a
+
+infixr 5 :<>:
