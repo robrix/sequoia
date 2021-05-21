@@ -31,6 +31,8 @@ module Focalized.Proof
 , disjR2
 , implL
 , implR
+, notL
+, notR
 ) where
 
 import           Control.Carrier.NonDet.Church
@@ -200,3 +202,15 @@ implR p q =
   [ Γ |> p :|-: q <| Δ ]
   :---:
   Γ :|-: p ==> q <| Δ
+
+notL, notR :: Prop FOL String -> Rule (Prop FOL) (Prop FOL) String
+
+notL p =
+  [ Γ :|-: p <| Δ ]
+  :---:
+  Γ |> P (Not p) :|-: Δ
+
+notR p =
+  [ Γ |> p :|-: Δ ]
+  :---:
+  Γ :|-: P (Not p) <| Δ
