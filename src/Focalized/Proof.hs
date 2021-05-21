@@ -9,9 +9,7 @@ module Focalized.Proof
 , pattern Δ
 , pattern Δ'
 , (<|)
-, viewl
 , (|>)
-, viewr
 , Sequent(..)
 , contradiction
 , assert
@@ -55,7 +53,8 @@ data Entry f a
   | J (f a)
 
 data Context f a
-  = C (Entry f a)
+  = Nil
+  | C (Entry f a)
   | Context f a :<>: Context f a
 
 infixr 5 :<>:
@@ -63,53 +62,37 @@ infixr 5 :<>:
 instance Semigroup (Context f a) where
   (<>) = (:<>:)
 
-pattern Γ, Γ', Δ, Δ' :: Maybe (Context f String)
-pattern Γ = Just (C (M "Γ"))
-pattern Γ' = Just (C (M "Γ′"))
-pattern Δ = Just (C (M "Δ"))
-pattern Δ' = Just (C (M "Δ′"))
+pattern Γ, Γ', Δ, Δ' :: Context f String
+pattern Γ = C (M "Γ")
+pattern Γ' = C (M "Γ′")
+pattern Δ = C (M "Δ")
+pattern Δ' = C (M "Δ′")
 
 
-(<|) :: f a -> Maybe (Context f a) -> Maybe (Context f a)
-e <| c = Just (C (J e)) <> c
+(<|) :: f a -> Context f a -> Context f a
+e <| c = C (J e) <> c
 
 infixr 5 <|
 
-viewl :: Context f a -> (Entry f a, Maybe (Context f a))
-viewl = \case
-  C e      -> (e, Nothing)
-  l :<>: r -> go l r where
-    go l r = case l of
-      C e        -> (e, Just r)
-      l1 :<>: l2 -> go l1 (l2 :<>: r)
-
-(|>) :: Maybe (Context f a) -> f a -> Maybe (Context f a)
-c |> e = c <> Just (C (J e))
+(|>) :: Context f a -> f a -> Context f a
+c |> e = c <> C (J e)
 
 infixl 5 |>
 
-viewr :: Context f a -> (Maybe (Context f a), Entry f a)
-viewr = \case
-  C e -> (Nothing, e)
-  l :<>: r -> go l r where
-    go l = \case
-      C e        -> (Just l, e)
-      r1 :<>: r2 -> go (l :<>: r1) r2
 
-
-data Sequent f g a = Maybe (Context f a) :|-: Maybe (Context g a)
+data Sequent f g a = Context f a :|-: Context g a
 
 infix 2 :|-:
 
 
 contradiction :: Sequent f g a
-contradiction = empty :|-: empty
+contradiction = Nil :|-: Nil
 
 assert :: g a -> Sequent f g a
-assert b = empty :|-: pure (C (J b))
+assert b = Nil :|-: C (J b)
 
 refute :: f a -> Sequent f g a
-refute a = pure (C (J a)) :|-: empty
+refute a = C (J a) :|-: Nil
 
 
 data Rule f g a = [Sequent f g a] :---: (Sequent f g a)
@@ -121,7 +104,7 @@ axiom s = [] :---: s
 
 
 init :: f a -> Rule f f a
-init a = axiom $ pure (C (J a)) :|-: pure (C (J a))
+init a = axiom $ C (J a) :|-: C (J a)
 
 cut :: f String -> Rule f f String
 cut a =
