@@ -20,3 +20,9 @@ instance Semigroup (Snoc a) where
 
 instance Monoid (Snoc a) where
   mempty = Nil
+
+instance Applicative Snoc where
+  pure a = Nil :> a
+
+  Nil     <*> _ = Nil
+  fs :> f <*> a = (fs <*> a) <> (f <$> a)
