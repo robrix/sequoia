@@ -79,13 +79,13 @@ infix 2 :|-:
 
 
 contradiction :: Sequent f g a
-contradiction = Nil :|-: Nil
+contradiction = empty :|-: empty
 
 assert :: g a -> Sequent f g a
-assert b = Nil :|-: Leaf (J b)
+assert b = empty :|-: pure (J b)
 
 refute :: f a -> Sequent f g a
-refute a = Leaf (J a) :|-: Nil
+refute a = pure (J a) :|-: empty
 
 
 data Rule f g a = [Sequent f g a] :---: (Sequent f g a)
@@ -97,7 +97,7 @@ axiom s = [] :---: s
 
 
 init :: f a -> Rule f f a
-init a = axiom $ Leaf (J a) :|-: Leaf (J a)
+init a = axiom $ pure (J a) :|-: pure (J a)
 
 cut :: f String -> Rule f f String
 cut a =
