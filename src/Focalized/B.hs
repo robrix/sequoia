@@ -45,16 +45,18 @@ instance Monad B where
 
 viewl :: Alternative m => B a -> m (a, B a)
 viewl = \case
-  Nil               -> empty
-  Leaf a            -> pure (a, Nil)
-  Nil :<>: r        -> viewl r
-  Leaf a :<>: r     -> pure (a, r)
-  (l :<>: m) :<>: r -> viewl (l :<>: (m :<>: r))
+  Nil      -> empty
+  Leaf a   -> pure (a, Nil)
+  l :<>: r -> case l of
+    Nil      -> viewl r
+    Leaf a   -> pure (a, r)
+    l :<>: m -> viewl (l :<>: (m :<>: r))
 
 viewr :: Alternative m => B a -> m (B a, a)
 viewr = \case
-  Nil               -> empty
-  Leaf a            -> pure (Nil, a)
-  l :<>: Nil        -> viewr l
-  l :<>: Leaf a     -> pure (l, a)
-  l :<>: (m :<>: r) -> viewr ((l :<>: m) :<>: r)
+  Nil      -> empty
+  Leaf a   -> pure (Nil, a)
+  l :<>: r -> case r of
+    Nil      -> viewr l
+    Leaf a   -> pure (l, a)
+    m :<>: r -> viewr ((l :<>: m) :<>: r)
