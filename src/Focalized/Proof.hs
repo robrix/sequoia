@@ -46,6 +46,7 @@ runProof :: Ord b => Γ a -> Proof a b -> Δ b
 runProof hyp (Proof m) = run (runNonDetM S.singleton (runReader hyp m))
 
 newtype Proof a b = Proof (ReaderC (Γ a) (NonDetC Identity) b)
+  deriving (Alternative, Applicative, Functor, Monad)
 
 type Γ = S.Set
 type Δ = S.Set
