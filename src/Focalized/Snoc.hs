@@ -26,3 +26,7 @@ instance Applicative Snoc where
 
   Nil     <*> _ = Nil
   fs :> f <*> a = (fs <*> a) <> (f <$> a)
+
+instance Monad Snoc where
+  Nil >>= _     = Nil
+  as :> a >>= f = (as >>= f) <> f a
