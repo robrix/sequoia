@@ -119,6 +119,7 @@ data FOL a
   | a :/\: a
   | Not a
   | a :=>: a
+  deriving (Foldable, Functor, Traversable)
 
 infixr 6 :=>:
 infixr 7 :\/:
