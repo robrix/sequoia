@@ -2,13 +2,18 @@ module Focalized.B
 ( B(..)
 ) where
 
+import Data.Foldable (toList)
+
 data B a
   = Nil
   | Leaf a
   | B a :<>: B a
-  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+  deriving (Eq, Foldable, Functor, Ord, Traversable)
 
 infixr 5 :<>:
+
+instance Show a => Show (B a) where
+  showsPrec p = showParen (p > 10) . showList . toList
 
 instance Semigroup (B a) where
   (<>) = (:<>:)
