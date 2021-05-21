@@ -111,7 +111,7 @@ cut a =
 data Prop f a
   = V a
   | P (f (Prop f a))
-  deriving (Functor)
+  deriving (Foldable, Functor, Traversable)
 
 instance Functor f => Applicative (Prop f) where
   pure = V
