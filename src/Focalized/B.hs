@@ -27,3 +27,8 @@ instance Applicative B where
   Nil        <*> _ = Nil
   Leaf f     <*> a = f <$> a
   fl :<>: fr <*> a = (fl <*> a) <> (fr <*> a)
+
+instance Monad B where
+  Nil        >>= _ = Nil
+  Leaf a     >>= f = f a
+  al :<>: ar >>= f = (al >>= f) <> (ar >>= f)
