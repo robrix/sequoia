@@ -18,7 +18,9 @@ instance Show a => Show (B a) where
   showsPrec _ = showList . toList
 
 instance Semigroup (B a) where
-  (<>) = (:<>:)
+  Nil <> b   = b
+  a   <> Nil = a
+  a   <> b   = a :<>: b
 
 instance Monoid (B a) where
   mempty = Nil
