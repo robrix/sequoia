@@ -13,3 +13,7 @@ infixl 5 :>
 
 instance Show a => Show (Snoc a) where
   showsPrec p s = showParen (p > 10) $ showList (toList s)
+
+instance Semigroup (Snoc a) where
+  a <> Nil       = a
+  a <> (bs :> b) = (a <> bs) :> b
