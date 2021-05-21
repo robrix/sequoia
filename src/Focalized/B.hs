@@ -34,7 +34,7 @@ instance Applicative B where
 
 instance Alternative B where
   empty = Nil
-  (<|>) = (:<>:)
+  (<|>) = (<>)
 
 instance Monad B where
   Nil        >>= _ = Nil
