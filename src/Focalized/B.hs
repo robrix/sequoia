@@ -1,6 +1,7 @@
 module Focalized.B
 ( B(..)
 , viewl
+, viewr
 ) where
 
 import Control.Applicative (Alternative(..))
@@ -49,3 +50,11 @@ viewl = \case
   Nil :<>: r        -> viewl r
   Leaf a :<>: r     -> pure (a, r)
   (l :<>: m) :<>: r -> viewl (l :<>: (m :<>: r))
+
+viewr :: Alternative m => B a -> m (B a, a)
+viewr = \case
+  Nil               -> empty
+  Leaf a            -> pure (Nil, a)
+  l :<>: Nil        -> viewr l
+  l :<>: Leaf a     -> pure (l, a)
+  l :<>: (m :<>: r) -> viewr ((l :<>: m) :<>: r)
