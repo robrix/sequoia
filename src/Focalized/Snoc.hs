@@ -2,6 +2,7 @@ module Focalized.Snoc
 ( Snoc(..)
 ) where
 
+import Control.Applicative
 import Data.Foldable (toList)
 
 data Snoc a
@@ -26,6 +27,10 @@ instance Applicative Snoc where
 
   Nil     <*> _ = Nil
   fs :> f <*> a = (fs <*> a) <> (f <$> a)
+
+instance Alternative Snoc where
+  empty = Nil
+  (<|>) = (<>)
 
 instance Monad Snoc where
   Nil >>= _     = Nil
