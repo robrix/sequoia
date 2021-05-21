@@ -2,6 +2,7 @@ module Focalized.B
 ( B(..)
 ) where
 
+import Control.Applicative (Alternative(..))
 import Data.Foldable (toList)
 
 data B a
@@ -27,6 +28,10 @@ instance Applicative B where
   Nil        <*> _ = Nil
   Leaf f     <*> a = f <$> a
   fl :<>: fr <*> a = (fl <*> a) <> (fr <*> a)
+
+instance Alternative B where
+  empty = Nil
+  (<|>) = (:<>:)
 
 instance Monad B where
   Nil        >>= _ = Nil
