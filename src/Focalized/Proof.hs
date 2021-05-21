@@ -119,6 +119,10 @@ instance Functor f => Applicative (Prop f) where
   V f <*> a = f <$> a
   P f <*> a = P ((<*> a) <$> f)
 
+instance Functor f => Monad (Prop f) where
+  V a >>= f = f a
+  P a >>= f = P ((>>= f) <$> a)
+
 data FOL a
   = Fls
   | Tru
