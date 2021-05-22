@@ -4,9 +4,11 @@ module Focalized.Multiset
 , empty
 , insert
 , delete
+, multiplicity
 ) where
 
 import qualified Data.Map as M
+import           Data.Maybe (fromMaybe)
 
 newtype Multiset a = Multiset (M.Map a Word)
   deriving (Eq, Ord)
@@ -36,3 +38,7 @@ delete a (Multiset as) = Multiset (M.update decr a as)
   decr i
     | i <= 0    = Nothing
     | otherwise = Just (i - 1)
+
+
+multiplicity :: Ord a => a -> Multiset a -> Word
+multiplicity a (Multiset as) = fromMaybe 0 (M.lookup a as)
