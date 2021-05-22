@@ -2,6 +2,7 @@ module Focalized.Multiset
 ( Multiset
 , singleton
 , empty
+, insert
 ) where
 
 import qualified Data.Map as M
@@ -23,3 +24,7 @@ singleton a = Multiset (M.singleton a 1)
 
 empty :: Multiset a
 empty = Multiset M.empty
+
+
+insert :: Ord a => a -> Multiset a -> Multiset a
+insert a (Multiset as) = Multiset (M.insertWith (+) a 1 as)
