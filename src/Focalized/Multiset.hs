@@ -12,6 +12,9 @@ newtype Multiset a = Multiset (M.Map a Word)
 instance Show a => Show (Multiset a) where
   showsPrec _ (Multiset m) = showList (M.toList m)
 
+instance Ord a => Semigroup (Multiset a) where
+  Multiset a <> Multiset b = Multiset (M.unionWith (+) a b)
+
 singleton :: a -> Multiset a
 singleton a = Multiset (M.singleton a 1)
 
