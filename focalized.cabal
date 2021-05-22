@@ -64,6 +64,7 @@ library
   import: common
   exposed-modules:
     Focalized.B
+    Focalized.Multiset
     Focalized.Proof
     Focalized.Snoc
 
