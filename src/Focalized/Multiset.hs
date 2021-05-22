@@ -5,6 +5,7 @@ module Focalized.Multiset
 , insert
 , delete
 , multiplicity
+, cardinality
 ) where
 
 import qualified Data.Map as M
@@ -42,3 +43,6 @@ delete a (Multiset as) = Multiset (M.update decr a as)
 
 multiplicity :: Ord a => a -> Multiset a -> Word
 multiplicity a (Multiset as) = fromMaybe 0 (M.lookup a as)
+
+cardinality :: Multiset a -> Word
+cardinality (Multiset as) = sum as
