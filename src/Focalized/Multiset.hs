@@ -15,6 +15,9 @@ instance Show a => Show (Multiset a) where
 instance Ord a => Semigroup (Multiset a) where
   Multiset a <> Multiset b = Multiset (M.unionWith (+) a b)
 
+instance Ord a => Monoid (Multiset a) where
+  mempty = empty
+
 singleton :: a -> Multiset a
 singleton a = Multiset (M.singleton a 1)
 
