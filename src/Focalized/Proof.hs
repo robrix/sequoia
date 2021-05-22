@@ -42,14 +42,14 @@ import           Focalized.B
 import qualified Focalized.Multiset as S
 import           Prelude hiding (init)
 
-runProof :: Ord b => Γ a -> Proof a b -> Δ b
+runProof :: Ord b => Γ a -> Proof a b -> S.Multiset b
 runProof hyp (Proof m) = run (runNonDetM S.singleton (runReader hyp m))
 
-newtype Proof a b = Proof (ReaderC (Γ a) (NonDetC Identity) b)
+newtype Proof a b = Proof (ReaderC (Γ a) Δ b)
   deriving (Alternative, Applicative, Functor, Monad)
 
 type Γ = S.Multiset
-type Δ = S.Multiset
+type Δ = NonDetC Identity
 
 
 data Entry f a
