@@ -38,8 +38,8 @@ module Focalized.Proof
 import           Control.Carrier.NonDet.Church
 import           Control.Carrier.Reader
 import           Data.Functor.Identity
-import qualified Data.Set as S
 import           Focalized.B
+import qualified Focalized.Multiset as S
 import           Prelude hiding (init)
 
 runProof :: Ord b => Γ a -> Proof a b -> Δ b
@@ -48,8 +48,8 @@ runProof hyp (Proof m) = run (runNonDetM S.singleton (runReader hyp m))
 newtype Proof a b = Proof (ReaderC (Γ a) (NonDetC Identity) b)
   deriving (Alternative, Applicative, Functor, Monad)
 
-type Γ = S.Set
-type Δ = S.Set
+type Γ = S.Multiset
+type Δ = S.Multiset
 
 
 data Entry f a
