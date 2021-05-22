@@ -9,6 +9,9 @@ import qualified Data.Map as M
 newtype Multiset a = Multiset (M.Map a Word)
   deriving (Eq, Ord)
 
+instance Show a => Show (Multiset a) where
+  showsPrec _ (Multiset m) = showList (M.toList m)
+
 singleton :: a -> Multiset a
 singleton a = Multiset (M.singleton a 1)
 
