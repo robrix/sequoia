@@ -3,6 +3,7 @@ module Focalized.Multiset
 , singleton
 , empty
 , insert
+, delete
 ) where
 
 import qualified Data.Map as M
@@ -28,3 +29,10 @@ empty = Multiset M.empty
 
 insert :: Ord a => a -> Multiset a -> Multiset a
 insert a (Multiset as) = Multiset (M.insertWith (+) a 1 as)
+
+delete :: Ord a => a -> Multiset a -> Multiset a
+delete a (Multiset as) = Multiset (M.update decr a as)
+  where
+  decr i
+    | i <= 0    = Nothing
+    | otherwise = Just (i - 1)
