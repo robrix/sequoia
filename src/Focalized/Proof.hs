@@ -52,6 +52,8 @@ type Γ = S.Multiset
 type Δ = NonDetC Identity
 type (|-) = (->)
 
+infix 2 |-
+
 
 data Entry f a
   = M a
