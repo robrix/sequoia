@@ -20,6 +20,7 @@ module Focalized.Proof
 , axiom
 , init
 , cut
+, Prop(..)
 , FOL(..)
 , flsL
 , truR
@@ -36,7 +37,6 @@ module Focalized.Proof
 
 import           Control.Carrier.NonDet.Church
 import           Control.Carrier.Reader
-import           Control.Monad (ap)
 import           Data.Functor.Identity
 import           Focalized.B
 import qualified Focalized.Multiset as S
@@ -113,69 +113,72 @@ cut a =
   Γ <> Γ' :|-: Δ <> Δ'
 
 
-data FOL a
+data Prop f a
   = V a
-  | Fls
+  | P (f (Prop f a))
+  deriving (Foldable, Functor, Traversable)
+
+instance Functor f => Applicative (Prop f) where
+  pure = V
+
+  V f <*> a = f <$> a
+  P f <*> a = P ((<*> a) <$> f)
+
+instance Functor f => Monad (Prop f) where
+  V a >>= f = f a
+  P a >>= f = P ((>>= f) <$> a)
+
+deriving instance (forall x . Eq x => Eq (f x), Eq a) => Eq (Prop f a)
+deriving instance (forall x . Eq x => Eq (f x), forall x . Ord x => Ord (f x), Ord a) => Ord (Prop f a)
+deriving instance (forall x . Show x => Show (f x), Show a) => Show (Prop f a)
+
+data FOL a
+  = Fls
   | Tru
-  | FOL a :\/: FOL a
-  | FOL a :/\: FOL a
-  | Not (FOL a)
-  | FOL a :=>: FOL a
+  | a :\/: a
+  | a :/\: a
+  | Not a
+  | a :=>: a
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
 infixr 6 :=>:
 infixr 7 :\/:
 infixr 8 :/\:
 
-instance Applicative FOL where
-  pure = V
-
-  (<*>) = ap
-
-instance Monad FOL where
-  p >>= f = case p of
-    V a      -> f a
-    Fls      -> Fls
-    Tru      -> Tru
-    p :\/: q -> (p >>= f) :\/: (q >>= f)
-    p :/\: q -> (p >>= f) :/\: (q >>= f)
-    Not p    -> Not (p >>= f)
-    p :=>: q -> (p >>= f) :=>: (q >>= f)
-
-(\/), (/\), (==>) :: FOL a -> FOL a -> FOL a
-(\/) = (:\/:)
-(/\) = (:/\:)
-(==>) = (:=>:)
+(\/), (/\), (==>) :: Prop FOL a -> Prop FOL a -> Prop FOL a
+p \/ q = P (p :\/: q)
+p /\ q = P (p :/\: q)
+p ==> q = P (p :=>: q)
 
 infixr 6 ==>
 infixr 7 \/
 infixr 8 /\
 
-flsL :: Rule FOL g Name
-flsL = axiom $ Γ |> Fls :|-: Δ
+flsL :: Rule (Prop FOL) g Name
+flsL = axiom $ Γ |> P Fls :|-: Δ
 
-truR :: Rule f FOL Name
-truR = axiom $ Γ :|-: Tru <| Δ
+truR :: Rule f (Prop FOL) Name
+truR = axiom $ Γ :|-: P Tru <| Δ
 
-conjL :: FOL Name -> FOL Name -> Rule FOL g Name
+conjL :: Prop FOL Name -> Prop FOL Name -> Rule (Prop FOL) g Name
 conjL p q =
   [ Γ |> p |> q :|-: Δ ]
   :---:
   Γ |> p /\ q :|-: Δ
 
-conjR :: FOL Name -> FOL Name -> Rule f FOL Name
+conjR :: Prop FOL Name -> Prop FOL Name -> Rule f (Prop FOL) Name
 conjR p q =
   [ Γ :|-: p <| Δ, Γ' :|-: q <| Δ' ]
   :---:
   Γ <> Γ' :|-: p /\ q <| Δ <> Δ'
 
-disjL :: FOL Name -> FOL Name -> Rule FOL g Name
+disjL :: Prop FOL Name -> Prop FOL Name -> Rule (Prop FOL) g Name
 disjL p q =
   [ Γ |> p :|-: Δ, Γ |> q :|-: Δ ]
   :---:
   Γ |> p \/ q :|-: Δ
 
-disjR1, disjR2 :: FOL Name -> FOL Name -> Rule f FOL Name
+disjR1, disjR2 :: Prop FOL Name -> Prop FOL Name -> Rule f (Prop FOL) Name
 
 disjR1 p q =
   [ Γ :|-: p <| Δ ]
@@ -187,7 +190,7 @@ disjR2 p q =
   :---:
   Γ :|-: p \/ q <| Δ
 
-implL, implR :: FOL Name -> FOL Name -> Rule FOL FOL Name
+implL, implR :: Prop FOL Name -> Prop FOL Name -> Rule (Prop FOL) (Prop FOL) Name
 
 implL p q =
   [ Γ :|-: p <| Δ, Γ' |> q :|-: Δ' ]
@@ -199,14 +202,14 @@ implR p q =
   :---:
   Γ :|-: p ==> q <| Δ
 
-notL, notR :: FOL Name -> Rule FOL FOL Name
+notL, notR :: Prop FOL Name -> Rule (Prop FOL) (Prop FOL) Name
 
 notL p =
   [ Γ :|-: p <| Δ ]
   :---:
-  Γ |> Not p :|-: Δ
+  Γ |> P (Not p) :|-: Δ
 
 notR p =
   [ Γ |> p :|-: Δ ]
   :---:
-  Γ :|-: Not p <| Δ
+  Γ :|-: P (Not p) <| Δ
