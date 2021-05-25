@@ -26,6 +26,7 @@ instance Ord a => Monoid (Multiset a) where
 
 instance Foldable Multiset where
   foldMap f (Multiset m) = M.foldMapWithKey (\ a n -> stimes n (f a)) m
+  length (Multiset m) = fromIntegral (sum m)
 
 singleton :: a -> Multiset a
 singleton a = Multiset (M.singleton a 1)
