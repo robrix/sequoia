@@ -10,6 +10,7 @@ module Focalized.Multiset
 
 import qualified Data.Map as M
 import           Data.Maybe (fromMaybe)
+import           Data.Semigroup (stimes)
 
 newtype Multiset a = Multiset (M.Map a Word)
   deriving (Eq, Ord)
@@ -22,6 +23,9 @@ instance Ord a => Semigroup (Multiset a) where
 
 instance Ord a => Monoid (Multiset a) where
   mempty = empty
+
+instance Foldable Multiset where
+  foldMap f (Multiset m) = M.foldMapWithKey (\ a n -> stimes n (f a)) m
 
 singleton :: a -> Multiset a
 singleton a = Multiset (M.singleton a 1)
