@@ -67,6 +67,7 @@ library
     Focalized.Multiset
     Focalized.Proof
     Focalized.Snoc
+    Focalized.Snoc.NonEmpty
 
   -- Modules included in this library but not exported.
   -- other-modules:
