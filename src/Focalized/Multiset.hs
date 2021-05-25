@@ -8,6 +8,7 @@ module Focalized.Multiset
 , cardinality
 , elems
 , distinctElems
+, quotients
 ) where
 
 import qualified Data.Map as M
@@ -60,3 +61,7 @@ elems (Multiset m) = [a' | (a, n) <- M.toList m, a' <- stimes n [a] ]
 
 distinctElems :: Multiset a -> [a]
 distinctElems (Multiset m) = M.keys m
+
+
+quotients :: Ord a => Multiset a -> [(a, Multiset a)]
+quotients m = [ (a, delete a m) | a <- distinctElems m ]
