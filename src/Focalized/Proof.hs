@@ -12,7 +12,7 @@ module Focalized.Proof
 , pattern Δ'
 , (<|)
 , (|>)
-, Sequent(..)
+, (:|-:)(..)
 , contradiction
 , assert
 , refute
@@ -80,26 +80,26 @@ c |> e = c <> Leaf (J e)
 infixl 5 |>
 
 
-data Sequent a b = a :|-: b
+data a :|-: b = a :|-: b
 
 infix 2 :|-:
 
 
-contradiction :: (Alternative f, Alternative g) => Sequent (f a) (g a)
+contradiction :: (Alternative f, Alternative g) => f a :|-: g a
 contradiction = empty :|-: empty
 
-assert :: Alternative f => g a -> Sequent (f a) (Context g a)
+assert :: Alternative f => g a -> f a :|-: Context g a
 assert b = empty :|-: pure (J b)
 
-refute :: Alternative g => f a -> Sequent (Context f a) (g a)
+refute :: Alternative g => f a -> Context f a :|-: g a
 refute a = pure (J a) :|-: empty
 
 
-data Rule f g a = [Sequent (Context f a) (Context g a)] :---: Sequent (Context f a) (Context g a)
+data Rule f g a = [Context f a :|-: Context g a] :---: (Context f a :|-: Context g a)
 
 infix 1 :---:
 
-axiom :: Sequent (Context f a) (Context g a) -> Rule f g a
+axiom :: Context f a :|-: Context g a -> Rule f g a
 axiom s = [] :---: s
 
 
