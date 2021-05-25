@@ -21,6 +21,7 @@ module Focalized.Proof
 
 import           Control.Carrier.NonDet.Church
 import           Control.Carrier.Reader
+import           Data.Either (partitionEithers)
 import           Data.Functor.Identity
 import qualified Focalized.Multiset as S
 import           Prelude hiding (init)
@@ -135,10 +136,11 @@ match = \case
     p :=>: q -> p <| _Γ |- _Δ |> q
     Not p    -> p <| _Γ |- _Δ
 
-(|-), chooseL, chooseR  :: (Alternative m, Monad m, Ord a) => Context FOL a -> Context FOL a -> m ()
-
-_Γ |- _Δ = chooseL _Γ _Δ <|> chooseR _Γ _Δ
-
-chooseL _Γ _Δ = foldMapA (\ (p, _Γ') -> connective p >>= \ p -> match (Left ((_Γ', p) :|-: _Δ))) (S.quotients _Γ)
-
-chooseR _Γ _Δ = foldMapA (\ (p, _Δ') -> connective p >>= \ p -> match (Right (_Γ :|-: (p, _Δ')))) (S.quotients _Δ)
+(|-) :: (Alternative m, Monad m, Ord a) => Context FOL a -> Context FOL a -> m ()
+_Γ |- _Δ = case (qΓ, qΔ) of
+  ([], []) -> foldMapA (guard . (`elem` aΓ)) aΔ
+  _        -> foldMapA (\ (p, _Γ') -> match (Left  ((_Γ', p) :|-: _Δ))) qΓ
+          <|> foldMapA (\ (p, _Δ') -> match (Right (_Γ :|-: (p, _Δ')))) qΔ
+  where
+  (aΓ, qΓ) = partitionEithers [ (, _Γ') <$> getProp p | (p, _Γ') <- S.quotients _Γ ]
+  (aΔ, qΔ) = partitionEithers [ (, _Δ') <$> getProp p | (p, _Δ') <- S.quotients _Δ ]
