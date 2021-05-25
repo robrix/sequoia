@@ -33,6 +33,8 @@ module Focalized.Proof
 , implR
 , notL
 , notR
+, match
+, (|-)
 ) where
 
 import           Control.Carrier.NonDet.Church
@@ -213,3 +215,31 @@ notR p =
   [ Γ |> p :|-: Δ ]
   :---:
   Γ :|-: P (Not p) <| Δ
+
+
+type C p a = S.Multiset (Prop p a)
+type L p a = (C p a, p (Prop p a))
+type R p a = (p (Prop p a), C p a)
+
+match :: (Alternative m, Monad m, Ord a) => Either (L FOL a :|-: C FOL a) (C FOL a :|-: R FOL a) -> m ()
+match = \case
+  Left  ((_Γ, p) :|-: _Δ) -> case p of
+    Fls      -> pure ()
+    Tru      -> empty -- no L rule for truth
+    p :/\: q -> _Γ |> p |> q |- _Δ
+    p :\/: q -> _Γ |> p |- _Δ >> _Γ |> q |- _Δ
+    p :=>: q -> _Γ |- p <| _Δ >> _Γ |> q |- _Δ -- fixme: split _Γ & _Δ (multiplicative nondeterminism)
+    Not p    -> _Γ |- p <| _Δ
+  Right (_Γ :|-: (p, _Δ)) -> case p of
+    Fls      -> empty -- no R rule for falsity
+    Tru      -> pure ()
+    p :/\: q -> _Γ |- p <| _Δ >> _Γ |- q <| _Δ -- fixme: split _Γ & _Δ (multiplicative nondeterminism)
+    p :\/: q -> (_Γ |- p <| _Δ) <|> (_Γ |- q <| _Δ)
+    p :=>: q -> _Γ |> p |- q <| _Δ
+    Not p    -> _Γ |> p |- _Δ
+  where
+  (<|) = S.insert
+  (|>) = flip S.insert
+
+(|-) :: Monad m => C FOL a -> C FOL a -> m ()
+_Γ |- _Δ = pure ()
