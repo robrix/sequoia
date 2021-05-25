@@ -112,17 +112,17 @@ match = \case
   Left  ((_Γ, p) :|-: _Δ) -> case p of
     Fls      -> pure ()
     Tru      -> empty -- no L rule for truth
-    p :/\: q -> _Γ |> p |> q |- _Δ
-    p :\/: q -> _Γ |> p |- _Δ >> _Γ |> q |- _Δ
-    p :=>: q -> _Γ |- p <| _Δ >> _Γ |> q |- _Δ -- fixme: split _Γ & _Δ (multiplicative nondeterminism)
-    Not p    -> _Γ |- p <| _Δ
+    p :/\: q -> p <| q <| _Γ |- _Δ
+    p :\/: q -> p <| _Γ |- _Δ >> q <| _Γ |- _Δ
+    p :=>: q -> _Γ |- _Δ |> p >> q <| _Γ |- _Δ -- fixme: split _Γ & _Δ (multiplicative nondeterminism)
+    Not p    -> _Γ |- _Δ |> p
   Right (_Γ :|-: (p, _Δ)) -> case p of
     Fls      -> empty -- no R rule for falsity
     Tru      -> pure ()
-    p :/\: q -> _Γ |- p <| _Δ >> _Γ |- q <| _Δ -- fixme: split _Γ & _Δ (multiplicative nondeterminism)
-    p :\/: q -> (_Γ |- p <| _Δ) <|> (_Γ |- q <| _Δ)
-    p :=>: q -> _Γ |> p |- q <| _Δ
-    Not p    -> _Γ |> p |- _Δ
+    p :/\: q -> _Γ |- _Δ |> p >> _Γ |- _Δ |> q -- fixme: split _Γ & _Δ (multiplicative nondeterminism)
+    p :\/: q -> (_Γ |- _Δ |> p) <|> (_Γ |- _Δ |> q)
+    p :=>: q -> p <| _Γ |- _Δ |> q
+    Not p    -> p <| _Γ |- _Δ
 
 (|-), chooseL, chooseR  :: (Alternative m, Monad m, Ord a) => Context FOL a -> Context FOL a -> m ()
 
