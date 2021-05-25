@@ -6,6 +6,7 @@ module Focalized.Multiset
 , delete
 , multiplicity
 , cardinality
+, elems
 ) where
 
 import qualified Data.Map as M
@@ -51,3 +52,7 @@ multiplicity a (Multiset as) = fromMaybe 0 (M.lookup a as)
 
 cardinality :: Multiset a -> Word
 cardinality (Multiset as) = sum as
+
+
+elems :: Multiset a -> [a]
+elems (Multiset m) = [a' | (a, n) <- M.toList m, a' <- stimes n [a] ]
