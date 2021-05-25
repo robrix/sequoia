@@ -139,5 +139,14 @@ match = \case
   (<|) = S.insert
   (|>) = flip S.insert
 
-(|-) :: Monad m => C FOL a -> C FOL a -> m ()
-_Γ |- _Δ = pure ()
+(|-), chooseL, chooseR  :: (Alternative m, Monad m, Ord a) => C FOL a -> C FOL a -> m ()
+
+_Γ |- _Δ = chooseL _Γ _Δ <|> chooseR _Γ _Δ
+
+chooseL _Γ _Δ = foldMapA (\ (p, _Γ') -> case p of
+  V _ -> empty
+  P p -> match (Left ((_Γ', p) :|-: _Δ))) (S.quotients _Γ)
+
+chooseR _Γ _Δ = foldMapA (\ (p, _Δ') -> case p of
+  V _ -> empty
+  P p -> match (Right (_Γ :|-: (p, _Δ')))) (S.quotients _Δ)
