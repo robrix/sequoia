@@ -7,6 +7,7 @@ module Focalized.Multiset
 , multiplicity
 , cardinality
 , elems
+, distinctElems
 ) where
 
 import qualified Data.Map as M
@@ -56,3 +57,6 @@ cardinality (Multiset as) = sum as
 
 elems :: Multiset a -> [a]
 elems (Multiset m) = [a' | (a, n) <- M.toList m, a' <- stimes n [a] ]
+
+distinctElems :: Multiset a -> [a]
+distinctElems (Multiset m) = M.keys m
