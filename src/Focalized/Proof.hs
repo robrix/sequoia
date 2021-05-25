@@ -105,11 +105,11 @@ neg :: Prop FOL a -> Prop FOL a
 neg p = P (Not p)
 
 
-type C p a = S.Multiset (Prop p a)
-type L p a = (C p a, p (Prop p a))
-type R p a = (p (Prop p a), C p a)
+type Context p a = S.Multiset (Prop p a)
+type L p a = (Context p a, p (Prop p a))
+type R p a = (p (Prop p a), Context p a)
 
-match :: (Alternative m, Monad m, Ord a) => Either (L FOL a :|-: C FOL a) (C FOL a :|-: R FOL a) -> m ()
+match :: (Alternative m, Monad m, Ord a) => Either (L FOL a :|-: Context FOL a) (Context FOL a :|-: R FOL a) -> m ()
 match = \case
   Left  ((_Γ, p) :|-: _Δ) -> case p of
     Fls      -> pure ()
@@ -126,7 +126,7 @@ match = \case
     p :=>: q -> _Γ |> p |- q <| _Δ
     Not p    -> _Γ |> p |- _Δ
 
-(|-), chooseL, chooseR  :: (Alternative m, Monad m, Ord a) => C FOL a -> C FOL a -> m ()
+(|-), chooseL, chooseR  :: (Alternative m, Monad m, Ord a) => Context FOL a -> Context FOL a -> m ()
 
 _Γ |- _Δ = chooseL _Γ _Δ <|> chooseR _Γ _Δ
 
