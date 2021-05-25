@@ -81,9 +81,7 @@ unProp = \case
   P p -> Right p
 
 connective :: Alternative m => Prop p a -> m (p (Prop p a))
-connective = \case
-  V _ -> empty
-  P p -> pure p
+connective = either (const empty) pure . unProp
 
 
 data FOL a
