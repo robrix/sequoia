@@ -3,19 +3,9 @@
 module Focalized.Proof
 ( runProof
 , Proof(..)
-, Entry(..)
-, Context
-, Name
-, pattern Γ
-, pattern Γ'
-, pattern Δ
-, pattern Δ'
 , (<|)
 , (|>)
 , (:|-:)(..)
-, contradiction
-, assert
-, refute
 , Prop(..)
 , FOL(..)
 , tru
@@ -31,7 +21,6 @@ module Focalized.Proof
 import           Control.Carrier.NonDet.Church
 import           Control.Carrier.Reader
 import           Data.Functor.Identity
-import           Focalized.B
 import qualified Focalized.Multiset as S
 import           Prelude hiding (init)
 
@@ -48,27 +37,13 @@ type (|-) = (->)
 infix 2 |-
 
 
-data Entry f a
-  = M a
-  | J (f a)
-
-type Context f a = B (Entry f a)
-type Name = String
-
-pattern Γ, Γ', Δ, Δ' :: Context f Name
-pattern Γ = Leaf (M "Γ")
-pattern Γ' = Leaf (M "Γ′")
-pattern Δ = Leaf (M "Δ")
-pattern Δ' = Leaf (M "Δ′")
-
-
-(<|) :: f a -> Context f a -> Context f a
-e <| c = Leaf (J e) <> c
+(<|) :: Ord a => a -> S.Multiset a -> S.Multiset a
+(<|) = S.insert
 
 infixr 5 <|
 
-(|>) :: Context f a -> f a -> Context f a
-c |> e = c <> Leaf (J e)
+(|>) :: Ord a => S.Multiset a -> a -> S.Multiset a
+(|>) = flip S.insert
 
 infixl 5 |>
 
@@ -76,16 +51,6 @@ infixl 5 |>
 data a :|-: b = a :|-: b
 
 infix 2 :|-:
-
-
-contradiction :: (Alternative f, Alternative g) => f a :|-: g a
-contradiction = empty :|-: empty
-
-assert :: Alternative f => g a -> f a :|-: Context g a
-assert b = empty :|-: pure (J b)
-
-refute :: Alternative g => f a -> Context f a :|-: g a
-refute a = pure (J a) :|-: empty
 
 
 data Prop f a
@@ -160,9 +125,6 @@ match = \case
     p :\/: q -> (_Γ |- p <| _Δ) <|> (_Γ |- q <| _Δ)
     p :=>: q -> _Γ |> p |- q <| _Δ
     Not p    -> _Γ |> p |- _Δ
-  where
-  (<|) = S.insert
-  (|>) = flip S.insert
 
 (|-), chooseL, chooseR  :: (Alternative m, Monad m, Ord a) => C FOL a -> C FOL a -> m ()
 
