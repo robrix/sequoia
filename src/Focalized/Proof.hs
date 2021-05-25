@@ -6,7 +6,7 @@ module Focalized.Proof
 , (|>)
 , (:|-:)(..)
 , Prop(..)
-, unProp
+, getProp
 , connective
 , FOL(..)
 , tru
@@ -74,13 +74,13 @@ deriving instance (forall x . Eq x => Eq (f x), forall x . Ord x => Ord (f x), O
 deriving instance (forall x . Show x => Show (f x), Show a) => Show (Prop f a)
 
 
-unProp :: Prop p a -> Either a (p (Prop p a))
-unProp = \case
+getProp :: Prop p a -> Either a (p (Prop p a))
+getProp = \case
   V a -> Left a
   P p -> Right p
 
 connective :: Alternative m => Prop p a -> m (p (Prop p a))
-connective = either (const empty) pure . unProp
+connective = either (const empty) pure . getProp
 
 
 data FOL a
