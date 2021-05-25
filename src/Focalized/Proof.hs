@@ -22,17 +22,6 @@ module Focalized.Proof
 , cut
 , Prop(..)
 , FOL(..)
-, flsL
-, truR
-, conjL
-, conjR
-, disjL
-, disjR1
-, disjR2
-, implL
-, implR
-, notL
-, notR
 , match
 , (|-)
 ) where
@@ -146,75 +135,6 @@ data FOL a
 infixr 6 :=>:
 infixr 7 :\/:
 infixr 8 :/\:
-
-(\/), (/\), (==>) :: Prop FOL a -> Prop FOL a -> Prop FOL a
-p \/ q = P (p :\/: q)
-p /\ q = P (p :/\: q)
-p ==> q = P (p :=>: q)
-
-infixr 6 ==>
-infixr 7 \/
-infixr 8 /\
-
-flsL :: Rule (Prop FOL) g Name
-flsL = axiom $ Γ |> P Fls :|-: Δ
-
-truR :: Rule f (Prop FOL) Name
-truR = axiom $ Γ :|-: P Tru <| Δ
-
-conjL :: Prop FOL Name -> Prop FOL Name -> Rule (Prop FOL) g Name
-conjL p q =
-  [ Γ |> p |> q :|-: Δ ]
-  :---:
-  Γ |> p /\ q :|-: Δ
-
-conjR :: Prop FOL Name -> Prop FOL Name -> Rule f (Prop FOL) Name
-conjR p q =
-  [ Γ :|-: p <| Δ, Γ' :|-: q <| Δ' ]
-  :---:
-  Γ <> Γ' :|-: p /\ q <| Δ <> Δ'
-
-disjL :: Prop FOL Name -> Prop FOL Name -> Rule (Prop FOL) g Name
-disjL p q =
-  [ Γ |> p :|-: Δ, Γ |> q :|-: Δ ]
-  :---:
-  Γ |> p \/ q :|-: Δ
-
-disjR1, disjR2 :: Prop FOL Name -> Prop FOL Name -> Rule f (Prop FOL) Name
-
-disjR1 p q =
-  [ Γ :|-: p <| Δ ]
-  :---:
-  Γ :|-: p \/ q <| Δ
-
-disjR2 p q =
-  [ Γ :|-: q <| Δ ]
-  :---:
-  Γ :|-: p \/ q <| Δ
-
-implL, implR :: Prop FOL Name -> Prop FOL Name -> Rule (Prop FOL) (Prop FOL) Name
-
-implL p q =
-  [ Γ :|-: p <| Δ, Γ' |> q :|-: Δ' ]
-  :---:
-  Γ <> Γ' |> p ==> q :|-: Δ <> Δ'
-
-implR p q =
-  [ Γ |> p :|-: q <| Δ ]
-  :---:
-  Γ :|-: p ==> q <| Δ
-
-notL, notR :: Prop FOL Name -> Rule (Prop FOL) (Prop FOL) Name
-
-notL p =
-  [ Γ :|-: p <| Δ ]
-  :---:
-  Γ |> P (Not p) :|-: Δ
-
-notR p =
-  [ Γ |> p :|-: Δ ]
-  :---:
-  Γ :|-: P (Not p) <| Δ
 
 
 type C p a = S.Multiset (Prop p a)
