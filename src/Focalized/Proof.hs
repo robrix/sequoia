@@ -16,10 +16,6 @@ module Focalized.Proof
 , contradiction
 , assert
 , refute
-, Rule(..)
-, axiom
-, init
-, cut
 , Prop(..)
 , FOL(..)
 , match
@@ -84,24 +80,6 @@ assert b = empty :|-: pure (J b)
 
 refute :: Alternative g => f a -> Context f a :|-: g a
 refute a = pure (J a) :|-: empty
-
-
-data Rule f g a = [Context f a :|-: Context g a] :---: (Context f a :|-: Context g a)
-
-infix 1 :---:
-
-axiom :: Context f a :|-: Context g a -> Rule f g a
-axiom s = [] :---: s
-
-
-init :: f Name -> Rule f f Name
-init a = axiom $ Γ |> a :|-: a <| Δ
-
-cut :: f Name -> Rule f f Name
-cut a =
-  [ Γ :|-: a <| Δ, Γ' |> a :|-: Δ' ]
-  :---:
-  Γ <> Γ' :|-: Δ <> Δ'
 
 
 data Prop f a
