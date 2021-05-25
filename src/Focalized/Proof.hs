@@ -18,6 +18,12 @@ module Focalized.Proof
 , refute
 , Prop(..)
 , FOL(..)
+, tru
+, fls
+, (==>)
+, (\/)
+, (/\)
+, neg
 , match
 , (|-)
 ) where
@@ -113,6 +119,25 @@ data FOL a
 infixr 6 :=>:
 infixr 7 :\/:
 infixr 8 :/\:
+
+
+tru, fls :: Prop FOL a
+
+tru = P Tru
+fls = P Fls
+
+(==>), (\/), (/\) :: Prop FOL a -> Prop FOL a -> Prop FOL a
+
+p ==> q = P (p :=>: q)
+p \/ q = P (p :\/: q)
+p /\ q = P (p :/\: q)
+
+infixr 6 ==>
+infixr 7 \/
+infixr 8 /\
+
+neg :: Prop FOL a -> Prop FOL a
+neg p = P (Not p)
 
 
 type C p a = S.Multiset (Prop p a)
