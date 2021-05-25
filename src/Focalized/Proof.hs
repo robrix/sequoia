@@ -7,6 +7,7 @@ module Focalized.Proof
 , (|>)
 , (:|-:)(..)
 , Prop(..)
+, connective
 , FOL(..)
 , tru
 , fls
@@ -71,6 +72,12 @@ instance Functor f => Monad (Prop f) where
 deriving instance (forall x . Eq x => Eq (f x), Eq a) => Eq (Prop f a)
 deriving instance (forall x . Eq x => Eq (f x), forall x . Ord x => Ord (f x), Ord a) => Ord (Prop f a)
 deriving instance (forall x . Show x => Show (f x), Show a) => Show (Prop f a)
+
+
+connective :: Alternative m => Prop p a -> m (p (Prop p a))
+connective = \case
+  V _ -> empty
+  P p -> pure p
 
 
 data FOL a
