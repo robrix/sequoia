@@ -2,6 +2,7 @@ module Focalized.Multiset
 ( Multiset
 , singleton
 , empty
+, fromList
 , insert
 , delete
 , multiplicity
@@ -11,6 +12,7 @@ module Focalized.Multiset
 , quotients
 ) where
 
+import           Data.Foldable (foldl')
 import qualified Data.Map as M
 import           Data.Maybe (fromMaybe)
 import           Data.Semigroup (stimes)
@@ -36,6 +38,9 @@ singleton a = Multiset (M.singleton a 1)
 
 empty :: Multiset a
 empty = Multiset M.empty
+
+fromList :: Ord a => [a] -> Multiset a
+fromList = foldl' (flip insert) empty
 
 
 insert :: Ord a => a -> Multiset a -> Multiset a
