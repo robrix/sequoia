@@ -9,7 +9,8 @@ data N
 data P
 
 data Neg n p a
-  = Bot
+  = N a
+  | Bot
   | Top
   | n a :⅋: n a
   | n a :&: n a
@@ -24,7 +25,8 @@ infixr 8 :&:
 
 
 data Pos n p a
-  = Zero
+  = P a
+  | Zero
   | One
   | p a :+: p a
   | p a :*: p a
