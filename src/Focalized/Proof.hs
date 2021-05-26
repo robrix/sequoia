@@ -8,7 +8,6 @@ module Focalized.Proof
 , Prop(..)
 , getProp
 , connective
-, Context
 ) where
 
 import           Control.Carrier.NonDet.Church
@@ -73,6 +72,3 @@ getProp = \case
 
 connective :: Alternative m => Prop p a -> m (p (Prop p a))
 connective = either (const empty) pure . getProp
-
-
-type Context p a = S.Multiset (Prop p a)
