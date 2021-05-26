@@ -1,7 +1,12 @@
 module Focalized.Polarized
-( Neg(..)
+( N
+, P
+, Neg(..)
 , Pos(..)
 ) where
+
+data N
+data P
 
 data Neg a
   = Bot
