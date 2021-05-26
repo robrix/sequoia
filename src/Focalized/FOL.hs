@@ -1,11 +1,5 @@
 module Focalized.FOL
 ( FOL(..)
-, tru
-, fls
-, (==>)
-, (\/)
-, (/\)
-, neg
 , match
 , (|-)
 ) where
@@ -17,41 +11,32 @@ import qualified Focalized.Multiset as S
 import           Focalized.Proof
 
 data FOL a
-  = Fls
+  = F a
+  | Fls
   | Tru
-  | a :\/: a
-  | a :/\: a
-  | Not a
-  | a :=>: a
+  | FOL a :\/: FOL a
+  | FOL a :/\: FOL a
+  | Not (FOL a)
+  | FOL a :=>: FOL a
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
 infixr 6 :=>:
 infixr 7 :\/:
 infixr 8 :/\:
 
+type Γ = S.Multiset
+type Δ = S.Multiset
 
-tru, fls :: Prop FOL a
-
-tru = P Tru
-fls = P Fls
-
-(==>), (\/), (/\) :: Prop FOL a -> Prop FOL a -> Prop FOL a
-
-p ==> q = P (p :=>: q)
-p \/ q = P (p :\/: q)
-p /\ q = P (p :/\: q)
-
-infixr 6 ==>
-infixr 7 \/
-infixr 8 /\
-
-neg :: Prop FOL a -> Prop FOL a
-neg p = P (Not p)
+unFOL :: FOL a -> Either a (FOL a)
+unFOL = \case
+  F a -> Left a
+  p   -> Right p
 
 
-match :: (Alternative m, Monad m, Ord a) => Either ((Context FOL a, FOL (Prop FOL a)) :|-: Context FOL a) (Context FOL a :|-: (FOL (Prop FOL a), Context FOL a)) -> m ()
+match :: (Alternative m, Monad m, Ord a) => Either ((Γ (FOL a), FOL a) :|-: Δ (FOL a)) (Γ (FOL a) :|-: (FOL a, Δ (FOL a))) -> m ()
 match = \case
   Left  ((_Γ, p) :|-: _Δ) -> case p of
+    F _      -> empty
     Fls      -> pure ()
     Tru      -> empty -- no L rule for truth
     p :/\: q -> p <| q <| _Γ |- _Δ
@@ -59,6 +44,7 @@ match = \case
     p :=>: q -> _Γ |- _Δ |> p >> q <| _Γ |- _Δ -- fixme: split _Γ & _Δ (multiplicative nondeterminism)
     Not p    -> _Γ |- _Δ |> p
   Right (_Γ :|-: (p, _Δ)) -> case p of
+    F _      -> empty
     Fls      -> empty -- no R rule for falsity
     Tru      -> pure ()
     p :/\: q -> _Γ |- _Δ |> p >> _Γ |- _Δ |> q -- fixme: split _Γ & _Δ (multiplicative nondeterminism)
@@ -66,13 +52,13 @@ match = \case
     p :=>: q -> p <| _Γ |- _Δ |> q
     Not p    -> p <| _Γ |- _Δ
 
-(|-) :: (Alternative m, Monad m, Ord a) => Context FOL a -> Context FOL a -> m ()
+(|-) :: (Alternative m, Monad m, Ord a) => Γ (FOL a) -> Δ (FOL a) -> m ()
 _Γ |- _Δ = case (qΓ, qΔ) of
   ([], []) -> foldMapA (guard . (`elem` aΓ)) aΔ
   _        -> foldMapA (\ (p, _Γ') -> match (Left  ((_Γ', p) :|-: _Δ))) qΓ
           <|> foldMapA (\ (p, _Δ') -> match (Right (_Γ :|-: (p, _Δ')))) qΔ
   where
-  (aΓ, qΓ) = partitionEithers [ (, _Γ') <$> getProp p | (p, _Γ') <- S.quotients _Γ ]
-  (aΔ, qΔ) = partitionEithers [ (, _Δ') <$> getProp p | (p, _Δ') <- S.quotients _Δ ]
+  (aΓ, qΓ) = partitionEithers [ (, _Γ') <$> unFOL p | (p, _Γ') <- S.quotients _Γ ]
+  (aΔ, qΔ) = partitionEithers [ (, _Δ') <$> unFOL p | (p, _Δ') <- S.quotients _Δ ]
 
 infix 2 |-
