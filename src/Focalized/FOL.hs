@@ -16,7 +16,6 @@ import           Data.Either (partitionEithers)
 import qualified Focalized.Multiset as S
 import           Focalized.Proof
 
-
 data FOL a
   = Fls
   | Tru
