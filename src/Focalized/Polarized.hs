@@ -1,12 +1,7 @@
 module Focalized.Polarized
-( N
-, P
-, Neg(..)
+( Neg(..)
 , Pos(..)
 ) where
-
-data N
-data P
 
 data Neg a
   = N a
