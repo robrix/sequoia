@@ -66,6 +66,7 @@ library
     Focalized.B
     Focalized.FOL
     Focalized.Multiset
+    Focalized.Polarized
     Focalized.Proof
     Focalized.Snoc
     Focalized.Snoc.NonEmpty
