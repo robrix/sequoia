@@ -8,14 +8,14 @@ module Focalized.Polarized
 data N
 data P
 
-data Neg a
+data Neg n p a
   = Bot
   | Top
-  | a :⅋: a
-  | a :&: a
-  | a :->: a
-  | Not a
-  | Up a
+  | n a :⅋: n a
+  | n a :&: n a
+  | p a :->: n a
+  | Not (p a)
+  | Up (p a)
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
 infixr 6 :->:
@@ -23,14 +23,14 @@ infixr 7 :⅋:
 infixr 8 :&:
 
 
-data Pos a
+data Pos n p a
   = Zero
   | One
-  | a :+: a
-  | a :*: a
-  | a :-<: a
-  | Neg a
-  | Down a
+  | p a :+: p a
+  | p a :*: p a
+  | p a :-<: n a
+  | Neg (n a)
+  | Down (n a)
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
 infixr 6 :-<:
