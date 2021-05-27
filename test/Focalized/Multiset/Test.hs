@@ -19,5 +19,9 @@ prop_monoid_left_identity = property $ do
   s <- forAll set
   mappend mempty s === s
 
+prop_monoid_right_identity = property $ do
+  s <- forAll set
+  mappend s mempty === s
+
 set = S.fromList <$> Gen.list (Range.linear 0 10) element
 element = Gen.choice (map pure ['a'..'z'])
