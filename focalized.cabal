@@ -90,3 +90,4 @@ test-suite test
   main-is: Test.hs
   build-depends:
     , base
+    , hedgehog ^>= 1
