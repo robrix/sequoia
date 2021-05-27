@@ -2,3 +2,5 @@ cradle:
   cabal:
     - path: "./src"
       component: "lib:focalized"
+    - path: "./test"
+      component: "test:test"

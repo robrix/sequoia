@@ -81,3 +81,12 @@ library
     , containers
     , fused-effects
   hs-source-dirs:   src
+
+
+test-suite test
+  import: common
+  type: exitcode-stdio-1.0
+  hs-source-dirs: test
+  main-is: Test.hs
+  build-depends:
+    , base
