@@ -2,8 +2,11 @@ module Focalized.FOL
 ( FOL(..)
 ) where
 
-import Control.Applicative (Alternative(..))
-import Focalized.Proof
+import           Control.Applicative (Alternative(..))
+import           Control.Effect.NonDet (foldMapA, guard)
+import           Data.Either (partitionEithers)
+import qualified Focalized.Multiset as S
+import           Focalized.Proof
 
 data FOL a
   = F a
@@ -38,10 +41,18 @@ instance Judgement FOL FOL where
     p :=>: q -> p <| _Γ |- _Δ |> q
     Not p    -> p <| _Γ |- _Δ
 
-  unJudgementL = \case
-    F a -> Left a
-    p   -> Right p
+unFOL = \case
+  F a -> Left a
+  p   -> Right p
 
-  unJudgementR = \case
-    F a -> Left a
-    p   -> Right p
+
+(|-) :: (Alternative m, Monad m, Ord a) => Γ (FOL a) -> Δ (FOL a) -> m ()
+_Γ |- _Δ = case (qΓ, qΔ) of
+  ([], []) -> foldMapA (guard . (`elem` aΓ)) aΔ
+  _        -> foldMapA (\ (p, _Γ') -> decomposeL p (_Γ' :|-: _Δ)) qΓ
+          <|> foldMapA (\ (p, _Δ') -> decomposeR (_Γ :|-: _Δ') p) qΔ
+  where
+  (aΓ, qΓ) = partitionEithers [ (, _Γ') <$> unFOL p | (p, _Γ') <- S.quotients _Γ ]
+  (aΔ, qΔ) = partitionEithers [ (, _Δ') <$> unFOL p | (p, _Δ') <- S.quotients _Δ ]
+
+infix 4 |-

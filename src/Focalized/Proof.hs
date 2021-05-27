@@ -8,12 +8,10 @@ module Focalized.Proof
 , type Γ
 , type Δ
 , Judgement(..)
-, (|-)
 ) where
 
 import           Control.Carrier.NonDet.Church
 import           Control.Carrier.Reader
-import           Data.Either (partitionEithers)
 import           Data.Functor.Identity
 import qualified Focalized.Multiset as S
 import           Prelude hiding (init)
@@ -47,18 +45,3 @@ type Δ = S.Multiset
 class Judgement r l | r -> l, l -> r where
   decomposeL :: (Alternative m, Monad m, Ord a) => l a -> Γ (l a) :|-: Δ (r a) -> m ()
   decomposeR :: (Alternative m, Monad m, Ord a) => Γ (l a) :|-: Δ (r a) -> r a -> m ()
-
-  unJudgementL :: l a -> Either a (l a)
-  unJudgementR :: r a -> Either a (r a)
-
-
-(|-) :: (Alternative m, Monad m, Judgement r l, Ord a, Ord (l a), Ord (r a)) => Γ (l a) -> Δ (r a) -> m ()
-_Γ |- _Δ = case (qΓ, qΔ) of
-  ([], []) -> foldMapA (guard . (`elem` aΓ)) aΔ
-  _        -> foldMapA (\ (p, _Γ') -> decomposeL p (_Γ' :|-: _Δ)) qΓ
-          <|> foldMapA (\ (p, _Δ') -> decomposeR (_Γ :|-: _Δ') p) qΔ
-  where
-  (aΓ, qΓ) = partitionEithers [ (, _Γ') <$> unJudgementL p | (p, _Γ') <- S.quotients _Γ ]
-  (aΔ, qΔ) = partitionEithers [ (, _Δ') <$> unJudgementR p | (p, _Δ') <- S.quotients _Δ ]
-
-infix 4 |-

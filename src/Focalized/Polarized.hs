@@ -3,9 +3,12 @@ module Focalized.Polarized
 , Pos(..)
 ) where
 
-import Control.Applicative (Alternative(..))
-import Control.Monad (ap)
-import Focalized.Proof
+import           Control.Applicative (Alternative(..))
+import           Control.Effect.NonDet (foldMapA, guard)
+import           Control.Monad (ap)
+import           Data.Either (partitionEithers)
+import qualified Focalized.Multiset as S
+import           Focalized.Proof
 
 data Neg a
   = N a
@@ -36,6 +39,10 @@ instance Monad Neg where
     a :->: b -> (a >>= Down . f) :->: (b >>= f)
     Not a    -> Not (a >>= Down . f)
     Up a     -> Up (a >>= Down . f)
+
+unNeg = \case
+  N a -> Left a
+  n   -> Right n
 
 
 data Pos a
@@ -68,6 +75,10 @@ instance Monad Pos where
     Neg a    -> Neg (a >>= Up . f)
     Down a   -> Down (a >>= Up . f)
 
+unPos = \case
+  P a -> Left a
+  p   -> Right p
+
 
 instance Judgement Neg Pos where
   decomposeL p (_Γ :|-: _Δ) = case p of
@@ -90,10 +101,14 @@ instance Judgement Neg Pos where
     Not p    -> p <| _Γ |- _Δ
     Up p     -> p <| _Γ |- _Δ
 
-  unJudgementL = \case
-    P a -> Left a
-    p   -> Right p
 
-  unJudgementR = \case
-    N a -> Left a
-    n   -> Right n
+(|-) :: (Alternative m, Monad m, Ord a) => Γ (Pos a) -> Δ (Neg a) -> m ()
+_Γ |- _Δ = case (qΓ, qΔ) of
+  ([], []) -> foldMapA (guard . (`elem` aΓ)) aΔ
+  _        -> foldMapA (\ (p, _Γ') -> decomposeL p (_Γ' :|-: _Δ)) qΓ
+          <|> foldMapA (\ (p, _Δ') -> decomposeR (_Γ :|-: _Δ') p) qΔ
+  where
+  (aΓ, qΓ) = partitionEithers [ (, _Γ') <$> unPos p | (p, _Γ') <- S.quotients _Γ ]
+  (aΔ, qΔ) = partitionEithers [ (, _Δ') <$> unNeg p | (p, _Δ') <- S.quotients _Δ ]
+
+infix 4 |-
