@@ -7,4 +7,4 @@ cd $(dirname "$0")/..
 
 echo "cabal.project"
 
-echo "facet.cabal"
+echo "focalized.cabal"
