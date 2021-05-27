@@ -92,4 +92,5 @@ test-suite test
   main-is: Test.hs
   build-depends:
     , base
+    , focalized
     , hedgehog ^>= 1
