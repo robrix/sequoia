@@ -3,6 +3,7 @@ module Focalized.Multiset.Test
 ( tests
 ) where
 
+import           Data.Foldable (for_)
 import qualified Focalized.Multiset as S
 import           Hedgehog
 import qualified Hedgehog.Gen as Gen
@@ -26,6 +27,10 @@ prop_monoid_right_identity = property $ do
 prop_semigroup_commutativity = property $ do
   (a, b) <- (,) <$> forAll set <*> forAll set
   a <> b === b <> a
+
+prop_quotients_length = property $ do
+  s <- forAll set
+  for_ (S.quotients s) $ \ (_, s') -> length s' === pred (length s)
 
 set = S.fromList <$> Gen.list (Range.linear 0 10) element
 element = Gen.choice (map pure ['a'..'z'])
