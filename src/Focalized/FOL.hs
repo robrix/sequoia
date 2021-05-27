@@ -61,4 +61,4 @@ _Γ |- _Δ = case (qΓ, qΔ) of
   (aΓ, qΓ) = partitionEithers [ (, _Γ') <$> unFOL p | (p, _Γ') <- S.quotients _Γ ]
   (aΔ, qΔ) = partitionEithers [ (, _Δ') <$> unFOL p | (p, _Δ') <- S.quotients _Δ ]
 
-infix 2 |-
+infix 4 |-

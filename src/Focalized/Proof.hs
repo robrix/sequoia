@@ -22,7 +22,7 @@ type Γ = S.Multiset
 type Δ = NonDetC Identity
 type (|-) = (->)
 
-infix 2 |-
+infix 4 |-
 
 
 (<|) :: Ord a => a -> S.Multiset a -> S.Multiset a
