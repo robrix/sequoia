@@ -15,15 +15,11 @@ import           Data.Functor.Identity
 import qualified Focalized.Multiset as S
 import           Prelude hiding (init)
 
-runProof :: Ord b => Γ a -> Proof a b -> S.Multiset b
+runProof :: Ord b => S.Multiset a -> Proof a b -> S.Multiset b
 runProof hyp (Proof m) = run (runNonDetM S.singleton (m hyp))
 
-newtype Proof a b = Proof (Γ a |- Δ b)
-  deriving (Alternative, Applicative, Functor, Monad) via ReaderC (Γ a) Δ
-
-type Γ = S.Multiset
-type Δ = NonDetC Identity
-type (|-) = (->)
+newtype Proof a b = Proof (S.Multiset a -> NonDetC Identity b)
+  deriving (Alternative, Applicative, Functor, Monad) via ReaderC (S.Multiset a) (NonDetC Identity)
 
 
 (<|) :: Ord a => a -> S.Multiset a -> S.Multiset a
