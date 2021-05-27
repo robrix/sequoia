@@ -15,5 +15,9 @@ prop_semigroup_associativity = property $ do
   (a, b, c) <- (,,) <$> forAll set <*> forAll set <*> forAll set
   a <> (b <> c) === (a <> b) <> c
 
+prop_monoid_left_identity = property $ do
+  s <- forAll set
+  mappend mempty s === s
+
 set = S.fromList <$> Gen.list (Range.linear 0 10) element
 element = Gen.choice (map pure ['a'..'z'])
