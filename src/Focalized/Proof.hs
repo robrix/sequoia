@@ -44,3 +44,5 @@ infix 4 :|-:
 
 class Prop p where
   decompose :: (Alternative m, Monad m, Ord a) => S.Multiset (p a) :|-: S.Multiset (p a) -> Either (p a) (p a) -> m ()
+
+  unProp :: p a -> Either a (p a)
