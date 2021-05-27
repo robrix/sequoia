@@ -50,7 +50,7 @@ delete :: Ord a => a -> Multiset a -> Multiset a
 delete a (Multiset as) = Multiset (M.update decr a as)
   where
   decr i
-    | i <= 0    = Nothing
+    | i <= 1    = Nothing
     | otherwise = Just (i - 1)
 
 
