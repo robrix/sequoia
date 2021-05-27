@@ -58,8 +58,8 @@ class Prop p where
 (|-) :: (Alternative m, Monad m, Prop p, Ord a, Ord (p a)) => Γ (p a) -> Δ (p a) -> m ()
 _Γ |- _Δ = case (qΓ, qΔ) of
   ([], []) -> foldMapA (guard . (`elem` aΓ)) aΔ
-  _        -> foldMapA (\ (p, _Γ') -> decompose (_Γ' :|-: _Δ) (Left  p)) qΓ
-          <|> foldMapA (\ (p, _Δ') -> decompose (_Γ :|-: _Δ') (Right p)) qΔ
+  _        -> foldMapA (\ (p, _Γ') -> decomposeL p (_Γ' :|-: _Δ)) qΓ
+          <|> foldMapA (\ (p, _Δ') -> decomposeR (_Γ :|-: _Δ') p) qΔ
   where
   (aΓ, qΓ) = partitionEithers [ (, _Γ') <$> unProp p | (p, _Γ') <- S.quotients _Γ ]
   (aΔ, qΔ) = partitionEithers [ (, _Δ') <$> unProp p | (p, _Δ') <- S.quotients _Δ ]
