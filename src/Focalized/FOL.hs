@@ -19,7 +19,7 @@ infixr 6 :=>:
 infixr 7 :\/:
 infixr 8 :/\:
 
-instance Prop FOL where
+instance Prop FOL FOL where
   decompose (_Γ :|-: _Δ) = \case
     Left  p -> case p of
       F _      -> empty
@@ -38,6 +38,10 @@ instance Prop FOL where
       p :=>: q -> p <| _Γ |- _Δ |> q
       Not p    -> p <| _Γ |- _Δ
 
-  unProp = \case
+  unPropL = \case
+    F a -> Left a
+    p   -> Right p
+
+  unPropR = \case
     F a -> Left a
     p   -> Right p

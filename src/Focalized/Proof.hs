@@ -1,3 +1,4 @@
+{-# LANGUAGE FunctionalDependencies #-}
 module Focalized.Proof
 ( runProof
 , Proof(..)
@@ -43,25 +44,26 @@ infix 4 :|-:
 type Γ = S.Multiset
 type Δ = S.Multiset
 
-class Prop p where
-  decompose :: (Alternative m, Monad m, Ord a) => Γ (p a) :|-: Δ (p a) -> Either (p a) (p a) -> m ()
+class Prop r l | r -> l, l -> r where
+  decompose :: (Alternative m, Monad m, Ord a) => Γ (l a) :|-: Δ (r a) -> Either (l a) (r a) -> m ()
 
-  decomposeL :: (Alternative m, Monad m, Ord a) => p a -> Γ (p a) :|-: Δ (p a) -> m ()
-  decomposeL p c = decompose c (Left p)
+  decomposeL :: (Alternative m, Monad m, Ord a) => l a -> Γ (l a) :|-: Δ (r a) -> m ()
+  decomposeL l c = decompose c (Left l)
 
-  decomposeR :: (Alternative m, Monad m, Ord a) => Γ (p a) :|-: Δ (p a) -> p a -> m ()
+  decomposeR :: (Alternative m, Monad m, Ord a) => Γ (l a) :|-: Δ (r a) -> r a -> m ()
   decomposeR c = decompose c . Right
 
-  unProp :: p a -> Either a (p a)
+  unPropL :: l a -> Either a (l a)
+  unPropR :: r a -> Either a (r a)
 
 
-(|-) :: (Alternative m, Monad m, Prop p, Ord a, Ord (p a)) => Γ (p a) -> Δ (p a) -> m ()
+(|-) :: (Alternative m, Monad m, Prop r l, Ord a, Ord (r a), Ord (l a)) => Γ (l a) -> Δ (r a) -> m ()
 _Γ |- _Δ = case (qΓ, qΔ) of
   ([], []) -> foldMapA (guard . (`elem` aΓ)) aΔ
   _        -> foldMapA (\ (p, _Γ') -> decomposeL p (_Γ' :|-: _Δ)) qΓ
           <|> foldMapA (\ (p, _Δ') -> decomposeR (_Γ :|-: _Δ') p) qΔ
   where
-  (aΓ, qΓ) = partitionEithers [ (, _Γ') <$> unProp p | (p, _Γ') <- S.quotients _Γ ]
-  (aΔ, qΔ) = partitionEithers [ (, _Δ') <$> unProp p | (p, _Δ') <- S.quotients _Δ ]
+  (aΓ, qΓ) = partitionEithers [ (, _Γ') <$> unPropL p | (p, _Γ') <- S.quotients _Γ ]
+  (aΔ, qΔ) = partitionEithers [ (, _Δ') <$> unPropR p | (p, _Δ') <- S.quotients _Δ ]
 
 infix 4 |-
