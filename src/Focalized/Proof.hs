@@ -45,14 +45,8 @@ type Γ = S.Multiset
 type Δ = S.Multiset
 
 class Judgement r l | r -> l, l -> r where
-  decompose :: (Alternative m, Monad m, Ord a) => Γ (l a) :|-: Δ (r a) -> Either (l a) (r a) -> m ()
-  decompose c = either (`decomposeL` c) (c `decomposeR`)
-
   decomposeL :: (Alternative m, Monad m, Ord a) => l a -> Γ (l a) :|-: Δ (r a) -> m ()
-  decomposeL l c = decompose c (Left l)
-
   decomposeR :: (Alternative m, Monad m, Ord a) => Γ (l a) :|-: Δ (r a) -> r a -> m ()
-  decomposeR c = decompose c . Right
 
   unJudgementL :: l a -> Either a (l a)
   unJudgementR :: r a -> Either a (r a)
