@@ -38,4 +38,4 @@ infixl 5 |>
 
 data a :|-: b = a :|-: b
 
-infix 2 :|-:
+infix 4 :|-:
