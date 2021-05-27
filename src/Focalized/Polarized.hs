@@ -3,7 +3,9 @@ module Focalized.Polarized
 , Pos(..)
 ) where
 
+import Control.Applicative (Alternative(..))
 import Control.Monad (ap)
+import Focalized.Proof
 
 data Neg a
   = N a
@@ -65,3 +67,33 @@ instance Monad Pos where
     a :-<: b -> (a >>= f) :-<: (b >>= Up . f)
     Neg a    -> Neg (a >>= Up . f)
     Down a   -> Down (a >>= Up . f)
+
+
+instance Judgement Neg Pos where
+  decomposeL p (_Γ :|-: _Δ) = case p of
+    P _      -> empty
+    Zero     -> pure ()
+    One      -> _Γ |- _Δ
+    p :+: q  -> p <| _Γ |- _Δ >> q <| _Γ |- _Δ
+    p :*: q  -> p <| q <| _Γ |- _Δ
+    p :-<: q -> p <| _Γ |- _Δ |> q
+    Neg p    -> _Γ |- _Δ |> p
+    Down p   -> _Γ |- _Δ |> p
+
+  decomposeR (_Γ :|-: _Δ) = \case
+    N _      -> empty
+    Bot      -> _Γ |- _Δ
+    Top      -> pure ()
+    p :⅋: q  -> _Γ |- _Δ |> p |> q
+    p :&: q  -> _Γ |- _Δ |> p >> _Γ |- _Δ |> q
+    p :->: q -> p <| _Γ |- _Δ |> q
+    Not p    -> p <| _Γ |- _Δ
+    Up p     -> p <| _Γ |- _Δ
+
+  unJudgementL = \case
+    P a -> Left a
+    p   -> Right p
+
+  unJudgementR = \case
+    N a -> Left a
+    n   -> Right n
