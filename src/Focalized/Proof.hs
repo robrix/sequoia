@@ -52,7 +52,7 @@ class Judgement r l | r -> l, l -> r where
   unJudgementR :: r a -> Either a (r a)
 
 
-(|-) :: (Alternative m, Monad m, Judgement r l, Ord a, Ord (r a), Ord (l a)) => Γ (l a) -> Δ (r a) -> m ()
+(|-) :: (Alternative m, Monad m, Judgement r l, Ord a, Ord (l a), Ord (r a)) => Γ (l a) -> Δ (r a) -> m ()
 _Γ |- _Δ = case (qΓ, qΔ) of
   ([], []) -> foldMapA (guard . (`elem` aΓ)) aΔ
   _        -> foldMapA (\ (p, _Γ') -> decomposeL p (_Γ' :|-: _Δ)) qΓ
