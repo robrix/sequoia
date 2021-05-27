@@ -87,6 +87,8 @@ test-suite test
   import: common
   type: exitcode-stdio-1.0
   hs-source-dirs: test
+  other-modules:
+    Focalized.Multiset.Test
   main-is: Test.hs
   build-depends:
     , base
