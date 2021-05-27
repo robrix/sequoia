@@ -4,6 +4,7 @@ module Focalized.Proof
 , (<|)
 , (|>)
 , (:|-:)(..)
+, Prop(..)
 ) where
 
 import           Control.Carrier.NonDet.Church
@@ -39,3 +40,7 @@ infixl 5 |>
 data a :|-: b = a :|-: b
 
 infix 4 :|-:
+
+
+class Prop p where
+  decompose :: (Alternative m, Monad m, Ord a) => S.Multiset (p a) :|-: S.Multiset (p a) -> Either (p a) (p a) -> m ()
