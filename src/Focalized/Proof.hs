@@ -5,10 +5,12 @@ module Focalized.Proof
 , (|>)
 , (:|-:)(..)
 , Prop(..)
+, (|-)
 ) where
 
 import           Control.Carrier.NonDet.Church
 import           Control.Carrier.Reader
+import           Data.Either (partitionEithers)
 import           Data.Functor.Identity
 import qualified Focalized.Multiset as S
 import           Prelude hiding (init)
@@ -22,8 +24,6 @@ newtype Proof a b = Proof (Γ a |- Δ b)
 type Γ = S.Multiset
 type Δ = NonDetC Identity
 type (|-) = (->)
-
-infix 4 |-
 
 
 (<|) :: Ord a => a -> S.Multiset a -> S.Multiset a
@@ -46,3 +46,15 @@ class Prop p where
   decompose :: (Alternative m, Monad m, Ord a) => S.Multiset (p a) :|-: S.Multiset (p a) -> Either (p a) (p a) -> m ()
 
   unProp :: p a -> Either a (p a)
+
+
+(|-) :: (Alternative m, Monad m, Prop p, Ord a, Ord (p a)) => S.Multiset (p a) -> S.Multiset (p a) -> m ()
+_Γ |- _Δ = case (qΓ, qΔ) of
+  ([], []) -> foldMapA (guard . (`elem` aΓ)) aΔ
+  _        -> foldMapA (\ (p, _Γ') -> decompose (_Γ' :|-: _Δ) (Left  p)) qΓ
+          <|> foldMapA (\ (p, _Δ') -> decompose (_Γ :|-: _Δ') (Right p)) qΔ
+  where
+  (aΓ, qΓ) = partitionEithers [ (, _Γ') <$> unProp p | (p, _Γ') <- S.quotients _Γ ]
+  (aΔ, qΔ) = partitionEithers [ (, _Δ') <$> unProp p | (p, _Δ') <- S.quotients _Δ ]
+
+infix 4 |-
