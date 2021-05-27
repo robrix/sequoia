@@ -1,13 +1,9 @@
-{-# LANGUAGE QuantifiedConstraints #-}
 module Focalized.Proof
 ( runProof
 , Proof(..)
 , (<|)
 , (|>)
 , (:|-:)(..)
-, Prop(..)
-, getProp
-, connective
 ) where
 
 import           Control.Carrier.NonDet.Church
@@ -43,32 +39,3 @@ infixl 5 |>
 data a :|-: b = a :|-: b
 
 infix 2 :|-:
-
-
-data Prop f a
-  = V a
-  | P (f (Prop f a))
-  deriving (Foldable, Functor, Traversable)
-
-instance Functor f => Applicative (Prop f) where
-  pure = V
-
-  V f <*> a = f <$> a
-  P f <*> a = P ((<*> a) <$> f)
-
-instance Functor f => Monad (Prop f) where
-  V a >>= f = f a
-  P a >>= f = P ((>>= f) <$> a)
-
-deriving instance (forall x . Eq x => Eq (f x), Eq a) => Eq (Prop f a)
-deriving instance (forall x . Eq x => Eq (f x), forall x . Ord x => Ord (f x), Ord a) => Ord (Prop f a)
-deriving instance (forall x . Show x => Show (f x), Show a) => Show (Prop f a)
-
-
-getProp :: Prop p a -> Either a (p (Prop p a))
-getProp = \case
-  V a -> Left a
-  P p -> Right p
-
-connective :: Alternative m => Prop p a -> m (p (Prop p a))
-connective = either (const empty) pure . getProp
