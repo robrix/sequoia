@@ -33,9 +33,9 @@ unFOL = \case
   p   -> Right p
 
 
-match :: (Alternative m, Monad m, Ord a) => Either ((Γ (FOL a), FOL a) :|-: Δ (FOL a)) (Γ (FOL a) :|-: (FOL a, Δ (FOL a))) -> m ()
-match = \case
-  Left  ((_Γ, p) :|-: _Δ) -> case p of
+match :: (Alternative m, Monad m, Ord a) => Γ (FOL a) :|-: Δ (FOL a) -> Either (FOL a) (FOL a) -> m ()
+match (_Γ :|-: _Δ) = \case
+  Left  p -> case p of
     F _      -> empty
     Fls      -> pure ()
     Tru      -> empty -- no L rule for truth
@@ -43,7 +43,7 @@ match = \case
     p :\/: q -> p <| _Γ |- _Δ >> q <| _Γ |- _Δ
     p :=>: q -> _Γ |- _Δ |> p >> q <| _Γ |- _Δ -- fixme: split _Γ & _Δ (multiplicative nondeterminism)
     Not p    -> _Γ |- _Δ |> p
-  Right (_Γ :|-: (p, _Δ)) -> case p of
+  Right p -> case p of
     F _      -> empty
     Fls      -> empty -- no R rule for falsity
     Tru      -> pure ()
@@ -55,8 +55,8 @@ match = \case
 (|-) :: (Alternative m, Monad m, Ord a) => Γ (FOL a) -> Δ (FOL a) -> m ()
 _Γ |- _Δ = case (qΓ, qΔ) of
   ([], []) -> foldMapA (guard . (`elem` aΓ)) aΔ
-  _        -> foldMapA (\ (p, _Γ') -> match (Left  ((_Γ', p) :|-: _Δ))) qΓ
-          <|> foldMapA (\ (p, _Δ') -> match (Right (_Γ :|-: (p, _Δ')))) qΔ
+  _        -> foldMapA (\ (p, _Γ') -> match (_Γ' :|-: _Δ) (Left  p)) qΓ
+          <|> foldMapA (\ (p, _Δ') -> match (_Γ :|-: _Δ') (Right p)) qΔ
   where
   (aΓ, qΓ) = partitionEithers [ (, _Γ') <$> unFOL p | (p, _Γ') <- S.quotients _Γ ]
   (aΔ, qΔ) = partitionEithers [ (, _Δ') <$> unFOL p | (p, _Δ') <- S.quotients _Δ ]
