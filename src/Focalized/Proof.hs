@@ -4,6 +4,8 @@ module Focalized.Proof
 , (<|)
 , (|>)
 , (:|-:)(..)
+, type Γ
+, type Δ
 , Prop(..)
 , (|-)
 ) where
@@ -38,13 +40,16 @@ data a :|-: b = a :|-: b
 infix 4 :|-:
 
 
+type Γ = S.Multiset
+type Δ = S.Multiset
+
 class Prop p where
-  decompose :: (Alternative m, Monad m, Ord a) => S.Multiset (p a) :|-: S.Multiset (p a) -> Either (p a) (p a) -> m ()
+  decompose :: (Alternative m, Monad m, Ord a) => Γ (p a) :|-: Δ (p a) -> Either (p a) (p a) -> m ()
 
   unProp :: p a -> Either a (p a)
 
 
-(|-) :: (Alternative m, Monad m, Prop p, Ord a, Ord (p a)) => S.Multiset (p a) -> S.Multiset (p a) -> m ()
+(|-) :: (Alternative m, Monad m, Prop p, Ord a, Ord (p a)) => Γ (p a) -> Δ (p a) -> m ()
 _Γ |- _Δ = case (qΓ, qΔ) of
   ([], []) -> foldMapA (guard . (`elem` aΓ)) aΔ
   _        -> foldMapA (\ (p, _Γ') -> decompose (_Γ' :|-: _Δ) (Left  p)) qΓ
