@@ -37,5 +37,10 @@ prop_insert_length = property $ do
   s <- forAll set
   length (S.insert a s) === succ (length s)
 
+prop_insert_inverse = property $ do
+  a <- forAll element
+  s <- forAll set
+  S.delete a (S.insert a s) === s
+
 set = S.fromList <$> Gen.list (Range.linear 0 10) element
 element = Gen.choice (map pure ['a'..'z'])
