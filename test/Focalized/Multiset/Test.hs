@@ -47,6 +47,11 @@ prop_insert_inverse = property $ do
   s <- forAll set
   S.delete a (S.insert a s) === s
 
+prop_delete_multiplicity = property $ do
+  a <- forAll element
+  s <- mappend (S.singleton a) <$> forAll set
+  S.multiplicity a (S.delete a s) === pred (S.multiplicity a s)
+
 prop_delete_partial_inverse = property $ do
   a <- forAll element
   s <- mappend (S.singleton a) <$> forAll set
