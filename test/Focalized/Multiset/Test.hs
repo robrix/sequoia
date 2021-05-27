@@ -32,5 +32,10 @@ prop_quotients_length = property $ do
   s <- forAll set
   for_ (S.quotients s) $ \ (_, s') -> length s' === pred (length s)
 
+prop_insert_length = property $ do
+  a <- forAll element
+  s <- forAll set
+  length (S.insert a s) === succ (length s)
+
 set = S.fromList <$> Gen.list (Range.linear 0 10) element
 element = Gen.choice (map pure ['a'..'z'])
