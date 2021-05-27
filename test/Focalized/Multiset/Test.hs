@@ -38,6 +38,11 @@ prop_insert_length = property $ do
   s <- forAll set
   length (S.insert a s) === succ (length s)
 
+prop_insert_multiplicity = property $ do
+  a <- forAll element
+  s <- forAll set
+  S.multiplicity a (S.insert a s) === succ (S.multiplicity a s)
+
 prop_insert_inverse = property $ do
   a <- forAll element
   s <- forAll set
