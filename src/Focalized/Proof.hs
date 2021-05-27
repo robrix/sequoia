@@ -46,6 +46,12 @@ type Δ = S.Multiset
 class Prop p where
   decompose :: (Alternative m, Monad m, Ord a) => Γ (p a) :|-: Δ (p a) -> Either (p a) (p a) -> m ()
 
+  decomposeL :: (Alternative m, Monad m, Ord a) => p a -> Γ (p a) :|-: Δ (p a) -> m ()
+  decomposeL p c = decompose c (Left p)
+
+  decomposeR :: (Alternative m, Monad m, Ord a) => Γ (p a) :|-: Δ (p a) -> p a -> m ()
+  decomposeR c = decompose c . Right
+
   unProp :: p a -> Either a (p a)
 
 
