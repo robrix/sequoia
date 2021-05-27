@@ -3,7 +3,6 @@ module Focalized.Multiset.Test
 ( tests
 ) where
 
-import           Control.Monad (when)
 import           Data.Foldable (for_)
 import qualified Focalized.Multiset as S
 import           Hedgehog
@@ -50,8 +49,8 @@ prop_insert_inverse = property $ do
 
 prop_delete_partial_inverse = property $ do
   a <- forAll element
-  s <- forAll set
-  when (a `elem` s) $ S.insert a (S.delete a s) === s
+  s <- mappend (S.singleton a) <$> forAll set
+  S.insert a (S.delete a s) === s
 
 
 set = S.fromList <$> Gen.list (Range.linear 0 10) element
