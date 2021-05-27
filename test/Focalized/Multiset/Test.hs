@@ -23,5 +23,9 @@ prop_monoid_right_identity = property $ do
   s <- forAll set
   mappend s mempty === s
 
+prop_semigroup_commutativity = property $ do
+  (a, b) <- (,) <$> forAll set <*> forAll set
+  a <> b === b <> a
+
 set = S.fromList <$> Gen.list (Range.linear 0 10) element
 element = Gen.choice (map pure ['a'..'z'])
