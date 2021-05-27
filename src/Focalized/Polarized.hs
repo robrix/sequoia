@@ -52,7 +52,7 @@ data Pos a
   | Pos a :+: Pos a
   | Pos a :*: Pos a
   | Pos a :-<: Neg a
-  | Neg (Neg a)
+  | Inv (Neg a)
   | Down (Neg a)
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
@@ -72,7 +72,7 @@ instance Monad Pos where
     a :+: b  -> (a >>= f) :+: (b >>= f)
     a :*: b  -> (a >>= f) :*: (b >>= f)
     a :-<: b -> (a >>= f) :-<: (b >>= Up . f)
-    Neg a    -> Neg (a >>= Up . f)
+    Inv a    -> Inv (a >>= Up . f)
     Down a   -> Down (a >>= Up . f)
 
 unPos = \case
@@ -88,7 +88,7 @@ instance Judgement Neg Pos where
     p :+: q  -> p <| _Γ |- _Δ >> q <| _Γ |- _Δ
     p :*: q  -> p <| q <| _Γ |- _Δ
     p :-<: q -> p <| _Γ |- _Δ |> q
-    Neg p    -> _Γ |- _Δ |> p
+    Inv p    -> _Γ |- _Δ |> p
     Down p   -> _Γ |- _Δ |> p
 
   decomposeR (_Γ :|-: _Δ) = \case
