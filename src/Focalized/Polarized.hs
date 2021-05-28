@@ -102,13 +102,15 @@ instance Judgement Neg Pos where
     Up p     -> p <| _Γ |- _Δ
 
 
-(|-) :: (Alternative m, Monad m, Ord a) => Γ (Pos a) -> Δ (Neg a) -> m ()
-_Γ |- _Δ = case (qΓ, qΔ) of
-  ([], []) -> foldMapA (guard . (`elem` aΓ)) aΔ
-  _        -> foldMapA (\ (p, _Γ') -> decomposeL p (_Γ' :|-: _Δ)) qΓ
-          <|> foldMapA (\ (p, _Δ') -> decomposeR (_Γ :|-: _Δ') p) qΔ
-  where
-  (aΓ, qΓ) = partitionEithers [ (, _Γ') <$> unPos p | (p, _Γ') <- S.quotients _Γ ]
-  (aΔ, qΔ) = partitionEithers [ (, _Δ') <$> unNeg p | (p, _Δ') <- S.quotients _Δ ]
+class Sequent l r where
+  (|-) :: (Alternative m, Monad m) => l -> r -> m ()
+  infix 4 |-
 
-infix 4 |-
+instance Ord a => Sequent (Γ (Pos a)) (Δ (Neg a)) where
+  _Γ |- _Δ = case (qΓ, qΔ) of
+    ([], []) -> foldMapA (guard . (`elem` aΓ)) aΔ
+    _        -> foldMapA (\ (p, _Γ') -> decomposeL p (_Γ' :|-: _Δ)) qΓ
+            <|> foldMapA (\ (p, _Δ') -> decomposeR (_Γ :|-: _Δ') p) qΔ
+    where
+    (aΓ, qΓ) = partitionEithers [ (, _Γ') <$> unPos p | (p, _Γ') <- S.quotients _Γ ]
+    (aΔ, qΔ) = partitionEithers [ (, _Δ') <$> unNeg p | (p, _Δ') <- S.quotients _Δ ]
