@@ -17,7 +17,7 @@ data Neg a
   | Neg a :⅋: Neg a
   | Neg a :&: Neg a
   | Pos a :->: Neg a
-  | Not (Pos a)
+  | Not (Neg a)
   | Up (Pos a)
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
@@ -37,7 +37,7 @@ instance Monad Neg where
     a :⅋: b  -> (a >>= f) :⅋: (b >>= f)
     a :&: b  -> (a >>= f) :&: (b >>= f)
     a :->: b -> (a >>= Down . f) :->: (b >>= f)
-    Not a    -> Not (a >>= Down . f)
+    Not a    -> Not (a >>= f)
     Up a     -> Up (a >>= Down . f)
 
 unNeg = \case
@@ -52,7 +52,7 @@ data Pos a
   | Pos a :+: Pos a
   | Pos a :*: Pos a
   | Pos a :-<: Neg a
-  | Inv (Neg a)
+  | Inv (Pos a)
   | Down (Neg a)
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
@@ -72,7 +72,7 @@ instance Monad Pos where
     a :+: b  -> (a >>= f) :+: (b >>= f)
     a :*: b  -> (a >>= f) :*: (b >>= f)
     a :-<: b -> (a >>= f) :-<: (b >>= Up . f)
-    Inv a    -> Inv (a >>= Up . f)
+    Inv a    -> Inv (a >>= f)
     Down a   -> Down (a >>= Up . f)
 
 unPos = \case
@@ -88,7 +88,7 @@ instance Judgement Neg Pos where
     p :+: q  -> p <| _Γ |- _Δ >> q <| _Γ |- _Δ
     p :*: q  -> p <| q <| _Γ |- _Δ
     p :-<: q -> p <| _Γ |- _Δ |> q
-    Inv p    -> _Γ |- _Δ |> p
+    Inv p    -> _Γ |- _Δ |> Up p
     Down p   -> _Γ |- _Δ |> p
 
   decomposeR (_Γ :|-: _Δ) = \case
@@ -98,7 +98,7 @@ instance Judgement Neg Pos where
     p :⅋: q  -> _Γ |- _Δ |> p |> q
     p :&: q  -> _Γ |- _Δ |> p >> _Γ |- _Δ |> q
     p :->: q -> p <| _Γ |- _Δ |> q
-    Not p    -> p <| _Γ |- _Δ
+    Not p    -> Down p <| _Γ |- _Δ
     Up p     -> p <| _Γ |- _Δ
 
 
