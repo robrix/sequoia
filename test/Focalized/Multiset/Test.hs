@@ -32,6 +32,12 @@ prop_quotients_length = property $ do
   s <- forAll set
   for_ (S.quotients s) $ \ (_, s') -> length s' === pred (length s)
 
+prop_insert_iteration = property $ do
+  i <- forAll (Gen.int (Range.linear 0 10))
+  a <- forAll element
+  s <- forAll set
+  foldl (const . S.insert a) s [0..pred i] === S.insertN a i s
+
 prop_insert_length = property $ do
   a <- forAll element
   s <- forAll set
