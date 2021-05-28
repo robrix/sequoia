@@ -4,6 +4,7 @@ module Focalized.Multiset.Test
 ) where
 
 import           Data.Foldable (for_)
+import           Data.Semigroup (stimes)
 import qualified Focalized.Multiset as S
 import           Hedgehog
 import qualified Hedgehog.Gen as Gen
@@ -52,6 +53,12 @@ prop_insert_inverse = property $ do
   a <- forAll element
   s <- forAll set
   S.delete a (S.insert a s) === s
+
+prop_delete_iteration = property $ do
+  i <- forAll (Gen.int (Range.linear 0 10))
+  a <- forAll element
+  s <- mappend (stimes (succ i) (S.singleton a)) <$> forAll set
+  foldl (const . S.delete a) s [0..i] === S.deleteN a (succ i) s
 
 prop_delete_multiplicity = property $ do
   a <- forAll element
