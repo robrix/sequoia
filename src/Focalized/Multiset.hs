@@ -17,7 +17,7 @@ import qualified Data.Map as M
 import           Data.Maybe (fromMaybe)
 import           Data.Semigroup (stimes)
 
-newtype Multiset a = Multiset (M.Map a Word)
+newtype Multiset a = Multiset (M.Map a Int)
   deriving (Eq, Ord)
 
 instance Show a => Show (Multiset a) where
@@ -31,7 +31,7 @@ instance Ord a => Monoid (Multiset a) where
 
 instance Foldable Multiset where
   foldMap f (Multiset m) = M.foldMapWithKey (\ a n -> stimes n (f a)) m
-  length = fromIntegral . cardinality
+  length = cardinality
 
 singleton :: a -> Multiset a
 singleton a = Multiset (M.singleton a 1)
@@ -54,10 +54,10 @@ delete a (Multiset as) = Multiset (M.update decr a as)
     | otherwise = Just (i - 1)
 
 
-multiplicity :: Ord a => a -> Multiset a -> Word
+multiplicity :: Ord a => a -> Multiset a -> Int
 multiplicity a (Multiset as) = fromMaybe 0 (M.lookup a as)
 
-cardinality :: Multiset a -> Word
+cardinality :: Multiset a -> Int
 cardinality (Multiset as) = sum as
 
 
