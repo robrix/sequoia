@@ -61,11 +61,7 @@ deleteN a i (Multiset as) = Multiset (M.update decr a as)
     | otherwise   = Just (i' - i)
 
 delete :: Ord a => a -> Multiset a -> Multiset a
-delete a (Multiset as) = Multiset (M.update decr a as)
-  where
-  decr i
-    | i <= 1    = Nothing
-    | otherwise = Just (i - 1)
+delete a = deleteN a 1
 
 
 multiplicity :: Ord a => a -> Multiset a -> Int
