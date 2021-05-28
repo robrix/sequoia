@@ -5,6 +5,7 @@ module Focalized.Multiset
 , fromList
 , insertN
 , insert
+, deleteN
 , delete
 , multiplicity
 , cardinality
@@ -51,6 +52,13 @@ insertN a i (Multiset m)
 
 insert :: Ord a => a -> Multiset a -> Multiset a
 insert a = insertN a 1
+
+deleteN :: Ord a => a -> Int -> Multiset a -> Multiset a
+deleteN a i (Multiset as) = Multiset (M.update decr a as)
+  where
+  decr i'
+    | i' - i <= 0 = Nothing
+    | otherwise   = Just (i' - i)
 
 delete :: Ord a => a -> Multiset a -> Multiset a
 delete a (Multiset as) = Multiset (M.update decr a as)
