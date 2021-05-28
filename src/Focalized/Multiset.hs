@@ -3,6 +3,7 @@ module Focalized.Multiset
 , singleton
 , empty
 , fromList
+, insertN
 , insert
 , delete
 , multiplicity
@@ -42,6 +43,11 @@ empty = Multiset M.empty
 fromList :: Ord a => [a] -> Multiset a
 fromList = foldl' (flip insert) empty
 
+
+insertN :: Ord a => a -> Int -> Multiset a -> Multiset a
+insertN a i (Multiset m)
+  | i <= 0    = Multiset m
+  | otherwise = Multiset (M.insertWith (+) a i m)
 
 insert :: Ord a => a -> Multiset a -> Multiset a
 insert a (Multiset as) = Multiset (M.insertWith (+) a 1 as)
