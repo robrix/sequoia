@@ -20,7 +20,9 @@ import qualified Data.Map as M
 import           Data.Maybe (fromMaybe)
 import           Data.Semigroup (stimes)
 
-newtype Multiset a = Multiset (M.Map a Int)
+type Multiplicity = Int
+
+newtype Multiset a = Multiset (M.Map a Multiplicity)
   deriving (Eq, Ord)
 
 instance Show a => Show (Multiset a) where
@@ -46,7 +48,7 @@ fromList :: Ord a => [a] -> Multiset a
 fromList = foldl' (flip insert) empty
 
 
-insertN :: Ord a => a -> Int -> Multiset a -> Multiset a
+insertN :: Ord a => a -> Multiplicity -> Multiset a -> Multiset a
 insertN a i (Multiset m)
   | i <= 0    = Multiset m
   | otherwise = Multiset (M.insertWith (+) a i m)
@@ -54,7 +56,7 @@ insertN a i (Multiset m)
 insert :: Ord a => a -> Multiset a -> Multiset a
 insert a = insertN a 1
 
-deleteN :: Ord a => a -> Int -> Multiset a -> Multiset a
+deleteN :: Ord a => a -> Multiplicity -> Multiset a -> Multiset a
 deleteN a i (Multiset as) = Multiset (M.update decr a as)
   where
   decr i'
@@ -65,10 +67,10 @@ delete :: Ord a => a -> Multiset a -> Multiset a
 delete a = deleteN a 1
 
 
-multiplicity :: Ord a => a -> Multiset a -> Int
+multiplicity :: Ord a => a -> Multiset a -> Multiplicity
 multiplicity a (Multiset as) = fromMaybe 0 (M.lookup a as)
 
-cardinality :: Multiset a -> Int
+cardinality :: Multiset a -> Multiplicity
 cardinality (Multiset as) = sum as
 
 
