@@ -12,6 +12,7 @@ module Focalized.Multiset
 , elems
 , distinctElems
 , quotients
+, minView
 ) where
 
 import           Data.Foldable (foldl')
@@ -80,3 +81,9 @@ distinctElems (Multiset m) = M.keys m
 
 quotients :: Ord a => Multiset a -> [(a, Multiset a)]
 quotients m = [ (a, delete a m) | a <- distinctElems m ]
+
+
+minView :: Ord a => Multiset a -> Maybe (a, Multiset a)
+minView (Multiset m) = do
+  ((a, i), m') <- M.minViewWithKey m
+  pure (a, insertN a (pred i) (Multiset m'))
