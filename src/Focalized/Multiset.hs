@@ -50,7 +50,7 @@ insertN a i (Multiset m)
   | otherwise = Multiset (M.insertWith (+) a i m)
 
 insert :: Ord a => a -> Multiset a -> Multiset a
-insert a (Multiset as) = Multiset (M.insertWith (+) a 1 as)
+insert a = insertN a 1
 
 delete :: Ord a => a -> Multiset a -> Multiset a
 delete a (Multiset as) = Multiset (M.update decr a as)
