@@ -1,4 +1,3 @@
-{-# LANGUAGE QuantifiedConstraints #-}
 module Focalized.Polarized
 ( Neg(..)
 , Pos(..)
@@ -10,16 +9,6 @@ import           Control.Monad (ap)
 import           Data.Either (partitionEithers)
 import qualified Focalized.Multiset as S
 import           Focalized.Proof
-
-data Prop f a
-  = V a
-  | C (f (Prop f a))
-  deriving (Foldable, Functor, Traversable)
-
-deriving instance (Eq a, forall x . Eq x => Eq (f x)) => Eq (Prop f a)
-deriving instance (Ord a, forall x . Eq x => Eq (f x), forall x . Ord x => Ord (f x)) => Ord (Prop f a)
-deriving instance (Show a, forall x . Show x => Show (f x)) => Show (Prop f a)
-
 
 data Neg a
   = N a
