@@ -12,7 +12,6 @@ module Focalized.Polarized
 import           Control.Applicative (Alternative(..))
 import           Control.Effect.NonDet (foldMapA, guard)
 import           Control.Monad (ap)
-import           Data.Either (partitionEithers)
 import qualified Focalized.Multiset as S
 import           Focalized.Proof
 
@@ -72,47 +71,6 @@ instance Monad (Prop polarity) where
     a :-<: b -> (a >>= f) :-<: (b >>= Up . f)
     Inv a    -> Inv (a >>= f)
     Down a   -> Down (a >>= Up . f)
-
-unProp :: Prop polarity a -> Either a (Prop polarity a)
-unProp = \case
-  V a -> Left a
-  p   -> Right p
-
-
-instance Judgement (Prop N) (Prop P) where
-  decomposeL p (_Γ :|-: _Δ) = case p of
-    V _      -> empty
-    Zero     -> pure ()
-    One      -> _Γ |- _Δ
-    p :+: q  -> p <| _Γ |- _Δ >> q <| _Γ |- _Δ
-    p :*: q  -> p <| q <| _Γ |- _Δ
-    p :-<: q -> p <| _Γ |- _Δ |> q
-    Inv p    -> _Γ |- _Δ |> Up p
-    Down p   -> _Γ |- _Δ |> p
-
-  decomposeR (_Γ :|-: _Δ) = \case
-    V _      -> empty
-    Bot      -> _Γ |- _Δ
-    Top      -> pure ()
-    p :⅋: q  -> _Γ |- _Δ |> p |> q
-    p :&: q  -> _Γ |- _Δ |> p >> _Γ |- _Δ |> q
-    p :->: q -> p <| _Γ |- _Δ |> q
-    Not p    -> Down p <| _Γ |- _Δ
-    Up p     -> p <| _Γ |- _Δ
-
-
-class Sequent l r where
-  (|-) :: (Alternative m, Monad m) => l -> r -> m ()
-  infix 4 |-
-
-instance Ord a => Sequent (Γ (Prop P a)) (Δ (Prop N a)) where
-  _Γ |- _Δ = case (qΓ, qΔ) of
-    ([], []) -> foldMapA (guard . (`elem` aΓ)) aΔ
-    _        -> foldMapA (\ (p, _Γ') -> decomposeL p (_Γ' :|-: _Δ)) qΓ
-            <|> foldMapA (\ (p, _Δ') -> decomposeR (_Γ :|-: _Δ') p) qΔ
-    where
-    (aΓ, qΓ) = partitionEithers [ (, _Γ') <$> unProp p | (p, _Γ') <- S.quotients _Γ ]
-    (aΔ, qΔ) = partitionEithers [ (, _Δ') <$> unProp p | (p, _Δ') <- S.quotients _Δ ]
 
 
 inversion :: (Alternative m, Monad m, Ord a) => (Γ (Prop P a), Γ (Either a (Prop N a))) :|-: (Δ (Either (Prop P a) a), Δ (Prop N a)) -> m ()
