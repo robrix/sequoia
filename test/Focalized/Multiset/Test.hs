@@ -33,6 +33,10 @@ prop_quotients_length = property $ do
   s <- forAll set
   for_ (S.quotients s) $ \ (_, s') -> length s' === pred (length s)
 
+prop_quotients_lengths = property $ do
+  s <- forAll set
+  for_ (S.quotients s) $ \ (_, s') -> length s' === pred (length s)
+
 prop_insert_iteration = property $ do
   i <- forAll (Gen.int (Range.linear 0 10))
   a <- forAll element
