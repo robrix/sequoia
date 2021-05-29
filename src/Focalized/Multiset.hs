@@ -83,7 +83,7 @@ distinctElems (Multiset m) = M.keys m
 
 
 quotients :: Ord a => Multiset a -> [(a, Multiset a)]
-quotients m = [ (a, delete a m) | a <- distinctElems m ]
+quotients m = [ (a, delete a m) | a <- elems m ]
 
 distinctQuotients :: Ord a => Multiset a -> [(a, Multiset a)]
 distinctQuotients m = [ (a, delete a m) | a <- distinctElems m ]
