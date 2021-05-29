@@ -55,22 +55,25 @@ instance Applicative (Prop polarity) where
   (<*>) = ap
 
 instance Monad (Prop polarity) where
-  m >>= f = case m of
-    V a      -> f a
-    Bot      -> Bot
-    Top      -> Top
-    a :⅋: b  -> (a >>= f) :⅋: (b >>= f)
-    a :&: b  -> (a >>= f) :&: (b >>= f)
-    a :->: b -> (a >>= Down . f) :->: (b >>= f)
-    Not a    -> Not (a >>= f)
-    Up a     -> Up (a >>= Down . f)
-    Zero     -> Zero
-    One      -> One
-    a :+: b  -> (a >>= f) :+: (b >>= f)
-    a :*: b  -> (a >>= f) :*: (b >>= f)
-    a :-<: b -> (a >>= f) :-<: (b >>= Up . f)
-    Inv a    -> Inv (a >>= f)
-    Down a   -> Down (a >>= Up . f)
+  (>>=) = bind
+
+bind :: Prop polarity a -> (a -> Prop polarity b) -> Prop polarity b
+bind m f = case m of
+  V a      -> f a
+  Bot      -> Bot
+  Top      -> Top
+  a :⅋: b  -> (a >>= f) :⅋: (b >>= f)
+  a :&: b  -> (a >>= f) :&: (b >>= f)
+  a :->: b -> (a >>= Down . f) :->: (b >>= f)
+  Not a    -> Not (a >>= f)
+  Up a     -> Up (a >>= Down . f)
+  Zero     -> Zero
+  One      -> One
+  a :+: b  -> (a >>= f) :+: (b >>= f)
+  a :*: b  -> (a >>= f) :*: (b >>= f)
+  a :-<: b -> (a >>= f) :-<: (b >>= Up . f)
+  Inv a    -> Inv (a >>= f)
+  Down a   -> Down (a >>= Up . f)
 
 
 inversion :: (Alternative m, Monad m, Ord a) => (Γ (Prop P a), Γ (Either a (Prop N a))) :|-: (Δ (Either (Prop P a) a), Δ (Prop N a)) -> m ()
