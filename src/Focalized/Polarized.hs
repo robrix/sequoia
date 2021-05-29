@@ -115,6 +115,9 @@ instance Ord a => L a (Neg a) where
 instance Ord a => L a (Pos a) where
   p <|| ΓI i s as = ΓI (S.insert p i) s as
 
+minInvertibleL :: Ord a => ΓI a -> Either (Γ (Either a (Neg a))) (Pos a, ΓI a)
+minInvertibleL (ΓI i s a) = maybe (Left (S.map Right s <> S.map Left a)) (\ (p, i') -> Right (p, ΓI i' s a)) (S.minView i)
+
 
 data ΔI a = ΔI
   (S.Multiset (Pos a))
@@ -133,6 +136,9 @@ instance Ord a => R a (Neg a) where
 
 instance Ord a => R a (Pos a) where
   ΔI s i as ||> p = ΔI (S.insert p s) i as
+
+minInvertibleR :: Ord a => ΔI a -> Either (Δ (Either (Pos a) a)) (ΔI a, Neg a)
+minInvertibleR (ΔI s i a) = maybe (Left (S.map Left s <> S.map Right a)) (\ (n, i') -> Right (ΔI s i' a, n)) (S.minView i)
 
 
 inversion :: (Alternative m, Monad m, Ord a) => (Γ (Pos a), Γ (Either a (Neg a))) :|-: (Δ (Either (Pos a) a), Δ (Neg a)) -> m ()
