@@ -37,6 +37,10 @@ prop_quotients_lengths = property $ do
   s <- forAll set
   for_ (S.quotients s) $ \ (_, s') -> length s' === pred (length s)
 
+prop_distinctQuotients_length = property $ do
+  s <- forAll set
+  length (S.distinctQuotients s) === S.distinctCardinality s
+
 prop_insert_iteration = property $ do
   i <- forAll (Gen.int (Range.linear 0 10))
   a <- forAll element
