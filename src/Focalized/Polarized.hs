@@ -19,7 +19,7 @@ data N
 data P
 
 data Prop polarity a where
-  V :: a -> Prop polarity a
+  N :: a -> Prop N a
   Bot :: Prop N a
   Top :: Prop N a
   (:⅋:) :: Prop N a -> Prop N a -> Prop N a
@@ -27,6 +27,7 @@ data Prop polarity a where
   (:->:) :: Prop P a -> Prop N a -> Prop N a
   Not :: Prop N a -> Prop N a
   Up :: Prop P a -> Prop N a
+  P :: a -> Prop P a
   Zero :: Prop P a
   One :: Prop P a
   (:+:) :: Prop P a -> Prop P a -> Prop P a
@@ -50,16 +51,23 @@ infixr 6 :-<:
 infixr 7 :+:
 infixr 8 :*:
 
-instance Applicative (Prop polarity) where
-  pure = V
+instance Applicative (Prop N) where
+  pure = N
   (<*>) = ap
 
-instance Monad (Prop polarity) where
+instance Monad (Prop N) where
+  (>>=) = bind
+
+instance Applicative (Prop P) where
+  pure = P
+  (<*>) = ap
+
+instance Monad (Prop P) where
   (>>=) = bind
 
 bind :: Prop polarity a -> (a -> Prop polarity b) -> Prop polarity b
 bind m f = case m of
-  V a      -> f a
+  N a      -> f a
   Bot      -> Bot
   Top      -> Top
   a :⅋: b  -> (a >>= f) :⅋: (b >>= f)
@@ -67,6 +75,7 @@ bind m f = case m of
   a :->: b -> (a >>= Down . f) :->: (b >>= f)
   Not a    -> Not (a >>= f)
   Up a     -> Up (a >>= Down . f)
+  P a      -> f a
   Zero     -> Zero
   One      -> One
   a :+: b  -> (a >>= f) :+: (b >>= f)
@@ -80,7 +89,7 @@ inversion :: (Alternative m, Monad m, Ord a) => (Γ (Prop P a), Γ (Either a (Pr
 inversion ((iΓ, _Γ) :|-: (_Δ, iΔ)) = case (S.minView iΓ, S.minView iΔ) of
   (Nothing,      Nothing)       -> neutral (_Γ :|-: _Δ)
   (Just (p, iΓ), _)             -> case p of
-    V a      -> inversion ((iΓ, Left a <| _Γ) :|-: (_Δ, iΔ))
+    P a      -> inversion ((iΓ, Left a <| _Γ) :|-: (_Δ, iΔ))
     Zero     -> pure ()
     One      -> inversion ((iΓ, _Γ) :|-: (_Δ, iΔ))
     p :+: q  -> inversion ((p <| iΓ, _Γ) :|-: (_Δ, iΔ)) >> inversion ((q <| iΓ, _Γ) :|-: (_Δ, iΔ))
@@ -89,7 +98,7 @@ inversion ((iΓ, _Γ) :|-: (_Δ, iΔ)) = case (S.minView iΓ, S.minView iΔ) of
     Inv p    -> inversion ((iΓ, _Γ) :|-: (_Δ |> Left p, iΔ))
     Down p   -> inversion ((iΓ, Right p <| _Γ) :|-: (_Δ, iΔ))
   (_,            Just (n, iΔ)) -> case n of
-    V a      -> inversion ((iΓ, _Γ) :|-: (_Δ |> Right a, iΔ))
+    N a      -> inversion ((iΓ, _Γ) :|-: (_Δ |> Right a, iΔ))
     Bot      -> inversion ((iΓ, _Γ) :|-: (_Δ, iΔ))
     Top      -> pure ()
     p :⅋: q  -> inversion ((iΓ, _Γ) :|-: (_Δ, iΔ |> p |> q))
@@ -105,7 +114,7 @@ neutral (_Γ :|-: _Δ)
 
 focusL :: (Alternative m, Monad m, Ord a) => (Prop N a, Γ (Either a (Prop N a))) :|-: Δ (Either (Prop P a) a) -> m ()
 focusL ((n, _Γ) :|-: _Δ) = case n of
-  V a      -> guard (Right a `elem` _Δ)
+  N a      -> guard (Right a `elem` _Δ)
   Bot      -> pure ()
   Top      -> empty -- no left rule for ⊤
   p :⅋: q  -> focusL ((p, _Γ) :|-: _Δ) <|> focusL ((q, _Γ) :|-: _Δ)
@@ -116,7 +125,7 @@ focusL ((n, _Γ) :|-: _Δ) = case n of
 
 focusR :: (Alternative m, Monad m, Ord a) => Γ (Either a (Prop N a)) :|-: (Δ (Either (Prop P a) a), Prop P a) -> m ()
 focusR (_Γ :|-: (_Δ, p)) = case p of
-  V a      -> guard (Left a `elem` _Γ)
+  P a      -> guard (Left a `elem` _Γ)
   Zero     -> empty -- no right rule for 0
   One      -> pure ()
   p :+: q  -> focusR (_Γ :|-: (_Δ, p)) <|> focusR (_Γ :|-: (_Δ, q))
