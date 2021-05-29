@@ -117,7 +117,7 @@ instance Ord a => L a (Pos a) where
 
 class Ord a => R a p where
   (||>) :: Context a -> p -> Context a
-  infixr 5 ||>
+  infixl 5 ||>
 
 instance Ord a => R a a where
   Context s i as ||> a = Context s i (S.insert a as)
