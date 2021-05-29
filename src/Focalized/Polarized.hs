@@ -141,6 +141,10 @@ minInvertibleR :: Ord a => ΔI a -> Either (Δ (Either (Pos a) a)) (ΔI a, Neg a
 minInvertibleR (ΔI s i a) = maybe (Left (S.map Left s <> S.map Right a)) (\ (n, i') -> Right (ΔI s i' a, n)) (S.minView i)
 
 
+class Sequent l r where
+  (|-) :: (Alternative m, Monad m) => l -> r -> m ()
+  infix 4 |-
+
 inversion :: (Alternative m, Monad m, Ord a) => (Γ (Pos a), Γ (Either a (Neg a))) :|-: (Δ (Either (Pos a) a), Δ (Neg a)) -> m ()
 inversion ((iΓ, _Γ) :|-: (_Δ, iΔ)) = case (S.minView iΓ, S.minView iΔ) of
   (Nothing,      Nothing)       -> neutral (_Γ :|-: _Δ)
