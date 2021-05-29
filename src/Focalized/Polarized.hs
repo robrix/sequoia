@@ -2,6 +2,8 @@ module Focalized.Polarized
 ( Neg(..)
 , Pos(..)
 , Context(..)
+, L(..)
+, R(..)
 , inversion
 , neutral
 , focusL
@@ -98,6 +100,33 @@ data Context a = Context
   (S.Multiset (Pos a))
   (S.Multiset (Neg a))
   (S.Multiset a)
+
+class Ord a => L a p where
+  (<||) :: p -> Context a -> Context a
+  infixr 5 <||
+
+instance Ord a => L a a where
+  a <|| Context i s as = Context i s (S.insert a as)
+
+instance Ord a => L a (Neg a) where
+  n <|| Context i s as = Context i (S.insert n s) as
+
+instance Ord a => L a (Pos a) where
+  p <|| Context i s as = Context (S.insert p i) s as
+
+
+class Ord a => R a p where
+  (||>) :: Context a -> p -> Context a
+  infixr 5 ||>
+
+instance Ord a => R a a where
+  Context s i as ||> a = Context s i (S.insert a as)
+
+instance Ord a => R a (Neg a) where
+  Context s i as ||> n = Context s (S.insert n i) as
+
+instance Ord a => R a (Pos a) where
+  Context s i as ||> p = Context (S.insert p s) i as
 
 
 inversion :: (Alternative m, Monad m, Ord a) => (Γ (Pos a), Γ (Either a (Neg a))) :|-: (Δ (Either (Pos a) a), Δ (Neg a)) -> m ()
