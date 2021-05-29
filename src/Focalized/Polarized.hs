@@ -11,7 +11,6 @@ import           Control.Applicative (Alternative(..))
 import           Control.Effect.NonDet (foldMapA, guard)
 import           Control.Monad (ap)
 import qualified Focalized.Multiset as S
-import           Focalized.Proof
 
 data Neg a
   = N a
@@ -73,6 +72,26 @@ instance Monad Pos where
     a :-<: b -> (a >>= f) :-<: (b >>= Up . f)
     Inv a    -> Inv (a >>= f)
     Down a   -> Down (a >>= Up . f)
+
+
+(<|) :: Ord a => a -> S.Multiset a -> S.Multiset a
+(<|) = S.insert
+
+infixr 5 <|
+
+(|>) :: Ord a => S.Multiset a -> a -> S.Multiset a
+(|>) = flip S.insert
+
+infixl 5 |>
+
+
+data a :|-: b = a :|-: b
+
+infix 4 :|-:
+
+
+type Γ = S.Multiset
+type Δ = S.Multiset
 
 
 inversion :: (Alternative m, Monad m, Ord a) => (Γ (Pos a), Γ (Either a (Neg a))) :|-: (Δ (Either (Pos a) a), Δ (Neg a)) -> m ()
