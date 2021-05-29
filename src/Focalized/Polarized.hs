@@ -145,6 +145,29 @@ class Sequent l r where
   (|-) :: (Alternative m, Monad m) => l -> r -> m ()
   infix 4 |-
 
+instance Ord a => Sequent (ΓI a) (ΔI a) where
+  _Γ |- _Δ = case (minInvertibleL _Γ, minInvertibleR _Δ) of
+    (Left  _Γ,      Left  _Δ)      -> neutral $ _Γ :|-: _Δ
+    (Right (p, _Γ), _)             -> case p of
+      P a      -> a <|| _Γ |- _Δ
+      Zero     -> pure ()
+      One      -> _Γ |- _Δ
+      p :+: q  -> p <|| _Γ |- _Δ >> q <|| _Γ |- _Δ
+      p :*: q  -> p <|| q <|| _Γ |- _Δ
+      p :-<: q -> p <|| _Γ |- _Δ ||> q
+      Inv p    -> _Γ |- _Δ ||> p
+      Down p   -> p <|| _Γ |- _Δ
+    (_,             Right (_Δ, n)) -> case n of
+      N a      -> _Γ |- _Δ ||> a
+      Bot      -> _Γ |- _Δ
+      Top      -> pure ()
+      p :⅋: q  -> _Γ |- _Δ ||> p ||> q
+      p :&: q  -> (_Γ |- _Δ ||> p) >> _Γ |- _Δ ||> q
+      p :->: q -> p <|| _Γ |- _Δ ||> q
+      Not p    -> p <|| _Γ |- _Δ
+      Up p     -> _Γ |- _Δ ||> p
+
+
 inversion :: (Alternative m, Monad m, Ord a) => (Γ (Pos a), Γ (Either a (Neg a))) :|-: (Δ (Either (Pos a) a), Δ (Neg a)) -> m ()
 inversion ((iΓ, _Γ) :|-: (_Δ, iΔ)) = case (S.minView iΓ, S.minView iΔ) of
   (Nothing,      Nothing)       -> neutral (_Γ :|-: _Δ)
