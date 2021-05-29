@@ -1,7 +1,8 @@
 module Focalized.Polarized
 ( Neg(..)
 , Pos(..)
-, Context(..)
+, Γ'(..)
+, Δ'(..)
 , L(..)
 , R(..)
 , inversion
@@ -96,37 +97,42 @@ infix 4 :|-:
 type Γ = S.Multiset
 type Δ = S.Multiset
 
-data Context a = Context
+data Γ' a = Γ
   (S.Multiset (Pos a))
   (S.Multiset (Neg a))
   (S.Multiset a)
 
 class Ord a => L a p where
-  (<||) :: p -> Context a -> Context a
+  (<||) :: p -> Γ' a -> Γ' a
   infixr 5 <||
 
 instance Ord a => L a a where
-  a <|| Context i s as = Context i s (S.insert a as)
+  a <|| Γ i s as = Γ i s (S.insert a as)
 
 instance Ord a => L a (Neg a) where
-  n <|| Context i s as = Context i (S.insert n s) as
+  n <|| Γ i s as = Γ i (S.insert n s) as
 
 instance Ord a => L a (Pos a) where
-  p <|| Context i s as = Context (S.insert p i) s as
+  p <|| Γ i s as = Γ (S.insert p i) s as
 
+
+data Δ' a = Δ
+  (S.Multiset (Pos a))
+  (S.Multiset (Neg a))
+  (S.Multiset a)
 
 class Ord a => R a p where
-  (||>) :: Context a -> p -> Context a
+  (||>) :: Δ' a -> p -> Δ' a
   infixl 5 ||>
 
 instance Ord a => R a a where
-  Context s i as ||> a = Context s i (S.insert a as)
+  Δ s i as ||> a = Δ s i (S.insert a as)
 
 instance Ord a => R a (Neg a) where
-  Context s i as ||> n = Context s (S.insert n i) as
+  Δ s i as ||> n = Δ s (S.insert n i) as
 
 instance Ord a => R a (Pos a) where
-  Context s i as ||> p = Context (S.insert p s) i as
+  Δ s i as ||> p = Δ (S.insert p s) i as
 
 
 inversion :: (Alternative m, Monad m, Ord a) => (Γ (Pos a), Γ (Either a (Neg a))) :|-: (Δ (Either (Pos a) a), Δ (Neg a)) -> m ()
