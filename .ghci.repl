@@ -37,7 +37,7 @@
 :seti -Wno-type-defaults
 :set -Wno-unused-packages
 
-:load Focalized.Proof Focalized.Polarized test/Test.hs
+:load Focalized.Polarized test/Test.hs
 
-import Focalized.Proof
+import Focalized.Polarized
 import Main
