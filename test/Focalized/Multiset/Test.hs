@@ -31,7 +31,7 @@ prop_semigroup_commutativity = property $ do
 
 prop_quotients_length = property $ do
   s <- forAll set
-  for_ (S.quotients s) $ \ (_, s') -> length s' === pred (length s)
+  length (S.quotients s) === length s
 
 prop_quotients_lengths = property $ do
   s <- forAll set
