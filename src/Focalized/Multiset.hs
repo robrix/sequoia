@@ -12,6 +12,7 @@ module Focalized.Multiset
 , elems
 , distinctElems
 , quotients
+, distinctQuotients
 , minView
 ) where
 
@@ -83,6 +84,9 @@ distinctElems (Multiset m) = M.keys m
 
 quotients :: Ord a => Multiset a -> [(a, Multiset a)]
 quotients m = [ (a, delete a m) | a <- distinctElems m ]
+
+distinctQuotients :: Ord a => Multiset a -> [(a, Multiset a)]
+distinctQuotients m = [ (a, delete a m) | a <- distinctElems m ]
 
 
 minView :: Ord a => Multiset a -> Maybe (a, Multiset a)
