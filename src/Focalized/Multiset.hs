@@ -9,6 +9,7 @@ module Focalized.Multiset
 , delete
 , multiplicity
 , cardinality
+, distinctCardinality
 , elems
 , distinctElems
 , quotients
@@ -73,6 +74,9 @@ multiplicity a (Multiset as) = fromMaybe 0 (M.lookup a as)
 
 cardinality :: Multiset a -> Multiplicity
 cardinality (Multiset as) = sum as
+
+distinctCardinality :: Multiset a -> Multiplicity
+distinctCardinality (Multiset as) = length as
 
 
 elems :: Multiset a -> [a]
