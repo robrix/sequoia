@@ -13,6 +13,7 @@ module Focalized.Multiset
 , elems
 , distinctElems
 , quotients
+, map
 , distinctQuotients
 , minView
 ) where
@@ -21,6 +22,7 @@ import           Data.Foldable (foldl')
 import qualified Data.Map as M
 import           Data.Maybe (fromMaybe)
 import           Data.Semigroup (stimes)
+import           Prelude hiding (map)
 
 type Multiplicity = Int
 
@@ -91,6 +93,10 @@ quotients m = [ (a, delete a m) | a <- elems m ]
 
 distinctQuotients :: Ord a => Multiset a -> [(a, Multiset a)]
 distinctQuotients m = [ (a, delete a m) | a <- distinctElems m ]
+
+
+map :: Ord b => (a -> b) -> Multiset a -> Multiset b
+map f (Multiset m) = Multiset (M.mapKeysWith (+) f m)
 
 
 minView :: Ord a => Multiset a -> Maybe (a, Multiset a)
