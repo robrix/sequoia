@@ -95,10 +95,9 @@ type Γ = S.Multiset
 type Δ = S.Multiset
 
 data Context a = Context
-  { invertible :: S.Multiset (Pos a)
-  , stable     :: S.Multiset (Neg a)
-  , atoms      :: S.Multiset a
-  }
+  (S.Multiset (Pos a))
+  (S.Multiset (Neg a))
+  (S.Multiset a)
 
 
 inversion :: (Alternative m, Monad m, Ord a) => (Γ (Pos a), Γ (Either a (Neg a))) :|-: (Δ (Either (Pos a) a), Δ (Neg a)) -> m ()
