@@ -5,7 +5,6 @@ module Focalized.Polarized
 , ΔI(..)
 , L(..)
 , R(..)
-, neutral
 , focusL
 , focusR
 ) where
@@ -137,7 +136,7 @@ class Sequent l r where
 
 instance Ord a => Sequent (ΓI a) (ΔI a) where
   _Γ |- _Δ = case (minInvertibleL _Γ, minInvertibleR _Δ) of
-    (Left  _Γ,      Left  _Δ)      -> neutral $ _Γ :|-: _Δ
+    (Left  _Γ,      Left  _Δ)      -> _Γ |- _Δ
     (Right (p, _Γ), _)             -> case p of
       P a      -> a <| _Γ |- _Δ
       Zero     -> pure ()
@@ -157,11 +156,10 @@ instance Ord a => Sequent (ΓI a) (ΔI a) where
       Not p    -> p <| _Γ |- _Δ
       Up p     -> _Γ |- _Δ |> p
 
-
-neutral :: (Alternative m, Monad m, Ord a) => ΓS a :|-: ΔS a -> m ()
-neutral (_Γ :|-: _Δ)
-  =   foldMapA (\ (p, _Γ') -> either (const empty) (\ n -> focusL ((n, _Γ') :|-: _Δ)) p) (S.quotients _Γ)
-  <|> foldMapA (\ (p, _Δ') -> either (\ p -> focusR (_Γ :|-: (_Δ', p))) (const empty) p) (S.quotients _Δ)
+instance Ord a => Sequent (ΓS a) (ΔS a) where
+  _Γ |- _Δ
+    =   foldMapA (\ (p, _Γ') -> either (const empty) (\ n -> focusL ((n, _Γ') :|-: _Δ)) p) (S.quotients _Γ)
+    <|> foldMapA (\ (p, _Δ') -> either (\ p -> focusR (_Γ :|-: (_Δ', p))) (const empty) p) (S.quotients _Δ)
 
 focusL :: (Alternative m, Monad m, Ord a) => (Neg a, ΓS a) :|-: ΔS a -> m ()
 focusL ((n, _Γ) :|-: _Δ) = case n of
