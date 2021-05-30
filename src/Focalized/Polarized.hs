@@ -205,8 +205,8 @@ focusL ((n, _Γ) :|-: _Δ) = case n of
   p :⅋: q  -> focusL ((p, _Γ) :|-: _Δ) <|> focusL ((q, _Γ) :|-: _Δ)
   p :&: q  -> focusL ((p, _Γ) :|-: _Δ) >> focusL ((q, _Γ) :|-: _Δ)
   p :->: q -> focusR (_Γ :|-: (_Δ, p)) >> focusL ((q, _Γ) :|-: _Δ)
-  Not p    -> inversion ((mempty, _Γ) :|-: (_Δ, S.singleton p))
-  Up p     -> inversion ((S.singleton p, _Γ) :|-: (_Δ, mempty))
+  Not p    -> ΓI mempty _Γ |- ΔI (S.singleton p) _Δ
+  Up p     -> ΓI (S.singleton p) _Γ |- ΔI mempty _Δ
 
 focusR :: (Alternative m, Monad m, Ord a) => ΓS a :|-: (ΔS a, Pos a) -> m ()
 focusR (_Γ :|-: (_Δ, p)) = case p of
@@ -216,5 +216,5 @@ focusR (_Γ :|-: (_Δ, p)) = case p of
   p :+: q  -> focusR (_Γ :|-: (_Δ, p)) <|> focusR (_Γ :|-: (_Δ, q))
   p :*: q  -> focusR (_Γ :|-: (_Δ, p)) >> focusR (_Γ :|-: (_Δ, q))
   p :-<: q -> focusR (_Γ :|-: (_Δ, p)) >> focusL ((q, _Γ) :|-: _Δ)
-  Inv p    -> inversion ((S.singleton p, _Γ) :|-: (_Δ, mempty))
-  Down p   -> inversion ((mempty, _Γ) :|-: (_Δ, S.singleton p))
+  Inv p    -> ΓI (S.singleton p) _Γ |- ΔI mempty _Δ
+  Down p   -> ΓI mempty _Γ |- ΔI (S.singleton p) _Δ
