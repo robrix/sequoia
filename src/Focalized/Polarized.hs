@@ -181,8 +181,8 @@ instance Ord a => Sequent (Neg a :<: ΓS a) (ΔS a) where
     N a      -> guard (Right a `elem` _Δ)
     Bot      -> pure ()
     Top      -> empty -- no left rule for ⊤
-    p :⅋: q  -> p :<: _Γ |- _Δ <|> q :<: _Γ |- _Δ
-    p :&: q  -> p :<: _Γ |- _Δ >> q :<: _Γ |- _Δ
+    p :⅋: q  -> p :<: _Γ |- _Δ >> q :<: _Γ |- _Δ
+    p :&: q  -> p :<: _Γ |- _Δ <|> q :<: _Γ |- _Δ
     p :->: q -> _Γ |- _Δ :>: p >> q :<: _Γ |- _Δ
     Not p    -> _Γ |- _Δ |> p
     Up p     -> p <| _Γ |- _Δ
