@@ -99,7 +99,7 @@ type Δ = S.Multiset
 
 data ΓI a = ΓI
   (S.Multiset (Pos a))
-  (S.Multiset (Either a (Neg a)))
+  (ΓS a)
 
 class Ord a => L a p where
   (<||) :: p -> ΓI a -> ΓI a
@@ -117,10 +117,12 @@ instance Ord a => L a (Pos a) where
 minInvertibleL :: Ord a => ΓI a -> Either (Γ (Either a (Neg a))) (Pos a, ΓI a)
 minInvertibleL (ΓI i s) = maybe (Left s) (\ (p, i') -> Right (p, ΓI i' s)) (S.minView i)
 
+type ΓS a = S.Multiset (Either a (Neg a))
+
 
 data ΔI a = ΔI
   (S.Multiset (Neg a))
-  (S.Multiset (Either (Pos a) a))
+  (ΔS a)
 
 class Ord a => R a p where
   (||>) :: ΔI a -> p -> ΔI a
@@ -137,6 +139,8 @@ instance Ord a => R a (Pos a) where
 
 minInvertibleR :: Ord a => ΔI a -> Either (Δ (Either (Pos a) a)) (ΔI a, Neg a)
 minInvertibleR (ΔI i s) = maybe (Left s) (\ (n, i') -> Right (ΔI i' s, n)) (S.minView i)
+
+type ΔS a = S.Multiset (Either (Pos a) a)
 
 
 class Sequent l r where
@@ -166,7 +170,7 @@ instance Ord a => Sequent (ΓI a) (ΔI a) where
       Up p     -> _Γ |- _Δ ||> p
 
 
-inversion :: (Alternative m, Monad m, Ord a) => (Γ (Pos a), Γ (Either a (Neg a))) :|-: (Δ (Either (Pos a) a), Δ (Neg a)) -> m ()
+inversion :: (Alternative m, Monad m, Ord a) => (Γ (Pos a), ΓS a) :|-: (ΔS a, Δ (Neg a)) -> m ()
 inversion ((iΓ, _Γ) :|-: (_Δ, iΔ)) = case (S.minView iΓ, S.minView iΔ) of
   (Nothing,      Nothing)       -> neutral (_Γ :|-: _Δ)
   (Just (p, iΓ), _)             -> case p of
@@ -188,12 +192,12 @@ inversion ((iΓ, _Γ) :|-: (_Δ, iΔ)) = case (S.minView iΓ, S.minView iΔ) of
     Not p    -> inversion ((iΓ, Right p <| _Γ) :|-: (_Δ, iΔ))
     Up p     -> inversion ((iΓ, _Γ) :|-: (_Δ |> Left p, iΔ))
 
-neutral :: (Alternative m, Monad m, Ord a) => Γ (Either a (Neg a)) :|-: Δ (Either (Pos a) a) -> m ()
+neutral :: (Alternative m, Monad m, Ord a) => ΓS a :|-: ΔS a -> m ()
 neutral (_Γ :|-: _Δ)
   =   foldMapA (\ (p, _Γ') -> either (const empty) (\ n -> focusL ((n, _Γ') :|-: _Δ)) p) (S.quotients _Γ)
   <|> foldMapA (\ (p, _Δ') -> either (\ p -> focusR (_Γ :|-: (_Δ', p))) (const empty) p) (S.quotients _Δ)
 
-focusL :: (Alternative m, Monad m, Ord a) => (Neg a, Γ (Either a (Neg a))) :|-: Δ (Either (Pos a) a) -> m ()
+focusL :: (Alternative m, Monad m, Ord a) => (Neg a, ΓS a) :|-: ΔS a -> m ()
 focusL ((n, _Γ) :|-: _Δ) = case n of
   N a      -> guard (Right a `elem` _Δ)
   Bot      -> pure ()
@@ -204,7 +208,7 @@ focusL ((n, _Γ) :|-: _Δ) = case n of
   Not p    -> inversion ((mempty, _Γ) :|-: (_Δ, S.singleton p))
   Up p     -> inversion ((S.singleton p, _Γ) :|-: (_Δ, mempty))
 
-focusR :: (Alternative m, Monad m, Ord a) => Γ (Either a (Neg a)) :|-: (Δ (Either (Pos a) a), Pos a) -> m ()
+focusR :: (Alternative m, Monad m, Ord a) => ΓS a :|-: (ΔS a, Pos a) -> m ()
 focusR (_Γ :|-: (_Δ, p)) = case p of
   P a      -> guard (Left a `elem` _Γ)
   Zero     -> empty -- no right rule for 0
