@@ -96,6 +96,9 @@ instance Ord a => L (Neg a) (ΓI a) (ΓI a) where
 instance Ord a => L (Pos a) (ΓI a) (ΓI a) where
   p <| ΓI i s = ΓI (S.insert p i) s
 
+instance L (Pos a) (ΓS a) (ΓI a) where
+  p <| _Γ = ΓI (S.singleton p) _Γ
+
 minInvertibleL :: Ord a => ΓI a -> Either (Γ (Either a (Neg a))) (Pos a, ΓI a)
 minInvertibleL (ΓI i s) = maybe (Left s) (\ (p, i') -> Right (p, ΓI i' s)) (S.minView i)
 
@@ -118,6 +121,9 @@ instance Ord a => R (ΔI a) (Neg a) (ΔI a) where
 
 instance Ord a => R (ΔI a) (Pos a) (ΔI a) where
   ΔI s i |> p = ΔI (S.insert (Left p) s) i
+
+instance R (ΔS a) (Neg a) (ΔI a) where
+  _Δ |> p = ΔI _Δ (S.singleton p)
 
 minInvertibleR :: Ord a => ΔI a -> Either (Δ (Either (Pos a) a)) (ΔI a, Neg a)
 minInvertibleR (ΔI s i) = maybe (Left s) (\ (n, i') -> Right (ΔI s i', n)) (S.minView i)
