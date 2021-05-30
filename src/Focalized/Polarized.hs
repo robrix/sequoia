@@ -99,24 +99,23 @@ type Δ = S.Multiset
 
 data ΓI a = ΓI
   (S.Multiset (Pos a))
-  (S.Multiset (Neg a))
-  (S.Multiset a)
+  (S.Multiset (Either a (Neg a)))
 
 class Ord a => L a p where
   (<||) :: p -> ΓI a -> ΓI a
   infixr 5 <||
 
 instance Ord a => L a a where
-  a <|| ΓI i s as = ΓI i s (S.insert a as)
+  a <|| ΓI i s = ΓI i (S.insert (Left a) s)
 
 instance Ord a => L a (Neg a) where
-  n <|| ΓI i s as = ΓI i (S.insert n s) as
+  n <|| ΓI i s = ΓI i (S.insert (Right n) s)
 
 instance Ord a => L a (Pos a) where
-  p <|| ΓI i s as = ΓI (S.insert p i) s as
+  p <|| ΓI i s = ΓI (S.insert p i) s
 
 minInvertibleL :: Ord a => ΓI a -> Either (Γ (Either a (Neg a))) (Pos a, ΓI a)
-minInvertibleL (ΓI i s a) = maybe (Left (S.map Right s <> S.map Left a)) (\ (p, i') -> Right (p, ΓI i' s a)) (S.minView i)
+minInvertibleL (ΓI i s) = maybe (Left s) (\ (p, i') -> Right (p, ΓI i' s)) (S.minView i)
 
 
 data ΔI a = ΔI
