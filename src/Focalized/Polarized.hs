@@ -178,8 +178,8 @@ instance Ord a => Sequent (Neg a :<: ΓS a) (ΔS a) where
     p :⅋: q  -> p :<: _Γ |- _Δ <|> q :<: _Γ |- _Δ
     p :&: q  -> p :<: _Γ |- _Δ >> q :<: _Γ |- _Δ
     p :->: q -> _Γ |- _Δ :>: p >> q :<: _Γ |- _Δ
-    Not p    -> ΓI mempty _Γ |- ΔI _Δ (S.singleton p)
-    Up p     -> ΓI (S.singleton p) _Γ |- ΔI _Δ mempty
+    Not p    -> ΓI mempty _Γ |- _Δ |> p
+    Up p     -> p <| _Γ |- ΔI _Δ mempty
 
 instance Ord a => Sequent (ΓS a) (ΔS a :>: Pos a) where
   _Γ |- _Δ :>: p = case p of
@@ -189,5 +189,5 @@ instance Ord a => Sequent (ΓS a) (ΔS a :>: Pos a) where
     p :+: q  -> _Γ |- _Δ :>: p <|> _Γ |- _Δ :>: q
     p :*: q  -> _Γ |- _Δ :>: p >> _Γ |- _Δ :>: q
     p :-<: q -> _Γ |- _Δ :>: p >> q :<: _Γ |- _Δ
-    Inv p    -> ΓI (S.singleton p) _Γ |- ΔI _Δ mempty
-    Down p   -> ΓI mempty _Γ |- ΔI _Δ (S.singleton p)
+    Inv p    -> p <| _Γ |- ΔI _Δ mempty
+    Down p   -> ΓI mempty _Γ |- _Δ |> p
