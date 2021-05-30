@@ -1,3 +1,4 @@
+{-# LANGUAGE FunctionalDependencies #-}
 module Focalized.Polarized
 ( Neg(..)
 , Pos(..)
@@ -82,17 +83,17 @@ data ΓI a = ΓI
   (S.Multiset (Pos a))
   (ΓS a)
 
-class Ord a => L a p where
-  (<|) :: p -> ΓI a -> ΓI a
+class L a b c | a b -> c where
+  (<|) :: a -> b -> c
   infixr 5 <|
 
-instance Ord a => L a a where
+instance Ord a => L a (ΓI a) (ΓI a) where
   a <| ΓI i s = ΓI i (S.insert (Left a) s)
 
-instance Ord a => L a (Neg a) where
+instance Ord a => L (Neg a) (ΓI a) (ΓI a) where
   n <| ΓI i s = ΓI i (S.insert (Right n) s)
 
-instance Ord a => L a (Pos a) where
+instance Ord a => L (Pos a) (ΓI a) (ΓI a) where
   p <| ΓI i s = ΓI (S.insert p i) s
 
 minInvertibleL :: Ord a => ΓI a -> Either (Γ (Either a (Neg a))) (Pos a, ΓI a)
@@ -105,17 +106,17 @@ data ΔI a = ΔI
   (ΔS a)
   (S.Multiset (Neg a))
 
-class Ord a => R a p where
-  (|>) :: ΔI a -> p -> ΔI a
+class R a b c | a b -> c where
+  (|>) :: a -> b -> c
   infixl 5 |>
 
-instance Ord a => R a a where
+instance Ord a => R (ΔI a) a (ΔI a) where
   ΔI s i |> a = ΔI (S.insert (Right a) s) i
 
-instance Ord a => R a (Neg a) where
+instance Ord a => R (ΔI a) (Neg a) (ΔI a) where
   ΔI s i |> n = ΔI s (S.insert n i)
 
-instance Ord a => R a (Pos a) where
+instance Ord a => R (ΔI a) (Pos a) (ΔI a) where
   ΔI s i |> p = ΔI (S.insert (Left p) s) i
 
 minInvertibleR :: Ord a => ΔI a -> Either (Δ (Either (Pos a) a)) (ΔI a, Neg a)
