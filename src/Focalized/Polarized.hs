@@ -5,6 +5,7 @@ module Focalized.Polarized
 , ΔI(..)
 , L(..)
 , R(..)
+, Sequent(..)
 ) where
 
 import           Control.Applicative (Alternative(..))
