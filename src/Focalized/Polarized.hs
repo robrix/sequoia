@@ -121,24 +121,24 @@ type ΓS a = S.Multiset (Either a (Neg a))
 
 
 data ΔI a = ΔI
-  (S.Multiset (Neg a))
   (ΔS a)
+  (S.Multiset (Neg a))
 
 class Ord a => R a p where
   (||>) :: ΔI a -> p -> ΔI a
   infixl 5 ||>
 
 instance Ord a => R a a where
-  ΔI i s ||> a = ΔI i (S.insert (Right a) s)
+  ΔI s i ||> a = ΔI (S.insert (Right a) s) i
 
 instance Ord a => R a (Neg a) where
-  ΔI i s ||> n = ΔI (S.insert n i) s
+  ΔI s i ||> n = ΔI s (S.insert n i)
 
 instance Ord a => R a (Pos a) where
-  ΔI i s ||> p = ΔI i (S.insert (Left p) s)
+  ΔI s i ||> p = ΔI (S.insert (Left p) s) i
 
 minInvertibleR :: Ord a => ΔI a -> Either (Δ (Either (Pos a) a)) (ΔI a, Neg a)
-minInvertibleR (ΔI i s) = maybe (Left s) (\ (n, i') -> Right (ΔI i' s, n)) (S.minView i)
+minInvertibleR (ΔI s i) = maybe (Left s) (\ (n, i') -> Right (ΔI s i', n)) (S.minView i)
 
 type ΔS a = S.Multiset (Either (Pos a) a)
 
@@ -205,8 +205,8 @@ focusL ((n, _Γ) :|-: _Δ) = case n of
   p :⅋: q  -> focusL ((p, _Γ) :|-: _Δ) <|> focusL ((q, _Γ) :|-: _Δ)
   p :&: q  -> focusL ((p, _Γ) :|-: _Δ) >> focusL ((q, _Γ) :|-: _Δ)
   p :->: q -> focusR (_Γ :|-: (_Δ, p)) >> focusL ((q, _Γ) :|-: _Δ)
-  Not p    -> ΓI mempty _Γ |- ΔI (S.singleton p) _Δ
-  Up p     -> ΓI (S.singleton p) _Γ |- ΔI mempty _Δ
+  Not p    -> ΓI mempty _Γ |- ΔI _Δ (S.singleton p)
+  Up p     -> ΓI (S.singleton p) _Γ |- ΔI _Δ mempty
 
 focusR :: (Alternative m, Monad m, Ord a) => ΓS a :|-: (ΔS a, Pos a) -> m ()
 focusR (_Γ :|-: (_Δ, p)) = case p of
@@ -216,5 +216,5 @@ focusR (_Γ :|-: (_Δ, p)) = case p of
   p :+: q  -> focusR (_Γ :|-: (_Δ, p)) <|> focusR (_Γ :|-: (_Δ, q))
   p :*: q  -> focusR (_Γ :|-: (_Δ, p)) >> focusR (_Γ :|-: (_Δ, q))
   p :-<: q -> focusR (_Γ :|-: (_Δ, p)) >> focusL ((q, _Γ) :|-: _Δ)
-  Inv p    -> ΓI (S.singleton p) _Γ |- ΔI mempty _Δ
-  Down p   -> ΓI mempty _Γ |- ΔI (S.singleton p) _Δ
+  Inv p    -> ΓI (S.singleton p) _Γ |- ΔI _Δ mempty
+  Down p   -> ΓI mempty _Γ |- ΔI _Δ (S.singleton p)
