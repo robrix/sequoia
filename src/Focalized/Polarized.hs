@@ -145,7 +145,7 @@ instance Ord a => Sequent (ΓI a) (ΔI a) where
       Bot      -> _Γ |- _Δ
       Top      -> pure ()
       p :⅋: q  -> _Γ |- _Δ |> p |> q
-      p :&: q  -> (_Γ |- _Δ |> p) >> _Γ |- _Δ |> q
+      p :&: q  -> _Γ |- _Δ |> p >> _Γ |- _Δ |> q
       p :->: q -> p <| _Γ |- _Δ |> q
       Not p    -> p <| _Γ |- _Δ
       Up p     -> _Γ |- _Δ |> p
