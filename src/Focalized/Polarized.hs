@@ -90,17 +90,17 @@ data ΓI a = ΓI
   (ΓS a)
 
 class Ord a => L a p where
-  (<||) :: p -> ΓI a -> ΓI a
-  infixr 5 <||
+  (<|) :: p -> ΓI a -> ΓI a
+  infixr 5 <|
 
 instance Ord a => L a a where
-  a <|| ΓI i s = ΓI i (S.insert (Left a) s)
+  a <| ΓI i s = ΓI i (S.insert (Left a) s)
 
 instance Ord a => L a (Neg a) where
-  n <|| ΓI i s = ΓI i (S.insert (Right n) s)
+  n <| ΓI i s = ΓI i (S.insert (Right n) s)
 
 instance Ord a => L a (Pos a) where
-  p <|| ΓI i s = ΓI (S.insert p i) s
+  p <| ΓI i s = ΓI (S.insert p i) s
 
 minInvertibleL :: Ord a => ΓI a -> Either (Γ (Either a (Neg a))) (Pos a, ΓI a)
 minInvertibleL (ΓI i s) = maybe (Left s) (\ (p, i') -> Right (p, ΓI i' s)) (S.minView i)
@@ -113,17 +113,17 @@ data ΔI a = ΔI
   (S.Multiset (Neg a))
 
 class Ord a => R a p where
-  (||>) :: ΔI a -> p -> ΔI a
-  infixl 5 ||>
+  (|>) :: ΔI a -> p -> ΔI a
+  infixl 5 |>
 
 instance Ord a => R a a where
-  ΔI s i ||> a = ΔI (S.insert (Right a) s) i
+  ΔI s i |> a = ΔI (S.insert (Right a) s) i
 
 instance Ord a => R a (Neg a) where
-  ΔI s i ||> n = ΔI s (S.insert n i)
+  ΔI s i |> n = ΔI s (S.insert n i)
 
 instance Ord a => R a (Pos a) where
-  ΔI s i ||> p = ΔI (S.insert (Left p) s) i
+  ΔI s i |> p = ΔI (S.insert (Left p) s) i
 
 minInvertibleR :: Ord a => ΔI a -> Either (Δ (Either (Pos a) a)) (ΔI a, Neg a)
 minInvertibleR (ΔI s i) = maybe (Left s) (\ (n, i') -> Right (ΔI s i', n)) (S.minView i)
@@ -139,23 +139,23 @@ instance Ord a => Sequent (ΓI a) (ΔI a) where
   _Γ |- _Δ = case (minInvertibleL _Γ, minInvertibleR _Δ) of
     (Left  _Γ,      Left  _Δ)      -> neutral $ _Γ :|-: _Δ
     (Right (p, _Γ), _)             -> case p of
-      P a      -> a <|| _Γ |- _Δ
+      P a      -> a <| _Γ |- _Δ
       Zero     -> pure ()
       One      -> _Γ |- _Δ
-      p :+: q  -> p <|| _Γ |- _Δ >> q <|| _Γ |- _Δ
-      p :*: q  -> p <|| q <|| _Γ |- _Δ
-      p :-<: q -> p <|| _Γ |- _Δ ||> q
-      Inv p    -> _Γ |- _Δ ||> p
-      Down p   -> p <|| _Γ |- _Δ
+      p :+: q  -> p <| _Γ |- _Δ >> q <| _Γ |- _Δ
+      p :*: q  -> p <| q <| _Γ |- _Δ
+      p :-<: q -> p <| _Γ |- _Δ |> q
+      Inv p    -> _Γ |- _Δ |> p
+      Down p   -> p <| _Γ |- _Δ
     (_,             Right (_Δ, n)) -> case n of
-      N a      -> _Γ |- _Δ ||> a
+      N a      -> _Γ |- _Δ |> a
       Bot      -> _Γ |- _Δ
       Top      -> pure ()
-      p :⅋: q  -> _Γ |- _Δ ||> p ||> q
-      p :&: q  -> (_Γ |- _Δ ||> p) >> _Γ |- _Δ ||> q
-      p :->: q -> p <|| _Γ |- _Δ ||> q
-      Not p    -> p <|| _Γ |- _Δ
-      Up p     -> _Γ |- _Δ ||> p
+      p :⅋: q  -> _Γ |- _Δ |> p |> q
+      p :&: q  -> (_Γ |- _Δ |> p) >> _Γ |- _Δ |> q
+      p :->: q -> p <| _Γ |- _Δ |> q
+      Not p    -> p <| _Γ |- _Δ
+      Up p     -> _Γ |- _Δ |> p
 
 
 neutral :: (Alternative m, Monad m, Ord a) => ΓS a :|-: ΔS a -> m ()
