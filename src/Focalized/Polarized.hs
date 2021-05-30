@@ -5,7 +5,6 @@ module Focalized.Polarized
 , ΔI(..)
 , L(..)
 , R(..)
-, focusR
 ) where
 
 import           Control.Applicative (Alternative(..))
@@ -73,11 +72,6 @@ instance Monad Pos where
     a :-<: b -> (a >>= f) :-<: (b >>= Up . f)
     Inv a    -> Inv (a >>= f)
     Down a   -> Down (a >>= Up . f)
-
-
-data a :|-: b = a :|-: b
-
-infix 4 :|-:
 
 
 type Γ = S.Multiset
@@ -158,7 +152,7 @@ instance Ord a => Sequent (ΓI a) (ΔI a) where
 instance Ord a => Sequent (ΓS a) (ΔS a) where
   _Γ |- _Δ
     =   foldMapA (\ (p, _Γ') -> either (const empty) (\ n -> n :<: _Γ' |- _Δ) p) (S.quotients _Γ)
-    <|> foldMapA (\ (p, _Δ') -> either (\ p -> focusR (_Γ :|-: _Δ' :>: p)) (const empty) p) (S.quotients _Δ)
+    <|> foldMapA (\ (p, _Δ') -> either (\ p -> _Γ |- _Δ' :>: p) (const empty) p) (S.quotients _Δ)
 
 data a :<: b = a :<: b
 
@@ -175,17 +169,17 @@ instance Ord a => Sequent (Neg a :<: ΓS a) (ΔS a) where
     Top      -> empty -- no left rule for ⊤
     p :⅋: q  -> p :<: _Γ |- _Δ <|> q :<: _Γ |- _Δ
     p :&: q  -> p :<: _Γ |- _Δ >> q :<: _Γ |- _Δ
-    p :->: q -> focusR (_Γ :|-: _Δ :>: p) >> q :<: _Γ |- _Δ
+    p :->: q -> _Γ |- _Δ :>: p >> q :<: _Γ |- _Δ
     Not p    -> ΓI mempty _Γ |- ΔI _Δ (S.singleton p)
     Up p     -> ΓI (S.singleton p) _Γ |- ΔI _Δ mempty
 
-focusR :: (Alternative m, Monad m, Ord a) => ΓS a :|-: ΔS a :>: Pos a -> m ()
-focusR (_Γ :|-: _Δ :>: p) = case p of
-  P a      -> guard (Left a `elem` _Γ)
-  Zero     -> empty -- no right rule for 0
-  One      -> pure ()
-  p :+: q  -> focusR (_Γ :|-: _Δ :>: p) <|> focusR (_Γ :|-: _Δ :>: q)
-  p :*: q  -> focusR (_Γ :|-: _Δ :>: p) >> focusR (_Γ :|-: _Δ :>: q)
-  p :-<: q -> focusR (_Γ :|-: _Δ :>: p) >> q :<: _Γ |- _Δ
-  Inv p    -> ΓI (S.singleton p) _Γ |- ΔI _Δ mempty
-  Down p   -> ΓI mempty _Γ |- ΔI _Δ (S.singleton p)
+instance Ord a => Sequent (ΓS a) (ΔS a :>: Pos a) where
+  _Γ |- _Δ :>: p = case p of
+    P a      -> guard (Left a `elem` _Γ)
+    Zero     -> empty -- no right rule for 0
+    One      -> pure ()
+    p :+: q  -> _Γ |- _Δ :>: p <|> _Γ |- _Δ :>: q
+    p :*: q  -> _Γ |- _Δ :>: p >> _Γ |- _Δ :>: q
+    p :-<: q -> _Γ |- _Δ :>: p >> q :<: _Γ |- _Δ
+    Inv p    -> ΓI (S.singleton p) _Γ |- ΔI _Δ mempty
+    Down p   -> ΓI mempty _Γ |- ΔI _Δ (S.singleton p)
