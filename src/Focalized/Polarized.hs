@@ -119,8 +119,8 @@ minInvertibleL (ΓI i s) = maybe (Left s) (\ (p, i') -> Right (p, ΓI i' s)) (S.
 
 
 data ΔI a = ΔI
-  (S.Multiset (Pos a))
   (S.Multiset (Neg a))
+  (S.Multiset (Pos a))
   (S.Multiset a)
 
 class Ord a => R a p where
@@ -128,16 +128,16 @@ class Ord a => R a p where
   infixl 5 ||>
 
 instance Ord a => R a a where
-  ΔI s i as ||> a = ΔI s i (S.insert a as)
+  ΔI i s as ||> a = ΔI i s (S.insert a as)
 
 instance Ord a => R a (Neg a) where
-  ΔI s i as ||> n = ΔI s (S.insert n i) as
+  ΔI i s as ||> n = ΔI (S.insert n i) s as
 
 instance Ord a => R a (Pos a) where
-  ΔI s i as ||> p = ΔI (S.insert p s) i as
+  ΔI i s as ||> p = ΔI i (S.insert p s) as
 
 minInvertibleR :: Ord a => ΔI a -> Either (Δ (Either (Pos a) a)) (ΔI a, Neg a)
-minInvertibleR (ΔI s i a) = maybe (Left (S.map Left s <> S.map Right a)) (\ (n, i') -> Right (ΔI s i' a, n)) (S.minView i)
+minInvertibleR (ΔI i s a) = maybe (Left (S.map Left s <> S.map Right a)) (\ (n, i') -> Right (ΔI i' s a, n)) (S.minView i)
 
 
 class Sequent l r where
