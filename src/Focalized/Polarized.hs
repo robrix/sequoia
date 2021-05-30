@@ -5,7 +5,6 @@ module Focalized.Polarized
 , ΔI(..)
 , L(..)
 , R(..)
-, inversion
 , neutral
 , focusL
 , focusR
@@ -76,17 +75,6 @@ instance Monad Pos where
     a :-<: b -> (a >>= f) :-<: (b >>= Up . f)
     Inv a    -> Inv (a >>= f)
     Down a   -> Down (a >>= Up . f)
-
-
-(<|) :: Ord a => a -> S.Multiset a -> S.Multiset a
-(<|) = S.insert
-
-infixr 5 <|
-
-(|>) :: Ord a => S.Multiset a -> a -> S.Multiset a
-(|>) = flip S.insert
-
-infixl 5 |>
 
 
 data a :|-: b = a :|-: b
@@ -169,28 +157,6 @@ instance Ord a => Sequent (ΓI a) (ΔI a) where
       Not p    -> p <|| _Γ |- _Δ
       Up p     -> _Γ |- _Δ ||> p
 
-
-inversion :: (Alternative m, Monad m, Ord a) => (Γ (Pos a), ΓS a) :|-: (ΔS a, Δ (Neg a)) -> m ()
-inversion ((iΓ, _Γ) :|-: (_Δ, iΔ)) = case (S.minView iΓ, S.minView iΔ) of
-  (Nothing,      Nothing)       -> neutral (_Γ :|-: _Δ)
-  (Just (p, iΓ), _)             -> case p of
-    P a      -> inversion ((iΓ, Left a <| _Γ) :|-: (_Δ, iΔ))
-    Zero     -> pure ()
-    One      -> inversion ((iΓ, _Γ) :|-: (_Δ, iΔ))
-    p :+: q  -> inversion ((p <| iΓ, _Γ) :|-: (_Δ, iΔ)) >> inversion ((q <| iΓ, _Γ) :|-: (_Δ, iΔ))
-    p :*: q  -> inversion ((p <| q <| iΓ, _Γ) :|-: (_Δ, iΔ))
-    p :-<: q -> inversion ((p <| iΓ, _Γ) :|-: (_Δ, iΔ |> q))
-    Inv p    -> inversion ((iΓ, _Γ) :|-: (_Δ |> Left p, iΔ))
-    Down p   -> inversion ((iΓ, Right p <| _Γ) :|-: (_Δ, iΔ))
-  (_,            Just (n, iΔ)) -> case n of
-    N a      -> inversion ((iΓ, _Γ) :|-: (_Δ |> Right a, iΔ))
-    Bot      -> inversion ((iΓ, _Γ) :|-: (_Δ, iΔ))
-    Top      -> pure ()
-    p :⅋: q  -> inversion ((iΓ, _Γ) :|-: (_Δ, iΔ |> p |> q))
-    p :&: q  -> inversion ((iΓ, _Γ) :|-: (_Δ, iΔ |> p)) >> inversion ((iΓ, _Γ) :|-: (_Δ, iΔ |> q))
-    p :->: q -> inversion ((p <| iΓ, _Γ) :|-: (_Δ, iΔ |> q))
-    Not p    -> inversion ((iΓ, Right p <| _Γ) :|-: (_Δ, iΔ))
-    Up p     -> inversion ((iΓ, _Γ) :|-: (_Δ |> Left p, iΔ))
 
 neutral :: (Alternative m, Monad m, Ord a) => ΓS a :|-: ΔS a -> m ()
 neutral (_Γ :|-: _Δ)
