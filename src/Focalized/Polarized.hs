@@ -158,27 +158,35 @@ instance Ord a => Sequent (ΓI a) (ΔI a) where
 
 instance Ord a => Sequent (ΓS a) (ΔS a) where
   _Γ |- _Δ
-    =   foldMapA (\ (p, _Γ') -> either (const empty) (\ n -> focusL ((n, _Γ') :|-: _Δ)) p) (S.quotients _Γ)
-    <|> foldMapA (\ (p, _Δ') -> either (\ p -> focusR (_Γ :|-: (_Δ', p))) (const empty) p) (S.quotients _Δ)
+    =   foldMapA (\ (p, _Γ') -> either (const empty) (\ n -> focusL (n :<: _Γ' :|-: _Δ)) p) (S.quotients _Γ)
+    <|> foldMapA (\ (p, _Δ') -> either (\ p -> focusR (_Γ :|-: _Δ' :>: p)) (const empty) p) (S.quotients _Δ)
 
-focusL :: (Alternative m, Monad m, Ord a) => (Neg a, ΓS a) :|-: ΔS a -> m ()
-focusL ((n, _Γ) :|-: _Δ) = case n of
+data a :<: b = a :<: b
+
+infixr 5 :<:
+
+data a :>: b = a :>: b
+
+infixl 5 :>:
+
+focusL :: (Alternative m, Monad m, Ord a) => Neg a :<: ΓS a :|-: ΔS a -> m ()
+focusL (n :<: _Γ :|-: _Δ) = case n of
   N a      -> guard (Right a `elem` _Δ)
   Bot      -> pure ()
   Top      -> empty -- no left rule for ⊤
-  p :⅋: q  -> focusL ((p, _Γ) :|-: _Δ) <|> focusL ((q, _Γ) :|-: _Δ)
-  p :&: q  -> focusL ((p, _Γ) :|-: _Δ) >> focusL ((q, _Γ) :|-: _Δ)
-  p :->: q -> focusR (_Γ :|-: (_Δ, p)) >> focusL ((q, _Γ) :|-: _Δ)
+  p :⅋: q  -> focusL (p :<: _Γ :|-: _Δ) <|> focusL (q :<: _Γ :|-: _Δ)
+  p :&: q  -> focusL (p :<: _Γ :|-: _Δ) >> focusL (q :<: _Γ :|-: _Δ)
+  p :->: q -> focusR (_Γ :|-: _Δ :>: p) >> focusL (q :<: _Γ :|-: _Δ)
   Not p    -> ΓI mempty _Γ |- ΔI _Δ (S.singleton p)
   Up p     -> ΓI (S.singleton p) _Γ |- ΔI _Δ mempty
 
-focusR :: (Alternative m, Monad m, Ord a) => ΓS a :|-: (ΔS a, Pos a) -> m ()
-focusR (_Γ :|-: (_Δ, p)) = case p of
+focusR :: (Alternative m, Monad m, Ord a) => ΓS a :|-: ΔS a :>: Pos a -> m ()
+focusR (_Γ :|-: _Δ :>: p) = case p of
   P a      -> guard (Left a `elem` _Γ)
   Zero     -> empty -- no right rule for 0
   One      -> pure ()
-  p :+: q  -> focusR (_Γ :|-: (_Δ, p)) <|> focusR (_Γ :|-: (_Δ, q))
-  p :*: q  -> focusR (_Γ :|-: (_Δ, p)) >> focusR (_Γ :|-: (_Δ, q))
-  p :-<: q -> focusR (_Γ :|-: (_Δ, p)) >> focusL ((q, _Γ) :|-: _Δ)
+  p :+: q  -> focusR (_Γ :|-: _Δ :>: p) <|> focusR (_Γ :|-: _Δ :>: q)
+  p :*: q  -> focusR (_Γ :|-: _Δ :>: p) >> focusR (_Γ :|-: _Δ :>: q)
+  p :-<: q -> focusR (_Γ :|-: _Δ :>: p) >> focusL (q :<: _Γ :|-: _Δ)
   Inv p    -> ΓI (S.singleton p) _Γ |- ΔI _Δ mempty
   Down p   -> ΓI mempty _Γ |- ΔI _Δ (S.singleton p)
