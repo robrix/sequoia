@@ -52,7 +52,7 @@ data Pos a
   | Pos a :+: Pos a
   | Pos a :*: Pos a
   | Pos a :-<: Neg a
-  | Inv (Pos a)
+  | Neg (Pos a)
   | Down (Neg a)
   deriving (Eq, Ord, Show, Foldable, Functor, Traversable)
 
@@ -72,7 +72,7 @@ instance Monad Pos where
     a :+: b  -> (a >>= f) :+: (b >>= f)
     a :*: b  -> (a >>= f) :*: (b >>= f)
     a :-<: b -> (a >>= f) :-<: (b >>= Up . f)
-    Inv a    -> Inv (a >>= f)
+    Neg a    -> Neg (a >>= f)
     Down a   -> Down (a >>= Up . f)
 
 
@@ -151,7 +151,7 @@ instance Ord a => Sequent (ΓI a) (ΔI a) where
       p :+: q  -> p <| _Γ |- _Δ >> q <| _Γ |- _Δ
       p :*: q  -> p <| q <| _Γ |- _Δ
       p :-<: q -> p <| _Γ |- _Δ |> q
-      Inv p    -> _Γ |- _Δ |> p
+      Neg p    -> _Γ |- _Δ |> p
       Down p   -> p <| _Γ |- _Δ
     (_,             Right (_Δ, n)) -> case n of
       N a      -> _Γ |- _Δ |> a
@@ -195,5 +195,5 @@ instance Ord a => Sequent (ΓS a) (ΔS a :>: Pos a) where
     p :+: q  -> _Γ |- _Δ :>: p <|> _Γ |- _Δ :>: q
     p :*: q  -> _Γ |- _Δ :>: p >> _Γ |- _Δ :>: q
     p :-<: q -> _Γ |- _Δ :>: p >> q :<: _Γ |- _Δ
-    Inv p    -> p <| _Γ |- _Δ
+    Neg p    -> p <| _Γ |- _Δ
     Down p   -> _Γ |- _Δ |> p
