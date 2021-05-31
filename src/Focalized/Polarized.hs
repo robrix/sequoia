@@ -1,7 +1,9 @@
 {-# LANGUAGE FunctionalDependencies #-}
 module Focalized.Polarized
 ( Neg(..)
+, CBN(..)
 , Pos(..)
+, CBV(..)
 , ΓI(..)
 , ΔI(..)
 , L(..)
@@ -44,6 +46,24 @@ instance Monad Neg where
     Not a    -> Not (a >>= f)
     Up a     -> Up (a >>= Down . f)
 
+data CBN a
+  = Covar a
+  | EBot (CBN a) -- Bot L
+  | IBot -- Bot R
+  -- no rule for Top L
+  | ITop -- Top R
+  | EWithL (CBN a) -- :&: L₁
+  | EWithR (CBN a) -- :&: L₂
+  | IWith (CBN a -> CBN a) (CBN a -> CBN a) -- :&: R
+  | EPar (CBN a) (CBN a) -- :⅋: L
+  | IPar (CBN a -> CBN a -> CBN a) -- :⅋: R
+  | ELam (CBN a) (CBV a) -- :->: L
+  | ILam (CBV a -> CBN a) -- :->: R
+  | ENot (CBN a) -- Not L
+  | INot (CBN a) -- Not R
+  | EThunk (CBV a) -- Down L
+  | IReturn (CBV a) -- Up R
+
 
 data Pos a
   = P a
@@ -74,6 +94,24 @@ instance Monad Pos where
     a :-<: b -> (a >>= f) :-<: (b >>= Up . f)
     Neg a    -> Neg (a >>= f)
     Down a   -> Down (a >>= Up . f)
+
+data CBV a
+  = Var a
+  | EZero (CBV a) -- Zero L
+  -- no rule for Zero R
+  | EOne (CBV a) -- One L
+  | IOne -- One R
+  | ESum (CBV a) (CBV a -> CBV a) (CBV a -> CBV a) -- :+: L
+  | ISumL (CBV a) -- :+: R₁
+  | ISumR (CBV a) -- :+: R₂
+  | EPair (CBV a) (CBV a -> CBV a -> CBV a) -- :*: L
+  | IPair (CBV a) (CBV a) -- :*: R
+  | EColam (CBV a -> CBN a) -- :-<: L
+  | IColam (CBV a) (CBV a) -- :-<: R -- FIXME: should this be in CBN?
+  | ENeg (CBV a) -- Neg L
+  | INeg (CBV a) -- Neg R
+  | IThunk (CBN a) -- Down R
+  | EReturn (CBN a) -- Up L
 
 
 type Γ = S.Multiset
