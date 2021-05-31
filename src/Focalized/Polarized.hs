@@ -2,8 +2,12 @@
 module Focalized.Polarized
 ( Neg(..)
 , CBN(..)
+, ECBN(..)
+, ICBN(..)
 , Pos(..)
 , CBV(..)
+, ECBV(..)
+, ICBV(..)
 , ΓI(..)
 , ΔI(..)
 , L(..)
@@ -48,20 +52,26 @@ instance Monad Neg where
 
 data CBN a
   = Covar a
-  | EBot (CBN a) -- Bot L
-  | IBot -- Bot R
+  | ECBN (ECBN a)
+  | ICBN (ICBN a)
+
+data ECBN a
+  = EBot (CBN a) -- Bot L
   -- no rule for Top L
-  | ITop -- Top R
   | EWithL (CBN a) -- :&: L₁
   | EWithR (CBN a) -- :&: L₂
-  | IWith (CBN a -> CBN a) (CBN a -> CBN a) -- :&: R
   | EPar (CBN a) (CBN a) -- :⅋: L
-  | IPar (CBN a -> CBN a -> CBN a) -- :⅋: R
   | ELam (CBN a) (CBV a) -- :->: L
-  | ILam (CBV a -> CBN a) -- :->: R
   | ENot (CBN a) -- Not L
-  | INot (CBN a) -- Not R
   | EThunk (CBV a) -- Down L
+
+data ICBN a
+  = IBot -- Bot R
+  | ITop -- Top R
+  | IWith (CBN a -> CBN a) (CBN a -> CBN a) -- :&: R
+  | IPar (CBN a -> CBN a -> CBN a) -- :⅋: R
+  | ILam (CBV a -> CBN a) -- :->: R
+  | INot (CBN a) -- Not R
   | IReturn (CBV a) -- Up R
 
 
@@ -97,21 +107,27 @@ instance Monad Pos where
 
 data CBV a
   = Var a
-  | EZero (CBV a) -- Zero L
+  | ECBV (ECBV a)
+  | ICBV (ICBV a)
+
+data ECBV a
+  = EZero (CBV a) -- Zero L
   -- no rule for Zero R
   | EOne (CBV a) -- One L
-  | IOne -- One R
   | ESum (CBV a) (CBV a -> CBV a) (CBV a -> CBV a) -- :+: L
+  | EPair (CBV a) (CBV a -> CBV a -> CBV a) -- :*: L
+  | EColam (CBV a -> CBN a) -- :-<: L
+  | ENeg (CBV a) -- Neg L
+  | EReturn (CBN a) -- Up L
+
+data ICBV a
+  = IOne -- One R
   | ISumL (CBV a) -- :+: R₁
   | ISumR (CBV a) -- :+: R₂
-  | EPair (CBV a) (CBV a -> CBV a -> CBV a) -- :*: L
   | IPair (CBV a) (CBV a) -- :*: R
-  | EColam (CBV a -> CBN a) -- :-<: L
   | IColam (CBV a) (CBV a) -- :-<: R -- FIXME: should this be in CBN?
-  | ENeg (CBV a) -- Neg L
   | INeg (CBV a) -- Neg R
   | IThunk (CBN a) -- Down R
-  | EReturn (CBN a) -- Up L
 
 
 type Γ = S.Multiset
