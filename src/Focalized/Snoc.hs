@@ -1,9 +1,11 @@
 module Focalized.Snoc
 ( Snoc(..)
+, lookup
 ) where
 
 import Control.Applicative
 import Data.Foldable (toList)
+import Prelude hiding (lookup)
 
 data Snoc a
   = Nil
@@ -35,3 +37,12 @@ instance Alternative Snoc where
 instance Monad Snoc where
   Nil >>= _     = Nil
   as :> a >>= f = (as >>= f) <> f a
+
+
+lookup :: Eq a => a -> Snoc (a, b) -> Maybe b
+lookup a = go
+  where
+  go Nil = Nothing
+  go (as :> (a', b))
+    | a == a'   = Just b
+    | otherwise = go as
