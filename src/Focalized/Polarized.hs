@@ -71,7 +71,7 @@ data ECBN a
   | EPar (CBN a) (CBN a) (CBN a) -- :⅋: L
   | ELam (CBN a) (CBV a) -- :->: L
   | ENot (CBN a) -- Not L
-  | EThunk (CBV a) -- Down L
+  | EDown (CBV a) -- Down L
 
 data ICBN a
   = IBot -- Bot R
@@ -80,7 +80,7 @@ data ICBN a
   | IPar (CBN a -> CBN a -> CBN a) -- :⅋: R
   | ILam (CBV a -> CBN a) -- :->: R
   | INot (CBN a) -- Not R
-  | IReturn (CBV a) -- Up R
+  | IUp (CBV a) -- Up R
 
 evalN :: Eq a => Snoc (a, CBV a) :|-: [(a, CBN a)] -> CBN a -> [ICBN a]
 evalN env@(_Γ :|-: _Δ) = \case
@@ -104,8 +104,8 @@ evalN env@(_Γ :|-: _Δ) = \case
     ENot e   -> do
       INot e' <- evalN env e
       evalN env e'
-    EThunk t -> do
-      IThunk e <- evalV env t
+    EDown t -> do
+      IDown e <- evalV env t
       evalN env e
   ICBN i  -> [i]
 
@@ -153,7 +153,7 @@ data ECBV a
   | EPair (CBV a) (ICBV a -> ICBV a -> CBV a) -- :*: L
   | EColam (CBV a) (ICBV a -> CBN a) -- :-<: L
   | ENeg (CBV a) -- Neg L
-  | EReturn (CBN a) -- Up L
+  | EUp (CBN a) -- Up L
 
 data ICBV a
   = IOne -- One R
@@ -162,7 +162,7 @@ data ICBV a
   | IPair (ICBV a) (ICBV a) -- :*: R
   | IColam (ICBV a) -- :-<: R -- FIXME: should this be in CBN?
   | INeg (ICBV a) -- Neg R
-  | IThunk (CBN a) -- Down R
+  | IDown (CBN a) -- Down R
 
 evalV :: Eq a => Snoc (a, CBV a) :|-: [(a, CBN a)] -> CBV a -> [ICBV a]
 evalV env@(_Γ :|-: _Δ) = \case
@@ -183,12 +183,12 @@ evalV env@(_Γ :|-: _Δ) = \case
       evalV env (f l r)
     EColam s b -> do
       IColam a <- evalV env s
-      IThunk . ICBN <$> evalN env (b a)
+      IDown . ICBN <$> evalN env (b a)
     ENeg e -> do
       INeg e' <- evalV env e
       [e']
-    EReturn e -> do -- this isn’t really how return works in e.g. CBPV, so this is probably a bad name
-      IReturn e' <- evalN env e
+    EUp e -> do -- this isn’t really how return works in e.g. CBPV, so this is probably a bad name
+      IUp e' <- evalN env e
       evalV env e'
   ICBV i -> [i]
 
