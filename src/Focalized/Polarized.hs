@@ -1,15 +1,7 @@
 {-# LANGUAGE FunctionalDependencies #-}
 module Focalized.Polarized
 ( Neg(..)
-, CBN(..)
-, ECBN(..)
-, ICBN(..)
-, evalN
 , Pos(..)
-, CBV(..)
-, ECBV(..)
-, ICBV(..)
-, evalV
 , ΓI(..)
 , ΔI(..)
 , L(..)
@@ -23,9 +15,7 @@ import           Control.Monad (ap)
 import qualified Focalized.Multiset as S
 import           Focalized.Snoc as Snoc
 
-data a :|-: b = a :|-: b
 
-infix 4 :|-:
 
 
 data Neg a
@@ -58,57 +48,6 @@ instance Monad Neg where
     Not a    -> Not (a >>= f)
     Up a     -> Up (a >>= Down . f)
 
-data CBN a
-  = Covar a
-  | ECBN (ECBN a)
-  | ICBN (ICBN a)
-
-data ECBN a
-  = EBot (CBN a) -- Bot L
-  -- no rule for Top L
-  | EWithL (CBN a) -- :&: L₁
-  | EWithR (CBN a) -- :&: L₂
-  | EPar (CBN a) (CBN a) (CBN a) -- :⅋: L
-  | ELam (CBN a) (CBV a) -- :->: L
-  | ENot (CBN a) -- Not L
-  | EDown (CBV a) -- Down L
-
-data ICBN a
-  = IBot -- Bot R
-  | ITop -- Top R
-  | IWith (CBN a) (CBN a) -- :&: R
-  | IPar (CBN a -> CBN a -> CBN a) -- :⅋: R
-  | ILam (CBV a -> CBN a) -- :->: R
-  | INot (CBN a) -- Not R
-  | IUp (CBV a) -- Up R
-
-evalN :: Eq a => Snoc (a, CBV a) :|-: [(a, CBN a)] -> CBN a -> [ICBN a]
-evalN env@(_Γ :|-: _Δ) = \case
-  Covar a -> case Prelude.lookup a _Δ of
-    Just e  -> evalN env e
-    Nothing -> []
-  ECBN e  -> case e of
-    EBot e   -> evalN env e
-    EWithL l -> do
-      IWith l' _ <- evalN env l
-      evalN env l'
-    EWithR r -> do
-      IWith r' _ <- evalN env r
-      evalN env r'
-    EPar p a b -> do
-      IPar f <- evalN env p
-      evalN env (f a b)
-    ELam f a -> do
-      ILam b <- evalN env f
-      evalN env (b a)
-    ENot e   -> do
-      INot e' <- evalN env e
-      evalN env e'
-    EDown t -> do
-      IDown e <- evalV env t
-      evalN env e
-  ICBN i  -> [i]
-
 
 data Pos a
   = P a
@@ -139,58 +78,6 @@ instance Monad Pos where
     a :-<: b -> (a >>= f) :-<: (b >>= Up . f)
     Neg a    -> Neg (a >>= f)
     Down a   -> Down (a >>= Up . f)
-
-data CBV a
-  = Var a
-  | ECBV (ECBV a)
-  | ICBV (ICBV a)
-
-data ECBV a
-  = EZero (CBV a) -- Zero L
-  -- no rule for Zero R
-  | EOne (CBV a) -- One L
-  | ESum (CBV a) (ICBV a -> CBV a) (ICBV a -> CBV a) -- :+: L
-  | EPair (CBV a) (ICBV a -> ICBV a -> CBV a) -- :*: L
-  | EColam (CBV a) (ICBV a -> CBN a) -- :-<: L
-  | ENeg (CBV a) -- Neg L
-  | EUp (CBN a) -- Up L
-
-data ICBV a
-  = IOne -- One R
-  | ISumL (ICBV a) -- :+: R₁
-  | ISumR (ICBV a) -- :+: R₂
-  | IPair (ICBV a) (ICBV a) -- :*: R
-  | IColam (ICBV a) -- :-<: R -- FIXME: should this be in CBN?
-  | INeg (ICBV a) -- Neg R
-  | IDown (CBN a) -- Down R
-
-evalV :: Eq a => Snoc (a, CBV a) :|-: [(a, CBN a)] -> CBV a -> [ICBV a]
-evalV env@(_Γ :|-: _Δ) = \case
-  Var a -> case Snoc.lookup a _Γ of
-    Just e  -> evalV env e
-    Nothing -> []
-  ECBV e -> case e of
-    EZero e    -> evalV env e
-    EOne e     -> evalV env e
-    ESum s f g -> do
-      s' <- evalV env s
-      case s' of
-        ISumL l -> evalV env (f l)
-        ISumR r -> evalV env (g r)
-        _       -> []
-    EPair s f -> do
-      IPair l r <- evalV env s
-      evalV env (f l r)
-    EColam s b -> do
-      IColam a <- evalV env s
-      IDown . ICBN <$> evalN env (b a)
-    ENeg e -> do
-      INeg e' <- evalV env e
-      [e']
-    EUp e -> do -- this isn’t really how return works in e.g. CBPV, so this is probably a bad name
-      IUp e' <- evalN env e
-      evalV env e'
-  ICBV i -> [i]
 
 
 type Γ = S.Multiset
