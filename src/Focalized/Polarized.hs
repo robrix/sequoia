@@ -245,7 +245,7 @@ class Proof p where
   funL :: _Γ `p` (_Δ |> a) -> (b <| _Γ) `p` _Δ -> ((a -> b) <| _Γ) `p` _Δ
   funR :: (a <| _Γ) `p` b -> _Γ `p` (a -> b)
 
-  sub :: _Γ `p` (_Δ |> a) -> (b <| _Γ) `p` _Δ -> _Γ `p` (_Δ |> (a -< b) _Δ)
+  subR :: _Γ `p` (_Δ |> a) -> (b <| _Γ) `p` _Δ -> _Γ `p` (_Δ |> (a -< b) _Δ)
 
   ($$) :: _Γ `p` (_Δ |> (a -> b)) -> _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b)
   f $$ a = cut (exR (wkR f)) (exR (wkR a) `funL` ax)
@@ -288,7 +288,7 @@ instance Proof (|-) where
   funL a kb (f, _Γ) = a _Γ >>- \ a' -> kb (f a', _Γ)
   funR = flip . curry
 
-  sub a b = liftA2 Sub <$> a <*> notR b
+  subR a b = liftA2 Sub <$> a <*> notR b
 
   zeroL = absurdP . fst
 
