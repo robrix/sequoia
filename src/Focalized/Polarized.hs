@@ -276,8 +276,8 @@ class Proof p where
   wkR :: _Γ `p` _Δ -> _Γ `p` (_Δ |> a)
   cnL :: (a <| a) `p` b -> a `p` b
   cnR :: _Γ `p` (a |> a) -> _Γ `p` a
-  exL :: (a <| (b <| c)) `p` _Δ -> (b <| (a <| c)) `p` _Δ
-  exR :: _Γ `p` ((a |> b) |> c) -> _Γ `p` ((a |> c) |> b)
+  exL :: (a <| b <| c) `p` _Δ -> (b <| a <| c) `p` _Δ
+  exR :: _Γ `p` (a |> b |> c) -> _Γ `p` (a |> c |> b)
 
   zapSum :: _Γ `p` (_Δ |> Not a _Δ & Not b _Δ) -> (a ⊕ b <| _Γ) `p` _Δ
 
