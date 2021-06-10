@@ -235,51 +235,51 @@ instance Ord a => Sequent (ΓS a) (ΔS a :>: Pos a) where
     Neg p    -> p <| _Γ |- _Δ
     Down p   -> _Γ |- _Δ |> p
 
-type (*) = (,)
-type (+) = Either
+type (<|) = (,)
+type (|>) = Either
 type (|-) = (->)
 
 class Proof p where
-  (&) :: _Γ `p` (_Δ + a) -> _Γ `p` (_Δ + b) -> _Γ `p` (_Δ + (a & b))
+  (&) :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> (a & b))
 
-  (⊗) :: _Γ `p` (_Δ + a) -> _Γ `p` (_Δ + b) -> _Γ `p` (_Δ + (a ⊗ b))
+  (⊗) :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> (a ⊗ b))
 
-  inl :: _Γ `p` (_Δ + a) -> _Γ `p` (_Δ + (a ⊕ b))
-  inr :: _Γ `p` (_Δ + b) -> _Γ `p` (_Δ + (a ⊕ b))
+  inl :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> (a ⊕ b))
+  inr :: _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> (a ⊕ b))
 
-  funL :: _Γ `p` (_Δ + a) -> (b * _Γ) `p` _Δ -> ((a -> b) * _Γ) `p` _Δ
-  lam :: (a * _Γ) `p` b -> _Γ `p` (a -> b)
+  funL :: _Γ `p` (_Δ |> a) -> (b <| _Γ) `p` _Δ -> ((a -> b) <| _Γ) `p` _Δ
+  lam :: (a <| _Γ) `p` b -> _Γ `p` (a -> b)
 
-  sub :: _Γ `p` (_Δ + a) -> (b * _Γ) `p` _Δ -> _Γ `p` (_Δ + (a -< b) _Δ)
+  sub :: _Γ `p` (_Δ |> a) -> (b <| _Γ) `p` _Δ -> _Γ `p` (_Δ |> (a -< b) _Δ)
 
-  ($$) :: _Γ `p` (_Δ + (a -> b)) -> _Γ `p` (_Δ + a) -> _Γ `p` (_Δ + b)
+  ($$) :: _Γ `p` (_Δ |> (a -> b)) -> _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b)
   f $$ a = cut (exR (wkR f)) (exR (wkR a) `funL` ax)
 
-  zeroL :: (Zero * _Γ) `p` _Δ
+  zeroL :: (Zero <| _Γ) `p` _Δ
 
-  oneL :: _Γ `p` _Δ -> (One * _Γ) `p` _Δ
-  oneR :: _Γ `p` (_Δ + One)
+  oneL :: _Γ `p` _Δ -> (One <| _Γ) `p` _Δ
+  oneR :: _Γ `p` (_Δ |> One)
 
-  botL :: (Bot * _Γ) `p` _Δ
-  botR :: _Γ `p` _Δ -> _Γ `p` (_Δ + Bot)
+  botL :: (Bot <| _Γ) `p` _Δ
+  botR :: _Γ `p` _Δ -> _Γ `p` (_Δ |> Bot)
 
-  topR :: _Γ `p` (_Δ + Top)
+  topR :: _Γ `p` (_Δ |> Top)
 
-  notL :: _Γ `p` (_Δ + a) -> (Not a _Δ * _Γ) `p` _Δ
-  notR :: (a * _Γ) `p` _Δ -> _Γ `p` (_Δ + Not a _Δ)
+  notL :: _Γ `p` (_Δ |> a) -> (Not a _Δ <| _Γ) `p` _Δ
+  notR :: (a <| _Γ) `p` _Δ -> _Γ `p` (_Δ |> Not a _Δ)
 
-  cut :: _Γ `p` (_Δ + a) -> (a * _Γ) `p` _Δ -> _Γ `p` _Δ
+  cut :: _Γ `p` (_Δ |> a) -> (a <| _Γ) `p` _Δ -> _Γ `p` _Δ
 
-  ax :: (a, _Γ) `p` (_Δ + a)
+  ax :: (a, _Γ) `p` (_Δ |> a)
 
-  wkL :: _Γ `p` _Δ -> (a * _Γ) `p` _Δ
-  wkR :: _Γ `p` _Δ -> _Γ `p` (_Δ + a)
-  cnL :: (a * a) `p` b -> a `p` b
-  cnR :: _Γ `p` (a + a) -> _Γ `p` a
-  exL :: (a * (b * c)) `p` _Δ -> (b * (a * c)) `p` _Δ
-  exR :: _Γ `p` ((a + b) + c) -> _Γ `p` ((a + c) + b)
+  wkL :: _Γ `p` _Δ -> (a <| _Γ) `p` _Δ
+  wkR :: _Γ `p` _Δ -> _Γ `p` (_Δ |> a)
+  cnL :: (a <| a) `p` b -> a `p` b
+  cnR :: _Γ `p` (a |> a) -> _Γ `p` a
+  exL :: (a <| (b <| c)) `p` _Δ -> (b <| (a <| c)) `p` _Δ
+  exR :: _Γ `p` ((a |> b) |> c) -> _Γ `p` ((a |> c) |> b)
 
-  zapSum :: _Γ `p` (_Δ + (Not a _Δ & Not b _Δ)) -> (a ⊕ b , _Γ) `p` _Δ
+  zapSum :: _Γ `p` (_Δ |> (Not a _Δ & Not b _Δ)) -> (a ⊕ b , _Γ) `p` _Δ
 
 
 instance Proof (|-) where
@@ -331,7 +331,7 @@ absurdN = \case
 absurdP :: Zero -> a
 absurdP = \case
 
-(>>-) :: (_Δ + a) -> (a -> _Δ) -> _Δ
+(>>-) :: (_Δ |> a) -> (a -> _Δ) -> _Δ
 (>>-) = flip (either id)
 
 infixl 1 >>-
