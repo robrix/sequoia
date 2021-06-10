@@ -255,8 +255,15 @@ class Proof p where
   ($$) :: _Γ `p` (_Δ + (a -> b)) -> _Γ `p` (_Δ + a) -> _Γ `p` (_Δ + b)
   f $$ a = cut (exR (wkR f)) (exR (wkR a) `funL` ax)
 
+  zeroL :: (Zero * _Γ) `p` _Δ
+
+  oneL :: _Γ `p` _Δ -> (One * _Γ) `p` _Δ
+  oneR :: _Γ `p` (_Δ + One)
+
   botL :: (Bot * _Γ) `p` _Δ
   botR :: _Γ `p` _Δ -> _Γ `p` (_Δ + Bot)
+
+  topR :: _Γ `p` (_Δ + Top)
 
   notL :: _Γ `p` (_Δ + a) -> (Not a _Δ * _Γ) `p` _Δ
   notR :: (a * _Γ) `p` _Δ -> _Γ `p` (_Δ + Not a _Δ)
@@ -288,8 +295,15 @@ instance Proof (|-) where
 
   sub a b = liftA2 Sub <$> a <*> notR b
 
-  botL = absurd . fst
+  zeroL = absurdP . fst
+
+  oneL = wkL
+  oneR = const (pure One')
+
+  botL = absurdN . fst
   botR = fmap Left
+
+  topR = const (pure Top')
 
   notL p (Not' np, _Γ) = p _Γ >>- np
   notR p _Γ = Right $ Not' $ \ a -> p (a, _Γ)
@@ -311,8 +325,11 @@ instance Proof (|-) where
 tail :: Proof p => _Γ' `p` _Δ -> (_Γ, _Γ') `p` _Δ
 tail = wkL
 
-absurd :: Bot -> a
-absurd = \case
+absurdN :: Bot -> a
+absurdN = \case
+
+absurdP :: Zero -> a
+absurdP = \case
 
 (>>-) :: (_Δ + a) -> (a -> _Δ) -> _Δ
 (>>-) = flip (either id)
