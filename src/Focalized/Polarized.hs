@@ -112,9 +112,6 @@ instance Monad Pos where
     Down a   -> Down (a >>= Up . f)
 
 
-type Γ = S.Multiset
-type Δ = S.Multiset
-
 data ΓI a = ΓI
   (S.Multiset (Pos a))
   (ΓS a)
@@ -135,7 +132,7 @@ instance Ord a => L (Pos a) (ΓI a) (ΓI a) where
 instance L (Pos a) (ΓS a) (ΓI a) where
   p <| _Γ = ΓI (S.singleton p) _Γ
 
-minInvertibleL :: Ord a => ΓI a -> Either (Γ (Either a (Neg a))) (Pos a, ΓI a)
+minInvertibleL :: Ord a => ΓI a -> Either (S.Multiset (Either a (Neg a))) (Pos a, ΓI a)
 minInvertibleL (ΓI i s) = maybe (Left s) (\ (p, i') -> Right (p, ΓI i' s)) (S.minView i)
 
 type ΓS a = S.Multiset (Either a (Neg a))
@@ -161,7 +158,7 @@ instance Ord a => R (ΔI a) (Pos a) (ΔI a) where
 instance R (ΔS a) (Neg a) (ΔI a) where
   _Δ |> p = ΔI _Δ (S.singleton p)
 
-minInvertibleR :: Ord a => ΔI a -> Either (Δ (Either (Pos a) a)) (ΔI a, Neg a)
+minInvertibleR :: Ord a => ΔI a -> Either (S.Multiset (Either (Pos a) a)) (ΔI a, Neg a)
 minInvertibleR (ΔI s i) = maybe (Left s) (\ (n, i') -> Right (ΔI s i', n)) (S.minView i)
 
 type ΔS a = S.Multiset (Either (Pos a) a)
