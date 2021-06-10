@@ -1,4 +1,6 @@
+{-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE NoStarIsType #-}
 module Focalized.Polarized
 ( Neg(..)
 , Pos(..)
@@ -7,15 +9,46 @@ module Focalized.Polarized
 , L(..)
 , R(..)
 , Sequent(..)
+, Proof(..)
 ) where
 
-import           Control.Applicative (Alternative(..))
+import           Control.Applicative (Alternative(..), liftA2)
 import           Control.Effect.NonDet (foldMapA, guard)
-import           Control.Monad (ap)
+import           Control.Monad (ap, join)
 import qualified Focalized.Multiset as S
-import           Focalized.Snoc as Snoc
+import           Prelude hiding (head, tail)
 
+data a ⊗ b = !a :⊗ !b
 
+infixr 7 ⊗
+
+data a ⊕ b
+  = InL !a
+  | InR !b
+
+infixr 6 ⊕
+
+data a & b = a :& b
+
+infixr 6 &
+
+newtype (a ⅋ b) _Δ = Par (forall r . (Not a _Δ -> Not b _Δ -> r) -> r)
+
+infixr 7 ⅋
+
+-- newtype a -< b = Sub ((a -> b) -> b)
+data (a -< b) _Δ = Sub a (Not b _Δ)
+
+infixr 0 -<
+
+newtype Not a _Δ = Not' { getNot :: a -> _Δ }
+newtype Neg' a _Δ = Negate { getNegate :: (One -< a) _Δ }
+
+data Bot
+data Top = Top'
+
+data Zero
+data One = One'
 
 
 data Neg a
@@ -201,3 +234,100 @@ instance Ord a => Sequent (ΓS a) (ΔS a :>: Pos a) where
     p :-<: q -> _Γ |- _Δ :>: p >> q :<: _Γ |- _Δ
     Neg p    -> p <| _Γ |- _Δ
     Down p   -> _Γ |- _Δ |> p
+
+type (*) = (,)
+type (+) = Either
+type (|-) = (->)
+
+class Proof p where
+  (&) :: _Γ `p` (_Δ + a) -> _Γ `p` (_Δ + b) -> _Γ `p` (_Δ + (a & b))
+
+  (⊗) :: _Γ `p` (_Δ + a) -> _Γ `p` (_Δ + b) -> _Γ `p` (_Δ + (a ⊗ b))
+
+  inl :: _Γ `p` (_Δ + a) -> _Γ `p` (_Δ + (a ⊕ b))
+  inr :: _Γ `p` (_Δ + b) -> _Γ `p` (_Δ + (a ⊕ b))
+
+  funL :: _Γ `p` (_Δ + a) -> (b * _Γ) `p` _Δ -> ((a -> b) * _Γ) `p` _Δ
+  lam :: (a * _Γ) `p` b -> _Γ `p` (a -> b)
+
+  sub :: _Γ `p` (_Δ + a) -> (b * _Γ) `p` _Δ -> _Γ `p` (_Δ + (a -< b) _Δ)
+
+  ($$) :: _Γ `p` (_Δ + (a -> b)) -> _Γ `p` (_Δ + a) -> _Γ `p` (_Δ + b)
+  f $$ a = cut (exR (wkR f)) (exR (wkR a) `funL` ax)
+
+  botL :: (Bot * _Γ) `p` _Δ
+  botR :: _Γ `p` _Δ -> _Γ `p` (_Δ + Bot)
+
+  notL :: _Γ `p` (_Δ + a) -> (Not a _Δ * _Γ) `p` _Δ
+  notR :: (a * _Γ) `p` _Δ -> _Γ `p` (_Δ + Not a _Δ)
+
+  cut :: _Γ `p` (_Δ + a) -> (a * _Γ) `p` _Δ -> _Γ `p` _Δ
+
+  ax :: (a, _Γ) `p` (_Δ + a)
+
+  wkL :: _Γ `p` _Δ -> (a * _Γ) `p` _Δ
+  wkR :: _Γ `p` _Δ -> _Γ `p` (_Δ + a)
+  cnL :: (a * a) `p` b -> a `p` b
+  cnR :: _Γ `p` (a + a) -> _Γ `p` a
+  exL :: (a * (b * c)) `p` _Δ -> (b * (a * c)) `p` _Δ
+  exR :: _Γ `p` ((a + b) + c) -> _Γ `p` ((a + c) + b)
+
+  zapSum :: _Γ `p` (_Δ + (Not a _Δ & Not b _Δ)) -> (a ⊕ b , _Γ) `p` _Δ
+
+
+instance Proof (|-) where
+  (&) = liftA2 (liftA2 (:&))
+
+  (⊗) = liftA2 (liftA2 (:⊗))
+
+  inl a = fmap InL <$> a
+  inr b = fmap InR <$> b
+
+  funL a kb (f, _Γ) = a _Γ >>- \ a' -> kb (f a', _Γ)
+  lam = flip . curry
+
+  sub a b = liftA2 Sub <$> a <*> notR b
+
+  botL = absurd . fst
+  botR = fmap Left
+
+  notL p (Not' np, _Γ) = p _Γ >>- np
+  notR p _Γ = Right $ Not' $ \ a -> p (a, _Γ)
+
+  cut f g _Γ = f _Γ >>- \ a -> g (a, _Γ)
+
+  ax = Right . fst
+
+  wkL = (. snd)
+  wkR = fmap Left
+  cnL = (. join (,))
+  cnR = fmap (either id id)
+  exL = (. \ (b, (a, c)) -> (a, (b, c)))
+  exR = fmap (either (either (Left . Left) Right) (Left . Right))
+
+  zapSum elim = tail elim >>= \ _Δ (sum, _) -> _Δ >>- flip zap sum
+
+
+tail :: Proof p => _Γ' `p` _Δ -> (_Γ, _Γ') `p` _Δ
+tail = wkL
+
+absurd :: Bot -> a
+absurd = \case
+
+(>>-) :: (_Δ + a) -> (a -> _Δ) -> _Δ
+(>>-) = flip (either id)
+
+infixl 1 >>-
+
+(|||) :: (a -> c) -> (b -> c) -> (a ⊕ b) -> c
+f ||| g = \case
+  InL a -> f a
+  InR b -> g b
+
+infixr 2 |||
+
+class Zap a b c | a b -> c, b c -> a, a c -> b where
+  zap :: a -> b -> c
+
+instance Zap (Not a _Δ & Not b _Δ) (a ⊕ b) _Δ where
+  zap (f :& g) = getNot f ||| getNot g
