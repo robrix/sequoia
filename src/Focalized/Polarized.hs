@@ -243,7 +243,7 @@ class Proof p where
   inr :: _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a ⊕ b)
 
   funL :: _Γ `p` (_Δ |> a) -> (b <| _Γ) `p` _Δ -> ((a -> b) <| _Γ) `p` _Δ
-  lam :: (a <| _Γ) `p` b -> _Γ `p` (a -> b)
+  funR :: (a <| _Γ) `p` b -> _Γ `p` (a -> b)
 
   sub :: _Γ `p` (_Δ |> a) -> (b <| _Γ) `p` _Δ -> _Γ `p` (_Δ |> (a -< b) _Δ)
 
@@ -286,7 +286,7 @@ instance Proof (|-) where
   inr b = fmap InR <$> b
 
   funL a kb (f, _Γ) = a _Γ >>- \ a' -> kb (f a', _Γ)
-  lam = flip . curry
+  funR = flip . curry
 
   sub a b = liftA2 Sub <$> a <*> notR b
 
