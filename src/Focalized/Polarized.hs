@@ -279,7 +279,7 @@ class Proof p where
   exL :: (a <| (b <| c)) `p` _Δ -> (b <| (a <| c)) `p` _Δ
   exR :: _Γ `p` ((a |> b) |> c) -> _Γ `p` ((a |> c) |> b)
 
-  zapSum :: _Γ `p` (_Δ |> Not a _Δ & Not b _Δ) -> (a ⊕ b , _Γ) `p` _Δ
+  zapSum :: _Γ `p` (_Δ |> Not a _Δ & Not b _Δ) -> (a ⊕ b <| _Γ) `p` _Δ
 
 
 instance Proof (|-) where
