@@ -1,4 +1,3 @@
-{-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE NoStarIsType #-}
 module Focalized.Polarized
