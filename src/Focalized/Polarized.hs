@@ -35,7 +35,6 @@ newtype (a ⅋ b) _Δ = Par (forall r . (Not a _Δ -> Not b _Δ -> r) -> r)
 
 infixr 7 ⅋
 
--- newtype a -< b = Sub ((a -> b) -> b)
 data (a -< b) _Δ = Sub a (Not b _Δ)
 
 infixr 0 -<
