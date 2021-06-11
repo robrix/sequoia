@@ -277,6 +277,7 @@ class Proof p where
   withL2 :: (b <| _Γ) `p` _Δ -> (a & b <| _Γ) `p` _Δ
   (&) :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a & b)
 
+  tensorL :: (a <| b <| _Γ) `p` _Δ -> (a ⊗ b <| _Γ) `p` _Δ
   (⊗) :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a ⊗ b)
 
   sumL :: (a <| _Γ) `p` _Δ -> (b <| _Γ) `p` _Δ -> (a ⊕ b <| _Γ) `p` _Δ
@@ -330,6 +331,7 @@ instance Proof (|-) where
   withL2 p (with, _Γ) = p (exr with, _Γ)
   (&) = liftA2 (liftA2 inlr)
 
+  tensorL p (a :⊗ b, _Γ) = p (a, (b, _Γ))
   (⊗) = liftA2 (liftA2 inlr)
 
   sumL a b (sum, _Γ) = exlr (a . (,_Γ)) (b . (,_Γ)) sum
