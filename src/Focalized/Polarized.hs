@@ -108,7 +108,7 @@ instance Monad Neg where
 
 
 data Pos a
-  = P a
+  = PVar a
   | PZero
   | POne
   | Pos a :+: Pos a
@@ -123,12 +123,12 @@ infixr 7 :+:
 infixr 8 :*:
 
 instance Applicative Pos where
-  pure = P
+  pure = PVar
   (<*>) = ap
 
 instance Monad Pos where
   m >>= f = case m of
-    P a       -> f a
+    PVar a    -> f a
     PZero     -> PZero
     POne      -> POne
     a :+: b   -> (a >>= f) :+: (b >>= f)
@@ -204,7 +204,7 @@ instance Ord a => Sequent (ΓI a) (ΔI a) where
   _Γ |- _Δ = case (minInvertibleL _Γ, minInvertibleR _Δ) of
     (Left  _Γ,      Left  _Δ)      -> _Γ |- _Δ
     (Right (p, _Γ), _)             -> case p of
-      P a       -> a <| _Γ |- _Δ
+      PVar a    -> a <| _Γ |- _Δ
       PZero     -> pure ()
       POne      -> _Γ |- _Δ
       p :+: q   -> p <| _Γ |- _Δ >> q <| _Γ |- _Δ
@@ -248,7 +248,7 @@ instance Ord a => Sequent (Neg a :<: ΓS a) (ΔS a) where
 
 instance Ord a => Sequent (ΓS a) (ΔS a :>: Pos a) where
   _Γ |- _Δ :>: p = case p of
-    P a       -> guard (Left a `elem` _Γ)
+    PVar a    -> guard (Left a `elem` _Γ)
     PZero     -> empty -- no right rule for 0
     POne      -> pure ()
     p :+: q   -> _Γ |- _Δ :>: p <|> _Γ |- _Δ :>: q
