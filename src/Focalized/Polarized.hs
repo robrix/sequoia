@@ -53,14 +53,19 @@ infixr 7 ⅋
 class Disj s where
   inl :: a -> a `s` b
   inr :: b -> a `s` b
+  exlr :: (a -> r) -> (b -> r) -> a `s` b -> r
 
 instance Disj (⊕) where
   inl = InL
   inr = InR
+  exlr ifl ifr = \case
+    InL l -> ifl l
+    InR r -> ifr r
 
 instance Disj (⅋) where
   inl l = Par $ \ ifl _ -> ifl l
   inr r = Par $ \ _ ifr -> ifr r
+  exlr ifl ifr (Par run) = run ifl ifr
 
 newtype (a --> b) _Δ = Fun { getFun :: a -> (_Δ |> b) }
 
