@@ -102,20 +102,20 @@ instance Monad Neg where
     NTop     -> NTop
     a :⅋: b  -> (a >>= f) :⅋: (b >>= f)
     a :&: b  -> (a >>= f) :&: (b >>= f)
-    a :->: b -> (a >>= Down . f) :->: (b >>= f)
+    a :->: b -> (a >>= PDown . f) :->: (b >>= f)
     NNot a   -> NNot (a >>= f)
-    NUp a    -> NUp (a >>= Down . f)
+    NUp a    -> NUp (a >>= PDown . f)
 
 
 data Pos a
   = P a
-  | Zero
-  | One
+  | PZero
+  | POne
   | Pos a :+: Pos a
   | Pos a :*: Pos a
   | Pos a :--<: Neg a
-  | Neg (Pos a)
-  | Down (Neg a)
+  | PNeg (Pos a)
+  | PDown (Neg a)
   deriving (Eq, Ord, Show, Foldable, Functor, Traversable)
 
 infixr 6 :--<:
@@ -129,13 +129,13 @@ instance Applicative Pos where
 instance Monad Pos where
   m >>= f = case m of
     P a       -> f a
-    Zero      -> Zero
-    One       -> One
+    PZero     -> PZero
+    POne      -> POne
     a :+: b   -> (a >>= f) :+: (b >>= f)
     a :*: b   -> (a >>= f) :*: (b >>= f)
     a :--<: b -> (a >>= f) :--<: (b >>= NUp . f)
-    Neg a     -> Neg (a >>= f)
-    Down a    -> Down (a >>= NUp . f)
+    PNeg a    -> PNeg (a >>= f)
+    PDown a   -> PDown (a >>= NUp . f)
 
 
 data ΓI a = ΓI
@@ -205,13 +205,13 @@ instance Ord a => Sequent (ΓI a) (ΔI a) where
     (Left  _Γ,      Left  _Δ)      -> _Γ |- _Δ
     (Right (p, _Γ), _)             -> case p of
       P a       -> a <| _Γ |- _Δ
-      Zero      -> pure ()
-      One       -> _Γ |- _Δ
+      PZero     -> pure ()
+      POne      -> _Γ |- _Δ
       p :+: q   -> p <| _Γ |- _Δ >> q <| _Γ |- _Δ
       p :*: q   -> p <| q <| _Γ |- _Δ
       p :--<: q -> p <| _Γ |- _Δ |> q
-      Neg p     -> _Γ |- _Δ |> p
-      Down p    -> p <| _Γ |- _Δ
+      PNeg p    -> _Γ |- _Δ |> p
+      PDown p   -> p <| _Γ |- _Δ
     (_,             Right (_Δ, n)) -> case n of
       N a      -> _Γ |- _Δ |> a
       NBot     -> _Γ |- _Δ
@@ -249,13 +249,13 @@ instance Ord a => Sequent (Neg a :<: ΓS a) (ΔS a) where
 instance Ord a => Sequent (ΓS a) (ΔS a :>: Pos a) where
   _Γ |- _Δ :>: p = case p of
     P a       -> guard (Left a `elem` _Γ)
-    Zero      -> empty -- no right rule for 0
-    One       -> pure ()
+    PZero     -> empty -- no right rule for 0
+    POne      -> pure ()
     p :+: q   -> _Γ |- _Δ :>: p <|> _Γ |- _Δ :>: q
     p :*: q   -> _Γ |- _Δ :>: p >> _Γ |- _Δ :>: q
     p :--<: q -> _Γ |- _Δ :>: p >> q :<: _Γ |- _Δ
-    Neg p     -> p <| _Γ |- _Δ
-    Down p    -> _Γ |- _Δ |> p
+    PNeg p    -> p <| _Γ |- _Δ
+    PDown p   -> _Γ |- _Δ |> p
 
 type (<|) = (,)
 type (|>) = Either
