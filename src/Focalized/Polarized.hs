@@ -273,6 +273,8 @@ type (|>) = Either
 type (|-) = (->)
 
 class Proof p where
+  withL1 :: (a <| _Γ) `p` _Δ -> (a & b <| _Γ) `p` _Δ
+  withL2 :: (b <| _Γ) `p` _Δ -> (a & b <| _Γ) `p` _Δ
   (&) :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a & b)
 
   (⊗) :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a ⊗ b)
@@ -324,6 +326,8 @@ class Proof p where
 
 
 instance Proof (|-) where
+  withL1 p (with, _Γ) = p (exl with, _Γ)
+  withL2 p (with, _Γ) = p (exr with, _Γ)
   (&) = liftA2 (liftA2 inlr)
 
   (⊗) = liftA2 (liftA2 inlr)
