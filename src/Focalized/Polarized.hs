@@ -277,6 +277,7 @@ class Proof p where
 
   (⊗) :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a ⊗ b)
 
+  sumL :: (a <| _Γ) `p` _Δ -> (b <| _Γ) `p` _Δ -> (a ⊕ b <| _Γ) `p` _Δ
   sumR1 :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> a ⊕ b)
   sumR2 :: _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a ⊕ b)
 
@@ -325,6 +326,7 @@ instance Proof (|-) where
 
   (⊗) = liftA2 (liftA2 inlr)
 
+  sumL a b (sum, _Γ) = exlr (a . (,_Γ)) (b . (,_Γ)) sum
   sumR1 a = fmap inl <$> a
   sumR2 b = fmap inr <$> b
 
