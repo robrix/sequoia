@@ -78,10 +78,10 @@ type Negate = (--<) One
 newtype Cont a _Δ = Cont { runCont :: a -> _Δ }
 
 data Bot
-data Top = Top'
+data Top = Top
 
 data Zero
-data One = One'
+data One = One
 
 class Proof p where
   withL1 :: (a <| _Γ) `p` _Δ -> (a & b <| _Γ) `p` _Δ
@@ -162,12 +162,12 @@ instance Proof (|-) where
   zeroL = absurdP . fst
 
   oneL = wkL
-  oneR = const (pure One')
+  oneR = const (pure One)
 
   botL = absurdN . fst
   botR = fmap Left
 
-  topR = const (pure Top')
+  topR = const (pure Top)
 
   notL p (k, _Γ) = p _Γ >>- runCont k
   notR p _Γ = Right $ Cont $ \ a -> p (a, _Γ)
