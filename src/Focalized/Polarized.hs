@@ -27,12 +27,18 @@ infixr 6 &
 
 class Conj p where
   inlr :: a -> b -> a `p` b
+  exl :: a `p` b -> a
+  exr :: a `p` b -> b
 
 instance Conj (⊗) where
   inlr = (:⊗)
+  exl (l :⊗ _) = l
+  exr (_ :⊗ r) = r
 
 instance Conj (&) where
   inlr = (:&)
+  exl (l :& _) = l
+  exr (_ :& r) = r
 
 data a ⊕ b
   = InL !a
