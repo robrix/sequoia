@@ -285,6 +285,7 @@ class Proof p where
   sumR2 :: _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a ⊕ b)
 
   parL :: (a <| _Γ) `p` _Δ -> (b <| _Γ) `p` _Δ -> (a ⅋ b <| _Γ) `p` _Δ
+  parR :: _Γ `p` (_Δ |> a |> b) -> _Γ `p` (_Δ |> a ⅋ b)
 
   funL :: _Γ `p` (_Δ |> a) -> (b <| _Γ) `p` _Δ -> ((a --> b) _Δ <| _Γ) `p` _Δ
   funR :: (a <| _Γ) `p` (_Δ |> b) -> _Γ `p` (_Δ |> (a --> b) _Δ)
@@ -339,6 +340,7 @@ instance Proof (|-) where
   sumR2 b = fmap inr <$> b
 
   parL a b (sum, _Γ) = exlr (a . (,_Γ)) (b . (,_Γ)) sum
+  parR ab = either (>>= (pure . inl)) (pure . inr) . ab
 
   funL a kb (f, _Γ) = a _Γ >>- \ a' -> getFun f a' >>- \ b' -> kb (b', _Γ)
   funR p _Γ = Right $ Fun $ \ a -> p (a, _Γ)
