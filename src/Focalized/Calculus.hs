@@ -7,6 +7,8 @@ module Focalized.Calculus
 
 import Control.Applicative (liftA2)
 import Control.Monad (join)
+import Data.Bifunctor (first)
+import Data.Profunctor
 import Prelude hiding (tail)
 
 type (<|) = (,)
@@ -15,6 +17,7 @@ type (|>) = Either
 infixl 5 |>
 
 type (|-) = (->)
+infix 2 |-
 
 data a ⊗ b = !a :⊗ !b
 
@@ -78,6 +81,7 @@ type Not = Cont
 type Negate = (--<) One
 
 newtype Cont a _Δ = Cont { runCont :: a -> _Δ }
+  deriving (Functor, Profunctor)
 
 data Bot
 data Top = Top
@@ -108,27 +112,27 @@ class Proof p where
   funL :: _Γ `p` (_Δ |> a) -> (b <| _Γ) `p` _Δ -> ((a --> b) _Δ <| _Γ) `p` _Δ
   funR :: (a <| _Γ) `p` (_Δ |> b) -> _Γ `p` (_Δ |> (a --> b) _Δ)
 
-  subL :: (a <| _Γ) `p` (_Δ |> b) -> ((a --< b) _Δ <| _Γ) `p` _Δ
-  subR :: _Γ `p` (_Δ |> a) -> (b <| _Γ) `p` _Δ -> _Γ `p` (_Δ |> (a --< b) _Δ)
+  subL :: (P a <| _Γ) `p` (_Δ |> N b) -> (P ((a --< b) _Δ) <| _Γ) `p` _Δ
+  subR :: _Γ `p` (_Δ |> P a) -> (N b <| _Γ) `p` _Δ -> _Γ `p` (_Δ |> P ((a --< b) _Δ))
 
   ($$) :: _Γ `p` (_Δ |> (a --> b) (_Δ |> b)) -> _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b)
   f $$ a = cut (exR (wkR f)) (exR (wkR a) `funL` ax)
 
-  zeroL :: (Zero <| _Γ) `p` _Δ
+  zeroL :: (P Zero <| _Γ) `p` _Δ
 
-  oneL :: _Γ `p` _Δ -> (One <| _Γ) `p` _Δ
-  oneR :: _Γ `p` (_Δ |> One)
+  oneL :: _Γ `p` _Δ -> (P One <| _Γ) `p` _Δ
+  oneR :: _Γ `p` (_Δ |> P One)
 
-  botL :: (Bot <| _Γ) `p` _Δ
-  botR :: _Γ `p` _Δ -> _Γ `p` (_Δ |> Bot)
+  botL :: (N Bot <| _Γ) `p` _Δ
+  botR :: _Γ `p` _Δ -> _Γ `p` (_Δ |> N Bot)
 
-  topR :: _Γ `p` (_Δ |> Top)
+  topR :: _Γ `p` (_Δ |> N Top)
 
-  negateL :: _Γ `p` (_Δ |> a) -> (Negate a _Δ <| _Γ) `p` _Δ
-  negateR :: (a <| _Γ) `p` _Δ -> _Γ `p` (_Δ |> Negate a _Δ)
+  negateL :: _Γ `p` (_Δ |> N a) -> (P (Negate a _Δ) <| _Γ) `p` _Δ
+  negateR :: (N a <| _Γ) `p` _Δ -> _Γ `p` (_Δ |> P (Negate a _Δ))
 
-  notL :: _Γ `p` (_Δ |> a) -> (Not a _Δ <| _Γ) `p` _Δ
-  notR :: (a <| _Γ) `p` _Δ -> _Γ `p` (_Δ |> Not a _Δ)
+  notL :: _Γ `p` (_Δ |> P a) -> (N (Not a _Δ) <| _Γ) `p` _Δ
+  notR :: (P a <| _Γ) `p` _Δ -> _Γ `p` (_Δ |> N (Not a _Δ))
 
   cut :: _Γ `p` (_Δ |> a) -> (a <| _Γ) `p` _Δ -> _Γ `p` _Δ
 
@@ -163,21 +167,21 @@ instance Proof (|-) where
   funL a kb (f, _Γ) = a _Γ >>- \ a' -> getFun f a' >>- \ b' -> kb (b', _Γ)
   funR p _Γ = Right $ Fun $ \ a -> p (a, _Γ)
 
-  subL b (Sub a k, _Γ) = notL (b . (a,)) (k, _Γ)
-  subR a b = liftA2 Sub <$> a <*> notR b
+  subL b (P (Sub a k), _Γ) = contL (fmap getN . b . (P a,)) (k, _Γ)
+  subR a b = liftA2 (fmap P . Sub . getP) <$> a <*> (fmap (lmap N) <$> contR b)
 
-  zeroL = absurdP . fst
+  zeroL = absurdP . getP . fst
 
   oneL = wkL
-  oneR = const (pure One)
+  oneR = const (pure (P One))
 
-  botL = absurdN . fst
+  botL = absurdN . getN . fst
   botR = fmap Left
 
-  topR = const (pure Top)
+  topR = const (pure (N Top))
 
-  notL p (k, _Γ) = p _Γ >>- runCont k
-  notR p _Γ = Right $ Cont $ \ a -> p (a, _Γ)
+  notL = lmap (first getN) . contL . fmap (fmap getP)
+  notR = fmap (fmap N) . contR . lmap (first P)
 
   negateL = subL . wkL
   negateR = subR oneR
@@ -194,6 +198,11 @@ instance Proof (|-) where
   exR = fmap (either (either (Left . Left) Right) (Left . Right))
 
   zapSum elim = tail elim >>= \ _Δ (sum, _) -> _Δ >>- flip zap sum
+
+contL :: _Γ |- _Δ |> a -> Cont a _Δ <| _Γ |- _Δ
+contL p (k, _Γ) = p _Γ >>- runCont k
+contR :: a <| _Γ |- _Δ -> _Γ |- _Δ |> Cont a _Δ
+contR p _Γ = Right $ Cont $ \ a -> p (a, _Γ)
 
 
 tail :: Proof p => _Γ' `p` _Δ -> (_Γ, _Γ') `p` _Δ

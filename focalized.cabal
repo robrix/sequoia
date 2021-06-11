@@ -78,6 +78,7 @@ library
   build-depends:
     , base ^>=4.14.1.0
     , containers
+    , profunctors
     , fused-effects
   hs-source-dirs:   src
 
