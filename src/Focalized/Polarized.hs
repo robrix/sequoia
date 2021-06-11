@@ -77,7 +77,7 @@ data One = One'
 
 
 data Neg a
-  = N a
+  = NVar a
   | NBot
   | NTop
   | Neg a :⅋: Neg a
@@ -92,12 +92,12 @@ infixr 7 :⅋:
 infixr 8 :&:
 
 instance Applicative Neg where
-  pure = N
+  pure = NVar
   (<*>) = ap
 
 instance Monad Neg where
   m >>= f = case m of
-    N a      -> f a
+    NVar a   -> f a
     NBot     -> NBot
     NTop     -> NTop
     a :⅋: b  -> (a >>= f) :⅋: (b >>= f)
@@ -213,7 +213,7 @@ instance Ord a => Sequent (ΓI a) (ΔI a) where
       PNeg p    -> _Γ |- _Δ |> p
       PDown p   -> p <| _Γ |- _Δ
     (_,             Right (_Δ, n)) -> case n of
-      N a      -> _Γ |- _Δ |> a
+      NVar a   -> _Γ |- _Δ |> a
       NBot     -> _Γ |- _Δ
       NTop     -> pure ()
       p :⅋: q  -> _Γ |- _Δ |> p |> q
@@ -237,7 +237,7 @@ infixl 5 :>:
 
 instance Ord a => Sequent (Neg a :<: ΓS a) (ΔS a) where
   n :<: _Γ |- _Δ = case n of
-    N a      -> guard (Right a `elem` _Δ)
+    NVar a   -> guard (Right a `elem` _Δ)
     NBot     -> pure ()
     NTop     -> empty -- no left rule for ⊤
     p :⅋: q  -> p :<: _Γ |- _Δ >> q :<: _Γ |- _Δ
