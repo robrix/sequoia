@@ -21,26 +21,53 @@ data a ⊗ b = !a :⊗ !b
 
 infixr 7 ⊗
 
+data a & b = a :& b
+
+infixr 6 &
+
+class Conj p where
+  inlr :: a -> b -> a `p` b
+
+instance Conj (⊗) where
+  inlr = (:⊗)
+
+instance Conj (&) where
+  inlr = (:&)
+
 data a ⊕ b
   = InL !a
   | InR !b
 
 infixr 6 ⊕
 
-data a & b = a :& b
-
-infixr 6 &
-
-newtype (a ⅋ b) _Δ = Par (forall r . (Not a _Δ -> Not b _Δ -> r) -> r)
+newtype (a ⅋ b) = Par (forall r . (a -> r) -> (b -> r) -> r)
 
 infixr 7 ⅋
 
-data (a -< b) _Δ = Sub a (Not b _Δ)
+class Disj s where
+  inl :: a -> a `s` b
+  inr :: b -> a `s` b
 
-infixr 0 -<
+instance Disj (⊕) where
+  inl = InL
+  inr = InR
 
-newtype Not a _Δ = Not' { getNot :: a -> _Δ }
-newtype Neg' a _Δ = Negate { getNegate :: (One -< a) _Δ }
+instance Disj (⅋) where
+  inl l = Par $ \ ifl _ -> ifl l
+  inr r = Par $ \ _ ifr -> ifr r
+
+newtype (a --> b) _Δ = Fun { getFun :: a -> (_Δ |> b) }
+
+infixr 0 -->
+
+data (a --< b) _Δ = Sub a (Cont b _Δ)
+
+infixr 0 --<
+
+type Not = Cont
+type Negate = (--<) One
+
+newtype Cont a _Δ = Cont { runCont :: a -> _Δ }
 
 data Bot
 data Top = Top'
@@ -86,12 +113,12 @@ data Pos a
   | One
   | Pos a :+: Pos a
   | Pos a :*: Pos a
-  | Pos a :-<: Neg a
+  | Pos a :--<: Neg a
   | Neg (Pos a)
   | Down (Neg a)
   deriving (Eq, Ord, Show, Foldable, Functor, Traversable)
 
-infixr 6 :-<:
+infixr 6 :--<:
 infixr 7 :+:
 infixr 8 :*:
 
@@ -101,14 +128,14 @@ instance Applicative Pos where
 
 instance Monad Pos where
   m >>= f = case m of
-    P a      -> f a
-    Zero     -> Zero
-    One      -> One
-    a :+: b  -> (a >>= f) :+: (b >>= f)
-    a :*: b  -> (a >>= f) :*: (b >>= f)
-    a :-<: b -> (a >>= f) :-<: (b >>= Up . f)
-    Neg a    -> Neg (a >>= f)
-    Down a   -> Down (a >>= Up . f)
+    P a       -> f a
+    Zero      -> Zero
+    One       -> One
+    a :+: b   -> (a >>= f) :+: (b >>= f)
+    a :*: b   -> (a >>= f) :*: (b >>= f)
+    a :--<: b -> (a >>= f) :--<: (b >>= Up . f)
+    Neg a     -> Neg (a >>= f)
+    Down a    -> Down (a >>= Up . f)
 
 
 data ΓI a = ΓI
@@ -177,14 +204,14 @@ instance Ord a => Sequent (ΓI a) (ΔI a) where
   _Γ |- _Δ = case (minInvertibleL _Γ, minInvertibleR _Δ) of
     (Left  _Γ,      Left  _Δ)      -> _Γ |- _Δ
     (Right (p, _Γ), _)             -> case p of
-      P a      -> a <| _Γ |- _Δ
-      Zero     -> pure ()
-      One      -> _Γ |- _Δ
-      p :+: q  -> p <| _Γ |- _Δ >> q <| _Γ |- _Δ
-      p :*: q  -> p <| q <| _Γ |- _Δ
-      p :-<: q -> p <| _Γ |- _Δ |> q
-      Neg p    -> _Γ |- _Δ |> p
-      Down p   -> p <| _Γ |- _Δ
+      P a       -> a <| _Γ |- _Δ
+      Zero      -> pure ()
+      One       -> _Γ |- _Δ
+      p :+: q   -> p <| _Γ |- _Δ >> q <| _Γ |- _Δ
+      p :*: q   -> p <| q <| _Γ |- _Δ
+      p :--<: q -> p <| _Γ |- _Δ |> q
+      Neg p     -> _Γ |- _Δ |> p
+      Down p    -> p <| _Γ |- _Δ
     (_,             Right (_Δ, n)) -> case n of
       N a      -> _Γ |- _Δ |> a
       Bot      -> _Γ |- _Δ
@@ -221,14 +248,14 @@ instance Ord a => Sequent (Neg a :<: ΓS a) (ΔS a) where
 
 instance Ord a => Sequent (ΓS a) (ΔS a :>: Pos a) where
   _Γ |- _Δ :>: p = case p of
-    P a      -> guard (Left a `elem` _Γ)
-    Zero     -> empty -- no right rule for 0
-    One      -> pure ()
-    p :+: q  -> _Γ |- _Δ :>: p <|> _Γ |- _Δ :>: q
-    p :*: q  -> _Γ |- _Δ :>: p >> _Γ |- _Δ :>: q
-    p :-<: q -> _Γ |- _Δ :>: p >> q :<: _Γ |- _Δ
-    Neg p    -> p <| _Γ |- _Δ
-    Down p   -> _Γ |- _Δ |> p
+    P a       -> guard (Left a `elem` _Γ)
+    Zero      -> empty -- no right rule for 0
+    One       -> pure ()
+    p :+: q   -> _Γ |- _Δ :>: p <|> _Γ |- _Δ :>: q
+    p :*: q   -> _Γ |- _Δ :>: p >> _Γ |- _Δ :>: q
+    p :--<: q -> _Γ |- _Δ :>: p >> q :<: _Γ |- _Δ
+    Neg p     -> p <| _Γ |- _Δ
+    Down p    -> _Γ |- _Δ |> p
 
 type (<|) = (,)
 type (|>) = Either
@@ -239,15 +266,16 @@ class Proof p where
 
   (⊗) :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a ⊗ b)
 
-  inl :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> a ⊕ b)
-  inr :: _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a ⊕ b)
+  sumR1 :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> a ⊕ b)
+  sumR2 :: _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a ⊕ b)
 
-  funL :: _Γ `p` (_Δ |> a) -> (b <| _Γ) `p` _Δ -> ((a -> b) <| _Γ) `p` _Δ
-  funR :: (a <| _Γ) `p` b -> _Γ `p` (a -> b)
+  funL :: _Γ `p` (_Δ |> a) -> (b <| _Γ) `p` _Δ -> ((a --> b) _Δ <| _Γ) `p` _Δ
+  funR :: (a <| _Γ) `p` (_Δ |> b) -> _Γ `p` (_Δ |> (a --> b) _Δ)
 
-  subR :: _Γ `p` (_Δ |> a) -> (b <| _Γ) `p` _Δ -> _Γ `p` (_Δ |> (a -< b) _Δ)
+  subL :: (a <| _Γ) `p` (_Δ |> b) -> ((a --< b) _Δ <| _Γ) `p` _Δ
+  subR :: _Γ `p` (_Δ |> a) -> (b <| _Γ) `p` _Δ -> _Γ `p` (_Δ |> (a --< b) _Δ)
 
-  ($$) :: _Γ `p` (_Δ |> (a -> b)) -> _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b)
+  ($$) :: _Γ `p` (_Δ |> (a --> b) (_Δ |> b)) -> _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b)
   f $$ a = cut (exR (wkR f)) (exR (wkR a) `funL` ax)
 
   zeroL :: (Zero <| _Γ) `p` _Δ
@@ -259,6 +287,9 @@ class Proof p where
   botR :: _Γ `p` _Δ -> _Γ `p` (_Δ |> Bot)
 
   topR :: _Γ `p` (_Δ |> Top)
+
+  negateL :: _Γ `p` (_Δ |> a) -> (Negate a _Δ <| _Γ) `p` _Δ
+  negateR :: (a <| _Γ) `p` _Δ -> _Γ `p` (_Δ |> Negate a _Δ)
 
   notL :: _Γ `p` (_Δ |> a) -> (Not a _Δ <| _Γ) `p` _Δ
   notR :: (a <| _Γ) `p` _Δ -> _Γ `p` (_Δ |> Not a _Δ)
@@ -274,20 +305,22 @@ class Proof p where
   exL :: (a <| b <| c) `p` _Δ -> (b <| a <| c) `p` _Δ
   exR :: _Γ `p` (a |> b |> c) -> _Γ `p` (a |> c |> b)
 
+
   zapSum :: _Γ `p` (_Δ |> Not a _Δ & Not b _Δ) -> (a ⊕ b <| _Γ) `p` _Δ
 
 
 instance Proof (|-) where
-  (&) = liftA2 (liftA2 (:&))
+  (&) = liftA2 (liftA2 inlr)
 
-  (⊗) = liftA2 (liftA2 (:⊗))
+  (⊗) = liftA2 (liftA2 inlr)
 
-  inl a = fmap InL <$> a
-  inr b = fmap InR <$> b
+  sumR1 a = fmap inl <$> a
+  sumR2 b = fmap inr <$> b
 
-  funL a kb (f, _Γ) = a _Γ >>- \ a' -> kb (f a', _Γ)
-  funR = flip . curry
+  funL a kb (f, _Γ) = a _Γ >>- \ a' -> getFun f a' >>- \ b' -> kb (b', _Γ)
+  funR p _Γ = Right $ Fun $ \ a -> p (a, _Γ)
 
+  subL b (Sub a k, _Γ) = notL (b . (a,)) (k, _Γ)
   subR a b = liftA2 Sub <$> a <*> notR b
 
   zeroL = absurdP . fst
@@ -300,8 +333,11 @@ instance Proof (|-) where
 
   topR = const (pure Top')
 
-  notL p (Not' np, _Γ) = p _Γ >>- np
-  notR p _Γ = Right $ Not' $ \ a -> p (a, _Γ)
+  notL p (k, _Γ) = p _Γ >>- runCont k
+  notR p _Γ = Right $ Cont $ \ a -> p (a, _Γ)
+
+  negateL = subL . wkL
+  negateR = subR oneR
 
   cut f g _Γ = f _Γ >>- \ a -> g (a, _Γ)
 
@@ -342,4 +378,4 @@ class Zap a b c | a b -> c, b c -> a, a c -> b where
   zap :: a -> b -> c
 
 instance Zap (Not a _Δ & Not b _Δ) (a ⊕ b) _Δ where
-  zap (f :& g) = getNot f ||| getNot g
+  zap (f :& g) = runCont f ||| runCont g
