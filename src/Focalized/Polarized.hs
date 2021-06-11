@@ -78,13 +78,13 @@ data One = One'
 
 data Neg a
   = N a
-  | Bot
-  | Top
+  | NBot
+  | NTop
   | Neg a :⅋: Neg a
   | Neg a :&: Neg a
   | Pos a :->: Neg a
-  | Not (Neg a)
-  | Up (Pos a)
+  | NNot (Neg a)
+  | NUp (Pos a)
   deriving (Eq, Ord, Show, Foldable, Functor, Traversable)
 
 infixr 6 :->:
@@ -98,13 +98,13 @@ instance Applicative Neg where
 instance Monad Neg where
   m >>= f = case m of
     N a      -> f a
-    Bot      -> Bot
-    Top      -> Top
+    NBot     -> NBot
+    NTop     -> NTop
     a :⅋: b  -> (a >>= f) :⅋: (b >>= f)
     a :&: b  -> (a >>= f) :&: (b >>= f)
     a :->: b -> (a >>= Down . f) :->: (b >>= f)
-    Not a    -> Not (a >>= f)
-    Up a     -> Up (a >>= Down . f)
+    NNot a   -> NNot (a >>= f)
+    NUp a    -> NUp (a >>= Down . f)
 
 
 data Pos a
@@ -133,9 +133,9 @@ instance Monad Pos where
     One       -> One
     a :+: b   -> (a >>= f) :+: (b >>= f)
     a :*: b   -> (a >>= f) :*: (b >>= f)
-    a :--<: b -> (a >>= f) :--<: (b >>= Up . f)
+    a :--<: b -> (a >>= f) :--<: (b >>= NUp . f)
     Neg a     -> Neg (a >>= f)
-    Down a    -> Down (a >>= Up . f)
+    Down a    -> Down (a >>= NUp . f)
 
 
 data ΓI a = ΓI
@@ -214,13 +214,13 @@ instance Ord a => Sequent (ΓI a) (ΔI a) where
       Down p    -> p <| _Γ |- _Δ
     (_,             Right (_Δ, n)) -> case n of
       N a      -> _Γ |- _Δ |> a
-      Bot      -> _Γ |- _Δ
-      Top      -> pure ()
+      NBot     -> _Γ |- _Δ
+      NTop     -> pure ()
       p :⅋: q  -> _Γ |- _Δ |> p |> q
       p :&: q  -> _Γ |- _Δ |> p >> _Γ |- _Δ |> q
       p :->: q -> p <| _Γ |- _Δ |> q
-      Not p    -> p <| _Γ |- _Δ
-      Up p     -> _Γ |- _Δ |> p
+      NNot p   -> p <| _Γ |- _Δ
+      NUp p    -> _Γ |- _Δ |> p
 
 instance Ord a => Sequent (ΓS a) (ΔS a) where
   _Γ |- _Δ
@@ -238,13 +238,13 @@ infixl 5 :>:
 instance Ord a => Sequent (Neg a :<: ΓS a) (ΔS a) where
   n :<: _Γ |- _Δ = case n of
     N a      -> guard (Right a `elem` _Δ)
-    Bot      -> pure ()
-    Top      -> empty -- no left rule for ⊤
+    NBot     -> pure ()
+    NTop     -> empty -- no left rule for ⊤
     p :⅋: q  -> p :<: _Γ |- _Δ >> q :<: _Γ |- _Δ
     p :&: q  -> p :<: _Γ |- _Δ <|> q :<: _Γ |- _Δ
     p :->: q -> _Γ |- _Δ :>: p >> q :<: _Γ |- _Δ
-    Not p    -> _Γ |- _Δ |> p
-    Up p     -> p <| _Γ |- _Δ
+    NNot p   -> _Γ |- _Δ |> p
+    NUp p    -> p <| _Γ |- _Δ
 
 instance Ord a => Sequent (ΓS a) (ΔS a :>: Pos a) where
   _Γ |- _Δ :>: p = case p of
