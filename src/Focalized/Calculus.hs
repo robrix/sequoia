@@ -1,6 +1,8 @@
 {-# LANGUAGE FunctionalDependencies #-}
 module Focalized.Calculus
 ( Proof(..)
+, N
+, P
 ) where
 
 import Control.Applicative (liftA2)
@@ -82,6 +84,11 @@ data Top = Top
 
 data Zero
 data One = One
+
+-- Polarities
+
+newtype N a = N { getN :: a }
+newtype P a = P { getP :: a }
 
 class Proof p where
   withL1 :: (a <| _Γ) `p` _Δ -> (a & b <| _Γ) `p` _Δ
