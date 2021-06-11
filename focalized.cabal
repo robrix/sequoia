@@ -64,6 +64,7 @@ library
   import: common
   exposed-modules:
     Focalized.B
+    Focalized.Calculus
     Focalized.Multiset
     Focalized.Polarized
     Focalized.Snoc
