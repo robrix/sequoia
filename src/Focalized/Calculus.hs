@@ -97,9 +97,15 @@ newtype N a = N { getN :: a }
   deriving (Eq, Ord, Show)
   deriving (Applicative, Foldable, Functor, Monad) via Identity
 
+instance Traversable N where
+  traverse f = fmap N . f . getN
+
 newtype P a = P { getP :: a }
   deriving (Eq, Ord, Show)
   deriving (Applicative, Foldable, Functor, Monad) via Identity
+
+instance Traversable P where
+  traverse f = fmap P . f . getP
 
 class Proof p where
   withL1 :: (N a <| _Γ) `p` _Δ -> (N (a & b) <| _Γ) `p` _Δ
