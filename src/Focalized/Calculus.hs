@@ -113,6 +113,10 @@ class Proof p where
   (⊗) :: _Γ `p` (_Δ |> P a) -> _Γ `p` (_Δ |> P b) -> _Γ `p` (_Δ |> P (a ⊗ b))
 
   sumL :: (P a <| _Γ) `p` _Δ -> (P b <| _Γ) `p` _Δ -> (P (a ⊕ b) <| _Γ) `p` _Δ
+  sumL1' :: (P (a ⊕ b) <| _Γ) `p` _Δ -> (P a <| _Γ) `p` _Δ
+  sumL1' = cut (sumR1 ax) . exL . wkL
+  sumL2' :: (P (a ⊕ b) <| _Γ) `p` _Δ -> (P b <| _Γ) `p` _Δ
+  sumL2' = cut (sumR2 ax) . exL . wkL
   sumR1 :: _Γ `p` (_Δ |> P a) -> _Γ `p` (_Δ |> P (a ⊕ b))
   sumR2 :: _Γ `p` (_Δ |> P b) -> _Γ `p` (_Δ |> P (a ⊕ b))
 
