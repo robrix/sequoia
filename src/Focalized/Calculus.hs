@@ -34,7 +34,7 @@ instance Bifunctor (⊗) where
 instance Bitraversable (⊗) where
   bitraverse f g (a :⊗ b) = (:⊗) <$> f a <*> g b
 
-newtype a & b = With (forall r . (a -> b -> r) -> r)
+newtype a & b = With (forall r . (N a -> N b -> r) -> r)
 
 infixr 6 &
 
@@ -58,9 +58,9 @@ instance Conj P (⊗) where
   exr (P (_ :⊗ r)) = P r
 
 instance Conj N (&) where
-  inlr a b = N $ With $ \ f -> f (getN a) (getN b)
-  exl (N (With run)) = run (const . N)
-  exr (N (With run)) = run (const N)
+  inlr a b = N $ With $ \ f -> f a b
+  exl (N (With run)) = run const
+  exr (N (With run)) = run (const id)
 
 data a ⊕ b
   = InL !a
@@ -358,7 +358,7 @@ class Zap a b c | a b -> c, b c -> a, a c -> b where
   zap :: a -> b -> c
 
 instance Zap (Not a _Δ & Not b _Δ) (a ⊕ b) _Δ where
-  zap (With run) = run $ \ f g -> runCont f ||| runCont g
+  zap (With run) = run $ \ (N f) (N g) -> runCont f ||| runCont g
 
 instance Zap a b c => Zap (N a) (P b) c where
   zap (N a) (P b) = zap a b
