@@ -40,6 +40,15 @@ data a & b = a :& b
 
 infixr 6 &
 
+instance Bifoldable (&) where
+  bifoldMap = bifoldMapDefault
+
+instance Bifunctor (&) where
+  bimap = bimapDefault
+
+instance Bitraversable (&) where
+  bitraverse f g (a :& b) = (:&) <$> f a <*> g b
+
 class Conj p where
   inlr :: a -> b -> a `p` b
   exl :: a `p` b -> a
