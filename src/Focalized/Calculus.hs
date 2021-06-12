@@ -63,8 +63,8 @@ instance Conj N (&) where
   exr (N (With run)) = run (const id)
 
 data a ⊕ b
-  = InL !a
-  | InR !b
+  = InL !(P a)
+  | InR !(P b)
 
 infixr 6 ⊕
 
@@ -76,8 +76,8 @@ instance Bifunctor (⊕) where
 
 instance Bitraversable (⊕) where
   bitraverse f g = \case
-    InL a -> InL <$> f a
-    InR b -> InR <$> g b
+    InL a -> InL <$> traverse f a
+    InR b -> InR <$> traverse g b
 
 newtype (a ⅋ b) = Par (forall r . (N a -> r) -> (N b -> r) -> r)
 
@@ -98,11 +98,11 @@ class Disj p d | d -> p where
   exlr :: (p a -> r) -> (p b -> r) -> p (a `d` b) -> r
 
 instance Disj P (⊕) where
-  inl = fmap InL
-  inr = fmap InR
+  inl = P . InL
+  inr = P . InR
   exlr ifl ifr = \case
-    P (InL l) -> ifl (P l)
-    P (InR r) -> ifr (P r)
+    P (InL l) -> ifl l
+    P (InR r) -> ifr r
 
 instance Disj N (⅋) where
   inl l = N $ Par $ \ ifl _ -> ifl l
@@ -349,8 +349,8 @@ infixl 1 >>-
 
 (|||) :: (a -> c) -> (b -> c) -> (a ⊕ b) -> c
 f ||| g = \case
-  InL a -> f a
-  InR b -> g b
+  InL (P a) -> f a
+  InR (P b) -> g b
 
 infixr 2 |||
 
