@@ -147,7 +147,7 @@ newtype P a = P { getP :: a }
 instance Traversable P where
   traverse f = fmap P . f . getP
 
-class Proof p where
+class Profunctor p => Proof p where
   withL1 :: (N a <| _Γ) `p` _Δ -> (N (a & b) <| _Γ) `p` _Δ
   withL2 :: (N b <| _Γ) `p` _Δ -> (N (a & b) <| _Γ) `p` _Δ
   (&) :: _Γ `p` (_Δ |> N a) -> _Γ `p` (_Δ |> N b) -> _Γ `p` (_Δ |> N (a & b))
@@ -222,12 +222,17 @@ class Proof p where
   ax :: (a, _Γ) `p` (_Δ |> a)
 
   wkL :: _Γ `p` _Δ -> (a <| _Γ) `p` _Δ
+  wkL = popL . const
   wkR :: _Γ `p` _Δ -> _Γ `p` (_Δ |> a)
+  wkR = rmap Left
   cnL :: (a <| a <| _Γ) `p` _Δ -> (a <| _Γ) `p` _Δ
+  cnL = popL . join . pushL2
   cnR :: _Γ `p` (_Δ |> a |> a) -> _Γ `p` (_Δ |> a)
+  cnR = rmap (either id pure)
   exL :: (a <| b <| c) `p` _Δ -> (b <| a <| c) `p` _Δ
+  exL = popL2 . flip . pushL2
   exR :: _Γ `p` (a |> b |> c) -> _Γ `p` (a |> c |> b)
-
+  exR = rmap (either (either (Left . Left) Right) (Left . Right))
 
   zapSum :: _Γ `p` (_Δ |> N (Not a _Δ & Not b _Δ)) -> (P (a ⊕ b) <| _Γ) `p` _Δ
   zapSum p = sumL (cut (wkL p) (withL1 (notL ax))) (cut (wkL p) (withL2 (notL ax)))
@@ -317,13 +322,6 @@ instance Proof (|-) where
   cut f g = f >>= either pure (pushL g)
 
   ax = popL (pure . pure)
-
-  wkL = popL . const
-  wkR = fmap Left
-  cnL = popL . join . pushL2
-  cnR = fmap (either id pure)
-  exL = popL2 . flip . pushL2
-  exR = fmap (either (either (Left . Left) Right) (Left . Right))
 
   popL = uncurry
   pushL = curry
