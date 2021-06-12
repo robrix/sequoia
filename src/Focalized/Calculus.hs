@@ -70,6 +70,17 @@ data a ⊕ b
 
 infixr 6 ⊕
 
+instance Bifoldable (⊕) where
+  bifoldMap = bifoldMapDefault
+
+instance Bifunctor (⊕) where
+  bimap = bimapDefault
+
+instance Bitraversable (⊕) where
+  bitraverse f g = \case
+    InL a -> InL <$> f a
+    InR b -> InR <$> g b
+
 newtype (a ⅋ b) = Par (forall r . (a -> r) -> (b -> r) -> r)
 
 infixr 7 ⅋
