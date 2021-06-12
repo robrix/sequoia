@@ -109,8 +109,8 @@ class Proof p where
   sumR1 :: _Γ `p` (_Δ |> P a) -> _Γ `p` (_Δ |> P (a ⊕ b))
   sumR2 :: _Γ `p` (_Δ |> P b) -> _Γ `p` (_Δ |> P (a ⊕ b))
 
-  parL :: (a <| _Γ) `p` _Δ -> (b <| _Γ) `p` _Δ -> (a ⅋ b <| _Γ) `p` _Δ
-  parR :: _Γ `p` (_Δ |> a |> b) -> _Γ `p` (_Δ |> a ⅋ b)
+  parL :: (N a <| _Γ) `p` _Δ -> (N b <| _Γ) `p` _Δ -> (N (a ⅋ b) <| _Γ) `p` _Δ
+  parR :: _Γ `p` (_Δ |> N a |> N b) -> _Γ `p` (_Δ |> N (a ⅋ b))
 
   funL :: _Γ `p` (_Δ |> a) -> (b <| _Γ) `p` _Δ -> ((a --> b) _Δ <| _Γ) `p` _Δ
   funR :: (a <| _Γ) `p` (_Δ |> b) -> _Γ `p` (_Δ |> (a --> b) _Δ)
@@ -164,8 +164,8 @@ instance Proof (|-) where
   sumR1 a = fmap (P . inl . getP) <$> a
   sumR2 b = fmap (P . inr . getP) <$> b
 
-  parL a b (sum, _Γ) = exlr (a . (,_Γ)) (b . (,_Γ)) sum
-  parR ab = either (>>= (pure . inl)) (pure . inr) . ab
+  parL a b (sum, _Γ) = exlr (a . (,_Γ) . N) (b . (,_Γ) . N) (getN sum)
+  parR ab = either (>>= (pure . fmap inl)) (pure . fmap inr) . ab
 
   funL a kb (f, _Γ) = a _Γ >>- \ a' -> getFun f a' >>- \ b' -> kb (b', _Γ)
   funR p _Γ = Right $ Fun $ \ a -> p (a, _Γ)
