@@ -295,7 +295,7 @@ instance Proof (|-) where
   funL a b = wkL a `cut` popL (\ a -> popL (\ f -> const (N <$> getFun (getN f) (getP a))) `cut` exL (wkL b))
   funR p _Γ = Right $ N $ Fun $ \ a -> getN <$> p (P a, _Γ)
 
-  subL b (P (Sub a k), _Γ) = contL (fmap getN . b . (P a,)) (k, _Γ)
+  subL b = popL (\ (P (Sub a k)) -> pushL (contL (fmap getN . b . (P a,))) k)
   subR a b = liftA2 (traverse Sub) <$> a <*> (fmap (lmap N) <$> contR b)
 
   zeroL = popL (absurdP . getP)
