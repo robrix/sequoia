@@ -322,7 +322,7 @@ instance Proof (|-) where
   wkR = fmap Left
   cnL = popL . join . pushL2
   cnR = fmap (either id pure)
-  exL = lmap (\ (b, (a, c)) -> (a, (b, c)))
+  exL = popL2 . flip . pushL2
   exR = fmap (either (either (Left . Left) Right) (Left . Right))
 
   popL = uncurry
