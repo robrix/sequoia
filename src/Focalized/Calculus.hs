@@ -118,6 +118,8 @@ data (a --< b) _Δ = Sub (P a) (Cont (N b) _Δ)
 infixr 0 --<
 
 type Not a = Cont (P a)
+mkNot :: (P a -> _Δ) -> N (Not a _Δ)
+mkNot = N . Cont
 runNot :: N (Not a _Δ) -> P a -> _Δ
 runNot = runCont . getN
 type Negate = (--<) One
@@ -320,7 +322,7 @@ instance Proof (|-) where
   topR = pure (pure (N Top))
 
   notL p = popL (cut p . popL . fmap pure . runNot)
-  notR = fmap (fmap N) . contR
+  notR p = closure (\ _Γ -> pure (mkNot (close _Γ . pushL p)))
 
   negateL = subL . wkL
   negateR = subR oneR
@@ -331,6 +333,12 @@ instance Proof (|-) where
 
   popL f = Sequent (uncurry (appSequent . f))
   pushL p = Sequent . curry (appSequent p)
+
+closure :: (_Γ -> _Δ) -> _Γ |- _Δ
+closure = Sequent
+
+close :: _Γ -> _Γ |- _Δ -> _Δ
+close = flip appSequent
 
 contL :: _Γ |- _Δ |> a -> Cont a _Δ <| _Γ |- _Δ
 contL p = Sequent $ \ (k, _Γ) -> appSequent p _Γ >>- runCont k
