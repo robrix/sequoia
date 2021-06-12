@@ -252,7 +252,7 @@ instance Proof (|-) where
   parL a b (sum, _Γ) = exlr (a . (,_Γ) . N) (b . (,_Γ) . N) (getN sum)
   parR ab = either (>>= (pure . fmap inl)) (pure . fmap inr) . ab
 
-  funL a kb (f, _Γ) = a _Γ >>- \ (P a') -> getFun (getN f) a' >>- \ b' -> kb (N b', _Γ)
+  funL a b = wkL a `cut` popL (\ a -> popL (\ f -> const (N <$> getFun (getN f) (getP a))) `cut` exL (wkL b))
   funR p _Γ = Right $ N $ Fun $ \ a -> getN <$> p (P a, _Γ)
 
   subL b (P (Sub a k), _Γ) = contL (fmap getN . b . (P a,)) (k, _Γ)
