@@ -223,8 +223,8 @@ class Proof p where
 
   wkL :: _Γ `p` _Δ -> (a <| _Γ) `p` _Δ
   wkR :: _Γ `p` _Δ -> _Γ `p` (_Δ |> a)
-  cnL :: (a <| a) `p` b -> a `p` b
-  cnR :: _Γ `p` (a |> a) -> _Γ `p` a
+  cnL :: (a <| a <| _Γ) `p` _Δ -> (a <| _Γ) `p` _Δ
+  cnR :: _Γ `p` (_Δ |> a |> a) -> _Γ `p` (_Δ |> a)
   exL :: (a <| b <| c) `p` _Δ -> (b <| a <| c) `p` _Δ
   exR :: _Γ `p` (a |> b |> c) -> _Γ `p` (a |> c |> b)
 
@@ -320,8 +320,8 @@ instance Proof (|-) where
 
   wkL = popL . const
   wkR = fmap Left
-  cnL = (. join (,))
-  cnR = fmap (either id id)
+  cnL = popL . join . pushL2
+  cnR = fmap (either id pure)
   exL = (. \ (b, (a, c)) -> (a, (b, c)))
   exR = fmap (either (either (Left . Left) Right) (Left . Right))
 
