@@ -229,7 +229,6 @@ class Proof p where
   pushL2 p = pushL . pushL p
 
 
-
 instance Proof (|-) where
   withL1 p = p . first (fmap exl)
   withL2 p = p . first (fmap exr)
