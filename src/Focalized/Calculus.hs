@@ -117,7 +117,7 @@ data (a --< b) _Δ = Sub (P a) (Cont (N b) _Δ)
 
 infixr 0 --<
 
-type Not = Cont
+type Not a = Cont (P a)
 type Negate = (--<) One
 
 newtype Cont a _Δ = Cont { runCont :: a -> _Δ }
@@ -317,8 +317,8 @@ instance Proof (|-) where
 
   topR = pure (pure (N Top))
 
-  notL = lmap (first getN) . contL . fmap (fmap getP)
-  notR = fmap (fmap N) . contR . lmap (first P)
+  notL = lmap (first getN) . contL
+  notR = fmap (fmap N) . contR
 
   negateL = subL . wkL
   negateR = subR oneR
@@ -347,18 +347,11 @@ absurdP = \case
 
 infixl 1 >>-
 
-(|||) :: (a -> c) -> (b -> c) -> (a ⊕ b) -> c
-f ||| g = \case
-  InL (P a) -> f a
-  InR (P b) -> g b
-
-infixr 2 |||
-
 class Zap a b c | a b -> c, b c -> a, a c -> b where
   zap :: a -> b -> c
 
 instance Zap (Not a _Δ & Not b _Δ) (a ⊕ b) _Δ where
-  zap (With run) = run $ \ (N f) (N g) -> runCont f ||| runCont g
+  zap (With run) = run $ \ (N f) (N g) -> exlr (runCont f) (runCont g) . P
 
 instance Zap a b c => Zap (N a) (P b) c where
   zap (N a) (P b) = zap a b
