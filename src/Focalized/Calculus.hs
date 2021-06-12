@@ -96,6 +96,7 @@ data One = One
 newtype N a = N { getN :: a }
   deriving (Eq, Ord, Show)
   deriving (Applicative, Foldable, Functor, Monad) via Identity
+
 newtype P a = P { getP :: a }
   deriving (Eq, Ord, Show)
   deriving (Applicative, Foldable, Functor, Monad) via Identity
