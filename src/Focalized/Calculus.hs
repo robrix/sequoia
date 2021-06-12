@@ -21,7 +21,7 @@ infixr 5 <|
 type (|>) = Either
 infixl 5 |>
 
-data a ⊗ b = !a :⊗ !b
+data a ⊗ b = !(P a) :⊗ !(P b)
 
 infixr 7 ⊗
 
@@ -32,7 +32,7 @@ instance Bifunctor (⊗) where
   bimap = bimapDefault
 
 instance Bitraversable (⊗) where
-  bitraverse f g (a :⊗ b) = (:⊗) <$> f a <*> g b
+  bitraverse f g (a :⊗ b) = fmap getP . inlr <$> traverse f a <*> traverse g b
 
 newtype a & b = With (forall r . (N a -> N b -> r) -> r)
 
@@ -53,9 +53,9 @@ class Conj p c | c -> p where
   exr :: p (a `c` b) -> p b
 
 instance Conj P (⊗) where
-  inlr = liftA2 (:⊗)
-  exl (P (l :⊗ _)) = P l
-  exr (P (_ :⊗ r)) = P r
+  inlr = fmap P . (:⊗)
+  exl (P (l :⊗ _)) = l
+  exr (P (_ :⊗ r)) = r
 
 instance Conj N (&) where
   inlr a b = N $ With $ \ f -> f a b
