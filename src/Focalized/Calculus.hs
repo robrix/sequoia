@@ -365,15 +365,3 @@ absurdN = \case
 
 absurdP :: Zero -> a
 absurdP = \case
-
-class Zap a b c | a b -> c, b c -> a, a c -> b where
-  zap :: a -> b -> c
-
-instance Zap (Not a _Δ & Not b _Δ) (a ⊕ b) _Δ where
-  zap (With run) = run $ \ f g -> exlr (runNot f) (runNot g) . P
-
-instance Zap a b c => Zap (N a) (P b) c where
-  zap (N a) (P b) = zap a b
-
-instance Zap a b c => Zap (P a) (N b) c where
-  zap (P a) (N b) = zap a b
