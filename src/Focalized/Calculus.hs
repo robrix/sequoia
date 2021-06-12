@@ -113,7 +113,7 @@ newtype (a --> b) _Δ = Fun { getFun :: P a -> (_Δ |> N b) }
 
 infixr 0 -->
 
-data (a --< b) _Δ = Sub (P a) (Cont (N b) _Δ)
+data (a --< b) _Δ = Sub !(P a) !(Cont (N b) _Δ)
 
 infixr 0 --<
 
