@@ -199,7 +199,7 @@ class Proof p where
   zapTensor p = tensorL (cut (wkL (wkL p)) (parL (notL (exL (wkL ax))) (notL (wkL ax))))
 
   zapPar :: _Γ `p` (_Δ |> P (Negate a _Δ ⊗ Negate b _Δ)) -> (N (a ⅋ b) <| _Γ) `p` _Δ
-  zapPar p = cut (wkL p) (tensorL (popL2 (pushL (negateL ax) /> parL </ pushL (negateL ax))))
+  zapPar p = cut (wkL p) (tensorL (popL2 (parL `on0` pushL (negateL ax) `on1` pushL (negateL ax))))
 
 
   -- | Pop something off the context which can later be pushed. Used with 'pushL', this provides a generalized context reordering facility.
@@ -228,14 +228,13 @@ class Proof p where
   pushL2 :: (a <| b <| _Γ) `p` _Δ -> a -> b -> _Γ `p` _Δ
   pushL2 p = pushL . pushL p
 
--- _ /> parL </ _
+on0 ::  (a -> b -> c) -> (a' -> a) -> (a' -> b -> c)
+on0 = (.)
 
-(/>) :: (a' -> a) -> (a -> b -> c) -> (a' -> b -> c)
-(/>) = flip (.)
-(</) :: (a -> b -> c) -> (b' -> b) -> (a -> b' -> c)
-(</) = fmap flip . (.) . flip
+on1 :: (a -> b -> c) -> (b' -> b) -> (a -> b' -> c)
+on1 = fmap flip . (.) . flip
 
-infixr 8 />, </
+infixl 4 `on0`, `on1`
 
 
 instance Proof (|-) where
