@@ -113,13 +113,13 @@ newtype (a --> b) _Δ = Fun { getFun :: P a -> (_Δ |> N b) }
 
 infixr 0 -->
 
-data (a --< b) _Δ = Sub !(P a) !(P (Cont (N b) _Δ))
+data (a --< b) _Δ = Sub !(P a) !(P (Negate b _Δ))
 
 infixr 0 --<
 
 subA :: P ((a --< b) _Δ) -> P a
 subA (P (Sub a _)) = a
-subK :: P ((a --< b) _Δ) -> P (Cont (N b) _Δ)
+subK :: P ((a --< b) _Δ) -> P (Negate b _Δ)
 subK (P (Sub _ k)) = k
 
 type Not a = Cont (P a)
@@ -127,7 +127,11 @@ mkNot :: (P a -> _Δ) -> N (Not a _Δ)
 mkNot = N . Cont
 runNot :: N (Not a _Δ) -> P a -> _Δ
 runNot = runCont . getN
-type Negate = (--<) One
+type Negate a = Cont (N a)
+mkNegate :: (N a -> _Δ) -> P (Negate a _Δ)
+mkNegate = P . Cont
+runNegate :: P (Negate a _Δ) -> N a -> _Δ
+runNegate = runCont . getP
 
 newtype Cont a _Δ = Cont { runCont :: a -> _Δ }
   deriving (Functor, Profunctor)
@@ -329,8 +333,8 @@ instance Proof (|-) where
   notL p = popL (cut p . popL . fmap pure . runNot)
   notR p = closure (\ _Γ -> pure (mkNot (close _Γ . pushL p)))
 
-  negateL = subL . wkL
-  negateR = subR oneR
+  negateL p = popL (cut p . popL . fmap pure . runNegate)
+  negateR p = closure (\ _Γ -> pure (mkNegate (close _Γ . pushL p)))
 
   cut f g = f >>= either pure (pushL g)
 
