@@ -290,7 +290,7 @@ instance Proof (|-) where
   sumR2 = fmap (fmap (fmap inr))
 
   parL a b = popL (exlr (pushL a . N) (pushL b . N) . getN)
-  parR ab = either (>>= (pure . fmap inl)) (pure . fmap inr) . ab
+  parR ab = either (>>= (pure . fmap inl)) (pure . fmap inr) <$> ab
 
   funL a b = wkL a `cut` popL (\ a -> popL (\ f -> const (N <$> getFun (getN f) (getP a))) `cut` exL (wkL b))
   funR p _Γ = Right $ N $ Fun $ \ a -> getN <$> p (P a, _Γ)
