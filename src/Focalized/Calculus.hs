@@ -85,6 +85,15 @@ newtype (a ⅋ b) = Par (forall r . (a -> r) -> (b -> r) -> r)
 
 infixr 7 ⅋
 
+instance Bifoldable (⅋) where
+  bifoldMap = bifoldMapDefault
+
+instance Bifunctor (⅋) where
+  bimap = bimapDefault
+
+instance Bitraversable (⅋) where
+  bitraverse f g (Par run) = run (fmap inl . f) (fmap inr . g)
+
 class Disj s where
   inl :: a -> a `s` b
   inr :: b -> a `s` b
