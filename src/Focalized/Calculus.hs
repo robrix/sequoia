@@ -1,4 +1,5 @@
 {-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Focalized.Calculus
 ( Proof(..)
 , N
@@ -234,3 +235,9 @@ class Zap a b c | a b -> c, b c -> a, a c -> b where
 
 instance Zap (Not a _Δ & Not b _Δ) (a ⊕ b) _Δ where
   zap (f :& g) = runCont f ||| runCont g
+
+instance Zap a b c => Zap (N a) (P b) c where
+  zap (N a) (P b) = zap a b
+
+instance Zap a b c => Zap (P a) (N b) c where
+  zap (P a) (N b) = zap a b
