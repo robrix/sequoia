@@ -8,6 +8,7 @@ module Focalized.Calculus
 import Control.Applicative (liftA2)
 import Control.Monad (join)
 import Data.Bifunctor (first)
+import Data.Functor.Identity
 import Data.Profunctor
 import Prelude hiding (tail)
 
@@ -92,15 +93,17 @@ data One = One
 -- Polarities
 
 newtype N a = N { getN :: a }
+  deriving (Applicative, Functor, Monad) via Identity
 newtype P a = P { getP :: a }
+  deriving (Applicative, Functor, Monad) via Identity
 
 class Proof p where
   withL1 :: (a <| _Γ) `p` _Δ -> (a & b <| _Γ) `p` _Δ
   withL2 :: (b <| _Γ) `p` _Δ -> (a & b <| _Γ) `p` _Δ
   (&) :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a & b)
 
-  tensorL :: (a <| b <| _Γ) `p` _Δ -> (a ⊗ b <| _Γ) `p` _Δ
-  (⊗) :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a ⊗ b)
+  tensorL :: (P a <| P b <| _Γ) `p` _Δ -> (P (a ⊗ b) <| _Γ) `p` _Δ
+  (⊗) :: _Γ `p` (_Δ |> P a) -> _Γ `p` (_Δ |> P b) -> _Γ `p` (_Δ |> P (a ⊗ b))
 
   sumL :: (P a <| _Γ) `p` _Δ -> (P b <| _Γ) `p` _Δ -> (P (a ⊕ b) <| _Γ) `p` _Δ
   sumR1 :: _Γ `p` (_Δ |> P a) -> _Γ `p` (_Δ |> P (a ⊕ b))
@@ -154,8 +157,8 @@ instance Proof (|-) where
   withL2 p (with, _Γ) = p (exr with, _Γ)
   (&) = liftA2 (liftA2 inlr)
 
-  tensorL p (a :⊗ b, _Γ) = p (a, (b, _Γ))
-  (⊗) = liftA2 (liftA2 inlr)
+  tensorL p (P (a :⊗ b), _Γ) = p (P a, (P b, _Γ))
+  (⊗) = liftA2 (liftA2 (liftA2 inlr))
 
   sumL a b (sum, _Γ) = exlr (a . (,_Γ) . P) (b . (,_Γ) . P) (getP sum)
   sumR1 a = fmap (P . inl . getP) <$> a
