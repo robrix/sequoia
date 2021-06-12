@@ -185,8 +185,8 @@ class Proof p where
 
 
 instance Proof (|-) where
-  withL1 p (with, _Γ) = p (N (exl (getN with)), _Γ)
-  withL2 p (with, _Γ) = p (N (exr (getN with)), _Γ)
+  withL1 p = p . first (fmap exl)
+  withL2 p = p . first (fmap exr)
   (&) = liftA2 (liftA2 (liftA2 inlr))
 
   tensorL p (P (a :⊗ b), _Γ) = p (P a, (P b, _Γ))
