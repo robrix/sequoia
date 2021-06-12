@@ -317,8 +317,8 @@ instance Proof (|-) where
   funL a b = wkL a `cut` popL (\ a -> popL (\ f -> pure (getFun (getN f) a)) `cut` exL (wkL b))
   funR p = Sequent $ \ _Γ -> Right $ N $ Fun $ \ a -> appSequent (pushL p a) _Γ
 
-  subL b = popL (\ s -> cut (pushL b (subA s)) (pushL (popL (popL . fmap pure . runCont . getP)) (subK s)))
-  subR a b = liftA2 (fmap P . Sub) <$> a <*> closure (\ _Γ -> pure (P (Cont (close _Γ . pushL b))))
+  subL b = popL (\ s -> cut (pushL b (subA s)) (pushL (negateL ax) (subK s)))
+  subR a b = liftA2 (fmap P . Sub) <$> a <*> negateR b
 
   zeroL = popL (absurdP . getP)
 
