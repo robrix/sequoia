@@ -8,7 +8,9 @@ module Focalized.Calculus
 
 import Control.Applicative (liftA2)
 import Control.Monad (join)
-import Data.Bifunctor (first)
+import Data.Bifoldable
+import Data.Bifunctor (Bifunctor(..))
+import Data.Bitraversable
 import Data.Functor.Identity
 import Data.Profunctor
 import Prelude hiding (tail)
@@ -24,6 +26,15 @@ infix 2 |-
 data a ⊗ b = !a :⊗ !b
 
 infixr 7 ⊗
+
+instance Bifoldable (⊗) where
+  bifoldMap = bifoldMapDefault
+
+instance Bifunctor (⊗) where
+  bimap = bimapDefault
+
+instance Bitraversable (⊗) where
+  bitraverse f g (a :⊗ b) = (:⊗) <$> f a <*> g b
 
 data a & b = a :& b
 
