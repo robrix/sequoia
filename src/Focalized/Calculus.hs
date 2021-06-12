@@ -113,9 +113,14 @@ newtype (a --> b) _Δ = Fun { getFun :: P a -> (_Δ |> N b) }
 
 infixr 0 -->
 
-data (a --< b) _Δ = Sub !(P a) !(Cont (N b) _Δ)
+data (a --< b) _Δ = Sub !(P a) !(P (Cont (N b) _Δ))
 
 infixr 0 --<
+
+subA :: P ((a --< b) _Δ) -> P a
+subA (P (Sub a _)) = a
+subK :: P ((a --< b) _Δ) -> P (Cont (N b) _Δ)
+subK (P (Sub _ k)) = k
 
 type Not a = Cont (P a)
 mkNot :: (P a -> _Δ) -> N (Not a _Δ)
@@ -308,8 +313,8 @@ instance Proof (|-) where
   funL a b = wkL a `cut` popL (\ a -> popL (\ f -> pure (getFun (getN f) a)) `cut` exL (wkL b))
   funR p = Sequent $ \ _Γ -> Right $ N $ Fun $ \ a -> appSequent (pushL p a) _Γ
 
-  subL b = popL (\ (P (Sub a k)) -> pushL (contL (pushL b a)) k)
-  subR a b = liftA2 (fmap P . Sub) <$> a <*> contR b
+  subL b = popL (\ s -> cut (pushL b (subA s)) (pushL (popL (popL . fmap pure . runCont . getP)) (subK s)))
+  subR a b = liftA2 (fmap P . Sub) <$> a <*> closure (\ _Γ -> pure (P (Cont (close _Γ . pushL b))))
 
   zeroL = popL (absurdP . getP)
 
@@ -340,22 +345,12 @@ closure = Sequent
 close :: _Γ -> _Γ |- _Δ -> _Δ
 close = flip appSequent
 
-contL :: _Γ |- _Δ |> a -> Cont a _Δ <| _Γ |- _Δ
-contL p = Sequent $ \ (k, _Γ) -> appSequent p _Γ >>- runCont k
-contR :: a <| _Γ |- _Δ -> _Γ |- _Δ |> Cont a _Δ
-contR p = Sequent $ \ _Γ -> Right $ Cont $ \ a -> appSequent p (a, _Γ)
-
 
 absurdN :: Bot -> a
 absurdN = \case
 
 absurdP :: Zero -> a
 absurdP = \case
-
-(>>-) :: (_Δ |> a) -> (a -> _Δ) -> _Δ
-(>>-) = flip (either id)
-
-infixl 1 >>-
 
 class Zap a b c | a b -> c, b c -> a, a c -> b where
   zap :: a -> b -> c
