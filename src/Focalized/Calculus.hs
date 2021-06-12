@@ -238,6 +238,8 @@ class Profunctor p => Proof p where
 
   cut :: _Γ `p` (_Δ |> a) -> (a <| _Γ) `p` _Δ -> _Γ `p` _Δ
 
+  infixr `cut`
+
   ax :: (a, _Γ) `p` (_Δ |> a)
 
   wkL :: _Γ `p` _Δ -> (a <| _Γ) `p` _Δ
@@ -322,7 +324,7 @@ instance Proof (|-) where
   parL a b = popL (exlr (pushL a) (pushL b))
   parR ab = either (>>= (pure . inl)) (pure . inr) <$> ab
 
-  funL a b = popL (\ f -> a `cut` (popL (pure . appFun f) `cut` exL (wkL b)))
+  funL a b = popL (\ f -> a `cut` popL (pure . appFun f) `cut` exL (wkL b))
   funR p = closure (\ _Γ -> pure (mkFun (close _Γ . pushL p)))
 
   subL b = popL (\ s -> cut (pushL b (subA s)) (pushL (negateL ax) (subK s)))
