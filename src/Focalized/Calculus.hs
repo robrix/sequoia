@@ -198,6 +198,37 @@ class Proof p where
   zapTensor :: _Γ `p` (_Δ |> N (Not a _Δ ⅋ Not b _Δ)) -> (P (a ⊗ b) <| _Γ) `p` _Δ
   zapTensor p = tensorL (cut (wkL (wkL p)) (parL (notL (exL (wkL ax))) (notL (wkL ax))))
 
+  zapPar :: _Γ `p` (_Δ |> P (Negate a _Δ ⊗ Negate b _Δ)) -> (N (a ⅋ b) <| _Γ) `p` _Δ
+  zapPar p = cut (wkL p) (tensorL (popL2 (\ a -> parL (pushL (negateL ax) a) . pushL (negateL ax))))
+
+
+  -- | Pop something off the context which can later be pushed. Used with 'pushL', this provides a generalized context reordering facility.
+  --
+  -- @
+  -- popL . pushL = id
+  -- @
+  -- @
+  -- pushL . popL = id
+  -- @
+  popL :: (a -> _Γ `p` _Δ) -> (a <| _Γ) `p` _Δ
+
+  -- | Push something onto the context which was previously popped off it. Used with 'popL', this provides a generalized context reordering facility. It is undefined what will happen if you push something which was not previously popped.
+  --
+  -- @
+  -- popL . pushL = id
+  -- @
+  -- @
+  -- pushL . popL = id
+  -- @
+  pushL :: (a <| _Γ) `p` _Δ -> a -> _Γ `p` _Δ
+
+  popL2 :: (a -> b -> _Γ `p` _Δ) -> (a <| b <| _Γ) `p` _Δ
+  popL2 f = popL (popL . f)
+
+  pushL2 :: (a <| b <| _Γ) `p` _Δ -> a -> b -> _Γ `p` _Δ
+  pushL2 p = pushL . pushL p
+
+
 
 instance Proof (|-) where
   withL1 p = p . first (fmap exl)
@@ -248,6 +279,9 @@ instance Proof (|-) where
   exR = fmap (either (either (Left . Left) Right) (Left . Right))
 
   zapSum elim = tail elim >>= \ _Δ (sum, _) -> _Δ >>- flip zap sum
+
+  popL = uncurry
+  pushL = curry
 
 contL :: _Γ |- _Δ |> a -> Cont a _Δ <| _Γ |- _Δ
 contL p (k, _Γ) = p _Γ >>- runCont k
