@@ -192,6 +192,9 @@ class Proof p where
   zapSum :: _Γ `p` (_Δ |> N (Not a _Δ & Not b _Δ)) -> (P (a ⊕ b) <| _Γ) `p` _Δ
   zapSum p = sumL (cut (wkL p) (withL1 (notL ax))) (cut (wkL p) (withL2 (notL ax)))
 
+  zapWith :: _Γ `p` (_Δ |> P (Negate a _Δ ⊕ Negate b _Δ)) -> (N (a & b) <| _Γ) `p` _Δ
+  zapWith p = cut (wkL p) (sumL (negateL (withL1 ax)) (negateL (withL2 ax)))
+
 
 instance Proof (|-) where
   withL1 p = p . first (fmap exl)
