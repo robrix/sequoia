@@ -118,6 +118,8 @@ data (a --< b) _Δ = Sub (P a) (Cont (N b) _Δ)
 infixr 0 --<
 
 type Not a = Cont (P a)
+runNot :: N (Not a _Δ) -> P a -> _Δ
+runNot = runCont . getN
 type Negate = (--<) One
 
 newtype Cont a _Δ = Cont { runCont :: a -> _Δ }
@@ -351,7 +353,7 @@ class Zap a b c | a b -> c, b c -> a, a c -> b where
   zap :: a -> b -> c
 
 instance Zap (Not a _Δ & Not b _Δ) (a ⊕ b) _Δ where
-  zap (With run) = run $ \ (N f) (N g) -> exlr (runCont f) (runCont g) . P
+  zap (With run) = run $ \ f g -> exlr (runNot f) (runNot g) . P
 
 instance Zap a b c => Zap (N a) (P b) c where
   zap (N a) (P b) = zap a b
