@@ -45,22 +45,22 @@ instance Bifunctor (&) where
   bimap = bimapDefault
 
 instance Bitraversable (&) where
-  bitraverse f g (With run) = run $ \ a b -> inlr <$> f a <*> g b
+  bitraverse f g w = fmap getN . inlr <$> traverse f (exl (N w)) <*> traverse g (exr (N w))
 
-class Conj c where
-  inlr :: a -> b -> a `c` b
-  exl :: a `c` b -> a
-  exr :: a `c` b -> b
+class Conj p c | c -> p where
+  inlr :: p a -> p b -> p (a `c` b)
+  exl :: p (a `c` b) -> p a
+  exr :: p (a `c` b) -> p b
 
-instance Conj (⊗) where
-  inlr = (:⊗)
-  exl (l :⊗ _) = l
-  exr (_ :⊗ r) = r
+instance Conj P (⊗) where
+  inlr = liftA2 (:⊗)
+  exl (P (l :⊗ _)) = P l
+  exr (P (_ :⊗ r)) = P r
 
-instance Conj (&) where
-  inlr a b = With $ \ f -> f a b
-  exl (With run) = run const
-  exr (With run) = run (const id)
+instance Conj N (&) where
+  inlr a b = N $ With $ \ f -> f (getN a) (getN b)
+  exl (N (With run)) = run (const . N)
+  exr (N (With run)) = run (const N)
 
 data a ⊕ b
   = InL !a
@@ -287,12 +287,12 @@ infix 2 |-
 
 
 instance Proof (|-) where
-  withL1 p = popL (pushL p . fmap exl)
-  withL2 p = popL (pushL p . fmap exr)
-  (&) = liftA2 (liftA2 (liftA2 inlr))
+  withL1 p = popL (pushL p . exl)
+  withL2 p = popL (pushL p . exr)
+  (&) = liftA2 (liftA2 inlr)
 
-  tensorL p = popL (pushL2 p . fmap exl <*> fmap exr)
-  (⊗) = liftA2 (liftA2 (liftA2 inlr))
+  tensorL p = popL (pushL2 p . exl <*> exr)
+  (⊗) = liftA2 (liftA2 inlr)
 
   sumL a b = popL (exlr (pushL a . P) (pushL b . P) . getP)
   sumR1 = fmap (fmap (fmap inl))
