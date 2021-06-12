@@ -112,13 +112,13 @@ class Proof p where
   parL :: (N a <| _Γ) `p` _Δ -> (N b <| _Γ) `p` _Δ -> (N (a ⅋ b) <| _Γ) `p` _Δ
   parR :: _Γ `p` (_Δ |> N a |> N b) -> _Γ `p` (_Δ |> N (a ⅋ b))
 
-  funL :: _Γ `p` (_Δ |> a) -> (b <| _Γ) `p` _Δ -> ((a --> b) _Δ <| _Γ) `p` _Δ
-  funR :: (a <| _Γ) `p` (_Δ |> b) -> _Γ `p` (_Δ |> (a --> b) _Δ)
+  funL :: _Γ `p` (_Δ |> P a) -> (N b <| _Γ) `p` _Δ -> (N ((a --> b) _Δ) <| _Γ) `p` _Δ
+  funR :: (P a <| _Γ) `p` (_Δ |> N b) -> _Γ `p` (_Δ |> N ((a --> b) _Δ))
 
   subL :: (P a <| _Γ) `p` (_Δ |> N b) -> (P ((a --< b) _Δ) <| _Γ) `p` _Δ
   subR :: _Γ `p` (_Δ |> P a) -> (N b <| _Γ) `p` _Δ -> _Γ `p` (_Δ |> P ((a --< b) _Δ))
 
-  ($$) :: _Γ `p` (_Δ |> (a --> b) (_Δ |> b)) -> _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b)
+  ($$) :: _Γ `p` (_Δ |> N ((a --> b) (_Δ |> N b))) -> _Γ `p` (_Δ |> P a) -> _Γ `p` (_Δ |> N b)
   f $$ a = cut (exR (wkR f)) (exR (wkR a) `funL` ax)
 
   zeroL :: (P Zero <| _Γ) `p` _Δ
@@ -167,8 +167,8 @@ instance Proof (|-) where
   parL a b (sum, _Γ) = exlr (a . (,_Γ) . N) (b . (,_Γ) . N) (getN sum)
   parR ab = either (>>= (pure . fmap inl)) (pure . fmap inr) . ab
 
-  funL a kb (f, _Γ) = a _Γ >>- \ a' -> getFun f a' >>- \ b' -> kb (b', _Γ)
-  funR p _Γ = Right $ Fun $ \ a -> p (a, _Γ)
+  funL a kb (f, _Γ) = a _Γ >>- \ (P a') -> getFun (getN f) a' >>- \ b' -> kb (N b', _Γ)
+  funR p _Γ = Right $ N $ Fun $ \ a -> getN <$> p (P a, _Γ)
 
   subL b (P (Sub a k), _Γ) = contL (fmap getN . b . (P a,)) (k, _Γ)
   subR a b = liftA2 (fmap P . Sub . getP) <$> a <*> (fmap (lmap N) <$> contR b)
