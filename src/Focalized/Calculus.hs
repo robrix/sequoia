@@ -316,7 +316,7 @@ instance Proof (|-) where
 
   cut f g _Γ = f _Γ >>- \ a -> g (a, _Γ)
 
-  ax = Right . fst
+  ax = popL (pure . pure)
 
   wkL = popL . const
   wkR = fmap Left
