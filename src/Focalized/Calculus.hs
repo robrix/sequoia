@@ -102,9 +102,9 @@ class Proof p where
   tensorL :: (a <| b <| _Γ) `p` _Δ -> (a ⊗ b <| _Γ) `p` _Δ
   (⊗) :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a ⊗ b)
 
-  sumL :: (a <| _Γ) `p` _Δ -> (b <| _Γ) `p` _Δ -> (a ⊕ b <| _Γ) `p` _Δ
-  sumR1 :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> a ⊕ b)
-  sumR2 :: _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a ⊕ b)
+  sumL :: (P a <| _Γ) `p` _Δ -> (P b <| _Γ) `p` _Δ -> (P (a ⊕ b) <| _Γ) `p` _Δ
+  sumR1 :: _Γ `p` (_Δ |> P a) -> _Γ `p` (_Δ |> P (a ⊕ b))
+  sumR2 :: _Γ `p` (_Δ |> P b) -> _Γ `p` (_Δ |> P (a ⊕ b))
 
   parL :: (a <| _Γ) `p` _Δ -> (b <| _Γ) `p` _Δ -> (a ⅋ b <| _Γ) `p` _Δ
   parR :: _Γ `p` (_Δ |> a |> b) -> _Γ `p` (_Δ |> a ⅋ b)
@@ -157,9 +157,9 @@ instance Proof (|-) where
   tensorL p (a :⊗ b, _Γ) = p (a, (b, _Γ))
   (⊗) = liftA2 (liftA2 inlr)
 
-  sumL a b (sum, _Γ) = exlr (a . (,_Γ)) (b . (,_Γ)) sum
-  sumR1 a = fmap inl <$> a
-  sumR2 b = fmap inr <$> b
+  sumL a b (sum, _Γ) = exlr (a . (,_Γ) . P) (b . (,_Γ) . P) (getP sum)
+  sumR1 a = fmap (P . inl . getP) <$> a
+  sumR2 b = fmap (P . inr . getP) <$> b
 
   parL a b (sum, _Γ) = exlr (a . (,_Γ)) (b . (,_Γ)) sum
   parR ab = either (>>= (pure . inl)) (pure . inr) . ab
