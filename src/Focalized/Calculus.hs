@@ -322,7 +322,7 @@ instance Proof (|-) where
   parL a b = popL (exlr (pushL a) (pushL b))
   parR ab = either (>>= (pure . inl)) (pure . inr) <$> ab
 
-  funL a b = wkL a `cut` popL (\ a -> popL (pure . (`appFun` a)) `cut` exL (wkL b))
+  funL a b = popL (\ f -> a `cut` (popL (pure . appFun f) `cut` exL (wkL b)))
   funR p = closure (\ _Γ -> pure (mkFun (close _Γ . pushL p)))
 
   subL b = popL (\ s -> cut (pushL b (subA s)) (pushL (negateL ax) (subK s)))
