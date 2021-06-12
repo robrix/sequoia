@@ -122,6 +122,8 @@ class Proof p where
 
   parL :: (N a <| _Γ) `p` _Δ -> (N b <| _Γ) `p` _Δ -> (N (a ⅋ b) <| _Γ) `p` _Δ
   parR :: _Γ `p` (_Δ |> N a |> N b) -> _Γ `p` (_Δ |> N (a ⅋ b))
+  parR' :: _Γ `p` (_Δ |> N (a ⅋ b)) -> _Γ `p` (_Δ |> N a |> N b)
+  parR' p = cut (exR (wkR (exR (wkR p)))) (parL (wkR ax) (exR (wkR ax)))
 
   funL :: _Γ `p` (_Δ |> P a) -> (N b <| _Γ) `p` _Δ -> (N ((a --> b) _Δ) <| _Γ) `p` _Δ
   funR :: (P a <| _Γ) `p` (_Δ |> N b) -> _Γ `p` (_Δ |> N ((a --> b) _Δ))
