@@ -150,7 +150,8 @@ class Proof p where
   exR :: _Γ `p` (a |> b |> c) -> _Γ `p` (a |> c |> b)
 
 
-  zapSum :: _Γ `p` (_Δ |> Not a _Δ & Not b _Δ) -> (a ⊕ b <| _Γ) `p` _Δ
+  zapSum :: _Γ `p` (_Δ |> N (Not a _Δ & Not b _Δ)) -> (P (a ⊕ b) <| _Γ) `p` _Δ
+  zapSum p = sumL (cut (wkL p) (withL1 (notL ax))) (cut (wkL p) (withL2 (notL ax)))
 
 
 instance Proof (|-) where
