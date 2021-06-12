@@ -238,8 +238,8 @@ infixl 4 `on0`, `on1`
 
 
 instance Proof (|-) where
-  withL1 p = p . first (fmap exl)
-  withL2 p = p . first (fmap exr)
+  withL1 p = popL (pushL p . fmap exl)
+  withL2 p = popL (pushL p . fmap exr)
   (&) = liftA2 (liftA2 (liftA2 inlr))
 
   tensorL p (P (a :⊗ b), _Γ) = p (P a, (P b, _Γ))
