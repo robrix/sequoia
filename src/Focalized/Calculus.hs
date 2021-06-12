@@ -79,7 +79,7 @@ instance Bitraversable (⊕) where
     InL a -> InL <$> f a
     InR b -> InR <$> g b
 
-newtype (a ⅋ b) = Par (forall r . (a -> r) -> (b -> r) -> r)
+newtype (a ⅋ b) = Par (forall r . (N a -> r) -> (N b -> r) -> r)
 
 infixr 7 ⅋
 
@@ -90,24 +90,24 @@ instance Bifunctor (⅋) where
   bimap = bimapDefault
 
 instance Bitraversable (⅋) where
-  bitraverse f g (Par run) = run (fmap inl . f) (fmap inr . g)
+  bitraverse f g (Par run) = getN <$> run (fmap inl . traverse f) (fmap inr . traverse g)
 
-class Disj d where
-  inl :: a -> a `d` b
-  inr :: b -> a `d` b
-  exlr :: (a -> r) -> (b -> r) -> a `d` b -> r
+class Disj p d | d -> p where
+  inl :: p a -> p (a `d` b)
+  inr :: p b -> p (a `d` b)
+  exlr :: (p a -> r) -> (p b -> r) -> p (a `d` b) -> r
 
-instance Disj (⊕) where
-  inl = InL
-  inr = InR
+instance Disj P (⊕) where
+  inl = fmap InL
+  inr = fmap InR
   exlr ifl ifr = \case
-    InL l -> ifl l
-    InR r -> ifr r
+    P (InL l) -> ifl (P l)
+    P (InR r) -> ifr (P r)
 
-instance Disj (⅋) where
-  inl l = Par $ \ ifl _ -> ifl l
-  inr r = Par $ \ _ ifr -> ifr r
-  exlr ifl ifr (Par run) = run ifl ifr
+instance Disj N (⅋) where
+  inl l = N $ Par $ \ ifl _ -> ifl l
+  inr r = N $ Par $ \ _ ifr -> ifr r
+  exlr ifl ifr (N (Par run)) = run ifl ifr
 
 newtype (a --> b) _Δ = Fun { getFun :: a -> (_Δ |> b) }
 
@@ -294,12 +294,12 @@ instance Proof (|-) where
   tensorL p = popL (pushL2 p . exl <*> exr)
   (⊗) = liftA2 (liftA2 inlr)
 
-  sumL a b = popL (exlr (pushL a . P) (pushL b . P) . getP)
-  sumR1 = fmap (fmap (fmap inl))
-  sumR2 = fmap (fmap (fmap inr))
+  sumL a b = popL (exlr (pushL a) (pushL b))
+  sumR1 = fmap (fmap inl)
+  sumR2 = fmap (fmap inr)
 
-  parL a b = popL (exlr (pushL a . N) (pushL b . N) . getN)
-  parR ab = either (>>= (pure . fmap inl)) (pure . fmap inr) <$> ab
+  parL a b = popL (exlr (pushL a) (pushL b))
+  parR ab = either (>>= (pure . inl)) (pure . inr) <$> ab
 
   funL a b = wkL a `cut` popL (\ a -> popL (\ f -> pure (N <$> getFun (getN f) (getP a))) `cut` exL (wkL b))
   funR p = Sequent $ \ _Γ -> Right $ N $ Fun $ \ a -> getN <$> appSequent (pushL p (P a)) _Γ
