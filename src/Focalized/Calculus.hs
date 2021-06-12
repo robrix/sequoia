@@ -114,6 +114,9 @@ newtype (a --> b) _Δ = Fun { getFun :: P a -> (_Δ |> N b) }
 mkFun :: (P a -> (_Δ |> N b)) -> N ((a --> b) _Δ)
 mkFun = N . Fun
 
+appFun :: N ((a --> b) _Δ) -> (P a -> (_Δ |> N b))
+appFun = getFun . getN
+
 infixr 0 -->
 
 data (a --< b) _Δ = Sub !(P a) !(P (Negate b _Δ))
@@ -319,7 +322,7 @@ instance Proof (|-) where
   parL a b = popL (exlr (pushL a) (pushL b))
   parR ab = either (>>= (pure . inl)) (pure . inr) <$> ab
 
-  funL a b = wkL a `cut` popL (\ a -> popL (\ f -> pure (getFun (getN f) a)) `cut` exL (wkL b))
+  funL a b = wkL a `cut` popL (\ a -> popL (pure . (`appFun` a)) `cut` exL (wkL b))
   funR p = closure (\ _Γ -> pure (mkFun (close _Γ . pushL p)))
 
   subL b = popL (\ s -> cut (pushL b (subA s)) (pushL (negateL ax) (subK s)))
