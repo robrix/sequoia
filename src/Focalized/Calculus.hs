@@ -149,6 +149,8 @@ class Proof p where
 
   botL :: (N Bot <| _Γ) `p` _Δ
   botR :: _Γ `p` _Δ -> _Γ `p` (_Δ |> N Bot)
+  botR' :: _Γ `p` (_Δ |> N Bot) -> _Γ `p` _Δ
+  botR' = (`cut` botL)
 
   topR :: _Γ `p` (_Δ |> N Top)
 
