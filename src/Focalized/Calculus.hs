@@ -322,7 +322,7 @@ instance Proof (|-) where
   wkR = fmap Left
   cnL = popL . join . pushL2
   cnR = fmap (either id pure)
-  exL = (. \ (b, (a, c)) -> (a, (b, c)))
+  exL = lmap (\ (b, (a, c)) -> (a, (b, c)))
   exR = fmap (either (either (Left . Left) Right) (Left . Right))
 
   zapSum elim = tail elim >>= \ _Δ (sum, _) -> _Δ >>- flip zap sum
