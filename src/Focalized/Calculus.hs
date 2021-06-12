@@ -319,7 +319,7 @@ instance Proof (|-) where
 
   topR = pure (pure (N Top))
 
-  notL = lmap (first getN) . contL
+  notL p = popL (cut p . popL . fmap pure . runNot)
   notR = fmap (fmap N) . contR
 
   negateL = subL . wkL
