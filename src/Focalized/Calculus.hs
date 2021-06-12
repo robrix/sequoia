@@ -296,7 +296,7 @@ instance Proof (|-) where
   funR p _Γ = Right $ N $ Fun $ \ a -> getN <$> p (P a, _Γ)
 
   subL b (P (Sub a k), _Γ) = contL (fmap getN . b . (P a,)) (k, _Γ)
-  subR a b = liftA2 (fmap P . Sub . getP) <$> a <*> (fmap (lmap N) <$> contR b)
+  subR a b = liftA2 (traverse Sub) <$> a <*> (fmap (lmap N) <$> contR b)
 
   zeroL = popL (absurdP . getP)
 
