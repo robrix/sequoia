@@ -94,9 +94,11 @@ data One = One
 -- Polarities
 
 newtype N a = N { getN :: a }
-  deriving (Applicative, Functor, Monad) via Identity
+  deriving (Eq, Ord, Show)
+  deriving (Applicative, Foldable, Functor, Monad) via Identity
 newtype P a = P { getP :: a }
-  deriving (Applicative, Functor, Monad) via Identity
+  deriving (Eq, Ord, Show)
+  deriving (Applicative, Foldable, Functor, Monad) via Identity
 
 class Proof p where
   withL1 :: (N a <| _Γ) `p` _Δ -> (N (a & b) <| _Γ) `p` _Δ
