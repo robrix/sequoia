@@ -301,12 +301,12 @@ instance Proof (|-) where
   zeroL = absurdP . getP . fst
 
   oneL = wkL
-  oneR = const (pure (P One))
+  oneR = pure (pure (P One))
 
   botL = absurdN . getN . fst
   botR = fmap Left
 
-  topR = const (pure (N Top))
+  topR = pure (pure (N Top))
 
   notL = lmap (first getN) . contL . fmap (fmap getP)
   notR = fmap (fmap N) . contR . lmap (first P)
