@@ -111,6 +111,9 @@ instance Disj N (⅋) where
 
 newtype (a --> b) _Δ = Fun { getFun :: P a -> (_Δ |> N b) }
 
+mkFun :: (P a -> (_Δ |> N b)) -> N ((a --> b) _Δ)
+mkFun = N . Fun
+
 infixr 0 -->
 
 data (a --< b) _Δ = Sub !(P a) !(P (Negate b _Δ))
@@ -317,7 +320,7 @@ instance Proof (|-) where
   parR ab = either (>>= (pure . inl)) (pure . inr) <$> ab
 
   funL a b = wkL a `cut` popL (\ a -> popL (\ f -> pure (getFun (getN f) a)) `cut` exL (wkL b))
-  funR p = Sequent $ \ _Γ -> Right $ N $ Fun $ \ a -> appSequent (pushL p a) _Γ
+  funR p = Sequent $ \ _Γ -> Right $ mkFun $ \ a -> appSequent (pushL p a) _Γ
 
   subL b = popL (\ s -> cut (pushL b (subA s)) (pushL (negateL ax) (subK s)))
   subR a b = liftA2 mkSub <$> a <*> negateR b
