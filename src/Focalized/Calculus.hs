@@ -325,8 +325,6 @@ instance Proof (|-) where
   exL = lmap (\ (b, (a, c)) -> (a, (b, c)))
   exR = fmap (either (either (Left . Left) Right) (Left . Right))
 
-  zapSum elim = tail elim >>= \ _Δ (sum, _) -> _Δ >>- flip zap sum
-
   popL = uncurry
   pushL = curry
 
@@ -335,9 +333,6 @@ contL p (k, _Γ) = p _Γ >>- runCont k
 contR :: a <| _Γ |- _Δ -> _Γ |- _Δ |> Cont a _Δ
 contR p _Γ = Right $ Cont $ \ a -> p (a, _Γ)
 
-
-tail :: Proof p => _Γ' `p` _Δ -> (_Γ, _Γ') `p` _Δ
-tail = wkL
 
 absurdN :: Bot -> a
 absurdN = \case
