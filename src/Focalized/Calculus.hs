@@ -195,6 +195,9 @@ class Proof p where
   zapWith :: _Γ `p` (_Δ |> P (Negate a _Δ ⊕ Negate b _Δ)) -> (N (a & b) <| _Γ) `p` _Δ
   zapWith p = cut (wkL p) (sumL (negateL (withL1 ax)) (negateL (withL2 ax)))
 
+  zapTensor :: _Γ `p` (_Δ |> N (Not a _Δ ⅋ Not b _Δ)) -> (P (a ⊗ b) <| _Γ) `p` _Δ
+  zapTensor p = tensorL (cut (wkL (wkL p)) (parL (notL (exL (wkL ax))) (notL (wkL ax))))
+
 
 instance Proof (|-) where
   withL1 p = p . first (fmap exl)
