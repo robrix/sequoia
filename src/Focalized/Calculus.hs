@@ -7,6 +7,7 @@ module Focalized.Calculus
 ) where
 
 import Control.Applicative (liftA2)
+import Control.Category (Category)
 import Control.Monad (join)
 import Data.Bifoldable
 import Data.Bifunctor (Bifunctor(..))
@@ -19,9 +20,6 @@ type (<|) = (,)
 infixr 5 <|
 type (|>) = Either
 infixl 5 |>
-
-type (|-) = (->)
-infix 2 |-
 
 data a ⊗ b = !a :⊗ !b
 
@@ -282,6 +280,12 @@ on1 = fmap flip . (.) . flip
 infixl 4 `on0`, `on1`
 
 
+newtype _Γ |- _Δ = Sequent { appSequent :: _Γ -> _Δ }
+  deriving (Applicative, Category, Functor, Monad, Profunctor)
+
+infix 2 |-
+
+
 instance Proof (|-) where
   withL1 p = popL (pushL p . fmap exl)
   withL2 p = popL (pushL p . fmap exr)
@@ -298,7 +302,7 @@ instance Proof (|-) where
   parR ab = either (>>= (pure . fmap inl)) (pure . fmap inr) <$> ab
 
   funL a b = wkL a `cut` popL (\ a -> popL (\ f -> pure (N <$> getFun (getN f) (getP a))) `cut` exL (wkL b))
-  funR p _Γ = Right $ N $ Fun $ \ a -> getN <$> pushL p (P a) _Γ
+  funR p = Sequent $ \ _Γ -> Right $ N $ Fun $ \ a -> getN <$> appSequent (pushL p (P a)) _Γ
 
   subL b = popL (\ (P (Sub a k)) -> pushL (contL (pushL (fmap getN <$> b) (P a))) k)
   subR a b = liftA2 (traverse Sub `on1` lmap N) <$> a <*> contR b
@@ -323,13 +327,13 @@ instance Proof (|-) where
 
   ax = popL (pure . pure)
 
-  popL = uncurry
-  pushL = curry
+  popL f = Sequent (uncurry (appSequent . f))
+  pushL p = Sequent . curry (appSequent p)
 
 contL :: _Γ |- _Δ |> a -> Cont a _Δ <| _Γ |- _Δ
-contL p (k, _Γ) = p _Γ >>- runCont k
+contL p = Sequent $ \ (k, _Γ) -> appSequent p _Γ >>- runCont k
 contR :: a <| _Γ |- _Δ -> _Γ |- _Δ |> Cont a _Δ
-contR p _Γ = Right $ Cont $ \ a -> p (a, _Γ)
+contR p = Sequent $ \ _Γ -> Right $ Cont $ \ a -> appSequent p (a, _Γ)
 
 
 absurdN :: Bot -> a
