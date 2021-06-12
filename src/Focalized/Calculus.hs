@@ -285,7 +285,7 @@ instance Proof (|-) where
   tensorL p = popL (pushL2 p . fmap exl <*> fmap exr)
   (⊗) = liftA2 (liftA2 (liftA2 inlr))
 
-  sumL a b (sum, _Γ) = exlr (a . (,_Γ) . P) (b . (,_Γ) . P) (getP sum)
+  sumL a b = popL (exlr (pushL a . P) (pushL b . P) . getP)
   sumR1 = fmap (fmap (fmap inl))
   sumR2 = fmap (fmap (fmap inr))
 
