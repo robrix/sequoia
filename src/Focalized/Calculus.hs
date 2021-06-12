@@ -320,7 +320,7 @@ instance Proof (|-) where
   parR ab = either (>>= (pure . inl)) (pure . inr) <$> ab
 
   funL a b = wkL a `cut` popL (\ a -> popL (\ f -> pure (getFun (getN f) a)) `cut` exL (wkL b))
-  funR p = Sequent $ \ _Γ -> Right $ mkFun $ \ a -> appSequent (pushL p a) _Γ
+  funR p = closure (\ _Γ -> pure (mkFun (close _Γ . pushL p)))
 
   subL b = popL (\ s -> cut (pushL b (subA s)) (pushL (negateL ax) (subK s)))
   subR a b = liftA2 mkSub <$> a <*> negateR b
