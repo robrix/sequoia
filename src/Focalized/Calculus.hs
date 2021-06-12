@@ -143,6 +143,8 @@ class Proof p where
   zeroL :: (P Zero <| _Γ) `p` _Δ
 
   oneL :: _Γ `p` _Δ -> (P One <| _Γ) `p` _Δ
+  oneL' :: (P One <| _Γ) `p` _Δ -> _Γ `p` _Δ
+  oneL' = cut oneR
   oneR :: _Γ `p` (_Δ |> P One)
 
   botL :: (N Bot <| _Γ) `p` _Δ
