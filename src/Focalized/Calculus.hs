@@ -193,8 +193,8 @@ instance Proof (|-) where
   (⊗) = liftA2 (liftA2 (liftA2 inlr))
 
   sumL a b (sum, _Γ) = exlr (a . (,_Γ) . P) (b . (,_Γ) . P) (getP sum)
-  sumR1 a = fmap (P . inl . getP) <$> a
-  sumR2 b = fmap (P . inr . getP) <$> b
+  sumR1 = fmap (fmap (fmap inl))
+  sumR2 = fmap (fmap (fmap inr))
 
   parL a b (sum, _Γ) = exlr (a . (,_Γ) . N) (b . (,_Γ) . N) (getN sum)
   parR ab = either (>>= (pure . fmap inl)) (pure . fmap inr) . ab
