@@ -314,7 +314,7 @@ instance Proof (|-) where
   negateL = subL . wkL
   negateR = subR oneR
 
-  cut f g _Γ = f _Γ >>- \ a -> g (a, _Γ)
+  cut f g = f >>= either pure (pushL g)
 
   ax = popL (pure . pure)
 
