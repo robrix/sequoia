@@ -109,11 +109,11 @@ instance Disj N (⅋) where
   inr r = N $ Par $ \ _ ifr -> ifr r
   exlr ifl ifr (N (Par run)) = run ifl ifr
 
-newtype (a --> b) _Δ = Fun { getFun :: a -> (_Δ |> b) }
+newtype (a --> b) _Δ = Fun { getFun :: P a -> (_Δ |> N b) }
 
 infixr 0 -->
 
-data (a --< b) _Δ = Sub a (Cont b _Δ)
+data (a --< b) _Δ = Sub (P a) (Cont (N b) _Δ)
 
 infixr 0 --<
 
@@ -301,11 +301,11 @@ instance Proof (|-) where
   parL a b = popL (exlr (pushL a) (pushL b))
   parR ab = either (>>= (pure . inl)) (pure . inr) <$> ab
 
-  funL a b = wkL a `cut` popL (\ a -> popL (\ f -> pure (N <$> getFun (getN f) (getP a))) `cut` exL (wkL b))
-  funR p = Sequent $ \ _Γ -> Right $ N $ Fun $ \ a -> getN <$> appSequent (pushL p (P a)) _Γ
+  funL a b = wkL a `cut` popL (\ a -> popL (\ f -> pure (getFun (getN f) a)) `cut` exL (wkL b))
+  funR p = Sequent $ \ _Γ -> Right $ N $ Fun $ \ a -> appSequent (pushL p a) _Γ
 
-  subL b = popL (\ (P (Sub a k)) -> pushL (contL (pushL (fmap getN <$> b) (P a))) k)
-  subR a b = liftA2 (traverse Sub `on1` lmap N) <$> a <*> contR b
+  subL b = popL (\ (P (Sub a k)) -> pushL (contL (pushL b a)) k)
+  subR a b = liftA2 (fmap P . Sub) <$> a <*> contR b
 
   zeroL = popL (absurdP . getP)
 
