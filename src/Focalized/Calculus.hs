@@ -303,7 +303,7 @@ instance Proof (|-) where
   oneL = wkL
   oneR = pure (pure (P One))
 
-  botL = absurdN . getN . fst
+  botL = popL (absurdN . getN)
   botR = fmap Left
 
   topR = pure (pure (N Top))
