@@ -129,6 +129,8 @@ class Proof p where
   funL2 :: (N ((a --> b) (_Δ |> N b)) <| P a <| _Γ) `p` (_Δ |> N b)
   funL2 = funL (exR (wkR ax)) (exL (wkL ax))
   funR :: (P a <| _Γ) `p` (_Δ |> N b) -> _Γ `p` (_Δ |> N ((a --> b) _Δ))
+  funR' :: _Γ `p` (_Δ |> N ((a --> b) (_Δ |> N b))) -> (P a <| _Γ) `p` (_Δ |> N b)
+  funR' p = cut (wkL (exR (wkR p))) funL2
 
   subL :: (P a <| _Γ) `p` (_Δ |> N b) -> (P ((a --< b) _Δ) <| _Γ) `p` _Δ
   subR :: _Γ `p` (_Δ |> P a) -> (N b <| _Γ) `p` _Δ -> _Γ `p` (_Δ |> P ((a --< b) _Δ))
