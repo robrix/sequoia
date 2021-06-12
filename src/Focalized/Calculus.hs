@@ -114,6 +114,8 @@ newtype (a --> b) _Δ = Fun { getFun :: P a -> (_Δ |> N b) }
 infixr 0 -->
 
 data (a --< b) _Δ = Sub !(P a) !(P (Negate b _Δ))
+mkSub :: P a -> P (Negate b _Δ) -> P ((a --< b) _Δ)
+mkSub = fmap P . Sub
 
 infixr 0 --<
 
@@ -318,7 +320,7 @@ instance Proof (|-) where
   funR p = Sequent $ \ _Γ -> Right $ N $ Fun $ \ a -> appSequent (pushL p a) _Γ
 
   subL b = popL (\ s -> cut (pushL b (subA s)) (pushL (negateL ax) (subK s)))
-  subR a b = liftA2 (fmap P . Sub) <$> a <*> negateR b
+  subR a b = liftA2 mkSub <$> a <*> negateR b
 
   zeroL = popL (absurdP . getP)
 
