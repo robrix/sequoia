@@ -158,6 +158,8 @@ class Proof p where
   negateL' :: (P (Negate a (_Δ |> N a)) <| _Γ) `p` _Δ -> _Γ `p` (_Δ |> N a)
   negateL' = cut (negateR ax) . wkR
   negateR :: (N a <| _Γ) `p` _Δ -> _Γ `p` (_Δ |> P (Negate a _Δ))
+  negateR' :: _Γ `p` (_Δ |> P (Negate a _Δ)) -> (N a <| _Γ) `p` _Δ
+  negateR' p = cut (wkL p) (negateL ax)
 
   notL :: _Γ `p` (_Δ |> P a) -> (N (Not a _Δ) <| _Γ) `p` _Δ
   notR :: (P a <| _Γ) `p` _Δ -> _Γ `p` (_Δ |> N (Not a _Δ))
