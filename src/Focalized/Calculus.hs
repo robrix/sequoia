@@ -318,7 +318,7 @@ instance Proof (|-) where
 
   ax = Right . fst
 
-  wkL = (. snd)
+  wkL = popL . const
   wkR = fmap Left
   cnL = (. join (,))
   cnR = fmap (either id id)
