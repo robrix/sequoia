@@ -47,10 +47,10 @@ instance Bifunctor (&) where
 instance Bitraversable (&) where
   bitraverse f g (With run) = run $ \ a b -> inlr <$> f a <*> g b
 
-class Conj p where
-  inlr :: a -> b -> a `p` b
-  exl :: a `p` b -> a
-  exr :: a `p` b -> b
+class Conj c where
+  inlr :: a -> b -> a `c` b
+  exl :: a `c` b -> a
+  exr :: a `c` b -> b
 
 instance Conj (⊗) where
   inlr = (:⊗)
@@ -92,10 +92,10 @@ instance Bifunctor (⅋) where
 instance Bitraversable (⅋) where
   bitraverse f g (Par run) = run (fmap inl . f) (fmap inr . g)
 
-class Disj s where
-  inl :: a -> a `s` b
-  inr :: b -> a `s` b
-  exlr :: (a -> r) -> (b -> r) -> a `s` b -> r
+class Disj d where
+  inl :: a -> a `d` b
+  inr :: b -> a `d` b
+  exlr :: (a -> r) -> (b -> r) -> a `d` b -> r
 
 instance Disj (⊕) where
   inl = InL
