@@ -131,6 +131,26 @@ data Γ = Γ
 data Δ
 
 
+class WeakenL _Γ where
+  wL :: Proof p => Γ `p` _Δ -> _Γ `p` _Δ
+
+instance WeakenL Γ where
+  wL = id
+
+instance WeakenL _Γ => WeakenL (a, _Γ) where
+  wL = wkL . wL
+
+
+class WeakenR _Δ where
+  wR :: Proof p => _Γ `p` Δ -> _Γ `p` _Δ
+
+instance WeakenR Δ where
+  wR = id
+
+instance WeakenR _Δ => WeakenR (_Δ |> a) where
+  wR = wkR . wR
+
+
 class Profunctor p => Proof p where
   withL1 :: (a, _Γ) `p` _Δ -> (a & b, _Γ) `p` _Δ
   withL2 :: (b, _Γ) `p` _Δ -> (a & b, _Γ) `p` _Δ
