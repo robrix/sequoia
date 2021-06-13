@@ -114,11 +114,8 @@ data (a --< b) _Δ = Sub { subA :: !a, subK :: !(Negate b _Δ) }
 
 infixr 0 --<
 
-type Not = Cont
-type Negate = Cont
-
-newtype Cont a _Δ = Cont { runCont :: a -> _Δ }
-  deriving (Functor, Profunctor)
+type Not = (->)
+type Negate = (->)
 
 data Bot
 data Top = Top
@@ -305,11 +302,11 @@ instance Proof (|-) where
 
   topR = pure (pure Top)
 
-  notL p = popL (cut p . popL . fmap pure . runCont)
-  notR p = closure (\ _Γ -> pure (Cont (close _Γ . pushL p)))
+  notL p = popL (cut p . popL . fmap pure)
+  notR p = closure (\ _Γ -> pure (close _Γ . pushL p))
 
-  negateL p = popL (cut p . popL . fmap pure . runCont)
-  negateR p = closure (\ _Γ -> pure (Cont (close _Γ . pushL p)))
+  negateL p = popL (cut p . popL . fmap pure)
+  negateR p = closure (\ _Γ -> pure (close _Γ . pushL p))
 
   cut f g = f >>= either pure (pushL g)
 
