@@ -214,7 +214,7 @@ class Profunctor p => Proof p where
   cnR = rmap (either id pure)
   exL :: (a, (b, c)) `p` _Δ -> (b, (a, c)) `p` _Δ
   exL = popL2 . flip . pushL2
-  exR :: _Γ `p` (a |> b |> c) -> _Γ `p` (a |> c |> b)
+  exR :: _Γ `p` (_Δ |> a |> b) -> _Γ `p` (_Δ |> b |> a)
   exR = rmap (either (either (Left . Left) Right) (Left . Right))
 
   zapSum :: _Γ `p` (_Δ |> Not a _Δ & Not b _Δ) -> (a ⊕ b, _Γ) `p` _Δ
