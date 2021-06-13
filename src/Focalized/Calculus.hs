@@ -130,9 +130,9 @@ class Profunctor p => Proof p where
   withL2 :: (b, _Γ) `p` _Δ -> (a & b, _Γ) `p` _Δ
   (&) :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a & b)
   withR1' :: _Γ `p` (_Δ |> a & b) -> _Γ `p` (_Δ |> a)
-  withR1' t = cut (exR (wkR t)) (withL1 ax)
+  withR1' t = exR (wkR t) `cut` withL1 ax
   withR2' :: _Γ `p` (_Δ |> a & b) -> _Γ `p` (_Δ |> b)
-  withR2' t = cut (exR (wkR t)) (withL2 ax)
+  withR2' t = exR (wkR t) `cut` withL2 ax
 
   tensorL :: (a, (b, _Γ)) `p` _Δ -> (a ⊗ b, _Γ) `p` _Δ
   tensorL' :: (a ⊗ b, _Γ) `p` _Δ -> (a, (b, _Γ)) `p` _Δ
