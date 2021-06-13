@@ -220,13 +220,13 @@ class Profunctor p => Proof p where
   zapSum :: _Γ `p` (_Δ |> Not a _Δ & Not b _Δ) -> (a ⊕ b, _Γ) `p` _Δ
   zapSum p = sumL (cut (wkL p) (withL1 (notL init))) (cut (wkL p) (withL2 (notL init)))
 
-  zapWith :: _Γ `p` (_Δ |> (Negate a _Δ ⊕ Negate b _Δ)) -> (a & b, _Γ) `p` _Δ
+  zapWith :: _Γ `p` (_Δ |> Negate a _Δ ⊕ Negate b _Δ) -> (a & b, _Γ) `p` _Δ
   zapWith p = cut (wkL p) (sumL (negateL (withL1 init)) (negateL (withL2 init)))
 
   zapTensor :: _Γ `p` (_Δ |> Not a _Δ ⅋ Not b _Δ) -> (a ⊗ b, _Γ) `p` _Δ
   zapTensor p = tensorL (cut (wkL (wkL p)) (parL (notL (exL (wkL init))) (notL (wkL init))))
 
-  zapPar :: _Γ `p` (_Δ |> (Negate a _Δ ⊗ Negate b _Δ)) -> (a ⅋ b, _Γ) `p` _Δ
+  zapPar :: _Γ `p` (_Δ |> Negate a _Δ ⊗ Negate b _Δ) -> (a ⅋ b, _Γ) `p` _Δ
   zapPar p = cut (wkL p) (tensorL (popL2 (parL `on0` pushL (negateL init) `on1` pushL (negateL init))))
 
 
