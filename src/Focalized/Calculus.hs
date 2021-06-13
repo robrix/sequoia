@@ -136,7 +136,7 @@ class Profunctor p => Proof p where
 
   tensorL :: (a, (b, _Γ)) `p` _Δ -> (a ⊗ b, _Γ) `p` _Δ
   tensorL' :: (a ⊗ b, _Γ) `p` _Δ -> (a, (b, _Γ)) `p` _Δ
-  tensorL' p = (ax ⊗ wkL ax) `cut` popL (wkL . wkL . pushL p)
+  tensorL' p = ax ⊗ wkL ax `cut` popL (wkL . wkL . pushL p)
   (⊗) :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a ⊗ b)
 
   sumL :: (a, _Γ) `p` _Δ -> (b, _Γ) `p` _Δ -> (a ⊕ b, _Γ) `p` _Δ
@@ -197,7 +197,7 @@ class Profunctor p => Proof p where
 
   cut :: _Γ `p` (_Δ |> a) -> (a, _Γ) `p` _Δ -> _Γ `p` _Δ
 
-  infixr `cut`
+  infixr 2 `cut`
 
   ax :: (a, _Γ) `p` (_Δ |> a)
 
