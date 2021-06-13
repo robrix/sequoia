@@ -253,7 +253,7 @@ class Profunctor p => Proof p where
   pushL2 :: (a, (b, _Γ)) `p` _Δ -> a -> b -> _Γ `p` _Δ
   pushL2 p = pushL . pushL p
 
-on0 ::  (a -> b -> c) -> (a' -> a) -> (a' -> b -> c)
+on0 :: (a -> b -> c) -> (a' -> a) -> (a' -> b -> c)
 on0 = (.)
 
 on1 :: (a -> b -> c) -> (b' -> b) -> (a -> b' -> c)
