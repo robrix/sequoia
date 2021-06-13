@@ -11,7 +11,7 @@ import Data.Bifoldable
 import Data.Bifunctor (Bifunctor(..))
 import Data.Bitraversable
 import Data.Profunctor
-import Prelude hiding (tail)
+import Prelude hiding (init, tail)
 
 type (|>) = Either
 infixl 5 |>
@@ -130,42 +130,42 @@ class Profunctor p => Proof p where
   withL2 :: (b, _Γ) `p` _Δ -> (a & b, _Γ) `p` _Δ
   (&) :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a & b)
   withR1' :: _Γ `p` (_Δ |> a & b) -> _Γ `p` (_Δ |> a)
-  withR1' t = exR (wkR t) `cut` withL1 ax
+  withR1' t = exR (wkR t) `cut` withL1 init
   withR2' :: _Γ `p` (_Δ |> a & b) -> _Γ `p` (_Δ |> b)
-  withR2' t = exR (wkR t) `cut` withL2 ax
+  withR2' t = exR (wkR t) `cut` withL2 init
 
   tensorL :: (a, (b, _Γ)) `p` _Δ -> (a ⊗ b, _Γ) `p` _Δ
   tensorL' :: (a ⊗ b, _Γ) `p` _Δ -> (a, (b, _Γ)) `p` _Δ
-  tensorL' p = ax ⊗ wkL ax `cut` popL (wkL . wkL . pushL p)
+  tensorL' p = init ⊗ wkL init `cut` popL (wkL . wkL . pushL p)
   (⊗) :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a ⊗ b)
 
   sumL :: (a, _Γ) `p` _Δ -> (b, _Γ) `p` _Δ -> (a ⊕ b, _Γ) `p` _Δ
   sumL1' :: (a ⊕ b, _Γ) `p` _Δ -> (a, _Γ) `p` _Δ
-  sumL1' = cut (sumR1 ax) . exL . wkL
+  sumL1' = cut (sumR1 init) . exL . wkL
   sumL2' :: (a ⊕ b, _Γ) `p` _Δ -> (b, _Γ) `p` _Δ
-  sumL2' = cut (sumR2 ax) . exL . wkL
+  sumL2' = cut (sumR2 init) . exL . wkL
   sumR1 :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> a ⊕ b)
   sumR2 :: _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a ⊕ b)
 
   parL :: (a, _Γ) `p` _Δ -> (b, _Γ) `p` _Δ -> (a ⅋ b, _Γ) `p` _Δ
   parR :: _Γ `p` (_Δ |> a |> b) -> _Γ `p` (_Δ |> a ⅋ b)
   parR' :: _Γ `p` (_Δ |> a ⅋ b) -> _Γ `p` (_Δ |> a |> b)
-  parR' p = cut (exR (wkR (exR (wkR p)))) (parL (wkR ax) (exR (wkR ax)))
+  parR' p = cut (exR (wkR (exR (wkR p)))) (parL (wkR init) (exR (wkR init)))
 
   funL :: _Γ `p` (_Δ |> a) -> (b, _Γ) `p` _Δ -> ((a --> b) _Δ, _Γ) `p` _Δ
   funL2 :: ((a --> b) (_Δ |> b), (a, _Γ)) `p` (_Δ |> b)
-  funL2 = funL (exR (wkR ax)) (exL (wkL ax))
+  funL2 = funL (exR (wkR init)) (exL (wkL init))
   funR :: (a, _Γ) `p` (_Δ |> b) -> _Γ `p` (_Δ |> (a --> b) _Δ)
   funR' :: _Γ `p` (_Δ |> (a --> b) (_Δ |> b)) -> (a, _Γ) `p` (_Δ |> b)
   funR' p = cut (wkL (exR (wkR p))) funL2
 
   subL :: (a, _Γ) `p` (_Δ |> b) -> ((a --< b) _Δ, _Γ) `p` _Δ
   subL' :: ((a --< b) (_Δ |> b), _Γ) `p` _Δ -> (a, _Γ) `p` (_Δ |> b)
-  subL' p = cut (subR (exR (wkR ax)) (exL (wkL ax))) (wkR (exL (wkL p)))
+  subL' p = cut (subR (exR (wkR init)) (exL (wkL init))) (wkR (exL (wkL p)))
   subR :: _Γ `p` (_Δ |> a) -> (b, _Γ) `p` _Δ -> _Γ `p` (_Δ |> (a --< b) _Δ)
 
   ($$) :: _Γ `p` (_Δ |> (a --> b) (_Δ |> b)) -> _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b)
-  f $$ a = cut (exR (wkR f)) (exR (wkR a) `funL` ax)
+  f $$ a = cut (exR (wkR f)) (exR (wkR a) `funL` init)
 
   zeroL :: (Zero, _Γ) `p` _Δ
 
@@ -183,23 +183,23 @@ class Profunctor p => Proof p where
 
   negateL :: _Γ `p` (_Δ |> a) -> (Negate a _Δ, _Γ) `p` _Δ
   negateL' :: (Negate a (_Δ |> a), _Γ) `p` _Δ -> _Γ `p` (_Δ |> a)
-  negateL' = cut (negateR ax) . wkR
+  negateL' = cut (negateR init) . wkR
   negateR :: (a, _Γ) `p` _Δ -> _Γ `p` (_Δ |> Negate a _Δ)
   negateR' :: _Γ `p` (_Δ |> Negate a _Δ) -> (a, _Γ) `p` _Δ
-  negateR' p = cut (wkL p) (negateL ax)
+  negateR' p = cut (wkL p) (negateL init)
 
   notL :: _Γ `p` (_Δ |> a) -> (Not a _Δ, _Γ) `p` _Δ
   notL' :: (Not a (_Δ |> a), _Γ) `p` _Δ -> _Γ `p` (_Δ |> a)
-  notL' = cut (notR ax) . wkR
+  notL' = cut (notR init) . wkR
   notR :: (a, _Γ) `p` _Δ -> _Γ `p` (_Δ |> Not a _Δ)
   notR' :: _Γ `p` (_Δ |> Not a _Δ) -> (a, _Γ) `p` _Δ
-  notR' p = cut (wkL p) (notL ax)
+  notR' p = cut (wkL p) (notL init)
 
   cut :: _Γ `p` (_Δ |> a) -> (a, _Γ) `p` _Δ -> _Γ `p` _Δ
 
   infixr 2 `cut`
 
-  ax :: (a, _Γ) `p` (_Δ |> a)
+  init :: (a, _Γ) `p` (_Δ |> a)
 
   wkL :: _Γ `p` _Δ -> (a, _Γ) `p` _Δ
   wkL = popL . const
@@ -215,16 +215,16 @@ class Profunctor p => Proof p where
   exR = rmap (either (either (Left . Left) Right) (Left . Right))
 
   zapSum :: _Γ `p` (_Δ |> Not a _Δ & Not b _Δ) -> (a ⊕ b, _Γ) `p` _Δ
-  zapSum p = sumL (cut (wkL p) (withL1 (notL ax))) (cut (wkL p) (withL2 (notL ax)))
+  zapSum p = sumL (cut (wkL p) (withL1 (notL init))) (cut (wkL p) (withL2 (notL init)))
 
   zapWith :: _Γ `p` (_Δ |> (Negate a _Δ ⊕ Negate b _Δ)) -> (a & b, _Γ) `p` _Δ
-  zapWith p = cut (wkL p) (sumL (negateL (withL1 ax)) (negateL (withL2 ax)))
+  zapWith p = cut (wkL p) (sumL (negateL (withL1 init)) (negateL (withL2 init)))
 
   zapTensor :: _Γ `p` (_Δ |> Not a _Δ ⅋ Not b _Δ) -> (a ⊗ b, _Γ) `p` _Δ
-  zapTensor p = tensorL (cut (wkL (wkL p)) (parL (notL (exL (wkL ax))) (notL (wkL ax))))
+  zapTensor p = tensorL (cut (wkL (wkL p)) (parL (notL (exL (wkL init))) (notL (wkL init))))
 
   zapPar :: _Γ `p` (_Δ |> (Negate a _Δ ⊗ Negate b _Δ)) -> (a ⅋ b, _Γ) `p` _Δ
-  zapPar p = cut (wkL p) (tensorL (popL2 (parL `on0` pushL (negateL ax) `on1` pushL (negateL ax))))
+  zapPar p = cut (wkL p) (tensorL (popL2 (parL `on0` pushL (negateL init) `on1` pushL (negateL init))))
 
 
   -- | Pop something off the context which can later be pushed. Used with 'pushL', this provides a generalized context reordering facility.
@@ -286,7 +286,7 @@ instance Proof (|-) where
   funL a b = popL (\ f -> a `cut` popL (pure . appFun f) `cut` exL (wkL b))
   funR p = closure (\ _Γ -> pure (Fun (close _Γ . pushL p)))
 
-  subL b = popL (\ s -> cut (pushL b (subA s)) (pushL (negateL ax) (subK s)))
+  subL b = popL (\ s -> cut (pushL b (subA s)) (pushL (negateL init) (subK s)))
   subR a b = liftA2 Sub <$> a <*> negateR b
 
   zeroL = popL absurdP
@@ -307,7 +307,7 @@ instance Proof (|-) where
 
   cut f g = f >>= either pure (pushL g)
 
-  ax = popL (pure . pure)
+  init = popL (pure . pure)
 
   popL f = Sequent (uncurry (appSequent . f))
   pushL p = Sequent . curry (appSequent p)
