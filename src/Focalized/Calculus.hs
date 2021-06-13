@@ -193,7 +193,7 @@ class Profunctor p => Proof p where
   ($$) :: _Γ `p` (_Δ |> (a --> b) (_Δ |> b)) -> _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b)
   f $$ a = cut (exR (wkR f)) (exR (wkR a) `funL` init)
 
-  zeroL :: (Zero, Γ) `p` Δ
+  zeroL :: (Zero, _Γ) `p` _Δ
 
   oneL :: _Γ `p` _Δ -> (One, _Γ) `p` _Δ
   oneL' :: (One, _Γ) `p` _Δ -> _Γ `p` _Δ
@@ -205,7 +205,7 @@ class Profunctor p => Proof p where
   botR' :: _Γ `p` (_Δ |> Bot) -> _Γ `p` _Δ
   botR' = (`cut` botL)
 
-  topR :: Γ `p` (Δ |> Top)
+  topR :: _Γ `p` (_Δ |> Top)
 
   negateL :: _Γ `p` (_Δ |> a) -> (Negate a _Δ, _Γ) `p` _Δ
   negateL' :: (Negate a (_Δ |> a), _Γ) `p` _Δ -> _Γ `p` (_Δ |> a)
