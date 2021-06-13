@@ -2,8 +2,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Focalized.Calculus
 ( Proof(..)
-, N
-, P
 ) where
 
 import Control.Applicative (liftA2)
@@ -12,14 +10,13 @@ import Control.Monad (join)
 import Data.Bifoldable
 import Data.Bifunctor (Bifunctor(..))
 import Data.Bitraversable
-import Data.Functor.Identity
 import Data.Profunctor
 import Prelude hiding (tail)
 
 type (|>) = Either
 infixl 5 |>
 
-data a ⊗ b = !(P a) :⊗ !(P b)
+data a ⊗ b = !a :⊗ !b
 
 infixr 7 ⊗
 
@@ -30,9 +27,9 @@ instance Bifunctor (⊗) where
   bimap = bimapDefault
 
 instance Bitraversable (⊗) where
-  bitraverse f g (a :⊗ b) = fmap getP . inlr <$> traverse f a <*> traverse g b
+  bitraverse f g (a :⊗ b) = inlr <$> f a <*> g b
 
-newtype a & b = With (forall r . (N a -> N b -> r) -> r)
+newtype a & b = With (forall r . (a -> b -> r) -> r)
 
 infixr 6 &
 
@@ -43,26 +40,26 @@ instance Bifunctor (&) where
   bimap = bimapDefault
 
 instance Bitraversable (&) where
-  bitraverse f g w = fmap getN . inlr <$> traverse f (exl (N w)) <*> traverse g (exr (N w))
+  bitraverse f g w = inlr <$> f (exl w) <*> g (exr w)
 
-class Conj p c | c -> p where
-  inlr :: p a -> p b -> p (a `c` b)
-  exl :: p (a `c` b) -> p a
-  exr :: p (a `c` b) -> p b
+class Conj c where
+  inlr :: a -> b -> a `c` b
+  exl :: a `c` b -> a
+  exr :: a `c` b -> b
 
-instance Conj P (⊗) where
-  inlr = fmap P . (:⊗)
-  exl (P (l :⊗ _)) = l
-  exr (P (_ :⊗ r)) = r
+instance Conj (⊗) where
+  inlr = (:⊗)
+  exl (l :⊗ _) = l
+  exr (_ :⊗ r) = r
 
-instance Conj N (&) where
-  inlr a b = N $ With $ \ f -> f a b
-  exl (N (With run)) = run const
-  exr (N (With run)) = run (const id)
+instance Conj (&) where
+  inlr a b = With $ \ f -> f a b
+  exl (With run) = run const
+  exr (With run) = run (const id)
 
 data a ⊕ b
-  = InL !(P a)
-  | InR !(P b)
+  = InL !a
+  | InR !b
 
 infixr 6 ⊕
 
@@ -74,10 +71,10 @@ instance Bifunctor (⊕) where
 
 instance Bitraversable (⊕) where
   bitraverse f g = \case
-    InL a -> InL <$> traverse f a
-    InR b -> InR <$> traverse g b
+    InL a -> InL <$> f a
+    InR b -> InR <$> g b
 
-newtype (a ⅋ b) = Par (forall r . (N a -> r) -> (N b -> r) -> r)
+newtype (a ⅋ b) = Par (forall r . (a -> r) -> (b -> r) -> r)
 
 infixr 7 ⅋
 
@@ -88,56 +85,35 @@ instance Bifunctor (⅋) where
   bimap = bimapDefault
 
 instance Bitraversable (⅋) where
-  bitraverse f g (Par run) = getN <$> run (fmap inl . traverse f) (fmap inr . traverse g)
+  bitraverse f g (Par run) = run (fmap inl . f) (fmap inr . g)
 
-class Disj p d | d -> p where
-  inl :: p a -> p (a `d` b)
-  inr :: p b -> p (a `d` b)
-  exlr :: (p a -> r) -> (p b -> r) -> p (a `d` b) -> r
+class Disj d where
+  inl :: a -> a `d` b
+  inr :: b -> a `d` b
+  exlr :: (a -> r) -> (b -> r) -> a `d` b -> r
 
-instance Disj P (⊕) where
-  inl = P . InL
-  inr = P . InR
+instance Disj (⊕) where
+  inl = InL
+  inr = InR
   exlr ifl ifr = \case
-    P (InL l) -> ifl l
-    P (InR r) -> ifr r
+    InL l -> ifl l
+    InR r -> ifr r
 
-instance Disj N (⅋) where
-  inl l = N $ Par $ \ ifl _ -> ifl l
-  inr r = N $ Par $ \ _ ifr -> ifr r
-  exlr ifl ifr (N (Par run)) = run ifl ifr
+instance Disj (⅋) where
+  inl l = Par $ \ ifl _ -> ifl l
+  inr r = Par $ \ _ ifr -> ifr r
+  exlr ifl ifr (Par run) = run ifl ifr
 
-newtype (a --> b) _Δ = Fun { getFun :: P a -> (_Δ |> N b) }
-
-mkFun :: (P a -> (_Δ |> N b)) -> N ((a --> b) _Δ)
-mkFun = N . Fun
-
-appFun :: N ((a --> b) _Δ) -> (P a -> (_Δ |> N b))
-appFun = getFun . getN
+newtype (a --> b) _Δ = Fun { appFun :: a -> (_Δ |> b) }
 
 infixr 0 -->
 
-data (a --< b) _Δ = Sub !(P a) !(P (Negate b _Δ))
-mkSub :: P a -> P (Negate b _Δ) -> P ((a --< b) _Δ)
-mkSub = fmap P . Sub
+data (a --< b) _Δ = Sub { subA :: !a, subK :: !(Negate b _Δ) }
 
 infixr 0 --<
 
-subA :: P ((a --< b) _Δ) -> P a
-subA (P (Sub a _)) = a
-subK :: P ((a --< b) _Δ) -> P (Negate b _Δ)
-subK (P (Sub _ k)) = k
-
-type Not a = Cont (P a)
-mkNot :: (P a -> _Δ) -> N (Not a _Δ)
-mkNot = N . Cont
-runNot :: N (Not a _Δ) -> P a -> _Δ
-runNot = runCont . getN
-type Negate a = Cont (N a)
-mkNegate :: (N a -> _Δ) -> P (Negate a _Δ)
-mkNegate = P . Cont
-runNegate :: P (Negate a _Δ) -> N a -> _Δ
-runNegate = runCont . getP
+type Not = Cont
+type Negate = Cont
 
 newtype Cont a _Δ = Cont { runCont :: a -> _Δ }
   deriving (Functor, Profunctor)
@@ -148,90 +124,75 @@ data Top = Top
 data Zero
 data One = One
 
--- Polarities
-
-newtype N a = N { getN :: a }
-  deriving (Eq, Ord, Show)
-  deriving (Applicative, Foldable, Functor, Monad) via Identity
-
-instance Traversable N where
-  traverse f = fmap N . f . getN
-
-newtype P a = P { getP :: a }
-  deriving (Eq, Ord, Show)
-  deriving (Applicative, Foldable, Functor, Monad) via Identity
-
-instance Traversable P where
-  traverse f = fmap P . f . getP
 
 class Profunctor p => Proof p where
-  withL1 :: (N a, _Γ) `p` _Δ -> (N (a & b), _Γ) `p` _Δ
-  withL2 :: (N b, _Γ) `p` _Δ -> (N (a & b), _Γ) `p` _Δ
-  (&) :: _Γ `p` (_Δ |> N a) -> _Γ `p` (_Δ |> N b) -> _Γ `p` (_Δ |> N (a & b))
-  withR1' :: _Γ `p` (_Δ |> N (a & b)) -> _Γ `p` (_Δ |> N a)
+  withL1 :: (a, _Γ) `p` _Δ -> (a & b, _Γ) `p` _Δ
+  withL2 :: (b, _Γ) `p` _Δ -> (a & b, _Γ) `p` _Δ
+  (&) :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a & b)
+  withR1' :: _Γ `p` (_Δ |> a & b) -> _Γ `p` (_Δ |> a)
   withR1' t = cut (exR (wkR t)) (withL1 ax)
-  withR2' :: _Γ `p` (_Δ |> N (a & b)) -> _Γ `p` (_Δ |> N b)
+  withR2' :: _Γ `p` (_Δ |> a & b) -> _Γ `p` (_Δ |> b)
   withR2' t = cut (exR (wkR t)) (withL2 ax)
 
-  tensorL :: (P a, (P b, _Γ)) `p` _Δ -> (P (a ⊗ b), _Γ) `p` _Δ
-  tensorL' :: (P (a ⊗ b), _Γ) `p` _Δ -> (P a, (P b, _Γ)) `p` _Δ
+  tensorL :: (a, (b, _Γ)) `p` _Δ -> (a ⊗ b, _Γ) `p` _Δ
+  tensorL' :: (a ⊗ b, _Γ) `p` _Δ -> (a, (b, _Γ)) `p` _Δ
   tensorL' = cut (exL (wkL ax) ⊗ wkL ax) . exL . wkL . exL . wkL
-  (⊗) :: _Γ `p` (_Δ |> P a) -> _Γ `p` (_Δ |> P b) -> _Γ `p` (_Δ |> P (a ⊗ b))
+  (⊗) :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a ⊗ b)
 
-  sumL :: (P a, _Γ) `p` _Δ -> (P b, _Γ) `p` _Δ -> (P (a ⊕ b), _Γ) `p` _Δ
-  sumL1' :: (P (a ⊕ b), _Γ) `p` _Δ -> (P a, _Γ) `p` _Δ
+  sumL :: (a, _Γ) `p` _Δ -> (b, _Γ) `p` _Δ -> (a ⊕ b, _Γ) `p` _Δ
+  sumL1' :: (a ⊕ b, _Γ) `p` _Δ -> (a, _Γ) `p` _Δ
   sumL1' = cut (sumR1 ax) . exL . wkL
-  sumL2' :: (P (a ⊕ b), _Γ) `p` _Δ -> (P b, _Γ) `p` _Δ
+  sumL2' :: (a ⊕ b, _Γ) `p` _Δ -> (b, _Γ) `p` _Δ
   sumL2' = cut (sumR2 ax) . exL . wkL
-  sumR1 :: _Γ `p` (_Δ |> P a) -> _Γ `p` (_Δ |> P (a ⊕ b))
-  sumR2 :: _Γ `p` (_Δ |> P b) -> _Γ `p` (_Δ |> P (a ⊕ b))
+  sumR1 :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> a ⊕ b)
+  sumR2 :: _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a ⊕ b)
 
-  parL :: (N a, _Γ) `p` _Δ -> (N b, _Γ) `p` _Δ -> (N (a ⅋ b), _Γ) `p` _Δ
-  parR :: _Γ `p` (_Δ |> N a |> N b) -> _Γ `p` (_Δ |> N (a ⅋ b))
-  parR' :: _Γ `p` (_Δ |> N (a ⅋ b)) -> _Γ `p` (_Δ |> N a |> N b)
+  parL :: (a, _Γ) `p` _Δ -> (b, _Γ) `p` _Δ -> (a ⅋ b, _Γ) `p` _Δ
+  parR :: _Γ `p` (_Δ |> a |> b) -> _Γ `p` (_Δ |> a ⅋ b)
+  parR' :: _Γ `p` (_Δ |> a ⅋ b) -> _Γ `p` (_Δ |> a |> b)
   parR' p = cut (exR (wkR (exR (wkR p)))) (parL (wkR ax) (exR (wkR ax)))
 
-  funL :: _Γ `p` (_Δ |> P a) -> (N b, _Γ) `p` _Δ -> (N ((a --> b) _Δ), _Γ) `p` _Δ
-  funL2 :: (N ((a --> b) (_Δ |> N b)), (P a, _Γ)) `p` (_Δ |> N b)
+  funL :: _Γ `p` (_Δ |> a) -> (b, _Γ) `p` _Δ -> ((a --> b) _Δ, _Γ) `p` _Δ
+  funL2 :: ((a --> b) (_Δ |> b), (a, _Γ)) `p` (_Δ |> b)
   funL2 = funL (exR (wkR ax)) (exL (wkL ax))
-  funR :: (P a, _Γ) `p` (_Δ |> N b) -> _Γ `p` (_Δ |> N ((a --> b) _Δ))
-  funR' :: _Γ `p` (_Δ |> N ((a --> b) (_Δ |> N b))) -> (P a, _Γ) `p` (_Δ |> N b)
+  funR :: (a, _Γ) `p` (_Δ |> b) -> _Γ `p` (_Δ |> (a --> b) _Δ)
+  funR' :: _Γ `p` (_Δ |> (a --> b) (_Δ |> b)) -> (a, _Γ) `p` (_Δ |> b)
   funR' p = cut (wkL (exR (wkR p))) funL2
 
-  subL :: (P a, _Γ) `p` (_Δ |> N b) -> (P ((a --< b) _Δ), _Γ) `p` _Δ
-  subL' :: (P ((a --< b) (_Δ |> N b)), _Γ) `p` _Δ -> (P a, _Γ) `p` (_Δ |> N b)
+  subL :: (a, _Γ) `p` (_Δ |> b) -> ((a --< b) _Δ, _Γ) `p` _Δ
+  subL' :: ((a --< b) (_Δ |> b), _Γ) `p` _Δ -> (a, _Γ) `p` (_Δ |> b)
   subL' p = cut (subR (exR (wkR ax)) (exL (wkL ax))) (wkR (exL (wkL p)))
-  subR :: _Γ `p` (_Δ |> P a) -> (N b, _Γ) `p` _Δ -> _Γ `p` (_Δ |> P ((a --< b) _Δ))
+  subR :: _Γ `p` (_Δ |> a) -> (b, _Γ) `p` _Δ -> _Γ `p` (_Δ |> (a --< b) _Δ)
 
-  ($$) :: _Γ `p` (_Δ |> N ((a --> b) (_Δ |> N b))) -> _Γ `p` (_Δ |> P a) -> _Γ `p` (_Δ |> N b)
+  ($$) :: _Γ `p` (_Δ |> (a --> b) (_Δ |> b)) -> _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b)
   f $$ a = cut (exR (wkR f)) (exR (wkR a) `funL` ax)
 
-  zeroL :: (P Zero, _Γ) `p` _Δ
+  zeroL :: (Zero, _Γ) `p` _Δ
 
-  oneL :: _Γ `p` _Δ -> (P One, _Γ) `p` _Δ
-  oneL' :: (P One, _Γ) `p` _Δ -> _Γ `p` _Δ
+  oneL :: _Γ `p` _Δ -> (One, _Γ) `p` _Δ
+  oneL' :: (One, _Γ) `p` _Δ -> _Γ `p` _Δ
   oneL' = cut oneR
-  oneR :: _Γ `p` (_Δ |> P One)
+  oneR :: _Γ `p` (_Δ |> One)
 
-  botL :: (N Bot, _Γ) `p` _Δ
-  botR :: _Γ `p` _Δ -> _Γ `p` (_Δ |> N Bot)
-  botR' :: _Γ `p` (_Δ |> N Bot) -> _Γ `p` _Δ
+  botL :: (Bot, _Γ) `p` _Δ
+  botR :: _Γ `p` _Δ -> _Γ `p` (_Δ |> Bot)
+  botR' :: _Γ `p` (_Δ |> Bot) -> _Γ `p` _Δ
   botR' = (`cut` botL)
 
-  topR :: _Γ `p` (_Δ |> N Top)
+  topR :: _Γ `p` (_Δ |> Top)
 
-  negateL :: _Γ `p` (_Δ |> N a) -> (P (Negate a _Δ), _Γ) `p` _Δ
-  negateL' :: (P (Negate a (_Δ |> N a)), _Γ) `p` _Δ -> _Γ `p` (_Δ |> N a)
+  negateL :: _Γ `p` (_Δ |> a) -> (Negate a _Δ, _Γ) `p` _Δ
+  negateL' :: (Negate a (_Δ |> a), _Γ) `p` _Δ -> _Γ `p` (_Δ |> a)
   negateL' = cut (negateR ax) . wkR
-  negateR :: (N a, _Γ) `p` _Δ -> _Γ `p` (_Δ |> P (Negate a _Δ))
-  negateR' :: _Γ `p` (_Δ |> P (Negate a _Δ)) -> (N a, _Γ) `p` _Δ
+  negateR :: (a, _Γ) `p` _Δ -> _Γ `p` (_Δ |> Negate a _Δ)
+  negateR' :: _Γ `p` (_Δ |> Negate a _Δ) -> (a, _Γ) `p` _Δ
   negateR' p = cut (wkL p) (negateL ax)
 
-  notL :: _Γ `p` (_Δ |> P a) -> (N (Not a _Δ), _Γ) `p` _Δ
-  notL' :: (N (Not a (_Δ |> P a)), _Γ) `p` _Δ -> _Γ `p` (_Δ |> P a)
+  notL :: _Γ `p` (_Δ |> a) -> (Not a _Δ, _Γ) `p` _Δ
+  notL' :: (Not a (_Δ |> a), _Γ) `p` _Δ -> _Γ `p` (_Δ |> a)
   notL' = cut (notR ax) . wkR
-  notR :: (P a, _Γ) `p` _Δ -> _Γ `p` (_Δ |> N (Not a _Δ))
-  notR' :: _Γ `p` (_Δ |> N (Not a _Δ)) -> (P a, _Γ) `p` _Δ
+  notR :: (a, _Γ) `p` _Δ -> _Γ `p` (_Δ |> Not a _Δ)
+  notR' :: _Γ `p` (_Δ |> Not a _Δ) -> (a, _Γ) `p` _Δ
   notR' p = cut (wkL p) (notL ax)
 
   cut :: _Γ `p` (_Δ |> a) -> (a, _Γ) `p` _Δ -> _Γ `p` _Δ
@@ -253,16 +214,16 @@ class Profunctor p => Proof p where
   exR :: _Γ `p` (a |> b |> c) -> _Γ `p` (a |> c |> b)
   exR = rmap (either (either (Left . Left) Right) (Left . Right))
 
-  zapSum :: _Γ `p` (_Δ |> N (Not a _Δ & Not b _Δ)) -> (P (a ⊕ b), _Γ) `p` _Δ
+  zapSum :: _Γ `p` (_Δ |> Not a _Δ & Not b _Δ) -> (a ⊕ b, _Γ) `p` _Δ
   zapSum p = sumL (cut (wkL p) (withL1 (notL ax))) (cut (wkL p) (withL2 (notL ax)))
 
-  zapWith :: _Γ `p` (_Δ |> P (Negate a _Δ ⊕ Negate b _Δ)) -> (N (a & b), _Γ) `p` _Δ
+  zapWith :: _Γ `p` (_Δ |> (Negate a _Δ ⊕ Negate b _Δ)) -> (a & b, _Γ) `p` _Δ
   zapWith p = cut (wkL p) (sumL (negateL (withL1 ax)) (negateL (withL2 ax)))
 
-  zapTensor :: _Γ `p` (_Δ |> N (Not a _Δ ⅋ Not b _Δ)) -> (P (a ⊗ b), _Γ) `p` _Δ
+  zapTensor :: _Γ `p` (_Δ |> Not a _Δ ⅋ Not b _Δ) -> (a ⊗ b, _Γ) `p` _Δ
   zapTensor p = tensorL (cut (wkL (wkL p)) (parL (notL (exL (wkL ax))) (notL (wkL ax))))
 
-  zapPar :: _Γ `p` (_Δ |> P (Negate a _Δ ⊗ Negate b _Δ)) -> (N (a ⅋ b), _Γ) `p` _Δ
+  zapPar :: _Γ `p` (_Δ |> (Negate a _Δ ⊗ Negate b _Δ)) -> (a ⅋ b, _Γ) `p` _Δ
   zapPar p = cut (wkL p) (tensorL (popL2 (parL `on0` pushL (negateL ax) `on1` pushL (negateL ax))))
 
 
@@ -323,26 +284,26 @@ instance Proof (|-) where
   parR ab = either (>>= (pure . inl)) (pure . inr) <$> ab
 
   funL a b = popL (\ f -> a `cut` popL (pure . appFun f) `cut` exL (wkL b))
-  funR p = closure (\ _Γ -> pure (mkFun (close _Γ . pushL p)))
+  funR p = closure (\ _Γ -> pure (Fun (close _Γ . pushL p)))
 
   subL b = popL (\ s -> cut (pushL b (subA s)) (pushL (negateL ax) (subK s)))
-  subR a b = liftA2 mkSub <$> a <*> negateR b
+  subR a b = liftA2 Sub <$> a <*> negateR b
 
-  zeroL = popL (absurdP . getP)
+  zeroL = popL absurdP
 
   oneL = wkL
-  oneR = pure (pure (P One))
+  oneR = pure (pure One)
 
-  botL = popL (absurdN . getN)
+  botL = popL absurdN
   botR = fmap Left
 
-  topR = pure (pure (N Top))
+  topR = pure (pure Top)
 
-  notL p = popL (cut p . popL . fmap pure . runNot)
-  notR p = closure (\ _Γ -> pure (mkNot (close _Γ . pushL p)))
+  notL p = popL (cut p . popL . fmap pure . runCont)
+  notR p = closure (\ _Γ -> pure (Cont (close _Γ . pushL p)))
 
-  negateL p = popL (cut p . popL . fmap pure . runNegate)
-  negateR p = closure (\ _Γ -> pure (mkNegate (close _Γ . pushL p)))
+  negateL p = popL (cut p . popL . fmap pure . runCont)
+  negateR p = closure (\ _Γ -> pure (Cont (close _Γ . pushL p)))
 
   cut f g = f >>= either pure (pushL g)
 
