@@ -268,6 +268,9 @@ class Profunctor p => Proof p where
   popR :: _Γ `p` (_Δ |> a) -> (a -> _Γ `p` _Δ) -> _Γ `p` _Δ
   pushR :: _Γ `p` _Δ -> a -> _Γ `p` (_Δ |> a)
 
+  popR2 :: _Γ `p` (_Δ |> a |> b) -> (Either a b -> _Γ `p` _Δ) -> _Γ `p` _Δ
+  popR2 p k = popR (popR p (wkR . k . Right)) (k . Left)
+
 on0 :: (a -> b -> c) -> (a' -> a) -> (a' -> b -> c)
 on0 = (.)
 
