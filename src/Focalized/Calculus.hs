@@ -2,6 +2,8 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Focalized.Calculus
 ( Proof(..)
+, Γ(..)
+, Δ
 ) where
 
 import Control.Applicative (liftA2)
@@ -120,6 +122,10 @@ data Top = Top
 
 data Zero
 data One = One
+
+
+data Γ = Γ
+data Δ
 
 
 class Profunctor p => Proof p where
