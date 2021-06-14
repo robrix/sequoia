@@ -127,6 +127,9 @@ data One = One
 data Γ = Γ
 data Δ
 
+absurdΔ :: Δ -> a
+absurdΔ = \case
+
 
 class Profunctor p => Proof p where
   withL1 :: (a, _Γ) `p` _Δ -> (a & b, _Γ) `p` _Δ
@@ -158,7 +161,7 @@ class Profunctor p => Proof p where
   funL :: _Γ `p` (_Δ |> a) -> (b, _Γ) `p` _Δ -> (a --> b, _Γ) `p` _Δ
   funL2 :: (a --> b, (a, _Γ)) `p` (_Δ |> b)
   funL2 = funL (exR (wkR init)) (exL (wkL init))
-  funR :: (forall _Δ . (a, _Γ) `p` (_Δ |> b)) -> _Γ `p` (_Δ |> a --> b)
+  funR :: (a, _Γ) `p` (Δ |> b) -> _Γ `p` (_Δ |> a --> b)
   funR' :: _Γ `p` (_Δ |> a --> b) -> (a, _Γ) `p` (_Δ |> b)
   funR' p = cut (wkL (exR (wkR p))) funL2
 
@@ -287,7 +290,7 @@ instance Proof (|-) where
   parR ab = either (>>= (pure . inl)) (pure . inr) <$> ab
 
   funL a b = popL (\ f -> a `cut` popL (pure . appFun f) `cut` exL (wkL b))
-  funR p = closure (\ _Γ -> pure (Fun (close _Γ . pushL p)))
+  funR p = closure (\ _Γ -> pure (Fun (close _Γ . pushL (generalizeR p))))
 
   subL b = popL (\ s -> cut (pushL b (subA s)) (pushL (negateL init) (subK s)))
   subR a b = liftA2 Sub <$> a <*> negateR b
@@ -320,6 +323,9 @@ closure = Sequent
 
 close :: _Γ -> _Γ |- _Δ -> _Δ
 close = flip appSequent
+
+generalizeR :: _Γ |- (Δ |> a) -> (forall _Δ . _Γ |- (_Δ |> a))
+generalizeR = rmap (either absurdΔ pure)
 
 
 absurdN :: Bot -> a
