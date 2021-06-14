@@ -145,6 +145,8 @@ class Profunctor p => Proof p where
   withR2' t = exR (wkR t) `cut` withL2 init
 
   tensorL :: (a, (b, _Γ)) `p` _Δ -> (a ⊗ b, _Γ) `p` _Δ
+  tensorLPar :: _Γ `p` (_Δ |> Negate a _Δ ⅋ Negate b _Δ) -> (a ⊗ b, _Γ) `p` _Δ
+  tensorLPar p = wkL p `cut` parL (negateL (tensorL (exL (wkL init)))) (negateL (tensorL (wkL init)))
   tensorL' :: (a ⊗ b, _Γ) `p` _Δ -> (a, (b, _Γ)) `p` _Δ
   tensorL' p = init ⊗ wkL init `cut` popL (wkL . wkL . pushL p)
   (⊗) :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a ⊗ b)
