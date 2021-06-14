@@ -16,7 +16,7 @@ import Data.Profunctor
 import Prelude hiding (init, tail)
 
 type (|>) = Either
-infixl 5 |>
+infixl 4 |>
 
 data a ⊗ b = !a :⊗ !b
 
