@@ -260,7 +260,7 @@ infixl 4 `on0`, `on1`
 
 
 newtype _Γ |- _Δ = Sequent { appSequent :: _Γ -> _Δ }
-  deriving (Applicative, Category, Functor, Monad, Profunctor, Strong)
+  deriving (Applicative, Category, Choice, Functor, Monad, Profunctor, Strong)
 
 infix 2 |-
 
