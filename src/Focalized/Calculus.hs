@@ -265,6 +265,9 @@ class Profunctor p => Proof p where
   pushL2 :: (a, (b, _Γ)) `p` _Δ -> a -> b -> _Γ `p` _Δ
   pushL2 p = pushL . pushL p
 
+  popR :: _Γ `p` (_Δ |> a) -> (a -> _Γ `p` _Δ) -> _Γ `p` _Δ
+  pushR :: _Γ `p` _Δ -> a -> _Γ `p` (_Δ |> a)
+
 on0 :: (a -> b -> c) -> (a' -> a) -> (a' -> b -> c)
 on0 = (.)
 
@@ -323,6 +326,9 @@ instance Proof (|-) where
 
   popL f = Sequent (uncurry (appSequent . f))
   pushL p = Sequent . curry (appSequent p)
+
+  popR p k = p >>= either pure k
+  pushR p = (<$ p) . pure
 
 closure :: (_Γ -> _Δ) -> _Γ |- _Δ
 closure = Sequent
