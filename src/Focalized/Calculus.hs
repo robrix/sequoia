@@ -137,7 +137,7 @@ class Profunctor p => Proof p where
   withL2 :: (b, _Γ) `p` _Δ -> (a & b, _Γ) `p` _Δ
   withL2 = withLSum . sumR2 . negateR
   withLSum :: _Γ `p` (_Δ |> Negate a _Δ ⊕ Negate b _Δ) -> (a & b, _Γ) `p` _Δ
-  withLSum p = wkL p `cut` sumL (negateL (popL (pushL init . exl))) (negateL (popL (pushL init . exr)))
+  withLSum p = wkL p `cut` sumL (negateL (withL1 init)) (negateL (withL2 init))
   (&) :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a & b)
   withR1' :: _Γ `p` (_Δ |> a & b) -> _Γ `p` (_Δ |> a)
   withR1' t = exR (wkR t) `cut` withL1 init
