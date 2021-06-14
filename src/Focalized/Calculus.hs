@@ -108,11 +108,11 @@ instance Disj (⅋) where
 
 newtype (a --> b) _Δ = Fun { appFun :: a -> (_Δ |> b) }
 
-infixr 0 -->
+infixr 5 -->
 
 data (a --< b) _Δ = Sub { subA :: !a, subK :: !(Negate b _Δ) }
 
-infixr 0 --<
+infixr 5 --<
 
 type Not = (->)
 type Negate = (->)
