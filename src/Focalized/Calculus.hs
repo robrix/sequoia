@@ -106,7 +106,7 @@ instance Disj (⅋) where
   inr r = Par $ \ _ ifr -> ifr r
   exlr ifl ifr (Par run) = run ifl ifr
 
-newtype (a --> b) _Δ = Fun { appFun :: a -> (_Δ |> b) }
+newtype a --> b = Fun { appFun :: forall _Δ . a -> (_Δ |> b) }
 
 infixr 5 -->
 
@@ -155,11 +155,11 @@ class Profunctor p => Proof p where
   parR' :: _Γ `p` (_Δ |> a ⅋ b) -> _Γ `p` (_Δ |> a |> b)
   parR' p = cut (exR (wkR (exR (wkR p)))) (parL (wkR init) (exR (wkR init)))
 
-  funL :: _Γ `p` (_Δ |> a) -> (b, _Γ) `p` _Δ -> ((a --> b) _Δ, _Γ) `p` _Δ
-  funL2 :: ((a --> b) (_Δ |> b), (a, _Γ)) `p` (_Δ |> b)
+  funL :: _Γ `p` (_Δ |> a) -> (b, _Γ) `p` _Δ -> (a --> b, _Γ) `p` _Δ
+  funL2 :: (a --> b, (a, _Γ)) `p` (_Δ |> b)
   funL2 = funL (exR (wkR init)) (exL (wkL init))
-  funR :: (a, _Γ) `p` (_Δ |> b) -> _Γ `p` (_Δ |> (a --> b) _Δ)
-  funR' :: _Γ `p` (_Δ |> (a --> b) (_Δ |> b)) -> (a, _Γ) `p` (_Δ |> b)
+  funR :: (forall _Δ . (a, _Γ) `p` (_Δ |> b)) -> _Γ `p` (_Δ |> a --> b)
+  funR' :: _Γ `p` (_Δ |> a --> b) -> (a, _Γ) `p` (_Δ |> b)
   funR' p = cut (wkL (exR (wkR p))) funL2
 
   subL :: (a, _Γ) `p` (_Δ |> b) -> ((a --< b) _Δ, _Γ) `p` _Δ
@@ -167,7 +167,7 @@ class Profunctor p => Proof p where
   subL' p = cut (subR (exR (wkR init)) (exL (wkL init))) (wkR (exL (wkL p)))
   subR :: _Γ `p` (_Δ |> a) -> (b, _Γ) `p` _Δ -> _Γ `p` (_Δ |> (a --< b) _Δ)
 
-  ($$) :: _Γ `p` (_Δ |> (a --> b) (_Δ |> b)) -> _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b)
+  ($$) :: _Γ `p` (_Δ |> a --> b) -> _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b)
   f $$ a = cut (exR (wkR f)) (exR (wkR a) `funL` init)
 
   zeroL :: (Zero, _Γ) `p` _Δ
