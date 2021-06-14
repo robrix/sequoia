@@ -133,9 +133,9 @@ absurdΔ = \case
 
 class Profunctor p => Proof p where
   withL1 :: (a, _Γ) `p` _Δ -> (a & b, _Γ) `p` _Δ
-  withL1 p = cut (wkL (sumR1 (negateR p))) (sumL (negateL (popL (pushL init . exl))) (negateL (popL (pushL init . exr))))
+  withL1 = withLSum . sumR1 . negateR
   withL2 :: (b, _Γ) `p` _Δ -> (a & b, _Γ) `p` _Δ
-  withL2 p = cut (wkL (sumR2 (negateR p))) (sumL (negateL (popL (pushL init . exl))) (negateL (popL (pushL init . exr))))
+  withL2 = withLSum . sumR2 . negateR
   withLSum :: _Γ `p` (_Δ |> Negate a _Δ ⊕ Negate b _Δ) -> (a & b, _Γ) `p` _Δ
   withLSum p = wkL p `cut` sumL (negateL (popL (pushL init . exl))) (negateL (popL (pushL init . exr)))
   (&) :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a & b)
