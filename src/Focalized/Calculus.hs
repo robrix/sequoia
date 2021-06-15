@@ -137,12 +137,10 @@ data Δ
 
 
 class Profunctor p => Core p where
-  cut :: _Γ `p` (_Δ |> a) -> (a, _Γ) `p` _Δ -> _Γ `p` _Δ
+  (>>>) :: _Γ `p` (_Δ |> a) -> (a, _Γ) `p` _Δ -> _Γ `p` _Δ
 
   init :: (a, _Γ) `p` (_Δ |> a)
 
-(>>>) :: Core p => _Γ `p` (_Δ |> a) -> (a, _Γ) `p` _Δ -> _Γ `p` _Δ
-(>>>) = cut
 
 infixr 1 >>>
 
@@ -352,7 +350,7 @@ instance Profunctor (|-) where
 
 
 instance Core (|-) where
-  cut f g = f >>= either pure (pushL g)
+  f >>> g = f >>= either pure (pushL g)
 
   init = popL (pure . pure)
 
