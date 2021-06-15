@@ -1,7 +1,8 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Focalized.Calculus
-( Proof(..)
+( Structural(..)
+, Proof(..)
 , Γ(..)
 , Δ
 ) where
@@ -131,7 +132,57 @@ absurdΔ :: Δ -> a
 absurdΔ = \case
 
 
-class Profunctor p => Proof p where
+class Profunctor p => Structural p where
+  wkL :: _Γ `p` _Δ -> (a, _Γ) `p` _Δ
+  wkL = popL . const
+  wkR :: _Γ `p` _Δ -> _Γ `p` (_Δ |> a)
+  wkR = rmap Left
+  cnL :: (a, (a, _Γ)) `p` _Δ -> (a, _Γ) `p` _Δ
+  cnL = popL . join . pushL2
+  cnR :: _Γ `p` (_Δ |> a |> a) -> _Γ `p` (_Δ |> a)
+  cnR = rmap (either id pure)
+  exL :: (a, (b, c)) `p` _Δ -> (b, (a, c)) `p` _Δ
+  exL = popL2 . flip . pushL2
+  exR :: _Γ `p` (_Δ |> a |> b) -> _Γ `p` (_Δ |> b |> a)
+  exR = rmap (either (either (Left . Left) Right) (Left . Right))
+
+  -- | Pop something off the context which can later be pushed. Used with 'pushL', this provides a generalized context reordering facility.
+  --
+  -- @
+  -- popL . pushL = id
+  -- @
+  -- @
+  -- pushL . popL = id
+  -- @
+  popL :: (a -> _Γ `p` _Δ) -> (a, _Γ) `p` _Δ
+
+  -- | Push something onto the context which was previously popped off it. Used with 'popL', this provides a generalized context reordering facility. It is undefined what will happen if you push something which was not previously popped.
+  --
+  -- @
+  -- popL . pushL = id
+  -- @
+  -- @
+  -- pushL . popL = id
+  -- @
+  pushL :: (a, _Γ) `p` _Δ -> a -> _Γ `p` _Δ
+
+  popL2 :: (a -> b -> _Γ `p` _Δ) -> (a, (b, _Γ)) `p` _Δ
+  popL2 f = popL (popL . f)
+
+  pushL2 :: (a, (b, _Γ)) `p` _Δ -> a -> b -> _Γ `p` _Δ
+  pushL2 p = pushL . pushL p
+
+  popR :: _Γ `p` (_Δ |> a) -> (a -> _Γ `p` _Δ) -> _Γ `p` _Δ
+  pushR :: _Γ `p` _Δ -> a -> _Γ `p` (_Δ |> a)
+
+  popR2 :: _Γ `p` (_Δ |> a |> b) -> (Either a b -> _Γ `p` _Δ) -> _Γ `p` _Δ
+  popR2 p k = popR (popR p (wkR . k . Right)) (k . Left)
+
+  pushR2 :: _Γ `p` _Δ -> Either a b -> _Γ `p` (_Δ |> a |> b)
+  pushR2 p = either (wkR . pushR p) (pushR (wkR p))
+
+
+class Structural p => Proof p where
   withL1 :: (a, _Γ) `p` _Δ -> (a & b, _Γ) `p` _Δ
   withL1 = withLSum . sumR1 . negateR
   withL2 :: (b, _Γ) `p` _Δ -> (a & b, _Γ) `p` _Δ
@@ -213,19 +264,6 @@ class Profunctor p => Proof p where
 
   init :: (a, _Γ) `p` (_Δ |> a)
 
-  wkL :: _Γ `p` _Δ -> (a, _Γ) `p` _Δ
-  wkL = popL . const
-  wkR :: _Γ `p` _Δ -> _Γ `p` (_Δ |> a)
-  wkR = rmap Left
-  cnL :: (a, (a, _Γ)) `p` _Δ -> (a, _Γ) `p` _Δ
-  cnL = popL . join . pushL2
-  cnR :: _Γ `p` (_Δ |> a |> a) -> _Γ `p` (_Δ |> a)
-  cnR = rmap (either id pure)
-  exL :: (a, (b, c)) `p` _Δ -> (b, (a, c)) `p` _Δ
-  exL = popL2 . flip . pushL2
-  exR :: _Γ `p` (_Δ |> a |> b) -> _Γ `p` (_Δ |> b |> a)
-  exR = rmap (either (either (Left . Left) Right) (Left . Right))
-
   zapSum :: _Γ `p` (_Δ |> Not a _Δ & Not b _Δ) -> (a ⊕ b, _Γ) `p` _Δ
   zapSum p = sumL (cut (wkL p) (withL1 (notL init))) (cut (wkL p) (withL2 (notL init)))
 
@@ -237,42 +275,6 @@ class Profunctor p => Proof p where
 
   zapPar :: _Γ `p` (_Δ |> Negate a _Δ ⊗ Negate b _Δ) -> (a ⅋ b, _Γ) `p` _Δ
   zapPar p = cut (wkL p) (tensorL (popL2 (parL `on0` pushL (negateL init) `on1` pushL (negateL init))))
-
-
-  -- | Pop something off the context which can later be pushed. Used with 'pushL', this provides a generalized context reordering facility.
-  --
-  -- @
-  -- popL . pushL = id
-  -- @
-  -- @
-  -- pushL . popL = id
-  -- @
-  popL :: (a -> _Γ `p` _Δ) -> (a, _Γ) `p` _Δ
-
-  -- | Push something onto the context which was previously popped off it. Used with 'popL', this provides a generalized context reordering facility. It is undefined what will happen if you push something which was not previously popped.
-  --
-  -- @
-  -- popL . pushL = id
-  -- @
-  -- @
-  -- pushL . popL = id
-  -- @
-  pushL :: (a, _Γ) `p` _Δ -> a -> _Γ `p` _Δ
-
-  popL2 :: (a -> b -> _Γ `p` _Δ) -> (a, (b, _Γ)) `p` _Δ
-  popL2 f = popL (popL . f)
-
-  pushL2 :: (a, (b, _Γ)) `p` _Δ -> a -> b -> _Γ `p` _Δ
-  pushL2 p = pushL . pushL p
-
-  popR :: _Γ `p` (_Δ |> a) -> (a -> _Γ `p` _Δ) -> _Γ `p` _Δ
-  pushR :: _Γ `p` _Δ -> a -> _Γ `p` (_Δ |> a)
-
-  popR2 :: _Γ `p` (_Δ |> a |> b) -> (Either a b -> _Γ `p` _Δ) -> _Γ `p` _Δ
-  popR2 p k = popR (popR p (wkR . k . Right)) (k . Left)
-
-  pushR2 :: _Γ `p` _Δ -> Either a b -> _Γ `p` (_Δ |> a |> b)
-  pushR2 p = either (wkR . pushR p) (pushR (wkR p))
 
 on0 :: (a -> b -> c) -> (a' -> a) -> (a' -> b -> c)
 on0 = (.)
@@ -288,6 +290,13 @@ newtype _Γ |- _Δ = Sequent { appSequent :: _Γ -> _Δ }
 
 infix 2 |-
 
+
+instance Structural (|-) where
+  popL f = Sequent (uncurry (appSequent . f))
+  pushL p = Sequent . curry (appSequent p)
+
+  popR p k = p >>= either pure k
+  pushR p = (<$ p) . pure
 
 instance Proof (|-) where
   withL1 p = popL (pushL p . exl)
@@ -329,12 +338,6 @@ instance Proof (|-) where
   cut f g = f >>= either pure (pushL g)
 
   init = popL (pure . pure)
-
-  popL f = Sequent (uncurry (appSequent . f))
-  pushL p = Sequent . curry (appSequent p)
-
-  popR p k = p >>= either pure k
-  pushR p = (<$ p) . pure
 
 closure :: (_Γ -> _Δ) -> _Γ |- _Δ
 closure = Sequent
