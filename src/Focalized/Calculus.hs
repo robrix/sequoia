@@ -85,7 +85,7 @@ instance Bitraversable (⊕) where
     InL a -> InL <$> f a
     InR b -> InR <$> g b
 
-newtype (a ⅋ b) = Par (forall r . (a -> r) -> (b -> r) -> r)
+newtype a ⅋ b = Par (forall r . (a -> r) -> (b -> r) -> r)
 
 infixr 7 ⅋
 
