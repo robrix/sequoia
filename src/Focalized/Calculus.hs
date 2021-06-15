@@ -131,6 +131,10 @@ data Δ
 absurdΔ :: Δ -> a
 absurdΔ = \case
 
+-- | Append a value to an output. For exclusive choice–based outputs, this should replace its second argument with its first. For inclusive choice, it should be a true append.
+(|>) :: _Δ -> a -> _Δ |> a
+(|>) = const pure
+
 
 class Profunctor p => Structural p where
   -- | Pop something off the context which can later be pushed. Used with 'pushL', this provides a generalized context reordering facility.
@@ -160,19 +164,20 @@ class Profunctor p => Structural p where
   pushL2 p = pushL . pushL p
 
   popR :: _Γ `p` (_Δ |> a) -> (a -> _Γ `p` _Δ) -> _Γ `p` _Δ
-  pushR :: _Γ `p` _Δ -> a -> _Γ `p` (_Δ |> a)
+  pushR :: _Γ `p` _Δ -> (_Δ -> _Δ |> a) -> _Γ `p` (_Δ |> a)
+  pushR = flip rmap
 
   popR2 :: _Γ `p` (_Δ |> a |> b) -> (Either a b -> _Γ `p` _Δ) -> _Γ `p` _Δ
   popR2 p k = popR (popR p (wkR . k . Right)) (k . Left)
 
   pushR2 :: _Γ `p` _Δ -> Either a b -> _Γ `p` (_Δ |> a |> b)
-  pushR2 p = either (wkR . pushR p) (pushR (wkR p))
+  pushR2 p = either (wkR . pushR p . flip (|>)) (pushR (wkR p) . flip (|>))
 
 
   wkL :: _Γ `p` _Δ -> (a, _Γ) `p` _Δ
   wkL = popL . const
   wkR :: _Γ `p` _Δ -> _Γ `p` (_Δ |> a)
-  wkR = rmap Left
+  wkR = (`pushR` Left)
   cnL :: (a, (a, _Γ)) `p` _Δ -> (a, _Γ) `p` _Δ
   cnL = popL . join . pushL2
   cnR :: _Γ `p` (_Δ |> a |> a) -> _Γ `p` (_Δ |> a)
@@ -297,7 +302,6 @@ instance Structural (|-) where
   pushL p = Sequent . curry (appSequent p)
 
   popR p k = p >>= either pure k
-  pushR p = (<$ p) . pure
 
 instance Proof (|-) where
   withL1 p = popL (pushL p . exl)
