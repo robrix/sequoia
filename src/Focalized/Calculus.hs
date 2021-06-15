@@ -319,10 +319,10 @@ instance Structural (|-) where
 
 instance Negative (|-) where
   negateL (Seq run) = Seq $ \ k (negA, c) -> run (either k negA) c
-  negateR (Seq run) = Seq $ \ k c -> let { (k', ka) = split k } in ka (run k' . (,c))
+  negateR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (run k' . (,c))
 
   notL (Seq run) = Seq $ \ k (notA, c) -> run (either k notA) c
-  notR (Seq run) = Seq $ \ k c -> let { (k', ka) = split k } in ka (run k' . (,c))
+  notR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (run k' . (,c))
 
 instance Additive (|-) where
   zeroL = popL absurdP
@@ -352,7 +352,7 @@ instance Multiplicative (|-) where
 
 instance Implicative (|-) where
   funL a b = popL (\ f -> a `cut` Seq (\ k (a, _Γ) -> appFun f (appSeq k _Γ . pushL b) a))
-  funR (Seq run) = Seq $ \ k c -> let { (k', ka) = split k } in ka (Fun (\ kb -> run (either k' kb) . (,c)))
+  funR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (Fun (\ kb -> run (either k' kb) . (,c)))
 
   subL b = popL (\ s -> cut (pushL b (subA s)) (pushL (negateL init) (subK s)))
   subR a b = liftA2 Sub <$> a <*> negateR b
