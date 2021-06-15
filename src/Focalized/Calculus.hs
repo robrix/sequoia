@@ -282,8 +282,8 @@ class (Core p, Structural p, Negative p) => Multiplicative p where
 
   tensorL :: (a, (b, _Γ)) `p` _Δ -> (a ⊗ b, _Γ) `p` _Δ
   tensorL = tensorLPar . parR . negateR . negateR
-  tensorLPar :: _Γ `p` (_Δ |> Negate a ⅋ Negate b) -> (a ⊗ b, _Γ) `p` _Δ
-  tensorLPar p = wkL p `cut` parL (negateL (tensorL (exL (wkL init)))) (negateL (tensorL (wkL init)))
+  tensorLPar :: _Γ `p` (_Δ |> Not a ⅋ Not b) -> (a ⊗ b, _Γ) `p` _Δ
+  tensorLPar p = wkL p `cut` parL (notL (tensorL (exL (wkL init)))) (notL (tensorL (wkL init)))
   tensorL' :: (a ⊗ b, _Γ) `p` _Δ -> (a, (b, _Γ)) `p` _Δ
   tensorL' p = init ⊗ wkL init `cut` popL (wkL . wkL . pushL p)
   (⊗) :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a ⊗ b)
