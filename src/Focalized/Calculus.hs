@@ -300,6 +300,7 @@ class (Core p, Structural p, Negative p) => Multiplicative p where
 
 class (Core p, Structural p, Negative p) => Implicative p where
   funL :: _Γ `p` (_Δ |> a) -> (b, _Γ) `p` _Δ -> (a --> b, _Γ) `p` _Δ
+  funL pa pb = funLSub (subR pa pb)
   funLSub :: _Γ `p` (_Δ |> a --< b) -> (a --> b, _Γ) `p` _Δ
   funLSub p = wkL p `cut` subL (exL (funL init init))
   funL2 :: (a --> b, (a, _Γ)) `p` (_Δ |> b)
