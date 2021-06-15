@@ -310,6 +310,7 @@ class (Core p, Structural p, Negative p) => Implicative p where
   funR' p = cut (wkL (exR (wkR p))) funL2
 
   subL :: (a, _Γ) `p` (_Δ |> b) -> (a --< b, _Γ) `p` _Δ
+  subL = subLFun . funR
   subLFun :: _Γ `p` (_Δ |> a --> b) -> (a --< b, _Γ) `p` _Δ
   subLFun p = wkL p `cut` exL (subL (exL (funL init init)))
   subL' :: (a --< b, _Γ) `p` _Δ -> (a, _Γ) `p` (_Δ |> b)
