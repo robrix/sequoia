@@ -318,11 +318,11 @@ instance Structural (|-) where
   popR p k = p >>= either pure k
 
 instance Negative (|-) where
-  notL p = popL (cut p . popL . fmap pure)
-  notR p = closure (\ _Γ -> pure (close _Γ . pushL p))
-
   negateL p = popL (cut p . popL . fmap pure)
   negateR p = closure (\ _Γ -> pure (close _Γ . pushL p))
+
+  notL p = popL (cut p . popL . fmap pure)
+  notR p = closure (\ _Γ -> pure (close _Γ . pushL p))
 
 instance Additive (|-) where
   zeroL = popL absurdP
