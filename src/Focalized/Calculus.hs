@@ -6,7 +6,7 @@ module Focalized.Calculus
 , Negative(..)
 , Additive(..)
 , Multiplicative(..)
-, Proof(..)
+, Implicative(..)
 , Γ(..)
 , Δ
 ) where
@@ -278,7 +278,7 @@ class (Core p, Structural p, Negative p) => Multiplicative p where
   zapPar p = cut (wkL p) (tensorL (popL2 (parL `on0` pushL (negateL init) `on1` pushL (negateL init))))
 
 
-class (Core p, Structural p, Negative p) => Proof p where
+class (Core p, Structural p, Negative p) => Implicative p where
   funL :: _Γ `p` (_Δ |> a) -> (b, _Γ) `p` _Δ -> (a --> b, _Γ) `p` _Δ
   funL2 :: (a --> b, (a, _Γ)) `p` (_Δ |> b)
   funL2 = funL (exR (wkR init)) (exL (wkL init))
@@ -353,7 +353,7 @@ instance Multiplicative (|-) where
   tensorL p = popL (pushL2 p . exl <*> exr)
   (⊗) = liftA2 (liftA2 inlr)
 
-instance Proof (|-) where
+instance Implicative (|-) where
   funL a b = popL (\ f -> a `cut` popL (pure . appFun f) `cut` exL (wkL b))
   funR p = closure (\ _Γ -> pure (Fun (close _Γ . pushL (generalizeR p))))
 
