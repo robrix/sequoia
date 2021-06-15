@@ -145,7 +145,7 @@ class Profunctor p => Core p where
 
 
 class Profunctor p => Structural p where
-  -- | Pop something off the context which can later be pushed. Used with 'pushL', this provides a generalized context reordering facility.
+  -- | Pop something off the input context which can later be pushed. Used with 'pushL', this provides a generalized context restructuring facility.
   --
   -- @
   -- popL . pushL = id
@@ -155,7 +155,7 @@ class Profunctor p => Structural p where
   -- @
   popL :: (a -> _Γ `p` _Δ) -> (a, _Γ) `p` _Δ
 
-  -- | Push something onto the context which was previously popped off it. Used with 'popL', this provides a generalized context reordering facility. It is undefined what will happen if you push something which was not previously popped.
+  -- | Push something onto the input context which was previously popped off it. Used with 'popL', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
   --
   -- @
   -- popL . pushL = id
@@ -172,7 +172,24 @@ class Profunctor p => Structural p where
   pushL2 p = pushL . pushL p
 
 
+  -- | Pop something off the output context which can later be pushed. Used with 'pushR', this provides a generalized context restructuring facility.
+  --
+  -- @
+  -- popR . pushR = id
+  -- @
+  -- @
+  -- pushR . popR = id
+  -- @
   popR :: ((a -> Δ) -> _Γ `p` _Δ) -> _Γ `p` (_Δ |> a)
+
+  -- | Push something onto the output context which was previously popped off it. Used with 'popR', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
+  --
+  -- @
+  -- popR . pushR = id
+  -- @
+  -- @
+  -- pushR . popR = id
+  -- @
   pushR :: _Γ `p` (_Δ |> a) -> ((a -> Δ) -> _Γ `p` _Δ)
 
   popR2 :: ((a -> Δ) -> (b -> Δ) -> _Γ `p` _Δ) -> _Γ `p` (_Δ |> b |> a)
