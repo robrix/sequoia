@@ -175,7 +175,6 @@ class Profunctor p => Structural p where
   popR :: ((a -> Δ) -> _Γ `p` _Δ) -> _Γ `p` (_Δ |> a)
   pushR :: _Γ `p` (_Δ |> a) -> ((a -> Δ) -> _Γ `p` _Δ)
 
-
   popR2 :: ((a -> Δ) -> (b -> Δ) -> _Γ `p` _Δ) -> _Γ `p` (_Δ |> b |> a)
   popR2 f = popR (popR . f)
 
