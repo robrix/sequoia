@@ -186,7 +186,7 @@ class Profunctor p => Structural p where
   wkL :: _Γ `p` _Δ -> (a, _Γ) `p` _Δ
   wkL = popL . const
   wkR :: _Γ `p` _Δ -> _Γ `p` (_Δ |> a)
-  wkR = rmap Left
+  wkR = popR . const
   cnL :: (a, (a, _Γ)) `p` _Δ -> (a, _Γ) `p` _Δ
   cnL = popL . join . pushL2
   cnR :: _Γ `p` (_Δ |> a |> a) -> _Γ `p` (_Δ |> a)
