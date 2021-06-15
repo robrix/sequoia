@@ -150,7 +150,6 @@ class Core p where
 
   init :: (a * is) `p` (os + a)
 
-
 infixr 1 >>>
 
 
