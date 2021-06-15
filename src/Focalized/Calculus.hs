@@ -12,8 +12,7 @@ module Focalized.Calculus
 ) where
 
 import Control.Applicative (liftA2)
-import Control.Category (Category)
-import Control.Monad (join)
+import Control.Monad (ap, join)
 import Data.Bifoldable
 import Data.Bifunctor (Bifunctor(..))
 import Data.Bitraversable
@@ -22,6 +21,10 @@ import Prelude hiding (init, tail)
 
 type (|>) = Either
 infixl 4 |>
+
+split :: (_Δ |> a -> r) -> (_Δ -> r, a -> r)
+split f = (f . Left, f . Right)
+
 
 data a ⊗ b = !a :⊗ !b
 
@@ -111,7 +114,7 @@ instance Disj (⅋) where
   inr r = Par $ \ _ ifr -> ifr r
   exlr ifl ifr (Par run) = run ifl ifr
 
-newtype a --> b = Fun { appFun :: forall _Δ . a -> (_Δ |> b) }
+newtype a --> b = Fun { appFun :: (b -> Δ) -> (a -> Δ) }
 
 infixr 5 -->
 
@@ -268,7 +271,7 @@ class (Core p, Structural p, Negative p) => Implicative p where
   funL :: _Γ `p` (_Δ |> a) -> (b, _Γ) `p` _Δ -> (a --> b, _Γ) `p` _Δ
   funL2 :: (a --> b, (a, _Γ)) `p` (_Δ |> b)
   funL2 = funL (exR (wkR init)) (exL (wkL init))
-  funR :: (a, _Γ) `p` (Δ |> b) -> _Γ `p` (_Δ |> a --> b)
+  funR :: (a, _Γ) `p` (_Δ |> b) -> _Γ `p` (_Δ |> a --> b)
   funR' :: _Γ `p` (_Δ |> a --> b) -> (a, _Γ) `p` (_Δ |> b)
   funR' p = cut (wkL (exR (wkR p))) funL2
 
@@ -289,10 +292,23 @@ on1 = fmap flip . (.) . flip
 infixl 4 `on0`, `on1`
 
 
-newtype _Γ |- _Δ = Sequent { appSequent :: _Γ -> _Δ }
-  deriving (Applicative, Category, Choice, Functor, Monad, Profunctor, Strong)
+newtype _Γ |- _Δ = Seq ((_Δ -> Δ) -> (_Γ -> Δ))
+  deriving (Functor)
 
 infix 2 |-
+
+appSeq :: (_Δ -> Δ) -> _Γ -> _Γ |- _Δ -> Δ
+appSeq k c (Seq run) = run k c
+
+instance Applicative ((|-) _Γ) where
+  pure a = Seq $ \ k _ -> k a
+  (<*>) = ap
+
+instance Monad ((|-) _Γ) where
+  Seq a >>= f = Seq $ \ k c -> a (appSeq k c . f) c
+
+instance Profunctor (|-) where
+  dimap f g (Seq run) = Seq $ \ k -> run (k . g) . f
 
 
 instance Core (|-) where
@@ -301,15 +317,15 @@ instance Core (|-) where
   init = popL (pure . pure)
 
 instance Structural (|-) where
-  popL f = Sequent (uncurry (appSequent . f))
-  pushL p = Sequent . curry (appSequent p)
+  popL f = Seq $ \ k -> uncurry (flip (appSeq k) . f)
+  pushL (Seq run) a = Seq $ \ k -> run k . (a,)
 
 instance Negative (|-) where
   negateL p = popL (cut p . popL . fmap pure)
-  negateR p = closure (\ _Γ -> pure (close _Γ . pushL p))
+  negateR (Seq run) = Seq $ \ k c -> let { (k', ka) = split k } in ka (absurdΔ . run k' . (,c))
 
   notL p = popL (cut p . popL . fmap pure)
-  notR p = closure (\ _Γ -> pure (close _Γ . pushL p))
+  notR (Seq run) = Seq $ \ k c -> let { (k', ka) = split k } in ka (absurdΔ . run k' . (,c))
 
 instance Additive (|-) where
   zeroL = popL absurdP
@@ -338,20 +354,11 @@ instance Multiplicative (|-) where
   (⊗) = liftA2 (liftA2 inlr)
 
 instance Implicative (|-) where
-  funL a b = popL (\ f -> a `cut` popL (pure . appFun f) `cut` exL (wkL b))
-  funR p = closure (\ _Γ -> pure (Fun (close _Γ . pushL (generalizeR p))))
+  funL a b = popL (\ f -> a `cut` Seq (\ k (a, _Γ) -> appFun f (appSeq k _Γ . pushL b) a))
+  funR (Seq run) = Seq $ \ k c -> let { (k', ka) = split k } in ka (Fun (\ kb -> run (either k' kb) . (,c)))
 
   subL b = popL (\ s -> cut (pushL b (subA s)) (pushL (negateL init) (subK s)))
   subR a b = liftA2 Sub <$> a <*> negateR b
-
-closure :: (_Γ -> _Δ) -> _Γ |- _Δ
-closure = Sequent
-
-close :: _Γ -> _Γ |- _Δ -> _Δ
-close = flip appSequent
-
-generalizeR :: _Γ |- (Δ |> a) -> (forall _Δ . _Γ |- (_Δ |> a))
-generalizeR = rmap (either absurdΔ pure)
 
 
 absurdN :: Bot -> a
