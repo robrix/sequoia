@@ -5,6 +5,7 @@ module Focalized.Calculus
 , Structural(..)
 , Negative(..)
 , Additive(..)
+, Multiplicative(..)
 , Proof(..)
 , Γ(..)
 , Δ
@@ -247,7 +248,22 @@ class (Core p, Structural p, Negative p) => Additive p where
   zapWith p = cut (wkL p) (sumL (negateL (withL1 init)) (negateL (withL2 init)))
 
 
-class (Core p, Structural p, Negative p) => Proof p where
+class (Core p, Structural p, Negative p) => Multiplicative p where
+  botL :: (Bot, _Γ) `p` _Δ
+  botR :: _Γ `p` _Δ -> _Γ `p` (_Δ |> Bot)
+  botR' :: _Γ `p` (_Δ |> Bot) -> _Γ `p` _Δ
+  botR' = (`cut` botL)
+
+  oneL :: _Γ `p` _Δ -> (One, _Γ) `p` _Δ
+  oneL' :: (One, _Γ) `p` _Δ -> _Γ `p` _Δ
+  oneL' = cut oneR
+  oneR :: _Γ `p` (_Δ |> One)
+
+  parL :: (a, _Γ) `p` _Δ -> (b, _Γ) `p` _Δ -> (a ⅋ b, _Γ) `p` _Δ
+  parR :: _Γ `p` (_Δ |> a |> b) -> _Γ `p` (_Δ |> a ⅋ b)
+  parR' :: _Γ `p` (_Δ |> a ⅋ b) -> _Γ `p` (_Δ |> a |> b)
+  parR' p = cut (exR (wkR (exR (wkR p)))) (parL (wkR init) (exR (wkR init)))
+
   tensorL :: (a, (b, _Γ)) `p` _Δ -> (a ⊗ b, _Γ) `p` _Δ
   tensorLPar :: _Γ `p` (_Δ |> Negate a _Δ ⅋ Negate b _Δ) -> (a ⊗ b, _Γ) `p` _Δ
   tensorLPar p = wkL p `cut` parL (negateL (tensorL (exL (wkL init)))) (negateL (tensorL (wkL init)))
@@ -255,11 +271,14 @@ class (Core p, Structural p, Negative p) => Proof p where
   tensorL' p = init ⊗ wkL init `cut` popL (wkL . wkL . pushL p)
   (⊗) :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a ⊗ b)
 
-  parL :: (a, _Γ) `p` _Δ -> (b, _Γ) `p` _Δ -> (a ⅋ b, _Γ) `p` _Δ
-  parR :: _Γ `p` (_Δ |> a |> b) -> _Γ `p` (_Δ |> a ⅋ b)
-  parR' :: _Γ `p` (_Δ |> a ⅋ b) -> _Γ `p` (_Δ |> a |> b)
-  parR' p = cut (exR (wkR (exR (wkR p)))) (parL (wkR init) (exR (wkR init)))
+  zapTensor :: _Γ `p` (_Δ |> Not a _Δ ⅋ Not b _Δ) -> (a ⊗ b, _Γ) `p` _Δ
+  zapTensor p = tensorL (cut (wkL (wkL p)) (parL (notL (exL (wkL init))) (notL (wkL init))))
 
+  zapPar :: _Γ `p` (_Δ |> Negate a _Δ ⊗ Negate b _Δ) -> (a ⅋ b, _Γ) `p` _Δ
+  zapPar p = cut (wkL p) (tensorL (popL2 (parL `on0` pushL (negateL init) `on1` pushL (negateL init))))
+
+
+class (Core p, Structural p, Negative p) => Proof p where
   funL :: _Γ `p` (_Δ |> a) -> (b, _Γ) `p` _Δ -> (a --> b, _Γ) `p` _Δ
   funL2 :: (a --> b, (a, _Γ)) `p` (_Δ |> b)
   funL2 = funL (exR (wkR init)) (exL (wkL init))
@@ -274,22 +293,6 @@ class (Core p, Structural p, Negative p) => Proof p where
 
   ($$) :: _Γ `p` (_Δ |> a --> b) -> _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b)
   f $$ a = cut (exR (wkR f)) (exR (wkR a) `funL` init)
-
-  oneL :: _Γ `p` _Δ -> (One, _Γ) `p` _Δ
-  oneL' :: (One, _Γ) `p` _Δ -> _Γ `p` _Δ
-  oneL' = cut oneR
-  oneR :: _Γ `p` (_Δ |> One)
-
-  botL :: (Bot, _Γ) `p` _Δ
-  botR :: _Γ `p` _Δ -> _Γ `p` (_Δ |> Bot)
-  botR' :: _Γ `p` (_Δ |> Bot) -> _Γ `p` _Δ
-  botR' = (`cut` botL)
-
-  zapTensor :: _Γ `p` (_Δ |> Not a _Δ ⅋ Not b _Δ) -> (a ⊗ b, _Γ) `p` _Δ
-  zapTensor p = tensorL (cut (wkL (wkL p)) (parL (notL (exL (wkL init))) (notL (wkL init))))
-
-  zapPar :: _Γ `p` (_Δ |> Negate a _Δ ⊗ Negate b _Δ) -> (a ⅋ b, _Γ) `p` _Δ
-  zapPar p = cut (wkL p) (tensorL (popL2 (parL `on0` pushL (negateL init) `on1` pushL (negateL init))))
 
 on0 :: (a -> b -> c) -> (a' -> a) -> (a' -> b -> c)
 on0 = (.)
@@ -337,24 +340,25 @@ instance Additive (|-) where
   withL2 p = popL (pushL p . exr)
   (&) = liftA2 (liftA2 inlr)
 
-instance Proof (|-) where
-  tensorL p = popL (pushL2 p . exl <*> exr)
-  (⊗) = liftA2 (liftA2 inlr)
+instance Multiplicative (|-) where
+  botL = popL absurdN
+  botR = fmap Left
+
+  oneL = wkL
+  oneR = pure (pure One)
 
   parL a b = popL (exlr (pushL a) (pushL b))
   parR ab = either (>>= (pure . inl)) (pure . inr) <$> ab
 
+  tensorL p = popL (pushL2 p . exl <*> exr)
+  (⊗) = liftA2 (liftA2 inlr)
+
+instance Proof (|-) where
   funL a b = popL (\ f -> a `cut` popL (pure . appFun f) `cut` exL (wkL b))
   funR p = closure (\ _Γ -> pure (Fun (close _Γ . pushL (generalizeR p))))
 
   subL b = popL (\ s -> cut (pushL b (subA s)) (pushL (negateL init) (subK s)))
   subR a b = liftA2 Sub <$> a <*> negateR b
-
-  oneL = wkL
-  oneR = pure (pure One)
-
-  botL = popL absurdN
-  botR = fmap Left
 
 closure :: (_Γ -> _Δ) -> _Γ |- _Δ
 closure = Sequent
