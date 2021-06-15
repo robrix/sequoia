@@ -135,10 +135,6 @@ data Δ
 absurdΔ :: Δ -> a
 absurdΔ = \case
 
--- | Append a value to an output. For exclusive choice–based outputs, this should replace its second argument with its first. For inclusive choice, it should be a true append.
-(|>) :: _Δ -> a -> _Δ |> a
-(|>) = const pure
-
 
 class Profunctor p => Core p where
   cut :: _Γ `p` (_Δ |> a) -> (a, _Γ) `p` _Δ -> _Γ `p` _Δ
@@ -175,21 +171,11 @@ class Profunctor p => Structural p where
   pushL2 :: (a, (b, _Γ)) `p` _Δ -> a -> b -> _Γ `p` _Δ
   pushL2 p = pushL . pushL p
 
-  popR :: _Γ `p` (_Δ |> a) -> (a -> _Γ `p` _Δ) -> _Γ `p` _Δ
-  pushR :: _Γ `p` _Δ -> (_Δ -> _Δ |> a) -> _Γ `p` (_Δ |> a)
-  pushR = flip rmap
-
-  popR2 :: _Γ `p` (_Δ |> a |> b) -> (Either a b -> _Γ `p` _Δ) -> _Γ `p` _Δ
-  popR2 p k = popR (popR p (wkR . k . Right)) (k . Left)
-
-  pushR2 :: _Γ `p` _Δ -> Either a b -> _Γ `p` (_Δ |> a |> b)
-  pushR2 p = either (wkR . pushR p . flip (|>)) (pushR (wkR p) . flip (|>))
-
 
   wkL :: _Γ `p` _Δ -> (a, _Γ) `p` _Δ
   wkL = popL . const
   wkR :: _Γ `p` _Δ -> _Γ `p` (_Δ |> a)
-  wkR = (`pushR` Left)
+  wkR = rmap Left
   cnL :: (a, (a, _Γ)) `p` _Δ -> (a, _Γ) `p` _Δ
   cnL = popL . join . pushL2
   cnR :: _Γ `p` (_Δ |> a |> a) -> _Γ `p` (_Δ |> a)
@@ -317,8 +303,6 @@ instance Core (|-) where
 instance Structural (|-) where
   popL f = Sequent (uncurry (appSequent . f))
   pushL p = Sequent . curry (appSequent p)
-
-  popR p k = p >>= either pure k
 
 instance Negative (|-) where
   negateL p = popL (cut p . popL . fmap pure)
