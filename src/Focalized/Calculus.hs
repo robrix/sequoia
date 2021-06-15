@@ -122,10 +122,8 @@ data a --< b = Sub { subA :: !a, subK :: !(Negate b) }
 
 infixr 5 --<
 
-type Not = K
-type Negate = K
-
-newtype K a = K { runK :: a -> Δ }
+newtype Not    a = Not    { runNot    :: a -> Δ }
+newtype Negate a = Negate { runNegate :: a -> Δ }
 
 data Bot
 data Top = Top
@@ -286,7 +284,7 @@ class (Core p, Structural p, Negative p) => Multiplicative p where
   parR' p = cut (exR (wkR (exR (wkR p)))) (parL (wkR init) init)
 
   tensorL :: (a, (b, _Γ)) `p` _Δ -> (a ⊗ b, _Γ) `p` _Δ
-  tensorL = tensorLPar . parR . negateR . negateR
+  tensorL = tensorLPar . parR . notR . notR
   tensorLPar :: _Γ `p` (_Δ |> Not a ⅋ Not b) -> (a ⊗ b, _Γ) `p` _Δ
   tensorLPar p = wkL p `cut` parL (notL (tensorL init)) (notL (tensorL (wkL init)))
   tensorL' :: (a ⊗ b, _Γ) `p` _Δ -> (a, (b, _Γ)) `p` _Δ
@@ -363,11 +361,11 @@ instance Structural (|-) where
   pushR (Seq run) a = Seq $ \ k -> run (either k a)
 
 instance Negative (|-) where
-  negateL (Seq run) = Seq $ \ k (negA, c) -> run (either k (runK negA)) c
-  negateR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (K (run k' . (,c)))
+  negateL (Seq run) = Seq $ \ k (negA, c) -> run (either k (runNegate negA)) c
+  negateR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (Negate (run k' . (,c)))
 
-  notL (Seq run) = Seq $ \ k (notA, c) -> run (either k (runK notA)) c
-  notR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (K (run k' . (,c)))
+  notL (Seq run) = Seq $ \ k (notA, c) -> run (either k (runNot notA)) c
+  notR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (Not (run k' . (,c)))
 
 instance Additive (|-) where
   zeroL = popL absurdP
