@@ -7,6 +7,8 @@ module Focalized.Calculus
 , Additive(..)
 , Multiplicative(..)
 , Implicative(..)
+, N(..)
+, P(..)
 , Γ(..)
 , Δ
 ) where
@@ -129,6 +131,10 @@ data Top = Top
 
 data Zero
 data One = One
+
+
+newtype N a = N { getN :: a }
+newtype P a = P { getP :: a }
 
 
 data Γ = Γ
