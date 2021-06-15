@@ -3,6 +3,8 @@
 module Focalized.Calculus
 ( Core(..)
 , Structural(..)
+, Negative(..)
+, Additive(..)
 , Proof(..)
 , Γ(..)
 , Δ
@@ -197,7 +199,35 @@ class Profunctor p => Structural p where
   exR = rmap (either (either (Left . Left) Right) (Left . Right))
 
 
-class (Core p, Structural p) => Proof p where
+class (Core p, Structural p) => Negative p where
+  negateL :: _Γ `p` (_Δ |> a) -> (Negate a _Δ, _Γ) `p` _Δ
+  negateL' :: (Negate a (_Δ |> a), _Γ) `p` _Δ -> _Γ `p` (_Δ |> a)
+  negateL' = cut (negateR init) . wkR
+  negateR :: (a, _Γ) `p` _Δ -> _Γ `p` (_Δ |> Negate a _Δ)
+  negateR' :: _Γ `p` (_Δ |> Negate a _Δ) -> (a, _Γ) `p` _Δ
+  negateR' p = cut (wkL p) (negateL init)
+
+  notL :: _Γ `p` (_Δ |> a) -> (Not a _Δ, _Γ) `p` _Δ
+  notL' :: (Not a (_Δ |> a), _Γ) `p` _Δ -> _Γ `p` (_Δ |> a)
+  notL' = cut (notR init) . wkR
+  notR :: (a, _Γ) `p` _Δ -> _Γ `p` (_Δ |> Not a _Δ)
+  notR' :: _Γ `p` (_Δ |> Not a _Δ) -> (a, _Γ) `p` _Δ
+  notR' p = cut (wkL p) (notL init)
+
+
+class (Core p, Structural p, Negative p) => Additive p where
+  zeroL :: (Zero, _Γ) `p` _Δ
+
+  topR :: _Γ `p` (_Δ |> Top)
+
+  sumL :: (a, _Γ) `p` _Δ -> (b, _Γ) `p` _Δ -> (a ⊕ b, _Γ) `p` _Δ
+  sumL1' :: (a ⊕ b, _Γ) `p` _Δ -> (a, _Γ) `p` _Δ
+  sumL1' = cut (sumR1 init) . exL . wkL
+  sumL2' :: (a ⊕ b, _Γ) `p` _Δ -> (b, _Γ) `p` _Δ
+  sumL2' = cut (sumR2 init) . exL . wkL
+  sumR1 :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> a ⊕ b)
+  sumR2 :: _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a ⊕ b)
+
   withL1 :: (a, _Γ) `p` _Δ -> (a & b, _Γ) `p` _Δ
   withL1 = withLSum . sumR1 . negateR
   withL2 :: (b, _Γ) `p` _Δ -> (a & b, _Γ) `p` _Δ
@@ -210,20 +240,20 @@ class (Core p, Structural p) => Proof p where
   withR2' :: _Γ `p` (_Δ |> a & b) -> _Γ `p` (_Δ |> b)
   withR2' t = exR (wkR t) `cut` withL2 init
 
+  zapSum :: _Γ `p` (_Δ |> Not a _Δ & Not b _Δ) -> (a ⊕ b, _Γ) `p` _Δ
+  zapSum p = sumL (cut (wkL p) (withL1 (notL init))) (cut (wkL p) (withL2 (notL init)))
+
+  zapWith :: _Γ `p` (_Δ |> Negate a _Δ ⊕ Negate b _Δ) -> (a & b, _Γ) `p` _Δ
+  zapWith p = cut (wkL p) (sumL (negateL (withL1 init)) (negateL (withL2 init)))
+
+
+class (Core p, Structural p, Negative p) => Proof p where
   tensorL :: (a, (b, _Γ)) `p` _Δ -> (a ⊗ b, _Γ) `p` _Δ
   tensorLPar :: _Γ `p` (_Δ |> Negate a _Δ ⅋ Negate b _Δ) -> (a ⊗ b, _Γ) `p` _Δ
   tensorLPar p = wkL p `cut` parL (negateL (tensorL (exL (wkL init)))) (negateL (tensorL (wkL init)))
   tensorL' :: (a ⊗ b, _Γ) `p` _Δ -> (a, (b, _Γ)) `p` _Δ
   tensorL' p = init ⊗ wkL init `cut` popL (wkL . wkL . pushL p)
   (⊗) :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a ⊗ b)
-
-  sumL :: (a, _Γ) `p` _Δ -> (b, _Γ) `p` _Δ -> (a ⊕ b, _Γ) `p` _Δ
-  sumL1' :: (a ⊕ b, _Γ) `p` _Δ -> (a, _Γ) `p` _Δ
-  sumL1' = cut (sumR1 init) . exL . wkL
-  sumL2' :: (a ⊕ b, _Γ) `p` _Δ -> (b, _Γ) `p` _Δ
-  sumL2' = cut (sumR2 init) . exL . wkL
-  sumR1 :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> a ⊕ b)
-  sumR2 :: _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a ⊕ b)
 
   parL :: (a, _Γ) `p` _Δ -> (b, _Γ) `p` _Δ -> (a ⅋ b, _Γ) `p` _Δ
   parR :: _Γ `p` (_Δ |> a |> b) -> _Γ `p` (_Δ |> a ⅋ b)
@@ -245,8 +275,6 @@ class (Core p, Structural p) => Proof p where
   ($$) :: _Γ `p` (_Δ |> a --> b) -> _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b)
   f $$ a = cut (exR (wkR f)) (exR (wkR a) `funL` init)
 
-  zeroL :: (Zero, _Γ) `p` _Δ
-
   oneL :: _Γ `p` _Δ -> (One, _Γ) `p` _Δ
   oneL' :: (One, _Γ) `p` _Δ -> _Γ `p` _Δ
   oneL' = cut oneR
@@ -256,28 +284,6 @@ class (Core p, Structural p) => Proof p where
   botR :: _Γ `p` _Δ -> _Γ `p` (_Δ |> Bot)
   botR' :: _Γ `p` (_Δ |> Bot) -> _Γ `p` _Δ
   botR' = (`cut` botL)
-
-  topR :: _Γ `p` (_Δ |> Top)
-
-  negateL :: _Γ `p` (_Δ |> a) -> (Negate a _Δ, _Γ) `p` _Δ
-  negateL' :: (Negate a (_Δ |> a), _Γ) `p` _Δ -> _Γ `p` (_Δ |> a)
-  negateL' = cut (negateR init) . wkR
-  negateR :: (a, _Γ) `p` _Δ -> _Γ `p` (_Δ |> Negate a _Δ)
-  negateR' :: _Γ `p` (_Δ |> Negate a _Δ) -> (a, _Γ) `p` _Δ
-  negateR' p = cut (wkL p) (negateL init)
-
-  notL :: _Γ `p` (_Δ |> a) -> (Not a _Δ, _Γ) `p` _Δ
-  notL' :: (Not a (_Δ |> a), _Γ) `p` _Δ -> _Γ `p` (_Δ |> a)
-  notL' = cut (notR init) . wkR
-  notR :: (a, _Γ) `p` _Δ -> _Γ `p` (_Δ |> Not a _Δ)
-  notR' :: _Γ `p` (_Δ |> Not a _Δ) -> (a, _Γ) `p` _Δ
-  notR' p = cut (wkL p) (notL init)
-
-  zapSum :: _Γ `p` (_Δ |> Not a _Δ & Not b _Δ) -> (a ⊕ b, _Γ) `p` _Δ
-  zapSum p = sumL (cut (wkL p) (withL1 (notL init))) (cut (wkL p) (withL2 (notL init)))
-
-  zapWith :: _Γ `p` (_Δ |> Negate a _Δ ⊕ Negate b _Δ) -> (a & b, _Γ) `p` _Δ
-  zapWith p = cut (wkL p) (sumL (negateL (withL1 init)) (negateL (withL2 init)))
 
   zapTensor :: _Γ `p` (_Δ |> Not a _Δ ⅋ Not b _Δ) -> (a ⊗ b, _Γ) `p` _Δ
   zapTensor p = tensorL (cut (wkL (wkL p)) (parL (notL (exL (wkL init))) (notL (wkL init))))
@@ -311,17 +317,29 @@ instance Structural (|-) where
 
   popR p k = p >>= either pure k
 
-instance Proof (|-) where
-  withL1 p = popL (pushL p . exl)
-  withL2 p = popL (pushL p . exr)
-  (&) = liftA2 (liftA2 inlr)
+instance Negative (|-) where
+  notL p = popL (cut p . popL . fmap pure)
+  notR p = closure (\ _Γ -> pure (close _Γ . pushL p))
 
-  tensorL p = popL (pushL2 p . exl <*> exr)
-  (⊗) = liftA2 (liftA2 inlr)
+  negateL p = popL (cut p . popL . fmap pure)
+  negateR p = closure (\ _Γ -> pure (close _Γ . pushL p))
+
+instance Additive (|-) where
+  zeroL = popL absurdP
+
+  topR = pure (pure Top)
 
   sumL a b = popL (exlr (pushL a) (pushL b))
   sumR1 = fmap (fmap inl)
   sumR2 = fmap (fmap inr)
+
+  withL1 p = popL (pushL p . exl)
+  withL2 p = popL (pushL p . exr)
+  (&) = liftA2 (liftA2 inlr)
+
+instance Proof (|-) where
+  tensorL p = popL (pushL2 p . exl <*> exr)
+  (⊗) = liftA2 (liftA2 inlr)
 
   parL a b = popL (exlr (pushL a) (pushL b))
   parR ab = either (>>= (pure . inl)) (pure . inr) <$> ab
@@ -332,21 +350,11 @@ instance Proof (|-) where
   subL b = popL (\ s -> cut (pushL b (subA s)) (pushL (negateL init) (subK s)))
   subR a b = liftA2 Sub <$> a <*> negateR b
 
-  zeroL = popL absurdP
-
   oneL = wkL
   oneR = pure (pure One)
 
   botL = popL absurdN
   botR = fmap Left
-
-  topR = pure (pure Top)
-
-  notL p = popL (cut p . popL . fmap pure)
-  notR p = closure (\ _Γ -> pure (close _Γ . pushL p))
-
-  negateL p = popL (cut p . popL . fmap pure)
-  negateR p = closure (\ _Γ -> pure (close _Γ . pushL p))
 
 closure :: (_Γ -> _Δ) -> _Γ |- _Δ
 closure = Sequent
