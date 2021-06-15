@@ -16,7 +16,6 @@ import Control.Monad (ap, join)
 import Data.Bifoldable
 import Data.Bifunctor (Bifunctor(..))
 import Data.Bitraversable
-import Data.Profunctor
 import Prelude hiding (init, tail)
 
 type (|>) = Either
@@ -136,7 +135,7 @@ data Γ = Γ
 data Δ
 
 
-class Profunctor p => Core p where
+class Core p where
   (>>>) :: _Γ `p` (_Δ |> a) -> (a, _Γ) `p` _Δ -> _Γ `p` _Δ
 
   init :: (a, _Γ) `p` (_Δ |> a)
@@ -145,7 +144,7 @@ class Profunctor p => Core p where
 infixr 1 >>>
 
 
-class Profunctor p => Structural p where
+class Structural p where
   -- | Pop something off the input context which can later be pushed. Used with 'pushL', this provides a generalized context restructuring facility.
   --
   -- @
@@ -344,9 +343,6 @@ instance Applicative ((|-) _Γ) where
 
 instance Monad ((|-) _Γ) where
   Seq a >>= f = Seq $ \ k c -> a (appSeq k c . f) c
-
-instance Profunctor (|-) where
-  dimap f g (Seq run) = Seq $ \ k -> run (k . g) . f
 
 
 instance Core (|-) where
