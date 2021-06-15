@@ -122,8 +122,10 @@ data a --< b = Sub { subA :: !a, subK :: !(Negate b) }
 
 infixr 5 --<
 
-type Not a = a -> Δ
-type Negate a = a -> Δ
+type Not = K
+type Negate = K
+
+newtype K a = K { runK :: a -> Δ }
 
 data Bot
 data Top = Top
@@ -361,11 +363,11 @@ instance Structural (|-) where
   pushR (Seq run) a = Seq $ \ k -> run (either k a)
 
 instance Negative (|-) where
-  negateL (Seq run) = Seq $ \ k (negA, c) -> run (either k negA) c
-  negateR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (run k' . (,c))
+  negateL (Seq run) = Seq $ \ k (negA, c) -> run (either k (runK negA)) c
+  negateR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (K (run k' . (,c)))
 
-  notL (Seq run) = Seq $ \ k (notA, c) -> run (either k notA) c
-  notR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (run k' . (,c))
+  notL (Seq run) = Seq $ \ k (notA, c) -> run (either k (runK notA)) c
+  notR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (K (run k' . (,c)))
 
 instance Additive (|-) where
   zeroL = popL absurdP
