@@ -133,19 +133,6 @@ absurdΔ = \case
 
 
 class Profunctor p => Structural p where
-  wkL :: _Γ `p` _Δ -> (a, _Γ) `p` _Δ
-  wkL = popL . const
-  wkR :: _Γ `p` _Δ -> _Γ `p` (_Δ |> a)
-  wkR = rmap Left
-  cnL :: (a, (a, _Γ)) `p` _Δ -> (a, _Γ) `p` _Δ
-  cnL = popL . join . pushL2
-  cnR :: _Γ `p` (_Δ |> a |> a) -> _Γ `p` (_Δ |> a)
-  cnR = rmap (either id pure)
-  exL :: (a, (b, c)) `p` _Δ -> (b, (a, c)) `p` _Δ
-  exL = popL2 . flip . pushL2
-  exR :: _Γ `p` (_Δ |> a |> b) -> _Γ `p` (_Δ |> b |> a)
-  exR = rmap (either (either (Left . Left) Right) (Left . Right))
-
   -- | Pop something off the context which can later be pushed. Used with 'pushL', this provides a generalized context reordering facility.
   --
   -- @
@@ -180,6 +167,20 @@ class Profunctor p => Structural p where
 
   pushR2 :: _Γ `p` _Δ -> Either a b -> _Γ `p` (_Δ |> a |> b)
   pushR2 p = either (wkR . pushR p) (pushR (wkR p))
+
+
+  wkL :: _Γ `p` _Δ -> (a, _Γ) `p` _Δ
+  wkL = popL . const
+  wkR :: _Γ `p` _Δ -> _Γ `p` (_Δ |> a)
+  wkR = rmap Left
+  cnL :: (a, (a, _Γ)) `p` _Δ -> (a, _Γ) `p` _Δ
+  cnL = popL . join . pushL2
+  cnR :: _Γ `p` (_Δ |> a |> a) -> _Γ `p` (_Δ |> a)
+  cnR = rmap (either id pure)
+  exL :: (a, (b, c)) `p` _Δ -> (b, (a, c)) `p` _Δ
+  exL = popL2 . flip . pushL2
+  exR :: _Γ `p` (_Δ |> a |> b) -> _Γ `p` (_Δ |> b |> a)
+  exR = rmap (either (either (Left . Left) Right) (Left . Right))
 
 
 class Structural p => Proof p where
