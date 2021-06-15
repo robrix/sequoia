@@ -1,7 +1,8 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Focalized.Calculus
-( Structural(..)
+( Core(..)
+, Structural(..)
 , Proof(..)
 , Γ(..)
 , Δ
@@ -136,6 +137,14 @@ absurdΔ = \case
 (|>) = const pure
 
 
+class Profunctor p => Core p where
+  cut :: _Γ `p` (_Δ |> a) -> (a, _Γ) `p` _Δ -> _Γ `p` _Δ
+
+  infixr 2 `cut`
+
+  init :: (a, _Γ) `p` (_Δ |> a)
+
+
 class Profunctor p => Structural p where
   -- | Pop something off the context which can later be pushed. Used with 'pushL', this provides a generalized context reordering facility.
   --
@@ -188,7 +197,7 @@ class Profunctor p => Structural p where
   exR = rmap (either (either (Left . Left) Right) (Left . Right))
 
 
-class Structural p => Proof p where
+class (Core p, Structural p) => Proof p where
   withL1 :: (a, _Γ) `p` _Δ -> (a & b, _Γ) `p` _Δ
   withL1 = withLSum . sumR1 . negateR
   withL2 :: (b, _Γ) `p` _Δ -> (a & b, _Γ) `p` _Δ
@@ -264,12 +273,6 @@ class Structural p => Proof p where
   notR' :: _Γ `p` (_Δ |> Not a _Δ) -> (a, _Γ) `p` _Δ
   notR' p = cut (wkL p) (notL init)
 
-  cut :: _Γ `p` (_Δ |> a) -> (a, _Γ) `p` _Δ -> _Γ `p` _Δ
-
-  infixr 2 `cut`
-
-  init :: (a, _Γ) `p` (_Δ |> a)
-
   zapSum :: _Γ `p` (_Δ |> Not a _Δ & Not b _Δ) -> (a ⊕ b, _Γ) `p` _Δ
   zapSum p = sumL (cut (wkL p) (withL1 (notL init))) (cut (wkL p) (withL2 (notL init)))
 
@@ -296,6 +299,11 @@ newtype _Γ |- _Δ = Sequent { appSequent :: _Γ -> _Δ }
 
 infix 2 |-
 
+
+instance Core (|-) where
+  cut f g = f >>= either pure (pushL g)
+
+  init = popL (pure . pure)
 
 instance Structural (|-) where
   popL f = Sequent (uncurry (appSequent . f))
@@ -339,10 +347,6 @@ instance Proof (|-) where
 
   negateL p = popL (cut p . popL . fmap pure)
   negateR p = closure (\ _Γ -> pure (close _Γ . pushL p))
-
-  cut f g = f >>= either pure (pushL g)
-
-  init = popL (pure . pure)
 
 closure :: (_Γ -> _Δ) -> _Γ |- _Δ
 closure = Sequent
