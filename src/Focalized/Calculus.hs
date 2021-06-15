@@ -118,12 +118,12 @@ newtype a --> b = Fun { appFun :: (b -> Δ) -> (a -> Δ) }
 
 infixr 5 -->
 
-data (a --< b) _Δ = Sub { subA :: !a, subK :: !(Negate b _Δ) }
+data a --< b = Sub { subA :: !a, subK :: !(Negate b) }
 
 infixr 5 --<
 
-type Not = (->)
-type Negate = (->)
+type Not a = a -> Δ
+type Negate a = a -> Δ
 
 data Bot
 data Top = Top
@@ -134,9 +134,6 @@ data One = One
 
 data Γ = Γ
 data Δ
-
-absurdΔ :: Δ -> a
-absurdΔ = \case
 
 
 class Profunctor p => Core p where
@@ -190,18 +187,18 @@ class Profunctor p => Structural p where
 
 
 class (Core p, Structural p) => Negative p where
-  negateL :: _Γ `p` (_Δ |> a) -> (Negate a _Δ, _Γ) `p` _Δ
-  negateL' :: (Negate a (_Δ |> a), _Γ) `p` _Δ -> _Γ `p` (_Δ |> a)
+  negateL :: _Γ `p` (_Δ |> a) -> (Negate a, _Γ) `p` _Δ
+  negateL' :: (Negate a, _Γ) `p` _Δ -> _Γ `p` (_Δ |> a)
   negateL' = cut (negateR init) . wkR
-  negateR :: (a, _Γ) `p` _Δ -> _Γ `p` (_Δ |> Negate a _Δ)
-  negateR' :: _Γ `p` (_Δ |> Negate a _Δ) -> (a, _Γ) `p` _Δ
+  negateR :: (a, _Γ) `p` _Δ -> _Γ `p` (_Δ |> Negate a)
+  negateR' :: _Γ `p` (_Δ |> Negate a) -> (a, _Γ) `p` _Δ
   negateR' p = cut (wkL p) (negateL init)
 
-  notL :: _Γ `p` (_Δ |> a) -> (Not a _Δ, _Γ) `p` _Δ
-  notL' :: (Not a (_Δ |> a), _Γ) `p` _Δ -> _Γ `p` (_Δ |> a)
+  notL :: _Γ `p` (_Δ |> a) -> (Not a, _Γ) `p` _Δ
+  notL' :: (Not a, _Γ) `p` _Δ -> _Γ `p` (_Δ |> a)
   notL' = cut (notR init) . wkR
-  notR :: (a, _Γ) `p` _Δ -> _Γ `p` (_Δ |> Not a _Δ)
-  notR' :: _Γ `p` (_Δ |> Not a _Δ) -> (a, _Γ) `p` _Δ
+  notR :: (a, _Γ) `p` _Δ -> _Γ `p` (_Δ |> Not a)
+  notR' :: _Γ `p` (_Δ |> Not a) -> (a, _Γ) `p` _Δ
   notR' p = cut (wkL p) (notL init)
 
 
@@ -222,7 +219,7 @@ class (Core p, Structural p, Negative p) => Additive p where
   withL1 = withLSum . sumR1 . negateR
   withL2 :: (b, _Γ) `p` _Δ -> (a & b, _Γ) `p` _Δ
   withL2 = withLSum . sumR2 . negateR
-  withLSum :: _Γ `p` (_Δ |> Negate a _Δ ⊕ Negate b _Δ) -> (a & b, _Γ) `p` _Δ
+  withLSum :: _Γ `p` (_Δ |> Negate a ⊕ Negate b) -> (a & b, _Γ) `p` _Δ
   withLSum p = wkL p `cut` sumL (negateL (withL1 init)) (negateL (withL2 init))
   (&) :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a & b)
   withR1' :: _Γ `p` (_Δ |> a & b) -> _Γ `p` (_Δ |> a)
@@ -230,10 +227,10 @@ class (Core p, Structural p, Negative p) => Additive p where
   withR2' :: _Γ `p` (_Δ |> a & b) -> _Γ `p` (_Δ |> b)
   withR2' t = exR (wkR t) `cut` withL2 init
 
-  zapSum :: _Γ `p` (_Δ |> Not a _Δ & Not b _Δ) -> (a ⊕ b, _Γ) `p` _Δ
+  zapSum :: _Γ `p` (_Δ |> Not a & Not b) -> (a ⊕ b, _Γ) `p` _Δ
   zapSum p = sumL (cut (wkL p) (withL1 (notL init))) (cut (wkL p) (withL2 (notL init)))
 
-  zapWith :: _Γ `p` (_Δ |> Negate a _Δ ⊕ Negate b _Δ) -> (a & b, _Γ) `p` _Δ
+  zapWith :: _Γ `p` (_Δ |> Negate a ⊕ Negate b) -> (a & b, _Γ) `p` _Δ
   zapWith p = cut (wkL p) (sumL (negateL (withL1 init)) (negateL (withL2 init)))
 
 
@@ -254,16 +251,16 @@ class (Core p, Structural p, Negative p) => Multiplicative p where
   parR' p = cut (exR (wkR (exR (wkR p)))) (parL (wkR init) (exR (wkR init)))
 
   tensorL :: (a, (b, _Γ)) `p` _Δ -> (a ⊗ b, _Γ) `p` _Δ
-  tensorLPar :: _Γ `p` (_Δ |> Negate a _Δ ⅋ Negate b _Δ) -> (a ⊗ b, _Γ) `p` _Δ
+  tensorLPar :: _Γ `p` (_Δ |> Negate a ⅋ Negate b) -> (a ⊗ b, _Γ) `p` _Δ
   tensorLPar p = wkL p `cut` parL (negateL (tensorL (exL (wkL init)))) (negateL (tensorL (wkL init)))
   tensorL' :: (a ⊗ b, _Γ) `p` _Δ -> (a, (b, _Γ)) `p` _Δ
   tensorL' p = init ⊗ wkL init `cut` popL (wkL . wkL . pushL p)
   (⊗) :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a ⊗ b)
 
-  zapTensor :: _Γ `p` (_Δ |> Not a _Δ ⅋ Not b _Δ) -> (a ⊗ b, _Γ) `p` _Δ
+  zapTensor :: _Γ `p` (_Δ |> Not a ⅋ Not b) -> (a ⊗ b, _Γ) `p` _Δ
   zapTensor p = tensorL (cut (wkL (wkL p)) (parL (notL (exL (wkL init))) (notL (wkL init))))
 
-  zapPar :: _Γ `p` (_Δ |> Negate a _Δ ⊗ Negate b _Δ) -> (a ⅋ b, _Γ) `p` _Δ
+  zapPar :: _Γ `p` (_Δ |> Negate a ⊗ Negate b) -> (a ⅋ b, _Γ) `p` _Δ
   zapPar p = cut (wkL p) (tensorL (popL2 (parL `on0` pushL (negateL init) `on1` pushL (negateL init))))
 
 
@@ -275,10 +272,10 @@ class (Core p, Structural p, Negative p) => Implicative p where
   funR' :: _Γ `p` (_Δ |> a --> b) -> (a, _Γ) `p` (_Δ |> b)
   funR' p = cut (wkL (exR (wkR p))) funL2
 
-  subL :: (a, _Γ) `p` (_Δ |> b) -> ((a --< b) _Δ, _Γ) `p` _Δ
-  subL' :: ((a --< b) (_Δ |> b), _Γ) `p` _Δ -> (a, _Γ) `p` (_Δ |> b)
+  subL :: (a, _Γ) `p` (_Δ |> b) -> (a --< b, _Γ) `p` _Δ
+  subL' :: (a --< b, _Γ) `p` _Δ -> (a, _Γ) `p` (_Δ |> b)
   subL' p = cut (subR (exR (wkR init)) (exL (wkL init))) (wkR (exL (wkL p)))
-  subR :: _Γ `p` (_Δ |> a) -> (b, _Γ) `p` _Δ -> _Γ `p` (_Δ |> (a --< b) _Δ)
+  subR :: _Γ `p` (_Δ |> a) -> (b, _Γ) `p` _Δ -> _Γ `p` (_Δ |> a --< b)
 
   ($$) :: _Γ `p` (_Δ |> a --> b) -> _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b)
   f $$ a = cut (exR (wkR f)) (exR (wkR a) `funL` init)
@@ -321,11 +318,11 @@ instance Structural (|-) where
   pushL (Seq run) a = Seq $ \ k -> run k . (a,)
 
 instance Negative (|-) where
-  negateL p = popL (cut p . popL . fmap pure)
-  negateR (Seq run) = Seq $ \ k c -> let { (k', ka) = split k } in ka (absurdΔ . run k' . (,c))
+  negateL (Seq run) = Seq $ \ k (negA, c) -> run (either k negA) c
+  negateR (Seq run) = Seq $ \ k c -> let { (k', ka) = split k } in ka (run k' . (,c))
 
-  notL p = popL (cut p . popL . fmap pure)
-  notR (Seq run) = Seq $ \ k c -> let { (k', ka) = split k } in ka (absurdΔ . run k' . (,c))
+  notL (Seq run) = Seq $ \ k (notA, c) -> run (either k notA) c
+  notR (Seq run) = Seq $ \ k c -> let { (k', ka) = split k } in ka (run k' . (,c))
 
 instance Additive (|-) where
   zeroL = popL absurdP
