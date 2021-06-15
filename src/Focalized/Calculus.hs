@@ -239,6 +239,8 @@ class (Core p, Structural p, Negative p) => Additive p where
   sumL1' = cut (sumR1 init) . exL . wkL
   sumL2' :: (a ⊕ b, _Γ) `p` _Δ -> (b, _Γ) `p` _Δ
   sumL2' = cut (sumR2 init) . exL . wkL
+  sumLWith :: _Γ `p` (_Δ |> Not a & Not b) -> (a ⊕ b, _Γ) `p` _Δ
+  sumLWith p = wkL p `cut` exL (sumL (exL (withL1 (notL init))) (exL (withL2 (notL init))))
   sumR1 :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> a ⊕ b)
   sumR2 :: _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a ⊕ b)
 
