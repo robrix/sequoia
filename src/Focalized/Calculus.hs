@@ -276,6 +276,7 @@ class (Core p, Structural p, Negative p) => Multiplicative p where
   oneR :: _Γ `p` (_Δ |> One)
 
   parL :: (a, _Γ) `p` _Δ -> (b, _Γ) `p` _Δ -> (a ⅋ b, _Γ) `p` _Δ
+  parL p1 p2 = parLTensor (negateR p1 ⊗ negateR p2)
   parLTensor :: _Γ `p` (_Δ |> Negate a ⊗ Negate b) -> (a ⅋ b, _Γ) `p` _Δ
   parLTensor p = wkL p `cut` tensorL (negateL (negateL (parL (wkR init) (exR (wkR init)))))
   parR :: _Γ `p` (_Δ |> a |> b) -> _Γ `p` (_Δ |> a ⅋ b)
