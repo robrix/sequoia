@@ -139,9 +139,12 @@ data Δ
 class Profunctor p => Core p where
   cut :: _Γ `p` (_Δ |> a) -> (a, _Γ) `p` _Δ -> _Γ `p` _Δ
 
-  infixr 2 `cut`
-
   init :: (a, _Γ) `p` (_Δ |> a)
+
+(>>>) :: Core p => _Γ `p` (_Δ |> a) -> (a, _Γ) `p` _Δ -> _Γ `p` _Δ
+(>>>) = cut
+
+infixr 1 >>>
 
 
 class Profunctor p => Structural p where
@@ -216,17 +219,17 @@ class Profunctor p => Structural p where
 class (Core p, Structural p) => Negative p where
   negateL :: _Γ `p` (_Δ |> a) -> (Negate a, _Γ) `p` _Δ
   negateL' :: (Negate a, _Γ) `p` _Δ -> _Γ `p` (_Δ |> a)
-  negateL' = cut (negateR init) . wkR
+  negateL' p = negateR init >>> wkR p
   negateR :: (a, _Γ) `p` _Δ -> _Γ `p` (_Δ |> Negate a)
   negateR' :: _Γ `p` (_Δ |> Negate a) -> (a, _Γ) `p` _Δ
-  negateR' p = cut (wkL p) (negateL init)
+  negateR' p = wkL p >>> negateL init
 
   notL :: _Γ `p` (_Δ |> a) -> (Not a, _Γ) `p` _Δ
   notL' :: (Not a, _Γ) `p` _Δ -> _Γ `p` (_Δ |> a)
-  notL' = cut (notR init) . wkR
+  notL' p = notR init >>> wkR p
   notR :: (a, _Γ) `p` _Δ -> _Γ `p` (_Δ |> Not a)
   notR' :: _Γ `p` (_Δ |> Not a) -> (a, _Γ) `p` _Δ
-  notR' p = cut (wkL p) (notL init)
+  notR' p = wkL p >>> notL init
 
 
 class (Core p, Structural p, Negative p) => Additive p where
@@ -237,11 +240,11 @@ class (Core p, Structural p, Negative p) => Additive p where
   sumL :: (a, _Γ) `p` _Δ -> (b, _Γ) `p` _Δ -> (a ⊕ b, _Γ) `p` _Δ
   sumL p1 p2 = sumLWith (notR p1 & notR p2)
   sumL1' :: (a ⊕ b, _Γ) `p` _Δ -> (a, _Γ) `p` _Δ
-  sumL1' = cut (sumR1 init) . exL . wkL
+  sumL1' p = sumR1 init >>> exL (wkL p)
   sumL2' :: (a ⊕ b, _Γ) `p` _Δ -> (b, _Γ) `p` _Δ
-  sumL2' = cut (sumR2 init) . exL . wkL
+  sumL2' p = sumR2 init >>> exL (wkL p)
   sumLWith :: _Γ `p` (_Δ |> Not a & Not b) -> (a ⊕ b, _Γ) `p` _Δ
-  sumLWith p = wkL p `cut` exL (sumL (exL (withL1 (notL init))) (exL (withL2 (notL init))))
+  sumLWith p = wkL p >>> exL (sumL (exL (withL1 (notL init))) (exL (withL2 (notL init))))
   sumR1 :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> a ⊕ b)
   sumR2 :: _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a ⊕ b)
 
@@ -250,75 +253,75 @@ class (Core p, Structural p, Negative p) => Additive p where
   withL2 :: (b, _Γ) `p` _Δ -> (a & b, _Γ) `p` _Δ
   withL2 = withLSum . sumR2 . negateR
   withLSum :: _Γ `p` (_Δ |> Negate a ⊕ Negate b) -> (a & b, _Γ) `p` _Δ
-  withLSum p = wkL p `cut` sumL (negateL (withL1 init)) (negateL (withL2 init))
+  withLSum p = wkL p >>> sumL (negateL (withL1 init)) (negateL (withL2 init))
   (&) :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a & b)
   withR1' :: _Γ `p` (_Δ |> a & b) -> _Γ `p` (_Δ |> a)
-  withR1' t = exR (wkR t) `cut` withL1 init
+  withR1' t = exR (wkR t) >>> withL1 init
   withR2' :: _Γ `p` (_Δ |> a & b) -> _Γ `p` (_Δ |> b)
-  withR2' t = exR (wkR t) `cut` withL2 init
+  withR2' t = exR (wkR t) >>> withL2 init
 
   zapSum :: _Γ `p` (_Δ |> Not a & Not b) -> (a ⊕ b, _Γ) `p` _Δ
-  zapSum p = sumL (cut (wkL p) (withL1 (notL init))) (cut (wkL p) (withL2 (notL init)))
+  zapSum p = sumL (wkL p >>> withL1 (notL init)) (wkL p >>> withL2 (notL init))
 
   zapWith :: _Γ `p` (_Δ |> Negate a ⊕ Negate b) -> (a & b, _Γ) `p` _Δ
-  zapWith p = cut (wkL p) (sumL (negateL (withL1 init)) (negateL (withL2 init)))
+  zapWith p = wkL p >>> sumL (negateL (withL1 init)) (negateL (withL2 init))
 
 
 class (Core p, Structural p, Negative p) => Multiplicative p where
   botL :: (Bot, _Γ) `p` _Δ
   botR :: _Γ `p` _Δ -> _Γ `p` (_Δ |> Bot)
   botR' :: _Γ `p` (_Δ |> Bot) -> _Γ `p` _Δ
-  botR' = (`cut` botL)
+  botR' = (>>> botL)
 
   oneL :: _Γ `p` _Δ -> (One, _Γ) `p` _Δ
   oneL' :: (One, _Γ) `p` _Δ -> _Γ `p` _Δ
-  oneL' = cut oneR
+  oneL' = (oneR >>>)
   oneR :: _Γ `p` (_Δ |> One)
 
   parL :: (a, _Γ) `p` _Δ -> (b, _Γ) `p` _Δ -> (a ⅋ b, _Γ) `p` _Δ
   parL p1 p2 = parLTensor (negateR p1 ⊗ negateR p2)
   parLTensor :: _Γ `p` (_Δ |> Negate a ⊗ Negate b) -> (a ⅋ b, _Γ) `p` _Δ
-  parLTensor p = wkL p `cut` tensorL (negateL (negateL (parL (wkR init) init)))
+  parLTensor p = wkL p >>> tensorL (negateL (negateL (parL (wkR init) init)))
   parR :: _Γ `p` (_Δ |> a |> b) -> _Γ `p` (_Δ |> a ⅋ b)
   parR' :: _Γ `p` (_Δ |> a ⅋ b) -> _Γ `p` (_Δ |> a |> b)
-  parR' p = cut (exR (wkR (exR (wkR p)))) (parL (wkR init) init)
+  parR' p = exR (wkR (exR (wkR p))) >>> parL (wkR init) init
 
   tensorL :: (a, (b, _Γ)) `p` _Δ -> (a ⊗ b, _Γ) `p` _Δ
   tensorL = tensorLPar . parR . notR . notR
   tensorLPar :: _Γ `p` (_Δ |> Not a ⅋ Not b) -> (a ⊗ b, _Γ) `p` _Δ
-  tensorLPar p = wkL p `cut` parL (notL (tensorL init)) (notL (tensorL (wkL init)))
+  tensorLPar p = wkL p >>> parL (notL (tensorL init)) (notL (tensorL (wkL init)))
   tensorL' :: (a ⊗ b, _Γ) `p` _Δ -> (a, (b, _Γ)) `p` _Δ
-  tensorL' p = init ⊗ wkL init `cut` popL (wkL . wkL . pushL p)
+  tensorL' p = init ⊗ wkL init >>> popL (wkL . wkL . pushL p)
   (⊗) :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a ⊗ b)
 
   zapTensor :: _Γ `p` (_Δ |> Not a ⅋ Not b) -> (a ⊗ b, _Γ) `p` _Δ
-  zapTensor p = tensorL (cut (wkL (wkL p)) (parL (notL init) (notL (wkL init))))
+  zapTensor p = tensorL (wkL (wkL p) >>> parL (notL init) (notL (wkL init)))
 
   zapPar :: _Γ `p` (_Δ |> Negate a ⊗ Negate b) -> (a ⅋ b, _Γ) `p` _Δ
-  zapPar p = cut (wkL p) (tensorL (popL2 (parL `on0` pushL (negateL init) `on1` pushL (negateL init))))
+  zapPar p = wkL p >>> tensorL (popL2 (parL `on0` pushL (negateL init) `on1` pushL (negateL init)))
 
 
 class (Core p, Structural p, Negative p) => Implicative p where
   funL :: _Γ `p` (_Δ |> a) -> (b, _Γ) `p` _Δ -> (a --> b, _Γ) `p` _Δ
   funL pa pb = funLSub (subR pa pb)
   funLSub :: _Γ `p` (_Δ |> a --< b) -> (a --> b, _Γ) `p` _Δ
-  funLSub p = wkL p `cut` subL (exL (funL init init))
+  funLSub p = wkL p >>> subL (exL (funL init init))
   funL2 :: (a --> b, (a, _Γ)) `p` (_Δ |> b)
   funL2 = funL init init
   funR :: (a, _Γ) `p` (_Δ |> b) -> _Γ `p` (_Δ |> a --> b)
   funR' :: _Γ `p` (_Δ |> a --> b) -> (a, _Γ) `p` (_Δ |> b)
-  funR' p = cut (wkL (exR (wkR p))) funL2
+  funR' p = wkL (exR (wkR p)) >>> funL2
 
   subL :: (a, _Γ) `p` (_Δ |> b) -> (a --< b, _Γ) `p` _Δ
   subL = subLFun . funR
   subLFun :: _Γ `p` (_Δ |> a --> b) -> (a --< b, _Γ) `p` _Δ
-  subLFun p = wkL p `cut` exL (subL (exL (funL init init)))
+  subLFun p = wkL p >>> exL (subL (exL (funL init init)))
   subL' :: (a --< b, _Γ) `p` _Δ -> (a, _Γ) `p` (_Δ |> b)
-  subL' p = cut (subR init init) (wkR (exL (wkL p)))
+  subL' p = subR init init >>> wkR (exL (wkL p))
   subR :: _Γ `p` (_Δ |> a) -> (b, _Γ) `p` _Δ -> _Γ `p` (_Δ |> a --< b)
 
   ($$) :: _Γ `p` (_Δ |> a --> b) -> _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b)
-  f $$ a = cut (exR (wkR f)) (exR (wkR a) `funL` init)
+  f $$ a = exR (wkR f) >>> exR (wkR a) `funL` init
 
 on0 :: (a -> b -> c) -> (a' -> a) -> (a' -> b -> c)
 on0 = (.)
@@ -394,10 +397,10 @@ instance Multiplicative (|-) where
   (⊗) = liftA2 (liftA2 inlr)
 
 instance Implicative (|-) where
-  funL a b = popL (\ f -> a `cut` Seq (\ k (a, _Γ) -> appFun f (appSeq k _Γ . pushL b) a))
+  funL a b = popL (\ f -> a >>> Seq (\ k (a, _Γ) -> appFun f (appSeq k _Γ . pushL b) a))
   funR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (Fun (\ kb -> run (either k' kb) . (,c)))
 
-  subL b = popL (\ s -> cut (pushL b (subA s)) (pushL (negateL init) (subK s)))
+  subL b = popL (\ s -> pushL b (subA s) >>> pushL (negateL init) (subK s))
   subR a b = liftA2 Sub <$> a <*> negateR b
 
 
