@@ -278,21 +278,21 @@ class (Core p, Structural p, Negative p) => Multiplicative p where
   parL :: (a, _Γ) `p` _Δ -> (b, _Γ) `p` _Δ -> (a ⅋ b, _Γ) `p` _Δ
   parL p1 p2 = parLTensor (negateR p1 ⊗ negateR p2)
   parLTensor :: _Γ `p` (_Δ |> Negate a ⊗ Negate b) -> (a ⅋ b, _Γ) `p` _Δ
-  parLTensor p = wkL p `cut` tensorL (negateL (negateL (parL (wkR init) (exR (wkR init)))))
+  parLTensor p = wkL p `cut` tensorL (negateL (negateL (parL (wkR init) init)))
   parR :: _Γ `p` (_Δ |> a |> b) -> _Γ `p` (_Δ |> a ⅋ b)
   parR' :: _Γ `p` (_Δ |> a ⅋ b) -> _Γ `p` (_Δ |> a |> b)
-  parR' p = cut (exR (wkR (exR (wkR p)))) (parL (wkR init) (exR (wkR init)))
+  parR' p = cut (exR (wkR (exR (wkR p)))) (parL (wkR init) init)
 
   tensorL :: (a, (b, _Γ)) `p` _Δ -> (a ⊗ b, _Γ) `p` _Δ
   tensorL = tensorLPar . parR . negateR . negateR
   tensorLPar :: _Γ `p` (_Δ |> Not a ⅋ Not b) -> (a ⊗ b, _Γ) `p` _Δ
-  tensorLPar p = wkL p `cut` parL (notL (tensorL (exL (wkL init)))) (notL (tensorL (wkL init)))
+  tensorLPar p = wkL p `cut` parL (notL (tensorL init)) (notL (tensorL (wkL init)))
   tensorL' :: (a ⊗ b, _Γ) `p` _Δ -> (a, (b, _Γ)) `p` _Δ
   tensorL' p = init ⊗ wkL init `cut` popL (wkL . wkL . pushL p)
   (⊗) :: _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b) -> _Γ `p` (_Δ |> a ⊗ b)
 
   zapTensor :: _Γ `p` (_Δ |> Not a ⅋ Not b) -> (a ⊗ b, _Γ) `p` _Δ
-  zapTensor p = tensorL (cut (wkL (wkL p)) (parL (notL (exL (wkL init))) (notL (wkL init))))
+  zapTensor p = tensorL (cut (wkL (wkL p)) (parL (notL init) (notL (wkL init))))
 
   zapPar :: _Γ `p` (_Δ |> Negate a ⊗ Negate b) -> (a ⅋ b, _Γ) `p` _Δ
   zapPar p = cut (wkL p) (tensorL (popL2 (parL `on0` pushL (negateL init) `on1` pushL (negateL init))))
@@ -303,14 +303,14 @@ class (Core p, Structural p, Negative p) => Implicative p where
   funLSub :: _Γ `p` (_Δ |> a --< b) -> (a --> b, _Γ) `p` _Δ
   funLSub p = wkL p `cut` subL (exL (funL init init))
   funL2 :: (a --> b, (a, _Γ)) `p` (_Δ |> b)
-  funL2 = funL (exR (wkR init)) (exL (wkL init))
+  funL2 = funL init init
   funR :: (a, _Γ) `p` (_Δ |> b) -> _Γ `p` (_Δ |> a --> b)
   funR' :: _Γ `p` (_Δ |> a --> b) -> (a, _Γ) `p` (_Δ |> b)
   funR' p = cut (wkL (exR (wkR p))) funL2
 
   subL :: (a, _Γ) `p` (_Δ |> b) -> (a --< b, _Γ) `p` _Δ
   subL' :: (a --< b, _Γ) `p` _Δ -> (a, _Γ) `p` (_Δ |> b)
-  subL' p = cut (subR (exR (wkR init)) (exL (wkL init))) (wkR (exL (wkL p)))
+  subL' p = cut (subR init init) (wkR (exL (wkL p)))
   subR :: _Γ `p` (_Δ |> a) -> (b, _Γ) `p` _Δ -> _Γ `p` (_Δ |> a --< b)
 
   ($$) :: _Γ `p` (_Δ |> a --> b) -> _Γ `p` (_Δ |> a) -> _Γ `p` (_Δ |> b)
