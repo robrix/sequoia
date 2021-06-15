@@ -172,6 +172,17 @@ class Profunctor p => Structural p where
   pushL2 p = pushL . pushL p
 
 
+  popR :: ((a -> Δ) -> _Γ `p` _Δ) -> _Γ `p` (_Δ |> a)
+  pushR :: _Γ `p` (_Δ |> a) -> ((a -> Δ) -> _Γ `p` _Δ)
+
+
+  popR2 :: ((a -> Δ) -> (b -> Δ) -> _Γ `p` _Δ) -> _Γ `p` (_Δ |> b |> a)
+  popR2 f = popR (popR . f)
+
+  pushR2 :: _Γ `p` (_Δ |> b |> a) -> (a -> Δ) -> (b -> Δ) -> _Γ `p` _Δ
+  pushR2 p = pushR . pushR p
+
+
   wkL :: _Γ `p` _Δ -> (a, _Γ) `p` _Δ
   wkL = popL . const
   wkR :: _Γ `p` _Δ -> _Γ `p` (_Δ |> a)
@@ -316,6 +327,9 @@ instance Core (|-) where
 instance Structural (|-) where
   popL f = Seq $ \ k -> uncurry (flip (appSeq k) . f)
   pushL (Seq run) a = Seq $ \ k -> run k . (a,)
+
+  popR f = Seq $ \ k c -> let (k', ka) = split k in appSeq k' c (f ka)
+  pushR (Seq run) a = Seq $ \ k -> run (either k a)
 
 instance Negative (|-) where
   negateL (Seq run) = Seq $ \ k (negA, c) -> run (either k negA) c
