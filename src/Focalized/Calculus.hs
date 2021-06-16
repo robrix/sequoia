@@ -343,15 +343,15 @@ newtype is |- os = Seq ((os -> Δ) -> (is -> Δ))
 
 infix 2 |-
 
-appSeq :: (os -> Δ) -> is -> is |- os -> Δ
-appSeq k c (Seq run) = run k c
+runSeq :: (os -> Δ) -> is -> is |- os -> Δ
+runSeq k c (Seq run) = run k c
 
 instance Applicative ((|-) is) where
   pure a = Seq $ \ k _ -> k a
   (<*>) = ap
 
 instance Monad ((|-) is) where
-  Seq a >>= f = Seq $ \ k c -> a (appSeq k c . f) c
+  Seq a >>= f = Seq $ \ k c -> a (runSeq k c . f) c
 
 
 instance Core (|-) where
@@ -360,10 +360,10 @@ instance Core (|-) where
   init = popL (pure . pure)
 
 instance Structural (|-) where
-  popL f = Seq $ \ k -> uncurry (flip (appSeq k) . f)
+  popL f = Seq $ \ k -> uncurry (flip (runSeq k) . f)
   pushL (Seq run) a = Seq $ \ k -> run k . (a,)
 
-  popR f = Seq $ \ k c -> let (k', ka) = split k in appSeq k' c (f ka)
+  popR f = Seq $ \ k c -> let (k', ka) = split k in runSeq k' c (f ka)
   pushR (Seq run) a = Seq $ \ k -> run (either k a)
 
 instance Negative (|-) where
@@ -400,7 +400,7 @@ instance Multiplicative (|-) where
   (⊗) = liftA2 (liftA2 inlr)
 
 instance Implicative (|-) where
-  funL a b = popL (\ f -> a >>> Seq (\ k (a, is) -> appFun f (appSeq k is . pushL b) a))
+  funL a b = popL (\ f -> a >>> Seq (\ k (a, is) -> appFun f (runSeq k is . pushL b) a))
   funR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (Fun (\ kb -> run (either k' kb) . (,c)))
 
   subL b = popL (\ s -> pushL b (subA s) >>> pushL (negateL init) (subK s))
