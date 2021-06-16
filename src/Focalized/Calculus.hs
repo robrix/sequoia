@@ -19,6 +19,7 @@ import Control.Monad (ap, join)
 import Data.Bifoldable
 import Data.Bifunctor (Bifunctor(..))
 import Data.Bitraversable
+import Data.Functor.Identity
 import Prelude hiding (init, tail)
 
 type (*) = (,)
@@ -42,7 +43,7 @@ instance Bifunctor (⊗) where
   bimap = bimapDefault
 
 instance Bitraversable (⊗) where
-  bitraverse f g (a :⊗ b) = inlr <$> f a <*> g b
+  bitraverse f g (a :⊗ b) = (:⊗) <$> f a <*> g b
 
 newtype a & b = With (forall r . (a -> b -> r) -> r)
 
@@ -55,22 +56,22 @@ instance Bifunctor (&) where
   bimap = bimapDefault
 
 instance Bitraversable (&) where
-  bitraverse f g w = inlr <$> f (exl w) <*> g (exr w)
+  bitraverse f g w = fmap getN . inlr <$> traverse f (exl (N w)) <*> traverse g (exr (N w))
 
-class Conj c where
-  inlr :: a -> b -> a `c` b
-  exl :: a `c` b -> a
-  exr :: a `c` b -> b
+class Conj p c | c -> p where
+  inlr :: p a -> p b -> p (a `c` b)
+  exl :: p (a `c` b) -> p a
+  exr :: p (a `c` b) -> p b
 
-instance Conj (⊗) where
-  inlr = (:⊗)
-  exl (l :⊗ _) = l
-  exr (_ :⊗ r) = r
+instance Conj P (⊗) where
+  inlr (P a) (P b) = P (a :⊗ b)
+  exl = fmap (\ (l :⊗ _) -> l)
+  exr = fmap (\ (_ :⊗ r) -> r)
 
-instance Conj (&) where
-  inlr a b = With $ \ f -> f a b
-  exl (With run) = run const
-  exr (With run) = run (const id)
+instance Conj N (&) where
+  inlr (N a) (N b) = N $ With $ \ f -> f a b
+  exl = fmap (\ (With run) -> run const)
+  exr = fmap (\ (With run) -> run (const id))
 
 data a ⊕ b
   = InL !a
@@ -100,35 +101,48 @@ instance Bifunctor (⅋) where
   bimap = bimapDefault
 
 instance Bitraversable (⅋) where
-  bitraverse f g (Par run) = run (fmap inl . f) (fmap inr . g)
+  bitraverse f g (Par run) = run (fmap (getN . inl . N) . f) (fmap (getN . inr . N) . g)
 
-class Disj d where
-  inl :: a -> a `d` b
-  inr :: b -> a `d` b
-  exlr :: (a -> r) -> (b -> r) -> a `d` b -> r
+class Disj p d | d -> p where
+  inl :: p a -> p (a `d` b)
+  inr :: p b -> p (a `d` b)
+  exlr :: (p a -> r) -> (p b -> r) -> (p (a `d` b) -> r)
 
-instance Disj (⊕) where
-  inl = InL
-  inr = InR
+instance Disj P (⊕) where
+  inl = fmap InL
+  inr = fmap InR
   exlr ifl ifr = \case
-    InL l -> ifl l
-    InR r -> ifr r
+    P (InL l) -> ifl (P l)
+    P (InR r) -> ifr (P r)
 
-instance Disj (⅋) where
-  inl l = Par $ \ ifl _ -> ifl l
-  inr r = Par $ \ _ ifr -> ifr r
-  exlr ifl ifr (Par run) = run ifl ifr
+instance Disj N (⅋) where
+  inl (N l) = N $ Par $ \ ifl _ -> ifl l
+  inr (N r) = N $ Par $ \ _ ifr -> ifr r
+  exlr ifl ifr (N (Par run)) = run (ifl . N) (ifr . N)
 
-newtype a --> b = Fun { appFun :: (b -> Δ) -> (a -> Δ) }
+newtype a --> b = Fun { appFun :: (N b -> Δ) -> (P a -> Δ) }
 
 infixr 5 -->
 
-data a --< b = Sub { subA :: !a, subK :: !(Negate b) }
+fun :: ((N b -> Δ) -> (P a -> Δ)) -> N (a --> b)
+fun = N . Fun
+
+data a --< b = Sub { subA :: !(P a), subK :: !(P (Negate b)) }
 
 infixr 5 --<
 
-newtype Not    a = Not    { runNot    :: a -> Δ }
-newtype Negate a = Negate { runNegate :: a -> Δ }
+sub :: P a -> P (Negate b) -> P (a --< b)
+sub = fmap P . Sub
+
+newtype Not    a = Not    { runNot    :: P a -> Δ }
+
+not' :: (P a -> Δ) -> N (Not a)
+not' = N . Not
+
+newtype Negate a = Negate { runNegate :: N a -> Δ }
+
+negate' :: (N a -> Δ) -> P (Negate a)
+negate' = P . Negate
 
 data Bot
 data Top = Top
@@ -138,7 +152,11 @@ data One = One
 
 
 newtype N a = N { getN :: a }
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+  deriving (Applicative, Monad) via Identity
 newtype P a = P { getP :: a }
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+  deriving (Applicative, Monad) via Identity
 
 
 data Γ = Γ
@@ -223,110 +241,110 @@ class Structural p where
 
 
 class (Core p, Structural p) => Negative p where
-  negateL :: is `p` (os + a) -> (Negate a * is) `p` os
-  negateL' :: (Negate a * is) `p` os -> is `p` (os + a)
+  negateL :: is `p` (os + N a) -> (P (Negate a) * is) `p` os
+  negateL' :: (P (Negate a) * is) `p` os -> is `p` (os + N a)
   negateL' p = negateR init >>> wkR p
-  negateR :: (a * is) `p` os -> is `p` (os + Negate a)
-  negateR' :: is `p` (os + Negate a) -> (a * is) `p` os
+  negateR :: (N a * is) `p` os -> is `p` (os + P (Negate a))
+  negateR' :: is `p` (os + P (Negate a)) -> (N a * is) `p` os
   negateR' p = wkL p >>> negateL init
 
-  notL :: is `p` (os + a) -> (Not a * is) `p` os
-  notL' :: (Not a * is) `p` os -> is `p` (os + a)
+  notL :: is `p` (os + P a) -> (N (Not a) * is) `p` os
+  notL' :: (N (Not a) * is) `p` os -> is `p` (os + P a)
   notL' p = notR init >>> wkR p
-  notR :: (a * is) `p` os -> is `p` (os + Not a)
-  notR' :: is `p` (os + Not a) -> (a * is) `p` os
+  notR :: (P a * is) `p` os -> is `p` (os + N (Not a))
+  notR' :: is `p` (os + N (Not a)) -> (P a * is) `p` os
   notR' p = wkL p >>> notL init
 
 
 class (Core p, Structural p, Negative p) => Additive p where
-  zeroL :: (Zero * is) `p` os
+  zeroL :: (P Zero * is) `p` os
 
-  topR :: is `p` (os + Top)
+  topR :: is `p` (os + N Top)
 
-  sumL :: (a * is) `p` os -> (b * is) `p` os -> (a ⊕ b * is) `p` os
+  sumL :: (P a * is) `p` os -> (P b * is) `p` os -> (P (a ⊕ b) * is) `p` os
   sumL p1 p2 = sumLWith (notR p1 & notR p2)
-  sumL1' :: (a ⊕ b * is) `p` os -> (a * is) `p` os
+  sumL1' :: (P (a ⊕ b) * is) `p` os -> (P a * is) `p` os
   sumL1' p = sumR1 init >>> exL (wkL p)
-  sumL2' :: (a ⊕ b * is) `p` os -> (b * is) `p` os
+  sumL2' :: (P (a ⊕ b) * is) `p` os -> (P b * is) `p` os
   sumL2' p = sumR2 init >>> exL (wkL p)
-  sumLWith :: is `p` (os + Not a & Not b) -> (a ⊕ b * is) `p` os
+  sumLWith :: is `p` (os + N (Not a & Not b)) -> (P (a ⊕ b) * is) `p` os
   sumLWith p = wkL p >>> exL (sumL (exL (withL1 (notL init))) (exL (withL2 (notL init))))
-  sumR1 :: is `p` (os + a) -> is `p` (os + a ⊕ b)
-  sumR2 :: is `p` (os + b) -> is `p` (os + a ⊕ b)
+  sumR1 :: is `p` (os + P a) -> is `p` (os + P (a ⊕ b))
+  sumR2 :: is `p` (os + P b) -> is `p` (os + P (a ⊕ b))
 
-  withL1 :: (a * is) `p` os -> (a & b * is) `p` os
+  withL1 :: (N a * is) `p` os -> (N (a & b) * is) `p` os
   withL1 = withLSum . sumR1 . negateR
-  withL2 :: (b * is) `p` os -> (a & b * is) `p` os
+  withL2 :: (N b * is) `p` os -> (N (a & b) * is) `p` os
   withL2 = withLSum . sumR2 . negateR
-  withLSum :: is `p` (os + Negate a ⊕ Negate b) -> (a & b * is) `p` os
+  withLSum :: is `p` (os + P (Negate a ⊕ Negate b)) -> (N (a & b) * is) `p` os
   withLSum p = wkL p >>> sumL (negateL (withL1 init)) (negateL (withL2 init))
-  (&) :: is `p` (os + a) -> is `p` (os + b) -> is `p` (os + a & b)
-  withR1' :: is `p` (os + a & b) -> is `p` (os + a)
+  (&) :: is `p` (os + N a) -> is `p` (os + N b) -> is `p` (os + N (a & b))
+  withR1' :: is `p` (os + N (a & b)) -> is `p` (os + N a)
   withR1' t = exR (wkR t) >>> withL1 init
-  withR2' :: is `p` (os + a & b) -> is `p` (os + b)
+  withR2' :: is `p` (os + N (a & b)) -> is `p` (os + N b)
   withR2' t = exR (wkR t) >>> withL2 init
 
-  zapSum :: is `p` (os + Not a & Not b) -> (a ⊕ b * is) `p` os
+  zapSum :: is `p` (os + N (Not a & Not b)) -> (P (a ⊕ b) * is) `p` os
   zapSum p = sumL (wkL p >>> withL1 (notL init)) (wkL p >>> withL2 (notL init))
 
-  zapWith :: is `p` (os + Negate a ⊕ Negate b) -> (a & b * is) `p` os
+  zapWith :: is `p` (os + P (Negate a ⊕ Negate b)) -> (N (a & b) * is) `p` os
   zapWith p = wkL p >>> sumL (negateL (withL1 init)) (negateL (withL2 init))
 
 
 class (Core p, Structural p, Negative p) => Multiplicative p where
-  botL :: (Bot * is) `p` os
-  botR :: is `p` os -> is `p` (os + Bot)
-  botR' :: is `p` (os + Bot) -> is `p` os
+  botL :: (N Bot * is) `p` os
+  botR :: is `p` os -> is `p` (os + N Bot)
+  botR' :: is `p` (os + N Bot) -> is `p` os
   botR' = (>>> botL)
 
-  oneL :: is `p` os -> (One * is) `p` os
-  oneL' :: (One * is) `p` os -> is `p` os
+  oneL :: is `p` os -> (P One * is) `p` os
+  oneL' :: (P One * is) `p` os -> is `p` os
   oneL' = (oneR >>>)
-  oneR :: is `p` (os + One)
+  oneR :: is `p` (os + P One)
 
-  parL :: (a * is) `p` os -> (b * is) `p` os -> (a ⅋ b * is) `p` os
+  parL :: (N a * is) `p` os -> (N b * is) `p` os -> (N (a ⅋ b) * is) `p` os
   parL p1 p2 = parLTensor (negateR p1 ⊗ negateR p2)
-  parLTensor :: is `p` (os + Negate a ⊗ Negate b) -> (a ⅋ b * is) `p` os
+  parLTensor :: is `p` (os + P (Negate a ⊗ Negate b)) -> (N (a ⅋ b) * is) `p` os
   parLTensor p = wkL p >>> tensorL (negateL (negateL (parL (wkR init) init)))
-  parR :: is `p` (os + a + b) -> is `p` (os + a ⅋ b)
-  parR' :: is `p` (os + a ⅋ b) -> is `p` (os + a + b)
+  parR :: is `p` (os + N a + N b) -> is `p` (os + N (a ⅋ b))
+  parR' :: is `p` (os + N (a ⅋ b)) -> is `p` (os + N a + N b)
   parR' p = exR (wkR (exR (wkR p))) >>> parL (wkR init) init
 
-  tensorL :: (a * b * is) `p` os -> (a ⊗ b * is) `p` os
+  tensorL :: (P a * P b * is) `p` os -> (P (a ⊗ b) * is) `p` os
   tensorL = tensorLPar . parR . notR . notR
-  tensorLPar :: is `p` (os + Not a ⅋ Not b) -> (a ⊗ b * is) `p` os
+  tensorLPar :: is `p` (os + N (Not a ⅋ Not b)) -> (P (a ⊗ b) * is) `p` os
   tensorLPar p = wkL p >>> parL (notL (tensorL init)) (notL (tensorL (wkL init)))
-  tensorL' :: (a ⊗ b * is) `p` os -> (a * b * is) `p` os
+  tensorL' :: (P (a ⊗ b) * is) `p` os -> (P a * P b * is) `p` os
   tensorL' p = init ⊗ wkL init >>> popL (wkL . wkL . pushL p)
-  (⊗) :: is `p` (os + a) -> is `p` (os + b) -> is `p` (os + a ⊗ b)
+  (⊗) :: is `p` (os + P a) -> is `p` (os + P b) -> is `p` (os + P (a ⊗ b))
 
-  zapTensor :: is `p` (os + Not a ⅋ Not b) -> (a ⊗ b * is) `p` os
+  zapTensor :: is `p` (os + N (Not a ⅋ Not b)) -> (P (a ⊗ b) * is) `p` os
   zapTensor p = tensorL (wkL (wkL p) >>> parL (notL init) (notL (wkL init)))
 
-  zapPar :: is `p` (os + Negate a ⊗ Negate b) -> (a ⅋ b * is) `p` os
+  zapPar :: is `p` (os + P (Negate a ⊗ Negate b)) -> (N (a ⅋ b) * is) `p` os
   zapPar p = wkL p >>> tensorL (popL2 (parL `on0` pushL (negateL init) `on1` pushL (negateL init)))
 
 
 class (Core p, Structural p, Negative p) => Implicative p where
-  funL :: is `p` (os + a) -> (b * is) `p` os -> (a --> b * is) `p` os
+  funL :: is `p` (os + P a) -> (N b * is) `p` os -> (N (a --> b) * is) `p` os
   funL pa pb = funLSub (subR pa pb)
-  funLSub :: is `p` (os + a --< b) -> (a --> b * is) `p` os
+  funLSub :: is `p` (os + P (a --< b)) -> (N (a --> b) * is) `p` os
   funLSub p = wkL p >>> subL (exL (funL init init))
-  funL2 :: (a --> b * a * is) `p` (os + b)
+  funL2 :: (N (a --> b) * P a * is) `p` (os + N b)
   funL2 = funL init init
-  funR :: (a * is) `p` (os + b) -> is `p` (os + a --> b)
-  funR' :: is `p` (os + a --> b) -> (a * is) `p` (os + b)
+  funR :: (P a * is) `p` (os + N b) -> is `p` (os + N (a --> b))
+  funR' :: is `p` (os + N (a --> b)) -> (P a * is) `p` (os + N b)
   funR' p = wkL (exR (wkR p)) >>> funL2
 
-  subL :: (a * is) `p` (os + b) -> (a --< b * is) `p` os
+  subL :: (P a * is) `p` (os + N b) -> (P (a --< b) * is) `p` os
   subL = subLFun . funR
-  subLFun :: is `p` (os + a --> b) -> (a --< b * is) `p` os
+  subLFun :: is `p` (os + N (a --> b)) -> (P (a --< b) * is) `p` os
   subLFun p = wkL p >>> exL (subL (exL (funL init init)))
-  subL' :: (a --< b * is) `p` os -> (a * is) `p` (os + b)
+  subL' :: (P (a --< b) * is) `p` os -> (P a * is) `p` (os + N b)
   subL' p = subR init init >>> wkR (exL (wkL p))
-  subR :: is `p` (os + a) -> (b * is) `p` os -> is `p` (os + a --< b)
+  subR :: is `p` (os + P a) -> (N b * is) `p` os -> is `p` (os + P (a --< b))
 
-  ($$) :: is `p` (os + a --> b) -> is `p` (os + a) -> is `p` (os + b)
+  ($$) :: is `p` (os + N (a --> b)) -> is `p` (os + P a) -> is `p` (os + N b)
   f $$ a = exR (wkR f) >>> exR (wkR a) `funL` init
 
 on0 :: (a -> b -> c) -> (a' -> a) -> (a' -> b -> c)
@@ -367,16 +385,16 @@ instance Structural (|-) where
   pushR (Seq run) a = Seq $ \ k -> run (either k a)
 
 instance Negative (|-) where
-  negateL (Seq run) = Seq $ \ k (negA, c) -> run (either k (runNegate negA)) c
-  negateR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (Negate (run k' . (,c)))
+  negateL (Seq run) = Seq $ \ k (P negA, c) -> run (either k (runNegate negA)) c
+  negateR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (negate' (run k' . (,c)))
 
-  notL (Seq run) = Seq $ \ k (notA, c) -> run (either k (runNot notA)) c
-  notR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (Not (run k' . (,c)))
+  notL (Seq run) = Seq $ \ k (N notA, c) -> run (either k (runNot notA)) c
+  notR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (not' (run k' . (,c)))
 
 instance Additive (|-) where
   zeroL = popL absurdP
 
-  topR = pure (pure Top)
+  topR = pure (pure (N Top))
 
   sumL a b = popL (exlr (pushL a) (pushL b))
   sumR1 = fmap (fmap inl)
@@ -391,7 +409,7 @@ instance Multiplicative (|-) where
   botR = fmap Left
 
   oneL = wkL
-  oneR = pure (pure One)
+  oneR = pure (pure (P One))
 
   parL a b = popL (exlr (pushL a) (pushL b))
   parR ab = either (>>= (pure . inl)) (pure . inr) <$> ab
@@ -400,15 +418,15 @@ instance Multiplicative (|-) where
   (⊗) = liftA2 (liftA2 inlr)
 
 instance Implicative (|-) where
-  funL a b = popL (\ f -> a >>> Seq (\ k (a, is) -> appFun f (runSeq k is . pushL b) a))
-  funR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (Fun (\ kb -> run (either k' kb) . (,c)))
+  funL a b = popL (\ (N f) -> a >>> Seq (\ k (a, is) -> appFun f (runSeq k is . pushL b) a))
+  funR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (fun (\ kb -> run (either k' kb) . (,c)))
 
-  subL b = popL (\ s -> pushL b (subA s) >>> pushL (negateL init) (subK s))
-  subR a b = liftA2 Sub <$> a <*> negateR b
+  subL b = popL (\ (P s) -> pushL b (subA s) >>> pushL (negateL init) (subK s))
+  subR a b = liftA2 sub <$> a <*> negateR b
 
 
-absurdN :: Bot -> a
+absurdN :: N Bot -> a
 absurdN = \case
 
-absurdP :: Zero -> a
+absurdP :: P Zero -> a
 absurdP = \case
