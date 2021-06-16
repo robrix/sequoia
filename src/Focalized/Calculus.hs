@@ -148,9 +148,11 @@ negate' = P . Negate
 
 data Bot
 data Top = Top
+  deriving (Eq, Ord, Show)
 
 data Zero
 data One = One
+  deriving (Eq, Ord, Show)
 
 
 newtype N a = N { getN :: a }
