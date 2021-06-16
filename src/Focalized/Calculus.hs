@@ -168,6 +168,8 @@ newtype P a = P { getP :: a }
 
 
 data Γ = Γ
+  deriving (Eq, Ord, Show)
+
 data Δ
 
 absurdΔ :: Δ -> a
