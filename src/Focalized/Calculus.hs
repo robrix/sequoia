@@ -51,6 +51,7 @@ instance Bitraversable (⊗) where
   bitraverse f g (a :⊗ b) = (:⊗) <$> f a <*> g b
 
 newtype a & b = With (forall r . (a -> b -> r) -> r)
+  deriving (Functor)
 
 infixr 6 &
 
@@ -97,6 +98,7 @@ instance Bitraversable (⊕) where
     InR b -> InR <$> g b
 
 newtype a ⅋ b = Par (forall r . (a -> r) -> (b -> r) -> r)
+  deriving (Functor)
 
 infixr 7 ⅋
 
