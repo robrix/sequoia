@@ -25,7 +25,7 @@ import Data.Bifunctor (Bifunctor(..))
 import Data.Bitraversable
 import Data.Functor.Identity
 import Data.Traversable (foldMapDefault)
-import Prelude hiding (init, tail)
+import Prelude hiding (init)
 
 type (*) = (,)
 infixr 4 *
