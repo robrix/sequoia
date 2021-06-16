@@ -210,11 +210,14 @@ instance Disj (⅋) where
   inr r = Par $ \ _ ifr -> ifr r
   exlr ifl ifr (Par run) = run ifl ifr
 
-newtype a --> b = Fun { appFun :: (N b -> Δ) -> (P a -> Δ) }
+newtype a --> b = Fun { getFun :: P (Negate b) -> N (Not a) }
 
 infixr 5 -->
 
-fun :: ((N b -> Δ) -> (P a -> Δ)) -> N (a --> b)
+appFun :: N (a --> b) -> (P (Negate b) -> N (Not a))
+appFun = getFun . getN
+
+fun :: (P (Negate b) -> N (Not a)) -> N (a --> b)
 fun = N . Fun
 
 data a --< b = Sub { subA :: !(P a), subK :: !(P (Negate b)) }
@@ -518,8 +521,8 @@ instance Multiplicative Seq where
   (⊗) = liftA2 (liftA2 inlrP)
 
 instance Implicative Seq where
-  funL a b = popL (\ (N f) -> a >>> Seq (\ k (a, is) -> appFun f (runSeq k is . pushL b) a))
-  funR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (fun (\ kb -> run (either k' kb) . (,c)))
+  funL a b = popL (\ f -> a >>> Seq (\ k (a, is) -> runNot (appFun f (negate' (runSeq k is . pushL b))) a))
+  funR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (fun (\ kb -> not' (run (either k' (runNegate kb)) . (,c))))
 
   subL b = popL (\ (P s) -> pushL b (subA s) >>> pushL (negateL init) (subK s))
   subR a b = liftA2 sub <$> a <*> negateR b
