@@ -37,6 +37,31 @@ split :: (os + a -> r) -> (os -> r, a -> r)
 split f = (f . Left, f . Right)
 
 
+class (Functor f, Functor u) => Adjunction f u | f -> u, u -> f where
+  {-# MINIMAL (unit | leftAdjunct), (counit | rightAdjunct) #-}
+  unit :: a -> u (f a)
+  unit = leftAdjunct id
+  counit :: f (u a) -> a
+  counit = rightAdjunct id
+
+  leftAdjunct :: (f a -> b) -> (a -> u b)
+  leftAdjunct f = fmap f . unit
+  rightAdjunct :: (a -> u b) -> (f a -> b)
+  rightAdjunct f = counit . fmap f
+
+instance Adjunction N P where
+  unit   =    P .    N
+  counit = getP . getN
+  leftAdjunct  f =    P . f .    N
+  rightAdjunct f = getP . f . getN
+
+instance Adjunction P N where
+  unit   =    N .    P
+  counit = getN . getP
+  leftAdjunct  f =    N . f .    P
+  rightAdjunct f = getN . f . getP
+
+
 data a ⊗ b = !a :⊗ !b
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
@@ -125,24 +150,33 @@ instance Bifunctor (⅋) where
   bimap = bimapDefault
 
 instance Bitraversable (⅋) where
-  bitraverse f g (Par run) = run (fmap (getN . inl . N) . f) (fmap (getN . inr . N) . g)
+  bitraverse f g (Par run) = run (fmap inl . f) (fmap inr . g)
 
-class Disj p d | d -> p where
-  inl :: p a -> p (a `d` b)
-  inr :: p b -> p (a `d` b)
-  exlr :: (p a -> r) -> (p b -> r) -> (p (a `d` b) -> r)
+class Applicative p => Disj p d | d -> p where
+  inl :: a -> a `d` b
+  inr :: b -> a `d` b
+  exlr :: (a -> r) -> (b -> r) -> ((a `d` b) -> r)
+
+inlP :: Disj p d => p a -> p (a `d` b)
+inlP = fmap inl
+
+inrP :: Disj p d => p b -> p (a `d` b)
+inrP = fmap inr
+
+exlrP :: (Adjunction p p', Disj p d) => (p a -> r) -> (p b -> r) -> (p (a `d` b) -> r)
+exlrP f g = rightAdjunct (exlr (leftAdjunct f) (leftAdjunct g))
 
 instance Disj P (⊕) where
-  inl = fmap InL
-  inr = fmap InR
+  inl = InL
+  inr = InR
   exlr ifl ifr = \case
-    P (InL l) -> ifl (P l)
-    P (InR r) -> ifr (P r)
+    InL l -> ifl l
+    InR r -> ifr r
 
 instance Disj N (⅋) where
-  inl (N l) = N $ Par $ \ ifl _ -> ifl l
-  inr (N r) = N $ Par $ \ _ ifr -> ifr r
-  exlr ifl ifr (N (Par run)) = run (ifl . N) (ifr . N)
+  inl l = Par $ \ ifl _ -> ifl l
+  inr r = Par $ \ _ ifr -> ifr r
+  exlr ifl ifr (Par run) = run ifl ifr
 
 newtype a --> b = Fun { appFun :: (N b -> Δ) -> (P a -> Δ) }
 
@@ -435,9 +469,9 @@ instance Additive (|-) where
 
   topR = pure (pure (N Top))
 
-  sumL a b = popL (exlr (pushL a) (pushL b))
-  sumR1 = fmap (fmap inl)
-  sumR2 = fmap (fmap inr)
+  sumL a b = popL (exlrP (pushL a) (pushL b))
+  sumR1 = fmap (fmap inlP)
+  sumR2 = fmap (fmap inrP)
 
   withL1 p = popL (pushL p . exlP)
   withL2 p = popL (pushL p . exrP)
@@ -450,8 +484,8 @@ instance Multiplicative (|-) where
   oneL = wkL
   oneR = pure (pure (P One))
 
-  parL a b = popL (exlr (pushL a) (pushL b))
-  parR ab = either (>>= (pure . inl)) (pure . inr) <$> ab
+  parL a b = popL (exlrP (pushL a) (pushL b))
+  parR ab = either (>>= (pure . inlP)) (pure . inrP) <$> ab
 
   tensorL p = popL (pushL2 p . exlP <*> exrP)
   (⊗) = liftA2 (liftA2 inlrP)
