@@ -12,6 +12,11 @@ module Focalized.Calculus
 , Core(..)
 , Structural(..)
 , Negative(..)
+  -- * Additive
+, Top(..)
+, Zero
+, type (&)(..)
+, type (⊕)(..)
 , Additive(..)
 , Multiplicative(..)
 , Implicative(..)
@@ -102,25 +107,6 @@ instance Bifunctor (⊗) where
 instance Bitraversable (⊗) where
   bitraverse f g (a :⊗ b) = (:⊗) <$> f a <*> g b
 
-newtype a & b = With (forall r . (a -> b -> r) -> r)
-  deriving (Functor)
-
-infixr 6 &
-
-instance Foldable ((&) a) where
-  foldMap = foldMapDefault
-
-instance Traversable ((&) a) where
-  traverse f (With run) = run $ \ a b -> let mk b = With (\ f -> f a b) in mk <$> f b
-
-instance Bifoldable (&) where
-  bifoldMap = bifoldMapDefault
-
-instance Bifunctor (&) where
-  bimap = bimapDefault
-
-instance Bitraversable (&) where
-  bitraverse f g w = inlr <$> f (exl w) <*> g (exr w)
 
 class Conj c where
   inlr :: a -> b -> a `c` b
@@ -141,28 +127,6 @@ instance Conj (⊗) where
   exl (l :⊗ _) = l
   exr (_ :⊗ r) = r
 
-instance Conj (&) where
-  inlr a b = With $ \ f -> f a b
-  exl (With run) = run const
-  exr (With run) = run (const id)
-
-data a ⊕ b
-  = InL !a
-  | InR !b
-  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-
-infixr 6 ⊕
-
-instance Bifoldable (⊕) where
-  bifoldMap = bifoldMapDefault
-
-instance Bifunctor (⊕) where
-  bimap = bimapDefault
-
-instance Bitraversable (⊕) where
-  bitraverse f g = \case
-    InL a -> InL <$> f a
-    InR b -> InR <$> g b
 
 newtype a ⅋ b = Par (forall r . (a -> r) -> (b -> r) -> r)
   deriving (Functor)
@@ -197,13 +161,6 @@ inrP = fmap inr
 
 exlrP :: (Adjunction p p', Disj d) => (p a -> r) -> (p b -> r) -> (p (a `d` b) -> r)
 exlrP f g = rightAdjunct (exlr (leftAdjunct f) (leftAdjunct g))
-
-instance Disj (⊕) where
-  inl = InL
-  inr = InR
-  exlr ifl ifr = \case
-    InL l -> ifl l
-    InR r -> ifr r
 
 instance Disj (⅋) where
   inl l = Par $ \ ifl _ -> ifl l
@@ -247,14 +204,6 @@ data Bot
 
 absurdN :: N Bot -> a
 absurdN = \case
-
-data Top = Top
-  deriving (Eq, Ord, Show)
-
-data Zero
-
-absurdP :: P Zero -> a
-absurdP = \case
 
 data One = One
   deriving (Eq, Ord, Show)
@@ -351,6 +300,70 @@ class (Core p, Structural p) => Negative p where
   notR :: (P a <| is) `p` os -> is `p` (os |> N (Not a))
   notR' :: is `p` (os |> N (Not a)) -> (P a <| is) `p` os
   notR' p = wkL p >>> notL init
+
+
+-- Additive
+
+data Top = Top
+  deriving (Eq, Ord, Show)
+
+
+data Zero
+
+absurdP :: P Zero -> a
+absurdP = \case
+
+
+newtype a & b = With (forall r . (a -> b -> r) -> r)
+  deriving (Functor)
+
+infixr 6 &
+
+instance Foldable ((&) a) where
+  foldMap = foldMapDefault
+
+instance Traversable ((&) a) where
+  traverse f (With run) = run $ \ a b -> let mk b = With (\ f -> f a b) in mk <$> f b
+
+instance Bifoldable (&) where
+  bifoldMap = bifoldMapDefault
+
+instance Bifunctor (&) where
+  bimap = bimapDefault
+
+instance Bitraversable (&) where
+  bitraverse f g w = inlr <$> f (exl w) <*> g (exr w)
+
+instance Conj (&) where
+  inlr a b = With $ \ f -> f a b
+  exl (With run) = run const
+  exr (With run) = run (const id)
+
+
+data a ⊕ b
+  = InL !a
+  | InR !b
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+
+infixr 6 ⊕
+
+instance Bifoldable (⊕) where
+  bifoldMap = bifoldMapDefault
+
+instance Bifunctor (⊕) where
+  bimap = bimapDefault
+
+instance Bitraversable (⊕) where
+  bitraverse f g = \case
+    InL a -> InL <$> f a
+    InR b -> InR <$> g b
+
+instance Disj (⊕) where
+  inl = InL
+  inr = InR
+  exlr ifl ifr = \case
+    InL l -> ifl l
+    InR r -> ifr r
 
 
 class (Core p, Structural p, Negative p) => Additive p where
