@@ -6,14 +6,15 @@ module Focalized.Calculus
 , type (|>)
 , Γ(..)
 , Δ
+  -- * Polarity
+, N(..)
+, P(..)
 , Core(..)
 , Structural(..)
 , Negative(..)
 , Additive(..)
 , Multiplicative(..)
 , Implicative(..)
-, N(..)
-, P(..)
 , Seq(..)
 , runSeq
 , runSeqIO
@@ -50,6 +51,8 @@ absurdΔ :: Δ -> a
 absurdΔ = \case
 
 
+-- Polarity
+
 class (Functor f, Functor u) => Adjunction f u | f -> u, u -> f where
   {-# MINIMAL (unit | leftAdjunct), (counit | rightAdjunct) #-}
   unit :: a -> u (f a)
@@ -62,11 +65,19 @@ class (Functor f, Functor u) => Adjunction f u | f -> u, u -> f where
   rightAdjunct :: (a -> u b) -> (f a -> b)
   rightAdjunct f = counit . fmap f
 
+newtype N a = N { getN :: a }
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+  deriving (Applicative, Monad) via Identity
+
 instance Adjunction N P where
   unit   =    P .    N
   counit = getP . getN
   leftAdjunct  f =    P . f .    N
   rightAdjunct f = getP . f . getN
+
+newtype P a = P { getP :: a }
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+  deriving (Applicative, Monad) via Identity
 
 instance Adjunction P N where
   unit   =    N .    P
@@ -236,14 +247,6 @@ absurdP = \case
 
 data One = One
   deriving (Eq, Ord, Show)
-
-
-newtype N a = N { getN :: a }
-  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-  deriving (Applicative, Monad) via Identity
-newtype P a = P { getP :: a }
-  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-  deriving (Applicative, Monad) via Identity
 
 
 class Core p where
