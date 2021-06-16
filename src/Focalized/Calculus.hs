@@ -1,7 +1,9 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Focalized.Calculus
-( Core(..)
+( type (<|)
+, type (|>)
+, Core(..)
 , Structural(..)
 , Negative(..)
 , Additive(..)
