@@ -11,6 +11,13 @@ module Focalized.Calculus
 , P(..)
 , Core(..)
 , Structural(..)
+  -- * Negating
+, Not(..)
+, runNot
+, not'
+, Negate(..)
+, runNegate
+, negate'
 , Negative(..)
   -- * Additive
 , Top(..)
@@ -184,21 +191,6 @@ infixr 5 --<
 sub :: P a -> P (Negate b) -> P (a --< b)
 sub = fmap P . Sub
 
-newtype Not    a = Not    { getNot    :: K (P a) }
-
-runNot :: N (Not a) -> (P a -> Δ)
-runNot = runK . getNot . getN
-
-not' :: (P a -> Δ) -> N (Not a)
-not' = N . Not . K
-
-newtype Negate a = Negate { getNegate :: K (N a) }
-
-runNegate :: P (Negate a) -> (N a -> Δ)
-runNegate = runK . getNegate . getP
-
-negate' :: (N a -> Δ) -> P (Negate a)
-negate' = P . Negate . K
 
 data Bot
 
@@ -286,20 +278,40 @@ class Structural p where
   exR = popR2 . flip . pushR2
 
 
-class (Core p, Structural p) => Negative p where
-  negateL :: is `p` (os |> N a) -> (P (Negate a) <| is) `p` os
-  negateL' :: (P (Negate a) <| is) `p` os -> is `p` (os |> N a)
-  negateL' p = negateR init >>> wkR p
-  negateR :: (N a <| is) `p` os -> is `p` (os |> P (Negate a))
-  negateR' :: is `p` (os |> P (Negate a)) -> (N a <| is) `p` os
-  negateR' p = wkL p >>> negateL init
+-- Negating
 
+newtype Not    a = Not    { getNot    :: K (P a) }
+
+runNot :: N (Not a) -> (P a -> Δ)
+runNot = runK . getNot . getN
+
+not' :: (P a -> Δ) -> N (Not a)
+not' = N . Not . K
+
+
+newtype Negate a = Negate { getNegate :: K (N a) }
+
+runNegate :: P (Negate a) -> (N a -> Δ)
+runNegate = runK . getNegate . getP
+
+negate' :: (N a -> Δ) -> P (Negate a)
+negate' = P . Negate . K
+
+
+class (Core p, Structural p) => Negative p where
   notL :: is `p` (os |> P a) -> (N (Not a) <| is) `p` os
   notL' :: (N (Not a) <| is) `p` os -> is `p` (os |> P a)
   notL' p = notR init >>> wkR p
   notR :: (P a <| is) `p` os -> is `p` (os |> N (Not a))
   notR' :: is `p` (os |> N (Not a)) -> (P a <| is) `p` os
   notR' p = wkL p >>> notL init
+
+  negateL :: is `p` (os |> N a) -> (P (Negate a) <| is) `p` os
+  negateL' :: (P (Negate a) <| is) `p` os -> is `p` (os |> N a)
+  negateL' p = negateR init >>> wkR p
+  negateR :: (N a <| is) `p` os -> is `p` (os |> P (Negate a))
+  negateR' :: is `p` (os |> P (Negate a)) -> (N a <| is) `p` os
+  negateR' p = wkL p >>> negateL init
 
 
 -- Additive
