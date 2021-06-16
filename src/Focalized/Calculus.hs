@@ -1,8 +1,11 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Focalized.Calculus
-( type (<|)
+( -- * Contexts
+  type (<|)
 , type (|>)
+, Γ(..)
+, Δ
 , Core(..)
 , Structural(..)
 , Negative(..)
@@ -11,8 +14,6 @@ module Focalized.Calculus
 , Implicative(..)
 , N(..)
 , P(..)
-, Γ(..)
-, Δ
 , Seq(..)
 , runSeq
 , runSeqIO
@@ -28,6 +29,8 @@ import Data.Functor.Identity
 import Data.Traversable (foldMapDefault)
 import Prelude hiding (init)
 
+-- Contexts
+
 type (<|) = (,)
 infixr 4 <|
 
@@ -36,6 +39,15 @@ infixl 4 |>
 
 split :: (os |> a -> r) -> (os -> r, a -> r)
 split f = (f . Left, f . Right)
+
+
+data Γ = Γ
+  deriving (Eq, Ord, Show)
+
+data Δ
+
+absurdΔ :: Δ -> a
+absurdΔ = \case
 
 
 class (Functor f, Functor u) => Adjunction f u | f -> u, u -> f where
@@ -232,15 +244,6 @@ newtype N a = N { getN :: a }
 newtype P a = P { getP :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
   deriving (Applicative, Monad) via Identity
-
-
-data Γ = Γ
-  deriving (Eq, Ord, Show)
-
-data Δ
-
-absurdΔ :: Δ -> a
-absurdΔ = \case
 
 
 class Core p where
