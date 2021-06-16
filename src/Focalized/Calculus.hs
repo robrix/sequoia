@@ -209,10 +209,18 @@ negate' :: (N a -> Δ) -> P (Negate a)
 negate' = P . Negate
 
 data Bot
+
+absurdN :: N Bot -> a
+absurdN = \case
+
 data Top = Top
   deriving (Eq, Ord, Show)
 
 data Zero
+
+absurdP :: P Zero -> a
+absurdP = \case
+
 data One = One
   deriving (Eq, Ord, Show)
 
@@ -500,10 +508,3 @@ instance Implicative Seq where
 
   subL b = popL (\ (P s) -> pushL b (subA s) >>> pushL (negateL init) (subK s))
   subR a b = liftA2 sub <$> a <*> negateR b
-
-
-absurdN :: N Bot -> a
-absurdN = \case
-
-absurdP :: P Zero -> a
-absurdP = \case
