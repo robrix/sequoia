@@ -31,6 +31,12 @@ module Focalized.Calculus
 , type (⅋)(..)
 , type (⊗)(..)
 , Multiplicative(..)
+  -- * Implicative
+, type (-->)(..)
+, appFun
+, fun
+, type (--<)(..)
+, sub
 , Implicative(..)
 , Seq(..)
 , runSeq
@@ -133,24 +139,6 @@ inrP = fmap inr
 
 exlrP :: (Adjunction p p', Disj d) => (p a -> r) -> (p b -> r) -> (p (a `d` b) -> r)
 exlrP f g = rightAdjunct (exlr (leftAdjunct f) (leftAdjunct g))
-
-
-newtype a --> b = Fun { getFun :: P (Negate b) -> N (Not a) }
-
-infixr 5 -->
-
-appFun :: N (a --> b) -> (P (Negate b) -> N (Not a))
-appFun = getFun . getN
-
-fun :: (P (Negate b) -> N (Not a)) -> N (a --> b)
-fun = N . Fun
-
-data a --< b = Sub { subA :: !(P a), subK :: !(P (Negate b)) }
-
-infixr 5 --<
-
-sub :: P a -> P (Negate b) -> P (a --< b)
-sub = fmap P . Sub
 
 
 class Core p where
@@ -455,6 +443,27 @@ class (Core p, Structural p, Negative p) => Multiplicative p where
 
   zapPar :: is `p` (os |> P (Negate a ⊗ Negate b)) -> (N (a ⅋ b) <| is) `p` os
   zapPar p = wkL p >>> tensorL (popL2 (parL `on0` pushL (negateL init) `on1` pushL (negateL init)))
+
+
+-- Implicative
+
+newtype a --> b = Fun { getFun :: P (Negate b) -> N (Not a) }
+
+infixr 5 -->
+
+appFun :: N (a --> b) -> (P (Negate b) -> N (Not a))
+appFun = getFun . getN
+
+fun :: (P (Negate b) -> N (Not a)) -> N (a --> b)
+fun = N . Fun
+
+
+data a --< b = Sub { subA :: !(P a), subK :: !(P (Negate b)) }
+
+infixr 5 --<
+
+sub :: P a -> P (Negate b) -> P (a --< b)
+sub = fmap P . Sub
 
 
 class (Core p, Structural p, Negative p) => Implicative p where
