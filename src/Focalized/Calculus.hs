@@ -12,7 +12,7 @@ module Focalized.Calculus
 , P(..)
 , Γ(..)
 , Δ
-, type (|-)(..)
+, Seq(..)
 , runSeq
 , runSeqIO
 ) where
@@ -427,15 +427,13 @@ on1 = fmap flip . (.) . flip
 infixl 4 `on0`, `on1`
 
 
-newtype is |- os = Seq ((os -> Δ) -> (is -> Δ))
+newtype Seq is os = Seq ((os -> Δ) -> (is -> Δ))
   deriving (Functor)
 
-infix 2 |-
-
-runSeq :: (os -> Δ) -> is -> is |- os -> Δ
+runSeq :: (os -> Δ) -> is -> Seq is os -> Δ
 runSeq k c (Seq run) = run k c
 
-runSeqIO :: (os -> IO ()) -> is -> is |- os -> IO ()
+runSeqIO :: (os -> IO ()) -> is -> Seq is os -> IO ()
 runSeqIO k is (Seq run) = absurdΔ (run (throw . Escape . k) is) `catch` getEscape
 
 newtype Escape = Escape { getEscape :: IO () }
@@ -443,34 +441,34 @@ newtype Escape = Escape { getEscape :: IO () }
 instance Show Escape where show _ = "Escape"
 instance Exception Escape
 
-instance Applicative ((|-) is) where
+instance Applicative (Seq is) where
   pure a = Seq $ \ k _ -> k a
   (<*>) = ap
 
-instance Monad ((|-) is) where
+instance Monad (Seq is) where
   Seq a >>= f = Seq $ \ k c -> a (runSeq k c . f) c
 
 
-instance Core (|-) where
+instance Core Seq where
   f >>> g = f >>= either pure (pushL g)
 
   init = popL (pure . pure)
 
-instance Structural (|-) where
+instance Structural Seq where
   popL f = Seq $ \ k -> uncurry (flip (runSeq k) . f)
   pushL (Seq run) a = Seq $ \ k -> run k . (a,)
 
   popR f = Seq $ \ k c -> let (k', ka) = split k in runSeq k' c (f ka)
   pushR (Seq run) a = Seq $ \ k -> run (either k a)
 
-instance Negative (|-) where
+instance Negative Seq where
   negateL (Seq run) = Seq $ \ k (P negA, c) -> run (either k (runNegate negA)) c
   negateR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (negate' (run k' . (,c)))
 
   notL (Seq run) = Seq $ \ k (N notA, c) -> run (either k (runNot notA)) c
   notR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (not' (run k' . (,c)))
 
-instance Additive (|-) where
+instance Additive Seq where
   zeroL = popL absurdP
 
   topR = pure (pure (N Top))
@@ -483,7 +481,7 @@ instance Additive (|-) where
   withL2 p = popL (pushL p . exrP)
   (&) = liftA2 (liftA2 inlrP)
 
-instance Multiplicative (|-) where
+instance Multiplicative Seq where
   botL = popL absurdN
   botR = fmap Left
 
@@ -496,7 +494,7 @@ instance Multiplicative (|-) where
   tensorL p = popL (pushL2 p . exlP <*> exrP)
   (⊗) = liftA2 (liftA2 inlrP)
 
-instance Implicative (|-) where
+instance Implicative Seq where
   funL a b = popL (\ (N f) -> a >>> Seq (\ k (a, is) -> appFun f (runSeq k is . pushL b) a))
   funR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (fun (\ kb -> run (either k' kb) . (,c)))
 
