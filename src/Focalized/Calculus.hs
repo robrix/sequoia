@@ -143,6 +143,12 @@ newtype a ⅋ b = Par (forall r . (a -> r) -> (b -> r) -> r)
 
 infixr 7 ⅋
 
+instance Foldable ((⅋) a) where
+  foldMap = foldMapDefault
+
+instance Traversable ((⅋) a) where
+  traverse f (Par run) = run (pure . inl) (fmap inr . f)
+
 instance Bifoldable (⅋) where
   bifoldMap = bifoldMapDefault
 
