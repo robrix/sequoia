@@ -119,6 +119,7 @@ class (Functor f, Functor u) => Adjunction f u | f -> u, u -> f where
   rightAdjunct :: (a -> u b) -> (f a -> b)
   rightAdjunct f = counit . fmap f
 
+
 newtype N a = N { getN :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
   deriving (Applicative, Monad) via Identity
@@ -128,6 +129,7 @@ instance Adjunction N P where
   counit = getP . getN
   leftAdjunct  f =    P . f .    N
   rightAdjunct f = getP . f . getN
+
 
 newtype P a = P { getP :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
