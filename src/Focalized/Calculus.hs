@@ -152,28 +152,28 @@ instance Bifunctor (⅋) where
 instance Bitraversable (⅋) where
   bitraverse f g (Par run) = run (fmap inl . f) (fmap inr . g)
 
-class Applicative p => Disj p d | d -> p where
+class Disj d where
   inl :: a -> a `d` b
   inr :: b -> a `d` b
   exlr :: (a -> r) -> (b -> r) -> ((a `d` b) -> r)
 
-inlP :: Disj p d => p a -> p (a `d` b)
+inlP :: (Disj d, Functor p) => p a -> p (a `d` b)
 inlP = fmap inl
 
-inrP :: Disj p d => p b -> p (a `d` b)
+inrP :: (Disj d, Functor p) => p b -> p (a `d` b)
 inrP = fmap inr
 
-exlrP :: (Adjunction p p', Disj p d) => (p a -> r) -> (p b -> r) -> (p (a `d` b) -> r)
+exlrP :: (Adjunction p p', Disj d) => (p a -> r) -> (p b -> r) -> (p (a `d` b) -> r)
 exlrP f g = rightAdjunct (exlr (leftAdjunct f) (leftAdjunct g))
 
-instance Disj P (⊕) where
+instance Disj (⊕) where
   inl = InL
   inr = InR
   exlr ifl ifr = \case
     InL l -> ifl l
     InR r -> ifr r
 
-instance Disj N (⅋) where
+instance Disj (⅋) where
   inl l = Par $ \ ifl _ -> ifl l
   inr r = Par $ \ _ ifr -> ifr r
   exlr ifl ifr (Par run) = run ifl ifr
