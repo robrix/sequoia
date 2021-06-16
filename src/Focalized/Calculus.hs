@@ -50,6 +50,8 @@ data Δ
 absurdΔ :: Δ -> a
 absurdΔ = \case
 
+newtype K a = K { runK :: a -> Δ }
+
 
 -- Polarity
 
@@ -222,15 +224,21 @@ infixr 5 --<
 sub :: P a -> P (Negate b) -> P (a --< b)
 sub = fmap P . Sub
 
-newtype Not    a = Not    { runNot    :: P a -> Δ }
+newtype Not    a = Not    { getNot    :: K (P a) }
+
+runNot :: N (Not a) -> (P a -> Δ)
+runNot = runK . getNot . getN
 
 not' :: (P a -> Δ) -> N (Not a)
-not' = N . Not
+not' = N . Not . K
 
-newtype Negate a = Negate { runNegate :: N a -> Δ }
+newtype Negate a = Negate { getNegate :: K (N a) }
+
+runNegate :: P (Negate a) -> (N a -> Δ)
+runNegate = runK . getNegate . getP
 
 negate' :: (N a -> Δ) -> P (Negate a)
-negate' = P . Negate
+negate' = P . Negate . K
 
 data Bot
 
@@ -477,10 +485,10 @@ instance Structural Seq where
   pushR (Seq run) a = Seq $ \ k -> run (either k a)
 
 instance Negative Seq where
-  negateL (Seq run) = Seq $ \ k (P negA, c) -> run (either k (runNegate negA)) c
+  negateL (Seq run) = Seq $ \ k (negA, c) -> run (either k (runNegate negA)) c
   negateR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (negate' (run k' . (,c)))
 
-  notL (Seq run) = Seq $ \ k (N notA, c) -> run (either k (runNot notA)) c
+  notL (Seq run) = Seq $ \ k (notA, c) -> run (either k (runNot notA)) c
   notR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (not' (run k' . (,c)))
 
 instance Additive Seq where
