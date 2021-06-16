@@ -140,36 +140,6 @@ instance Adjunction P N where
   rightAdjunct f = getN . f . getP
 
 
-class Conj c where
-  inlr :: a -> b -> a `c` b
-  exl :: (a `c` b) -> a
-  exr :: (a `c` b) -> b
-
-inlrP :: (Conj c, Applicative p) => p a -> p b -> p (a `c` b)
-inlrP = liftA2 inlr
-
-exlP :: (Conj c, Functor p) => p (a `c` b) -> p a
-exlP = fmap exl
-
-exrP :: (Conj c, Functor p) => p (a `c` b) -> p b
-exrP = fmap exr
-
-
-class Disj d where
-  inl :: a -> a `d` b
-  inr :: b -> a `d` b
-  exlr :: (a -> r) -> (b -> r) -> ((a `d` b) -> r)
-
-inlP :: (Disj d, Functor p) => p a -> p (a `d` b)
-inlP = fmap inl
-
-inrP :: (Disj d, Functor p) => p b -> p (a `d` b)
-inrP = fmap inr
-
-exlrP :: (Adjunction p p', Disj d) => (p a -> r) -> (p b -> r) -> (p (a `d` b) -> r)
-exlrP f g = rightAdjunct (exlr (leftAdjunct f) (leftAdjunct g))
-
-
 -- Core rules
 
 class Core p where
@@ -584,3 +554,33 @@ on1 :: (a -> b -> c) -> (b' -> b) -> (a -> b' -> c)
 on1 = fmap flip . (.) . flip
 
 infixl 4 `on0`, `on1`
+
+
+class Conj c where
+  inlr :: a -> b -> a `c` b
+  exl :: (a `c` b) -> a
+  exr :: (a `c` b) -> b
+
+inlrP :: (Conj c, Applicative p) => p a -> p b -> p (a `c` b)
+inlrP = liftA2 inlr
+
+exlP :: (Conj c, Functor p) => p (a `c` b) -> p a
+exlP = fmap exl
+
+exrP :: (Conj c, Functor p) => p (a `c` b) -> p b
+exrP = fmap exr
+
+
+class Disj d where
+  inl :: a -> a `d` b
+  inr :: b -> a `d` b
+  exlr :: (a -> r) -> (b -> r) -> ((a `d` b) -> r)
+
+inlP :: (Disj d, Functor p) => p a -> p (a `d` b)
+inlP = fmap inl
+
+inrP :: (Disj d, Functor p) => p b -> p (a `d` b)
+inrP = fmap inr
+
+exlrP :: (Adjunction p p', Disj d) => (p a -> r) -> (p b -> r) -> (p (a `d` b) -> r)
+exlrP f g = rightAdjunct (exlr (leftAdjunct f) (leftAdjunct g))
