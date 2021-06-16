@@ -24,6 +24,7 @@ import Data.Bifoldable
 import Data.Bifunctor (Bifunctor(..))
 import Data.Bitraversable
 import Data.Functor.Identity
+import Data.Traversable (foldMapDefault)
 import Prelude hiding (init, tail)
 
 type (*) = (,)
@@ -54,6 +55,12 @@ newtype a & b = With (forall r . (a -> b -> r) -> r)
   deriving (Functor)
 
 infixr 6 &
+
+instance Foldable ((&) a) where
+  foldMap = foldMapDefault
+
+instance Traversable ((&) a) where
+  traverse f (With run) = run $ \ a b -> let mk b = With (\ f -> f a b) in mk <$> f b
 
 instance Bifoldable (&) where
   bifoldMap = bifoldMapDefault
