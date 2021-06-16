@@ -514,14 +514,6 @@ class (Core p, Structural p, Negative p) => Implicative p where
   ($$) :: is `p` (os |> N (a --> b)) -> is `p` (os |> P a) -> is `p` (os |> N b)
   f $$ a = exR (wkR f) >>> exR (wkR a) `funL` init
 
-on0 :: (a -> b -> c) -> (a' -> a) -> (a' -> b -> c)
-on0 = (.)
-
-on1 :: (a -> b -> c) -> (b' -> b) -> (a -> b' -> c)
-on1 = fmap flip . (.) . flip
-
-infixl 4 `on0`, `on1`
-
 
 instance Core Seq where
   f >>> g = f >>= either pure (pushL g)
@@ -574,3 +566,14 @@ instance Implicative Seq where
 
   subL b = popL (\ (P s) -> pushL b (subA s) >>> pushL (negateL init) (subK s))
   subR a b = liftA2 sub <$> a <*> negateR b
+
+
+-- Utilities
+
+on0 :: (a -> b -> c) -> (a' -> a) -> (a' -> b -> c)
+on0 = (.)
+
+on1 :: (a -> b -> c) -> (b' -> b) -> (a -> b' -> c)
+on1 = fmap flip . (.) . flip
+
+infixl 4 `on0`, `on1`
