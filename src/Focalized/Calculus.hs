@@ -69,22 +69,31 @@ instance Bifunctor (&) where
   bimap = bimapDefault
 
 instance Bitraversable (&) where
-  bitraverse f g w = fmap getN . inlr <$> traverse f (exl (N w)) <*> traverse g (exr (N w))
+  bitraverse f g w = inlr <$> f (exl w) <*> g (exr w)
 
-class Conj p c | c -> p where
-  inlr :: p a -> p b -> p (a `c` b)
-  exl :: p (a `c` b) -> p a
-  exr :: p (a `c` b) -> p b
+class Applicative p => Conj p c | c -> p where
+  inlr :: a -> b -> a `c` b
+  exl :: (a `c` b) -> a
+  exr :: (a `c` b) -> b
+
+inlrP :: Conj p c => p a -> p b -> p (a `c` b)
+inlrP = liftA2 inlr
+
+exlP :: Conj p c => p (a `c` b) -> p a
+exlP = fmap exl
+
+exrP :: Conj p c => p (a `c` b) -> p b
+exrP = fmap exr
 
 instance Conj P (⊗) where
-  inlr (P a) (P b) = P (a :⊗ b)
-  exl = fmap (\ (l :⊗ _) -> l)
-  exr = fmap (\ (_ :⊗ r) -> r)
+  inlr = (:⊗)
+  exl (l :⊗ _) = l
+  exr (_ :⊗ r) = r
 
 instance Conj N (&) where
-  inlr (N a) (N b) = N $ With $ \ f -> f a b
-  exl = fmap (\ (With run) -> run const)
-  exr = fmap (\ (With run) -> run (const id))
+  inlr a b = With $ \ f -> f a b
+  exl (With run) = run const
+  exr (With run) = run (const id)
 
 data a ⊕ b
   = InL !a
@@ -430,9 +439,9 @@ instance Additive (|-) where
   sumR1 = fmap (fmap inl)
   sumR2 = fmap (fmap inr)
 
-  withL1 p = popL (pushL p . exl)
-  withL2 p = popL (pushL p . exr)
-  (&) = liftA2 (liftA2 inlr)
+  withL1 p = popL (pushL p . exlP)
+  withL2 p = popL (pushL p . exrP)
+  (&) = liftA2 (liftA2 inlrP)
 
 instance Multiplicative (|-) where
   botL = popL absurdN
@@ -444,8 +453,8 @@ instance Multiplicative (|-) where
   parL a b = popL (exlr (pushL a) (pushL b))
   parR ab = either (>>= (pure . inl)) (pure . inr) <$> ab
 
-  tensorL p = popL (pushL2 p . exl <*> exr)
-  (⊗) = liftA2 (liftA2 inlr)
+  tensorL p = popL (pushL2 p . exlP <*> exrP)
+  (⊗) = liftA2 (liftA2 inlrP)
 
 instance Implicative (|-) where
   funL a b = popL (\ (N f) -> a >>> Seq (\ k (a, is) -> appFun f (runSeq k is . pushL b) a))
