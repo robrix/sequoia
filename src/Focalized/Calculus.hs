@@ -13,6 +13,7 @@ module Focalized.Calculus
 , Γ(..)
 , Δ
 , type (|-)(..)
+, runSeq
 ) where
 
 import Control.Applicative (liftA2)
