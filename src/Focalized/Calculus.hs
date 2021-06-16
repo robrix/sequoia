@@ -96,26 +96,26 @@ instance Bifunctor (&) where
 instance Bitraversable (&) where
   bitraverse f g w = inlr <$> f (exl w) <*> g (exr w)
 
-class Applicative p => Conj p c | c -> p where
+class Conj c where
   inlr :: a -> b -> a `c` b
   exl :: (a `c` b) -> a
   exr :: (a `c` b) -> b
 
-inlrP :: Conj p c => p a -> p b -> p (a `c` b)
+inlrP :: (Conj c, Applicative p) => p a -> p b -> p (a `c` b)
 inlrP = liftA2 inlr
 
-exlP :: Conj p c => p (a `c` b) -> p a
+exlP :: (Conj c, Functor p) => p (a `c` b) -> p a
 exlP = fmap exl
 
-exrP :: Conj p c => p (a `c` b) -> p b
+exrP :: (Conj c, Functor p) => p (a `c` b) -> p b
 exrP = fmap exr
 
-instance Conj P (⊗) where
+instance Conj (⊗) where
   inlr = (:⊗)
   exl (l :⊗ _) = l
   exr (_ :⊗ r) = r
 
-instance Conj N (&) where
+instance Conj (&) where
   inlr a b = With $ \ f -> f a b
   exl (With run) = run const
   exr (With run) = run (const id)
