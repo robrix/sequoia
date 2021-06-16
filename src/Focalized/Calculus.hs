@@ -94,10 +94,12 @@ split f = (f . Left, f . Right)
 data Γ = Γ
   deriving (Eq, Ord, Show)
 
+
 data Δ
 
 absurdΔ :: Δ -> a
 absurdΔ = \case
+
 
 newtype K a = K { runK :: a -> Δ }
 
