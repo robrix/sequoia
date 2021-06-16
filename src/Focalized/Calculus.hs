@@ -37,6 +37,7 @@ split f = (f . Left, f . Right)
 
 
 data a ⊗ b = !a :⊗ !b
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
 infixr 7 ⊗
 
@@ -80,6 +81,7 @@ instance Conj N (&) where
 data a ⊕ b
   = InL !a
   | InR !b
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
 infixr 6 ⊕
 
