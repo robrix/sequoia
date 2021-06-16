@@ -25,6 +25,11 @@ module Focalized.Calculus
 , type (&)(..)
 , type (⊕)(..)
 , Additive(..)
+  -- * Multiplicative
+, Bot
+, One(..)
+, type (⅋)(..)
+, type (⊗)(..)
 , Multiplicative(..)
 , Implicative(..)
 , Seq(..)
@@ -100,21 +105,6 @@ instance Adjunction P N where
   rightAdjunct f = getN . f . getP
 
 
-data a ⊗ b = !a :⊗ !b
-  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-
-infixr 7 ⊗
-
-instance Bifoldable (⊗) where
-  bifoldMap = bifoldMapDefault
-
-instance Bifunctor (⊗) where
-  bimap = bimapDefault
-
-instance Bitraversable (⊗) where
-  bitraverse f g (a :⊗ b) = (:⊗) <$> f a <*> g b
-
-
 class Conj c where
   inlr :: a -> b -> a `c` b
   exl :: (a `c` b) -> a
@@ -129,31 +119,6 @@ exlP = fmap exl
 exrP :: (Conj c, Functor p) => p (a `c` b) -> p b
 exrP = fmap exr
 
-instance Conj (⊗) where
-  inlr = (:⊗)
-  exl (l :⊗ _) = l
-  exr (_ :⊗ r) = r
-
-
-newtype a ⅋ b = Par (forall r . (a -> r) -> (b -> r) -> r)
-  deriving (Functor)
-
-infixr 7 ⅋
-
-instance Foldable ((⅋) a) where
-  foldMap = foldMapDefault
-
-instance Traversable ((⅋) a) where
-  traverse f (Par run) = run (pure . inl) (fmap inr . f)
-
-instance Bifoldable (⅋) where
-  bifoldMap = bifoldMapDefault
-
-instance Bifunctor (⅋) where
-  bimap = bimapDefault
-
-instance Bitraversable (⅋) where
-  bitraverse f g (Par run) = run (fmap inl . f) (fmap inr . g)
 
 class Disj d where
   inl :: a -> a `d` b
@@ -169,10 +134,6 @@ inrP = fmap inr
 exlrP :: (Adjunction p p', Disj d) => (p a -> r) -> (p b -> r) -> (p (a `d` b) -> r)
 exlrP f g = rightAdjunct (exlr (leftAdjunct f) (leftAdjunct g))
 
-instance Disj (⅋) where
-  inl l = Par $ \ ifl _ -> ifl l
-  inr r = Par $ \ _ ifr -> ifr r
-  exlr ifl ifr (Par run) = run ifl ifr
 
 newtype a --> b = Fun { getFun :: P (Negate b) -> N (Not a) }
 
@@ -190,15 +151,6 @@ infixr 5 --<
 
 sub :: P a -> P (Negate b) -> P (a --< b)
 sub = fmap P . Sub
-
-
-data Bot
-
-absurdN :: N Bot -> a
-absurdN = \case
-
-data One = One
-  deriving (Eq, Ord, Show)
 
 
 class Core p where
@@ -411,6 +363,64 @@ class (Core p, Structural p, Negative p) => Additive p where
 
   zapWith :: is `p` (os |> P (Negate a ⊕ Negate b)) -> (N (a & b) <| is) `p` os
   zapWith p = wkL p >>> sumL (negateL (withL1 init)) (negateL (withL2 init))
+
+
+-- Multiplicative
+
+data Bot
+
+absurdN :: N Bot -> a
+absurdN = \case
+
+
+data One = One
+  deriving (Eq, Ord, Show)
+
+
+newtype a ⅋ b = Par (forall r . (a -> r) -> (b -> r) -> r)
+  deriving (Functor)
+
+infixr 7 ⅋
+
+instance Foldable ((⅋) a) where
+  foldMap = foldMapDefault
+
+instance Traversable ((⅋) a) where
+  traverse f (Par run) = run (pure . inl) (fmap inr . f)
+
+instance Bifoldable (⅋) where
+  bifoldMap = bifoldMapDefault
+
+instance Bifunctor (⅋) where
+  bimap = bimapDefault
+
+instance Bitraversable (⅋) where
+  bitraverse f g (Par run) = run (fmap inl . f) (fmap inr . g)
+
+instance Disj (⅋) where
+  inl l = Par $ \ ifl _ -> ifl l
+  inr r = Par $ \ _ ifr -> ifr r
+  exlr ifl ifr (Par run) = run ifl ifr
+
+
+data a ⊗ b = !a :⊗ !b
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+
+infixr 7 ⊗
+
+instance Bifoldable (⊗) where
+  bifoldMap = bifoldMapDefault
+
+instance Bifunctor (⊗) where
+  bimap = bimapDefault
+
+instance Bitraversable (⊗) where
+  bitraverse f g (a :⊗ b) = (:⊗) <$> f a <*> g b
+
+instance Conj (⊗) where
+  inlr = (:⊗)
+  exl (l :⊗ _) = l
+  exr (_ :⊗ r) = r
 
 
 class (Core p, Structural p, Negative p) => Multiplicative p where
