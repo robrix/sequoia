@@ -12,6 +12,7 @@ module Focalized.Calculus
 , P(..)
 , Γ(..)
 , Δ
+, type (|-)(..)
 ) where
 
 import Control.Applicative (liftA2)
