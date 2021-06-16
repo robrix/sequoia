@@ -14,9 +14,11 @@ module Focalized.Calculus
 , Δ
 , type (|-)(..)
 , runSeq
+, runSeqIO
 ) where
 
 import Control.Applicative (liftA2)
+import Control.Exception (Exception, catch, throw)
 import Control.Monad (ap, join)
 import Data.Bifoldable
 import Data.Bifunctor (Bifunctor(..))
@@ -165,6 +167,9 @@ newtype P a = P { getP :: a }
 
 data Γ = Γ
 data Δ
+
+absurdΔ :: Δ -> a
+absurdΔ = \case
 
 
 class Core p where
@@ -367,6 +372,14 @@ infix 2 |-
 
 runSeq :: (os -> Δ) -> is -> is |- os -> Δ
 runSeq k c (Seq run) = run k c
+
+runSeqIO :: (os -> IO ()) -> is -> is |- os -> IO ()
+runSeqIO k is (Seq run) = absurdΔ (run (throw . Escape . k) is) `catch` getEscape
+
+newtype Escape = Escape { getEscape :: IO () }
+
+instance Show Escape where show _ = "Escape"
+instance Exception Escape
 
 instance Applicative ((|-) is) where
   pure a = Seq $ \ k _ -> k a
