@@ -13,6 +13,7 @@ module Focalized.Calculus
   -- * Polarity
 , N(..)
 , P(..)
+  -- * Core rules
 , Core(..)
 , Structural(..)
   -- * Negating
@@ -168,6 +169,8 @@ inrP = fmap inr
 exlrP :: (Adjunction p p', Disj d) => (p a -> r) -> (p b -> r) -> (p (a `d` b) -> r)
 exlrP f g = rightAdjunct (exlr (leftAdjunct f) (leftAdjunct g))
 
+
+-- Core rules
 
 class Core p where
   (>>>) :: is `p` (os |> a) -> (a <| is) `p` os -> is `p` os
