@@ -176,6 +176,11 @@ class Core p where
 
 infixr 1 >>>
 
+instance Core Seq where
+  f >>> g = f >>= either pure (pushL g)
+
+  init = popL (pure . pure)
+
 
 class Structural p where
   -- | Pop something off the input context which can later be pushed. Used with 'pushL', this provides a generalized context restructuring facility.
@@ -245,6 +250,14 @@ class Structural p where
   exR :: is `p` (os |> a |> b) -> is `p` (os |> b |> a)
   exR = popR2 . flip . pushR2
 
+instance Structural Seq where
+  popL f = Seq $ \ k -> uncurry (flip (runSeq k) . f)
+  pushL (Seq run) a = Seq $ \ k -> run k . (a,)
+
+  popR f = Seq $ \ k c -> let (k', ka) = split k in runSeq k' c (f ka)
+  pushR (Seq run) a = Seq $ \ k -> run (either k a)
+
+
 
 -- Negating
 
@@ -280,6 +293,13 @@ class (Core p, Structural p) => Negative p where
   negateR :: (N a <| is) `p` os -> is `p` (os |> P (Negate a))
   negateR' :: is `p` (os |> P (Negate a)) -> (N a <| is) `p` os
   negateR' p = wkL p >>> negateL init
+
+instance Negative Seq where
+  negateL (Seq run) = Seq $ \ k (negA, c) -> run (either k (runNegate negA)) c
+  negateR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (negate' (run k' . (,c)))
+
+  notL (Seq run) = Seq $ \ k (notA, c) -> run (either k (runNot notA)) c
+  notR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (not' (run k' . (,c)))
 
 
 -- Additive
@@ -380,6 +400,19 @@ class (Core p, Structural p, Negative p) => Additive p where
   zapWith :: is `p` (os |> P (Negate a ⊕ Negate b)) -> (N (a & b) <| is) `p` os
   zapWith p = wkL p >>> sumL (negateL (withL1 init)) (negateL (withL2 init))
 
+instance Additive Seq where
+  zeroL = popL absurdP
+
+  topR = pure (pure (N Top))
+
+  sumL a b = popL (exlrP (pushL a) (pushL b))
+  sumR1 = fmap (fmap inlP)
+  sumR2 = fmap (fmap inrP)
+
+  withL1 p = popL (pushL p . exlP)
+  withL2 p = popL (pushL p . exrP)
+  (&) = liftA2 (liftA2 inlrP)
+
 
 -- Multiplicative
 
@@ -473,6 +506,20 @@ class (Core p, Structural p, Negative p) => Multiplicative p where
   zapPar p = wkL p >>> tensorL (popL2 (parL `on0` pushL (negateL init) `on1` pushL (negateL init)))
 
 
+instance Multiplicative Seq where
+  botL = popL absurdN
+  botR = fmap Left
+
+  oneL = wkL
+  oneR = pure (pure (P One))
+
+  parL a b = popL (exlrP (pushL a) (pushL b))
+  parR ab = either (>>= (pure . inlP)) (pure . inrP) <$> ab
+
+  tensorL p = popL (pushL2 p . exlP <*> exrP)
+  (⊗) = liftA2 (liftA2 inlrP)
+
+
 -- Implicative
 
 newtype a --> b = Fun { getFun :: P (Negate b) -> N (Not a) }
@@ -516,51 +563,6 @@ class (Core p, Structural p, Negative p) => Implicative p where
   ($$) :: is `p` (os |> N (a --> b)) -> is `p` (os |> P a) -> is `p` (os |> N b)
   f $$ a = exR (wkR f) >>> exR (wkR a) `funL` init
 
-
-instance Core Seq where
-  f >>> g = f >>= either pure (pushL g)
-
-  init = popL (pure . pure)
-
-instance Structural Seq where
-  popL f = Seq $ \ k -> uncurry (flip (runSeq k) . f)
-  pushL (Seq run) a = Seq $ \ k -> run k . (a,)
-
-  popR f = Seq $ \ k c -> let (k', ka) = split k in runSeq k' c (f ka)
-  pushR (Seq run) a = Seq $ \ k -> run (either k a)
-
-instance Negative Seq where
-  negateL (Seq run) = Seq $ \ k (negA, c) -> run (either k (runNegate negA)) c
-  negateR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (negate' (run k' . (,c)))
-
-  notL (Seq run) = Seq $ \ k (notA, c) -> run (either k (runNot notA)) c
-  notR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (not' (run k' . (,c)))
-
-instance Additive Seq where
-  zeroL = popL absurdP
-
-  topR = pure (pure (N Top))
-
-  sumL a b = popL (exlrP (pushL a) (pushL b))
-  sumR1 = fmap (fmap inlP)
-  sumR2 = fmap (fmap inrP)
-
-  withL1 p = popL (pushL p . exlP)
-  withL2 p = popL (pushL p . exrP)
-  (&) = liftA2 (liftA2 inlrP)
-
-instance Multiplicative Seq where
-  botL = popL absurdN
-  botR = fmap Left
-
-  oneL = wkL
-  oneR = pure (pure (P One))
-
-  parL a b = popL (exlrP (pushL a) (pushL b))
-  parR ab = either (>>= (pure . inlP)) (pure . inrP) <$> ab
-
-  tensorL p = popL (pushL2 p . exlP <*> exrP)
-  (⊗) = liftA2 (liftA2 inlrP)
 
 instance Implicative Seq where
   funL a b = popL (\ f -> a >>> Seq (\ k (a, is) -> runNot (appFun f (negate' (runSeq k is . pushL b))) a))
