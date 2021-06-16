@@ -1,8 +1,12 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Focalized.Calculus
-( -- * Contexts
-  type (<|)
+( -- * Sequents
+  runSeq
+, runSeqIO
+, Seq(..)
+  -- * Contexts
+, type (<|)
 , type (|>)
 , Γ(..)
 , Δ
@@ -38,9 +42,6 @@ module Focalized.Calculus
 , type (--<)(..)
 , sub
 , Implicative(..)
-, Seq(..)
-, runSeq
-, runSeqIO
 ) where
 
 import Control.Applicative (liftA2)
@@ -52,6 +53,31 @@ import Data.Bitraversable
 import Data.Functor.Identity
 import Data.Traversable (foldMapDefault)
 import Prelude hiding (init)
+
+-- Sequents
+
+runSeq :: (os -> Δ) -> is -> Seq is os -> Δ
+runSeq k c (Seq run) = run k c
+
+runSeqIO :: (os -> IO ()) -> is -> Seq is os -> IO ()
+runSeqIO k is (Seq run) = absurdΔ (run (throw . Escape . k) is) `catch` getEscape
+
+newtype Escape = Escape { getEscape :: IO () }
+
+instance Show Escape where show _ = "Escape"
+instance Exception Escape
+
+
+newtype Seq is os = Seq ((os -> Δ) -> (is -> Δ))
+  deriving (Functor)
+
+instance Applicative (Seq is) where
+  pure a = Seq $ \ k _ -> k a
+  (<*>) = ap
+
+instance Monad (Seq is) where
+  Seq a >>= f = Seq $ \ k c -> a (runSeq k c . f) c
+
 
 -- Contexts
 
@@ -495,28 +521,6 @@ on1 :: (a -> b -> c) -> (b' -> b) -> (a -> b' -> c)
 on1 = fmap flip . (.) . flip
 
 infixl 4 `on0`, `on1`
-
-
-newtype Seq is os = Seq ((os -> Δ) -> (is -> Δ))
-  deriving (Functor)
-
-runSeq :: (os -> Δ) -> is -> Seq is os -> Δ
-runSeq k c (Seq run) = run k c
-
-runSeqIO :: (os -> IO ()) -> is -> Seq is os -> IO ()
-runSeqIO k is (Seq run) = absurdΔ (run (throw . Escape . k) is) `catch` getEscape
-
-newtype Escape = Escape { getEscape :: IO () }
-
-instance Show Escape where show _ = "Escape"
-instance Exception Escape
-
-instance Applicative (Seq is) where
-  pure a = Seq $ \ k _ -> k a
-  (<*>) = ap
-
-instance Monad (Seq is) where
-  Seq a >>= f = Seq $ \ k c -> a (runSeq k c . f) c
 
 
 instance Core Seq where
