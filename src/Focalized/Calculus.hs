@@ -29,10 +29,10 @@ import Prelude hiding (init)
 type (<|) = (,)
 infixr 4 <|
 
-type (+) = Either
-infixl 4 +
+type (|>) = Either
+infixl 4 |>
 
-split :: (os + a -> r) -> (os -> r, a -> r)
+split :: (os |> a -> r) -> (os -> r, a -> r)
 split f = (f . Left, f . Right)
 
 
@@ -242,9 +242,9 @@ absurdΔ = \case
 
 
 class Core p where
-  (>>>) :: is `p` (os + a) -> (a <| is) `p` os -> is `p` os
+  (>>>) :: is `p` (os |> a) -> (a <| is) `p` os -> is `p` os
 
-  init :: (a <| is) `p` (os + a)
+  init :: (a <| is) `p` (os |> a)
 
 infixr 1 >>>
 
@@ -285,7 +285,7 @@ class Structural p where
   -- @
   -- pushR . popR = id
   -- @
-  popR :: ((a -> Δ) -> is `p` os) -> is `p` (os + a)
+  popR :: ((a -> Δ) -> is `p` os) -> is `p` (os |> a)
 
   -- | Push something onto the output context which was previously popped off it. Used with 'popR', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
   --
@@ -295,49 +295,49 @@ class Structural p where
   -- @
   -- pushR . popR = id
   -- @
-  pushR :: is `p` (os + a) -> ((a -> Δ) -> is `p` os)
+  pushR :: is `p` (os |> a) -> ((a -> Δ) -> is `p` os)
 
-  popR2 :: ((a -> Δ) -> (b -> Δ) -> is `p` os) -> is `p` (os + b + a)
+  popR2 :: ((a -> Δ) -> (b -> Δ) -> is `p` os) -> is `p` (os |> b |> a)
   popR2 f = popR (popR . f)
 
-  pushR2 :: is `p` (os + b + a) -> (a -> Δ) -> (b -> Δ) -> is `p` os
+  pushR2 :: is `p` (os |> b |> a) -> (a -> Δ) -> (b -> Δ) -> is `p` os
   pushR2 p = pushR . pushR p
 
 
   wkL :: is `p` os -> (a <| is) `p` os
   wkL = popL . const
-  wkR :: is `p` os -> is `p` (os + a)
+  wkR :: is `p` os -> is `p` (os |> a)
   wkR = popR . const
   cnL :: (a <| a <| is) `p` os -> (a <| is) `p` os
   cnL = popL . join . pushL2
-  cnR :: is `p` (os + a + a) -> is `p` (os + a)
+  cnR :: is `p` (os |> a |> a) -> is `p` (os |> a)
   cnR = popR . join . pushR2
   exL :: (a <| b <| c) `p` os -> (b <| a <| c) `p` os
   exL = popL2 . flip . pushL2
-  exR :: is `p` (os + a + b) -> is `p` (os + b + a)
+  exR :: is `p` (os |> a |> b) -> is `p` (os |> b |> a)
   exR = popR2 . flip . pushR2
 
 
 class (Core p, Structural p) => Negative p where
-  negateL :: is `p` (os + N a) -> (P (Negate a) <| is) `p` os
-  negateL' :: (P (Negate a) <| is) `p` os -> is `p` (os + N a)
+  negateL :: is `p` (os |> N a) -> (P (Negate a) <| is) `p` os
+  negateL' :: (P (Negate a) <| is) `p` os -> is `p` (os |> N a)
   negateL' p = negateR init >>> wkR p
-  negateR :: (N a <| is) `p` os -> is `p` (os + P (Negate a))
-  negateR' :: is `p` (os + P (Negate a)) -> (N a <| is) `p` os
+  negateR :: (N a <| is) `p` os -> is `p` (os |> P (Negate a))
+  negateR' :: is `p` (os |> P (Negate a)) -> (N a <| is) `p` os
   negateR' p = wkL p >>> negateL init
 
-  notL :: is `p` (os + P a) -> (N (Not a) <| is) `p` os
-  notL' :: (N (Not a) <| is) `p` os -> is `p` (os + P a)
+  notL :: is `p` (os |> P a) -> (N (Not a) <| is) `p` os
+  notL' :: (N (Not a) <| is) `p` os -> is `p` (os |> P a)
   notL' p = notR init >>> wkR p
-  notR :: (P a <| is) `p` os -> is `p` (os + N (Not a))
-  notR' :: is `p` (os + N (Not a)) -> (P a <| is) `p` os
+  notR :: (P a <| is) `p` os -> is `p` (os |> N (Not a))
+  notR' :: is `p` (os |> N (Not a)) -> (P a <| is) `p` os
   notR' p = wkL p >>> notL init
 
 
 class (Core p, Structural p, Negative p) => Additive p where
   zeroL :: (P Zero <| is) `p` os
 
-  topR :: is `p` (os + N Top)
+  topR :: is `p` (os |> N Top)
 
   sumL :: (P a <| is) `p` os -> (P b <| is) `p` os -> (P (a ⊕ b) <| is) `p` os
   sumL p1 p2 = sumLWith (notR p1 & notR p2)
@@ -345,84 +345,84 @@ class (Core p, Structural p, Negative p) => Additive p where
   sumL1' p = sumR1 init >>> exL (wkL p)
   sumL2' :: (P (a ⊕ b) <| is) `p` os -> (P b <| is) `p` os
   sumL2' p = sumR2 init >>> exL (wkL p)
-  sumLWith :: is `p` (os + N (Not a & Not b)) -> (P (a ⊕ b) <| is) `p` os
+  sumLWith :: is `p` (os |> N (Not a & Not b)) -> (P (a ⊕ b) <| is) `p` os
   sumLWith p = wkL p >>> exL (sumL (exL (withL1 (notL init))) (exL (withL2 (notL init))))
-  sumR1 :: is `p` (os + P a) -> is `p` (os + P (a ⊕ b))
-  sumR2 :: is `p` (os + P b) -> is `p` (os + P (a ⊕ b))
+  sumR1 :: is `p` (os |> P a) -> is `p` (os |> P (a ⊕ b))
+  sumR2 :: is `p` (os |> P b) -> is `p` (os |> P (a ⊕ b))
 
   withL1 :: (N a <| is) `p` os -> (N (a & b) <| is) `p` os
   withL1 = withLSum . sumR1 . negateR
   withL2 :: (N b <| is) `p` os -> (N (a & b) <| is) `p` os
   withL2 = withLSum . sumR2 . negateR
-  withLSum :: is `p` (os + P (Negate a ⊕ Negate b)) -> (N (a & b) <| is) `p` os
+  withLSum :: is `p` (os |> P (Negate a ⊕ Negate b)) -> (N (a & b) <| is) `p` os
   withLSum p = wkL p >>> sumL (negateL (withL1 init)) (negateL (withL2 init))
-  (&) :: is `p` (os + N a) -> is `p` (os + N b) -> is `p` (os + N (a & b))
-  withR1' :: is `p` (os + N (a & b)) -> is `p` (os + N a)
+  (&) :: is `p` (os |> N a) -> is `p` (os |> N b) -> is `p` (os |> N (a & b))
+  withR1' :: is `p` (os |> N (a & b)) -> is `p` (os |> N a)
   withR1' t = exR (wkR t) >>> withL1 init
-  withR2' :: is `p` (os + N (a & b)) -> is `p` (os + N b)
+  withR2' :: is `p` (os |> N (a & b)) -> is `p` (os |> N b)
   withR2' t = exR (wkR t) >>> withL2 init
 
-  zapSum :: is `p` (os + N (Not a & Not b)) -> (P (a ⊕ b) <| is) `p` os
+  zapSum :: is `p` (os |> N (Not a & Not b)) -> (P (a ⊕ b) <| is) `p` os
   zapSum p = sumL (wkL p >>> withL1 (notL init)) (wkL p >>> withL2 (notL init))
 
-  zapWith :: is `p` (os + P (Negate a ⊕ Negate b)) -> (N (a & b) <| is) `p` os
+  zapWith :: is `p` (os |> P (Negate a ⊕ Negate b)) -> (N (a & b) <| is) `p` os
   zapWith p = wkL p >>> sumL (negateL (withL1 init)) (negateL (withL2 init))
 
 
 class (Core p, Structural p, Negative p) => Multiplicative p where
   botL :: (N Bot <| is) `p` os
-  botR :: is `p` os -> is `p` (os + N Bot)
-  botR' :: is `p` (os + N Bot) -> is `p` os
+  botR :: is `p` os -> is `p` (os |> N Bot)
+  botR' :: is `p` (os |> N Bot) -> is `p` os
   botR' = (>>> botL)
 
   oneL :: is `p` os -> (P One <| is) `p` os
   oneL' :: (P One <| is) `p` os -> is `p` os
   oneL' = (oneR >>>)
-  oneR :: is `p` (os + P One)
+  oneR :: is `p` (os |> P One)
 
   parL :: (N a <| is) `p` os -> (N b <| is) `p` os -> (N (a ⅋ b) <| is) `p` os
   parL p1 p2 = parLTensor (negateR p1 ⊗ negateR p2)
-  parLTensor :: is `p` (os + P (Negate a ⊗ Negate b)) -> (N (a ⅋ b) <| is) `p` os
+  parLTensor :: is `p` (os |> P (Negate a ⊗ Negate b)) -> (N (a ⅋ b) <| is) `p` os
   parLTensor p = wkL p >>> tensorL (negateL (negateL (parL (wkR init) init)))
-  parR :: is `p` (os + N a + N b) -> is `p` (os + N (a ⅋ b))
-  parR' :: is `p` (os + N (a ⅋ b)) -> is `p` (os + N a + N b)
+  parR :: is `p` (os |> N a |> N b) -> is `p` (os |> N (a ⅋ b))
+  parR' :: is `p` (os |> N (a ⅋ b)) -> is `p` (os |> N a |> N b)
   parR' p = exR (wkR (exR (wkR p))) >>> parL (wkR init) init
 
   tensorL :: (P a <| P b <| is) `p` os -> (P (a ⊗ b) <| is) `p` os
   tensorL = tensorLPar . parR . notR . notR
-  tensorLPar :: is `p` (os + N (Not a ⅋ Not b)) -> (P (a ⊗ b) <| is) `p` os
+  tensorLPar :: is `p` (os |> N (Not a ⅋ Not b)) -> (P (a ⊗ b) <| is) `p` os
   tensorLPar p = wkL p >>> parL (notL (tensorL init)) (notL (tensorL (wkL init)))
   tensorL' :: (P (a ⊗ b) <| is) `p` os -> (P a <| P b <| is) `p` os
   tensorL' p = init ⊗ wkL init >>> popL (wkL . wkL . pushL p)
-  (⊗) :: is `p` (os + P a) -> is `p` (os + P b) -> is `p` (os + P (a ⊗ b))
+  (⊗) :: is `p` (os |> P a) -> is `p` (os |> P b) -> is `p` (os |> P (a ⊗ b))
 
-  zapTensor :: is `p` (os + N (Not a ⅋ Not b)) -> (P (a ⊗ b) <| is) `p` os
+  zapTensor :: is `p` (os |> N (Not a ⅋ Not b)) -> (P (a ⊗ b) <| is) `p` os
   zapTensor p = tensorL (wkL (wkL p) >>> parL (notL init) (notL (wkL init)))
 
-  zapPar :: is `p` (os + P (Negate a ⊗ Negate b)) -> (N (a ⅋ b) <| is) `p` os
+  zapPar :: is `p` (os |> P (Negate a ⊗ Negate b)) -> (N (a ⅋ b) <| is) `p` os
   zapPar p = wkL p >>> tensorL (popL2 (parL `on0` pushL (negateL init) `on1` pushL (negateL init)))
 
 
 class (Core p, Structural p, Negative p) => Implicative p where
-  funL :: is `p` (os + P a) -> (N b <| is) `p` os -> (N (a --> b) <| is) `p` os
+  funL :: is `p` (os |> P a) -> (N b <| is) `p` os -> (N (a --> b) <| is) `p` os
   funL pa pb = funLSub (subR pa pb)
-  funLSub :: is `p` (os + P (a --< b)) -> (N (a --> b) <| is) `p` os
+  funLSub :: is `p` (os |> P (a --< b)) -> (N (a --> b) <| is) `p` os
   funLSub p = wkL p >>> subL (exL (funL init init))
-  funL2 :: (N (a --> b) <| P a <| is) `p` (os + N b)
+  funL2 :: (N (a --> b) <| P a <| is) `p` (os |> N b)
   funL2 = funL init init
-  funR :: (P a <| is) `p` (os + N b) -> is `p` (os + N (a --> b))
-  funR' :: is `p` (os + N (a --> b)) -> (P a <| is) `p` (os + N b)
+  funR :: (P a <| is) `p` (os |> N b) -> is `p` (os |> N (a --> b))
+  funR' :: is `p` (os |> N (a --> b)) -> (P a <| is) `p` (os |> N b)
   funR' p = wkL (exR (wkR p)) >>> funL2
 
-  subL :: (P a <| is) `p` (os + N b) -> (P (a --< b) <| is) `p` os
+  subL :: (P a <| is) `p` (os |> N b) -> (P (a --< b) <| is) `p` os
   subL = subLFun . funR
-  subLFun :: is `p` (os + N (a --> b)) -> (P (a --< b) <| is) `p` os
+  subLFun :: is `p` (os |> N (a --> b)) -> (P (a --< b) <| is) `p` os
   subLFun p = wkL p >>> exL (subL (exL (funL init init)))
-  subL' :: (P (a --< b) <| is) `p` os -> (P a <| is) `p` (os + N b)
+  subL' :: (P (a --< b) <| is) `p` os -> (P a <| is) `p` (os |> N b)
   subL' p = subR init init >>> wkR (exL (wkL p))
-  subR :: is `p` (os + P a) -> (N b <| is) `p` os -> is `p` (os + P (a --< b))
+  subR :: is `p` (os |> P a) -> (N b <| is) `p` os -> is `p` (os |> P (a --< b))
 
-  ($$) :: is `p` (os + N (a --> b)) -> is `p` (os + P a) -> is `p` (os + N b)
+  ($$) :: is `p` (os |> N (a --> b)) -> is `p` (os |> P a) -> is `p` (os |> N b)
   f $$ a = exR (wkR f) >>> exR (wkR a) `funL` init
 
 on0 :: (a -> b -> c) -> (a' -> a) -> (a' -> b -> c)
