@@ -218,8 +218,8 @@ class Structural p where
   instantiate = instantiateL . instantiateR
 
   abstractL :: is -> is `p` os -> Γ `p` os
-  abstractR :: (os -> Δ) -> is `p` os -> is `p` Δ
-  abstract :: is -> (os -> Δ) -> is `p` os -> Γ `p` Δ
+  abstractR :: (os -> os') -> is `p` os -> is `p` os'
+  abstract :: is -> (os -> os') -> is `p` os -> Γ `p` os'
   abstract i k = abstractL i . abstractR k
 
 
