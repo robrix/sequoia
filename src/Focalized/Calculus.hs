@@ -290,7 +290,7 @@ instance Negative Seq where
   negateR p = cont (\ k c -> negate' (poppedL (abstract c k) p))
 
   notL p = popL (\ notA -> p >>> poppedL instantiate (runNot notA))
-  notR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (not' (Seq (const (run k' . (c <$)))))
+  notR p = cont (\ k c -> not' (poppedL (abstract c k) p))
 
 
 -- Additive
