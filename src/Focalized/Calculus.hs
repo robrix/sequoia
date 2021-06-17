@@ -252,8 +252,8 @@ not' = N . Not
 
 newtype Negate a = Negate { getNegate :: Seq (N a <| Γ) Δ }
 
-runNegate :: P (Negate a) -> (N a -> Δ)
-runNegate = flip (runSeq id . (,Γ)) . getNegate . getP
+runNegate :: P (Negate a) -> Seq (N a <| Γ) Δ
+runNegate = getNegate . getP
 
 negate' :: Seq (N a <| Γ) Δ -> P (Negate a)
 negate' = P . Negate
@@ -275,7 +275,7 @@ class (Core p, Structural p) => Negative p where
   negateR' p = wkL p >>> negateL init
 
 instance Negative Seq where
-  negateL (Seq run) = Seq $ \ k (negA, c) -> run (either k (runNegate negA)) c
+  negateL p = popL (\ negateA -> p >>> popL (instantiate . pushL (runNegate negateA)))
   negateR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (negate' (Seq (const (run k' . (c <$)))))
 
   notL p = popL (\ notA -> p >>> popL (instantiate . pushL (runNot notA)))
@@ -546,7 +546,7 @@ class (Core p, Structural p, Negative p) => Implicative p where
 
 instance Implicative Seq where
   funL a b = popL (\ f -> a >>> Seq (\ k (a, is) -> runSeq id (a, Γ) (runNot (appFun f (negate' (Seq (const (\ c -> runSeq k (is <$ c) b))))))))
-  funR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (fun (\ kb -> not' (Seq (const (run (either k' (runNegate kb)) . (c <$))))))
+  funR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (fun (\ kb -> not' (Seq (const (run (either k' (\ a -> runSeq id (a, Γ) (runNegate kb))) . (c <$))))))
 
   subL b = popL (\ (P s) -> pushL b (subA s) >>> pushL (negateL init) (subK s))
   subR a b = liftA2 sub <$> a <*> negateR b
