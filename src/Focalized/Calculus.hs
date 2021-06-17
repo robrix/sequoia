@@ -209,6 +209,12 @@ class Structural p where
   pushR2 p = pushR . pushR p
 
 
+  instantiateL :: Γ `p` os -> is `p` os
+  instantiateR :: is `p` Δ -> is `p` os
+  instantiate :: Γ `p` Δ -> is `p` os
+  instantiate = instantiateL . instantiateR
+
+
   wkL :: is `p` os -> (a <| is) `p` os
   wkL = popL . const
   wkR :: is `p` os -> is `p` (os |> a)
@@ -228,6 +234,9 @@ instance Structural Seq where
 
   popR f = Seq $ \ k c -> let (k', ka) = split k in runSeq k' c (f ka)
   pushR (Seq run) a = Seq $ \ k -> run (either k a)
+
+  instantiateL (Seq run) = Seq (\ k -> run k . const Γ)
+  instantiateR = fmap absurdΔ
 
 
 -- Negating
