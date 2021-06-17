@@ -165,6 +165,9 @@ class Structural p where
   -- @
   popL :: (a -> is `p` os) -> (a <| is) `p` os
 
+  poppedL :: (is `p` os -> is' `p` os) -> ((a <| is) `p` os -> (a <| is') `p` os)
+  poppedL f p = popL (f . pushL p)
+
   -- | Push something onto the input context which was previously popped off it. Used with 'popL', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
   --
   -- @
