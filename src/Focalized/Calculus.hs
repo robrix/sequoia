@@ -217,9 +217,9 @@ class Structural p where
   instantiate :: Γ `p` Δ -> i `p` o
   instantiate = instantiateL . instantiateR
 
-  abstractL :: i -> i `p` o -> Γ `p` o
+  abstractL :: (i' -> i) -> i `p` o -> i' `p` o
   abstractR :: (o -> o') -> i `p` o -> i `p` o'
-  abstract :: i -> (o -> o') -> i `p` o -> Γ `p` o'
+  abstract :: (i' -> i) -> (o -> o') -> i `p` o -> i' `p` o'
   abstract i k = abstractL i . abstractR k
 
 
@@ -246,7 +246,7 @@ instance Structural Seq where
   instantiateL (Seq run) = Seq (\ k -> run k . const Γ)
   instantiateR = fmap absurdΔ
 
-  abstractL i (Seq run) = Seq (\ k Γ -> run k i)
+  abstractL i (Seq run) = Seq (\ k -> run k . i)
   abstractR = fmap
 
 
@@ -556,7 +556,7 @@ class (Core p, Structural p, Negative p) => Implicative p where
 
 
 instance Implicative Seq where
-  funL a b = popL (\ f -> a >>> Seq (\ k (a, i) -> runSeq id (a, Γ) (runNot (appFun f (negate' (popL (abstract i k . pushL b)))))))
+  funL a b = popL (\ f -> a >>> Seq (\ k (a, i) -> runSeq id (a, Γ) (runNot (appFun f (negate' (popL (abstract (const i) k . pushL b)))))))
   funR b = cont (\ k c -> fun (\ kb -> not' (poppedL (abstract c k) (b >>> pushL (negateL init) kb))))
 
   subL b = popL (\ (P s) -> pushL b (subA s) >>> pushL (negateL init) (subK s))
@@ -574,8 +574,8 @@ on1 = fmap flip . (.) . flip
 infixl 4 `on0`, `on1`
 
 
-cont :: ((o -> Δ) -> i -> a) -> Seq i (o |> a)
-cont f = Seq $ \ k -> k . Right . f (k . Left)
+cont :: ((o -> Δ) -> (Γ -> i) -> a) -> Seq i (o |> a)
+cont f = Seq $ \ k -> k . Right . f (k . Left) . const
 
 
 class Conj c where
