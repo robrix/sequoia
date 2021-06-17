@@ -557,7 +557,7 @@ class (Core p, Structural p, Negative p) => Implicative p where
 
 instance Implicative Seq where
   funL a b = popL (\ f -> a >>> Seq (\ k (a, i) -> runSeq id (a, Γ) (runNot (appFun f (negate' (popL (abstract i k . pushL b)))))))
-  funR (Seq run) = cont $ \ k c -> fun (\ kb -> not' (Seq (const (run (either k (\ a -> runSeq id (a, Γ) (runNegate kb))) . (c <$)))))
+  funR b = cont (\ k c -> fun (\ kb -> not' (poppedL (abstract c k) (b >>> pushL (negateL init) kb))))
 
   subL b = popL (\ (P s) -> pushL b (subA s) >>> pushL (negateL init) (subK s))
   subR a b = liftA2 sub <$> a <*> negateR b
