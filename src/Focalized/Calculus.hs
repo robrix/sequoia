@@ -583,6 +583,11 @@ class Disj d where
   inr :: b -> a `d` b
   exlr :: (a -> r) -> (b -> r) -> ((a `d` b) -> r)
 
+instance Disj Either where
+  inl = Left
+  inr = Right
+  exlr = either
+
 inlP :: (Disj d, Functor p) => p a -> p (a `d` b)
 inlP = fmap inl
 
