@@ -155,8 +155,6 @@ instance Core Seq where
 
 
 class Structural p where
-  {-# MINIMAL popL, pushL, popR, pushR, ((localL, localR) | localLR) #-}
-
   -- | Pop something off the input context which can later be pushed. Used with 'pushL', this provides a generalized context restructuring facility.
   --
   -- @
@@ -239,7 +237,6 @@ instance Structural Seq where
   popR f = Seq $ \ k c -> let (k', ka) = split k in runSeq k' c (f ka)
   pushR (Seq run) a = Seq $ \ k -> run (either k a)
 
-  localLR l r (Seq run) = Seq (\ k -> run (k . r) . l)
 
 
 -- Negating
