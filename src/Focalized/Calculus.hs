@@ -273,10 +273,10 @@ class (Core p, Structural p) => Negative p where
   negateR' p = wkL p >>> negateL init
 
 instance Negative Seq where
-  negateL p = popL (\ negateA -> p >>> poppedL (dimap (const Γ) absurdΔ) (runNegate negateA))
+  negateL p = popL (\ negateA -> p >>> dimap (Γ <$) absurdΔ (runNegate negateA))
   negateR p = cont (\ abstract -> negate' (poppedL abstract p))
 
-  notL p = popL (\ notA -> p >>> poppedL (dimap (const Γ) absurdΔ) (runNot notA))
+  notL p = popL (\ notA -> p >>> dimap (Γ <$) absurdΔ (runNot notA))
   notR p = cont (\ abstract -> not' (poppedL abstract p))
 
 
