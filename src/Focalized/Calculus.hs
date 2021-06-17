@@ -214,6 +214,11 @@ class Structural p where
   instantiate :: Γ `p` Δ -> is `p` os
   instantiate = instantiateL . instantiateR
 
+  abstractL :: is -> is `p` os -> Γ `p` os
+  abstractR :: (os -> Δ) -> is `p` os -> is `p` Δ
+  abstract :: is -> (os -> Δ) -> is `p` os -> Γ `p` Δ
+  abstract i k = abstractL i . abstractR k
+
 
   wkL :: is `p` os -> (a <| is) `p` os
   wkL = popL . const
@@ -237,6 +242,9 @@ instance Structural Seq where
 
   instantiateL (Seq run) = Seq (\ k -> run k . const Γ)
   instantiateR = fmap absurdΔ
+
+  abstractL i (Seq run) = Seq (\ k Γ -> run k i)
+  abstractR k (Seq run) = Seq (\ _ is -> run k is)
 
 
 -- Negating
