@@ -52,6 +52,7 @@ import Data.Bifoldable
 import Data.Bifunctor (Bifunctor(..))
 import Data.Bitraversable
 import Data.Functor.Identity
+import Data.Profunctor
 import Data.Traversable (foldMapDefault)
 import Prelude hiding (init)
 
@@ -78,6 +79,9 @@ instance Applicative (Seq i) where
 
 instance Monad (Seq i) where
   Seq a >>= f = Seq $ \ k c -> a (runSeq k c . f) c
+
+instance Profunctor Seq where
+  dimap f g (Seq run) = Seq (\ k -> run (k . g) . f)
 
 
 -- Contexts
@@ -212,17 +216,6 @@ class Structural p where
   pushR2 p = pushR . pushR p
 
 
-  instantiateL :: Γ `p` o -> i `p` o
-  instantiateR :: i `p` Δ -> i `p` o
-  instantiate :: Γ `p` Δ -> i `p` o
-  instantiate = instantiateL . instantiateR
-
-  abstractL :: (i' -> i) -> i `p` o -> i' `p` o
-  abstractR :: (o -> o') -> i `p` o -> i `p` o'
-  abstract :: (i' -> i) -> (o -> o') -> i `p` o -> i' `p` o'
-  abstract i k = abstractL i . abstractR k
-
-
   wkL :: i `p` o -> (a <| i) `p` o
   wkL = popL . const
   wkR :: i `p` o -> i `p` (o |> a)
@@ -242,12 +235,6 @@ instance Structural Seq where
 
   popR f = Seq $ \ k c -> let (k', ka) = split k in runSeq k' c (f ka)
   pushR (Seq run) a = Seq $ \ k -> run (either k a)
-
-  instantiateL (Seq run) = Seq (\ k -> run k . const Γ)
-  instantiateR = fmap absurdΔ
-
-  abstractL i (Seq run) = Seq (\ k -> run k . i)
-  abstractR = fmap
 
 
 -- Negating
@@ -286,10 +273,10 @@ class (Core p, Structural p) => Negative p where
   negateR' p = wkL p >>> negateL init
 
 instance Negative Seq where
-  negateL p = popL (\ negateA -> p >>> poppedL instantiate (runNegate negateA))
+  negateL p = popL (\ negateA -> p >>> poppedL (dimap (const Γ) absurdΔ) (runNegate negateA))
   negateR p = cont (\ abstract -> negate' (poppedL abstract p))
 
-  notL p = popL (\ notA -> p >>> poppedL instantiate (runNot notA))
+  notL p = popL (\ notA -> p >>> poppedL (dimap (const Γ) absurdΔ) (runNot notA))
   notR p = cont (\ abstract -> not' (poppedL abstract p))
 
 
@@ -556,7 +543,7 @@ class (Core p, Structural p, Negative p) => Implicative p where
 
 
 instance Implicative Seq where
-  funL a b = popL (\ f -> a >>> Seq (\ k (a, i) -> runSeq id (a, Γ) (runNot (appFun f (negate' (popL (abstract (const i) k . pushL b)))))))
+  funL a b = popL (\ f -> a >>> Seq (\ k (a, i) -> runSeq id (a, Γ) (runNot (appFun f (negate' (popL (dimap (const i) k . pushL b)))))))
   funR b = cont (\ abstract -> fun (\ kb -> not' (poppedL abstract (b >>> pushL (negateL init) kb))))
 
   subL b = popL (\ (P s) -> pushL b (subA s) >>> pushL (negateL init) (subK s))
@@ -575,7 +562,7 @@ infixl 4 `on0`, `on1`
 
 
 cont :: ((Seq i o -> Seq Γ Δ) -> a) -> Seq i (o |> a)
-cont f = Seq $ \ k -> k . Right . f . flip abstract (k . Left) . const
+cont f = Seq $ \ k -> k . Right . f . flip dimap (k . Left) . const
 
 
 class Conj c where
