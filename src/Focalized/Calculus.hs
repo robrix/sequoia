@@ -287,7 +287,7 @@ class (Core p, Structural p) => Negative p where
 
 instance Negative Seq where
   negateL p = popL (\ negateA -> p >>> poppedL instantiate (runNegate negateA))
-  negateR p = Seq $ \ k c -> k (pure (negate' (poppedL (abstract c (k . Left)) p)))
+  negateR p = cont (\ k c -> negate' (poppedL (abstract c k) p))
 
   notL p = popL (\ notA -> p >>> poppedL instantiate (runNot notA))
   notR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (not' (Seq (const (run k' . (c <$)))))
@@ -572,6 +572,10 @@ on1 :: (a -> b -> c) -> (b' -> b) -> (a -> b' -> c)
 on1 = fmap flip . (.) . flip
 
 infixl 4 `on0`, `on1`
+
+
+cont :: ((o -> Δ) -> i -> a) -> Seq i (o |> a)
+cont f = Seq $ \ k -> k . Right . f (k . Left)
 
 
 class Conj c where
