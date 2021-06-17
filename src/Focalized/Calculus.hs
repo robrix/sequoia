@@ -563,6 +563,11 @@ class Conj c where
   exl :: (a `c` b) -> a
   exr :: (a `c` b) -> b
 
+instance Conj (,) where
+  inlr = (,)
+  exl = fst
+  exr = snd
+
 inlrP :: (Conj c, Applicative p) => p a -> p b -> p (a `c` b)
 inlrP = liftA2 inlr
 
