@@ -287,10 +287,10 @@ class (Core p, Structural p) => Negative p where
 
 instance Negative Seq where
   negateL p = popL (\ negateA -> p >>> poppedL instantiate (runNegate negateA))
-  negateR p = cont (\ k c -> negate' (poppedL (abstract c k) p))
+  negateR p = cont (\ abstract -> negate' (poppedL abstract p))
 
   notL p = popL (\ notA -> p >>> poppedL instantiate (runNot notA))
-  notR p = cont (\ k c -> not' (poppedL (abstract c k) p))
+  notR p = cont (\ abstract -> not' (poppedL abstract p))
 
 
 -- Additive
@@ -557,7 +557,7 @@ class (Core p, Structural p, Negative p) => Implicative p where
 
 instance Implicative Seq where
   funL a b = popL (\ f -> a >>> Seq (\ k (a, i) -> runSeq id (a, Γ) (runNot (appFun f (negate' (popL (abstract (const i) k . pushL b)))))))
-  funR b = cont (\ k c -> fun (\ kb -> not' (poppedL (abstract c k) (b >>> pushL (negateL init) kb))))
+  funR b = cont (\ abstract -> fun (\ kb -> not' (poppedL abstract (b >>> pushL (negateL init) kb))))
 
   subL b = popL (\ (P s) -> pushL b (subA s) >>> pushL (negateL init) (subK s))
   subR a b = liftA2 sub <$> a <*> negateR b
@@ -574,8 +574,8 @@ on1 = fmap flip . (.) . flip
 infixl 4 `on0`, `on1`
 
 
-cont :: ((o -> Δ) -> (Γ -> i) -> a) -> Seq i (o |> a)
-cont f = Seq $ \ k -> k . Right . f (k . Left) . const
+cont :: ((Seq i o -> Seq Γ Δ) -> a) -> Seq i (o |> a)
+cont f = Seq $ \ k -> k . Right . f . flip abstract (k . Left) . const
 
 
 class Conj c where
