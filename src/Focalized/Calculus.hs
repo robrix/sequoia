@@ -209,14 +209,6 @@ class Structural p where
   pushR2 p = pushR . pushR p
 
 
-  localL :: (is' -> is) -> is `p` os -> is' `p` os
-  localL = (`localLR` id)
-  localR :: (os -> os') -> is `p` os -> is `p` os'
-  localR = (id `localLR`)
-  localLR :: (is' -> is) -> (os -> os') -> is `p` os -> is' `p` os'
-  localLR l r = localL l . localR r
-
-
   wkL :: is `p` os -> (a <| is) `p` os
   wkL = popL . const
   wkR :: is `p` os -> is `p` (os |> a)
