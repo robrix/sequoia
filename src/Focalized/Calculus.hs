@@ -199,6 +199,9 @@ class Structural p where
   -- @
   popR :: ((a -> Δ) -> i `p` o) -> i `p` (o |> a)
 
+  poppedR :: (i `p` o -> i' `p` o') -> (i `p` (o |> a) -> i' `p` (o' |> a))
+  poppedR f p = popR (f . pushR p)
+
   -- | Push something onto the output context which was previously popped off it. Used with 'popR', this provides a generalized context restructuring facility. It i undefined what will happen if you push something which was not previously popped.
   --
   -- @
