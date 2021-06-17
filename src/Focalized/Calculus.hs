@@ -58,10 +58,10 @@ import Prelude hiding (init)
 
 -- Sequents
 
-runSeq :: (o -> Δ) -> i -> Seq i o -> Δ
+runSeq :: (o -> r) -> i -> Seq r i o -> r
 runSeq k c (Seq run) = run k c
 
-runSeqIO :: (o -> IO ()) -> i -> Seq i o -> IO ()
+runSeqIO :: (o -> IO ()) -> i -> Seq Δ i o -> IO ()
 runSeqIO k i (Seq run) = absurdΔ (run (throw . Escape . k) i) `catch` getEscape
 
 newtype Escape = Escape { getEscape :: IO () }
@@ -70,17 +70,17 @@ instance Show Escape where show _ = "Escape"
 instance Exception Escape
 
 
-newtype Seq i o = Seq ((o -> Δ) -> (i -> Δ))
+newtype Seq r i o = Seq ((o -> r) -> (i -> r))
   deriving (Functor)
 
-instance Applicative (Seq i) where
+instance Applicative (Seq r i) where
   pure a = Seq $ \ k _ -> k a
   (<*>) = ap
 
-instance Monad (Seq i) where
+instance Monad (Seq r i) where
   Seq a >>= f = Seq $ \ k c -> a (runSeq k c . f) c
 
-instance Profunctor Seq where
+instance Profunctor (Seq r) where
   dimap f g (Seq run) = Seq (\ k -> run (k . g) . f)
 
 
@@ -152,7 +152,7 @@ class Core p where
 
 infixr 1 >>>
 
-instance Core Seq where
+instance Core (Seq Δ) where
   f >>> g = f >>= either pure (pushL g)
 
   init = popL (pure . pure)
@@ -232,7 +232,7 @@ class Structural p where
   exR :: i `p` (o |> a |> b) -> i `p` (o |> b |> a)
   exR = popR2 . flip . pushR2
 
-instance Structural Seq where
+instance Structural (Seq Δ) where
   popL f = Seq $ \ k -> uncurry (flip (runSeq k) . f)
   pushL (Seq run) a = Seq $ \ k -> run k . (a,)
 
@@ -242,21 +242,21 @@ instance Structural Seq where
 
 -- Negating
 
-newtype Not    a = Not    { getNot    :: Seq (P a <| Γ) Δ }
+newtype Not    a = Not    { getNot    :: Seq Δ (P a <| Γ) Δ }
 
-runNot :: N (Not a) -> Seq (P a <| Γ) Δ
+runNot :: N (Not a) -> Seq Δ (P a <| Γ) Δ
 runNot = getNot . getN
 
-not' :: Seq (P a <| Γ) Δ -> N (Not a)
+not' :: Seq Δ (P a <| Γ) Δ -> N (Not a)
 not' = N . Not
 
 
-newtype Negate a = Negate { getNegate :: Seq (N a <| Γ) Δ }
+newtype Negate a = Negate { getNegate :: Seq Δ (N a <| Γ) Δ }
 
-runNegate :: P (Negate a) -> Seq (N a <| Γ) Δ
+runNegate :: P (Negate a) -> Seq Δ (N a <| Γ) Δ
 runNegate = getNegate . getP
 
-negate' :: Seq (N a <| Γ) Δ -> P (Negate a)
+negate' :: Seq Δ (N a <| Γ) Δ -> P (Negate a)
 negate' = P . Negate
 
 
@@ -275,7 +275,7 @@ class (Core p, Structural p) => Negative p where
   negateR' :: i `p` (o |> P (Negate a)) -> (N a <| i) `p` o
   negateR' p = wkL p >>> negateL init
 
-instance Negative Seq where
+instance Negative (Seq Δ) where
   negateL p = popL (\ negateA -> p >>> dimap (Γ <$) absurdΔ (runNegate negateA))
   negateR p = cont (\ abstract -> negate' (poppedL abstract p))
 
@@ -381,7 +381,7 @@ class (Core p, Structural p, Negative p) => Additive p where
   zapWith :: i `p` (o |> P (Negate a ⊕ Negate b)) -> (N (a & b) <| i) `p` o
   zapWith p = wkL p >>> sumL (negateL (withL1 init)) (negateL (withL2 init))
 
-instance Additive Seq where
+instance Additive (Seq Δ) where
   zeroL = popL absurdP
 
   topR = pure (pure (N Top))
@@ -487,7 +487,7 @@ class (Core p, Structural p, Negative p) => Multiplicative p where
   zapPar p = wkL p >>> tensorL (popL2 (parL `on0` pushL (negateL init) `on1` pushL (negateL init)))
 
 
-instance Multiplicative Seq where
+instance Multiplicative (Seq Δ) where
   botL = popL absurdN
   botR = fmap Left
 
@@ -503,17 +503,17 @@ instance Multiplicative Seq where
 
 -- Implicative
 
-newtype a --> b = Fun { getFun :: Seq (P (Negate b) <| Γ) (Δ |> N (Not a)) }
+newtype a --> b = Fun { getFun :: Seq Δ (P (Negate b) <| Γ) (Δ |> N (Not a)) }
 
 infixr 5 -->
 
-appFun :: N (a --> b) -> Seq (P (Negate b) <| Γ) (Δ |> N (Not a))
+appFun :: N (a --> b) -> Seq Δ (P (Negate b) <| Γ) (Δ |> N (Not a))
 appFun = getFun . getN
 
-appFun' :: N (a --> b) -> Seq (P (Negate b) <| i) (o |> N (Not a))
+appFun' :: N (a --> b) -> Seq Δ (P (Negate b) <| i) (o |> N (Not a))
 appFun' = dimap (Γ <$) (first absurdΔ) . appFun
 
-fun :: Seq (P (Negate b) <| Γ) (Δ |> N (Not a)) -> N (a --> b)
+fun :: Seq Δ (P (Negate b) <| Γ) (Δ |> N (Not a)) -> N (a --> b)
 fun = N . Fun
 
 
@@ -548,7 +548,7 @@ class (Core p, Structural p, Negative p) => Implicative p where
   f $$ a = exR (wkR f) >>> exR (wkR a) `funL` init
 
 
-instance Implicative Seq where
+instance Implicative (Seq Δ) where
   funL a b = popL (\ f -> a >>> notR' (exR (negateL' (appFun' f))) >>> exL (wkL b))
   funR b = cont (\ abstract -> fun (poppedL (poppedR abstract) (notR (exL (negateL b)))))
 
@@ -567,7 +567,7 @@ on1 = fmap flip . (.) . flip
 infixl 4 `on0`, `on1`
 
 
-cont :: ((Seq i o -> Seq Γ Δ) -> a) -> Seq i (o |> a)
+cont :: ((Seq Δ i o -> Seq Δ Γ Δ) -> a) -> Seq Δ i (o |> a)
 cont f = Seq $ \ k -> k . Right . f . flip dimap (k . Left) . const
 
 
