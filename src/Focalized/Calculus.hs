@@ -286,10 +286,10 @@ class (Core p, Structural p) => Negative p where
   negateR' p = wkL p >>> negateL init
 
 instance Negative Seq where
-  negateL p = popL (\ negateA -> p >>> popL (instantiate . pushL (runNegate negateA)))
+  negateL p = popL (\ negateA -> p >>> poppedL instantiate (runNegate negateA))
   negateR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (negate' (Seq (const (run k' . (c <$)))))
 
-  notL p = popL (\ notA -> p >>> popL (instantiate . pushL (runNot notA)))
+  notL p = popL (\ notA -> p >>> poppedL instantiate (runNot notA))
   notR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (not' (Seq (const (run k' . (c <$)))))
 
 
