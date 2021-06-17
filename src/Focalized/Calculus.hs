@@ -102,9 +102,6 @@ absurdΔ :: Δ -> a
 absurdΔ = \case
 
 
-newtype K a = K { runK :: a -> Δ }
-
-
 -- Polarity
 
 class (Functor f, Functor u) => Adjunction f u | f -> u, u -> f where
@@ -245,13 +242,13 @@ not' :: Seq (P a <| Γ) Δ -> N (Not a)
 not' = N . Not
 
 
-newtype Negate a = Negate { getNegate :: K (N a) }
+newtype Negate a = Negate { getNegate :: Seq (N a <| Γ) Δ }
 
 runNegate :: P (Negate a) -> (N a -> Δ)
-runNegate = runK . getNegate . getP
+runNegate = flip (runSeq id . (,Γ)) . getNegate . getP
 
-negate' :: (N a -> Δ) -> P (Negate a)
-negate' = P . Negate . K
+negate' :: Seq (N a <| Γ) Δ -> P (Negate a)
+negate' = P . Negate
 
 
 class (Core p, Structural p) => Negative p where
@@ -271,7 +268,7 @@ class (Core p, Structural p) => Negative p where
 
 instance Negative Seq where
   negateL (Seq run) = Seq $ \ k (negA, c) -> run (either k (runNegate negA)) c
-  negateR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (negate' (run k' . (,c)))
+  negateR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (negate' (Seq (const (run k' . (c <$)))))
 
   notL (Seq run) = Seq $ \ k (notA, c) -> run (either k (runNot notA)) c
   notR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (not' (Seq (const (run k' . (c <$)))))
@@ -540,7 +537,7 @@ class (Core p, Structural p, Negative p) => Implicative p where
 
 
 instance Implicative Seq where
-  funL a b = popL (\ f -> a >>> Seq (\ k (a, is) -> runNot (appFun f (negate' (runSeq k is . pushL b))) a))
+  funL a b = popL (\ f -> a >>> Seq (\ k (a, is) -> runNot (appFun f (negate' (Seq (const (\ c -> runSeq k (is <$ c) b))))) a))
   funR (Seq run) = Seq $ \ k c -> let (k', ka) = split k in ka (fun (\ kb -> not' (Seq (const (run (either k' (runNegate kb)) . (c <$))))))
 
   subL b = popL (\ (P s) -> pushL b (subA s) >>> pushL (negateL init) (subK s))
