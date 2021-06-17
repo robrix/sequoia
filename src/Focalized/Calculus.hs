@@ -503,14 +503,17 @@ instance Multiplicative Seq where
 
 -- Implicative
 
-newtype a --> b = Fun { getFun :: P (Negate b) -> N (Not a) }
+newtype a --> b = Fun { getFun :: Seq (P (Negate b) <| Γ) (Δ |> N (Not a)) }
 
 infixr 5 -->
 
-appFun :: N (a --> b) -> (P (Negate b) -> N (Not a))
+appFun :: N (a --> b) -> Seq (P (Negate b) <| Γ) (Δ |> N (Not a))
 appFun = getFun . getN
 
-fun :: (P (Negate b) -> N (Not a)) -> N (a --> b)
+appFun' :: N (a --> b) -> Seq (P (Negate b) <| i) (o |> N (Not a))
+appFun' = dimap (Γ <$) (first absurdΔ) . appFun
+
+fun :: Seq (P (Negate b) <| Γ) (Δ |> N (Not a)) -> N (a --> b)
 fun = N . Fun
 
 
@@ -546,8 +549,8 @@ class (Core p, Structural p, Negative p) => Implicative p where
 
 
 instance Implicative Seq where
-  funL a b = popL (\ f -> a >>> Seq (\ k (a, i) -> runSeq id (a, Γ) (runNot (appFun f (negate' (popL (dimap (const i) k . pushL b)))))))
-  funR b = cont (\ abstract -> fun (\ kb -> not' (poppedL abstract (b >>> pushL (negateL init) kb))))
+  funL a b = popL (\ f -> a >>> notR' (exR (negateL' (appFun' f))) >>> exL (wkL b))
+  funR b = cont (\ abstract -> fun (poppedL (poppedR abstract) (notR (exL (negateL b)))))
 
   subL b = popL (\ (P s) -> pushL b (subA s) >>> pushL (negateL init) (subK s))
   subR a b = liftA2 sub <$> a <*> negateR b
