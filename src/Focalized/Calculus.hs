@@ -230,7 +230,6 @@ instance Structural Seq where
   pushR (Seq run) a = Seq $ \ k -> run (either k a)
 
 
-
 -- Negating
 
 newtype Not    a = Not    { getNot    :: Seq (P a <| Γ) Δ }
