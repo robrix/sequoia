@@ -247,7 +247,7 @@ instance Structural Seq where
   instantiateR = fmap absurdΔ
 
   abstractL i (Seq run) = Seq (\ k Γ -> run k i)
-  abstractR k (Seq run) = Seq (\ _ is -> run k is)
+  abstractR = fmap
 
 
 -- Negating
