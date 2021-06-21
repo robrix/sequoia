@@ -1,3 +1,4 @@
+{-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Focalized.Calculus
@@ -45,6 +46,7 @@ module Focalized.Calculus
 , Implicative(..)
   -- * Quantifying
 , ForAll(..)
+, Exists(..)
 , Quantifying(..)
 ) where
 
@@ -563,9 +565,14 @@ instance Implicative (Seq Δ) where
 
 newtype ForAll f = ForAll (forall x . f x)
 
+data Exists f = forall x . Exists (f x)
+
 class (Core p, Structural p, Negative p) => Quantifying p where
   forAllL :: p (f x <| i) o -> p (ForAll f <| i) o
   forAllR :: (forall x . p i (o |> f x)) -> p i (o |> ForAll f)
+
+  existsL :: (forall x . p (f x <| i) o) -> p (Exists f <| i) o
+  existsR :: p i (o |> f x) -> p i (o |> Exists f)
 
 
 -- Utilities
