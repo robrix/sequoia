@@ -563,7 +563,7 @@ instance Implicative (Seq Δ) where
 
 -- Quantifying
 
-newtype ForAll f = ForAll (forall x . f x)
+newtype ForAll f = ForAll { forAll :: forall x . f x }
 
 data Exists f = forall x . Exists (f x)
 
