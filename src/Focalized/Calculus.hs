@@ -596,6 +596,12 @@ instance Adjunction P N where
   rightAdjunct f = getN . f . getP
 
 
+up :: P a -> N (Up a)
+up = N . Up . getP
+
+runUp :: N (Up a) -> P a
+runUp = P . getUp . getN
+
 newtype Up   a = Up   { getUp   :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
   deriving (Applicative, Monad, Representable) via Identity
@@ -610,6 +616,12 @@ instance Adjunction Up Down where
   leftAdjunct  f =    Down . f .    Up
   rightAdjunct f = getDown . f . getUp
 
+
+down :: N a -> P (Down a)
+down = P . Down . getN
+
+runDown :: P (Down a) -> N a
+runDown = N . getDown . getP
 
 newtype Down a = Down { getDown :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
@@ -632,6 +644,14 @@ class (Core p, Structural p) => Shifting p where
 
   downL :: p (N a <| i) o -> p (P (Down a) <| i) o
   downR :: p i (o |> N a) -> p i (o |> P (Down a))
+
+
+instance Shifting (Seq Δ) where
+  upL   = mapL runUp
+  upR   = mapR up
+
+  downL = mapL runDown
+  downR = mapR down
 
 
 -- Utilities
