@@ -569,7 +569,11 @@ instance Implicative (Seq Δ) where
 
 -- Quantifying
 
-newtype ForAll f = ForAll { forAll :: forall x . f x }
+newtype ForAll f = ForAll (forall x . f x)
+
+runForAll :: N (ForAll f) -> N (f x)
+runForAll (N (ForAll f)) = N f
+
 
 data Exists f = forall x . Exists (f x)
 
@@ -581,9 +585,9 @@ runExists f (P (Exists r)) = f (P r)
 
 
 class (Core p, Structural p, Negative p) => Quantifying p where
-  forAllL :: p (f x <| i) o -> p (ForAll f <| i) o
-  -- FIXME: the correct signature should be p i (o |> (forall x . f x)) -> p i (o |> ForAll f), but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
-  -- forAllR :: (forall x . p i (o |> f x)) -> p i (o |> ForAll f)
+  forAllL :: p (N (f x) <| i) o -> p (N (ForAll f) <| i) o
+  -- FIXME: the correct signature should be p i (o |> (forall x . N (f x))) -> p i (o |> N (ForAll f)), but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
+  -- forAllR :: (forall x . p i (o |> N (f x))) -> p i (o |> N (ForAll f))
 
   -- FIXME: the correct signature should be p ((forall x . P (f x)) <| i) o -> p (P (Exists f) <| i) o, but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
   existsL :: (forall x . p (P (f x) <| i) o) -> p (P (Exists f) <| i) o
@@ -591,7 +595,7 @@ class (Core p, Structural p, Negative p) => Quantifying p where
 
 
 instance Quantifying (Seq Δ) where
-  forAllL p = mapL forAll p
+  forAllL p = mapL runForAll p
   -- forAllR p = mapR ForAll p
 
   existsL p = popL (runExists (pushL p))
