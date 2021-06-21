@@ -226,6 +226,9 @@ class Structural p where
   pushR2 :: p i (o |> b |> a) -> (a -> Δ) -> (b -> Δ) -> p i o
   pushR2 p = pushR . pushR p
 
+  mapR :: (a -> a') -> p i (o |> a) -> p i (o |> a')
+  mapR f p = popR (pushR p . (. f))
+
 
   wkL :: p i o -> p (a <| i) o
   wkL = popL . const
