@@ -573,6 +573,7 @@ newtype ForAll f = ForAll { forAll :: forall x . f x }
 
 data Exists f = forall x . Exists (f x)
 
+
 class (Core p, Structural p, Negative p) => Quantifying p where
   forAllL :: p (f x <| i) o -> p (ForAll f <| i) o
   forAllR :: (forall x . p i (o |> f x)) -> p i (o |> ForAll f)
