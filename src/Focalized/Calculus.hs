@@ -595,15 +595,6 @@ instance Quantifying (Seq Δ) where
 
 -- Utilities
 
-on0 :: (a -> b -> c) -> (a' -> a) -> (a' -> b -> c)
-on0 = (.)
-
-on1 :: (a -> b -> c) -> (b' -> b) -> (a -> b' -> c)
-on1 = fmap flip . (.) . flip
-
-infixl 4 `on0`, `on1`
-
-
 cont :: ((Seq Δ i o -> Seq Δ Γ Δ) -> a) -> Seq Δ i (o |> a)
 cont f = Seq $ \ k -> k . Right . f . flip dimap (k . Left) . const
 
