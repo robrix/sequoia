@@ -586,6 +586,7 @@ class (Core p, Structural p, Negative p) => Quantifying p where
 
 instance Quantifying (Seq Δ) where
   forAllL p = mapL forAll p
+  -- forAllR p = mapR ForAll p
 
   existsR p = mapR Exists p
 
