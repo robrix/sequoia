@@ -11,9 +11,6 @@ module Focalized.Calculus
 , type (|>)
 , Γ(..)
 , Δ
-  -- * Polarity
-, N(..)
-, P(..)
   -- * Core rules
 , Core(..)
 , Structural(..)
@@ -48,6 +45,9 @@ module Focalized.Calculus
 , ForAll(..)
 , Exists(..)
 , Quantifying(..)
+  -- * Polarity
+, N(..)
+, P(..)
 ) where
 
 import Control.Applicative (liftA2)
@@ -112,38 +112,6 @@ data Δ
 
 absurdΔ :: Δ -> a
 absurdΔ = \case
-
-
--- Polarity
-
-newtype N a = N { getN :: a }
-  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-  deriving (Applicative, Monad, Representable) via Identity
-
-instance Distributive N where
-  collect f = N . fmap (getN . f)
-  distribute = N . fmap getN
-
-instance Adjunction N P where
-  unit   =    P .    N
-  counit = getP . getN
-  leftAdjunct  f =    P . f .    N
-  rightAdjunct f = getP . f . getN
-
-
-newtype P a = P { getP :: a }
-  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-  deriving (Applicative, Monad, Representable) via Identity
-
-instance Distributive P where
-  collect f = P . fmap (getP . f)
-  distribute = P . fmap getP
-
-instance Adjunction P N where
-  unit   =    N .    P
-  counit = getN . getP
-  leftAdjunct  f =    N . f .    P
-  rightAdjunct f = getN . f . getP
 
 
 -- Core rules
@@ -591,6 +559,38 @@ instance Quantifying (Seq Δ) where
 
   existsL p = popL (runExists (pushL p))
   existsR p = mapR exists p
+
+
+-- Polarity
+
+newtype N a = N { getN :: a }
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+  deriving (Applicative, Monad, Representable) via Identity
+
+instance Distributive N where
+  collect f = N . fmap (getN . f)
+  distribute = N . fmap getN
+
+instance Adjunction N P where
+  unit   =    P .    N
+  counit = getP . getN
+  leftAdjunct  f =    P . f .    N
+  rightAdjunct f = getP . f . getN
+
+
+newtype P a = P { getP :: a }
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+  deriving (Applicative, Monad, Representable) via Identity
+
+instance Distributive P where
+  collect f = P . fmap (getP . f)
+  distribute = P . fmap getP
+
+instance Adjunction P N where
+  unit   =    N .    P
+  counit = getN . getP
+  leftAdjunct  f =    N . f .    P
+  rightAdjunct f = getN . f . getP
 
 
 -- Utilities
