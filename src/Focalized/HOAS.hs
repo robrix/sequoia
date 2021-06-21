@@ -398,3 +398,25 @@ instance (App a, Applicative i) => App (Elab (i a) (i a)) where
     f' ::: _A :-> _B <- syn (elab ctx f)
     a' <- chk (elab ctx a ::: _A)
     pure $ f' $$ a' ::: _B
+
+-- instance (HO a, Applicative i) => FO (Elab (i a) (i a)) where
+--   lamFO n b = Elab $ \ ctx -> mkChk $ \ _T -> do
+--     _A :-> _B <- pure _T
+--     lam n (\ wk v -> chk (elab (v:map wk ctx) (fmap wk b) ::: _B))
+
+-- checkHOASU :: (Applicative i, HO rep) => [(Name, Type)] -> HOD rep -> Check Maybe (i rep)
+-- checkHOASU ctx = \case
+--   VarHO n v -> switch (synthHOASU ctx (VarHO n v))
+--   LamHO n b -> Check $ \ _T -> do
+--     _A :-> _B <- pure _T
+--     lam n (\ wk v -> check (_ (fmap wk . checkHOASU ctx . b . VarHO n <$> v)) _B)
+--   AppHO f a -> switch (synthHOASU ctx (AppHO f a))
+
+-- synthHOASU :: (Applicative i, HO rep) => [(Name, Type)] -> HOD rep -> Synth Maybe (i rep)
+-- synthHOASU ctx = Synth . \case
+--   VarHO n v -> (pure v :::) <$> lookup n ctx
+--   LamHO{}     -> Nothing
+--   AppHO f a -> do
+--     f' ::: _A :-> _B <- synth (synthHOASU ctx f)
+--     a' <- check (checkHOASU ctx a) _A
+--     pure (f' $$ a' ::: _B)
