@@ -595,7 +595,7 @@ instance Quantifying (Seq Δ) where
 
 -- Utilities
 
-cont :: ((Seq Δ i o -> Seq Δ Γ Δ) -> a) -> Seq Δ i (o |> a)
+cont :: ((Seq r i o -> Seq r Γ Δ) -> a) -> Seq Δ i (o |> a)
 cont f = Seq $ \ k -> k . Right . f . flip dimap (k . Left) . const
 
 
