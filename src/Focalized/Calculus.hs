@@ -652,6 +652,8 @@ class (Core p, Structural p) => Shifting p where
   downL'   :: p (P (Down   a) <| i) o -> p (N a <| i) o
   downL' p = downR init >>> exL (wkL p)
   downR :: p i (o |> N a) -> p i (o |> P (Down a))
+  downR'   :: p i (o |> P (Down   a)) -> p i (o |> N a)
+  downR' p = exR (wkR p) >>> downL init
 
 
 instance Shifting (Seq Δ) where
