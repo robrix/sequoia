@@ -370,7 +370,7 @@ class (Core p, Structural p, Negative p) => Additive p where
   sumL2' :: p (P (a ⊕ b) <| i) o -> p (P b <| i) o
   sumL2' p = sumR2 init >>> exL (wkL p)
   sumLWith :: p i (o |> N (Not a & Not b)) -> p (P (a ⊕ b) <| i) o
-  sumLWith p = wkL p >>> exL (sumL (exL (withL1 (notL init))) (exL (withL2 (notL init))))
+  sumLWith p = sumL (wkL p >>> withL1 (notL init)) (wkL p >>> withL2 (notL init))
   sumR1 :: p i (o |> P a) -> p i (o |> P (a ⊕ b))
   sumR2 :: p i (o |> P b) -> p i (o |> P (a ⊕ b))
 
@@ -386,11 +386,6 @@ class (Core p, Structural p, Negative p) => Additive p where
   withR2' :: p i (o |> N (a & b)) -> p i (o |> N b)
   withR2' t = exR (wkR t) >>> withL2 init
 
-  zapSum :: p i (o |> N (Not a & Not b)) -> p (P (a ⊕ b) <| i) o
-  zapSum p = sumL (wkL p >>> withL1 (notL init)) (wkL p >>> withL2 (notL init))
-
-  zapWith :: p i (o |> P (Negate a ⊕ Negate b)) -> p (N (a & b) <| i) o
-  zapWith p = wkL p >>> sumL (negateL (withL1 init)) (negateL (withL2 init))
 
 instance Additive (Seq Δ) where
   zeroL = popL absurdP
@@ -490,12 +485,6 @@ class (Core p, Structural p, Negative p) => Multiplicative p where
   tensorL' :: p (P (a ⊗ b) <| i) o -> p (P a <| P b <| i) o
   tensorL' p = init ⊗ wkL init >>> popL (wkL . wkL . pushL p)
   (⊗) :: p i (o |> P a) -> p i (o |> P b) -> p i (o |> P (a ⊗ b))
-
-  zapTensor :: p i (o |> N (Not a ⅋ Not b)) -> p (P (a ⊗ b) <| i) o
-  zapTensor p = tensorL (wkL (wkL p) >>> parL (notL init) (notL (wkL init)))
-
-  zapPar :: p i (o |> P (Negate a ⊗ Negate b)) -> p (N (a ⅋ b) <| i) o
-  zapPar p = wkL p >>> tensorL (popL2 (parL `on0` pushL (negateL init) `on1` pushL (negateL init)))
 
 
 instance Multiplicative (Seq Δ) where
