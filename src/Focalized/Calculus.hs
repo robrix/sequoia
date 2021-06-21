@@ -698,3 +698,11 @@ inrP = fmap inr
 
 exlrP :: (Adjunction p p', Disj d) => (p a -> r) -> (p b -> r) -> (p (a `d` b) -> r)
 exlrP f g = rightAdjunct (exlr (leftAdjunct f) (leftAdjunct g))
+
+
+newtype (f · g) a = C { getC :: f (g a) }
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+
+instance (Applicative f, Applicative g) => Applicative (f · g) where
+  pure = C . pure . pure
+  f <*> a = C ((<*>) <$> getC f <*> getC a)
