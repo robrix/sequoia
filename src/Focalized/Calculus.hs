@@ -649,6 +649,8 @@ class (Core p, Structural p) => Shifting p where
   upR' p = exR (wkR p) >>> upL init
 
   downL :: p (N a <| i) o -> p (P (Down a) <| i) o
+  downL'   :: p (P (Down   a) <| i) o -> p (N a <| i) o
+  downL' p = downR init >>> exL (wkL p)
   downR :: p i (o |> N a) -> p i (o |> P (Down a))
 
 
