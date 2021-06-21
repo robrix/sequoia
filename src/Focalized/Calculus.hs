@@ -542,7 +542,7 @@ runExists :: (forall x . P (f x) -> r) -> P (Exists f) -> r
 runExists f (P (Exists r)) = f (P r)
 
 
-class (Core p, Structural p) => Quantifying p where
+class (Core p, Structural p, Shifting p) => Quantifying p where
   forAllL :: p (N (f x) <| i) o -> p (N (ForAll f) <| i) o
   -- FIXME: the correct signature should be p i (o |> (forall x . N (f x))) -> p i (o |> N (ForAll f)), but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
   -- forAllR :: (forall x . p i (o |> N (f x))) -> p i (o |> N (ForAll f))
@@ -554,6 +554,8 @@ class (Core p, Structural p) => Quantifying p where
   existsL' :: p (P (Exists f) <| i) o -> (forall x . p (P (f x) <| i) o)
   existsL' p = existsR init >>> exL (wkL p)
   existsR :: p i (o |> P (f x)) -> p i (o |> P (Exists f))
+  existsRForAll :: p i (o |> N (ForAll (Up · f))) -> p i (o |> P (Exists f))
+  existsRForAll p = existsR (upR' (mapR (fmap getC) (forAllR' p)))
 
 
 instance Quantifying (Seq Δ) where
