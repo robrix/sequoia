@@ -65,6 +65,7 @@ library
   exposed-modules:
     Focalized.B
     Focalized.Calculus
+    Focalized.HOAS
     Focalized.Multiset
     Focalized.Polarized
     Focalized.Snoc
@@ -78,6 +79,7 @@ library
   build-depends:
     , base ^>=4.14.1.0
     , containers
+    , distributive
     , fused-effects
     , profunctors
   hs-source-dirs:   src
