@@ -56,7 +56,10 @@ import Control.Monad (ap, join)
 import Data.Bifoldable
 import Data.Bifunctor (Bifunctor(..))
 import Data.Bitraversable
+import Data.Distributive
+import Data.Functor.Adjunction
 import Data.Functor.Identity
+import Data.Functor.Rep
 import Data.Profunctor
 import Data.Traversable (foldMapDefault)
 import Prelude hiding (init)
@@ -113,22 +116,13 @@ absurdΔ = \case
 
 -- Polarity
 
-class (Functor f, Functor u) => Adjunction f u | f -> u, u -> f where
-  {-# MINIMAL (unit | leftAdjunct), (counit | rightAdjunct) #-}
-  unit :: a -> u (f a)
-  unit = leftAdjunct id
-  counit :: f (u a) -> a
-  counit = rightAdjunct id
-
-  leftAdjunct :: (f a -> b) -> (a -> u b)
-  leftAdjunct f = fmap f . unit
-  rightAdjunct :: (a -> u b) -> (f a -> b)
-  rightAdjunct f = counit . fmap f
-
-
 newtype N a = N { getN :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-  deriving (Applicative, Monad) via Identity
+  deriving (Applicative, Monad, Representable) via Identity
+
+instance Distributive N where
+  collect f = N . fmap (getN . f)
+  distribute = N . fmap getN
 
 instance Adjunction N P where
   unit   =    P .    N
@@ -139,7 +133,11 @@ instance Adjunction N P where
 
 newtype P a = P { getP :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-  deriving (Applicative, Monad) via Identity
+  deriving (Applicative, Monad, Representable) via Identity
+
+instance Distributive P where
+  collect f = P . fmap (getP . f)
+  distribute = P . fmap getP
 
 instance Adjunction P N where
   unit   =    N .    P
