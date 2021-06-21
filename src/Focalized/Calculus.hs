@@ -193,6 +193,9 @@ class Structural p where
   pushL2 :: p (a <| b <| i) o -> a -> b -> p i o
   pushL2 p = pushL . pushL p
 
+  mapL :: (a' -> a) -> p (a <| i) o -> p (a' <| i) o
+  mapL f p = popL (pushL p . f)
+
 
   -- | Pop something off the output context which can later be pushed. Used with 'pushR', this provides a generalized context restructuring facility.
   --
