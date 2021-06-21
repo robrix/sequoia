@@ -573,8 +573,11 @@ newtype ForAll f = ForAll { forAll :: forall x . f x }
 
 data Exists f = forall x . Exists (f x)
 
-exists :: (forall x . f x -> r) -> Exists f -> r
-exists f (Exists r) = f r
+exists :: P (f x) -> P (Exists f)
+exists = fmap Exists
+
+runExists :: (forall x . P (f x) -> r) -> P (Exists f) -> r
+runExists f (P (Exists r)) = f (P r)
 
 
 class (Core p, Structural p, Negative p) => Quantifying p where
@@ -582,17 +585,17 @@ class (Core p, Structural p, Negative p) => Quantifying p where
   -- FIXME: the correct signature should be p i (o |> (forall x . f x)) -> p i (o |> ForAll f), but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
   -- forAllR :: (forall x . p i (o |> f x)) -> p i (o |> ForAll f)
 
-  -- FIXME: the correct signature should be p ((forall x . f x) <| i) o -> p (Exists f <| i) o, but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
-  existsL :: (forall x . p (f x <| i) o) -> p (Exists f <| i) o
-  existsR :: p i (o |> f x) -> p i (o |> Exists f)
+  -- FIXME: the correct signature should be p ((forall x . P (f x)) <| i) o -> p (P (Exists f) <| i) o, but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
+  existsL :: (forall x . p (P (f x) <| i) o) -> p (P (Exists f) <| i) o
+  existsR :: p i (o |> P (f x)) -> p i (o |> P (Exists f))
 
 
 instance Quantifying (Seq Δ) where
   forAllL p = mapL forAll p
   -- forAllR p = mapR ForAll p
 
-  existsL p = popL (exists (pushL p))
-  existsR p = mapR Exists p
+  existsL p = popL (runExists (pushL p))
+  existsR p = mapR exists p
 
 
 -- Utilities
