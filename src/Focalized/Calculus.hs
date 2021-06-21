@@ -642,6 +642,8 @@ instance Adjunction Down Up where
 
 class (Core p, Structural p) => Shifting p where
   upL   :: p (P a <| i) o -> p (N (Up   a) <| i) o
+  upL'   :: p (N (Up   a) <| i) o -> p (P a <| i) o
+  upL' p = upR init >>> exL (wkL p)
   upR   :: p i (o |> P a) -> p i (o |> N (Up   a))
   upR'   :: p i (o |> N (Up   a)) -> p i (o |> P a)
   upR' p = exR (wkR p) >>> upL init
