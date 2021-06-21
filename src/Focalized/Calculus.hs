@@ -362,8 +362,8 @@ instance Additive (Seq Δ) where
   topR = pure (pure (N Top))
 
   sumL a b = popL (exlrP (pushL a) (pushL b))
-  sumR1 = fmap (fmap inlP)
-  sumR2 = fmap (fmap inrP)
+  sumR1 = mapR inlP
+  sumR2 = mapR inrP
 
   withL1 p = popL (pushL p . exlP)
   withL2 p = popL (pushL p . exrP)
