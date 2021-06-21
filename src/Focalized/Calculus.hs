@@ -584,6 +584,12 @@ class (Core p, Structural p, Negative p) => Quantifying p where
   existsR :: p i (o |> f x) -> p i (o |> Exists f)
 
 
+instance Quantifying (Seq Δ) where
+  forAllL p = mapL forAll p
+
+  existsR p = mapR Exists p
+
+
 -- Utilities
 
 on0 :: (a -> b -> c) -> (a' -> a) -> (a' -> b -> c)
