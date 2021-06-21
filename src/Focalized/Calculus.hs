@@ -576,8 +576,10 @@ data Exists f = forall x . Exists (f x)
 
 class (Core p, Structural p, Negative p) => Quantifying p where
   forAllL :: p (f x <| i) o -> p (ForAll f <| i) o
+  -- FIXME: the correct signature should be p i (o |> (forall x . f x)) -> p i (o |> ForAll f), but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
   forAllR :: (forall x . p i (o |> f x)) -> p i (o |> ForAll f)
 
+  -- FIXME: the correct signature should be p ((forall x . f x) <| i) o -> p (Exists f <| i) o, but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
   existsL :: (forall x . p (f x <| i) o) -> p (Exists f <| i) o
   existsR :: p i (o |> f x) -> p i (o |> Exists f)
 
