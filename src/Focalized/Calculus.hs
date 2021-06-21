@@ -555,7 +555,7 @@ class (Core p, Structural p, Shifting p) => Quantifying p where
   existsL' p = existsR init >>> exL (wkL p)
   existsR :: p i (o |> P (f x)) -> p i (o |> P (Exists f))
   existsRForAll :: p i (o |> N (ForAll (Up · f))) -> p i (o |> P (Exists f))
-  existsRForAll p = existsR (upR' (mapR (fmap getC) (forAllR' p)))
+  existsRForAll = existsR . upR' . mapR (fmap getC) . forAllR'
 
 
 instance Quantifying (Seq Δ) where
