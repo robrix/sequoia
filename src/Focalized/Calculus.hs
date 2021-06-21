@@ -48,6 +48,8 @@ module Focalized.Calculus
   -- * Polarity
 , N(..)
 , P(..)
+, Up(..)
+, Down(..)
 ) where
 
 import Control.Applicative (liftA2)
@@ -591,6 +593,36 @@ instance Adjunction P N where
   counit = getN . getP
   leftAdjunct  f =    N . f .    P
   rightAdjunct f = getN . f . getP
+
+
+newtype Up   a = Up   { getUp   :: a }
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+  deriving (Applicative, Monad, Representable) via Identity
+
+instance Distributive Up where
+  collect f = Up . fmap (getUp . f)
+  distribute = Up . fmap getUp
+
+instance Adjunction Up Down where
+  unit   =    Down .    Up
+  counit = getDown . getUp
+  leftAdjunct  f =    Down . f .    Up
+  rightAdjunct f = getDown . f . getUp
+
+
+newtype Down a = Down { getDown :: a }
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+  deriving (Applicative, Monad, Representable) via Identity
+
+instance Distributive Down where
+  collect f = Down . fmap (getDown . f)
+  distribute = Down . fmap getDown
+
+instance Adjunction Down Up where
+  unit   =    Up .    Down
+  counit = getUp . getDown
+  leftAdjunct  f =    Up . f .    Down
+  rightAdjunct f = getUp . f . getDown
 
 
 -- Utilities
