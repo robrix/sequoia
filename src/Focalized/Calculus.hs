@@ -544,6 +544,8 @@ runExists f (P (Exists r)) = f (P r)
 
 class (Core p, Structural p, Negative p, Shifting p) => Quantifying p where
   forAllL :: p (N (f x) <| i) o -> p (N (ForAll f) <| i) o
+  forAllLExists :: p i (o |> P (Exists (Negate · f))) -> p (N (ForAll f) <| i) o
+  forAllLExists p = wkL p >>> existsL (mapL (fmap getC) (negateL (forAllL init)))
   -- FIXME: the correct signature should be p i (o |> (forall x . N (f x))) -> p i (o |> N (ForAll f)), but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
   -- forAllR :: (forall x . p i (o |> N (f x))) -> p i (o |> N (ForAll f))
   forAllR' :: p i (o |> N (ForAll f)) -> (forall x . p i (o |> N (f x)))
