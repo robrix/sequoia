@@ -45,6 +45,9 @@ module Focalized.Calculus
 , ForAll(..)
 , Exists(..)
 , Quantifying(..)
+  -- * Recursive
+, Mu(..)
+, Nu(..)
   -- * Polarity
 , N(..)
 , P(..)
@@ -568,6 +571,14 @@ instance Quantifying (Seq Δ) where
 
   existsL p = popL (runExists (pushL p))
   existsR p = mapR exists p
+
+
+-- Recursive
+
+newtype Mu f = Mu (forall r . (f r -> r) -> r)
+
+
+data Nu f = forall r . Nu (r -> f r) r
 
 
 -- Polarity
