@@ -43,6 +43,9 @@ module Focalized.Calculus
 , type (--<)(..)
 , sub
 , Implicative(..)
+  -- * Quantifying
+, ForAll(..)
+, Quantifying(..)
 ) where
 
 import Control.Applicative (liftA2)
@@ -554,6 +557,15 @@ instance Implicative (Seq Δ) where
 
   subL b = popL (\ (P s) -> pushL b (subA s) >>> pushL (negateL init) (subK s))
   subR a b = liftA2 sub <$> a <*> negateR b
+
+
+-- Quantifying
+
+newtype ForAll f = ForAll (forall x . f x)
+
+class (Core p, Structural p, Negative p) => Quantifying p where
+  forAllL :: p (f x <| i) o -> p (ForAll f <| i) o
+  forAllR :: (forall x . p i (o |> f x)) -> p i (o |> ForAll f)
 
 
 -- Utilities
