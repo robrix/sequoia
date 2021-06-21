@@ -577,6 +577,8 @@ class (Core p, Structural p, Negative p) => Quantifying p where
   forAllL :: p (N (f x) <| i) o -> p (N (ForAll f) <| i) o
   -- FIXME: the correct signature should be p i (o |> (forall x . N (f x))) -> p i (o |> N (ForAll f)), but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
   -- forAllR :: (forall x . p i (o |> N (f x))) -> p i (o |> N (ForAll f))
+  forAllR' :: p i (o |> N (ForAll f)) -> (forall x . p i (o |> N (f x)))
+  forAllR' p = exR (wkR p) >>> forAllL init
 
   -- FIXME: the correct signature should be p ((forall x . P (f x)) <| i) o -> p (P (Exists f) <| i) o, but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
   existsL :: (forall x . p (P (f x) <| i) o) -> p (P (Exists f) <| i) o
