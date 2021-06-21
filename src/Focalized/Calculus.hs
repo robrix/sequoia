@@ -580,6 +580,8 @@ class (Core p, Structural p, Negative p) => Quantifying p where
 
   -- FIXME: the correct signature should be p ((forall x . P (f x)) <| i) o -> p (P (Exists f) <| i) o, but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
   existsL :: (forall x . p (P (f x) <| i) o) -> p (P (Exists f) <| i) o
+  existsL' :: p (P (Exists f) <| i) o -> (forall x . p (P (f x) <| i) o)
+  existsL' p = existsR init >>> exL (wkL p)
   existsR :: p i (o |> P (f x)) -> p i (o |> P (Exists f))
 
 
