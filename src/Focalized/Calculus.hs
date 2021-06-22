@@ -572,8 +572,12 @@ instance Polarized N (Mu f) where
 class (Core p, Structural p) => Recursive p where
   nuL :: (forall x . Neg (f x)) => p (Exists ((I :-> f) :⊗ I) <| i) o -> p (Nu f <| i) o
   nuR :: (forall x . Neg (f x)) => p i (o |> Exists ((I :-> f) :⊗ I)) -> p i (o |> Nu f)
+  nuR' :: (forall x . Neg (f x)) => p i (o |> Nu f) -> p i (o |> Exists ((I :-> f) :⊗ I))
+  nuR' p = exR (wkR p) >>> nuL init
 
   muL :: (forall x . Pos (f x)) => p (ForAll ((f :-> I) :-> I) <| i) o -> p (Mu f <| i) o
+  muL' :: (forall x . Pos (f x)) => p (Mu f <| i) o -> p (ForAll ((f :-> I) :-> I) <| i) o
+  muL' p = muR init >>> exL (wkL p)
   muR :: (forall x . Pos (f x)) => p i (o |> ForAll ((f :-> I) :-> I)) -> p i (o |> Mu f)
 
 
