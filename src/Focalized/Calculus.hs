@@ -422,7 +422,7 @@ instance Disj (⅋) where
 data a ⊗ b = !a :⊗ !b
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
-infixr 7 ⊗
+infixr 7 ⊗, :⊗, .⊗
 
 instance Bifoldable (⊗) where
   bifoldMap = bifoldMapDefault
