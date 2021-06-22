@@ -683,12 +683,18 @@ instance Polarized P (P a)
 type Neg = Polarized N
 type Pos = Polarized P
 
+neg :: Neg a => a -> a
+neg = getN . polarize
+
+pos :: Pos a => a -> a
+pos = getP . polarize
+
 
 up :: Pos a => a -> Up a
-up = Up . getP . polarize
+up = Up . pos
 
 runUp :: Pos a => Up a -> a
-runUp = getP . polarize . getUp
+runUp = pos . getUp
 
 newtype Up   a = Up   { getUp   :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
@@ -708,10 +714,10 @@ instance Adjunction Up Down where
 
 
 down :: Neg a => a -> Down a
-down = Down . getN . polarize
+down = Down . neg
 
 runDown :: Neg a => Down a -> a
-runDown = getN . polarize . getDown
+runDown = neg . getDown
 
 newtype Down a = Down { getDown :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
