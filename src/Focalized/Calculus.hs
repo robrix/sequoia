@@ -779,6 +779,8 @@ newtype (f :-> g) a = Fn (f a -> g a)
 
 infixr 5 :->
 
+instance (Polarized P (f a), Polarized N (g a)) => Polarized N ((f :-> g) a) where
+
 
 class Conj c where
   inlr :: f a -> g a -> (f `c` g) a
