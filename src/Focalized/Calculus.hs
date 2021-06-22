@@ -79,7 +79,6 @@ import Data.Functor.Adjunction
 import Data.Functor.Identity
 import Data.Functor.Rep
 import Data.Profunctor hiding ((:->))
-import Data.Traversable (foldMapDefault)
 import Prelude hiding (init)
 
 -- Sequents
@@ -411,30 +410,37 @@ data One = One
   deriving (Eq, Ord, Show)
 
 
-newtype a ⅋ b = Par (forall r . (a -> r) -> (b -> r) -> r)
-  deriving (Functor)
+newtype a ⅋ b = Par { getPar :: (I :⅋ I) a b }
+  deriving (Bifunctor, Bifoldable, Disj I I, Foldable, Functor, Traversable)
 
-infixr 7 ⅋
-
-instance Foldable ((⅋) a) where
-  foldMap = foldMapDefault
-
-instance Traversable ((⅋) a) where
-  traverse f (Par run) = run (pure . inl . I) (fmap (inr . I) . f)
-
-instance Bifoldable (⅋) where
-  bifoldMap = bifoldMapDefault
-
-instance Bifunctor (⅋) where
-  bimap = bimapDefault
+infixr 7 ⅋, :⅋
 
 instance Bitraversable (⅋) where
-  bitraverse f g (Par run) = run (fmap (inl . I) . f) (fmap (inr . I) . g)
+  bitraverse f g = fmap Par . bitraverse f g . getPar
 
-instance Disj I I (⅋) where
-  inl (I l) = Par $ \ ifl _ -> ifl l
-  inr (I r) = Par $ \ _ ifr -> ifr r
-  exlr ifl ifr (Par run) = run (ifl . I) (ifr . I)
+
+newtype (f :⅋ g) a b = Par1 (forall r . (f a -> r) -> (g b -> r) -> r)
+  deriving (Functor)
+
+instance Foldable g => Foldable ((f :⅋ g) a) where
+  foldMap f = exlr (const mempty) (foldMap f)
+
+instance Traversable g => Traversable ((f :⅋ g) a) where
+  traverse f (Par1 run) = run (pure . inl) (fmap inr . traverse f)
+
+instance (Foldable f, Foldable g) => Bifoldable (f :⅋ g) where
+  bifoldMap f g = exlr (foldMap f) (foldMap g)
+
+instance (Functor f, Functor g) => Bifunctor (f :⅋ g) where
+  bimap f g = exlr (inl . fmap f) (inr . fmap g)
+
+instance (Traversable f, Traversable g) => Bitraversable (f :⅋ g) where
+  bitraverse f g (Par1 run) = run (fmap inl . traverse f) (fmap inr . traverse g)
+
+instance Disj f g (f :⅋ g) where
+  inl l = Par1 $ \ ifl _ -> ifl l
+  inr r = Par1 $ \ _ ifr -> ifr r
+  exlr ifl ifr (Par1 run) = run ifl ifr
 
 
 newtype a ⊗ b = Tensor { getTensor :: (I :⊗ I) a b }
