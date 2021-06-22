@@ -24,15 +24,14 @@ module Focalized.Calculus
   -- * Additive
 , Top(..)
 , Zero
-, type (&)
+, type (&)(..)
 , type (⊕)
 , Additive(..)
   -- * Multiplicative
 , Bot
 , One(..)
 , type (⅋)
-, type (⊗)
-, (:⊗)(..)
+, type (⊗)(..)
 , Multiplicative(..)
   -- * Implicative
 , Fun(..)
@@ -59,7 +58,6 @@ module Focalized.Calculus
   -- * Utilities
 , I(..)
 , J(..)
-, (:->)(..)
 , Conj(..)
 , Disj(..)
 ) where
@@ -282,23 +280,20 @@ absurdP :: Zero -> a
 absurdP = \case
 
 
-type (a & b) = (K a :& K b) ()
-
-infixr 6 &, :&
-
-
-newtype (f :& g) a = With (forall r . (f a -> g a -> r) -> r)
+newtype a & b = With (forall r . (a -> b -> r) -> r)
   deriving (Functor)
 
-instance (Neg (f a), Neg (g a)) => Polarized N ((f :& g) a) where
+infixr 6 &
 
-instance (Foldable f, Foldable g) => Foldable (f :& g) where
+instance (Neg a, Neg b) => Polarized N (a & b) where
+
+instance Foldable ((&) f) where
   foldMap = foldMapConj
 
-instance (Traversable f, Traversable g) => Traversable (f :& g) where
+instance Traversable ((&) f) where
   traverse = traverseConj
 
-instance Conj (:&) where
+instance Conj (&) where
   inlr a b = With $ \ f -> f a b
   exl (With run) = run const
   exr (With run) = run (const id)
@@ -362,9 +357,9 @@ instance Additive (Seq Δ) where
   sumR1 = mapR inl'
   sumR2 = mapR inr'
 
-  withL1 p = popL (pushL p . exl')
-  withL2 p = popL (pushL p . exr')
-  withR = liftA2 (liftA2 inlr')
+  withL1 p = popL (pushL p . exl)
+  withL2 p = popL (pushL p . exr)
+  withR = liftA2 (liftA2 inlr)
 
 
 -- Multiplicative
@@ -405,17 +400,14 @@ instance Disj (:⅋) where
   exlr ifl ifr (Par run) = run ifl ifr
 
 
-type (a ⊗ b) = (K a :⊗ K b) ()
+data a ⊗ b = !a :⊗ !b
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
 infixr 7 ⊗, :⊗
 
+instance (Pos a, Pos b) => Polarized P (a ⊗ b) where
 
-data (f :⊗ g) a = !(f a) :⊗ !(g a)
-  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-
-instance (Pos (f a), Pos (g a)) => Polarized P ((f :⊗ g) a) where
-
-instance Conj (:⊗) where
+instance Conj (⊗) where
   inlr = (:⊗)
   exl (l :⊗ _) = l
   exr (_ :⊗ r) = r
@@ -459,8 +451,8 @@ instance Multiplicative (Seq Δ) where
   parL a b = popL (exlr' (pushL a) (pushL b))
   parR ab = either (>>= (pure . inl')) (pure . inr') <$> ab
 
-  tensorL p = popL (pushL2 p . exl' <*> exr')
-  tensorR = liftA2 (liftA2 inlr')
+  tensorL p = popL (pushL2 p . exl <*> exr)
+  tensorR = liftA2 (liftA2 inlr)
 
 
 -- Implicative
@@ -561,26 +553,26 @@ instance Quantifying (Seq Δ) where
 
 -- Recursive
 
-newtype Nu f = Nu { getNu :: Exists P (Down · (I :-> f) :⊗ I) }
+newtype Nu f = Nu { getNu :: Exists P (Down · S (⊗) (S (-->) I f) I) }
 
 instance Polarized N (Nu f) where
 
 
-newtype Mu f = Mu { getMu :: ForAll N (Down · (f :-> I) :-> I) }
+newtype Mu f = Mu { getMu :: ForAll N (Down · S (-->) (S (-->) f I) I) }
 
 instance Polarized N (Mu f) where
 
 
 class (Core p, Structural p, Quantifying p) => Recursive p where
-  nuL :: ForAllC (Polarized P) Neg f => p (Exists P (Down · (I :-> f) :⊗ I) <| i) o -> p (Nu f <| i) o
-  nuR :: ForAllC (Polarized P) Neg f => p i (o |> Exists P (Down · (I :-> f) :⊗ I)) -> p i (o |> Nu f)
-  nuR' :: ForAllC (Polarized P) Neg f => p i (o |> Nu f) -> p i (o |> Exists P (Down · (I :-> f) :⊗ I))
+  nuL :: ForAllC (Polarized P) Neg f => p (Exists P (Down · S (⊗) (S (-->) I f) I) <| i) o -> p (Nu f <| i) o
+  nuR :: ForAllC (Polarized P) Neg f => p i (o |> Exists P (Down · S (⊗) (S (-->) I f) I)) -> p i (o |> Nu f)
+  nuR' :: ForAllC (Polarized P) Neg f => p i (o |> Nu f) -> p i (o |> Exists P (Down · S (⊗) (S (-->) I f) I))
   nuR' p = exR (wkR p) >>> nuL init
 
-  muL :: ForAllC (Polarized N) Pos f => p (ForAll N (Down · (f :-> I) :-> I) <| i) o -> p (Mu f <| i) o
-  muL' :: ForAllC (Polarized N) Pos f => p (Mu f <| i) o -> p (ForAll N (Down · (f :-> I) :-> I) <| i) o
+  muL :: ForAllC (Polarized N) Pos f => p (ForAll N (Down · S (-->) (S (-->) f I) I) <| i) o -> p (Mu f <| i) o
+  muL' :: ForAllC (Polarized N) Pos f => p (Mu f <| i) o -> p (ForAll N (Down · S (-->) (S (-->) f I) I) <| i) o
   muL' p = muR init >>> exL (wkL p)
-  muR :: ForAllC (Polarized N) Pos f => p i (o |> ForAll N (Down · (f :-> I) :-> I)) -> p i (o |> Mu f)
+  muR :: ForAllC (Polarized N) Pos f => p i (o |> ForAll N (Down · S (-->) (S (-->) f I) I)) -> p i (o |> Mu f)
 
 
 instance Recursive (Seq Δ) where
@@ -777,32 +769,28 @@ instance Bitraversable p => Traversable (J p) where
   traverse f = fmap J . bitraverse f f . getJ
 
 
-newtype (f :-> g) a = Fn (f a -> g a)
+newtype S p f g a = S { getS :: f a `p` g a }
 
-infixr 5 :->
+instance (Foldable f, Foldable g, Bifoldable p) => Foldable (S p f g) where
+  foldMap f = bifoldMap (foldMap f) (foldMap f) . getS
 
-instance (Polarized P (f a), Polarized N (g a)) => Polarized N ((f :-> g) a) where
+instance (Functor f, Functor g, Bifunctor p) => Functor (S p f g) where
+  fmap f = S . bimap (fmap f) (fmap f) . getS
+
+instance (Traversable f, Traversable g, Bitraversable p) => Traversable (S p f g) where
+  traverse f = fmap S . bitraverse (traverse f) (traverse f) . getS
 
 
 class Conj c where
-  inlr :: f a -> g a -> (f `c` g) a
-  exl :: (f `c` g) a -> f a
-  exr :: (f `c` g) a -> g a
+  inlr :: a -> b -> (a `c` b)
+  exl :: (a `c` b) -> a
+  exr :: (a `c` b) -> b
 
-inlr' :: Conj c => a -> b -> (K a `c` K b) x
-inlr' a b = inlr (K a) (K b)
+foldMapConj :: Conj p => (b -> m) -> (a `p` b) -> m
+foldMapConj f = f . exr
 
-exl' :: Conj c => (K a `c` K b) x -> a
-exl' = getK . exl
-
-exr' :: Conj c => (K a `c` K b) x -> b
-exr' = getK . exr
-
-foldMapConj :: (Foldable f, Foldable g, Conj p, Monoid m) => (a -> m) -> (f `p` g) a -> m
-foldMapConj f = (<>) . foldMap f . exl <*> foldMap f . exr
-
-traverseConj :: (Traversable f, Traversable g, Conj p, Applicative m) => (a -> m a') -> (f `p` g) a -> m ((f `p` g) a')
-traverseConj f c = inlr <$> traverse f (exl c) <*> traverse f (exr c)
+traverseConj :: (Conj p, Applicative m) => (b -> m b') -> (a `p` b) -> m (a `p` b')
+traverseConj f c = inlr (exl c) <$> f (exr c)
 
 
 class Disj d where
