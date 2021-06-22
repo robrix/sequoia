@@ -1,4 +1,5 @@
 {-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -708,14 +709,23 @@ instance Adjunction P N where
   rightAdjunct f = getN . f . getP
 
 
+class Polarity p where
+  polarize' :: a -> p a
+
+instance Polarity N where
+  polarize' = N
+
+instance Polarity P where
+  polarize' = P
+
+
 class Polarized p c | c -> p where
   polarize :: c -> p c
+  default polarize :: Polarity p => c -> p c
+  polarize = polarize'
 
-instance Polarized N (N a) where
-  polarize = N
-
-instance Polarized P (P a) where
-  polarize = P
+instance Polarized N (N a)
+instance Polarized P (P a)
 
 
 type Neg' = Polarized N
