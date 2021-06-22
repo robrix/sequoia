@@ -1,3 +1,4 @@
+{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -58,6 +59,8 @@ module Focalized.Calculus
 , N(..)
 , P(..)
 , Polarized(..)
+, Neg'
+, Pos'
 , Neg(..)
 , Pos(..)
 , Up(..)
@@ -713,6 +716,10 @@ instance Polarized N (N a) where
 
 instance Polarized P (P a) where
   polarize = P
+
+
+type Neg' = Polarized N
+type Pos' = Polarized P
 
 
 class Neg n where
