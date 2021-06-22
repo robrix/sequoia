@@ -438,9 +438,12 @@ instance Disj I I (⅋) where
 
 
 newtype a ⊗ b = Tensor { getTensor :: (I :⊗ I) a b }
-  deriving (Conj I I, Eq, Foldable, Functor, Ord, Show, Traversable)
+  deriving (Bifoldable, Bifunctor, Conj I I, Eq, Foldable, Functor, Ord, Show, Traversable)
 
 infixr 7 ⊗, :⊗, .⊗
+
+instance Bitraversable (⊗) where
+  bitraverse f g = fmap Tensor . bitraverse f g . getTensor
 
 
 data (f :⊗ g) a b = !(f a) :⊗ !(g b)
