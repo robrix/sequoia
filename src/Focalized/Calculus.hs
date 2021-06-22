@@ -290,13 +290,13 @@ absurdP :: P Zero -> a
 absurdP = \case
 
 
-newtype a & b = With ((I :& I) a b)
+newtype a & b = With { getWith :: (I :& I) a b }
   deriving (Conj I I, Bifoldable, Bifunctor, Foldable, Functor, Traversable)
 
 infixr 6 &, :&
 
 instance Bitraversable (&) where
-  bitraverse f g w = inlr <$> traverse f (exl w) <*> traverse g (exr w)
+  bitraverse f g = fmap With . bitraverse f g . getWith
 
 
 newtype (f :& g) a b = With1 (forall r . (f a -> g b -> r) -> r)
