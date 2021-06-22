@@ -684,6 +684,12 @@ type Neg = Polarized N
 type Pos = Polarized P
 
 
+up :: Pos a => a -> Up a
+up = Up . getP . polarize
+
+runUp :: Pos a => Up a -> a
+runUp = getP . polarize . getUp
+
 newtype Up   a = Up   { getUp   :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
   deriving (Applicative, Monad, Representable) via Identity
@@ -700,6 +706,12 @@ instance Adjunction Up Down where
   leftAdjunct  f =    Down . f .    Up
   rightAdjunct f = getDown . f . getUp
 
+
+down :: Neg a => a -> Down a
+down = Down . getN . polarize
+
+runDown :: Neg a => Down a -> a
+runDown = getN . polarize . getDown
 
 newtype Down a = Down { getDown :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
@@ -719,27 +731,27 @@ instance Adjunction Down Up where
 
 
 class (Core p, Structural p) => Shifting p where
-  upL   :: p (a <| i) o -> p (Up   a <| i) o
-  upL'   :: p (Up   a <| i) o -> p (a <| i) o
+  upL   :: Pos a => p (a <| i) o -> p (Up   a <| i) o
+  upL'   :: Pos a => p (Up   a <| i) o -> p (a <| i) o
   upL' p = upR init >>> exL (wkL p)
-  upR   :: p i (o |> a) -> p i (o |> Up   a)
-  upR'   :: p i (o |> Up   a) -> p i (o |> a)
+  upR   :: Pos a => p i (o |> a) -> p i (o |> Up   a)
+  upR'   :: Pos a => p i (o |> Up   a) -> p i (o |> a)
   upR' p = exR (wkR p) >>> upL init
 
-  downL :: p (a <| i) o -> p (Down a <| i) o
-  downL'   :: p (Down a <| i) o -> p (a <| i) o
+  downL :: Neg a => p (a <| i) o -> p (Down a <| i) o
+  downL'   :: Neg a => p (Down a <| i) o -> p (a <| i) o
   downL' p = downR init >>> exL (wkL p)
-  downR :: p i (o |> a) -> p i (o |> Down a)
-  downR'   :: p i (o |> Down a) -> p i (o |> a)
+  downR :: Neg a => p i (o |> a) -> p i (o |> Down a)
+  downR'   :: Neg a => p i (o |> Down a) -> p i (o |> a)
   downR' p = exR (wkR p) >>> downL init
 
 
 instance Shifting (Seq Δ) where
-  upL   = mapL getUp
-  upR   = mapR Up
+  upL   = mapL runUp
+  upR   = mapR up
 
-  downL = mapL getDown
-  downR = mapR Down
+  downL = mapL runDown
+  downR = mapR down
 
 
 -- Utilities
