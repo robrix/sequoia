@@ -67,6 +67,12 @@ module Focalized.Calculus
 , (:->)(..)
 , type (.->)
 , Conj(..)
+, foldMapConj
+, bifoldMapConj
+, fmapConj
+, bimapConj
+, traverseConj
+, bitraverseConj
 , Disj(..)
 , foldMapDisj
 , bifoldMapDisj
@@ -303,26 +309,26 @@ newtype a & b = With { getWith :: (I :& I) a b }
 infixr 6 &, :&
 
 instance Bitraversable (&) where
-  bitraverse f g = fmap With . bitraverse f g . getWith
+  bitraverse = bitraverseConj
 
 
 newtype (f :& g) a b = With1 (forall r . (f a -> g b -> r) -> r)
   deriving (Functor)
 
 instance Foldable g => Foldable ((f :& g) a) where
-  foldMap f = foldMap f . exr
+  foldMap = foldMapConj
 
 instance Traversable g => Traversable ((f :& g) a) where
-  traverse f r = inlr (exl r) <$> traverse f (exr r)
+  traverse = traverseConj
 
 instance (Foldable f, Foldable g) => Bifoldable (f :& g) where
-  bifoldMap f g = (foldMap f &&& foldMap g) (<>)
+  bifoldMap = bifoldMapConj
 
 instance (Functor f, Functor g) => Bifunctor (f :& g) where
-  bimap f g = fmap f *** fmap g
+  bimap = bimapConj
 
 instance (Traversable f, Traversable g) => Bitraversable (f :& g) where
-  bitraverse f g w = inlr <$> traverse f (exl w) <*> traverse g (exr w)
+  bitraverse = bitraverseConj
 
 instance Conj f g (f :& g) where
   inlr a b = With1 $ \ f -> f a b
@@ -455,20 +461,20 @@ newtype a ⊗ b = Tensor { getTensor :: (I :⊗ I) a b }
 infixr 7 ⊗, :⊗, .⊗
 
 instance Bitraversable (⊗) where
-  bitraverse f g = fmap Tensor . bitraverse f g . getTensor
+  bitraverse = bitraverseConj
 
 
 data (f :⊗ g) a b = !(f a) :⊗ !(g b)
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
 instance (Foldable f, Foldable g) => Bifoldable (f :⊗ g) where
-  bifoldMap f g = (foldMap f &&& foldMap g) (<>)
+  bifoldMap = bifoldMapConj
 
 instance (Functor f, Functor g) => Bifunctor (f :⊗ g) where
-  bimap f g = fmap f *** fmap g
+  bimap = bimapConj
 
 instance (Traversable f, Traversable g) => Bitraversable (f :⊗ g) where
-  bitraverse f g (a :⊗ b) = (:⊗) <$> traverse f a <*> traverse g b
+  bitraverse = bitraverseConj
 
 instance Conj f g (f :⊗ g) where
   inlr = (:⊗)
@@ -794,12 +800,6 @@ instance Conj I I (,) where
   exl = I . fst
   exr = I . snd
 
-(***) :: (Conj f g r, Conj f' g' r') => (f a -> f' a') -> (g b -> g' b') -> (a `r` b) -> (a' `r'` b')
-f *** g = inlr <$> f . exl <*> g . exr
-
-(&&&) :: Conj f g r => (f a -> c) -> (g b -> d) -> (c -> d -> e) -> (a `r` b) -> e
-(f &&& g) h = h <$> f . exl <*> g . exr
-
 inlrP :: (Conj f g c, Applicative p) => p (f a) -> p (g b) -> p (a `c` b)
 inlrP = liftA2 inlr
 
@@ -808,6 +808,24 @@ exlP = fmap exl
 
 exrP :: (Conj f g c, Functor p) => p (a `c` b) -> p (g b)
 exrP = fmap exr
+
+foldMapConj :: (Foldable g, Conj f g p, Monoid m) => (b -> m) -> (a `p` b) -> m
+foldMapConj f = foldMap f . exr
+
+bifoldMapConj :: (Foldable f, Foldable g, Conj f g p, Monoid m) => (a -> m) -> (b -> m) -> (a `p` b) -> m
+bifoldMapConj f g = (<>) <$> foldMap f . exl <*> foldMap g . exr
+
+fmapConj :: (Functor g, Conj f g p) => (b -> b') -> (a `p` b) -> (a `p` b')
+fmapConj f = inlr <$> exl <*> fmap f . exr
+
+bimapConj :: (Functor f, Functor g, Conj f g p) => (a -> a') -> (b -> b') -> (a `p` b) -> (a' `p` b')
+bimapConj f g = inlr <$> fmap f . exl <*> fmap g . exr
+
+traverseConj :: (Traversable g, Conj f g p, Applicative m) => (b -> m b') -> (a `p` b) -> m (a `p` b')
+traverseConj f c = inlr (exl c) <$> traverse f (exr c)
+
+bitraverseConj :: (Traversable f, Traversable g, Conj f g p, Applicative m) => (a -> m a') -> (b -> m b') -> (a `p` b) -> m (a' `p` b')
+bitraverseConj f g c = inlr <$> traverse f (exl c) <*> traverse g (exr c)
 
 
 class Disj f g d | d -> f g where
