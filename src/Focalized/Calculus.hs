@@ -442,29 +442,20 @@ instance Disj f g (f :⅋ g) where
   exlr ifl ifr (Par1 run) = run ifl ifr
 
 
-type (⊗) = I :⊗ I
+type (a ⊗ b) = (K a :⊗ K b) ()
 
 infixr 7 ⊗, :⊗
 
 
-data (f :⊗ g) a b = !(f a) :⊗ !(g b)
+data (f :⊗ g) a = !(f a) :⊗ !(g a)
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
-instance (Pos (f a), Pos (g b)) => Polarized P ((f :⊗ g) a b) where
+instance (Pos (f a), Pos (g a)) => Polarized P ((f :⊗ g) a) where
 
-instance (Foldable f, Foldable g) => Bifoldable (f :⊗ g) where
-  bifoldMap = bifoldMapConj
-
-instance (Functor f, Functor g) => Bifunctor (f :⊗ g) where
-  bimap = bimapConj
-
-instance (Traversable f, Traversable g) => Bitraversable (f :⊗ g) where
-  bitraverse = bitraverseConj
-
-instance Conj f g (f :⊗ g) where
-  inlr = (:⊗)
-  exl (l :⊗ _) = l
-  exr (_ :⊗ r) = r
+instance Conj1 (:⊗) where
+  inlr1 = (:⊗)
+  exl1 (l :⊗ _) = l
+  exr1 (_ :⊗ r) = r
 
 
 class (Core p, Structural p, Negative p) => Multiplicative p where
@@ -505,8 +496,8 @@ instance Multiplicative (Seq Δ) where
   parL a b = popL (exlrI (pushL a) (pushL b))
   parR ab = either (>>= (pure . inlI)) (pure . inrI) <$> ab
 
-  tensorL p = popL (pushL2 p . exlI <*> exrI)
-  (⊗) = liftA2 (liftA2 inlrI)
+  tensorL p = popL (pushL2 p . exl' <*> exr')
+  (⊗) = liftA2 (liftA2 inlr')
 
 
 -- Implicative
@@ -604,22 +595,22 @@ instance Quantifying (Seq Δ) where
 
 -- Recursive
 
-newtype Nu f = Nu { getNu :: Exists (J (J (I :-> f) :⊗ I)) }
+newtype Nu f = Nu { getNu :: Exists ((I :-> f) :⊗ I) }
 
 instance Polarized N (Nu f) where
 
 
-newtype Mu f = Mu { getMu :: ForAll (J (J (f :-> I) :-> I)) }
+newtype Mu f = Mu { getMu :: ForAll ((f :-> I) :-> I) }
 
 instance Polarized N (Mu f) where
 
 
 class (Core p, Structural p) => Recursive p where
-  nuL :: (forall x . Neg (f x)) => p (Exists (J (J (I :-> f) :⊗ I)) <| i) o -> p (Nu f <| i) o
-  nuR :: (forall x . Neg (f x)) => p i (o |> Exists (J (J (I :-> f) :⊗ I))) -> p i (o |> Nu f)
+  nuL :: (forall x . Neg (f x)) => p (Exists ((I :-> f) :⊗ I) <| i) o -> p (Nu f <| i) o
+  nuR :: (forall x . Neg (f x)) => p i (o |> Exists ((I :-> f) :⊗ I)) -> p i (o |> Nu f)
 
-  muL :: (forall x . Pos (f x)) => p (ForAll (J (J (f :-> I) :-> I)) <| i) o -> p (Mu f <| i) o
-  muR :: (forall x . Pos (f x)) => p i (o |> ForAll (J (J (f :-> I) :-> I))) -> p i (o |> Mu f)
+  muL :: (forall x . Pos (f x)) => p (ForAll ((f :-> I) :-> I) <| i) o -> p (Mu f <| i) o
+  muR :: (forall x . Pos (f x)) => p i (o |> ForAll ((f :-> I) :-> I)) -> p i (o |> Mu f)
 
 
 instance Recursive (Seq Δ) where
@@ -812,7 +803,7 @@ instance Bitraversable p => Traversable (J p) where
   traverse f = fmap J . bitraverse f f . getJ
 
 
-newtype (f :-> g) a b = Fn (f a -> g b)
+newtype (f :-> g) a = Fn (f a -> g a)
 
 infixr 5 :->
 
@@ -853,6 +844,21 @@ traverseConj f c = inlr (exl c) <$> traverse f (exr c)
 
 bitraverseConj :: (Traversable f, Traversable g, Conj f g p, Applicative m) => (a -> m a') -> (b -> m b') -> (a `p` b) -> m (a' `p` b')
 bitraverseConj f g c = inlr <$> traverse f (exl c) <*> traverse g (exr c)
+
+
+class Conj1 c where
+  inlr1 :: f a -> g a -> (f `c` g) a
+  exl1 :: (f `c` g) a -> f a
+  exr1 :: (f `c` g) a -> g a
+
+inlr' :: Conj1 c => a -> b -> (K a `c` K b) x
+inlr' a b = inlr1 (K a) (K b)
+
+exl' :: Conj1 c => (K a `c` K b) x -> a
+exl' = getK . exl1
+
+exr' :: Conj1 c => (K a `c` K b) x -> b
+exr' = getK . exr1
 
 
 class Disj f g d | d -> f g where
