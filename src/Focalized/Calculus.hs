@@ -2,6 +2,7 @@
 {-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Focalized.Calculus
 ( -- * Sequents
@@ -18,11 +19,7 @@ module Focalized.Calculus
 , Structural(..)
   -- * Negating
 , Not(..)
-, runNot
-, not'
 , Negate(..)
-, runNegate
-, negate'
 , Negative(..)
   -- * Additive
 , Top(..)
@@ -39,10 +36,7 @@ module Focalized.Calculus
 , Multiplicative(..)
   -- * Implicative
 , type (-->)(..)
-, appFun
-, fun
 , type (--<)(..)
-, sub
 , Implicative(..)
   -- * Quantifying
 , ForAll(..)
@@ -50,20 +44,14 @@ module Focalized.Calculus
 , Quantifying(..)
   -- * Recursive
 , Mu(..)
-, mu
-, runMu
 , Nu(..)
-, nu
-, runNu
 , Recursive(..)
   -- * Polarity
 , N(..)
 , P(..)
 , Polarized(..)
-, Neg'
-, Pos'
-, Neg(..)
-, Pos(..)
+, Neg
+, Pos
 , Up(..)
 , Down(..)
 , Shifting(..)
@@ -255,49 +243,37 @@ instance Structural (Seq Δ) where
 
 -- Negating
 
-newtype Not    a = Not    { getNot    :: Seq Δ (P a <| Γ) Δ }
+newtype Not    a = Not    { getNot    :: Seq Δ (a <| Γ) Δ }
 
-instance Pos a => Neg (Not a) where
-
-runNot :: N (Not a) -> Seq Δ (P a <| Γ) Δ
-runNot = getNot . getN
-
-not' :: Seq Δ (P a <| Γ) Δ -> N (Not a)
-not' = N . Not
+instance Pos a => Polarized N (Not a) where
 
 
-newtype Negate a = Negate { getNegate :: Seq Δ (N a <| Γ) Δ }
+newtype Negate a = Negate { getNegate :: Seq Δ (a <| Γ) Δ }
 
-instance Neg a => Pos (Negate a) where
-
-runNegate :: P (Negate a) -> Seq Δ (N a <| Γ) Δ
-runNegate = getNegate . getP
-
-negate' :: Seq Δ (N a <| Γ) Δ -> P (Negate a)
-negate' = P . Negate
+instance Neg a => Polarized P (Negate a) where
 
 
 class (Core p, Structural p) => Negative p where
-  notL :: p i (o |> P a) -> p (N (Not a) <| i) o
-  notL' :: p (N (Not a) <| i) o -> p i (o |> P a)
+  notL :: Pos a => p i (o |> a) -> p (Not a <| i) o
+  notL' :: Pos a => p (Not a <| i) o -> p i (o |> a)
   notL' p = notR init >>> wkR p
-  notR :: p (P a <| i) o -> p i (o |> N (Not a))
-  notR' :: p i (o |> N (Not a)) -> p (P a <| i) o
+  notR :: Pos a => p (a <| i) o -> p i (o |> Not a)
+  notR' :: Pos a => p i (o |> Not a) -> p (a <| i) o
   notR' p = wkL p >>> notL init
 
-  negateL :: p i (o |> N a) -> p (P (Negate a) <| i) o
-  negateL' :: p (P (Negate a) <| i) o -> p i (o |> N a)
+  negateL :: Neg a => p i (o |> a) -> p (Negate a <| i) o
+  negateL' :: Neg a => p (Negate a <| i) o -> p i (o |> a)
   negateL' p = negateR init >>> wkR p
-  negateR :: p (N a <| i) o -> p i (o |> P (Negate a))
-  negateR' :: p i (o |> P (Negate a)) -> p (N a <| i) o
+  negateR :: Neg a => p (a <| i) o -> p i (o |> Negate a)
+  negateR' :: Neg a => p i (o |> Negate a) -> p (a <| i) o
   negateR' p = wkL p >>> negateL init
 
 instance Negative (Seq Δ) where
-  negateL p = popL (\ negateA -> p >>> dimap (Γ <$) absurdΔ (runNegate negateA))
-  negateR p = cont (\ abstract -> negate' (poppedL abstract p))
+  negateL p = popL (\ negateA -> p >>> dimap (Γ <$) absurdΔ (getNegate negateA))
+  negateR p = cont (\ abstract -> Negate (poppedL abstract p))
 
-  notL p = popL (\ notA -> p >>> dimap (Γ <$) absurdΔ (runNot notA))
-  notR p = cont (\ abstract -> not' (poppedL abstract p))
+  notL p = popL (\ notA -> p >>> dimap (Γ <$) absurdΔ (getNot notA))
+  notR p = cont (\ abstract -> Not (poppedL abstract p))
 
 
 -- Additive
@@ -305,14 +281,14 @@ instance Negative (Seq Δ) where
 data Top = Top
   deriving (Eq, Ord, Show)
 
-instance Neg Top where
+instance Polarized N Top where
 
 
 data Zero
 
-instance Pos Zero where
+instance Polarized P Zero where
 
-absurdP :: P Zero -> a
+absurdP :: Zero -> a
 absurdP = \case
 
 
@@ -324,7 +300,7 @@ infixr 6 &, :&
 newtype (f :& g) a b = With1 (forall r . (f a -> g b -> r) -> r)
   deriving (Functor)
 
-instance (Neg (f a), Neg (g b)) => Neg ((f :& g) a b) where
+instance (Neg (f a), Neg (g b)) => Polarized N ((f :& g) a b) where
 
 instance Foldable g => Foldable ((f :& g) a) where
   foldMap = foldMapConj
@@ -357,7 +333,7 @@ data (f :⊕ g) a b
   | InR1 !(g b)
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
-instance (Pos (f a), Pos (g b)) => Pos ((f :⊕ g) a b)
+instance (Pos (f a), Pos (g b)) => Polarized P ((f :⊕ g) a b)
 
 instance (Foldable f, Foldable g) => Bifoldable (f :⊕ g) where
   bifoldMap = bifoldMapDisj
@@ -377,62 +353,62 @@ instance Disj f g (f :⊕ g) where
 
 
 class (Core p, Structural p, Negative p) => Additive p where
-  zeroL :: p (P Zero <| i) o
+  zeroL :: p (Zero <| i) o
 
-  topR :: p i (o |> N Top)
+  topR :: p i (o |> Top)
 
-  sumL :: p (P a <| i) o -> p (P b <| i) o -> p (P (a ⊕ b) <| i) o
+  sumL :: (Pos a, Pos b) => p (a <| i) o -> p (b <| i) o -> p (a ⊕ b <| i) o
   sumL p1 p2 = sumLWith (notR p1 & notR p2)
-  sumL1' :: p (P (a ⊕ b) <| i) o -> p (P a <| i) o
+  sumL1' :: (Pos a, Pos b) => p (a ⊕ b <| i) o -> p (a <| i) o
   sumL1' p = sumR1 init >>> exL (wkL p)
-  sumL2' :: p (P (a ⊕ b) <| i) o -> p (P b <| i) o
+  sumL2' :: (Pos a, Pos b) => p (a ⊕ b <| i) o -> p (b <| i) o
   sumL2' p = sumR2 init >>> exL (wkL p)
-  sumLWith :: p i (o |> N (Not a & Not b)) -> p (P (a ⊕ b) <| i) o
+  sumLWith :: (Pos a, Pos b) => p i (o |> Not a & Not b) -> p (a ⊕ b <| i) o
   sumLWith p = sumL (wkL p >>> withL1 (notL init)) (wkL p >>> withL2 (notL init))
-  sumR1 :: p i (o |> P a) -> p i (o |> P (a ⊕ b))
-  sumR2 :: p i (o |> P b) -> p i (o |> P (a ⊕ b))
+  sumR1 :: (Pos a, Pos b) => p i (o |> a) -> p i (o |> a ⊕ b)
+  sumR2 :: (Pos a, Pos b) => p i (o |> b) -> p i (o |> a ⊕ b)
 
-  withL1 :: p (N a <| i) o -> p (N (a & b) <| i) o
+  withL1 :: (Neg a, Neg b) => p (a <| i) o -> p (a & b <| i) o
   withL1 = withLSum . sumR1 . negateR
-  withL2 :: p (N b <| i) o -> p (N (a & b) <| i) o
+  withL2 :: (Neg a, Neg b) => p (b <| i) o -> p (a & b <| i) o
   withL2 = withLSum . sumR2 . negateR
-  withLSum :: p i (o |> P (Negate a ⊕ Negate b)) -> p (N (a & b) <| i) o
+  withLSum :: (Neg a, Neg b) => p i (o |> Negate a ⊕ Negate b) -> p (a & b <| i) o
   withLSum p = wkL p >>> sumL (negateL (withL1 init)) (negateL (withL2 init))
-  (&) :: p i (o |> N a) -> p i (o |> N b) -> p i (o |> N (a & b))
-  withR1' :: p i (o |> N (a & b)) -> p i (o |> N a)
+  (&) :: (Neg a, Neg b) => p i (o |> a) -> p i (o |> b) -> p i (o |> (a & b))
+  withR1' :: (Neg a, Neg b) => p i (o |> (a & b)) -> p i (o |> a)
   withR1' t = exR (wkR t) >>> withL1 init
-  withR2' :: p i (o |> N (a & b)) -> p i (o |> N b)
+  withR2' :: (Neg a, Neg b) => p i (o |> (a & b)) -> p i (o |> b)
   withR2' t = exR (wkR t) >>> withL2 init
 
 
 instance Additive (Seq Δ) where
   zeroL = popL absurdP
 
-  topR = pure (pure (N Top))
+  topR = pure (pure Top)
 
-  sumL a b = popL (exlrP (pushL a) (pushL b))
-  sumR1 = mapR inlP
-  sumR2 = mapR inrP
+  sumL a b = popL (exlrI (pushL a) (pushL b))
+  sumR1 = mapR inlI
+  sumR2 = mapR inrI
 
-  withL1 p = popL (pushL p . exlP)
-  withL2 p = popL (pushL p . exrP)
-  (&) = liftA2 (liftA2 inlrP)
+  withL1 p = popL (pushL p . exlI)
+  withL2 p = popL (pushL p . exrI)
+  (&) = liftA2 (liftA2 inlrI)
 
 
 -- Multiplicative
 
 data Bot
 
-instance Neg Bot where
+instance Polarized N Bot where
 
-absurdN :: N Bot -> a
+absurdN :: Bot -> a
 absurdN = \case
 
 
 data One = One
   deriving (Eq, Ord, Show)
 
-instance Pos One where
+instance Polarized P One where
 
 
 type (⅋) = I :⅋ I
@@ -443,7 +419,7 @@ infixr 7 ⅋, :⅋
 newtype (f :⅋ g) a b = Par1 (forall r . (f a -> r) -> (g b -> r) -> r)
   deriving (Functor)
 
-instance (Neg (f a), Neg (g b)) => Neg ((f :⅋ g) a b) where
+instance (Neg (f a), Neg (g b)) => Polarized N ((f :⅋ g) a b) where
 
 instance Foldable g => Foldable ((f :⅋ g) a) where
   foldMap = foldMapDisj
@@ -474,7 +450,7 @@ infixr 7 ⊗, :⊗
 data (f :⊗ g) a b = !(f a) :⊗ !(g b)
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
-instance (Pos (f a), Pos (g b)) => Pos ((f :⊗ g) a b) where
+instance (Pos (f a), Pos (g b)) => Polarized P ((f :⊗ g) a b) where
 
 instance (Foldable f, Foldable g) => Bifoldable (f :⊗ g) where
   bifoldMap = bifoldMapConj
@@ -492,31 +468,31 @@ instance Conj f g (f :⊗ g) where
 
 
 class (Core p, Structural p, Negative p) => Multiplicative p where
-  botL :: p (N Bot <| i) o
-  botR :: p i o -> p i (o |> N Bot)
-  botR' :: p i (o |> N Bot) -> p i o
+  botL :: p (Bot <| i) o
+  botR :: p i o -> p i (o |> Bot)
+  botR' :: p i (o |> Bot) -> p i o
   botR' = (>>> botL)
 
-  oneL :: p i o -> p (P One <| i) o
-  oneL' :: p (P One <| i) o -> p i o
+  oneL :: p i o -> p (One <| i) o
+  oneL' :: p (One <| i) o -> p i o
   oneL' = (oneR >>>)
-  oneR :: p i (o |> P One)
+  oneR :: p i (o |> One)
 
-  parL :: p (N a <| i) o -> p (N b <| i) o -> p (N (a ⅋ b) <| i) o
+  parL :: (Neg a, Neg b) => p (a <| i) o -> p (b <| i) o -> p (a ⅋ b <| i) o
   parL p1 p2 = parLTensor (negateR p1 ⊗ negateR p2)
-  parLTensor :: p i (o |> P (Negate a ⊗ Negate b)) -> p (N (a ⅋ b) <| i) o
+  parLTensor :: (Neg a, Neg b) => p i (o |> Negate a ⊗ Negate b) -> p (a ⅋ b <| i) o
   parLTensor p = wkL p >>> tensorL (negateL (negateL (parL (wkR init) init)))
-  parR :: p i (o |> N a |> N b) -> p i (o |> N (a ⅋ b))
-  parR' :: p i (o |> N (a ⅋ b)) -> p i (o |> N a |> N b)
+  parR :: (Neg a, Neg b) => p i (o |> a |> b) -> p i (o |> a ⅋ b)
+  parR' :: (Neg a, Neg b) => p i (o |> a ⅋ b) -> p i (o |> a |> b)
   parR' p = exR (wkR (exR (wkR p))) >>> parL (wkR init) init
 
-  tensorL :: p (P a <| P b <| i) o -> p (P (a ⊗ b) <| i) o
+  tensorL :: (Pos a, Pos b) => p (a <| b <| i) o -> p (a ⊗ b <| i) o
   tensorL = tensorLPar . parR . notR . notR
-  tensorLPar :: p i (o |> N (Not a ⅋ Not b)) -> p (P (a ⊗ b) <| i) o
+  tensorLPar :: (Pos a, Pos b) => p i (o |> Not a ⅋ Not b) -> p (a ⊗ b <| i) o
   tensorLPar p = wkL p >>> parL (notL (tensorL init)) (notL (tensorL (wkL init)))
-  tensorL' :: p (P (a ⊗ b) <| i) o -> p (P a <| P b <| i) o
+  tensorL' :: (Pos a, Pos b) => p (a ⊗ b <| i) o -> p (a <| b <| i) o
   tensorL' p = init ⊗ wkL init >>> popL (wkL . wkL . pushL p)
-  (⊗) :: p i (o |> P a) -> p i (o |> P b) -> p i (o |> P (a ⊗ b))
+  (⊗) :: (Pos a, Pos b) => p i (o |> a) -> p i (o |> b) -> p i (o |> a ⊗ b)
 
 
 instance Multiplicative (Seq Δ) where
@@ -524,109 +500,98 @@ instance Multiplicative (Seq Δ) where
   botR = fmap Left
 
   oneL = wkL
-  oneR = pure (pure (P One))
+  oneR = pure (pure One)
 
-  parL a b = popL (exlrP (pushL a) (pushL b))
-  parR ab = either (>>= (pure . inlP)) (pure . inrP) <$> ab
+  parL a b = popL (exlrI (pushL a) (pushL b))
+  parR ab = either (>>= (pure . inlI)) (pure . inrI) <$> ab
 
-  tensorL p = popL (pushL2 p . exlP <*> exrP)
-  (⊗) = liftA2 (liftA2 inlrP)
+  tensorL p = popL (pushL2 p . exlI <*> exrI)
+  (⊗) = liftA2 (liftA2 inlrI)
 
 
 -- Implicative
 
-newtype a --> b = Fun { getFun :: Seq Δ (P (Negate b) <| Γ) (Δ |> N (Not a)) }
+newtype a --> b = Fun { getFun :: Seq Δ (Negate b <| Γ) (Δ |> Not a) }
 
 infixr 5 -->
 
-instance (Pos a, Neg b) => Neg (a --> b) where
+instance (Pos a, Neg b) => Polarized N (a --> b) where
 
-appFun :: N (a --> b) -> Seq Δ (P (Negate b) <| Γ) (Δ |> N (Not a))
-appFun = getFun . getN
-
-appFun' :: N (a --> b) -> Seq Δ (P (Negate b) <| i) (o |> N (Not a))
-appFun' = dimap (Γ <$) (first absurdΔ) . appFun
-
-fun :: Seq Δ (P (Negate b) <| Γ) (Δ |> N (Not a)) -> N (a --> b)
-fun = N . Fun
+appFun' :: (a --> b) -> Seq Δ (Negate b <| i) (o |> Not a)
+appFun' = dimap (Γ <$) (first absurdΔ) . getFun
 
 
-data a --< b = Sub { subA :: !(P a), subK :: !(P (Negate b)) }
+data a --< b = Sub { subA :: !a, subK :: !(Negate b) }
 
 infixr 5 --<
 
-instance (Pos a, Neg b) => Pos (a --< b) where
-
-sub :: P a -> P (Negate b) -> P (a --< b)
-sub = fmap P . Sub
+instance (Pos a, Neg b) => Polarized P (a --< b) where
 
 
 class (Core p, Structural p, Negative p) => Implicative p where
-  funL :: p i (o |> P a) -> p (N b <| i) o -> p (N (a --> b) <| i) o
+  funL :: (Pos a, Neg b) => p i (o |> a) -> p (b <| i) o -> p (a --> b <| i) o
   funL pa pb = funLSub (subR pa pb)
-  funLSub :: p i (o |> P (a --< b)) -> p (N (a --> b) <| i) o
+  funLSub :: (Pos a, Neg b) => p i (o |> a --< b) -> p (a --> b <| i) o
   funLSub p = wkL p >>> subL (exL (funL init init))
-  funL2 :: p (N (a --> b) <| P a <| i)  (o |> N b)
+  funL2 :: (Pos a, Neg b) => p (a --> b <| a <| i)  (o |> b)
   funL2 = funL init init
-  funR :: p (P a <| i) (o |> N b) -> p i (o |> N (a --> b))
-  funR' :: p i (o |> N (a --> b)) -> p (P a <| i) (o |> N b)
+  funR :: (Pos a, Neg b) => p (a <| i) (o |> b) -> p i (o |> a --> b)
+  funR' :: (Pos a, Neg b) => p i (o |> a --> b) -> p (a <| i) (o |> b)
   funR' p = wkL (exR (wkR p)) >>> funL2
 
-  subL :: p (P a <| i) (o |> N b) -> p (P (a --< b) <| i) o
+  subL :: (Pos a, Neg b) => p (a <| i) (o |> b) -> p (a --< b <| i) o
   subL = subLFun . funR
-  subLFun :: p i (o |> N (a --> b)) -> p (P (a --< b) <| i) o
+  subLFun :: (Pos a, Neg b) => p i (o |> a --> b) -> p (a --< b <| i) o
   subLFun p = wkL p >>> exL (subL (exL (funL init init)))
-  subL' :: p (P (a --< b) <| i) o -> p (P a <| i) (o |> N b)
+  subL' :: (Pos a, Neg b) => p (a --< b <| i) o -> p (a <| i) (o |> b)
   subL' p = subR init init >>> wkR (exL (wkL p))
-  subR :: p i (o |> P a) -> p (N b <| i) o -> p i (o |> P (a --< b))
+  subR :: (Pos a, Neg b) => p i (o |> a) -> p (b <| i) o -> p i (o |> a --< b)
 
-  ($$) :: p i (o |> N (a --> b)) -> p i (o |> P a) -> p i (o |> N b)
+  ($$) :: (Pos a, Neg b) => p i (o |> a --> b) -> p i (o |> a) -> p i (o |> b)
   f $$ a = exR (wkR f) >>> exR (wkR a) `funL` init
 
 
 instance Implicative (Seq Δ) where
   funL a b = popL (\ f -> a >>> notR' (exR (negateL' (appFun' f))) >>> exL (wkL b))
-  funR b = cont (\ abstract -> fun (poppedL (poppedR abstract) (notR (exL (negateL b)))))
+  funR b = cont (\ abstract -> Fun (poppedL (poppedR abstract) (notR (exL (negateL b)))))
 
-  subL b = popL (\ (P s) -> pushL b (subA s) >>> pushL (negateL init) (subK s))
-  subR a b = liftA2 sub <$> a <*> negateR b
+  subL b = popL (\ s -> pushL b (subA s) >>> pushL (negateL init) (subK s))
+  subR a b = liftA2 Sub <$> a <*> negateR b
 
 
 -- Quantifying
 
-newtype ForAll f = ForAll (forall x . f x)
+newtype ForAll f = ForAll { runForAll :: forall x . f x }
 
-runForAll :: N (ForAll f) -> N (f x)
-runForAll (N (ForAll f)) = N f
+instance Polarized N (ForAll f)
 
 
 data Exists f = forall x . Exists (f x)
 
-exists :: P (f x) -> P (Exists f)
-exists = fmap Exists
+instance Polarized P (Exists f)
 
-runExists :: (forall x . P (f x) -> r) -> P (Exists f) -> r
-runExists f (P (Exists r)) = f (P r)
+runExists :: (forall x . f x -> r) -> Exists f -> r
+runExists f (Exists r) = f r
 
 
 class (Core p, Structural p, Negative p, Shifting p) => Quantifying p where
-  forAllL :: p (N (f x) <| i) o -> p (N (ForAll f) <| i) o
-  forAllLExists :: p i (o |> P (Exists (Negate · f))) -> p (N (ForAll f) <| i) o
-  forAllLExists p = wkL p >>> existsL (mapL (fmap getC) (negateL (forAllL init)))
-  -- FIXME: the correct signature should be p i (o |> (forall x . N (f x))) -> p i (o |> N (ForAll f)), but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
-  -- forAllR :: (forall x . p i (o |> N (f x))) -> p i (o |> N (ForAll f))
-  forAllR' :: p i (o |> N (ForAll f)) -> (forall x . p i (o |> N (f x)))
+  forAllL :: (forall x . Neg (f x)) => p (f x <| i) o -> p (ForAll f <| i) o
+  forAllLExists :: (forall x . Neg (f x)) => p i (o |> Exists (Negate · f)) -> p (ForAll f <| i) o
+  forAllLExists p = wkL p >>> existsL (mapL getC (negateL (forAllL init)))
+  -- FIXME: the correct signature should be p i (o |> (forall x . f x)) -> p i (o |> ForAll f), but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
+  -- forAllR :: (forall x . Neg (f x)) => (forall x . p i (o |> f x)) -> p i (o |> ForAll f)
+  forAllR' :: (forall x . Neg (f x)) => p i (o |> ForAll f) -> (forall x . p i (o |> f x))
   forAllR' p = exR (wkR p) >>> forAllL init
 
-  -- FIXME: the correct signature should be p ((forall x . P (f x)) <| i) o -> p (P (Exists f) <| i) o, but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
-  existsL :: (forall x . p (P (f x) <| i) o) -> p (P (Exists f) <| i) o
-  existsL' :: p (P (Exists f) <| i) o -> (forall x . p (P (f x) <| i) o)
+  -- FIXME: the correct signature should be p ((forall x . f x) <| i) o -> p (Exists f <| i) o, but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
+  existsL :: (forall x . Pos (f x)) => (forall x . p (f x <| i) o) -> p (Exists f <| i) o
+  existsL' :: (forall x . Pos (f x)) => p (Exists f <| i) o -> (forall x . p (f x <| i) o)
   existsL' p = existsR init >>> exL (wkL p)
-  existsLForAll :: p i (o |> N (ForAll (Not · f))) -> p (P (Exists f) <| i) o
-  existsLForAll p = wkL p >>> exL (existsL (exL (forAllL (mapL (fmap getC) (notL init)))))
-  existsR :: p i (o |> P (f x)) -> p i (o |> P (Exists f))
-  existsRForAll :: p i (o |> N (ForAll (Up · f))) -> p i (o |> P (Exists f))
-  existsRForAll = existsR . upR' . mapR (fmap getC) . forAllR'
+  existsLForAll :: (forall x . Pos (f x)) => p i (o |> ForAll (Not · f)) -> p (Exists f <| i) o
+  existsLForAll p = wkL p >>> exL (existsL (exL (forAllL (mapL getC (notL init)))))
+  existsR :: p i (o |> f x) -> p i (o |> Exists f)
+  existsRForAll :: (forall x . Pos (f x)) => p i (o |> ForAll (Up · f)) -> p i (o |> Exists f)
+  existsRForAll = existsR . upR' . mapR getC . forAllR'
 
 
 instance Quantifying (Seq Δ) where
@@ -634,47 +599,35 @@ instance Quantifying (Seq Δ) where
   -- forAllR p = mapR ForAll p
 
   existsL p = popL (runExists (pushL p))
-  existsR p = mapR exists p
+  existsR p = mapR Exists p
 
 
 -- Recursive
 
 newtype Nu f = Nu { getNu :: Exists (J (J (I :-> f) :⊗ I)) }
 
-instance Neg (Nu f) where
-
-nu :: N (Exists (J (J (I :-> f) :⊗ I))) -> N (Nu f)
-nu = fmap Nu
-
-runNu :: N (Nu f) -> N (Exists (J (J (I :-> f) :⊗ I)))
-runNu = fmap getNu
+instance Polarized N (Nu f) where
 
 
 newtype Mu f = Mu { getMu :: ForAll (J (J (f :-> I) :-> I)) }
 
-instance Neg (Mu f) where
-
-mu :: P (ForAll (J (J (f :-> I) :-> I))) -> P (Mu f)
-mu = fmap Mu
-
-runMu :: P (Mu f) -> P (ForAll (J (J (f :-> I) :-> I)))
-runMu = fmap getMu
+instance Polarized N (Mu f) where
 
 
 class (Core p, Structural p) => Recursive p where
-  nuL :: p (N (Exists (J (J (I :-> f) :⊗ I))) <| i) o -> p (N (Nu f) <| i) o
-  nuR :: p i (o |> N (Exists (J (J (I :-> f) :⊗ I)))) -> p i (o |> N (Nu f))
+  nuL :: (forall x . Neg (f x)) => p (Exists (J (J (I :-> f) :⊗ I)) <| i) o -> p (Nu f <| i) o
+  nuR :: (forall x . Neg (f x)) => p i (o |> Exists (J (J (I :-> f) :⊗ I))) -> p i (o |> Nu f)
 
-  muL :: p (P (ForAll (J (J (f :-> I) :-> I))) <| i) o -> p (P (Mu f) <| i) o
-  muR :: p i (o |> P (ForAll (J (J (f :-> I) :-> I)))) -> p i (o |> P (Mu f))
+  muL :: (forall x . Pos (f x)) => p (ForAll (J (J (f :-> I) :-> I)) <| i) o -> p (Mu f <| i) o
+  muR :: (forall x . Pos (f x)) => p i (o |> ForAll (J (J (f :-> I) :-> I))) -> p i (o |> Mu f)
 
 
 instance Recursive (Seq Δ) where
-  muL = mapL runMu
-  muR = mapR mu
+  muL = mapL getMu
+  muR = mapR Mu
 
-  nuL = mapL runNu
-  nuR = mapR nu
+  nuL = mapL getNu
+  nuR = mapR Nu
 
 
 -- Polarity
@@ -727,35 +680,15 @@ class Polarized p c | c -> p where
 instance Polarized N (N a)
 instance Polarized P (P a)
 
+type Neg = Polarized N
+type Pos = Polarized P
 
-type Neg' = Polarized N
-type Pos' = Polarized P
-
-
-class Neg n where
-  neg :: n -> N n
-  neg = N
-
-instance Neg (N a) where
-
-class Pos p where
-  pos :: p -> P p
-  pos = P
-
-instance Pos (P a) where
-
-
-up :: P a -> N (Up a)
-up = N . Up . getP
-
-runUp :: N (Up a) -> P a
-runUp = P . getUp . getN
 
 newtype Up   a = Up   { getUp   :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
   deriving (Applicative, Monad, Representable) via Identity
 
-instance Pos a => Neg (Up a) where
+instance Pos a => Polarized N (Up a) where
 
 instance Distributive Up where
   collect f = Up . fmap (getUp . f)
@@ -768,17 +701,11 @@ instance Adjunction Up Down where
   rightAdjunct f = getDown . f . getUp
 
 
-down :: N a -> P (Down a)
-down = P . Down . getN
-
-runDown :: P (Down a) -> N a
-runDown = N . getDown . getP
-
 newtype Down a = Down { getDown :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
   deriving (Applicative, Monad, Representable) via Identity
 
-instance Neg a => Pos (Down a) where
+instance Neg a => Polarized P (Down a) where
 
 instance Distributive Down where
   collect f = Down . fmap (getDown . f)
@@ -792,27 +719,27 @@ instance Adjunction Down Up where
 
 
 class (Core p, Structural p) => Shifting p where
-  upL   :: p (P a <| i) o -> p (N (Up   a) <| i) o
-  upL'   :: p (N (Up   a) <| i) o -> p (P a <| i) o
+  upL   :: p (a <| i) o -> p (Up   a <| i) o
+  upL'   :: p (Up   a <| i) o -> p (a <| i) o
   upL' p = upR init >>> exL (wkL p)
-  upR   :: p i (o |> P a) -> p i (o |> N (Up   a))
-  upR'   :: p i (o |> N (Up   a)) -> p i (o |> P a)
+  upR   :: p i (o |> a) -> p i (o |> Up   a)
+  upR'   :: p i (o |> Up   a) -> p i (o |> a)
   upR' p = exR (wkR p) >>> upL init
 
-  downL :: p (N a <| i) o -> p (P (Down a) <| i) o
-  downL'   :: p (P (Down   a) <| i) o -> p (N a <| i) o
+  downL :: p (a <| i) o -> p (Down a <| i) o
+  downL'   :: p (Down a <| i) o -> p (a <| i) o
   downL' p = downR init >>> exL (wkL p)
-  downR :: p i (o |> N a) -> p i (o |> P (Down a))
-  downR'   :: p i (o |> P (Down   a)) -> p i (o |> N a)
+  downR :: p i (o |> a) -> p i (o |> Down a)
+  downR'   :: p i (o |> Down a) -> p i (o |> a)
   downR' p = exR (wkR p) >>> downL init
 
 
 instance Shifting (Seq Δ) where
-  upL   = mapL runUp
-  upR   = mapR up
+  upL   = mapL getUp
+  upR   = mapR Up
 
-  downL = mapL runDown
-  downR = mapR down
+  downL = mapL getDown
+  downR = mapR Down
 
 
 -- Utilities
@@ -844,6 +771,8 @@ newtype (f · g) a = C { getC :: f (g a) }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
 infixr 7 ·
+
+instance (Polarity p, Polarized p (f (g a))) => Polarized p ((f · g) a) where
 
 instance (Applicative f, Applicative g) => Applicative (f · g) where
   pure = C . pure . pure
@@ -889,15 +818,6 @@ exlI = getI . exl
 exrI :: Conj I I c => (a `c` b) -> b
 exrI = getI . exr
 
-inlrP :: (Conj I I c, Applicative p) => p a -> p b -> p (a `c` b)
-inlrP = liftA2 inlrI
-
-exlP :: (Conj I I c, Functor p) => p (a `c` b) -> p a
-exlP = fmap exlI
-
-exrP :: (Conj I I c, Functor p) => p (a `c` b) -> p b
-exrP = fmap exrI
-
 foldMapConj :: (Foldable g, Conj f g p, Monoid m) => (b -> m) -> (a `p` b) -> m
 foldMapConj f = foldMap f . exr
 
@@ -935,15 +855,6 @@ inrI = inr . I
 
 exlrI :: Disj I I d => (a -> r) -> (b -> r) -> ((a `d` b) -> r)
 exlrI f g = exlr (f . getI) (g . getI)
-
-inlP :: (Disj I I d, Functor p) => p a -> p (a `d` b)
-inlP = fmap inlI
-
-inrP :: (Disj I I d, Functor p) => p b -> p (a `d` b)
-inrP = fmap inrI
-
-exlrP :: (Adjunction p p', Disj I I d) => (p a -> r) -> (p b -> r) -> (p (a `d` b) -> r)
-exlrP f g = rightAdjunct (exlrI (leftAdjunct f) (leftAdjunct g))
 
 foldMapDisj :: (Foldable g, Disj f g p, Monoid m) => (b -> m) -> (a `p` b) -> m
 foldMapDisj f = exlr (const mempty) (foldMap f)
