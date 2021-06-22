@@ -766,6 +766,10 @@ instance Adjunction I I where
   rightAdjunct f = getI . f . getI
 
 
+newtype K a b = K { getK :: a }
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+
+
 newtype (f · g) a = C { getC :: f (g a) }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
