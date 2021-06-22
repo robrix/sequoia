@@ -47,6 +47,7 @@ module Focalized.Calculus
 , Quantifying(..)
   -- * Recursive
 , Mu(..)
+, mu
 , Nu(..)
   -- * Polarity
 , N(..)
@@ -579,6 +580,9 @@ instance Quantifying (Seq Δ) where
 -- Recursive
 
 newtype Mu f = Mu (ForAll ((f :-> I) :-> I))
+
+mu :: N (ForAll ((f :-> I) :-> I)) -> N (Mu f)
+mu = fmap Mu
 
 
 data Nu f = forall r . Nu (r -> f r) r
