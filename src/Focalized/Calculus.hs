@@ -50,8 +50,10 @@ module Focalized.Calculus
   -- * Recursive
 , Mu(..)
 , mu
+, getMu
 , Nu(..)
 , nu
+, getNu
 , Recursive(..)
   -- * Polarity
 , N(..)
@@ -597,11 +599,17 @@ newtype Mu f = Mu (ForAll ((f .-> I) .-> I))
 mu :: N (ForAll ((f .-> I) .-> I)) -> N (Mu f)
 mu = fmap Mu
 
+getMu :: N (Mu f) -> N (ForAll ((f .-> I) .-> I))
+getMu (N (Mu f)) = N f
+
 
 newtype Nu f = Nu (Exists ((I .-> f) .⊗ I))
 
 nu :: P (Exists ((I .-> f) .⊗ I)) -> P (Nu f)
 nu = fmap Nu
+
+getNu :: P (Nu f) -> P (Exists ((I .-> f) .⊗ I))
+getNu (P (Nu f)) = P f
 
 
 class (Core p, Structural p) => Recursive p where
