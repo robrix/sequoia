@@ -57,6 +57,8 @@ module Focalized.Calculus
   -- * Polarity
 , N(..)
 , P(..)
+, Neg(..)
+, Pos(..)
 , Up(..)
 , Down(..)
 , Shifting(..)
@@ -250,6 +252,8 @@ instance Structural (Seq Δ) where
 
 newtype Not    a = Not    { getNot    :: Seq Δ (P a <| Γ) Δ }
 
+instance Pos a => Neg (Not a) where
+
 runNot :: N (Not a) -> Seq Δ (P a <| Γ) Δ
 runNot = getNot . getN
 
@@ -258,6 +262,8 @@ not' = N . Not
 
 
 newtype Negate a = Negate { getNegate :: Seq Δ (N a <| Γ) Δ }
+
+instance Neg a => Pos (Negate a) where
 
 runNegate :: P (Negate a) -> Seq Δ (N a <| Γ) Δ
 runNegate = getNegate . getP
@@ -294,8 +300,12 @@ instance Negative (Seq Δ) where
 data Top = Top
   deriving (Eq, Ord, Show)
 
+instance Neg Top where
+
 
 data Zero
+
+instance Pos Zero where
 
 absurdP :: P Zero -> a
 absurdP = \case
@@ -308,6 +318,8 @@ infixr 6 &, :&
 
 newtype (f :& g) a b = With1 (forall r . (f a -> g b -> r) -> r)
   deriving (Functor)
+
+instance (Neg (f a), Neg (g b)) => Neg ((f :& g) a b) where
 
 instance Foldable g => Foldable ((f :& g) a) where
   foldMap = foldMapConj
@@ -339,6 +351,8 @@ data (f :⊕ g) a b
   = InL1 !(f a)
   | InR1 !(g b)
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+
+instance (Pos (f a), Pos (g b)) => Pos ((f :⊕ g) a b)
 
 instance (Foldable f, Foldable g) => Bifoldable (f :⊕ g) where
   bifoldMap = bifoldMapDisj
@@ -404,12 +418,16 @@ instance Additive (Seq Δ) where
 
 data Bot
 
+instance Neg Bot where
+
 absurdN :: N Bot -> a
 absurdN = \case
 
 
 data One = One
   deriving (Eq, Ord, Show)
+
+instance Pos One where
 
 
 type (⅋) = I :⅋ I
@@ -419,6 +437,8 @@ infixr 7 ⅋, :⅋
 
 newtype (f :⅋ g) a b = Par1 (forall r . (f a -> r) -> (g b -> r) -> r)
   deriving (Functor)
+
+instance (Neg (f a), Neg (g b)) => Neg ((f :⅋ g) a b) where
 
 instance Foldable g => Foldable ((f :⅋ g) a) where
   foldMap = foldMapDisj
@@ -448,6 +468,8 @@ infixr 7 ⊗, :⊗
 
 data (f :⊗ g) a b = !(f a) :⊗ !(g b)
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+
+instance (Pos (f a), Pos (g b)) => Pos ((f :⊗ g) a b) where
 
 instance (Foldable f, Foldable g) => Bifoldable (f :⊗ g) where
   bifoldMap = bifoldMapConj
@@ -512,6 +534,8 @@ newtype a --> b = Fun { getFun :: Seq Δ (P (Negate b) <| Γ) (Δ |> N (Not a)) 
 
 infixr 5 -->
 
+instance (Pos a, Neg b) => Neg (a --> b) where
+
 appFun :: N (a --> b) -> Seq Δ (P (Negate b) <| Γ) (Δ |> N (Not a))
 appFun = getFun . getN
 
@@ -525,6 +549,8 @@ fun = N . Fun
 data a --< b = Sub { subA :: !(P a), subK :: !(P (Negate b)) }
 
 infixr 5 --<
+
+instance (Pos a, Neg b) => Pos (a --< b) where
 
 sub :: P a -> P (Negate b) -> P (a --< b)
 sub = fmap P . Sub
@@ -610,6 +636,8 @@ instance Quantifying (Seq Δ) where
 
 newtype Nu f = Nu { getNu :: Exists (J (J (I :-> f) :⊗ I)) }
 
+instance Neg (Nu f) where
+
 nu :: N (Exists (J (J (I :-> f) :⊗ I))) -> N (Nu f)
 nu = fmap Nu
 
@@ -618,6 +646,8 @@ runNu = fmap getNu
 
 
 newtype Mu f = Mu { getMu :: ForAll (J (J (f :-> I) :-> I)) }
+
+instance Neg (Mu f) where
 
 mu :: P (ForAll (J (J (f :-> I) :-> I))) -> P (Mu f)
 mu = fmap Mu
@@ -674,6 +704,19 @@ instance Adjunction P N where
   rightAdjunct f = getN . f . getP
 
 
+class Neg n where
+  neg :: n -> N n
+  neg = N
+
+instance Neg (N a) where
+
+class Pos p where
+  pos :: p -> P p
+  pos = P
+
+instance Pos (P a) where
+
+
 up :: P a -> N (Up a)
 up = N . Up . getP
 
@@ -683,6 +726,8 @@ runUp = P . getUp . getN
 newtype Up   a = Up   { getUp   :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
   deriving (Applicative, Monad, Representable) via Identity
+
+instance Neg (Up a) where
 
 instance Distributive Up where
   collect f = Up . fmap (getUp . f)
@@ -704,6 +749,8 @@ runDown = N . getDown . getP
 newtype Down a = Down { getDown :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
   deriving (Applicative, Monad, Representable) via Identity
+
+instance Pos (Down a) where
 
 instance Distributive Down where
   collect f = Down . fmap (getDown . f)
