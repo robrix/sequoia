@@ -297,9 +297,9 @@ instance (Traversable f, Traversable g) => Traversable (f :& g) where
   traverse = traverseConj1
 
 instance Conj (:&) where
-  inlr1 a b = With1 $ \ f -> f a b
-  exl1 (With1 run) = run const
-  exr1 (With1 run) = run (const id)
+  inlr a b = With1 $ \ f -> f a b
+  exl (With1 run) = run const
+  exr (With1 run) = run (const id)
 
 
 type (a ⊕ b) = (K a :⊕ K b) ()
@@ -315,9 +315,9 @@ data (f :⊕ g) a
 instance (Pos (f a), Pos (g a)) => Polarized P ((f :⊕ g) a)
 
 instance Disj (:⊕) where
-  inl1 = InL1
-  inr1 = InR1
-  exlr1 ifl ifr = \case
+  inl = InL1
+  inr = InR1
+  exlr ifl ifr = \case
     InL1 l -> ifl l
     InR1 r -> ifr r
 
@@ -398,9 +398,9 @@ instance (Traversable f, Traversable g) => Traversable (f :⅋ g) where
   traverse = traverseDisj1
 
 instance Disj (:⅋) where
-  inl1 l = Par1 $ \ ifl _ -> ifl l
-  inr1 r = Par1 $ \ _ ifr -> ifr r
-  exlr1 ifl ifr (Par1 run) = run ifl ifr
+  inl l = Par1 $ \ ifl _ -> ifl l
+  inr r = Par1 $ \ _ ifr -> ifr r
+  exlr ifl ifr (Par1 run) = run ifl ifr
 
 
 type (a ⊗ b) = (K a :⊗ K b) ()
@@ -414,9 +414,9 @@ data (f :⊗ g) a = !(f a) :⊗ !(g a)
 instance (Pos (f a), Pos (g a)) => Polarized P ((f :⊗ g) a) where
 
 instance Conj (:⊗) where
-  inlr1 = (:⊗)
-  exl1 (l :⊗ _) = l
-  exr1 (_ :⊗ r) = r
+  inlr = (:⊗)
+  exl (l :⊗ _) = l
+  exr (_ :⊗ r) = r
 
 
 class (Core p, Structural p, Negative p) => Multiplicative p where
@@ -770,42 +770,42 @@ infixr 5 :->
 
 
 class Conj c where
-  inlr1 :: f a -> g a -> (f `c` g) a
-  exl1 :: (f `c` g) a -> f a
-  exr1 :: (f `c` g) a -> g a
+  inlr :: f a -> g a -> (f `c` g) a
+  exl :: (f `c` g) a -> f a
+  exr :: (f `c` g) a -> g a
 
 inlr' :: Conj c => a -> b -> (K a `c` K b) x
-inlr' a b = inlr1 (K a) (K b)
+inlr' a b = inlr (K a) (K b)
 
 exl' :: Conj c => (K a `c` K b) x -> a
-exl' = getK . exl1
+exl' = getK . exl
 
 exr' :: Conj c => (K a `c` K b) x -> b
-exr' = getK . exr1
+exr' = getK . exr
 
 foldMapConj1 :: (Foldable f, Foldable g, Conj p, Monoid m) => (a -> m) -> (f `p` g) a -> m
-foldMapConj1 f = (<>) . foldMap f . exl1 <*> foldMap f . exr1
+foldMapConj1 f = (<>) . foldMap f . exl <*> foldMap f . exr
 
 traverseConj1 :: (Traversable f, Traversable g, Conj p, Applicative m) => (a -> m a') -> (f `p` g) a -> m ((f `p` g) a')
-traverseConj1 f c = inlr1 <$> traverse f (exl1 c) <*> traverse f (exr1 c)
+traverseConj1 f c = inlr <$> traverse f (exl c) <*> traverse f (exr c)
 
 
 class Disj d where
-  inl1 :: f a -> (f `d` g) a
-  inr1 :: g a -> (f `d` g) a
-  exlr1 :: (f a -> r) -> (g a -> r) -> ((f `d` g) a -> r)
+  inl :: f a -> (f `d` g) a
+  inr :: g a -> (f `d` g) a
+  exlr :: (f a -> r) -> (g a -> r) -> ((f `d` g) a -> r)
 
 inl' :: Disj d => a -> (K a `d` K b) x
-inl' = inl1 . K
+inl' = inl . K
 
 inr' :: Disj d => b -> (K a `d` K b) x
-inr' = inr1 . K
+inr' = inr . K
 
 exlr' :: Disj d => (a -> r) -> (b -> r) -> ((K a `d` K b) x -> r)
-exlr' f g = exlr1 (f . getK) (g . getK)
+exlr' f g = exlr (f . getK) (g . getK)
 
 foldMapDisj1 :: (Foldable f, Foldable g, Disj p, Monoid m) => (a -> m) -> (f `p` g) a -> m
-foldMapDisj1 f = exlr1 (foldMap f) (foldMap f)
+foldMapDisj1 f = exlr (foldMap f) (foldMap f)
 
 traverseDisj1 :: (Traversable f, Traversable g, Disj p, Applicative m) => (a -> m a') -> (f `p` g) a -> m ((f `p` g) a')
-traverseDisj1 f = exlr1 (fmap inl1 . traverse f) (fmap inr1 . traverse f)
+traverseDisj1 f = exlr (fmap inl . traverse f) (fmap inr . traverse f)
