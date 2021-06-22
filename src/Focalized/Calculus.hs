@@ -769,6 +769,7 @@ cont f = Seq $ \ k -> k . Right . f . flip dimap (k . Left) . const
 
 newtype I a = I { getI :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+  deriving (Representable) via Identity
 
 instance Distributive I where
   collect f  = I . fmap (getI . f)
