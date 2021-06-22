@@ -59,8 +59,8 @@ module Focalized.Calculus
 , I(..)
 , J(..)
 , (:->)(..)
-, Conj(..)
-, Disj(..)
+, Conj1(..)
+, Disj1(..)
 ) where
 
 import Control.Applicative (liftA2)
@@ -769,17 +769,6 @@ newtype (f :-> g) a = Fn (f a -> g a)
 infixr 5 :->
 
 
-class Conj f g c | c -> f g where
-  inlr :: f a -> g b -> a `c` b
-  exl :: (a `c` b) -> f a
-  exr :: (a `c` b) -> g b
-
-instance Conj I I (,) where
-  inlr (I a) (I b) = (a, b)
-  exl = I . fst
-  exr = I . snd
-
-
 class Conj1 c where
   inlr1 :: f a -> g a -> (f `c` g) a
   exl1 :: (f `c` g) a -> f a
@@ -799,17 +788,6 @@ foldMapConj1 f = (<>) . foldMap f . exl1 <*> foldMap f . exr1
 
 traverseConj1 :: (Traversable f, Traversable g, Conj1 p, Applicative m) => (a -> m a') -> (f `p` g) a -> m ((f `p` g) a')
 traverseConj1 f c = inlr1 <$> traverse f (exl1 c) <*> traverse f (exr1 c)
-
-
-class Disj f g d | d -> f g where
-  inl :: f a -> a `d` b
-  inr :: g b -> a `d` b
-  exlr :: (f a -> r) -> (g b -> r) -> ((a `d` b) -> r)
-
-instance Disj I I Either where
-  inl = Left  . getI
-  inr = Right . getI
-  exlr f g = either (f . I) (g . I)
 
 
 class Disj1 d where
