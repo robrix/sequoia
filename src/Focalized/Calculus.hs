@@ -66,6 +66,14 @@ module Focalized.Calculus
 , J(..)
 , (:->)(..)
 , type (.->)
+, Conj(..)
+, Disj(..)
+, foldMapDisj
+, bifoldMapDisj
+, fmapDisj
+, bimapDisj
+, traverseDisj
+, bitraverseDisj
 ) where
 
 import Control.Applicative (liftA2)
@@ -337,15 +345,13 @@ data (f :⊕ g) a b
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
 instance (Foldable f, Foldable g) => Bifoldable (f :⊕ g) where
-  bifoldMap f g = exlr (foldMap f) (foldMap g)
+  bifoldMap = bifoldMapDisj
 
 instance (Functor f, Functor g) => Bifunctor (f :⊕ g) where
-  bimap f g = exlr (inl . fmap f) (inr . fmap g)
+  bimap = bimapDisj
 
 instance (Traversable f, Traversable g) => Bitraversable (f :⊕ g) where
-  bitraverse f g = \case
-    InL1 a -> InL1 <$> traverse f a
-    InR1 b -> InR1 <$> traverse g b
+  bitraverse = bitraverseDisj
 
 instance Disj f g (f :⊕ g) where
   inl = InL1
@@ -423,19 +429,19 @@ newtype (f :⅋ g) a b = Par1 (forall r . (f a -> r) -> (g b -> r) -> r)
   deriving (Functor)
 
 instance Foldable g => Foldable ((f :⅋ g) a) where
-  foldMap f = exlr (const mempty) (foldMap f)
+  foldMap = foldMapDisj
 
 instance Traversable g => Traversable ((f :⅋ g) a) where
-  traverse f = exlr (pure . inl) (fmap inr . traverse f)
+  traverse = traverseDisj
 
 instance (Foldable f, Foldable g) => Bifoldable (f :⅋ g) where
-  bifoldMap f g = exlr (foldMap f) (foldMap g)
+  bifoldMap = bifoldMapDisj
 
 instance (Functor f, Functor g) => Bifunctor (f :⅋ g) where
-  bimap f g = exlr (inl . fmap f) (inr . fmap g)
+  bimap = bimapDisj
 
 instance (Traversable f, Traversable g) => Bitraversable (f :⅋ g) where
-  bitraverse f g = exlr (fmap inl . traverse f) (fmap inr . traverse g)
+  bitraverse = bitraverseDisj
 
 instance Disj f g (f :⅋ g) where
   inl l = Par1 $ \ ifl _ -> ifl l
@@ -822,6 +828,24 @@ inrP = fmap inr
 
 exlrP :: (Adjunction p p', Disj f g d) => (p (f a) -> r) -> (p (g b) -> r) -> (p (a `d` b) -> r)
 exlrP f g = rightAdjunct (exlr (leftAdjunct f) (leftAdjunct g))
+
+foldMapDisj :: (Foldable g, Disj f g p, Monoid m) => (b -> m) -> (a `p` b) -> m
+foldMapDisj f = exlr (const mempty) (foldMap f)
+
+bifoldMapDisj :: (Foldable f, Foldable g, Disj f g p, Monoid m) => (a -> m) -> (b -> m) -> (a `p` b) -> m
+bifoldMapDisj f g = exlr (foldMap f) (foldMap g)
+
+fmapDisj :: (Functor g, Disj f g p) => (b -> b') -> (a `p` b) -> (a `p` b')
+fmapDisj f = exlr inl (inr . fmap f)
+
+bimapDisj :: (Functor f, Functor g, Disj f g p) => (a -> a') -> (b -> b') -> (a `p` b) -> (a' `p` b')
+bimapDisj f g = exlr (inl . fmap f) (inr . fmap g)
+
+traverseDisj :: (Traversable g, Disj f g p, Applicative m) => (b -> m b') -> (a `p` b) -> m (a `p` b')
+traverseDisj f = exlr (pure . inl) (fmap inr . traverse f)
+
+bitraverseDisj :: (Traversable f, Traversable g, Disj f g p, Applicative m) => (a -> m a') -> (b -> m b') -> (a `p` b) -> m (a' `p` b')
+bitraverseDisj f g = exlr (fmap inl . traverse f) (fmap inr . traverse g)
 
 
 newtype (f · g) a = C { getC :: f (g a) }
