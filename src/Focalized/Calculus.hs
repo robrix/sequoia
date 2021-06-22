@@ -401,13 +401,13 @@ instance Additive (Seq Δ) where
 
   topR = pure (pure (N Top))
 
-  sumL a b = popL (exlrP (pushL a . fmap getI) (pushL b . fmap getI))
-  sumR1 = mapR (inlP . fmap I)
-  sumR2 = mapR (inrP . fmap I)
+  sumL a b = popL (exlrP (pushL a) (pushL b))
+  sumR1 = mapR inlP
+  sumR2 = mapR inrP
 
-  withL1 p = popL (pushL p . fmap getI . exlP)
-  withL2 p = popL (pushL p . fmap getI . exrP)
-  (&) = liftA2 (liftA2 (\ a b -> inlrP (I <$> a) (I <$> b)))
+  withL1 p = popL (pushL p . exlP)
+  withL2 p = popL (pushL p . exrP)
+  (&) = liftA2 (liftA2 inlrP)
 
 
 -- Multiplicative
@@ -520,11 +520,11 @@ instance Multiplicative (Seq Δ) where
   oneL = wkL
   oneR = pure (pure (P One))
 
-  parL a b = popL (exlrP (pushL a . fmap getI) (pushL b . fmap getI))
-  parR ab = either (>>= (pure . inlP . fmap I)) (pure . inrP . fmap I) <$> ab
+  parL a b = popL (exlrP (pushL a) (pushL b))
+  parR ab = either (>>= (pure . inlP)) (pure . inrP) <$> ab
 
-  tensorL p = popL (pushL2 p . fmap getI . exlP <*> fmap getI . exrP)
-  (⊗) = liftA2 (liftA2 (\ a b -> inlrP (I <$> a) (I <$> b)))
+  tensorL p = popL (pushL2 p . exlP <*> exrP)
+  (⊗) = liftA2 (liftA2 inlrP)
 
 
 -- Implicative
@@ -800,14 +800,23 @@ instance Conj I I (,) where
   exl = I . fst
   exr = I . snd
 
-inlrP :: (Conj f g c, Applicative p) => p (f a) -> p (g b) -> p (a `c` b)
-inlrP = liftA2 inlr
+inlrI :: Conj I I c => a -> b -> (a `c` b)
+inlrI a b = inlr (I a) (I b)
 
-exlP :: (Conj f g c, Functor p) => p (a `c` b) -> p (f a)
-exlP = fmap exl
+exlI :: Conj I I c => (a `c` b) -> a
+exlI = getI . exl
 
-exrP :: (Conj f g c, Functor p) => p (a `c` b) -> p (g b)
-exrP = fmap exr
+exrI :: Conj I I c => (a `c` b) -> b
+exrI = getI . exr
+
+inlrP :: (Conj I I c, Applicative p) => p a -> p b -> p (a `c` b)
+inlrP = liftA2 inlrI
+
+exlP :: (Conj I I c, Functor p) => p (a `c` b) -> p a
+exlP = fmap exlI
+
+exrP :: (Conj I I c, Functor p) => p (a `c` b) -> p b
+exrP = fmap exrI
 
 foldMapConj :: (Foldable g, Conj f g p, Monoid m) => (b -> m) -> (a `p` b) -> m
 foldMapConj f = foldMap f . exr
@@ -838,14 +847,23 @@ instance Disj I I Either where
   inr = Right . getI
   exlr f g = either (f . I) (g . I)
 
-inlP :: (Disj f g d, Functor p) => p (f a) -> p (a `d` b)
-inlP = fmap inl
+inlI :: Disj I I d => a -> a `d` b
+inlI = inl . I
 
-inrP :: (Disj f g d, Functor p) => p (g b) -> p (a `d` b)
-inrP = fmap inr
+inrI :: Disj I I d => b -> a `d` b
+inrI = inr . I
 
-exlrP :: (Adjunction p p', Disj f g d) => (p (f a) -> r) -> (p (g b) -> r) -> (p (a `d` b) -> r)
-exlrP f g = rightAdjunct (exlr (leftAdjunct f) (leftAdjunct g))
+exlrI :: Disj I I d => (a -> r) -> (b -> r) -> ((a `d` b) -> r)
+exlrI f g = exlr (f . getI) (g . getI)
+
+inlP :: (Disj I I d, Functor p) => p a -> p (a `d` b)
+inlP = fmap inlI
+
+inrP :: (Disj I I d, Functor p) => p b -> p (a `d` b)
+inrP = fmap inrI
+
+exlrP :: (Adjunction p p', Disj I I d) => (p a -> r) -> (p b -> r) -> (p (a `d` b) -> r)
+exlrP f g = rightAdjunct (exlrI (leftAdjunct f) (leftAdjunct g))
 
 foldMapDisj :: (Foldable g, Disj f g p, Monoid m) => (b -> m) -> (a `p` b) -> m
 foldMapDisj f = exlr (const mempty) (foldMap f)
