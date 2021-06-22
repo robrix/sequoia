@@ -745,7 +745,7 @@ newtype Up   a = Up   { getUp   :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
   deriving (Applicative, Monad, Representable) via Identity
 
-instance Neg (Up a) where
+instance Pos a => Neg (Up a) where
 
 instance Distributive Up where
   collect f = Up . fmap (getUp . f)
@@ -768,7 +768,7 @@ newtype Down a = Down { getDown :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
   deriving (Applicative, Monad, Representable) via Identity
 
-instance Pos (Down a) where
+instance Neg a => Pos (Down a) where
 
 instance Distributive Down where
   collect f = Down . fmap (getDown . f)
