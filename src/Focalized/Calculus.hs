@@ -782,6 +782,16 @@ instance Adjunction I I where
   rightAdjunct f = getI . f . getI
 
 
+newtype (f · g) a = C { getC :: f (g a) }
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+
+infixr 7 ·
+
+instance (Applicative f, Applicative g) => Applicative (f · g) where
+  pure = C . pure . pure
+  f <*> a = C ((<*>) <$> getC f <*> getC a)
+
+
 newtype J p a = J { getJ :: p a a }
 
 instance Bifoldable p => Foldable (J p) where
@@ -893,13 +903,3 @@ traverseDisj f = exlr (pure . inl) (fmap inr . traverse f)
 
 bitraverseDisj :: (Traversable f, Traversable g, Disj f g p, Applicative m) => (a -> m a') -> (b -> m b') -> (a `p` b) -> m (a' `p` b')
 bitraverseDisj f g = exlr (fmap inl . traverse f) (fmap inr . traverse g)
-
-
-newtype (f · g) a = C { getC :: f (g a) }
-  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-
-infixr 7 ·
-
-instance (Applicative f, Applicative g) => Applicative (f · g) where
-  pure = C . pure . pure
-  f <*> a = C ((<*>) <$> getC f <*> getC a)
