@@ -620,6 +620,14 @@ class (Core p, Structural p) => Recursive p where
   nuR :: p i (o |> P (Exists ((I .-> f) .⊗ I))) -> p i (o |> P (Nu f))
 
 
+instance Recursive (Seq Δ) where
+  muL = mapL getMu
+  muR = mapR mu
+
+  nuL = mapL getNu
+  nuR = mapR nu
+
+
 -- Polarity
 
 newtype N a = N { getN :: a }
