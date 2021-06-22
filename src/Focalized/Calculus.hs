@@ -596,7 +596,7 @@ mu :: N (ForAll ((f .-> I) .-> I)) -> N (Mu f)
 mu = fmap Mu
 
 
-data Nu f = forall r . Nu (r -> f r) r
+newtype Nu f = Nu (Exists ((I .-> f) .⊗ I))
 
 
 -- Polarity
