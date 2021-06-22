@@ -292,35 +292,26 @@ absurdP :: Zero -> a
 absurdP = \case
 
 
-type (&) = I :& I
+type (a & b) = (K a :& K b) ()
 
 infixr 6 &, :&
 
 
-newtype (f :& g) a b = With1 (forall r . (f a -> g b -> r) -> r)
+newtype (f :& g) a = With1 (forall r . (f a -> g a -> r) -> r)
   deriving (Functor)
 
-instance (Neg (f a), Neg (g b)) => Polarized N ((f :& g) a b) where
+instance (Neg (f a), Neg (g a)) => Polarized N ((f :& g) a) where
 
-instance Foldable g => Foldable ((f :& g) a) where
-  foldMap = foldMapConj
+instance (Foldable f, Foldable g) => Foldable (f :& g) where
+  foldMap = foldMapConj1
 
-instance Traversable g => Traversable ((f :& g) a) where
-  traverse = traverseConj
+instance (Traversable f, Traversable g) => Traversable (f :& g) where
+  traverse = traverseConj1
 
-instance (Foldable f, Foldable g) => Bifoldable (f :& g) where
-  bifoldMap = bifoldMapConj
-
-instance (Functor f, Functor g) => Bifunctor (f :& g) where
-  bimap = bimapConj
-
-instance (Traversable f, Traversable g) => Bitraversable (f :& g) where
-  bitraverse = bitraverseConj
-
-instance Conj f g (f :& g) where
-  inlr a b = With1 $ \ f -> f a b
-  exl (With1 run) = run const
-  exr (With1 run) = run (const id)
+instance Conj1 (:&) where
+  inlr1 a b = With1 $ \ f -> f a b
+  exl1 (With1 run) = run const
+  exr1 (With1 run) = run (const id)
 
 
 type (⊕) = I :⊕ I
@@ -390,9 +381,9 @@ instance Additive (Seq Δ) where
   sumR1 = mapR inlI
   sumR2 = mapR inrI
 
-  withL1 p = popL (pushL p . exlI)
-  withL2 p = popL (pushL p . exrI)
-  (&) = liftA2 (liftA2 inlrI)
+  withL1 p = popL (pushL p . exl')
+  withL2 p = popL (pushL p . exr')
+  (&) = liftA2 (liftA2 inlr')
 
 
 -- Multiplicative
@@ -809,15 +800,6 @@ instance Conj I I (,) where
   exl = I . fst
   exr = I . snd
 
-inlrI :: Conj I I c => a -> b -> (a `c` b)
-inlrI a b = inlr (I a) (I b)
-
-exlI :: Conj I I c => (a `c` b) -> a
-exlI = getI . exl
-
-exrI :: Conj I I c => (a `c` b) -> b
-exrI = getI . exr
-
 foldMapConj :: (Foldable g, Conj f g p, Monoid m) => (b -> m) -> (a `p` b) -> m
 foldMapConj f = foldMap f . exr
 
@@ -850,6 +832,12 @@ exl' = getK . exl1
 
 exr' :: Conj1 c => (K a `c` K b) x -> b
 exr' = getK . exr1
+
+foldMapConj1 :: (Foldable f, Foldable g, Conj1 p, Monoid m) => (a -> m) -> (f `p` g) a -> m
+foldMapConj1 f = (<>) . foldMap f . exl1 <*> foldMap f . exr1
+
+traverseConj1 :: (Traversable f, Traversable g, Conj1 p, Applicative m) => (a -> m a') -> (f `p` g) a -> m ((f `p` g) a')
+traverseConj1 f c = inlr1 <$> traverse f (exl1 c) <*> traverse f (exr1 c)
 
 
 class Disj f g d | d -> f g where
