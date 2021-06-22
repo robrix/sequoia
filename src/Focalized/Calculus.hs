@@ -50,10 +50,10 @@ module Focalized.Calculus
   -- * Recursive
 , Mu(..)
 , mu
-, getMu
+, runMu
 , Nu(..)
 , nu
-, getNu
+, runNu
 , Recursive(..)
   -- * Polarity
 , N(..)
@@ -613,37 +613,37 @@ instance Quantifying (Seq Δ) where
 
 -- Recursive
 
-newtype Mu f = Mu (ForAll ((f .-> I) .-> I))
+newtype Nu f = Nu { getNu :: Exists ((I .-> f) .⊗ I) }
 
-mu :: N (ForAll ((f .-> I) .-> I)) -> N (Mu f)
-mu = fmap Mu
-
-getMu :: N (Mu f) -> N (ForAll ((f .-> I) .-> I))
-getMu (N (Mu f)) = N f
-
-
-newtype Nu f = Nu (Exists ((I .-> f) .⊗ I))
-
-nu :: P (Exists ((I .-> f) .⊗ I)) -> P (Nu f)
+nu :: N (Exists ((I .-> f) .⊗ I)) -> N (Nu f)
 nu = fmap Nu
 
-getNu :: P (Nu f) -> P (Exists ((I .-> f) .⊗ I))
-getNu (P (Nu f)) = P f
+runNu :: N (Nu f) -> N (Exists ((I .-> f) .⊗ I))
+runNu = fmap getNu
+
+
+newtype Mu f = Mu { getMu :: ForAll ((f .-> I) .-> I) }
+
+mu :: P (ForAll ((f .-> I) .-> I)) -> P (Mu f)
+mu = fmap Mu
+
+runMu :: P (Mu f) -> P (ForAll ((f .-> I) .-> I))
+runMu = fmap getMu
 
 
 class (Core p, Structural p) => Recursive p where
-  muL :: p (N (ForAll ((f .-> I) .-> I)) <| i) o -> p (N (Mu f) <| i) o
-  muR :: p i (o |> N (ForAll ((f .-> I) .-> I))) -> p i (o |> N (Mu f))
+  nuL :: p (N (Exists ((I .-> f) .⊗ I)) <| i) o -> p (N (Nu f) <| i) o
+  nuR :: p i (o |> N (Exists ((I .-> f) .⊗ I))) -> p i (o |> N (Nu f))
 
-  nuL :: p (P (Exists ((I .-> f) .⊗ I)) <| i) o -> p (P (Nu f) <| i) o
-  nuR :: p i (o |> P (Exists ((I .-> f) .⊗ I))) -> p i (o |> P (Nu f))
+  muL :: p (P (ForAll ((f .-> I) .-> I)) <| i) o -> p (P (Mu f) <| i) o
+  muR :: p i (o |> P (ForAll ((f .-> I) .-> I))) -> p i (o |> P (Mu f))
 
 
 instance Recursive (Seq Δ) where
-  muL = mapL getMu
+  muL = mapL runMu
   muR = mapR mu
 
-  nuL = mapL getNu
+  nuL = mapL runNu
   nuR = mapR nu
 
 
