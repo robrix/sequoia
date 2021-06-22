@@ -779,6 +779,9 @@ instance (Applicative f, Applicative g) => Applicative (f · g) where
   pure = C . pure . pure
   f <*> a = C ((<*>) <$> getC f <*> getC a)
 
+instance (Distributive f, Distributive g) => Distributive (f · g) where
+  collect f r = C (fmap distribute (collect (getC . f) r))
+
 
 newtype J p a = J { getJ :: p a a }
 
