@@ -328,7 +328,7 @@ class (Core p, Structural p, Negative p) => Additive p where
   topR :: p i (o |> Top)
 
   sumL :: (Pos a, Pos b) => p (a <| i) o -> p (b <| i) o -> p (a ⊕ b <| i) o
-  sumL p1 p2 = sumLWith (notR p1 & notR p2)
+  sumL p1 p2 = sumLWith (withR (notR p1) (notR p2))
   sumL1' :: (Pos a, Pos b) => p (a ⊕ b <| i) o -> p (a <| i) o
   sumL1' p = sumR1 init >>> exL (wkL p)
   sumL2' :: (Pos a, Pos b) => p (a ⊕ b <| i) o -> p (b <| i) o
@@ -344,7 +344,7 @@ class (Core p, Structural p, Negative p) => Additive p where
   withL2 = withLSum . sumR2 . negateR
   withLSum :: (Neg a, Neg b) => p i (o |> Negate a ⊕ Negate b) -> p (a & b <| i) o
   withLSum p = wkL p >>> sumL (negateL (withL1 init)) (negateL (withL2 init))
-  (&) :: (Neg a, Neg b) => p i (o |> a) -> p i (o |> b) -> p i (o |> (a & b))
+  withR :: (Neg a, Neg b) => p i (o |> a) -> p i (o |> b) -> p i (o |> (a & b))
   withR1' :: (Neg a, Neg b) => p i (o |> (a & b)) -> p i (o |> a)
   withR1' t = exR (wkR t) >>> withL1 init
   withR2' :: (Neg a, Neg b) => p i (o |> (a & b)) -> p i (o |> b)
@@ -362,7 +362,7 @@ instance Additive (Seq Δ) where
 
   withL1 p = popL (pushL p . exl')
   withL2 p = popL (pushL p . exr')
-  (&) = liftA2 (liftA2 inlr')
+  withR = liftA2 (liftA2 inlr')
 
 
 -- Multiplicative
