@@ -290,30 +290,37 @@ absurdP :: P Zero -> a
 absurdP = \case
 
 
-newtype a & b = With (forall r . (a -> b -> r) -> r)
-  deriving (Functor)
+newtype a & b = With ((I :& I) a b)
+  deriving (Conj I I, Bifoldable, Bifunctor, Foldable, Functor, Traversable)
 
-infixr 6 &
-
-instance Foldable ((&) a) where
-  foldMap = foldMapDefault
-
-instance Traversable ((&) a) where
-  traverse f (With run) = run $ \ a b -> let mk b = With (\ f -> f a b) in mk <$> f b
-
-instance Bifoldable (&) where
-  bifoldMap = bifoldMapDefault
-
-instance Bifunctor (&) where
-  bimap = bimapDefault
+infixr 6 &, :&
 
 instance Bitraversable (&) where
   bitraverse f g w = inlr <$> traverse f (exl w) <*> traverse g (exr w)
 
-instance Conj I I (&) where
-  inlr (I a) (I b) = With $ \ f -> f a b
-  exl (With run) = I (run const)
-  exr (With run) = I (run (const id))
+
+newtype (f :& g) a b = With1 (forall r . (f a -> g b -> r) -> r)
+  deriving (Functor)
+
+instance Foldable g => Foldable ((f :& g) a) where
+  foldMap f = foldMap f . exr
+
+instance Traversable g => Traversable ((f :& g) a) where
+  traverse f r = inlr (exl r) <$> traverse f (exr r)
+
+instance (Foldable f, Foldable g) => Bifoldable (f :& g) where
+  bifoldMap f g = (foldMap f &&& foldMap g) (<>)
+
+instance (Functor f, Functor g) => Bifunctor (f :& g) where
+  bimap f g = fmap f *** fmap g
+
+instance (Traversable f, Traversable g) => Bitraversable (f :& g) where
+  bitraverse f g w = inlr <$> traverse f (exl w) <*> traverse g (exr w)
+
+instance Conj f g (f :& g) where
+  inlr a b = With1 $ \ f -> f a b
+  exl (With1 run) = run const
+  exr (With1 run) = run (const id)
 
 
 data a ⊕ b
