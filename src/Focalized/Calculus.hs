@@ -695,6 +695,7 @@ cont f = Seq $ \ k -> k . Right . f . flip dimap (k . Left) . const
 newtype I a = I { getI :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
+
 newtype (f :-> g) a = Fn (f a -> g a)
 
 infixr 5 :->
