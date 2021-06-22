@@ -725,6 +725,8 @@ newtype I a = I { getI :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
   deriving (Representable) via Identity
 
+instance (Polarity p, Polarized p a) => Polarized p (I a) where
+
 instance Distributive I where
   collect f  = I . fmap (getI . f)
   distribute = I . fmap  getI
