@@ -33,6 +33,8 @@ module Focalized.Calculus
 , One(..)
 , type (⅋)(..)
 , type (⊗)(..)
+, (:⊗)(..)
+, type (.⊗)
 , Multiplicative(..)
   -- * Implicative
 , type (-->)(..)
@@ -435,6 +437,11 @@ instance Conj (⊗) where
   inlr = (:⊗)
   exl (l :⊗ _) = l
   exr (_ :⊗ r) = r
+
+
+newtype (f :⊗ g) a b = Tensor1 { getTensor1 :: f a ⊗ g b }
+
+type (f .⊗ g) = J (f :⊗ g)
 
 
 class (Core p, Structural p, Negative p) => Multiplicative p where
