@@ -59,6 +59,7 @@ module Focalized.Calculus
 , I(..)
 , J(..)
 , (:->)(..)
+, type (.->)
 ) where
 
 import Control.Applicative (liftA2)
@@ -580,9 +581,9 @@ instance Quantifying (Seq Δ) where
 
 -- Recursive
 
-newtype Mu f = Mu (ForAll ((f :-> I) :-> I))
+newtype Mu f = Mu (ForAll ((f .-> I) .-> I))
 
-mu :: N (ForAll ((f :-> I) :-> I)) -> N (Mu f)
+mu :: N (ForAll ((f .-> I) .-> I)) -> N (Mu f)
 mu = fmap Mu
 
 
@@ -709,9 +710,11 @@ instance Bitraversable p => Traversable (J p) where
   traverse f = fmap J . bitraverse f f . getJ
 
 
-newtype (f :-> g) a = Fn (f a -> g a)
+newtype (f :-> g) a b = Fn (f a -> g b)
 
-infixr 5 :->
+infixr 5 :->, .->
+
+type (f .-> g) = J (f :-> g)
 
 
 class Conj c where
