@@ -708,6 +708,12 @@ instance Adjunction P N where
 class Polarized p c | c -> p where
   polarize :: c -> p c
 
+instance Polarized N (N a) where
+  polarize = N
+
+instance Polarized P (P a) where
+  polarize = P
+
 
 class Neg n where
   neg :: n -> N n
