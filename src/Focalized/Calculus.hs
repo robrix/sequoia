@@ -323,30 +323,37 @@ instance Conj f g (f :& g) where
   exr (With1 run) = run (const id)
 
 
-data a ⊕ b
-  = InL !a
-  | InR !b
-  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+newtype a ⊕ b = Sum { getSum :: (I :⊕ I) a b }
+  deriving (Disj I I, Bifoldable, Bifunctor, Eq, Foldable, Functor, Ord, Show, Traversable)
 
-infixr 6 ⊕
-
-instance Bifoldable (⊕) where
-  bifoldMap = bifoldMapDefault
-
-instance Bifunctor (⊕) where
-  bimap = bimapDefault
+infixr 6 ⊕, :⊕
 
 instance Bitraversable (⊕) where
-  bitraverse f g = \case
-    InL a -> InL <$> f a
-    InR b -> InR <$> g b
+  bitraverse f g = fmap Sum . bitraverse f g . getSum
 
-instance Disj (⊕) where
-  inl = InL
-  inr = InR
+
+data (f :⊕ g) a b
+  = InL1 !(f a)
+  | InR1 !(g b)
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+
+instance (Foldable f, Foldable g) => Bifoldable (f :⊕ g) where
+  bifoldMap f g = exlr (foldMap f) (foldMap g)
+
+instance (Functor f, Functor g) => Bifunctor (f :⊕ g) where
+  bimap f g = exlr (inl . fmap f) (inr . fmap g)
+
+instance (Traversable f, Traversable g) => Bitraversable (f :⊕ g) where
+  bitraverse f g = \case
+    InL1 a -> InL1 <$> traverse f a
+    InR1 b -> InR1 <$> traverse g b
+
+instance Disj f g (f :⊕ g) where
+  inl = InL1
+  inr = InR1
   exlr ifl ifr = \case
-    InL l -> ifl l
-    InR r -> ifr r
+    InL1 l -> ifl l
+    InR1 r -> ifr r
 
 
 class (Core p, Structural p, Negative p) => Additive p where
@@ -383,9 +390,9 @@ instance Additive (Seq Δ) where
 
   topR = pure (pure (N Top))
 
-  sumL a b = popL (exlrP (pushL a) (pushL b))
-  sumR1 = mapR inlP
-  sumR2 = mapR inrP
+  sumL a b = popL (exlrP (pushL a . fmap getI) (pushL b . fmap getI))
+  sumR1 = mapR (inlP . fmap I)
+  sumR2 = mapR (inrP . fmap I)
 
   withL1 p = popL (pushL p . fmap getI . exlP)
   withL2 p = popL (pushL p . fmap getI . exrP)
@@ -413,7 +420,7 @@ instance Foldable ((⅋) a) where
   foldMap = foldMapDefault
 
 instance Traversable ((⅋) a) where
-  traverse f (Par run) = run (pure . inl) (fmap inr . f)
+  traverse f (Par run) = run (pure . inl . I) (fmap (inr . I) . f)
 
 instance Bifoldable (⅋) where
   bifoldMap = bifoldMapDefault
@@ -422,12 +429,12 @@ instance Bifunctor (⅋) where
   bimap = bimapDefault
 
 instance Bitraversable (⅋) where
-  bitraverse f g (Par run) = run (fmap inl . f) (fmap inr . g)
+  bitraverse f g (Par run) = run (fmap (inl . I) . f) (fmap (inr . I) . g)
 
-instance Disj (⅋) where
-  inl l = Par $ \ ifl _ -> ifl l
-  inr r = Par $ \ _ ifr -> ifr r
-  exlr ifl ifr (Par run) = run ifl ifr
+instance Disj I I (⅋) where
+  inl (I l) = Par $ \ ifl _ -> ifl l
+  inr (I r) = Par $ \ _ ifr -> ifr r
+  exlr ifl ifr (Par run) = run (ifl . I) (ifr . I)
 
 
 newtype a ⊗ b = Tensor { getTensor :: (I :⊗ I) a b }
@@ -492,8 +499,8 @@ instance Multiplicative (Seq Δ) where
   oneL = wkL
   oneR = pure (pure (P One))
 
-  parL a b = popL (exlrP (pushL a) (pushL b))
-  parR ab = either (>>= (pure . inlP)) (pure . inrP) <$> ab
+  parL a b = popL (exlrP (pushL a . fmap getI) (pushL b . fmap getI))
+  parR ab = either (>>= (pure . inlP . fmap I)) (pure . inrP . fmap I) <$> ab
 
   tensorL p = popL (pushL2 p . fmap getI . exlP <*> fmap getI . exrP)
   (⊗) = liftA2 (liftA2 (\ a b -> inlrP (I <$> a) (I <$> b)))
@@ -788,23 +795,23 @@ exrP :: (Conj f g c, Functor p) => p (a `c` b) -> p (g b)
 exrP = fmap exr
 
 
-class Disj d where
-  inl :: a -> a `d` b
-  inr :: b -> a `d` b
-  exlr :: (a -> r) -> (b -> r) -> ((a `d` b) -> r)
+class Disj f g d | d -> f g where
+  inl :: f a -> a `d` b
+  inr :: g b -> a `d` b
+  exlr :: (f a -> r) -> (g b -> r) -> ((a `d` b) -> r)
 
-instance Disj Either where
-  inl = Left
-  inr = Right
-  exlr = either
+instance Disj I I Either where
+  inl = Left  . getI
+  inr = Right . getI
+  exlr f g = either (f . I) (g . I)
 
-inlP :: (Disj d, Functor p) => p a -> p (a `d` b)
+inlP :: (Disj f g d, Functor p) => p (f a) -> p (a `d` b)
 inlP = fmap inl
 
-inrP :: (Disj d, Functor p) => p b -> p (a `d` b)
+inrP :: (Disj f g d, Functor p) => p (g b) -> p (a `d` b)
 inrP = fmap inr
 
-exlrP :: (Adjunction p p', Disj d) => (p a -> r) -> (p b -> r) -> (p (a `d` b) -> r)
+exlrP :: (Adjunction p p', Disj f g d) => (p (f a) -> r) -> (p (g b) -> r) -> (p (a `d` b) -> r)
 exlrP f g = rightAdjunct (exlr (leftAdjunct f) (leftAdjunct g))
 
 
