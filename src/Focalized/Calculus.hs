@@ -411,35 +411,26 @@ data One = One
 instance Polarized P One where
 
 
-type (⅋) = I :⅋ I
+type (a ⅋ b) = (K a :⅋ K b) ()
 
 infixr 7 ⅋, :⅋
 
 
-newtype (f :⅋ g) a b = Par1 (forall r . (f a -> r) -> (g b -> r) -> r)
+newtype (f :⅋ g) a = Par1 (forall r . (f a -> r) -> (g a -> r) -> r)
   deriving (Functor)
 
-instance (Neg (f a), Neg (g b)) => Polarized N ((f :⅋ g) a b) where
+instance (Neg (f a), Neg (g a)) => Polarized N ((f :⅋ g) a) where
 
-instance Foldable g => Foldable ((f :⅋ g) a) where
-  foldMap = foldMapDisj
+instance (Foldable f, Foldable g) => Foldable (f :⅋ g) where
+  foldMap = foldMapDisj1
 
-instance Traversable g => Traversable ((f :⅋ g) a) where
-  traverse = traverseDisj
+instance (Traversable f, Traversable g) => Traversable (f :⅋ g) where
+  traverse = traverseDisj1
 
-instance (Foldable f, Foldable g) => Bifoldable (f :⅋ g) where
-  bifoldMap = bifoldMapDisj
-
-instance (Functor f, Functor g) => Bifunctor (f :⅋ g) where
-  bimap = bimapDisj
-
-instance (Traversable f, Traversable g) => Bitraversable (f :⅋ g) where
-  bitraverse = bitraverseDisj
-
-instance Disj f g (f :⅋ g) where
-  inl l = Par1 $ \ ifl _ -> ifl l
-  inr r = Par1 $ \ _ ifr -> ifr r
-  exlr ifl ifr (Par1 run) = run ifl ifr
+instance Disj1 (:⅋) where
+  inl1 l = Par1 $ \ ifl _ -> ifl l
+  inr1 r = Par1 $ \ _ ifr -> ifr r
+  exlr1 ifl ifr (Par1 run) = run ifl ifr
 
 
 type (a ⊗ b) = (K a :⊗ K b) ()
@@ -493,8 +484,8 @@ instance Multiplicative (Seq Δ) where
   oneL = wkL
   oneR = pure (pure One)
 
-  parL a b = popL (exlrI (pushL a) (pushL b))
-  parR ab = either (>>= (pure . inlI)) (pure . inrI) <$> ab
+  parL a b = popL (exlr' (pushL a) (pushL b))
+  parR ab = either (>>= (pure . inl')) (pure . inr') <$> ab
 
   tensorL p = popL (pushL2 p . exl' <*> exr')
   (⊗) = liftA2 (liftA2 inlr')
@@ -897,3 +888,24 @@ traverseDisj f = exlr (pure . inl) (fmap inr . traverse f)
 
 bitraverseDisj :: (Traversable f, Traversable g, Disj f g p, Applicative m) => (a -> m a') -> (b -> m b') -> (a `p` b) -> m (a' `p` b')
 bitraverseDisj f g = exlr (fmap inl . traverse f) (fmap inr . traverse g)
+
+
+class Disj1 d where
+  inl1 :: f a -> (f `d` g) a
+  inr1 :: g a -> (f `d` g) a
+  exlr1 :: (f a -> r) -> (g a -> r) -> ((f `d` g) a -> r)
+
+inl' :: Disj1 d => a -> (K a `d` K b) x
+inl' = inl1 . K
+
+inr' :: Disj1 d => b -> (K a `d` K b) x
+inr' = inr1 . K
+
+exlr' :: Disj1 d => (a -> r) -> (b -> r) -> ((K a `d` K b) x -> r)
+exlr' f g = exlr1 (f . getK) (g . getK)
+
+foldMapDisj1 :: (Foldable f, Foldable g, Disj1 p, Monoid m) => (a -> m) -> (f `p` g) a -> m
+foldMapDisj1 f = exlr1 (foldMap f) (foldMap f)
+
+traverseDisj1 :: (Traversable f, Traversable g, Disj1 p, Applicative m) => (a -> m a') -> (f `p` g) a -> m ((f `p` g) a')
+traverseDisj1 f = exlr1 (fmap inl1 . traverse f) (fmap inr1 . traverse f)
