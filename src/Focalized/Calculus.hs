@@ -57,6 +57,7 @@ module Focalized.Calculus
 , Shifting(..)
   -- * Utilities
 , I(..)
+, J(..)
 , (:->)(..)
 ) where
 
@@ -694,6 +695,18 @@ cont f = Seq $ \ k -> k . Right . f . flip dimap (k . Left) . const
 
 newtype I a = I { getI :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+
+
+newtype J p a = J { getJ :: p a a }
+
+instance Bifoldable p => Foldable (J p) where
+  foldMap f = bifoldMap f f . getJ
+
+instance Bifunctor p => Functor (J p) where
+  fmap f = J . bimap f f . getJ
+
+instance Bitraversable p => Traversable (J p) where
+  traverse f = fmap J . bitraverse f f . getJ
 
 
 newtype (f :-> g) a = Fn (f a -> g a)
