@@ -52,6 +52,7 @@ module Focalized.Calculus
 , mu
 , Nu(..)
 , nu
+, Recursive(..)
   -- * Polarity
 , N(..)
 , P(..)
@@ -601,6 +602,14 @@ newtype Nu f = Nu (Exists ((I .-> f) .⊗ I))
 
 nu :: P (Exists ((I .-> f) .⊗ I)) -> P (Nu f)
 nu = fmap Nu
+
+
+class (Core p, Structural p) => Recursive p where
+  muL :: p (N (ForAll ((f .-> I) .-> I)) <| i) o -> p (N (Mu f) <| i) o
+  muR :: p i (o |> N (ForAll ((f .-> I) .-> I))) -> p i (o |> N (Mu f))
+
+  nuL :: p (P (Exists ((I .-> f) .⊗ I)) <| i) o -> p (P (Nu f) <| i) o
+  nuR :: p i (o |> P (Exists ((I .-> f) .⊗ I))) -> p i (o |> P (Nu f))
 
 
 -- Polarity
