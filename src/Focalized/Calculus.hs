@@ -748,7 +748,7 @@ instance Shifting (Seq Δ) where
 -- Utilities
 
 cont :: ((Seq r i o -> Seq r Γ Δ) -> a) -> Seq Δ i (o |> a)
-cont f = Seq $ \ k -> k . Right . f . flip dimap (k . Left) . const
+cont f = Seq $ \ k -> k . Right . f . (`dimap` (k . Left)) . const
 
 
 newtype I a = I { getI :: a }
