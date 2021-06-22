@@ -35,7 +35,8 @@ module Focalized.Calculus
 , (:⊗)(..)
 , Multiplicative(..)
   -- * Implicative
-, type (-->)(..)
+, Fun(..)
+, type (-->)
 , type (--<)(..)
 , Implicative(..)
   -- * Quantifying
@@ -463,7 +464,9 @@ instance Multiplicative (Seq Δ) where
 
 -- Implicative
 
-newtype a --> b = Fun { getFun :: Seq Δ (Negate b <| Γ) (Δ |> Not a) }
+newtype Fun r a b = Fun { getFun :: Seq r (Negate b <| Γ) (Δ |> Not a) }
+
+type (-->) = Fun Δ
 
 infixr 5 -->
 
