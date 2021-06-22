@@ -65,7 +65,6 @@ module Focalized.Calculus
 , I(..)
 , J(..)
 , (:->)(..)
-, type (.->)
 , Conj(..)
 , foldMapConj
 , bifoldMapConj
@@ -613,30 +612,30 @@ instance Quantifying (Seq Δ) where
 
 -- Recursive
 
-newtype Nu f = Nu { getNu :: Exists ((I .-> f) .⊗ I) }
+newtype Nu f = Nu { getNu :: Exists (J (I :-> f) .⊗ I) }
 
-nu :: N (Exists ((I .-> f) .⊗ I)) -> N (Nu f)
+nu :: N (Exists (J (I :-> f) .⊗ I)) -> N (Nu f)
 nu = fmap Nu
 
-runNu :: N (Nu f) -> N (Exists ((I .-> f) .⊗ I))
+runNu :: N (Nu f) -> N (Exists (J (I :-> f) .⊗ I))
 runNu = fmap getNu
 
 
-newtype Mu f = Mu { getMu :: ForAll ((f .-> I) .-> I) }
+newtype Mu f = Mu { getMu :: ForAll (J (J (f :-> I) :-> I)) }
 
-mu :: P (ForAll ((f .-> I) .-> I)) -> P (Mu f)
+mu :: P (ForAll (J (J (f :-> I) :-> I))) -> P (Mu f)
 mu = fmap Mu
 
-runMu :: P (Mu f) -> P (ForAll ((f .-> I) .-> I))
+runMu :: P (Mu f) -> P (ForAll (J (J (f :-> I) :-> I)))
 runMu = fmap getMu
 
 
 class (Core p, Structural p) => Recursive p where
-  nuL :: p (N (Exists ((I .-> f) .⊗ I)) <| i) o -> p (N (Nu f) <| i) o
-  nuR :: p i (o |> N (Exists ((I .-> f) .⊗ I))) -> p i (o |> N (Nu f))
+  nuL :: p (N (Exists (J (I :-> f) .⊗ I)) <| i) o -> p (N (Nu f) <| i) o
+  nuR :: p i (o |> N (Exists (J (I :-> f) .⊗ I))) -> p i (o |> N (Nu f))
 
-  muL :: p (P (ForAll ((f .-> I) .-> I)) <| i) o -> p (P (Mu f) <| i) o
-  muR :: p i (o |> P (ForAll ((f .-> I) .-> I))) -> p i (o |> P (Mu f))
+  muL :: p (P (ForAll (J (J (f :-> I) :-> I))) <| i) o -> p (P (Mu f) <| i) o
+  muR :: p i (o |> P (ForAll (J (J (f :-> I) :-> I)))) -> p i (o |> P (Mu f))
 
 
 instance Recursive (Seq Δ) where
@@ -797,9 +796,7 @@ instance Bitraversable p => Traversable (J p) where
 
 newtype (f :-> g) a b = Fn (f a -> g b)
 
-infixr 5 :->, .->
-
-type (f .-> g) = J (f :-> g)
+infixr 5 :->
 
 
 class Conj f g c | c -> f g where
