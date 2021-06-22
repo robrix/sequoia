@@ -431,7 +431,7 @@ class (Core p, Structural p, Negative p) => Multiplicative p where
   oneR :: p i (o |> One)
 
   parL :: (Neg a, Neg b) => p (a <| i) o -> p (b <| i) o -> p (a ⅋ b <| i) o
-  parL p1 p2 = parLTensor (negateR p1 ⊗ negateR p2)
+  parL p1 p2 = parLTensor (tensorR (negateR p1) (negateR p2))
   parLTensor :: (Neg a, Neg b) => p i (o |> Negate a ⊗ Negate b) -> p (a ⅋ b <| i) o
   parLTensor p = wkL p >>> tensorL (negateL (negateL (parL (wkR init) init)))
   parR :: (Neg a, Neg b) => p i (o |> a |> b) -> p i (o |> a ⅋ b)
@@ -443,8 +443,8 @@ class (Core p, Structural p, Negative p) => Multiplicative p where
   tensorLPar :: (Pos a, Pos b) => p i (o |> Not a ⅋ Not b) -> p (a ⊗ b <| i) o
   tensorLPar p = wkL p >>> parL (notL (tensorL init)) (notL (tensorL (wkL init)))
   tensorL' :: (Pos a, Pos b) => p (a ⊗ b <| i) o -> p (a <| b <| i) o
-  tensorL' p = init ⊗ wkL init >>> popL (wkL . wkL . pushL p)
-  (⊗) :: (Pos a, Pos b) => p i (o |> a) -> p i (o |> b) -> p i (o |> a ⊗ b)
+  tensorL' p = tensorR init (wkL init) >>> popL (wkL . wkL . pushL p)
+  tensorR :: (Pos a, Pos b) => p i (o |> a) -> p i (o |> b) -> p i (o |> a ⊗ b)
 
 
 instance Multiplicative (Seq Δ) where
@@ -458,7 +458,7 @@ instance Multiplicative (Seq Δ) where
   parR ab = either (>>= (pure . inl')) (pure . inr') <$> ab
 
   tensorL p = popL (pushL2 p . exl' <*> exr')
-  (⊗) = liftA2 (liftA2 inlr')
+  tensorR = liftA2 (liftA2 inlr')
 
 
 -- Implicative
