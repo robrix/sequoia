@@ -60,19 +60,7 @@ module Focalized.Calculus
 , J(..)
 , (:->)(..)
 , Conj(..)
-, foldMapConj
-, bifoldMapConj
-, fmapConj
-, bimapConj
-, traverseConj
-, bitraverseConj
 , Disj(..)
-, foldMapDisj
-, bifoldMapDisj
-, fmapDisj
-, bimapDisj
-, traverseDisj
-, bitraverseDisj
 ) where
 
 import Control.Applicative (liftA2)
@@ -791,24 +779,6 @@ instance Conj I I (,) where
   exl = I . fst
   exr = I . snd
 
-foldMapConj :: (Foldable g, Conj f g p, Monoid m) => (b -> m) -> (a `p` b) -> m
-foldMapConj f = foldMap f . exr
-
-bifoldMapConj :: (Foldable f, Foldable g, Conj f g p, Monoid m) => (a -> m) -> (b -> m) -> (a `p` b) -> m
-bifoldMapConj f g = (<>) <$> foldMap f . exl <*> foldMap g . exr
-
-fmapConj :: (Functor g, Conj f g p) => (b -> b') -> (a `p` b) -> (a `p` b')
-fmapConj f = inlr <$> exl <*> fmap f . exr
-
-bimapConj :: (Functor f, Functor g, Conj f g p) => (a -> a') -> (b -> b') -> (a `p` b) -> (a' `p` b')
-bimapConj f g = inlr <$> fmap f . exl <*> fmap g . exr
-
-traverseConj :: (Traversable g, Conj f g p, Applicative m) => (b -> m b') -> (a `p` b) -> m (a `p` b')
-traverseConj f c = inlr (exl c) <$> traverse f (exr c)
-
-bitraverseConj :: (Traversable f, Traversable g, Conj f g p, Applicative m) => (a -> m a') -> (b -> m b') -> (a `p` b) -> m (a' `p` b')
-bitraverseConj f g c = inlr <$> traverse f (exl c) <*> traverse g (exr c)
-
 
 class Conj1 c where
   inlr1 :: f a -> g a -> (f `c` g) a
@@ -840,24 +810,6 @@ instance Disj I I Either where
   inl = Left  . getI
   inr = Right . getI
   exlr f g = either (f . I) (g . I)
-
-foldMapDisj :: (Foldable g, Disj f g p, Monoid m) => (b -> m) -> (a `p` b) -> m
-foldMapDisj f = exlr (const mempty) (foldMap f)
-
-bifoldMapDisj :: (Foldable f, Foldable g, Disj f g p, Monoid m) => (a -> m) -> (b -> m) -> (a `p` b) -> m
-bifoldMapDisj f g = exlr (foldMap f) (foldMap g)
-
-fmapDisj :: (Functor g, Disj f g p) => (b -> b') -> (a `p` b) -> (a `p` b')
-fmapDisj f = exlr inl (inr . fmap f)
-
-bimapDisj :: (Functor f, Functor g, Disj f g p) => (a -> a') -> (b -> b') -> (a `p` b) -> (a' `p` b')
-bimapDisj f g = exlr (inl . fmap f) (inr . fmap g)
-
-traverseDisj :: (Traversable g, Disj f g p, Applicative m) => (b -> m b') -> (a `p` b) -> m (a `p` b')
-traverseDisj f = exlr (pure . inl) (fmap inr . traverse f)
-
-bitraverseDisj :: (Traversable f, Traversable g, Disj f g p, Applicative m) => (a -> m a') -> (b -> m b') -> (a `p` b) -> m (a' `p` b')
-bitraverseDisj f g = exlr (fmap inl . traverse f) (fmap inr . traverse g)
 
 
 class Disj1 d where
