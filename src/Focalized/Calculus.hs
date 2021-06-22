@@ -34,7 +34,6 @@ module Focalized.Calculus
 , type (⅋)
 , type (⊗)
 , (:⊗)(..)
-, type (.⊗)
 , Multiplicative(..)
   -- * Implicative
 , type (-->)(..)
@@ -444,7 +443,7 @@ instance Disj f g (f :⅋ g) where
 
 type (⊗) = I :⊗ I
 
-infixr 7 ⊗, :⊗, .⊗
+infixr 7 ⊗, :⊗
 
 
 data (f :⊗ g) a b = !(f a) :⊗ !(g b)
@@ -463,9 +462,6 @@ instance Conj f g (f :⊗ g) where
   inlr = (:⊗)
   exl (l :⊗ _) = l
   exr (_ :⊗ r) = r
-
-
-type (f .⊗ g) = J (f :⊗ g)
 
 
 class (Core p, Structural p, Negative p) => Multiplicative p where
@@ -612,12 +608,12 @@ instance Quantifying (Seq Δ) where
 
 -- Recursive
 
-newtype Nu f = Nu { getNu :: Exists (J (I :-> f) .⊗ I) }
+newtype Nu f = Nu { getNu :: Exists (J (J (I :-> f) :⊗ I)) }
 
-nu :: N (Exists (J (I :-> f) .⊗ I)) -> N (Nu f)
+nu :: N (Exists (J (J (I :-> f) :⊗ I))) -> N (Nu f)
 nu = fmap Nu
 
-runNu :: N (Nu f) -> N (Exists (J (I :-> f) .⊗ I))
+runNu :: N (Nu f) -> N (Exists (J (J (I :-> f) :⊗ I)))
 runNu = fmap getNu
 
 
@@ -631,8 +627,8 @@ runMu = fmap getMu
 
 
 class (Core p, Structural p) => Recursive p where
-  nuL :: p (N (Exists (J (I :-> f) .⊗ I)) <| i) o -> p (N (Nu f) <| i) o
-  nuR :: p i (o |> N (Exists (J (I :-> f) .⊗ I))) -> p i (o |> N (Nu f))
+  nuL :: p (N (Exists (J (J (I :-> f) :⊗ I))) <| i) o -> p (N (Nu f) <| i) o
+  nuR :: p i (o |> N (Exists (J (J (I :-> f) :⊗ I)))) -> p i (o |> N (Nu f))
 
   muL :: p (P (ForAll (J (J (f :-> I) :-> I))) <| i) o -> p (P (Mu f) <| i) o
   muR :: p i (o |> P (ForAll (J (J (f :-> I) :-> I)))) -> p i (o |> P (Mu f))
