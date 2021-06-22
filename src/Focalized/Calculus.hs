@@ -51,6 +51,7 @@ module Focalized.Calculus
 , Mu(..)
 , mu
 , Nu(..)
+, nu
   -- * Polarity
 , N(..)
 , P(..)
@@ -597,6 +598,9 @@ mu = fmap Mu
 
 
 newtype Nu f = Nu (Exists ((I .-> f) .⊗ I))
+
+nu :: P (Exists ((I .-> f) .⊗ I)) -> P (Nu f)
+nu = fmap Nu
 
 
 -- Polarity
