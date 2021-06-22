@@ -285,7 +285,7 @@ type (a & b) = (K a :& K b) ()
 infixr 6 &, :&
 
 
-newtype (f :& g) a = With1 (forall r . (f a -> g a -> r) -> r)
+newtype (f :& g) a = With (forall r . (f a -> g a -> r) -> r)
   deriving (Functor)
 
 instance (Neg (f a), Neg (g a)) => Polarized N ((f :& g) a) where
@@ -297,9 +297,9 @@ instance (Traversable f, Traversable g) => Traversable (f :& g) where
   traverse = traverseConj
 
 instance Conj (:&) where
-  inlr a b = With1 $ \ f -> f a b
-  exl (With1 run) = run const
-  exr (With1 run) = run (const id)
+  inlr a b = With $ \ f -> f a b
+  exl (With run) = run const
+  exr (With run) = run (const id)
 
 
 type (a ⊕ b) = (K a :⊕ K b) ()
@@ -308,18 +308,18 @@ infixr 6 ⊕, :⊕
 
 
 data (f :⊕ g) a
-  = InL1 !(f a)
-  | InR1 !(g a)
+  = InL !(f a)
+  | InR !(g a)
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
 instance (Pos (f a), Pos (g a)) => Polarized P ((f :⊕ g) a)
 
 instance Disj (:⊕) where
-  inl = InL1
-  inr = InR1
+  inl = InL
+  inr = InR
   exlr ifl ifr = \case
-    InL1 l -> ifl l
-    InR1 r -> ifr r
+    InL l -> ifl l
+    InR r -> ifr r
 
 
 class (Core p, Structural p, Negative p) => Additive p where
@@ -386,7 +386,7 @@ type (a ⅋ b) = (K a :⅋ K b) ()
 infixr 7 ⅋, :⅋
 
 
-newtype (f :⅋ g) a = Par1 (forall r . (f a -> r) -> (g a -> r) -> r)
+newtype (f :⅋ g) a = Par (forall r . (f a -> r) -> (g a -> r) -> r)
   deriving (Functor)
 
 instance (Neg (f a), Neg (g a)) => Polarized N ((f :⅋ g) a) where
@@ -398,9 +398,9 @@ instance (Traversable f, Traversable g) => Traversable (f :⅋ g) where
   traverse = traverseDisj
 
 instance Disj (:⅋) where
-  inl l = Par1 $ \ ifl _ -> ifl l
-  inr r = Par1 $ \ _ ifr -> ifr r
-  exlr ifl ifr (Par1 run) = run ifl ifr
+  inl l = Par $ \ ifl _ -> ifl l
+  inr r = Par $ \ _ ifr -> ifr r
+  exlr ifl ifr (Par run) = run ifl ifr
 
 
 type (a ⊗ b) = (K a :⊗ K b) ()
