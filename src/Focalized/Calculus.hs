@@ -437,7 +437,7 @@ class (Core p, Structural p, Negative p) => Multiplicative p where
   parLTensor p = wkL p >>> tensorL (negateL (negateL (parL (wkR init) init)))
   parR :: (Neg a, Neg b) => p i (o |> a |> b) -> p i (o |> a ⅋ b)
   parR' :: (Neg a, Neg b) => p i (o |> a ⅋ b) -> p i (o |> a |> b)
-  parR' p = exR (wkR (exR (wkR p))) >>> parL (wkR init) init
+  parR' p = poppedR (wkR . wkR) p >>> parL (wkR init) init
 
   tensorL :: (Pos a, Pos b) => p (a <| b <| i) o -> p (a ⊗ b <| i) o
   tensorL = tensorLPar . parR . notR . notR
