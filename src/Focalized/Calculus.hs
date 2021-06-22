@@ -426,7 +426,7 @@ instance Foldable g => Foldable ((f :⅋ g) a) where
   foldMap f = exlr (const mempty) (foldMap f)
 
 instance Traversable g => Traversable ((f :⅋ g) a) where
-  traverse f (Par1 run) = run (pure . inl) (fmap inr . traverse f)
+  traverse f = exlr (pure . inl) (fmap inr . traverse f)
 
 instance (Foldable f, Foldable g) => Bifoldable (f :⅋ g) where
   bifoldMap f g = exlr (foldMap f) (foldMap g)
@@ -435,7 +435,7 @@ instance (Functor f, Functor g) => Bifunctor (f :⅋ g) where
   bimap f g = exlr (inl . fmap f) (inr . fmap g)
 
 instance (Traversable f, Traversable g) => Bitraversable (f :⅋ g) where
-  bitraverse f g (Par1 run) = run (fmap inl . traverse f) (fmap inr . traverse g)
+  bitraverse f g = exlr (fmap inl . traverse f) (fmap inr . traverse g)
 
 instance Disj f g (f :⅋ g) where
   inl l = Par1 $ \ ifl _ -> ifl l
