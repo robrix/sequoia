@@ -559,7 +559,7 @@ instance Quantifying (Seq Δ) where
 
 -- Recursive
 
-newtype Nu f = Nu { getNu :: Exists ((I :-> f) :⊗ I) }
+newtype Nu f = Nu { getNu :: Exists (Down · (I :-> f) :⊗ I) }
 
 instance Polarized N (Nu f) where
 
@@ -570,9 +570,9 @@ instance Polarized N (Mu f) where
 
 
 class (Core p, Structural p) => Recursive p where
-  nuL :: (forall x . Neg (f x)) => p (Exists ((I :-> f) :⊗ I) <| i) o -> p (Nu f <| i) o
-  nuR :: (forall x . Neg (f x)) => p i (o |> Exists ((I :-> f) :⊗ I)) -> p i (o |> Nu f)
-  nuR' :: (forall x . Neg (f x)) => p i (o |> Nu f) -> p i (o |> Exists ((I :-> f) :⊗ I))
+  nuL :: (forall x . Neg (f x)) => p (Exists (Down · (I :-> f) :⊗ I) <| i) o -> p (Nu f <| i) o
+  nuR :: (forall x . Neg (f x)) => p i (o |> Exists (Down · (I :-> f) :⊗ I)) -> p i (o |> Nu f)
+  nuR' :: (forall x . Neg (f x)) => p i (o |> Nu f) -> p i (o |> Exists (Down · (I :-> f) :⊗ I))
   nuR' p = exR (wkR p) >>> nuL init
 
   muL :: (forall x . Pos (f x)) => p (ForAll (Down · (f :-> I) :-> I) <| i) o -> p (Mu f <| i) o
