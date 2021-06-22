@@ -25,14 +25,14 @@ module Focalized.Calculus
   -- * Additive
 , Top(..)
 , Zero
-, type (&)(..)
-, type (⊕)(..)
+, type (&)
+, type (⊕)
 , Additive(..)
   -- * Multiplicative
 , Bot
 , One(..)
-, type (⅋)(..)
-, type (⊗)(..)
+, type (⅋)
+, type (⊗)
 , (:⊗)(..)
 , type (.⊗)
 , Multiplicative(..)
@@ -303,13 +303,9 @@ absurdP :: P Zero -> a
 absurdP = \case
 
 
-newtype a & b = With { getWith :: (I :& I) a b }
-  deriving (Conj I I, Bifoldable, Bifunctor, Foldable, Functor, Traversable)
+type (&) = I :& I
 
 infixr 6 &, :&
-
-instance Bitraversable (&) where
-  bitraverse = bitraverseConj
 
 
 newtype (f :& g) a b = With1 (forall r . (f a -> g b -> r) -> r)
@@ -336,13 +332,9 @@ instance Conj f g (f :& g) where
   exr (With1 run) = run (const id)
 
 
-newtype a ⊕ b = Sum { getSum :: (I :⊕ I) a b }
-  deriving (Disj I I, Bifoldable, Bifunctor, Eq, Foldable, Functor, Ord, Show, Traversable)
+type (⊕) = I :⊕ I
 
 infixr 6 ⊕, :⊕
-
-instance Bitraversable (⊕) where
-  bitraverse f g = fmap Sum . bitraverse f g . getSum
 
 
 data (f :⊕ g) a b
@@ -422,13 +414,9 @@ data One = One
   deriving (Eq, Ord, Show)
 
 
-newtype a ⅋ b = Par { getPar :: (I :⅋ I) a b }
-  deriving (Bifunctor, Bifoldable, Disj I I, Foldable, Functor, Traversable)
+type (⅋) = I :⅋ I
 
 infixr 7 ⅋, :⅋
-
-instance Bitraversable (⅋) where
-  bitraverse f g = fmap Par . bitraverse f g . getPar
 
 
 newtype (f :⅋ g) a b = Par1 (forall r . (f a -> r) -> (g b -> r) -> r)
@@ -455,13 +443,9 @@ instance Disj f g (f :⅋ g) where
   exlr ifl ifr (Par1 run) = run ifl ifr
 
 
-newtype a ⊗ b = Tensor { getTensor :: (I :⊗ I) a b }
-  deriving (Bifoldable, Bifunctor, Conj I I, Eq, Foldable, Functor, Ord, Show, Traversable)
+type (⊗) = I :⊗ I
 
 infixr 7 ⊗, :⊗, .⊗
-
-instance Bitraversable (⊗) where
-  bitraverse = bitraverseConj
 
 
 data (f :⊗ g) a b = !(f a) :⊗ !(g b)
