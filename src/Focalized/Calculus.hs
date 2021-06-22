@@ -775,6 +775,12 @@ instance Distributive I where
   collect f  = I . fmap (getI . f)
   distribute = I . fmap  getI
 
+instance Adjunction I I where
+  unit   =    I .    I
+  counit = getI . getI
+  leftAdjunct  f =    I . f .    I
+  rightAdjunct f = getI . f . getI
+
 
 newtype J p a = J { getJ :: p a a }
 
