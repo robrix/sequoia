@@ -739,6 +739,8 @@ instance Adjunction I I where
 newtype K a b = K { getK :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
+instance (Polarity p, Polarized p a) => Polarized p (K a b) where
+
 
 newtype (f · g) a = C { getC :: f (g a) }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
