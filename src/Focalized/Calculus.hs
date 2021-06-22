@@ -54,6 +54,9 @@ module Focalized.Calculus
 , Up(..)
 , Down(..)
 , Shifting(..)
+  -- * Utilities
+, I(..)
+, (:->)(..)
 ) where
 
 import Control.Applicative (liftA2)
@@ -66,7 +69,7 @@ import Data.Distributive
 import Data.Functor.Adjunction
 import Data.Functor.Identity
 import Data.Functor.Rep
-import Data.Profunctor
+import Data.Profunctor hiding ((:->))
 import Data.Traversable (foldMapDefault)
 import Prelude hiding (init)
 
@@ -575,7 +578,7 @@ instance Quantifying (Seq Δ) where
 
 -- Recursive
 
-newtype Mu f = Mu (forall r . (f r -> r) -> r)
+newtype Mu f = Mu (ForAll ((f :-> I) :-> I))
 
 
 data Nu f = forall r . Nu (r -> f r) r
@@ -683,6 +686,14 @@ instance Shifting (Seq Δ) where
 
 cont :: ((Seq r i o -> Seq r Γ Δ) -> a) -> Seq Δ i (o |> a)
 cont f = Seq $ \ k -> k . Right . f . flip dimap (k . Left) . const
+
+
+newtype I a = I { getI :: a }
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+
+newtype (f :-> g) a = Fn (f a -> g a)
+
+infixr 5 :->
 
 
 class Conj c where
