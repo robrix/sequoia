@@ -74,6 +74,7 @@ import Data.Distributive
 import Data.Functor.Adjunction
 import Data.Functor.Identity
 import Data.Functor.Rep
+import Data.Kind (Constraint)
 import Data.Profunctor hiding ((:->))
 import Prelude hiding (init)
 
@@ -516,37 +517,38 @@ instance Implicative (Seq Δ) where
 
 -- Quantifying
 
-newtype ForAll f = ForAll { runForAll :: forall x . f x }
+newtype ForAll p f = ForAll { runForAll :: forall x . Polarized p x => f x }
 
-instance Polarized N (ForAll f)
+instance (forall x . Polarized n x => Neg (f x)) => Polarized N (ForAll p f)
 
 
-data Exists f = forall x . Exists (f x)
+data Exists p f = forall x . Polarized p x => Exists (f x)
 
-instance Polarized P (Exists f)
+instance (forall x . Polarized n x => Pos (f x)) => Polarized P (Exists p f)
 
-runExists :: (forall x . f x -> r) -> Exists f -> r
+runExists :: (forall x . Polarized p x => f x -> r) -> Exists p f -> r
 runExists f (Exists r) = f r
 
 
+type ForAllC cx cf f = (forall x . cx x => cf (f x)) :: Constraint
+
+
 class (Core p, Structural p, Negative p, Shifting p) => Quantifying p where
-  forAllL :: (forall x . Neg (f x)) => p (f x <| i) o -> p (ForAll f <| i) o
-  forAllLExists :: (forall x . Neg (f x)) => p i (o |> Exists (Negate · f)) -> p (ForAll f <| i) o
+  forAllL :: (Polarized n x, Neg (f x)) => p (f x <| i) o -> p (ForAll n f <| i) o
+  forAllLExists :: ForAllC (Polarized n) Neg f => p i (o |> Exists n (Negate · f)) -> p (ForAll n f <| i) o
   forAllLExists p = wkL p >>> existsL (mapL getC (negateL (forAllL init)))
-  -- FIXME: the correct signature should be p i (o |> (forall x . f x)) -> p i (o |> ForAll f), but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
-  -- forAllR :: (forall x . Neg (f x)) => (forall x . p i (o |> f x)) -> p i (o |> ForAll f)
-  forAllR' :: (forall x . Neg (f x)) => p i (o |> ForAll f) -> (forall x . p i (o |> f x))
+  -- FIXME: the correct signature should be p i (o |> (forall x . Polarized n x => f x)) -> p i (o |> ForAll f), but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
+  -- forAllR :: ForAllC (Polarized n) Neg f => (forall x . Polarized n x => p i (o |> f x)) -> p i (o |> ForAll n f)
+  forAllR' :: ForAllC (Polarized n) Neg f => p i (o |> ForAll n f) -> (forall x . Polarized n x => p i (o |> f x))
   forAllR' p = exR (wkR p) >>> forAllL init
 
   -- FIXME: the correct signature should be p ((forall x . f x) <| i) o -> p (Exists f <| i) o, but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
-  existsL :: (forall x . Pos (f x)) => (forall x . p (f x <| i) o) -> p (Exists f <| i) o
-  existsL' :: (forall x . Pos (f x)) => p (Exists f <| i) o -> (forall x . p (f x <| i) o)
+  existsL :: (forall x . Polarized n x => p (f x <| i) o) -> p (Exists n f <| i) o
+  existsL' :: ForAllC (Polarized n) Pos f => p (Exists n f <| i) o -> (forall x . Polarized n x => p (f x <| i) o)
   existsL' p = existsR init >>> exL (wkL p)
-  existsLForAll :: (forall x . Pos (f x)) => p i (o |> ForAll (Not · f)) -> p (Exists f <| i) o
+  existsLForAll :: ForAllC (Polarized n) Pos f => p i (o |> ForAll n (Not · f)) -> p (Exists n f <| i) o
   existsLForAll p = wkL p >>> exL (existsL (exL (forAllL (mapL getC (notL init)))))
-  existsR :: p i (o |> f x) -> p i (o |> Exists f)
-  existsRForAll :: (forall x . Pos (f x)) => p i (o |> ForAll (Up · f)) -> p i (o |> Exists f)
-  existsRForAll = existsR . upR' . mapR getC . forAllR'
+  existsR :: (Polarized n x, Pos (f x)) => p i (o |> f x) -> p i (o |> Exists n f)
 
 
 instance Quantifying (Seq Δ) where
@@ -559,26 +561,26 @@ instance Quantifying (Seq Δ) where
 
 -- Recursive
 
-newtype Nu f = Nu { getNu :: Exists (Down · (I :-> f) :⊗ I) }
+newtype Nu f = Nu { getNu :: Exists P (Down · (I :-> f) :⊗ I) }
 
 instance Polarized N (Nu f) where
 
 
-newtype Mu f = Mu { getMu :: ForAll (Down · (f :-> I) :-> I) }
+newtype Mu f = Mu { getMu :: ForAll N (Down · (f :-> I) :-> I) }
 
 instance Polarized N (Mu f) where
 
 
-class (Core p, Structural p) => Recursive p where
-  nuL :: (forall x . Neg (f x)) => p (Exists (Down · (I :-> f) :⊗ I) <| i) o -> p (Nu f <| i) o
-  nuR :: (forall x . Neg (f x)) => p i (o |> Exists (Down · (I :-> f) :⊗ I)) -> p i (o |> Nu f)
-  nuR' :: (forall x . Neg (f x)) => p i (o |> Nu f) -> p i (o |> Exists (Down · (I :-> f) :⊗ I))
+class (Core p, Structural p, Quantifying p) => Recursive p where
+  nuL :: (forall x . Neg (f x)) => p (Exists P (Down · (I :-> f) :⊗ I) <| i) o -> p (Nu f <| i) o
+  nuR :: (forall x . Neg (f x)) => p i (o |> Exists P (Down · (I :-> f) :⊗ I)) -> p i (o |> Nu f)
+  nuR' :: (forall x . Neg (f x)) => p i (o |> Nu f) -> p i (o |> Exists P (Down · (I :-> f) :⊗ I))
   nuR' p = exR (wkR p) >>> nuL init
 
-  muL :: (forall x . Pos (f x)) => p (ForAll (Down · (f :-> I) :-> I) <| i) o -> p (Mu f <| i) o
-  muL' :: (forall x . Pos (f x)) => p (Mu f <| i) o -> p (ForAll (Down · (f :-> I) :-> I) <| i) o
+  muL :: (forall x . Pos (f x)) => p (ForAll N (Down · (f :-> I) :-> I) <| i) o -> p (Mu f <| i) o
+  muL' :: (forall x . Pos (f x)) => p (Mu f <| i) o -> p (ForAll N (Down · (f :-> I) :-> I) <| i) o
   muL' p = muR init >>> exL (wkL p)
-  muR :: (forall x . Pos (f x)) => p i (o |> ForAll (Down · (f :-> I) :-> I)) -> p i (o |> Mu f)
+  muR :: (forall x . Pos (f x)) => p i (o |> ForAll N (Down · (f :-> I) :-> I)) -> p i (o |> Mu f)
 
 
 instance Recursive (Seq Δ) where
