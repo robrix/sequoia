@@ -314,31 +314,22 @@ instance Conj1 (:&) where
   exr1 (With1 run) = run (const id)
 
 
-type (⊕) = I :⊕ I
+type (a ⊕ b) = (K a :⊕ K b) ()
 
 infixr 6 ⊕, :⊕
 
 
-data (f :⊕ g) a b
+data (f :⊕ g) a
   = InL1 !(f a)
-  | InR1 !(g b)
+  | InR1 !(g a)
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
-instance (Pos (f a), Pos (g b)) => Polarized P ((f :⊕ g) a b)
+instance (Pos (f a), Pos (g a)) => Polarized P ((f :⊕ g) a)
 
-instance (Foldable f, Foldable g) => Bifoldable (f :⊕ g) where
-  bifoldMap = bifoldMapDisj
-
-instance (Functor f, Functor g) => Bifunctor (f :⊕ g) where
-  bimap = bimapDisj
-
-instance (Traversable f, Traversable g) => Bitraversable (f :⊕ g) where
-  bitraverse = bitraverseDisj
-
-instance Disj f g (f :⊕ g) where
-  inl = InL1
-  inr = InR1
-  exlr ifl ifr = \case
+instance Disj1 (:⊕) where
+  inl1 = InL1
+  inr1 = InR1
+  exlr1 ifl ifr = \case
     InL1 l -> ifl l
     InR1 r -> ifr r
 
@@ -377,9 +368,9 @@ instance Additive (Seq Δ) where
 
   topR = pure (pure Top)
 
-  sumL a b = popL (exlrI (pushL a) (pushL b))
-  sumR1 = mapR inlI
-  sumR2 = mapR inrI
+  sumL a b = popL (exlr' (pushL a) (pushL b))
+  sumR1 = mapR inl'
+  sumR2 = mapR inr'
 
   withL1 p = popL (pushL p . exl')
   withL2 p = popL (pushL p . exr')
@@ -849,15 +840,6 @@ instance Disj I I Either where
   inl = Left  . getI
   inr = Right . getI
   exlr f g = either (f . I) (g . I)
-
-inlI :: Disj I I d => a -> a `d` b
-inlI = inl . I
-
-inrI :: Disj I I d => b -> a `d` b
-inrI = inr . I
-
-exlrI :: Disj I I d => (a -> r) -> (b -> r) -> ((a `d` b) -> r)
-exlrI f g = exlr (f . getI) (g . getI)
 
 foldMapDisj :: (Foldable g, Disj f g p, Monoid m) => (b -> m) -> (a `p` b) -> m
 foldMapDisj f = exlr (const mempty) (foldMap f)
