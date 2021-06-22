@@ -304,12 +304,12 @@ instance Bifunctor (&) where
   bimap = bimapDefault
 
 instance Bitraversable (&) where
-  bitraverse f g w = inlr <$> f (exl w) <*> g (exr w)
+  bitraverse f g w = inlr <$> traverse f (exl w) <*> traverse g (exr w)
 
-instance Conj (&) where
-  inlr a b = With $ \ f -> f a b
-  exl (With run) = run const
-  exr (With run) = run (const id)
+instance Conj I I (&) where
+  inlr (I a) (I b) = With $ \ f -> f a b
+  exl (With run) = I (run const)
+  exr (With run) = I (run (const id))
 
 
 data a ⊕ b
@@ -376,9 +376,9 @@ instance Additive (Seq Δ) where
   sumR1 = mapR inlP
   sumR2 = mapR inrP
 
-  withL1 p = popL (pushL p . exlP)
-  withL2 p = popL (pushL p . exrP)
-  (&) = liftA2 (liftA2 inlrP)
+  withL1 p = popL (pushL p . fmap getI . exlP)
+  withL2 p = popL (pushL p . fmap getI . exrP)
+  (&) = liftA2 (liftA2 (\ a b -> inlrP (I <$> a) (I <$> b)))
 
 
 -- Multiplicative
@@ -419,27 +419,29 @@ instance Disj (⅋) where
   exlr ifl ifr (Par run) = run ifl ifr
 
 
-data a ⊗ b = !a :⊗ !b
-  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+newtype a ⊗ b = Tensor { getTensor :: (I :⊗ I) a b }
+  deriving (Conj I I, Eq, Foldable, Functor, Ord, Show, Traversable)
 
 infixr 7 ⊗, :⊗, .⊗
 
-instance Bifoldable (⊗) where
-  bifoldMap = bifoldMapDefault
 
-instance Bifunctor (⊗) where
-  bimap = bimapDefault
+data (f :⊗ g) a b = !(f a) :⊗ !(g b)
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
-instance Bitraversable (⊗) where
-  bitraverse f g (a :⊗ b) = (:⊗) <$> f a <*> g b
+instance (Foldable f, Foldable g) => Bifoldable (f :⊗ g) where
+  bifoldMap f g = (foldMap f &&& foldMap g) (<>)
 
-instance Conj (⊗) where
+instance (Functor f, Functor g) => Bifunctor (f :⊗ g) where
+  bimap f g = fmap f *** fmap g
+
+instance (Traversable f, Traversable g) => Bitraversable (f :⊗ g) where
+  bitraverse f g (a :⊗ b) = (:⊗) <$> traverse f a <*> traverse g b
+
+instance Conj f g (f :⊗ g) where
   inlr = (:⊗)
   exl (l :⊗ _) = l
   exr (_ :⊗ r) = r
 
-
-newtype (f :⊗ g) a b = Tensor1 { getTensor1 :: f a ⊗ g b }
 
 type (f .⊗ g) = J (f :⊗ g)
 
@@ -482,8 +484,8 @@ instance Multiplicative (Seq Δ) where
   parL a b = popL (exlrP (pushL a) (pushL b))
   parR ab = either (>>= (pure . inlP)) (pure . inrP) <$> ab
 
-  tensorL p = popL (pushL2 p . exlP <*> exrP)
-  (⊗) = liftA2 (liftA2 inlrP)
+  tensorL p = popL (pushL2 p . fmap getI . exlP <*> fmap getI . exrP)
+  (⊗) = liftA2 (liftA2 (\ a b -> inlrP (I <$> a) (I <$> b)))
 
 
 -- Implicative
@@ -724,23 +726,29 @@ infixr 5 :->, .->
 type (f .-> g) = J (f :-> g)
 
 
-class Conj c where
-  inlr :: a -> b -> a `c` b
-  exl :: (a `c` b) -> a
-  exr :: (a `c` b) -> b
+class Conj f g c | c -> f g where
+  inlr :: f a -> g b -> a `c` b
+  exl :: (a `c` b) -> f a
+  exr :: (a `c` b) -> g b
 
-instance Conj (,) where
-  inlr = (,)
-  exl = fst
-  exr = snd
+instance Conj I I (,) where
+  inlr (I a) (I b) = (a, b)
+  exl = I . fst
+  exr = I . snd
 
-inlrP :: (Conj c, Applicative p) => p a -> p b -> p (a `c` b)
+(***) :: (Conj f g r, Conj f' g' r') => (f a -> f' a') -> (g b -> g' b') -> (a `r` b) -> (a' `r'` b')
+f *** g = inlr <$> f . exl <*> g . exr
+
+(&&&) :: Conj f g r => (f a -> c) -> (g b -> d) -> (c -> d -> e) -> (a `r` b) -> e
+(f &&& g) h = h <$> f . exl <*> g . exr
+
+inlrP :: (Conj f g c, Applicative p) => p (f a) -> p (g b) -> p (a `c` b)
 inlrP = liftA2 inlr
 
-exlP :: (Conj c, Functor p) => p (a `c` b) -> p a
+exlP :: (Conj f g c, Functor p) => p (a `c` b) -> p (f a)
 exlP = fmap exl
 
-exrP :: (Conj c, Functor p) => p (a `c` b) -> p b
+exrP :: (Conj f g c, Functor p) => p (a `c` b) -> p (g b)
 exrP = fmap exr
 
 
