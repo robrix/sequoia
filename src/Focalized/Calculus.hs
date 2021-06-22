@@ -57,6 +57,7 @@ module Focalized.Calculus
   -- * Polarity
 , N(..)
 , P(..)
+, Polarized(..)
 , Neg(..)
 , Pos(..)
 , Up(..)
@@ -702,6 +703,10 @@ instance Adjunction P N where
   counit = getN . getP
   leftAdjunct  f =    N . f .    P
   rightAdjunct f = getN . f . getP
+
+
+class Polarized p c | c -> p where
+  polarize :: c -> p c
 
 
 class Neg n where
