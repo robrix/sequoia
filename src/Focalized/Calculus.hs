@@ -299,19 +299,16 @@ instance Conj (&) where
   exr (With run) = run (const id)
 
 
-type (a ⊕ b) = (K a :⊕ K b) ()
-
-infixr 6 ⊕, :⊕
-
-
-data (f :⊕ g) a
-  = InL !(f a)
-  | InR !(g a)
+data a ⊕ b
+  = InL !a
+  | InR !b
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
-instance (Pos (f a), Pos (g a)) => Polarized P ((f :⊕ g) a)
+infixr 6 ⊕
 
-instance Disj (:⊕) where
+instance (Pos a, Pos b) => Polarized P (a ⊕ b)
+
+instance Disj (⊕) where
   inl = InL
   inr = InR
   exlr ifl ifr = \case
@@ -353,9 +350,9 @@ instance Additive (Seq Δ) where
 
   topR = pure (pure Top)
 
-  sumL a b = popL (exlr' (pushL a) (pushL b))
-  sumR1 = mapR inl'
-  sumR2 = mapR inr'
+  sumL a b = popL (exlr (pushL a) (pushL b))
+  sumR1 = mapR inl
+  sumR2 = mapR inr
 
   withL1 p = popL (pushL p . exl)
   withL2 p = popL (pushL p . exr)
@@ -378,23 +375,20 @@ data One = One
 instance Polarized P One where
 
 
-type (a ⅋ b) = (K a :⅋ K b) ()
-
-infixr 7 ⅋, :⅋
-
-
-newtype (f :⅋ g) a = Par (forall r . (f a -> r) -> (g a -> r) -> r)
+newtype a ⅋ b = Par (forall r . (a -> r) -> (b -> r) -> r)
   deriving (Functor)
 
-instance (Neg (f a), Neg (g a)) => Polarized N ((f :⅋ g) a) where
+infixr 7 ⅋
 
-instance (Foldable f, Foldable g) => Foldable (f :⅋ g) where
+instance (Neg a, Neg b) => Polarized N (a ⅋ b) where
+
+instance Foldable ((⅋) f) where
   foldMap = foldMapDisj
 
-instance (Traversable f, Traversable g) => Traversable (f :⅋ g) where
+instance Traversable ((⅋) f) where
   traverse = traverseDisj
 
-instance Disj (:⅋) where
+instance Disj (⅋) where
   inl l = Par $ \ ifl _ -> ifl l
   inr r = Par $ \ _ ifr -> ifr r
   exlr ifl ifr (Par run) = run ifl ifr
@@ -448,8 +442,8 @@ instance Multiplicative (Seq Δ) where
   oneL = wkL
   oneR = pure (pure One)
 
-  parL a b = popL (exlr' (pushL a) (pushL b))
-  parR ab = either (>>= (pure . inl')) (pure . inr') <$> ab
+  parL a b = popL (exlr (pushL a) (pushL b))
+  parR ab = either (>>= (pure . inl)) (pure . inr) <$> ab
 
   tensorL p = popL (pushL2 p . exl <*> exr)
   tensorR = liftA2 (liftA2 inlr)
@@ -794,21 +788,12 @@ traverseConj f c = inlr (exl c) <$> f (exr c)
 
 
 class Disj d where
-  inl :: f a -> (f `d` g) a
-  inr :: g a -> (f `d` g) a
-  exlr :: (f a -> r) -> (g a -> r) -> ((f `d` g) a -> r)
+  inl :: a -> (a `d` b)
+  inr :: b -> (a `d` b)
+  exlr :: (a -> r) -> (b -> r) -> ((a `d` b) -> r)
 
-inl' :: Disj d => a -> (K a `d` K b) x
-inl' = inl . K
+foldMapDisj :: (Disj p, Monoid m) => (b -> m) -> (a `p` b) -> m
+foldMapDisj = exlr (const mempty)
 
-inr' :: Disj d => b -> (K a `d` K b) x
-inr' = inr . K
-
-exlr' :: Disj d => (a -> r) -> (b -> r) -> ((K a `d` K b) x -> r)
-exlr' f g = exlr (f . getK) (g . getK)
-
-foldMapDisj :: (Foldable f, Foldable g, Disj p, Monoid m) => (a -> m) -> (f `p` g) a -> m
-foldMapDisj f = exlr (foldMap f) (foldMap f)
-
-traverseDisj :: (Traversable f, Traversable g, Disj p, Applicative m) => (a -> m a') -> (f `p` g) a -> m ((f `p` g) a')
-traverseDisj f = exlr (fmap inl . traverse f) (fmap inr . traverse f)
+traverseDisj :: (Disj p, Applicative m) => (b -> m b') -> (a `p` b) -> m (a `p` b')
+traverseDisj f = exlr (pure . inl) (fmap inr . f)
