@@ -69,7 +69,7 @@ import Control.Exception (Exception, catch, throw)
 import Control.Monad (ap, join)
 import Data.Bifunctor (Bifunctor(..))
 import Data.Distributive
-import Data.Functor.Adjunction
+import Data.Functor.Adjunction hiding (splitL)
 import Data.Functor.Identity
 import Data.Functor.Rep
 import Data.Kind (Constraint)
@@ -124,6 +124,25 @@ data Δ
 
 absurdΔ :: Δ -> a
 absurdΔ = \case
+
+
+class AppendL c1 c2 res | c1 c2 -> res, c1 res -> c2 where
+  appendL :: c1 -> c2 -> res
+  splitL :: res -> (c1, c2)
+
+  instantiateL :: (Structural p, Profunctor p) => c1 `p` o -> res `p` o
+
+instance AppendL Γ ds ds where
+  appendL _ = id
+  splitL = (Γ,)
+
+  instantiateL = lmap (const Γ)
+
+instance AppendL cs ds res => AppendL (c, cs) ds (c, res) where
+  appendL (c, cs) ds = (c, appendL cs ds)
+  splitL (c, res) = let (cs, ds) = splitL res in ((c, cs), ds)
+
+  instantiateL = poppedL instantiateL
 
 
 -- Core rules
@@ -459,8 +478,8 @@ infixr 5 -->
 
 instance (Pos a, Neg b) => Polarized N (Fun r a b) where
 
-appFun :: Fun r a b -> Seq r (Negate r b <| i) (o |> Not r a)
-appFun = dimap (Γ <$) (first absurdΔ) . getFun
+appFun :: Fun Δ a b -> Seq Δ (Negate Δ b <| i) (o |> Not Δ a)
+appFun = instantiateL . rmap (first absurdΔ) . getFun
 
 
 data Sub r a b = Sub { subA :: !a, subK :: !(Negate r b) }
