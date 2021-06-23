@@ -459,7 +459,7 @@ infixr 5 -->
 
 instance (Pos a, Neg b) => Polarized N (a --> b) where
 
-appFun :: (a --> b) -> Seq Δ (Negate b <| i) (o |> Not a)
+appFun :: Fun r a b -> Seq r (Negate b <| i) (o |> Not a)
 appFun = dimap (Γ <$) (first absurdΔ) . getFun
 
 
