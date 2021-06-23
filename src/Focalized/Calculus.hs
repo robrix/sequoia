@@ -36,7 +36,8 @@ module Focalized.Calculus
   -- * Implicative
 , Fun(..)
 , type (-->)
-, type (--<)(..)
+, Sub(..)
+, type (--<)
 , Implicative(..)
   -- * Quantifying
 , ForAll(..)
@@ -462,7 +463,9 @@ appFun :: Fun r a b -> Seq r (Negate r b <| i) (o |> Not r a)
 appFun = dimap (Γ <$) (first absurdΔ) . getFun
 
 
-data a --< b = Sub { subA :: !a, subK :: !(Negate Δ b) }
+data Sub r a b = Sub { subA :: !a, subK :: !(Negate r b) }
+
+type (--<) = Sub Δ
 
 infixr 5 --<
 
