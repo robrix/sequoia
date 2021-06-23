@@ -263,16 +263,17 @@ instance Neg a => Polarized P (Negate r a) where
 class (Core p, Structural p) => Negative p where
   notL :: Pos a => p i (o |> a) -> p (Not Δ a <| i) o
   notL' :: Pos a => p (Not Δ a <| i) o -> p i (o |> a)
-  notL' p = notR init >>> wkR p
   notR :: Pos a => p (a <| i) o -> p i (o |> Not Δ a)
   notR' :: Pos a => p i (o |> Not Δ a) -> p (a <| i) o
-  notR' p = wkL p >>> notL init
 
   negateL :: Neg a => p i (o |> a) -> p (Negate Δ a <| i) o
   negateL' :: Neg a => p (Negate Δ a <| i) o -> p i (o |> a)
-  negateL' p = negateR init >>> wkR p
   negateR :: Neg a => p (a <| i) o -> p i (o |> Negate Δ a)
   negateR' :: Neg a => p i (o |> Negate Δ a) -> p (a <| i) o
+
+  notL' p = notR init >>> wkR p
+  notR' p = wkL p >>> notL init
+  negateL' p = negateR init >>> wkR p
   negateR' p = wkL p >>> negateL init
 
 instance Negative (Seq Δ) where
@@ -341,26 +342,27 @@ class (Core p, Structural p, Negative p) => Additive p where
   topR :: p i (o |> Top)
 
   sumL :: (Pos a, Pos b) => p (a <| i) o -> p (b <| i) o -> p (a ⊕ b <| i) o
-  sumL p1 p2 = sumLWith (withR (notR p1) (notR p2))
   sumL1' :: (Pos a, Pos b) => p (a ⊕ b <| i) o -> p (a <| i) o
-  sumL1' p = sumR1 init >>> exL (wkL p)
   sumL2' :: (Pos a, Pos b) => p (a ⊕ b <| i) o -> p (b <| i) o
-  sumL2' p = sumR2 init >>> exL (wkL p)
   sumLWith :: (Pos a, Pos b) => p i (o |> Not Δ a & Not Δ b) -> p (a ⊕ b <| i) o
-  sumLWith p = sumL (wkL p >>> withL1 (notL init)) (wkL p >>> withL2 (notL init))
   sumR1 :: (Pos a, Pos b) => p i (o |> a) -> p i (o |> a ⊕ b)
   sumR2 :: (Pos a, Pos b) => p i (o |> b) -> p i (o |> a ⊕ b)
 
   withL1 :: (Neg a, Neg b) => p (a <| i) o -> p (a & b <| i) o
-  withL1 = withLSum . sumR1 . negateR
   withL2 :: (Neg a, Neg b) => p (b <| i) o -> p (a & b <| i) o
-  withL2 = withLSum . sumR2 . negateR
   withLSum :: (Neg a, Neg b) => p i (o |> Negate Δ a ⊕ Negate Δ b) -> p (a & b <| i) o
-  withLSum p = wkL p >>> sumL (negateL (withL1 init)) (negateL (withL2 init))
   withR :: (Neg a, Neg b) => p i (o |> a) -> p i (o |> b) -> p i (o |> (a & b))
   withR1' :: (Neg a, Neg b) => p i (o |> (a & b)) -> p i (o |> a)
-  withR1' t = exR (wkR t) >>> withL1 init
   withR2' :: (Neg a, Neg b) => p i (o |> (a & b)) -> p i (o |> b)
+
+  sumL p1 p2 = sumLWith (withR (notR p1) (notR p2))
+  sumL1' p = sumR1 init >>> exL (wkL p)
+  sumL2' p = sumR2 init >>> exL (wkL p)
+  sumLWith p = sumL (wkL p >>> withL1 (notL init)) (wkL p >>> withL2 (notL init))
+  withL1 = withLSum . sumR1 . negateR
+  withL2 = withLSum . sumR2 . negateR
+  withLSum p = wkL p >>> sumL (negateL (withL1 init)) (negateL (withL2 init))
+  withR1' t = exR (wkR t) >>> withL1 init
   withR2' t = exR (wkR t) >>> withL2 init
 
 
@@ -430,28 +432,29 @@ class (Core p, Structural p, Negative p) => Multiplicative p where
   botL :: p (Bot <| i) o
   botR :: p i o -> p i (o |> Bot)
   botR' :: p i (o |> Bot) -> p i o
-  botR' = (>>> botL)
 
   oneL :: p i o -> p (One <| i) o
   oneL' :: p (One <| i) o -> p i o
-  oneL' = (oneR >>>)
   oneR :: p i (o |> One)
 
   parL :: (Neg a, Neg b) => p (a <| i) o -> p (b <| i) o -> p (a ⅋ b <| i) o
-  parL p1 p2 = parLTensor (tensorR (negateR p1) (negateR p2))
   parLTensor :: (Neg a, Neg b) => p i (o |> Negate Δ a ⊗ Negate Δ b) -> p (a ⅋ b <| i) o
-  parLTensor p = wkL p >>> tensorL (negateL (negateL (parL (wkR init) init)))
   parR :: (Neg a, Neg b) => p i (o |> a |> b) -> p i (o |> a ⅋ b)
   parR' :: (Neg a, Neg b) => p i (o |> a ⅋ b) -> p i (o |> a |> b)
-  parR' p = poppedR (wkR . wkR) p >>> parL (wkR init) init
 
   tensorL :: (Pos a, Pos b) => p (a <| b <| i) o -> p (a ⊗ b <| i) o
-  tensorL = tensorLPar . parR . notR . notR
   tensorLPar :: (Pos a, Pos b) => p i (o |> Not Δ a ⅋ Not Δ b) -> p (a ⊗ b <| i) o
-  tensorLPar p = wkL p >>> parL (notL (tensorL init)) (notL (tensorL (wkL init)))
   tensorL' :: (Pos a, Pos b) => p (a ⊗ b <| i) o -> p (a <| b <| i) o
-  tensorL' p = tensorR init (wkL init) >>> popL (wkL . wkL . pushL p)
   tensorR :: (Pos a, Pos b) => p i (o |> a) -> p i (o |> b) -> p i (o |> a ⊗ b)
+
+  botR' = (>>> botL)
+  oneL' = (oneR >>>)
+  parL p1 p2 = parLTensor (tensorR (negateR p1) (negateR p2))
+  parLTensor p = wkL p >>> tensorL (negateL (negateL (parL (wkR init) init)))
+  parR' p = poppedR (wkR . wkR) p >>> parL (wkR init) init
+  tensorL = tensorLPar . parR . notR . notR
+  tensorLPar p = wkL p >>> parL (notL (tensorL init)) (notL (tensorL (wkL init)))
+  tensorL' p = tensorR init (wkL init) >>> popL (wkL . wkL . pushL p)
 
 
 instance Multiplicative (Seq Δ) where
@@ -493,24 +496,25 @@ instance (Pos a, Neg b) => Polarized P (Sub r a b) where
 
 class (Core p, Structural p, Negative p) => Implicative p where
   funL :: (Pos a, Neg b) => p i (o |> a) -> p (b <| i) o -> p (a --> b <| i) o
-  funL pa pb = funLSub (subR pa pb)
   funLSub :: (Pos a, Neg b) => p i (o |> a --< b) -> p (a --> b <| i) o
-  funLSub p = wkL p >>> subL (exL (funL init init))
   funL2 :: (Pos a, Neg b) => p (a --> b <| a <| i)  (o |> b)
-  funL2 = funL init init
   funR :: (Pos a, Neg b) => p (a <| i) (o |> b) -> p i (o |> a --> b)
   funR' :: (Pos a, Neg b) => p i (o |> a --> b) -> p (a <| i) (o |> b)
-  funR' p = wkL (exR (wkR p)) >>> funL2
 
   subL :: (Pos a, Neg b) => p (a <| i) (o |> b) -> p (a --< b <| i) o
-  subL = subLFun . funR
   subLFun :: (Pos a, Neg b) => p i (o |> a --> b) -> p (a --< b <| i) o
-  subLFun p = wkL p >>> exL (subL (exL (funL init init)))
   subL' :: (Pos a, Neg b) => p (a --< b <| i) o -> p (a <| i) (o |> b)
-  subL' p = subR init init >>> wkR (exL (wkL p))
   subR :: (Pos a, Neg b) => p i (o |> a) -> p (b <| i) o -> p i (o |> a --< b)
 
   ($$) :: (Pos a, Neg b) => p i (o |> a --> b) -> p i (o |> a) -> p i (o |> b)
+
+  funL pa pb = funLSub (subR pa pb)
+  funLSub p = wkL p >>> subL (exL (funL init init))
+  funL2 = funL init init
+  funR' p = wkL (exR (wkR p)) >>> funL2
+  subL = subLFun . funR
+  subLFun p = wkL p >>> exL (subL (exL (funL init init)))
+  subL' p = subR init init >>> wkR (exL (wkL p))
   f $$ a = exR (wkR f) >>> exR (wkR a) `funL` init
 
 
@@ -543,19 +547,20 @@ type ForAllC cx cf f = (forall x . cx x => cf (f x)) :: Constraint
 class (Core p, Structural p, Negative p, Shifting p) => Quantifying p where
   forAllL :: (Polarized n x, Neg (f x)) => p (f x <| i) o -> p (ForAll n f <| i) o
   forAllLExists :: ForAllC (Polarized n) Neg f => p i (o |> Exists n (Negate Δ · f)) -> p (ForAll n f <| i) o
-  forAllLExists p = wkL p >>> existsL (mapL getC (negateL (forAllL init)))
   -- FIXME: the correct signature should be p i (o |> (forall x . Polarized n x => f x)) -> p i (o |> ForAll f), but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
   -- forAllR :: ForAllC (Polarized n) Neg f => (forall x . Polarized n x => p i (o |> f x)) -> p i (o |> ForAll n f)
   forAllR' :: ForAllC (Polarized n) Neg f => p i (o |> ForAll n f) -> (forall x . Polarized n x => p i (o |> f x))
-  forAllR' p = exR (wkR p) >>> forAllL init
 
   -- FIXME: the correct signature should be p ((forall x . f x) <| i) o -> p (Exists f <| i) o, but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
   existsL :: (forall x . Polarized n x => p (f x <| i) o) -> p (Exists n f <| i) o
   existsL' :: ForAllC (Polarized n) Pos f => p (Exists n f <| i) o -> (forall x . Polarized n x => p (f x <| i) o)
-  existsL' p = existsR init >>> exL (wkL p)
   existsLForAll :: ForAllC (Polarized n) Pos f => p i (o |> ForAll n (Not Δ · f)) -> p (Exists n f <| i) o
-  existsLForAll p = wkL p >>> exL (existsL (exL (forAllL (mapL getC (notL init)))))
   existsR :: (Polarized n x, Pos (f x)) => p i (o |> f x) -> p i (o |> Exists n f)
+
+  forAllLExists p = wkL p >>> existsL (mapL getC (negateL (forAllL init)))
+  forAllR' p = exR (wkR p) >>> forAllL init
+  existsL' p = existsR init >>> exL (wkL p)
+  existsLForAll p = wkL p >>> exL (existsL (exL (forAllL (mapL getC (notL init)))))
 
 
 instance Quantifying (Seq Δ) where
@@ -590,13 +595,14 @@ class (Core p, Structural p, Implicative p, Quantifying p) => Recursive p where
   nuL :: ForAllC (Polarized P) Neg f => p (Exists P (NuF f) <| i) o -> p (Nu f <| i) o
   nuR :: ForAllC (Polarized P) Neg f => p i (o |> Exists P (NuF f)) -> p i (o |> Nu f)
   nuR' :: ForAllC (Polarized P) Neg f => p i (o |> Nu f) -> p i (o |> Exists P (NuF f))
-  nuR' p = exR (wkR p) >>> nuL init
 
   muL :: ForAllC (Polarized N) Pos f => p (ForAll N (MuF f) <| i) o -> p (Mu f <| i) o
   muL' :: ForAllC (Polarized N) Pos f => p (Mu f <| i) o -> p (ForAll N (MuF f) <| i) o
-  muL' p = muR init >>> exL (wkL p)
   muR :: ForAllC (Polarized N) Pos f => p i (o |> ForAll N (MuF f)) -> p i (o |> Mu f)
   muLFold :: (ForAllC (Polarized N) Pos f, Neg a) => p i (o |> f a --> a) -> p i (o |> Mu f) -> p i (o |> a)
+
+  nuR' p = exR (wkR p) >>> nuL init
+  muL' p = muR init >>> exL (wkL p)
   muLFold f mu = exR (wkR mu) >>> muL (forAllL (mapL getMuF (funL (downR (exR (wkR f))) init)))
 
 
