@@ -459,8 +459,8 @@ infixr 5 -->
 
 instance (Pos a, Neg b) => Polarized N (a --> b) where
 
-appFun' :: (a --> b) -> Seq Δ (Negate b <| i) (o |> Not a)
-appFun' = dimap (Γ <$) (first absurdΔ) . getFun
+appFun :: (a --> b) -> Seq Δ (Negate b <| i) (o |> Not a)
+appFun = dimap (Γ <$) (first absurdΔ) . getFun
 
 
 data a --< b = Sub { subA :: !a, subK :: !(Negate b) }
@@ -494,7 +494,7 @@ class (Core p, Structural p, Negative p) => Implicative p where
 
 
 instance Implicative (Seq Δ) where
-  funL a b = popL (\ f -> a >>> notR' (exR (negateL' (appFun' f))) >>> exL (wkL b))
+  funL a b = popL (\ f -> a >>> notR' (exR (negateL' (appFun f))) >>> exL (wkL b))
   funR b = cont (\ abstract -> Fun (poppedL (poppedR abstract) (notR (exL (negateL b)))))
 
   subL b = popL (\ s -> pushL b (subA s) >>> pushL (negateL init) (subK s))
