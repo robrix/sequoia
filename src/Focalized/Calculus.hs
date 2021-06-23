@@ -230,29 +230,29 @@ instance Structural (Seq Δ) where
 
 -- Negating
 
-newtype Not    a = Not    { getNot    :: Seq Δ (a <| Γ) Δ }
+newtype Not    r a = Not    { getNot    :: Seq r (a <| Γ) Δ }
 
-instance Pos a => Polarized N (Not a) where
+instance Pos a => Polarized N (Not r a) where
 
 
-newtype Negate a = Negate { getNegate :: Seq Δ (a <| Γ) Δ }
+newtype Negate r a = Negate { getNegate :: Seq r (a <| Γ) Δ }
 
-instance Neg a => Polarized P (Negate a) where
+instance Neg a => Polarized P (Negate r a) where
 
 
 class (Core p, Structural p) => Negative p where
-  notL :: Pos a => p i (o |> a) -> p (Not a <| i) o
-  notL' :: Pos a => p (Not a <| i) o -> p i (o |> a)
+  notL :: Pos a => p i (o |> a) -> p (Not Δ a <| i) o
+  notL' :: Pos a => p (Not Δ a <| i) o -> p i (o |> a)
   notL' p = notR init >>> wkR p
-  notR :: Pos a => p (a <| i) o -> p i (o |> Not a)
-  notR' :: Pos a => p i (o |> Not a) -> p (a <| i) o
+  notR :: Pos a => p (a <| i) o -> p i (o |> Not Δ a)
+  notR' :: Pos a => p i (o |> Not Δ a) -> p (a <| i) o
   notR' p = wkL p >>> notL init
 
-  negateL :: Neg a => p i (o |> a) -> p (Negate a <| i) o
-  negateL' :: Neg a => p (Negate a <| i) o -> p i (o |> a)
+  negateL :: Neg a => p i (o |> a) -> p (Negate Δ a <| i) o
+  negateL' :: Neg a => p (Negate Δ a <| i) o -> p i (o |> a)
   negateL' p = negateR init >>> wkR p
-  negateR :: Neg a => p (a <| i) o -> p i (o |> Negate a)
-  negateR' :: Neg a => p i (o |> Negate a) -> p (a <| i) o
+  negateR :: Neg a => p (a <| i) o -> p i (o |> Negate Δ a)
+  negateR' :: Neg a => p i (o |> Negate Δ a) -> p (a <| i) o
   negateR' p = wkL p >>> negateL init
 
 instance Negative (Seq Δ) where
@@ -326,7 +326,7 @@ class (Core p, Structural p, Negative p) => Additive p where
   sumL1' p = sumR1 init >>> exL (wkL p)
   sumL2' :: (Pos a, Pos b) => p (a ⊕ b <| i) o -> p (b <| i) o
   sumL2' p = sumR2 init >>> exL (wkL p)
-  sumLWith :: (Pos a, Pos b) => p i (o |> Not a & Not b) -> p (a ⊕ b <| i) o
+  sumLWith :: (Pos a, Pos b) => p i (o |> Not Δ a & Not Δ b) -> p (a ⊕ b <| i) o
   sumLWith p = sumL (wkL p >>> withL1 (notL init)) (wkL p >>> withL2 (notL init))
   sumR1 :: (Pos a, Pos b) => p i (o |> a) -> p i (o |> a ⊕ b)
   sumR2 :: (Pos a, Pos b) => p i (o |> b) -> p i (o |> a ⊕ b)
@@ -335,7 +335,7 @@ class (Core p, Structural p, Negative p) => Additive p where
   withL1 = withLSum . sumR1 . negateR
   withL2 :: (Neg a, Neg b) => p (b <| i) o -> p (a & b <| i) o
   withL2 = withLSum . sumR2 . negateR
-  withLSum :: (Neg a, Neg b) => p i (o |> Negate a ⊕ Negate b) -> p (a & b <| i) o
+  withLSum :: (Neg a, Neg b) => p i (o |> Negate Δ a ⊕ Negate Δ b) -> p (a & b <| i) o
   withLSum p = wkL p >>> sumL (negateL (withL1 init)) (negateL (withL2 init))
   withR :: (Neg a, Neg b) => p i (o |> a) -> p i (o |> b) -> p i (o |> (a & b))
   withR1' :: (Neg a, Neg b) => p i (o |> (a & b)) -> p i (o |> a)
@@ -419,7 +419,7 @@ class (Core p, Structural p, Negative p) => Multiplicative p where
 
   parL :: (Neg a, Neg b) => p (a <| i) o -> p (b <| i) o -> p (a ⅋ b <| i) o
   parL p1 p2 = parLTensor (tensorR (negateR p1) (negateR p2))
-  parLTensor :: (Neg a, Neg b) => p i (o |> Negate a ⊗ Negate b) -> p (a ⅋ b <| i) o
+  parLTensor :: (Neg a, Neg b) => p i (o |> Negate Δ a ⊗ Negate Δ b) -> p (a ⅋ b <| i) o
   parLTensor p = wkL p >>> tensorL (negateL (negateL (parL (wkR init) init)))
   parR :: (Neg a, Neg b) => p i (o |> a |> b) -> p i (o |> a ⅋ b)
   parR' :: (Neg a, Neg b) => p i (o |> a ⅋ b) -> p i (o |> a |> b)
@@ -427,7 +427,7 @@ class (Core p, Structural p, Negative p) => Multiplicative p where
 
   tensorL :: (Pos a, Pos b) => p (a <| b <| i) o -> p (a ⊗ b <| i) o
   tensorL = tensorLPar . parR . notR . notR
-  tensorLPar :: (Pos a, Pos b) => p i (o |> Not a ⅋ Not b) -> p (a ⊗ b <| i) o
+  tensorLPar :: (Pos a, Pos b) => p i (o |> Not Δ a ⅋ Not Δ b) -> p (a ⊗ b <| i) o
   tensorLPar p = wkL p >>> parL (notL (tensorL init)) (notL (tensorL (wkL init)))
   tensorL' :: (Pos a, Pos b) => p (a ⊗ b <| i) o -> p (a <| b <| i) o
   tensorL' p = tensorR init (wkL init) >>> popL (wkL . wkL . pushL p)
@@ -450,7 +450,7 @@ instance Multiplicative (Seq Δ) where
 
 -- Implicative
 
-newtype Fun r a b = Fun { getFun :: Seq r (Negate b <| Γ) (Δ |> Not a) }
+newtype Fun r a b = Fun { getFun :: Seq r (Negate r b <| Γ) (Δ |> Not r a) }
 
 type (-->) = Fun Δ
 
@@ -458,11 +458,11 @@ infixr 5 -->
 
 instance (Pos a, Neg b) => Polarized N (a --> b) where
 
-appFun :: Fun r a b -> Seq r (Negate b <| i) (o |> Not a)
+appFun :: Fun r a b -> Seq r (Negate r b <| i) (o |> Not r a)
 appFun = dimap (Γ <$) (first absurdΔ) . getFun
 
 
-data a --< b = Sub { subA :: !a, subK :: !(Negate b) }
+data a --< b = Sub { subA :: !a, subK :: !(Negate Δ b) }
 
 infixr 5 --<
 
@@ -520,7 +520,7 @@ type ForAllC cx cf f = (forall x . cx x => cf (f x)) :: Constraint
 
 class (Core p, Structural p, Negative p, Shifting p) => Quantifying p where
   forAllL :: (Polarized n x, Neg (f x)) => p (f x <| i) o -> p (ForAll n f <| i) o
-  forAllLExists :: ForAllC (Polarized n) Neg f => p i (o |> Exists n (Negate · f)) -> p (ForAll n f <| i) o
+  forAllLExists :: ForAllC (Polarized n) Neg f => p i (o |> Exists n (Negate Δ · f)) -> p (ForAll n f <| i) o
   forAllLExists p = wkL p >>> existsL (mapL getC (negateL (forAllL init)))
   -- FIXME: the correct signature should be p i (o |> (forall x . Polarized n x => f x)) -> p i (o |> ForAll f), but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
   -- forAllR :: ForAllC (Polarized n) Neg f => (forall x . Polarized n x => p i (o |> f x)) -> p i (o |> ForAll n f)
@@ -531,7 +531,7 @@ class (Core p, Structural p, Negative p, Shifting p) => Quantifying p where
   existsL :: (forall x . Polarized n x => p (f x <| i) o) -> p (Exists n f <| i) o
   existsL' :: ForAllC (Polarized n) Pos f => p (Exists n f <| i) o -> (forall x . Polarized n x => p (f x <| i) o)
   existsL' p = existsR init >>> exL (wkL p)
-  existsLForAll :: ForAllC (Polarized n) Pos f => p i (o |> ForAll n (Not · f)) -> p (Exists n f <| i) o
+  existsLForAll :: ForAllC (Polarized n) Pos f => p i (o |> ForAll n (Not Δ · f)) -> p (Exists n f <| i) o
   existsLForAll p = wkL p >>> exL (existsL (exL (forAllL (mapL getC (notL init)))))
   existsR :: (Polarized n x, Pos (f x)) => p i (o |> f x) -> p i (o |> Exists n f)
 
