@@ -172,7 +172,6 @@ class Structural p where
   popL :: (a -> p i o) -> p (a <| i) o
 
   poppedL :: (p i o -> p i' o') -> (p (a <| i) o -> p (a <| i') o')
-  poppedL f p = popL (f . pushL p)
 
   -- | Push something onto the input context which was previously popped off it. Used with 'popL', this provides a generalized context restructuring facility. It i undefined what will happen if you push something which was not previously popped.
   --
@@ -185,13 +184,10 @@ class Structural p where
   pushL :: p (a <| i) o -> a -> p i o
 
   popL2 :: (a -> b -> p i o) -> p (a <| b <| i) o
-  popL2 f = popL (popL . f)
 
   pushL2 :: p (a <| b <| i) o -> a -> b -> p i o
-  pushL2 p = pushL . pushL p
 
   mapL :: (a' -> a) -> p (a <| i) o -> p (a' <| i) o
-  mapL f p = popL (pushL p . f)
 
 
   -- | Pop something off the output context which can later be pushed. Used with 'pushR', this provides a generalized context restructuring facility.
@@ -205,7 +201,6 @@ class Structural p where
   popR :: ((a -> Δ) -> p i o) -> p i (o |> a)
 
   poppedR :: (p i o -> p i' o') -> (p i (o |> a) -> p i' (o' |> a))
-  poppedR f p = popR (f . pushR p)
 
   -- | Push something onto the output context which was previously popped off it. Used with 'popR', this provides a generalized context restructuring facility. It i undefined what will happen if you push something which was not previously popped.
   --
@@ -218,26 +213,32 @@ class Structural p where
   pushR :: p i (o |> a) -> ((a -> Δ) -> p i o)
 
   popR2 :: ((a -> Δ) -> (b -> Δ) -> p i o) -> p i (o |> b |> a)
-  popR2 f = popR (popR . f)
 
   pushR2 :: p i (o |> b |> a) -> (a -> Δ) -> (b -> Δ) -> p i o
-  pushR2 p = pushR . pushR p
 
   mapR :: (a -> a') -> p i (o |> a) -> p i (o |> a')
-  mapR f p = popR (pushR p . (. f))
 
 
   wkL :: p i o -> p (a <| i) o
-  wkL = popL . const
   wkR :: p i o -> p i (o |> a)
-  wkR = popR . const
   cnL :: p (a <| a <| i) o -> p (a <| i) o
-  cnL = popL . join . pushL2
   cnR :: p i (o |> a |> a) -> p i (o |> a)
-  cnR = popR . join . pushR2
   exL :: p (a <| b <| c) o -> p (b <| a <| c) o
-  exL = popL2 . flip . pushL2
   exR :: p i (o |> a |> b) -> p i (o |> b |> a)
+
+  poppedL f p = popL (f . pushL p)
+  popL2 f = popL (popL . f)
+  pushL2 p = pushL . pushL p
+  mapL f p = popL (pushL p . f)
+  poppedR f p = popR (f . pushR p)
+  popR2 f = popR (popR . f)
+  pushR2 p = pushR . pushR p
+  mapR f p = popR (pushR p . (. f))
+  wkL = popL . const
+  wkR = popR . const
+  cnL = popL . join . pushL2
+  cnR = popR . join . pushR2
+  exL = popL2 . flip . pushL2
   exR = popR2 . flip . pushR2
 
 instance Structural (Seq Δ) where
@@ -481,6 +482,9 @@ infixr 5 -->
 
 instance (Pos a, Neg b) => Polarized N (Fun r a b) where
 
+-- runFun :: Fun r a b -> (b -> r) -> a -> r
+-- runFun (Fun s) k a = runSeq (either absurdΔ (_)) (Negate _, Γ) s
+
 appFun :: Fun Δ a b -> Seq Δ (Negate Δ b <| i) (o |> Not Δ a)
 appFun = instantiateL . rmap (first absurdΔ) . getFun
 
@@ -589,6 +593,25 @@ instance ForAllC Neg Pos f => Polarized N (Mu f) where
 newtype MuF f a = MuF { getMuF :: Down (f a --> a) --> a }
 
 instance (Polarized P (f a), Polarized N a) => Polarized N (MuF f a) where
+
+
+-- foldMu :: (f a -> a) -> Mu f -> a
+-- foldMu alg (Mu (ForAll (MuF (Fun f)))) = f alg
+
+-- unfoldMu :: Functor f => (a -> f a) -> a -> Mu f
+-- unfoldMu coalg a = Mu $ ForAll $ MuF $ \ alg -> refold alg coalg a
+
+-- refoldMu :: Functor f => (f b -> b) -> (a -> f a) -> a -> b
+-- refoldMu f g = foldMu f . unfoldMu g
+
+-- mu :: Functor f => f (Mu f) -> Mu f
+-- mu = unfoldMu (fmap getMu)
+
+-- runMu :: Functor f => Mu f -> f (Mu f)
+-- runMu = foldMu (fmap mu)
+
+-- nuToMu :: Functor f => Nu f -> Mu f
+-- nuToMu = unfoldMu getNu
 
 
 class (Core p, Structural p, Implicative p, Quantifying p) => Recursive p where
