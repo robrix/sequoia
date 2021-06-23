@@ -574,6 +574,8 @@ class (Core p, Structural p, Implicative p, Quantifying p) => Recursive p where
   muL' :: ForAllC (Polarized N) Pos f => p (Mu f <| i) o -> p (ForAll N (MuF f) <| i) o
   muL' p = muR init >>> exL (wkL p)
   muR :: ForAllC (Polarized N) Pos f => p i (o |> ForAll N (MuF f)) -> p i (o |> Mu f)
+  muLFold :: (ForAllC (Polarized N) Pos f, Neg a) => p i (o |> f a --> a) -> p i (o |> Mu f) -> p i (o |> a)
+  muLFold f mu = exR (wkR mu) >>> muL (forAllL (mapL getMuF (funL (downR (exR (wkR f))) init)))
 
 
 instance Recursive (Seq Δ) where
