@@ -457,7 +457,7 @@ type (-->) = Fun Δ
 
 infixr 5 -->
 
-instance (Pos a, Neg b) => Polarized N (a --> b) where
+instance (Pos a, Neg b) => Polarized N (Fun r a b) where
 
 appFun :: Fun r a b -> Seq r (Negate r b <| i) (o |> Not r a)
 appFun = dimap (Γ <$) (first absurdΔ) . getFun
@@ -469,7 +469,7 @@ type (--<) = Sub Δ
 
 infixr 5 --<
 
-instance (Pos a, Neg b) => Polarized P (a --< b) where
+instance (Pos a, Neg b) => Polarized P (Sub r a b) where
 
 
 class (Core p, Structural p, Negative p) => Implicative p where
