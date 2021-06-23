@@ -147,10 +147,10 @@ instance AppendL cs ds res => AppendL (c, cs) ds (c, res) where
 
 -- Core rules
 
-class Core p where
-  (>>>) :: p i (o |> a) -> p (a <| i) o -> p i o
+class Core s where
+  (>>>) :: s i (o |> a) -> s (a <| i) o -> s i o
 
-  init :: p (a <| i) (o |> a)
+  init :: s (a <| i) (o |> a)
 
 infixr 1 >>>
 
@@ -160,7 +160,7 @@ instance Core (Seq Δ) where
   init = popL (pure . pure)
 
 
-class Structural p where
+class Structural s where
   -- | Pop something off the input context which can later be pushed. Used with 'pushL', this provides a generalized context restructuring facility.
   --
   -- @
@@ -169,9 +169,9 @@ class Structural p where
   -- @
   -- pushL . popL = id
   -- @
-  popL :: (a -> p i o) -> p (a <| i) o
+  popL :: (a -> s i o) -> s (a <| i) o
 
-  poppedL :: (p i o -> p i' o') -> (p (a <| i) o -> p (a <| i') o')
+  poppedL :: (s i o -> s i' o') -> (s (a <| i) o -> s (a <| i') o')
 
   -- | Push something onto the input context which was previously popped off it. Used with 'popL', this provides a generalized context restructuring facility. It i undefined what will happen if you push something which was not previously popped.
   --
@@ -181,13 +181,13 @@ class Structural p where
   -- @
   -- pushL . popL = id
   -- @
-  pushL :: p (a <| i) o -> a -> p i o
+  pushL :: s (a <| i) o -> a -> s i o
 
-  popL2 :: (a -> b -> p i o) -> p (a <| b <| i) o
+  popL2 :: (a -> b -> s i o) -> s (a <| b <| i) o
 
-  pushL2 :: p (a <| b <| i) o -> a -> b -> p i o
+  pushL2 :: s (a <| b <| i) o -> a -> b -> s i o
 
-  mapL :: (a' -> a) -> p (a <| i) o -> p (a' <| i) o
+  mapL :: (a' -> a) -> s (a <| i) o -> s (a' <| i) o
 
 
   -- | Pop something off the output context which can later be pushed. Used with 'pushR', this provides a generalized context restructuring facility.
@@ -198,9 +198,9 @@ class Structural p where
   -- @
   -- pushR . popR = id
   -- @
-  popR :: ((a -> Δ) -> p i o) -> p i (o |> a)
+  popR :: ((a -> Δ) -> s i o) -> s i (o |> a)
 
-  poppedR :: (p i o -> p i' o') -> (p i (o |> a) -> p i' (o' |> a))
+  poppedR :: (s i o -> s i' o') -> (s i (o |> a) -> s i' (o' |> a))
 
   -- | Push something onto the output context which was previously popped off it. Used with 'popR', this provides a generalized context restructuring facility. It i undefined what will happen if you push something which was not previously popped.
   --
@@ -210,21 +210,21 @@ class Structural p where
   -- @
   -- pushR . popR = id
   -- @
-  pushR :: p i (o |> a) -> ((a -> Δ) -> p i o)
+  pushR :: s i (o |> a) -> ((a -> Δ) -> s i o)
 
-  popR2 :: ((a -> Δ) -> (b -> Δ) -> p i o) -> p i (o |> b |> a)
+  popR2 :: ((a -> Δ) -> (b -> Δ) -> s i o) -> s i (o |> b |> a)
 
-  pushR2 :: p i (o |> b |> a) -> (a -> Δ) -> (b -> Δ) -> p i o
+  pushR2 :: s i (o |> b |> a) -> (a -> Δ) -> (b -> Δ) -> s i o
 
-  mapR :: (a -> a') -> p i (o |> a) -> p i (o |> a')
+  mapR :: (a -> a') -> s i (o |> a) -> s i (o |> a')
 
 
-  wkL :: p i o -> p (a <| i) o
-  wkR :: p i o -> p i (o |> a)
-  cnL :: p (a <| a <| i) o -> p (a <| i) o
-  cnR :: p i (o |> a |> a) -> p i (o |> a)
-  exL :: p (a <| b <| c) o -> p (b <| a <| c) o
-  exR :: p i (o |> a |> b) -> p i (o |> b |> a)
+  wkL :: s i o -> s (a <| i) o
+  wkR :: s i o -> s i (o |> a)
+  cnL :: s (a <| a <| i) o -> s (a <| i) o
+  cnR :: s i (o |> a |> a) -> s i (o |> a)
+  exL :: s (a <| b <| c) o -> s (b <| a <| c) o
+  exR :: s i (o |> a |> b) -> s i (o |> b |> a)
 
   poppedL f p = popL (f . pushL p)
   popL2 f = popL (popL . f)
@@ -261,16 +261,16 @@ newtype Negate r a = Negate { getNegate :: Seq r (a <| Γ) Δ }
 instance Neg a => Polarized P (Negate r a) where
 
 
-class (Core p, Structural p) => Negative p where
-  notL :: Pos a => p i (o |> a) -> p (Not Δ a <| i) o
-  notL' :: Pos a => p (Not Δ a <| i) o -> p i (o |> a)
-  notR :: Pos a => p (a <| i) o -> p i (o |> Not Δ a)
-  notR' :: Pos a => p i (o |> Not Δ a) -> p (a <| i) o
+class (Core s, Structural s) => Negative s where
+  notL :: Pos a => s i (o |> a) -> s (Not Δ a <| i) o
+  notL' :: Pos a => s (Not Δ a <| i) o -> s i (o |> a)
+  notR :: Pos a => s (a <| i) o -> s i (o |> Not Δ a)
+  notR' :: Pos a => s i (o |> Not Δ a) -> s (a <| i) o
 
-  negateL :: Neg a => p i (o |> a) -> p (Negate Δ a <| i) o
-  negateL' :: Neg a => p (Negate Δ a <| i) o -> p i (o |> a)
-  negateR :: Neg a => p (a <| i) o -> p i (o |> Negate Δ a)
-  negateR' :: Neg a => p i (o |> Negate Δ a) -> p (a <| i) o
+  negateL :: Neg a => s i (o |> a) -> s (Negate Δ a <| i) o
+  negateL' :: Neg a => s (Negate Δ a <| i) o -> s i (o |> a)
+  negateR :: Neg a => s (a <| i) o -> s i (o |> Negate Δ a)
+  negateR' :: Neg a => s i (o |> Negate Δ a) -> s (a <| i) o
 
   notL' p = notR init >>> wkR p
   notR' p = wkL p >>> notL init
@@ -337,24 +337,24 @@ instance Disj (⊕) where
     InR r -> ifr r
 
 
-class (Core p, Structural p, Negative p) => Additive p where
-  zeroL :: p (Zero <| i) o
+class (Core s, Structural s, Negative s) => Additive s where
+  zeroL :: s (Zero <| i) o
 
-  topR :: p i (o |> Top)
+  topR :: s i (o |> Top)
 
-  sumL :: (Pos a, Pos b) => p (a <| i) o -> p (b <| i) o -> p (a ⊕ b <| i) o
-  sumL1' :: (Pos a, Pos b) => p (a ⊕ b <| i) o -> p (a <| i) o
-  sumL2' :: (Pos a, Pos b) => p (a ⊕ b <| i) o -> p (b <| i) o
-  sumLWith :: (Pos a, Pos b) => p i (o |> Not Δ a & Not Δ b) -> p (a ⊕ b <| i) o
-  sumR1 :: (Pos a, Pos b) => p i (o |> a) -> p i (o |> a ⊕ b)
-  sumR2 :: (Pos a, Pos b) => p i (o |> b) -> p i (o |> a ⊕ b)
+  sumL :: (Pos a, Pos b) => s (a <| i) o -> s (b <| i) o -> s (a ⊕ b <| i) o
+  sumL1' :: (Pos a, Pos b) => s (a ⊕ b <| i) o -> s (a <| i) o
+  sumL2' :: (Pos a, Pos b) => s (a ⊕ b <| i) o -> s (b <| i) o
+  sumLWith :: (Pos a, Pos b) => s i (o |> Not Δ a & Not Δ b) -> s (a ⊕ b <| i) o
+  sumR1 :: (Pos a, Pos b) => s i (o |> a) -> s i (o |> a ⊕ b)
+  sumR2 :: (Pos a, Pos b) => s i (o |> b) -> s i (o |> a ⊕ b)
 
-  withL1 :: (Neg a, Neg b) => p (a <| i) o -> p (a & b <| i) o
-  withL2 :: (Neg a, Neg b) => p (b <| i) o -> p (a & b <| i) o
-  withLSum :: (Neg a, Neg b) => p i (o |> Negate Δ a ⊕ Negate Δ b) -> p (a & b <| i) o
-  withR :: (Neg a, Neg b) => p i (o |> a) -> p i (o |> b) -> p i (o |> (a & b))
-  withR1' :: (Neg a, Neg b) => p i (o |> (a & b)) -> p i (o |> a)
-  withR2' :: (Neg a, Neg b) => p i (o |> (a & b)) -> p i (o |> b)
+  withL1 :: (Neg a, Neg b) => s (a <| i) o -> s (a & b <| i) o
+  withL2 :: (Neg a, Neg b) => s (b <| i) o -> s (a & b <| i) o
+  withLSum :: (Neg a, Neg b) => s i (o |> Negate Δ a ⊕ Negate Δ b) -> s (a & b <| i) o
+  withR :: (Neg a, Neg b) => s i (o |> a) -> s i (o |> b) -> s i (o |> (a & b))
+  withR1' :: (Neg a, Neg b) => s i (o |> (a & b)) -> s i (o |> a)
+  withR2' :: (Neg a, Neg b) => s i (o |> (a & b)) -> s i (o |> b)
 
   sumL p1 p2 = sumLWith (withR (notR p1) (notR p2))
   sumL1' p = sumR1 init >>> exL (wkL p)
@@ -429,24 +429,24 @@ instance Conj (⊗) where
   exr (_ :⊗ r) = r
 
 
-class (Core p, Structural p, Negative p) => Multiplicative p where
-  botL :: p (Bot <| i) o
-  botR :: p i o -> p i (o |> Bot)
-  botR' :: p i (o |> Bot) -> p i o
+class (Core s, Structural s, Negative s) => Multiplicative s where
+  botL :: s (Bot <| i) o
+  botR :: s i o -> s i (o |> Bot)
+  botR' :: s i (o |> Bot) -> s i o
 
-  oneL :: p i o -> p (One <| i) o
-  oneL' :: p (One <| i) o -> p i o
-  oneR :: p i (o |> One)
+  oneL :: s i o -> s (One <| i) o
+  oneL' :: s (One <| i) o -> s i o
+  oneR :: s i (o |> One)
 
-  parL :: (Neg a, Neg b) => p (a <| i) o -> p (b <| i) o -> p (a ⅋ b <| i) o
-  parLTensor :: (Neg a, Neg b) => p i (o |> Negate Δ a ⊗ Negate Δ b) -> p (a ⅋ b <| i) o
-  parR :: (Neg a, Neg b) => p i (o |> a |> b) -> p i (o |> a ⅋ b)
-  parR' :: (Neg a, Neg b) => p i (o |> a ⅋ b) -> p i (o |> a |> b)
+  parL :: (Neg a, Neg b) => s (a <| i) o -> s (b <| i) o -> s (a ⅋ b <| i) o
+  parLTensor :: (Neg a, Neg b) => s i (o |> Negate Δ a ⊗ Negate Δ b) -> s (a ⅋ b <| i) o
+  parR :: (Neg a, Neg b) => s i (o |> a |> b) -> s i (o |> a ⅋ b)
+  parR' :: (Neg a, Neg b) => s i (o |> a ⅋ b) -> s i (o |> a |> b)
 
-  tensorL :: (Pos a, Pos b) => p (a <| b <| i) o -> p (a ⊗ b <| i) o
-  tensorLPar :: (Pos a, Pos b) => p i (o |> Not Δ a ⅋ Not Δ b) -> p (a ⊗ b <| i) o
-  tensorL' :: (Pos a, Pos b) => p (a ⊗ b <| i) o -> p (a <| b <| i) o
-  tensorR :: (Pos a, Pos b) => p i (o |> a) -> p i (o |> b) -> p i (o |> a ⊗ b)
+  tensorL :: (Pos a, Pos b) => s (a <| b <| i) o -> s (a ⊗ b <| i) o
+  tensorLPar :: (Pos a, Pos b) => s i (o |> Not Δ a ⅋ Not Δ b) -> s (a ⊗ b <| i) o
+  tensorL' :: (Pos a, Pos b) => s (a ⊗ b <| i) o -> s (a <| b <| i) o
+  tensorR :: (Pos a, Pos b) => s i (o |> a) -> s i (o |> b) -> s i (o |> a ⊗ b)
 
   botR' = (>>> botL)
   oneL' = (oneR >>>)
@@ -498,19 +498,19 @@ infixr 5 --<
 instance (Pos a, Neg b) => Polarized P (Sub r a b) where
 
 
-class (Core p, Structural p, Negative p) => Implicative p where
-  funL :: (Pos a, Neg b) => p i (o |> a) -> p (b <| i) o -> p (a --> b <| i) o
-  funLSub :: (Pos a, Neg b) => p i (o |> a --< b) -> p (a --> b <| i) o
-  funL2 :: (Pos a, Neg b) => p (a --> b <| a <| i)  (o |> b)
-  funR :: (Pos a, Neg b) => p (a <| i) (o |> b) -> p i (o |> a --> b)
-  funR' :: (Pos a, Neg b) => p i (o |> a --> b) -> p (a <| i) (o |> b)
+class (Core s, Structural s, Negative s) => Implicative s where
+  funL :: (Pos a, Neg b) => s i (o |> a) -> s (b <| i) o -> s (a --> b <| i) o
+  funLSub :: (Pos a, Neg b) => s i (o |> a --< b) -> s (a --> b <| i) o
+  funL2 :: (Pos a, Neg b) => s (a --> b <| a <| i)  (o |> b)
+  funR :: (Pos a, Neg b) => s (a <| i) (o |> b) -> s i (o |> a --> b)
+  funR' :: (Pos a, Neg b) => s i (o |> a --> b) -> s (a <| i) (o |> b)
 
-  subL :: (Pos a, Neg b) => p (a <| i) (o |> b) -> p (a --< b <| i) o
-  subLFun :: (Pos a, Neg b) => p i (o |> a --> b) -> p (a --< b <| i) o
-  subL' :: (Pos a, Neg b) => p (a --< b <| i) o -> p (a <| i) (o |> b)
-  subR :: (Pos a, Neg b) => p i (o |> a) -> p (b <| i) o -> p i (o |> a --< b)
+  subL :: (Pos a, Neg b) => s (a <| i) (o |> b) -> s (a --< b <| i) o
+  subLFun :: (Pos a, Neg b) => s i (o |> a --> b) -> s (a --< b <| i) o
+  subL' :: (Pos a, Neg b) => s (a --< b <| i) o -> s (a <| i) (o |> b)
+  subR :: (Pos a, Neg b) => s i (o |> a) -> s (b <| i) o -> s i (o |> a --< b)
 
-  ($$) :: (Pos a, Neg b) => p i (o |> a --> b) -> p i (o |> a) -> p i (o |> b)
+  ($$) :: (Pos a, Neg b) => s i (o |> a --> b) -> s i (o |> a) -> s i (o |> b)
 
   funL pa pb = funLSub (subR pa pb)
   funLSub p = wkL p >>> subL (exL (funL init init))
@@ -548,18 +548,18 @@ runExists f (Exists r) = f r
 type ForAllC cx cf f = (forall x . cx x => cf (f x)) :: Constraint
 
 
-class (Core p, Structural p, Negative p, Shifting p) => Quantifying p where
-  forAllL :: (Polarized n x, Neg (f x)) => p (f x <| i) o -> p (ForAll n f <| i) o
-  forAllLExists :: ForAllC (Polarized n) Neg f => p i (o |> Exists n (Negate Δ · f)) -> p (ForAll n f <| i) o
-  -- FIXME: the correct signature should be p i (o |> (forall x . Polarized n x => f x)) -> p i (o |> ForAll f), but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
-  -- forAllR :: ForAllC (Polarized n) Neg f => (forall x . Polarized n x => p i (o |> f x)) -> p i (o |> ForAll n f)
-  forAllR' :: ForAllC (Polarized n) Neg f => p i (o |> ForAll n f) -> (forall x . Polarized n x => p i (o |> f x))
+class (Core s, Structural s, Negative s, Shifting s) => Quantifying s where
+  forAllL :: (Polarized n x, Neg (f x)) => s (f x <| i) o -> s (ForAll n f <| i) o
+  forAllLExists :: ForAllC (Polarized n) Neg f => s i (o |> Exists n (Negate Δ · f)) -> s (ForAll n f <| i) o
+  -- FIXME: the correct signature should be s i (o |> (forall x . Polarized n x => f x)) -> s i (o |> ForAll f), but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
+  -- forAllR :: ForAllC (Polarized n) Neg f => (forall x . Polarized n x => s i (o |> f x)) -> s i (o |> ForAll n f)
+  forAllR' :: ForAllC (Polarized n) Neg f => s i (o |> ForAll n f) -> (forall x . Polarized n x => s i (o |> f x))
 
-  -- FIXME: the correct signature should be p ((forall x . f x) <| i) o -> p (Exists f <| i) o, but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
-  existsL :: (forall x . Polarized n x => p (f x <| i) o) -> p (Exists n f <| i) o
-  existsL' :: ForAllC (Polarized n) Pos f => p (Exists n f <| i) o -> (forall x . Polarized n x => p (f x <| i) o)
-  existsLForAll :: ForAllC (Polarized n) Pos f => p i (o |> ForAll n (Not Δ · f)) -> p (Exists n f <| i) o
-  existsR :: (Polarized n x, Pos (f x)) => p i (o |> f x) -> p i (o |> Exists n f)
+  -- FIXME: the correct signature should be s ((forall x . f x) <| i) o -> s (Exists f <| i) o, but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
+  existsL :: (forall x . Polarized n x => s (f x <| i) o) -> s (Exists n f <| i) o
+  existsL' :: ForAllC (Polarized n) Pos f => s (Exists n f <| i) o -> (forall x . Polarized n x => s (f x <| i) o)
+  existsLForAll :: ForAllC (Polarized n) Pos f => s i (o |> ForAll n (Not Δ · f)) -> s (Exists n f <| i) o
+  existsR :: (Polarized n x, Pos (f x)) => s i (o |> f x) -> s i (o |> Exists n f)
 
   forAllLExists p = wkL p >>> existsL (mapL getC (negateL (forAllL init)))
   forAllR' p = exR (wkR p) >>> forAllL init
@@ -614,15 +614,15 @@ instance (Polarized P (f a), Polarized N a) => Polarized N (MuF f a) where
 -- nuToMu = unfoldMu getNu
 
 
-class (Core p, Structural p, Implicative p, Quantifying p) => Recursive p where
-  nuL :: ForAllC (Polarized P) Neg f => p (Exists P (NuF f) <| i) o -> p (Nu f <| i) o
-  nuR :: ForAllC (Polarized P) Neg f => p i (o |> Exists P (NuF f)) -> p i (o |> Nu f)
-  nuR' :: ForAllC (Polarized P) Neg f => p i (o |> Nu f) -> p i (o |> Exists P (NuF f))
+class (Core s, Structural s, Implicative s, Quantifying s) => Recursive s where
+  nuL :: ForAllC (Polarized P) Neg f => s (Exists P (NuF f) <| i) o -> s (Nu f <| i) o
+  nuR :: ForAllC (Polarized P) Neg f => s i (o |> Exists P (NuF f)) -> s i (o |> Nu f)
+  nuR' :: ForAllC (Polarized P) Neg f => s i (o |> Nu f) -> s i (o |> Exists P (NuF f))
 
-  muL :: ForAllC (Polarized N) Pos f => p (ForAll N (MuF f) <| i) o -> p (Mu f <| i) o
-  muL' :: ForAllC (Polarized N) Pos f => p (Mu f <| i) o -> p (ForAll N (MuF f) <| i) o
-  muR :: ForAllC (Polarized N) Pos f => p i (o |> ForAll N (MuF f)) -> p i (o |> Mu f)
-  muLFold :: (ForAllC (Polarized N) Pos f, Neg a) => p i (o |> f a --> a) -> p i (o |> Mu f) -> p i (o |> a)
+  muL :: ForAllC (Polarized N) Pos f => s (ForAll N (MuF f) <| i) o -> s (Mu f <| i) o
+  muL' :: ForAllC (Polarized N) Pos f => s (Mu f <| i) o -> s (ForAll N (MuF f) <| i) o
+  muR :: ForAllC (Polarized N) Pos f => s i (o |> ForAll N (MuF f)) -> s i (o |> Mu f)
+  muLFold :: (ForAllC (Polarized N) Pos f, Neg a) => s i (o |> f a --> a) -> s i (o |> Mu f) -> s i (o |> a)
 
   nuR' p = exR (wkR p) >>> nuL init
   muL' p = muR init >>> exL (wkL p)
