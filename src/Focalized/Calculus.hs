@@ -66,9 +66,7 @@ module Focalized.Calculus
 import Control.Applicative (liftA2)
 import Control.Exception (Exception, catch, throw)
 import Control.Monad (ap, join)
-import Data.Bifoldable
 import Data.Bifunctor (Bifunctor(..))
-import Data.Bitraversable
 import Data.Distributive
 import Data.Functor.Adjunction
 import Data.Functor.Identity
@@ -758,30 +756,6 @@ instance (Applicative f, Applicative g) => Applicative (f · g) where
 
 instance (Distributive f, Distributive g) => Distributive (f · g) where
   collect f r = C (fmap distribute (collect (getC . f) r))
-
-
-newtype J p a = J { getJ :: p a a }
-
-instance Bifoldable p => Foldable (J p) where
-  foldMap f = bifoldMap f f . getJ
-
-instance Bifunctor p => Functor (J p) where
-  fmap f = J . bimap f f . getJ
-
-instance Bitraversable p => Traversable (J p) where
-  traverse f = fmap J . bitraverse f f . getJ
-
-
-newtype S p f g a = S { getS :: f a `p` g a }
-
-instance (Foldable f, Foldable g, Bifoldable p) => Foldable (S p f g) where
-  foldMap f = bifoldMap (foldMap f) (foldMap f) . getS
-
-instance (Functor f, Functor g, Bifunctor p) => Functor (S p f g) where
-  fmap f = S . bimap (fmap f) (fmap f) . getS
-
-instance (Traversable f, Traversable g, Bitraversable p) => Traversable (S p f g) where
-  traverse f = fmap S . bitraverse (traverse f) (traverse f) . getS
 
 
 class Conj c where
