@@ -722,7 +722,7 @@ instance Quantifying Seq where
 
 -- Recursive
 
-newtype Nu r f = Nu { getNu :: Exists P (NuF r f) }
+data Nu r f = forall x . Polarized P x => Nu { getNu :: Down (Fun r x (f x)) ⊗ x }
 
 instance Polarized N (Nu r f) where
 
@@ -731,10 +731,10 @@ newtype NuF r f a = NuF { getNuF :: Down (Fun r a (f a)) ⊗ a }
 instance (Polarized N (f a), Polarized P a) => Polarized P (NuF r f a)
 
 nu :: Exists P (NuF r f) -> Nu r f
-nu = Nu
+nu (Exists (NuF r)) = Nu r
 
 runNu :: Nu r f -> Exists P (NuF r f)
-runNu = getNu
+runNu (Nu r) = Exists (NuF r)
 
 
 newtype Mu r f = Mu { getMu :: forall x . Neg x => Fun r (Down (Fun r (f x) x)) x }
