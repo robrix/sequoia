@@ -369,39 +369,36 @@ instance Disj (⊕) where
 
 class (Core s, Structural s, Negative s) => Additive s where
   zeroL :: s r (Zero <| i) o
+  zeroL = popL absurdP
 
   topR :: s r i (o |> Top)
+  topR = liftR Top
 
   sumL :: (Pos a, Pos b) => s r (a <| i) o -> s r (b <| i) o -> s r (a ⊕ b <| i) o
+  sumL p1 p2 = sumLWith (withR (notR p1) (notR p2))
   sumL1' :: (Pos a, Pos b) => s r (a ⊕ b <| i) o -> s r (a <| i) o
+  sumL1' p = sumR1 init >>> exL (wkL p)
   sumL2' :: (Pos a, Pos b) => s r (a ⊕ b <| i) o -> s r (b <| i) o
+  sumL2' p = sumR2 init >>> exL (wkL p)
   sumLWith :: (Pos a, Pos b) => s r i (o |> Not r a & Not r b) -> s r (a ⊕ b <| i) o
+  sumLWith p = sumL (wkL p >>> withL1 (notL init)) (wkL p >>> withL2 (notL init))
   sumR1 :: (Pos a, Pos b) => s r i (o |> a) -> s r i (o |> a ⊕ b)
   sumR2 :: (Pos a, Pos b) => s r i (o |> b) -> s r i (o |> a ⊕ b)
 
   withL1 :: (Neg a, Neg b) => s r (a <| i) o -> s r (a & b <| i) o
+  withL1 = withLSum . sumR1 . negateR
   withL2 :: (Neg a, Neg b) => s r (b <| i) o -> s r (a & b <| i) o
+  withL2 = withLSum . sumR2 . negateR
   withLSum :: (Neg a, Neg b) => s r i (o |> Negate r a ⊕ Negate r b) -> s r (a & b <| i) o
+  withLSum p = wkL p >>> sumL (negateL (withL1 init)) (negateL (withL2 init))
   withR :: (Neg a, Neg b) => s r i (o |> a) -> s r i (o |> b) -> s r i (o |> (a & b))
   withR1' :: (Neg a, Neg b) => s r i (o |> (a & b)) -> s r i (o |> a)
-  withR2' :: (Neg a, Neg b) => s r i (o |> (a & b)) -> s r i (o |> b)
-
-  sumL p1 p2 = sumLWith (withR (notR p1) (notR p2))
-  sumL1' p = sumR1 init >>> exL (wkL p)
-  sumL2' p = sumR2 init >>> exL (wkL p)
-  sumLWith p = sumL (wkL p >>> withL1 (notL init)) (wkL p >>> withL2 (notL init))
-  withL1 = withLSum . sumR1 . negateR
-  withL2 = withLSum . sumR2 . negateR
-  withLSum p = wkL p >>> sumL (negateL (withL1 init)) (negateL (withL2 init))
   withR1' t = exR (wkR t) >>> withL1 init
+  withR2' :: (Neg a, Neg b) => s r i (o |> (a & b)) -> s r i (o |> b)
   withR2' t = exR (wkR t) >>> withL2 init
 
 
 instance Additive Seq where
-  zeroL = popL absurdP
-
-  topR = liftR Top
-
   sumL a b = popL (exlr (pushL a) (pushL b))
   sumR1 = mapR inl
   sumR2 = mapR inr
@@ -461,40 +458,37 @@ instance Conj (⊗) where
 
 class (Core s, Structural s, Negative s) => Multiplicative s where
   botL :: s r (Bot <| i) o
+  botL = popL absurdN
   botR :: s r i o -> s r i (o |> Bot)
+  botR = fmap inl
   botR' :: s r i (o |> Bot) -> s r i o
+  botR' = (>>> botL)
 
   oneL :: s r i o -> s r (One <| i) o
+  oneL = wkL
   oneL' :: s r (One <| i) o -> s r i o
+  oneL' = (oneR >>>)
   oneR :: s r i (o |> One)
+  oneR = liftR One
 
   parL :: (Neg a, Neg b) => s r (a <| i) o -> s r (b <| i) o -> s r (a ⅋ b <| i) o
+  parL p1 p2 = parLTensor (tensorR (negateR p1) (negateR p2))
   parLTensor :: (Neg a, Neg b) => s r i (o |> Negate r a ⊗ Negate r b) -> s r (a ⅋ b <| i) o
+  parLTensor p = wkL p >>> tensorL (negateL (negateL (parL (wkR init) init)))
   parR :: (Neg a, Neg b) => s r i (o |> a |> b) -> s r i (o |> a ⅋ b)
   parR' :: (Neg a, Neg b) => s r i (o |> a ⅋ b) -> s r i (o |> a |> b)
+  parR' p = poppedR (wkR . wkR) p >>> parL (wkR init) init
 
   tensorL :: (Pos a, Pos b) => s r (a <| b <| i) o -> s r (a ⊗ b <| i) o
-  tensorLPar :: (Pos a, Pos b) => s r i (o |> Not r a ⅋ Not r b) -> s r (a ⊗ b <| i) o
-  tensorL' :: (Pos a, Pos b) => s r (a ⊗ b <| i) o -> s r (a <| b <| i) o
-  tensorR :: (Pos a, Pos b) => s r i (o |> a) -> s r i (o |> b) -> s r i (o |> a ⊗ b)
-
-  botR' = (>>> botL)
-  oneL' = (oneR >>>)
-  parL p1 p2 = parLTensor (tensorR (negateR p1) (negateR p2))
-  parLTensor p = wkL p >>> tensorL (negateL (negateL (parL (wkR init) init)))
-  parR' p = poppedR (wkR . wkR) p >>> parL (wkR init) init
   tensorL = tensorLPar . parR . notR . notR
+  tensorLPar :: (Pos a, Pos b) => s r i (o |> Not r a ⅋ Not r b) -> s r (a ⊗ b <| i) o
   tensorLPar p = wkL p >>> parL (notL (tensorL init)) (notL (tensorL (wkL init)))
+  tensorL' :: (Pos a, Pos b) => s r (a ⊗ b <| i) o -> s r (a <| b <| i) o
   tensorL' p = tensorR init (wkL init) >>> popL (wkL . wkL . pushL p)
+  tensorR :: (Pos a, Pos b) => s r i (o |> a) -> s r i (o |> b) -> s r i (o |> a ⊗ b)
 
 
 instance Multiplicative Seq where
-  botL = popL absurdN
-  botR = fmap inl
-
-  oneL = wkL
-  oneR = liftR One
-
   parL a b = popL (exlr (pushL a) (pushL b))
   parR ab = (>>= inr . inl) |> inr . inr <$> ab
 
