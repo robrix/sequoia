@@ -733,6 +733,10 @@ cps f = CPS (\ k -> K (runK k . f))
 
 newtype CPS r a b = CPS { runCPS :: K r b -> K r a }
 
+instance Cat.Category (CPS r) where
+  id = CPS id
+  CPS f . CPS g = CPS (g . f)
+
 instance Functor (CPS r a) where
   fmap f (CPS r) = CPS (r . mapK f)
 
