@@ -77,9 +77,7 @@ module Focalized.Calculus
 , runK
 , K(..)
 , cps
-, liftCPS
 , liftCPS'
-, lowerCPS
 , runCPS
 , appCPS
 , pappCPS
@@ -114,7 +112,7 @@ runSeq :: (o -> r) -> i -> Seq r i o -> r
 runSeq k c = runCPS k c . getSeq
 
 sequent :: ((o -> r) -> (i -> r)) -> Seq r i o
-sequent = Seq . liftCPS
+sequent = Seq . CPS
 
 newtype Seq r i o = Seq { getSeq :: CPS r i o }
   deriving (Applicative, Functor, Monad)
@@ -124,7 +122,7 @@ liftLR = Seq . dimap exl inr
 
 
 lowerLR :: (CPS r a b -> Seq r i o) -> Seq r (a <| i) (o |> b) -> Seq r i o
-lowerLR f p = sequent $ \ k c -> runSeq k c (f (liftCPS (\ kb a -> runSeq (k |> kb) (a <| c) p)))
+lowerLR f p = sequent $ \ k c -> runSeq k c (f (CPS (\ kb a -> runSeq (k |> kb) (a <| c) p)))
 
 
 -- Effectful sequents
@@ -136,7 +134,7 @@ newtype SeqT r i m o = SeqT { getSeqT :: Seq (m r) i o }
   deriving (Applicative, Functor, Monad)
 
 instance MonadTrans (SeqT r i) where
-  lift m = SeqT (Seq (liftCPS (\ k _ -> m >>= k)))
+  lift m = SeqT (Seq (CPS (\ k _ -> m >>= k)))
 
 
 -- Contexts
@@ -620,7 +618,7 @@ appFun :: Fun r a b -> a -> (b -> r) -> r
 appFun = appCPS . getFun
 
 liftFun :: ((b -> r) -> (a -> r)) -> Fun r a b
-liftFun = Fun . liftCPS
+liftFun = Fun . CPS
 
 liftFun' :: (a -> (b -> r) -> r) -> Fun r a b
 liftFun' = liftFun . flip
@@ -890,22 +888,16 @@ instance Cat.Category K where
 
 
 cps :: (a -> b) -> CPS r a b
-cps f = CPS (\ k -> K (getK k . f))
-
-liftCPS :: ((b -> r) -> (a -> r)) -> CPS r a b
-liftCPS f = CPS (K . f . getK)
+cps f = CPS (. f)
 
 liftCPS' :: (a -> (b -> r) -> r) -> CPS r a b
-liftCPS' = liftCPS . flip
-
-lowerCPS :: CPS r a b -> ((b -> r) -> (a -> r))
-lowerCPS c = getK . getCPS c . K
+liftCPS' = CPS . flip
 
 runCPS :: (b -> r) -> a -> CPS r a b -> r
-runCPS k a c = runK a (getCPS c (K k))
+runCPS k a c = getCPS c k a
 
 appCPS :: CPS r a b -> a -> (b -> r) -> r
-appCPS c a k = getK (getCPS c (K k)) a
+appCPS c a k = getCPS c k a
 
 pappCPS :: CPS r a b -> a -> CPS r () b
 pappCPS c a = c Cat.<<< pure a
@@ -914,7 +906,7 @@ execCPS :: CPS r () a -> (a -> r) -> r
 execCPS c = appCPS c ()
 
 evalCPS :: CPS r i r -> i -> r
-evalCPS c = getK (getCPS c (K id))
+evalCPS c = getCPS c id
 
 refoldCPS :: Traversable f => CPS r (f b) b -> CPS r a (f a) -> CPS r a b
 refoldCPS f g = go where go = f Cat.<<< traversing go Cat.<<< g
@@ -923,52 +915,52 @@ traversing :: Traversable f => CPS r a b -> CPS r (f a) (f b)
 traversing c = liftCPS' $ \ a -> execCPS (traverse (pappCPS c) a)
 
 resetCPS :: CPS o i o -> CPS r i o
-resetCPS c = liftCPS $ \ k -> k . evalCPS c
+resetCPS c = CPS $ \ k -> k . evalCPS c
 
 shiftCPS :: ((o -> r) -> CPS r i r) -> CPS r i o
-shiftCPS f = liftCPS (evalCPS . f)
+shiftCPS f = CPS (evalCPS . f)
 
-newtype CPS r a b = CPS { getCPS :: K r b -> K r a }
+newtype CPS r a b = CPS { getCPS :: (b -> r) -> (a -> r) }
 
 instance Cat.Category (CPS r) where
   id = CPS id
   CPS f . CPS g = CPS (g . f)
 
 instance Functor (CPS r a) where
-  fmap f (CPS r) = CPS (r . mapK f)
+  fmap f (CPS r) = CPS (r . (. f))
 
 instance Applicative (CPS r a) where
-  pure a = CPS (K . const . runK a)
+  pure a = CPS (const . ($ a))
   (<*>) = ap
 
 instance Monad (CPS r a) where
-  r >>= f = liftCPS $ \ k a -> runCPS (runCPS k a . f) a r
+  r >>= f = CPS $ \ k a -> runCPS (runCPS k a . f) a r
 
 instance Arrow (CPS r) where
   arr = cps
-  first  f = liftCPS (\ k (l, r) -> appCPS f l (k . (, r)))
-  second g = liftCPS (\ k (l, r) -> appCPS g r (k . (l,)))
-  f *** g = liftCPS (\ k (l, r) -> appCPS f l (appCPS g r . fmap k . (,)))
-  f &&& g = liftCPS (\ k a -> appCPS f a (appCPS g a . fmap k . (,)))
+  first  f = CPS (\ k (l, r) -> appCPS f l (k . (, r)))
+  second g = CPS (\ k (l, r) -> appCPS g r (k . (l,)))
+  f *** g = CPS (\ k (l, r) -> appCPS f l (appCPS g r . fmap k . (,)))
+  f &&& g = CPS (\ k a -> appCPS f a (appCPS g a . fmap k . (,)))
 
 instance ArrowChoice (CPS r) where
-  left  f = liftCPS (\ k -> exlr (lowerCPS f (k . inl)) (k . inr))
-  right g = liftCPS (\ k -> exlr (k . inl) (lowerCPS g (k . inr)))
-  f +++ g = liftCPS (\ k -> exlr (lowerCPS f (k . inl)) (lowerCPS g (k . inr)))
-  f ||| g = liftCPS (exlr <$> lowerCPS f <*> lowerCPS g)
+  left  f = CPS (\ k -> exlr (getCPS f (k . inl)) (k . inr))
+  right g = CPS (\ k -> exlr (k . inl) (getCPS g (k . inr)))
+  f +++ g = CPS (\ k -> exlr (getCPS f (k . inl)) (getCPS g (k . inr)))
+  f ||| g = CPS (exlr <$> getCPS f <*> getCPS g)
 
 instance ArrowApply (CPS r) where
-  app = liftCPS (flip (uncurry appCPS))
+  app = CPS (flip (uncurry appCPS))
 
 instance Profunctor (CPS r) where
-  dimap f g (CPS c) = CPS (mapK f . c . mapK g)
+  dimap f g (CPS c) = CPS ((. f) . c . (. g))
 
 
 newtype CPST r i m o = CPST { getCPST :: CPS (m r) i o }
   deriving (Applicative, Functor, Monad)
 
 instance MonadTrans (CPST r i) where
-  lift m = CPST (liftCPS (const . (m >>=)))
+  lift m = CPST (CPS (const . (m >>=)))
 
 
 newtype (f · g) a = C { getC :: f (g a) }
