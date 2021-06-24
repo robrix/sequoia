@@ -950,6 +950,7 @@ instance Monad (CPS r a) where
 
 instance Arrow (CPS r) where
   arr = cps
+  first f = liftCPS (\ k (l, r) -> appCPS f l (k . (, r)))
   f *** g = liftCPS (\ k (l, r) -> appCPS f l (appCPS g r . fmap k . (,)))
 
 
