@@ -15,6 +15,7 @@ module Focalized.Calculus
 , lowerR
 , lowerLR
   -- * Effectful sequents
+, runSeqM
 , SeqM(..)
   -- * Contexts
 , type (<|)
@@ -119,6 +120,9 @@ lowerLR f p = sequent $ \ k c -> runSeq k c (f (\ kb a -> runSeq (k |> kb) (a <|
 
 
 -- Effectful sequents
+
+runSeqM :: (o -> m r) -> i -> SeqM r i m o -> m r
+runSeqM k i = runSeq k i . getSeqM
 
 newtype SeqM r i m o = SeqM { getSeqM :: Seq (m r) i o }
 
