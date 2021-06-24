@@ -101,10 +101,10 @@ liftL :: (a -> r) -> Seq r (a <| i) o
 liftL ka = sequent $ \ _ -> ka . exl
 
 liftR :: a -> Seq r i (o |> a)
-liftR = pure . pure
+liftR = pure . inr
 
 liftLR :: (a -> b) -> Seq r (a <| i) (o |> b)
-liftLR f = sequent $ \ k -> k . pure . f . exl
+liftLR f = sequent $ \ k -> k . inr . f . exl
 
 lowerL :: ((a -> r) -> Seq r i o) -> Seq r (a <| i) o -> Seq r i o
 lowerL f p = sequent $ \ k c -> runSeq k c (f (\ a -> runSeq k (a <| c) p))
@@ -128,7 +128,7 @@ type (|>) = Either
 infixl 4 |>
 
 (|>) :: (os -> r) -> (o -> r) -> ((os |> o) -> r)
-(|>) = either
+(|>) = exlr
 
 split :: (o |> a -> r) -> (o -> r, a -> r)
 split f = (f . Left, f . Right)
@@ -151,9 +151,9 @@ class Core s where
 infixr 1 >>>
 
 instance Core Seq where
-  f >>> g = f >>= either pure (pushL g)
+  f >>> g = f >>= pure |> pushL g
 
-  init = popL (pure . pure)
+  init = popL (pure . inr)
 
 
 class Structural s where
@@ -366,7 +366,7 @@ class (Core s, Structural s, Negative s) => Additive s where
 instance Additive Seq where
   zeroL = popL absurdP
 
-  topR = pure (pure Top)
+  topR = pure (inr Top)
 
   sumL a b = popL (exlr (pushL a) (pushL b))
   sumR1 = mapR inl
@@ -459,10 +459,10 @@ instance Multiplicative Seq where
   botR = fmap Left
 
   oneL = wkL
-  oneR = pure (pure One)
+  oneR = pure (inr One)
 
   parL a b = popL (exlr (pushL a) (pushL b))
-  parR ab = either (>>= (pure . inl)) (pure . inr) <$> ab
+  parR ab = (>>= inr . inl) |> inr . inr <$> ab
 
   tensorL p = popL (pushL2 p . exl <*> exr)
   tensorR = liftA2 (liftA2 inlr)
