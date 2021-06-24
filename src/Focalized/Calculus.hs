@@ -77,7 +77,7 @@ module Focalized.Calculus
 , runK
 , K(..)
 , cps
-, liftCPS'
+, liftCPS
 , runCPS
 , appCPS
 , pappCPS
@@ -755,7 +755,7 @@ runMu :: Mu r f -> ForAll N (MuF r f)
 runMu m = ForAll (MuF (getMu m))
 
 foldMu :: Polarized N a => Down (Fun r (f a) a) -> CPS r (Mu r f) a
-foldMu alg = liftCPS' $ \ (Mu f) -> appFun f alg
+foldMu alg = liftCPS $ \ (Mu f) -> appFun f alg
 
 unfoldMu :: Traversable f => (a -> f a) -> CPS r a (Mu r f)
 unfoldMu coalg = cps $ \ a -> Mu $ liftFun' $ \ (Down (Fun alg)) -> appCPS (refoldCPS alg (cps coalg)) a
@@ -890,8 +890,8 @@ instance Cat.Category K where
 cps :: (a -> b) -> CPS r a b
 cps f = CPS (. f)
 
-liftCPS' :: (a -> (b -> r) -> r) -> CPS r a b
-liftCPS' = CPS . flip
+liftCPS :: (a -> (b -> r) -> r) -> CPS r a b
+liftCPS = CPS . flip
 
 runCPS :: (b -> r) -> a -> CPS r a b -> r
 runCPS k a c = getCPS c k a
@@ -912,7 +912,7 @@ refoldCPS :: Traversable f => CPS r (f b) b -> CPS r a (f a) -> CPS r a b
 refoldCPS f g = go where go = f Cat.<<< traversing go Cat.<<< g
 
 traversing :: Traversable f => CPS r a b -> CPS r (f a) (f b)
-traversing c = liftCPS' $ \ a -> execCPS (traverse (pappCPS c) a)
+traversing c = liftCPS $ \ a -> execCPS (traverse (pappCPS c) a)
 
 resetCPS :: CPS o i o -> CPS r i o
 resetCPS c = CPS $ \ k -> k . evalCPS c
