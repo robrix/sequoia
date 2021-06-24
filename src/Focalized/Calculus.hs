@@ -959,6 +959,7 @@ instance ArrowChoice (CPS r) where
   left  f = liftCPS (\ k -> exlr (lowerCPS f (k . inl)) (k . inr))
   right g = liftCPS (\ k -> exlr (k . inl) (lowerCPS g (k . inr)))
   f +++ g = liftCPS (\ k -> exlr (lowerCPS f (k . inl)) (lowerCPS g (k . inr)))
+  f ||| g = liftCPS (exlr <$> lowerCPS f <*> lowerCPS g)
 
 
 newtype CPST r i m o = CPST { getCPST :: CPS (m r) i o }
