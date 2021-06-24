@@ -91,6 +91,7 @@ module Focalized.Calculus
 , resetCPS
 , shiftCPS
 , CPS(..)
+, CPST(..)
 , Conj(..)
 , curryConj
 , uncurryConj
@@ -945,6 +946,10 @@ instance Applicative (CPS r a) where
 
 instance Monad (CPS r a) where
   r >>= f = liftCPS $ \ k a -> runCPS (runCPS k a . f) a r
+
+
+newtype CPST r i m o = CPST { getCPST :: CPS (m r) i o }
+  deriving (Applicative, Functor, Monad)
 
 
 newtype (f · g) a = C { getC :: f (g a) }
