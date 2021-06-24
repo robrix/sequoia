@@ -118,8 +118,15 @@ lowerLR f p = sequent $ \ k c -> runSeq k c (f (\ kb a -> runSeq (k |> kb) (a <|
 
 -- Contexts
 
-type (<|) = (,)
+data a <| b = a :<| b
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+
 infixr 4 <|
+
+instance Conj (<|) where
+  inlr = (:<|)
+  exl (a :<| _) = a
+  exr (_ :<| b) = b
 
 (<|) :: i -> is -> i <| is
 (<|) = inlr
