@@ -10,7 +10,6 @@ module Focalized.HOAS ( module Focalized.HOAS ) where
 import Control.Applicative (Alternative(..), liftA2, optional, (<**>))
 import Control.Monad (ap, guard, void, (<=<))
 import Data.Char
-import Data.Distributive
 import Data.Foldable (asum, traverse_)
 
 newtype Name = Name { getName :: String }
@@ -200,10 +199,6 @@ instance Applicative I where
 
 instance Monad I where
   I a >>= f = f a
-
-instance Distributive I where
-  collect f = I . fmap (getI . f)
-  distribute = I . fmap getI
 
 
 newtype K a b = K { getK :: a }
