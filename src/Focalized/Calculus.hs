@@ -547,12 +547,12 @@ instance Implicative Seq where
 
 newtype ForAll p f = ForAll { runForAll :: forall x . Polarized p x => f x }
 
-instance (forall x . Polarized n x => Neg (f x)) => Polarized N (ForAll p f)
+instance (forall x . Polarized p x => Neg (f x)) => Polarized N (ForAll p f)
 
 
 data Exists p f = forall x . Polarized p x => Exists (f x)
 
-instance (forall x . Polarized n x => Pos (f x)) => Polarized P (Exists p f)
+instance (forall x . Polarized p x => Pos (f x)) => Polarized P (Exists p f)
 
 runExists :: (forall x . Polarized p x => f x -> r) -> Exists p f -> r
 runExists f (Exists r) = f r
