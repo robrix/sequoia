@@ -98,13 +98,13 @@ newtype Seq r i o = Seq { getSeq :: CPS r i o }
   deriving (Applicative, Functor, Monad)
 
 liftL :: (a -> r) -> Seq r (a <| i) o
-liftL ka = sequent $ \ _ -> ka . fst
+liftL ka = sequent $ \ _ -> ka . exl
 
 liftR :: a -> Seq r i (o |> a)
 liftR = pure . pure
 
 liftLR :: (a -> b) -> Seq r (a <| i) (o |> b)
-liftLR f = sequent $ \ k -> k . pure . f . fst
+liftLR f = sequent $ \ k -> k . pure . f . exl
 
 lowerL :: ((a -> r) -> Seq r i o) -> Seq r (a <| i) o -> Seq r i o
 lowerL f p = sequent $ \ k c -> runSeq k c (f (\ a -> runSeq k (a <| c) p))
@@ -238,7 +238,7 @@ class Structural s where
   exR = popR2 . flip . pushR2
 
 instance Structural Seq where
-  popL f = sequent $ \ k -> uncurry (flip (runSeq k) . f)
+  popL f = sequent $ \ k -> uncurryConj (flip (runSeq k) . f)
   pushL s a = sequent $ \ k i -> runSeq k (a <| i) s
 
   popR f = sequent $ \ k c -> let (k', ka) = split k in runSeq k' c (f ka)
