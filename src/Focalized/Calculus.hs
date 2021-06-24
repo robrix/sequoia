@@ -757,14 +757,6 @@ class Polarized p out => Polarize p inn out | inn p -> out, inn out -> p where
 type ToNeg = Polarize N
 type ToPos = Polarize P
 
-instance (ToPos a pa, ToNeg b nb) => Polarize N (a -> b) (pa -> nb) where
-  polarize f = polarize . f . neutralize
-  neutralize f = neutralize . f . polarize
-
-instance (ToPos a pa, ToNeg b nb) => Polarize P (a -> b) (Down (pa -> nb)) where
-  polarize f = Down (polarize . f . neutralize)
-  neutralize f = neutralize . getDown f . polarize
-
 
 newtype Up   a = Up   { getUp   :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
