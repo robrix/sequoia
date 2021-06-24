@@ -92,7 +92,7 @@ runSeq :: (o -> r) -> i -> Seq r i o -> r
 runSeq k c = runCPS k c . getSeq
 
 sequent :: ((o -> r) -> (i -> r)) -> Seq r i o
-sequent = Seq . cps
+sequent = Seq . liftCPS
 
 newtype Seq r i o = Seq { getSeq :: CPS r i o }
   deriving (Applicative, Functor, Monad)
@@ -102,7 +102,7 @@ liftLR = Seq . mapCPS exl inr
 
 
 lowerLR :: (CPS r a b -> Seq r i o) -> Seq r (a <| i) (o |> b) -> Seq r i o
-lowerLR f p = sequent $ \ k c -> runSeq k c (f (cps (\ kb a -> runSeq (k |> kb) (a <| c) p)))
+lowerLR f p = sequent $ \ k c -> runSeq k c (f (liftCPS (\ kb a -> runSeq (k |> kb) (a <| c) p)))
 
 
 -- Effectful sequents
@@ -114,7 +114,7 @@ newtype SeqT r i m o = SeqT { getSeqT :: Seq (m r) i o }
   deriving (Applicative, Functor, Monad)
 
 instance MonadTrans (SeqT r i) where
-  lift m = SeqT (Seq (cps (\ k _ -> m >>= k)))
+  lift m = SeqT (Seq (liftCPS (\ k _ -> m >>= k)))
 
 
 -- Contexts
@@ -734,11 +734,11 @@ instance Cat.Category K where
   K f . K g = K (g . f)
 
 
-cps :: ((b -> r) -> (a -> r)) -> CPS r a b
-cps f = CPS (K . f . getK)
+cps :: (a -> b) -> CPS r a b
+cps f = CPS (\ k -> K (getK k . f))
 
-liftCPS :: (a -> b) -> CPS r a b
-liftCPS f = CPS (\ k -> K (getK k . f))
+liftCPS :: ((b -> r) -> (a -> r)) -> CPS r a b
+liftCPS f = CPS (K . f . getK)
 
 lowerCPS :: CPS r a b -> ((b -> r) -> (a -> r))
 lowerCPS c = getK . getCPS c . K
@@ -764,7 +764,7 @@ instance Applicative (CPS r a) where
   (<*>) = ap
 
 instance Monad (CPS r a) where
-  r >>= f = cps $ \ k a -> runCPS (runCPS k a . f) a r
+  r >>= f = liftCPS $ \ k a -> runCPS (runCPS k a . f) a r
 
 
 newtype (f · g) a = C { getC :: f (g a) }
