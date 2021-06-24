@@ -101,8 +101,8 @@ sequent = Seq . cps
 newtype Seq r i o = Seq { getSeq :: CPS r i o }
   deriving (Applicative, Functor, Monad)
 
-liftL :: (a -> r) -> Seq r (a <| i) o
-liftL ka = sequent $ \ _ -> ka . exl
+liftL :: K r a -> Seq r (a <| i) o
+liftL ka = sequent $ \ _ -> getK ka . exl
 
 liftR :: a -> Seq r i (o |> a)
 liftR = pure . inr
@@ -312,10 +312,10 @@ class (Core s, Structural s) => Negative s where
   negateR' p = wkL p >>> negateL init
 
 instance Negative Seq where
-  negateL p = popL (\ negateA -> p >>> liftL (getK (getNegate negateA)))
+  negateL p = popL (\ negateA -> p >>> liftL (getNegate negateA))
   negateR = lowerL (liftR . Negate) . wkR
 
-  notL p = popL (\ notA -> p >>> liftL (getK (getNot notA)))
+  notL p = popL (\ notA -> p >>> liftL (getNot notA))
   notR = lowerL (liftR . Not) . wkR
 
 
