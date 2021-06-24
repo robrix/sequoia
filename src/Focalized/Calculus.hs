@@ -912,7 +912,7 @@ refoldCPS :: Traversable f => CPS r (f b) b -> CPS r a (f a) -> CPS r a b
 refoldCPS f g = go where go = f Cat.<<< traversing go Cat.<<< g
 
 traversing :: Traversable f => CPS r a b -> CPS r (f a) (f b)
-traversing c = liftCPS $ \ a -> execCPS (traverse (pappCPS c) a)
+traversing c = liftCPS (execCPS . traverse (pappCPS c))
 
 resetCPS :: CPS o i o -> CPS r i o
 resetCPS c = CPS $ \ k -> k . evalCPS c
