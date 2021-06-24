@@ -70,6 +70,7 @@ module Focalized.Calculus
 , K(..)
 , cps
 , liftCPS
+, liftCPS'
 , lowerCPS
 , runCPS
 , appCPS
@@ -831,6 +832,9 @@ cps f = CPS (\ k -> K (getK k . f))
 
 liftCPS :: ((b -> r) -> (a -> r)) -> CPS r a b
 liftCPS f = CPS (K . f . getK)
+
+liftCPS' :: (a -> (b -> r) -> r) -> CPS r a b
+liftCPS' = liftCPS . flip
 
 lowerCPS :: CPS r a b -> ((b -> r) -> (a -> r))
 lowerCPS c = getK . getCPS c . K
