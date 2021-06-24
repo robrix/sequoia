@@ -66,6 +66,7 @@ module Focalized.Calculus
   -- * Utilities
 , K(..)
 , mapK
+, cps
 , CPS(..)
 , Conj(..)
 , Disj(..)
@@ -720,6 +721,10 @@ newtype K r a = K { runK :: a -> r }
 
 mapK :: (a' -> a) -> K r a -> K r a'
 mapK f (K g) = K (g . f)
+
+
+cps :: (a -> b) -> CPS r a b
+cps f = CPS (\ k -> K (runK k . f))
 
 newtype CPS r a b = CPS { runCPS :: K r b -> K r a }
 
