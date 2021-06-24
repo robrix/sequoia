@@ -73,10 +73,7 @@ module Focalized.Calculus
 import Control.Applicative (liftA2)
 import Control.Exception (Exception, catch, throw)
 import Control.Monad (ap, join)
-import Data.Distributive
-import Data.Functor.Adjunction hiding (splitL)
 import Data.Functor.Identity
-import Data.Functor.Rep
 import Data.Kind (Constraint)
 import Prelude hiding (init)
 
@@ -641,32 +638,12 @@ instance Recursive Seq where
 
 newtype N a = N { getN :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-  deriving (Applicative, Monad, Representable) via Identity
-
-instance Distributive N where
-  collect f = N . fmap (getN . f)
-  distribute = N . fmap getN
-
-instance Adjunction N P where
-  unit   =    P .    N
-  counit = getP . getN
-  leftAdjunct  f =    P . f .    N
-  rightAdjunct f = getP . f . getN
+  deriving (Applicative, Monad) via Identity
 
 
 newtype P a = P { getP :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-  deriving (Applicative, Monad, Representable) via Identity
-
-instance Distributive P where
-  collect f = P . fmap (getP . f)
-  distribute = P . fmap getP
-
-instance Adjunction P N where
-  unit   =    N .    P
-  counit = getN . getP
-  leftAdjunct  f =    N . f .    P
-  rightAdjunct f = getN . f . getP
+  deriving (Applicative, Monad) via Identity
 
 
 class Polarity p where
@@ -705,19 +682,9 @@ runUp = pos . getUp
 
 newtype Up   a = Up   { getUp   :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-  deriving (Applicative, Monad, Representable) via Identity
+  deriving (Applicative, Monad) via Identity
 
 instance Pos a => Polarized N (Up a) where
-
-instance Distributive Up where
-  collect f = Up . fmap (getUp . f)
-  distribute = Up . fmap getUp
-
-instance Adjunction Up Down where
-  unit   =    Down .    Up
-  counit = getDown . getUp
-  leftAdjunct  f =    Down . f .    Up
-  rightAdjunct f = getDown . f . getUp
 
 
 down :: Neg a => a -> Down a
@@ -728,19 +695,9 @@ runDown = neg . getDown
 
 newtype Down a = Down { getDown :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-  deriving (Applicative, Monad, Representable) via Identity
+  deriving (Applicative, Monad) via Identity
 
 instance Neg a => Polarized P (Down a) where
-
-instance Distributive Down where
-  collect f = Down . fmap (getDown . f)
-  distribute = Down . fmap getDown
-
-instance Adjunction Down Up where
-  unit   =    Up .    Down
-  counit = getUp . getDown
-  leftAdjunct  f =    Up . f .    Down
-  rightAdjunct f = getUp . f . getDown
 
 
 class (Core s, Structural s) => Shifting s where
@@ -772,19 +729,8 @@ instance Shifting Seq where
 
 newtype I a = I { getI :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-  deriving (Representable) via Identity
 
 instance (Polarity p, Polarized p a) => Polarized p (I a) where
-
-instance Distributive I where
-  collect f  = I . fmap (getI . f)
-  distribute = I . fmap  getI
-
-instance Adjunction I I where
-  unit   =    I .    I
-  counit = getI . getI
-  leftAdjunct  f =    I . f .    I
-  rightAdjunct f = getI . f . getI
 
 
 newtype K a b = K { getK :: a }
@@ -803,9 +749,6 @@ instance (Polarity p, Polarized p (f (g a))) => Polarized p ((f · g) a) where
 instance (Applicative f, Applicative g) => Applicative (f · g) where
   pure = C . pure . pure
   f <*> a = C ((<*>) <$> getC f <*> getC a)
-
-instance (Distributive f, Distributive g) => Distributive (f · g) where
-  collect f r = C (fmap distribute (collect (getC . f) r))
 
 
 class Conj c where
