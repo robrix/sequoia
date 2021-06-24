@@ -206,6 +206,7 @@ class Structural s where
   popL :: (a -> s r i o) -> s r (a <| i) o
 
   poppedL :: (s r i o -> s r i' o') -> (s r (a <| i) o -> s r (a <| i') o')
+  poppedL f p = popL (f . pushL p)
 
   -- | Push something onto the input context which was previously popped off it. Used with 'popL', this provides a generalized context restructuring facility. It i undefined what will happen if you push something which was not previously popped.
   --
@@ -218,10 +219,13 @@ class Structural s where
   pushL :: s r (a <| i) o -> a -> s r i o
 
   popL2 :: (a -> b -> s r i o) -> s r (a <| b <| i) o
+  popL2 f = popL (popL . f)
 
   pushL2 :: s r (a <| b <| i) o -> a -> b -> s r i o
+  pushL2 p = pushL . pushL p
 
   mapL :: (a' -> a) -> s r (a <| i) o -> s r (a' <| i) o
+  mapL f p = popL (pushL p . f)
 
 
   -- | Pop something off the output context which can later be pushed. Used with 'pushR', this provides a generalized context restructuring facility.
@@ -235,6 +239,7 @@ class Structural s where
   popR :: (K r a -> s r i o) -> s r i (o |> a)
 
   poppedR :: (s r i o -> s r i' o') -> (s r i (o |> a) -> s r i' (o' |> a))
+  poppedR f p = popR (f . pushR p)
 
   -- | Push something onto the output context which was previously popped off it. Used with 'popR', this provides a generalized context restructuring facility. It i undefined what will happen if you push something which was not previously popped.
   --
@@ -247,32 +252,26 @@ class Structural s where
   pushR :: s r i (o |> a) -> (K r a -> s r i o)
 
   popR2 :: (K r a -> K r b -> s r i o) -> s r i (o |> b |> a)
+  popR2 f = popR (popR . f)
 
   pushR2 :: s r i (o |> b |> a) -> K r a -> K r b -> s r i o
+  pushR2 p = pushR . pushR p
 
   mapR :: (a -> a') -> s r i (o |> a) -> s r i (o |> a')
+  mapR f p = popR (pushR p . mapK f)
 
 
   wkL :: s r i o -> s r (a <| i) o
-  wkR :: s r i o -> s r i (o |> a)
-  cnL :: s r (a <| a <| i) o -> s r (a <| i) o
-  cnR :: s r i (o |> a |> a) -> s r i (o |> a)
-  exL :: s r (a <| b <| c) o -> s r (b <| a <| c) o
-  exR :: s r i (o |> a |> b) -> s r i (o |> b |> a)
-
-  poppedL f p = popL (f . pushL p)
-  popL2 f = popL (popL . f)
-  pushL2 p = pushL . pushL p
-  mapL f p = popL (pushL p . f)
-  poppedR f p = popR (f . pushR p)
-  popR2 f = popR (popR . f)
-  pushR2 p = pushR . pushR p
-  mapR f p = popR (pushR p . mapK f)
   wkL = popL . const
+  wkR :: s r i o -> s r i (o |> a)
   wkR = popR . const
+  cnL :: s r (a <| a <| i) o -> s r (a <| i) o
   cnL = popL . join . pushL2
+  cnR :: s r i (o |> a |> a) -> s r i (o |> a)
   cnR = popR . join . pushR2
+  exL :: s r (a <| b <| c) o -> s r (b <| a <| c) o
   exL = popL2 . flip . pushL2
+  exR :: s r i (o |> a |> b) -> s r i (o |> b |> a)
   exR = popR2 . flip . pushR2
 
 instance Structural Seq where
