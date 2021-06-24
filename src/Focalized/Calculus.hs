@@ -69,6 +69,7 @@ module Focalized.Calculus
 , cps
 , liftCPS
 , runCPS
+, mapCPS
 , CPS(..)
 , Conj(..)
 , curryConj
@@ -762,6 +763,9 @@ liftCPS f = CPS (\ k -> K (getK k . f))
 
 runCPS :: (b -> r) -> a -> CPS r a b -> r
 runCPS k a c = runK a (getCPS c (K k))
+
+mapCPS :: (a' -> a) -> (b -> b') -> CPS r a b -> CPS r a' b'
+mapCPS f g (CPS c) = CPS (mapK f . c . mapK g)
 
 newtype CPS r a b = CPS { getCPS :: K r b -> K r a }
 
