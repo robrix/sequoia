@@ -96,7 +96,7 @@ instance Show Escape where show _ = "Escape"
 instance Exception Escape
 
 
-newtype Seq r i o = Seq ((o -> r) -> (i -> r))
+newtype Seq r i o = Seq { appSeq :: (o -> r) -> (i -> r) }
   deriving (Functor)
 
 instance Applicative (Seq r i) where
