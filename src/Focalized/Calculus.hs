@@ -64,9 +64,12 @@ module Focalized.Calculus
 , Down(..)
 , Shifting(..)
   -- * Utilities
-, K(..)
 , mapK
+, runK
+, K(..)
 , cps
+, liftCPS
+, runCPS
 , CPS(..)
 , Conj(..)
 , Disj(..)
@@ -718,20 +721,29 @@ instance Shifting Seq where
 
 -- Utilities
 
-newtype K r a = K { runK :: a -> r }
+mapK :: (a' -> a) -> K r a -> K r a'
+mapK f (K g) = K (g . f)
+
+runK :: a -> K r a -> r
+runK = flip getK
+
+newtype K r a = K { getK :: a -> r }
 
 instance Cat.Category K where
   id = K id
   K f . K g = K (g . f)
 
-mapK :: (a' -> a) -> K r a -> K r a'
-mapK f (K g) = K (g . f)
 
+cps :: ((b -> r) -> (a -> r)) -> CPS r a b
+cps f = CPS (K . f . getK)
 
-cps :: (a -> b) -> CPS r a b
-cps f = CPS (\ k -> K (runK k . f))
+liftCPS :: (a -> b) -> CPS r a b
+liftCPS f = CPS (\ k -> K (getK k . f))
 
-newtype CPS r a b = CPS { runCPS :: K r b -> K r a }
+runCPS :: (b -> r) -> a -> CPS r a b -> r
+runCPS k a c = runK a (getCPS c (K k))
+
+newtype CPS r a b = CPS { getCPS :: K r b -> K r a }
 
 instance Cat.Category (CPS r) where
   id = CPS id
@@ -739,6 +751,13 @@ instance Cat.Category (CPS r) where
 
 instance Functor (CPS r a) where
   fmap f (CPS r) = CPS (r . mapK f)
+
+instance Applicative (CPS r a) where
+  pure a = CPS (K . const . runK a)
+  (<*>) = ap
+
+instance Monad (CPS r a) where
+  r >>= f = cps $ \ k a -> runCPS (runCPS k a . f) a r
 
 
 newtype (f · g) a = C { getC :: f (g a) }
