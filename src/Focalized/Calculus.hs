@@ -56,6 +56,10 @@ module Focalized.Calculus
 , NuF(..)
 , Mu(..)
 , MuF(..)
+, mu
+, foldMu
+, unfoldMu
+, refold
 , Recursive(..)
   -- * Polarity
 , N(..)
@@ -735,6 +739,19 @@ instance Polarized P (Mu r f) where
 newtype MuF r f a = MuF { getMuF :: Fun r (Down (Fun r (f a) a)) a }
 
 instance (Polarized P (f a), Polarized N a) => Polarized N (MuF r f a) where
+
+mu :: (forall a . Fun r (Down (Fun r (f a) a)) a) -> Mu r f
+mu r = Mu (ForAll (MuF r))
+
+foldMu :: Polarized N a => Down (Fun r (f a) a) -> CPS r (Mu r f) a
+foldMu alg = liftCPS' $ \ (Mu (ForAll (MuF f))) -> appFun f alg
+
+unfoldMu :: Traversable f => (a -> f a) -> CPS r a (Mu r f)
+unfoldMu coalg = cps $ \ a -> mu $ liftFun' $ \ (Down (Fun alg)) -> appCPS (refoldCPS alg (cps coalg)) a
+
+
+refold :: Functor f => (f b -> b) -> (a -> f a) -> a -> b
+refold f g = go where go = f . fmap go . g
 
 
 class (Core s, Structural s, Implicative s, Quantifying s) => Recursive s where
