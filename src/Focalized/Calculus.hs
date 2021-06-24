@@ -84,6 +84,7 @@ import           Control.Monad (ap, join)
 import           Control.Monad.Trans.Class
 import           Data.Functor.Identity
 import           Data.Kind (Constraint, Type)
+import           Data.Void
 import           Prelude hiding (init)
 
 -- Sequents
@@ -288,10 +289,26 @@ newtype Not    r a = Not    { getNot    :: K r a }
 
 instance Pos a => Polarized N (Not r a) where
 
+instance ToPos a na => Polarize N (K r a) (Not r na) where
+  polarize = Not . mapK neutralize
+  neutralize = mapK polarize . getNot
+
+instance Pos a => Polarize N (Not r a) (Not r a) where
+  polarize = id
+  neutralize = id
+
 
 newtype Negate r a = Negate { getNegate :: K r a }
 
 instance Neg a => Polarized P (Negate r a) where
+
+instance ToNeg a na => Polarize P (K r a) (Negate r na) where
+  polarize = Negate . mapK neutralize
+  neutralize = mapK polarize . getNegate
+
+instance Neg a => Polarize P (Negate r a) (Negate r a) where
+  polarize = id
+  neutralize = id
 
 
 class (Core s, Structural s) => Negative s where
@@ -324,10 +341,26 @@ data Top = Top
 
 instance Polarized N Top where
 
+instance Polarize N () Top where
+  polarize = const Top
+  neutralize = const ()
+
+instance Polarize N Top Top where
+  polarize = id
+  neutralize = id
+
 
 data Zero
 
 instance Polarized P Zero where
+
+instance Polarize P Void Zero where
+  polarize = absurd
+  neutralize = absurdP
+
+instance Polarize P Zero Zero where
+  polarize = id
+  neutralize = id
 
 absurdP :: Zero -> a
 absurdP = \case
@@ -339,6 +372,14 @@ newtype a & b = With (forall r . (a -> b -> r) -> r)
 infixr 6 &
 
 instance (Neg a, Neg b) => Polarized N (a & b) where
+
+instance (ToNeg a pa, ToNeg b pb) => Polarize N (a, b) (pa & pb) where
+  polarize = inlr <$> polarize . exl <*> polarize . exr
+  neutralize = inlr <$> neutralize . exl <*> neutralize . exr
+
+instance (Neg a, Neg b) => Polarize N (a & b) (a & b) where
+  polarize = id
+  neutralize = id
 
 instance Foldable ((&) f) where
   foldMap = foldMapConj
@@ -360,6 +401,14 @@ data a ⊕ b
 infixr 6 ⊕
 
 instance (Pos a, Pos b) => Polarized P (a ⊕ b)
+
+instance (ToPos a pa, ToPos b pb) => Polarize P (a, b) (pa ⊗ pb) where
+  polarize = inlr <$> polarize . exl <*> polarize . exr
+  neutralize = inlr <$> neutralize . exl <*> neutralize . exr
+
+instance (Pos a, Pos b) => Polarize P (a ⊗ b) (a ⊗ b) where
+  polarize = id
+  neutralize = id
 
 instance Disj (⊕) where
   inl = InL
@@ -416,6 +465,14 @@ data Bot
 
 instance Polarized N Bot where
 
+instance Polarize N Void Bot where
+  polarize = absurd
+  neutralize = absurdN
+
+instance Polarize N Bot Bot where
+  polarize = id
+  neutralize = id
+
 absurdN :: Bot -> a
 absurdN = \case
 
@@ -425,6 +482,14 @@ data One = One
 
 instance Polarized P One where
 
+instance Polarize P () One where
+  polarize = const One
+  neutralize = const ()
+
+instance Polarize P One One where
+  polarize = id
+  neutralize = id
+
 
 newtype a ⅋ b = Par (forall r . (a -> r) -> (b -> r) -> r)
   deriving (Functor)
@@ -432,6 +497,14 @@ newtype a ⅋ b = Par (forall r . (a -> r) -> (b -> r) -> r)
 infixr 7 ⅋
 
 instance (Neg a, Neg b) => Polarized N (a ⅋ b) where
+
+instance (ToNeg a pa, ToNeg b pb) => Polarize N (Either a b) (pa ⅋ pb) where
+  polarize = exlr (inl . polarize) (inr . polarize)
+  neutralize = exlr (inl . neutralize) (inr . neutralize)
+
+instance (Neg a, Neg b) => Polarize N (a ⅋ b) (a ⅋ b) where
+  polarize = id
+  neutralize = id
 
 instance Foldable ((⅋) f) where
   foldMap = foldMapDisj
@@ -451,6 +524,14 @@ data a ⊗ b = !a :⊗ !b
 infixr 7 ⊗, :⊗
 
 instance (Pos a, Pos b) => Polarized P (a ⊗ b) where
+
+instance (ToPos a pa, ToPos b pb) => Polarize P (Either a b) (pa ⊕ pb) where
+  polarize = exlr (inl . polarize) (inr . polarize)
+  neutralize = exlr (inl . neutralize) (inr . neutralize)
+
+instance (Pos a, Pos b) => Polarize P (a ⊕ b) (a ⊕ b) where
+  polarize = id
+  neutralize = id
 
 instance Conj (⊗) where
   inlr = (:⊗)
@@ -504,6 +585,14 @@ newtype Fun r a b = Fun { getFun :: CPS r a b }
 
 instance (Pos a, Neg b) => Polarized N (Fun r a b) where
 
+instance (ToPos a pa, ToNeg b nb) => Polarize N (CPS r a b) (Fun r pa nb) where
+  polarize = Fun . mapCPS neutralize polarize
+  neutralize = mapCPS polarize neutralize . getFun
+
+instance (Pos a, Neg b) => Polarize N (Fun r a b) (Fun r a b) where
+  polarize = id
+  neutralize = id
+
 appFun :: Fun r a b -> Seq r (a <| i) (o |> b)
 appFun = Seq . mapCPS exl inr . getFun
 
@@ -511,6 +600,10 @@ appFun = Seq . mapCPS exl inr . getFun
 data Sub r a b = Sub { subA :: !a, subK :: !(Negate r b) }
 
 instance (Pos a, Neg b) => Polarized P (Sub r a b) where
+
+instance (Pos a, Neg b) => Polarize P (Sub r a b) (Sub r a b) where
+  polarize = id
+  neutralize = id
 
 
 class (Core s, Structural s, Negative s) => Implicative s where
@@ -650,11 +743,31 @@ type Neg = Polarized N
 type Pos = Polarized P
 
 
+class Polarized p out => Polarize p inn out | inn p -> out, inn out -> p where
+  polarize :: inn -> out
+  neutralize :: out -> inn
+
+type ToNeg = Polarize N
+type ToPos = Polarize P
+
+instance (ToPos a pa, ToNeg b nb) => Polarize N (a -> b) (pa -> nb) where
+  polarize f = polarize . f . neutralize
+  neutralize f = neutralize . f . polarize
+
+instance (ToPos a pa, ToNeg b nb) => Polarize P (a -> b) (Down (pa -> nb)) where
+  polarize f = Down (polarize . f . neutralize)
+  neutralize f = neutralize . getDown f . polarize
+
+
 newtype Up   a = Up   { getUp   :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
   deriving (Applicative, Monad) via Identity
 
 instance Pos a => Polarized N (Up a) where
+
+instance Pos a => Polarize N (Up a) (Up a) where
+  polarize = id
+  neutralize = id
 
 
 newtype Down a = Down { getDown :: a }
@@ -662,6 +775,10 @@ newtype Down a = Down { getDown :: a }
   deriving (Applicative, Monad) via Identity
 
 instance Neg a => Polarized P (Down a) where
+
+instance Neg a => Polarize P (Down a) (Down a) where
+  polarize = id
+  neutralize = id
 
 
 class (Core s, Structural s) => Shifting s where
