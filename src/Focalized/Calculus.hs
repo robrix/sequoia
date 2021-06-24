@@ -508,9 +508,6 @@ infixr 5 -->
 
 instance (Pos a, Neg b) => Polarized N (Fun r a b) where
 
--- runFun :: Fun r a b -> (b -> r) -> a -> r
--- runFun (Fun s) k a = runSeq (either absurdΔ (_)) (Negate _, Γ) s
-
 appFun :: Fun r a b -> Seq r (Negate r b <| i) (o |> Not r a)
 appFun (Fun f) = liftLR (Not . getCPS f . getNegate)
 
