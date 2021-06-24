@@ -663,24 +663,12 @@ type Neg = Polarized N
 type Pos = Polarized P
 
 
-up :: Pos a => a -> Up a
-up = Up . getP . polarize
-
-runUp :: Pos a => Up a -> a
-runUp = getP . polarize . getUp
-
 newtype Up   a = Up   { getUp   :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
   deriving (Applicative, Monad) via Identity
 
 instance Pos a => Polarized N (Up a) where
 
-
-down :: Neg a => a -> Down a
-down = Down . getN . polarize
-
-runDown :: Neg a => Down a -> a
-runDown = getN . polarize . getDown
 
 newtype Down a = Down { getDown :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
@@ -706,11 +694,11 @@ class (Core s, Structural s) => Shifting s where
 
 
 instance Shifting Seq where
-  upL   = mapL runUp
-  upR   = mapR up
+  upL   = mapL getUp
+  upR   = mapR Up
 
-  downL = mapL runDown
-  downR = mapR down
+  downL = mapL getDown
+  downR = mapR Down
 
 
 -- Utilities
