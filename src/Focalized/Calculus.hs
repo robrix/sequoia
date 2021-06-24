@@ -242,12 +242,12 @@ instance Structural Seq where
 
 -- Negating
 
-newtype Not    r a = Not    { getNot    :: a -> r }
+newtype Not    r a = Not    { getNot    :: K r a }
 
 instance Pos a => Polarized N (Not r a) where
 
 
-newtype Negate r a = Negate { getNegate :: a -> r }
+newtype Negate r a = Negate { getNegate :: K r a }
 
 instance Neg a => Polarized P (Negate r a) where
 
@@ -269,11 +269,11 @@ class (Core s, Structural s) => Negative s where
   negateR' p = wkL p >>> negateL init
 
 instance Negative Seq where
-  negateL p = popL (\ negateA -> p >>> liftL (getNegate negateA))
-  negateR = lowerL (liftR . Negate) . wkR
+  negateL p = popL (\ negateA -> p >>> liftL (getK (getNegate negateA)))
+  negateR = lowerL (liftR . Negate . K) . wkR
 
-  notL p = popL (\ notA -> p >>> liftL (getNot notA))
-  notR = lowerL (liftR . Not) . wkR
+  notL p = popL (\ notA -> p >>> liftL (getK (getNot notA)))
+  notR = lowerL (liftR . Not . K) . wkR
 
 
 -- Additive
@@ -465,7 +465,7 @@ instance Multiplicative Seq where
 
 -- Implicative
 
-newtype Fun r a b = Fun { getFun :: (b -> r) -> (a -> r) }
+newtype Fun r a b = Fun { getFun :: CPS r a b }
 
 type (-->) = Fun Δ
 
@@ -477,7 +477,7 @@ instance (Pos a, Neg b) => Polarized N (Fun r a b) where
 -- runFun (Fun s) k a = runSeq (either absurdΔ (_)) (Negate _, Γ) s
 
 appFun :: Fun r a b -> Seq r (Negate r b <| i) (o |> Not r a)
-appFun (Fun f) = liftLR (Not . f . getNegate)
+appFun (Fun f) = liftLR (Not . getCPS f . getNegate)
 
 
 data Sub r a b = Sub { subA :: !a, subK :: !(Negate r b) }
@@ -515,7 +515,7 @@ class (Core s, Structural s, Negative s) => Implicative s where
 
 instance Implicative Seq where
   funL a b = popL (\ f -> a >>> notR' (exR (negateL' (appFun f))) >>> exL (wkL b))
-  funR = lowerLR (liftR . Fun) . exR . wkR
+  funR = lowerLR (liftR . Fun . cps) . exR . wkR
 
   subL b = popL (\ s -> pushL b (subA s) >>> pushL (negateL init) (subK s))
   subR a b = liftA2 Sub <$> a <*> negateR b
