@@ -266,7 +266,7 @@ class Core s => Structural s where
   mapR f p = popR (pushR p . mapK f)
 
   mapR2 :: (a -> b -> c) -> s r i (o |> a) -> s r i (o |> b) -> s r i (o |> c)
-  mapR2 f a b = popR (pushR (exR (wkR a)) . mapK f) >>> popL (\ f -> popR (pushR b . mapK f))
+  mapR2 f a b = popR (pushR (wkR' a) . mapK f) >>> popL (\ f -> popR (pushR b . mapK f))
 
   liftR :: a -> s r i (o |> a)
 
@@ -446,9 +446,9 @@ class (Core s, Structural s, Negative s) => Additive s where
   sumL :: (Pos a, Pos b) => s r (a <| i) o -> s r (b <| i) o -> s r (a ⊕ b <| i) o
   sumL p1 p2 = sumLWith (withR (notR p1) (notR p2))
   sumL1' :: (Pos a, Pos b) => s r (a ⊕ b <| i) o -> s r (a <| i) o
-  sumL1' p = sumR1 init >>> exL (wkL p)
+  sumL1' p = sumR1 init >>> wkL' p
   sumL2' :: (Pos a, Pos b) => s r (a ⊕ b <| i) o -> s r (b <| i) o
-  sumL2' p = sumR2 init >>> exL (wkL p)
+  sumL2' p = sumR2 init >>> wkL' p
   sumLWith :: (Pos a, Pos b) => s r i (o |> Not r a & Not r b) -> s r (a ⊕ b <| i) o
   sumLWith p = sumL (wkL p >>> withL1 (notL init)) (wkL p >>> withL2 (notL init))
   sumR1 :: (Pos a, Pos b) => s r i (o |> a) -> s r i (o |> a ⊕ b)
@@ -462,9 +462,9 @@ class (Core s, Structural s, Negative s) => Additive s where
   withLSum p = wkL p >>> sumL (negateL (withL1 init)) (negateL (withL2 init))
   withR :: (Neg a, Neg b) => s r i (o |> a) -> s r i (o |> b) -> s r i (o |> (a & b))
   withR1' :: (Neg a, Neg b) => s r i (o |> (a & b)) -> s r i (o |> a)
-  withR1' t = exR (wkR t) >>> withL1 init
+  withR1' t = wkR' t >>> withL1 init
   withR2' :: (Neg a, Neg b) => s r i (o |> (a & b)) -> s r i (o |> b)
-  withR2' t = exR (wkR t) >>> withL2 init
+  withR2' t = wkR' t >>> withL2 init
 
 
 instance Additive Seq where
@@ -640,22 +640,22 @@ class (Core s, Structural s, Negative s) => Implicative s where
   funL2 = funL init init
   funR :: (Pos a, Neg b) => s r (a <| i) (o |> b) -> s r i (o |> Fun r a b)
   ($$) :: (Pos a, Neg b) => s r i (o |> Fun r a b) -> s r i (o |> a) -> s r i (o |> b)
-  f $$ a = exR (wkR f) >>> exR (wkR a) `funL` init
+  f $$ a = wkR' f >>> wkR' a `funL` init
   funR' :: (Pos a, Neg b) => s r i (o |> Fun r a b) -> s r (a <| i) (o |> b)
-  funR' p = wkL (exR (wkR p)) >>> funL2
+  funR' p = wkL (wkR' p) >>> funL2
 
   subL :: (Pos a, Neg b) => s r (a <| i) (o |> b) -> s r (Sub r a b <| i) o
   subL = subLFun . funR
   subLFun :: (Pos a, Neg b) => s r i (o |> Fun r a b) -> s r (Sub r a b <| i) o
   subLFun p = wkL p >>> exL (subL (exL (funL init init)))
   subL' :: (Pos a, Neg b) => s r (Sub r a b <| i) o -> s r (a <| i) (o |> b)
-  subL' p = subR init init >>> wkR (exL (wkL p))
+  subL' p = subR init init >>> wkR (wkL' p)
   subR :: (Pos a, Neg b) => s r i (o |> a) -> s r (b <| i) o -> s r i (o |> Sub r a b)
 
 
 instance Implicative Seq where
-  funL a b = popL (\ f -> a >>> runFun f >>> exL (wkL b))
-  funR = lowerLR (liftR . Fun) . exR . wkR
+  funL a b = popL (\ f -> a >>> runFun f >>> wkL' b)
+  funR = lowerLR (liftR . Fun) . wkR'
 
   subL b = popL (\ s -> liftR (subA s) >>> b >>> liftL (getNegate (subK s)))
   subR a b = liftA2 Sub <$> a <*> negateR b
@@ -686,12 +686,12 @@ class (Core s, Structural s, Negative s, Shifting s) => Quantifying s where
   -- FIXME: the correct signature should be s r i (o |> (forall x . Polarized n x => f x)) -> s r i (o |> ForAll f), but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
   -- forAllR :: ForAllC (Polarized n) Neg f => (forall x . Polarized n x => s r i (o |> f x)) -> s r i (o |> ForAll n f)
   forAllR' :: ForAllC (Polarized n) Neg f => s r i (o |> ForAll n f) -> (forall x . Polarized n x => s r i (o |> f x))
-  forAllR' p = exR (wkR p) >>> forAllL init
+  forAllR' p = wkR' p >>> forAllL init
 
   -- FIXME: the correct signature should be s r ((forall x . f x) <| i) o -> s r (Exists f <| i) o, but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
   existsL :: (forall x . Polarized n x => s r (f x <| i) o) -> s r (Exists n f <| i) o
   existsL' :: ForAllC (Polarized n) Pos f => s r (Exists n f <| i) o -> (forall x . Polarized n x => s r (f x <| i) o)
-  existsL' p = existsR init >>> exL (wkL p)
+  existsL' p = existsR init >>> wkL' p
   existsLForAll :: ForAllC (Polarized n) Pos f => s r i (o |> ForAll n (Not r · f)) -> s r (Exists n f <| i) o
   existsLForAll p = wkL p >>> exL (existsL (exL (forAllL (mapL getC (notL init)))))
   existsR :: (Polarized n x, Pos (f x)) => s r i (o |> f x) -> s r i (o |> Exists n f)
@@ -729,14 +729,14 @@ class (Core s, Structural s, Implicative s, Quantifying s) => Recursive s where
   nuL :: ForAllC (Polarized P) Neg f => s r (Exists P (NuF r f) <| i) o -> s r (Nu r f <| i) o
   nuR :: ForAllC (Polarized P) Neg f => s r i (o |> Exists P (NuF r f)) -> s r i (o |> Nu r f)
   nuR' :: ForAllC (Polarized P) Neg f => s r i (o |> Nu r f) -> s r i (o |> Exists P (NuF r f))
-  nuR' p = exR (wkR p) >>> nuL init
+  nuR' p = wkR' p >>> nuL init
 
   muL :: ForAllC (Polarized N) Pos f => s r (ForAll N (MuF r f) <| i) o -> s r (Mu r f <| i) o
   muL' :: ForAllC (Polarized N) Pos f => s r (Mu r f <| i) o -> s r (ForAll N (MuF r f) <| i) o
-  muL' p = muR init >>> exL (wkL p)
+  muL' p = muR init >>> wkL' p
   muR :: ForAllC (Polarized N) Pos f => s r i (o |> ForAll N (MuF r f)) -> s r i (o |> Mu r f)
   muLFold :: (ForAllC (Polarized N) Pos f, Neg a) => s r i (o |> Fun r (f a) a) -> s r (a <| i) o -> s r (Mu r f <| i) o
-  muLFold f k = muL (forAllL (mapL getMuF (funL (downR (exR (wkR f))) init))) >>> exL (wkL k)
+  muLFold f k = muL (forAllL (mapL getMuF (funL (downR (wkR' f)) init))) >>> wkL' k
 
 
 instance Recursive Seq where
@@ -807,17 +807,17 @@ instance Neg a => Polarize P (Down a) (Down a) where
 class (Core s, Structural s) => Shifting s where
   upL   :: Pos a => s r (a <| i) o -> s r (Up   a <| i) o
   upL'   :: Pos a => s r (Up   a <| i) o -> s r (a <| i) o
-  upL' p = upR init >>> exL (wkL p)
+  upL' p = upR init >>> wkL' p
   upR   :: Pos a => s r i (o |> a) -> s r i (o |> Up   a)
   upR'   :: Pos a => s r i (o |> Up   a) -> s r i (o |> a)
-  upR' p = exR (wkR p) >>> upL init
+  upR' p = wkR' p >>> upL init
 
   downL :: Neg a => s r (a <| i) o -> s r (Down a <| i) o
   downL'   :: Neg a => s r (Down a <| i) o -> s r (a <| i) o
-  downL' p = downR init >>> exL (wkL p)
+  downL' p = downR init >>> wkL' p
   downR :: Neg a => s r i (o |> a) -> s r i (o |> Down a)
   downR'   :: Neg a => s r i (o |> Down a) -> s r i (o |> a)
-  downR' p = exR (wkR p) >>> downL init
+  downR' p = wkR' p >>> downL init
 
 
 instance Shifting Seq where
