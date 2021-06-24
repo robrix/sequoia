@@ -956,7 +956,8 @@ instance Arrow (CPS r) where
   f &&& g = liftCPS (\ k a -> appCPS f a (appCPS g a . fmap k . (,)))
 
 instance ArrowChoice (CPS r) where
-  left f = liftCPS (\ k -> exlr (lowerCPS f (k . inl)) (k . inr))
+  left  f = liftCPS (\ k -> exlr (lowerCPS f (k . inl)) (k . inr))
+  right g = liftCPS (\ k -> exlr (k . inl) (lowerCPS g (k . inr)))
   f +++ g = liftCPS (\ k -> exlr (lowerCPS f (k . inl)) (lowerCPS g (k . inr)))
 
 
