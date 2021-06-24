@@ -12,6 +12,9 @@ module Focalized.Calculus
 , liftL
 , liftR
 , liftLR
+, lowerL
+, lowerR
+, lowerLR
   -- * Contexts
 , type (<|)
 , type (|>)
@@ -114,6 +117,15 @@ liftR = pure . pure
 
 liftLR :: (a -> b) -> Seq r (a <| i) (o |> b)
 liftLR f = Seq $ \ k -> k . pure . f . fst
+
+lowerL :: ((a -> r) -> Seq r i o) -> Seq r (a <| i) o -> Seq r i o
+lowerL f p = Seq $ \ k c -> runSeq k c (f (\ a -> runSeq k (a, c) p))
+
+lowerR :: Structural p => (a -> p r i o) -> p r i (o |> a) -> p r i o
+lowerR k p = p >>> popL k
+
+lowerLR :: (((b -> r) -> (a -> r)) -> Seq r i o) -> Seq r (a <| i) (o |> b) -> Seq r i o
+lowerLR f p = Seq $ \ k c -> runSeq k c (f (\ kb a -> runSeq (either k kb) (a, c) p))
 
 
 -- Contexts
