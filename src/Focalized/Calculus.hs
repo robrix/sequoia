@@ -606,25 +606,6 @@ newtype MuF r f a = MuF { getMuF :: Fun r (Down (Fun r (f a) a)) a }
 instance (Polarized P (f a), Polarized N a) => Polarized N (MuF r f a) where
 
 
--- foldMu :: (f a -> a) -> Mu f -> a
--- foldMu alg (Mu (ForAll (MuF (Fun f)))) = f alg
-
--- unfoldMu :: Functor f => (a -> f a) -> a -> Mu f
--- unfoldMu coalg a = Mu $ ForAll $ MuF $ \ alg -> refold alg coalg a
-
--- refoldMu :: Functor f => (f b -> b) -> (a -> f a) -> a -> b
--- refoldMu f g = foldMu f . unfoldMu g
-
--- mu :: Functor f => f (Mu f) -> Mu f
--- mu = unfoldMu (fmap getMu)
-
--- runMu :: Functor f => Mu f -> f (Mu f)
--- runMu = foldMu (fmap mu)
-
--- nuToMu :: Functor f => Nu f -> Mu f
--- nuToMu = unfoldMu getNu
-
-
 class (Core s, Structural s, Implicative s, Quantifying s) => Recursive s where
   nuL :: ForAllC (Polarized P) Neg f => s r (Exists P (NuF r f) <| i) o -> s r (Nu r f <| i) o
   nuR :: ForAllC (Polarized P) Neg f => s r i (o |> Exists P (NuF r f)) -> s r i (o |> Nu r f)
