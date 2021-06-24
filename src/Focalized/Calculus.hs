@@ -14,6 +14,8 @@ module Focalized.Calculus
 , lowerL
 , lowerR
 , lowerLR
+  -- * Effectful sequents
+, SeqM(..)
   -- * Contexts
 , type (<|)
 , (<|)
@@ -114,6 +116,11 @@ lowerR k p = p >>> popL k
 
 lowerLR :: (((b -> r) -> (a -> r)) -> Seq r i o) -> Seq r (a <| i) (o |> b) -> Seq r i o
 lowerLR f p = sequent $ \ k c -> runSeq k c (f (\ kb a -> runSeq (k |> kb) (a <| c) p))
+
+
+-- Effectful sequents
+
+newtype SeqM r i m o = SeqM { getSeqM :: Seq (m r) i o }
 
 
 -- Contexts
