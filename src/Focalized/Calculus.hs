@@ -915,7 +915,7 @@ traversing :: Traversable f => CPS r a b -> CPS r (f a) (f b)
 traversing c = liftCPS (execCPS . traverse (pappCPS c))
 
 resetCPS :: CPS o i o -> CPS r i o
-resetCPS c = CPS $ \ k -> k . evalCPS c
+resetCPS c = CPS (. evalCPS c)
 
 shiftCPS :: ((o -> r) -> CPS r i r) -> CPS r i o
 shiftCPS f = CPS (evalCPS . f)
