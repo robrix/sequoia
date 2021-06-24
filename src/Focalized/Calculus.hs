@@ -62,6 +62,8 @@ module Focalized.Calculus
 , Neg
 , Pos
 , Polarize(..)
+, neg
+, pos
 , Up(..)
 , Down(..)
 , Shifting(..)
@@ -757,6 +759,12 @@ class Polarized p out => Polarize p inn out | inn p -> out, inn out -> p where
 
 type ToNeg = Polarize N
 type ToPos = Polarize P
+
+neg :: Polarize N inn out => inn -> out
+neg = polarize
+
+pos :: Polarize P inn out => inn -> out
+pos = polarize
 
 
 newtype Up   a = Up   { getUp   :: a }
