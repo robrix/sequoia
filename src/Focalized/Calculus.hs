@@ -74,6 +74,8 @@ module Focalized.Calculus
 , runCPS
 , CPS(..)
 , Conj(..)
+, curryConj
+, uncurryConj
 , Disj(..)
 ) where
 
@@ -779,6 +781,12 @@ class Conj c where
   inlr :: a -> b -> (a `c` b)
   exl :: (a `c` b) -> a
   exr :: (a `c` b) -> b
+
+curryConj :: Conj p => ((a `p` b) -> r) -> (a -> b -> r)
+curryConj f = fmap f . inlr
+
+uncurryConj :: Conj p => (a -> b -> r) -> ((a `p` b) -> r)
+uncurryConj f = f <$> exl <*> exr
 
 foldMapConj :: Conj p => (b -> m) -> (a `p` b) -> m
 foldMapConj f = f . exr
