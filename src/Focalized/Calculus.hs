@@ -171,9 +171,6 @@ instance Monad ((|>) a) where
 (|>) :: (os -> r) -> (o -> r) -> ((os |> o) -> r)
 (|>) = exlr
 
-split :: (o |> a -> r) -> (o -> r, a -> r)
-split f = (f . inl, f . inr)
-
 
 data Γ = Γ
   deriving (Eq, Ord, Show)
@@ -282,7 +279,7 @@ instance Structural Seq where
   popL f = sequent $ \ k -> uncurryConj (flip (runSeq k) . f)
   pushL s a = sequent $ \ k i -> runSeq k (a <| i) s
 
-  popR f = sequent $ \ k c -> let (k', ka) = split k in runSeq k' c (f ka)
+  popR f = sequent $ \ k c -> runSeq (k . inl) c (f (k . inr))
   pushR s a = sequent $ \ k i -> runSeq (k |> a) i s
 
 
