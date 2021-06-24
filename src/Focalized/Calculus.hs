@@ -276,8 +276,12 @@ class Core s => Structural s where
 
   wkL :: s r i o -> s r (a <| i) o
   wkL = popL . const
+  wkL' :: s r (a <| i) o -> s r (a <| b <| i) o
+  wkL' = exL . wkL
   wkR :: s r i o -> s r i (o |> a)
   wkR = popR . const
+  wkR' :: s r i (o |> a) -> s r i (o |> b |> a)
+  wkR' = exR . wkR
   cnL :: s r (a <| a <| i) o -> s r (a <| i) o
   cnL = popL . join . pushL2
   cnR :: s r i (o |> a |> a) -> s r i (o |> a)
