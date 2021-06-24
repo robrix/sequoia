@@ -79,6 +79,7 @@ module Focalized.Calculus
 , appCPS
 , pappCPS
 , execCPS
+, traversing
 , mapCPS
 , CPS(..)
 , Conj(..)
@@ -872,6 +873,9 @@ execCPS c = appCPS c ()
 -- | CPS is a Profunctor.
 mapCPS :: (a' -> a) -> (b -> b') -> CPS r a b -> CPS r a' b'
 mapCPS f g (CPS c) = CPS (mapK f . c . mapK g)
+
+traversing :: Traversable f => CPS r a b -> CPS r (f a) (f b)
+traversing c = liftCPS' $ \ a -> execCPS (traverse (pappCPS c) a)
 
 newtype CPS r a b = CPS { getCPS :: K r b -> K r a }
 
