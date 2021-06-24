@@ -153,6 +153,9 @@ instance Applicative ((|>) a) where
 instance Monad ((|>) a) where
   (>>=) = flip (exlr inl)
 
+-- | Discrimination of values in '|>'.
+--
+-- @¬A ✕ ¬B -> ¬(A + B)@
 (|>) :: (os -> r) -> (o -> r) -> ((os |> o) -> r)
 (|>) = exlr
 
