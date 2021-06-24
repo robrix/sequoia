@@ -80,6 +80,7 @@ library
     , base ^>=4.14.1.0
     , containers
     , fused-effects
+    , profunctors
     , transformers
   hs-source-dirs:   src
 

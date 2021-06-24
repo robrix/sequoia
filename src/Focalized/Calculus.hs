@@ -85,7 +85,6 @@ module Focalized.Calculus
 , pappCPS
 , execCPS
 , evalCPS
-, mapCPS
 , refoldCPS
 , traversing
 , resetCPS
@@ -105,6 +104,7 @@ import           Control.Monad (ap, join)
 import           Control.Monad.Trans.Class
 import           Data.Functor.Identity
 import           Data.Kind (Constraint, Type)
+import           Data.Profunctor
 import           Data.Void
 import           Prelude hiding (init)
 
@@ -120,7 +120,7 @@ newtype Seq r i o = Seq { getSeq :: CPS r i o }
   deriving (Applicative, Functor, Monad)
 
 liftLR :: CPS r a b -> Seq r (a <| i) (o |> b)
-liftLR = Seq . mapCPS exl inr
+liftLR = Seq . dimap exl inr
 
 
 lowerLR :: (CPS r a b -> Seq r i o) -> Seq r (a <| i) (o |> b) -> Seq r i o
@@ -614,7 +614,7 @@ instance Multiplicative Seq where
 -- Implicative
 
 runFun :: Fun r a b -> Seq r (a <| i) (o |> b)
-runFun = Seq . mapCPS exl inr . getFun
+runFun = Seq . dimap exl inr . getFun
 
 appFun :: Fun r a b -> a -> (b -> r) -> r
 appFun = appCPS . getFun
@@ -630,8 +630,8 @@ newtype Fun r a b = Fun { getFun :: CPS r a b }
 instance (Pos a, Neg b) => Polarized N (Fun r a b) where
 
 instance (ToPos a pa, ToNeg b nb) => Polarize N (CPS r a b) (Fun r pa nb) where
-  polarize = Fun . mapCPS neutralize polarize
-  neutralize = mapCPS polarize neutralize . getFun
+  polarize = Fun . dimap neutralize polarize
+  neutralize = dimap polarize neutralize . getFun
 
 instance (ToPos na a, ToNeg nb b) => Polarize P (CPS r na nb) (Down (Fun r a b)) where
   polarize = Down . polarize
@@ -916,10 +916,6 @@ execCPS c = appCPS c ()
 evalCPS :: CPS r i r -> i -> r
 evalCPS c = getK (getCPS c (K id))
 
--- | CPS is a Profunctor.
-mapCPS :: (a' -> a) -> (b -> b') -> CPS r a b -> CPS r a' b'
-mapCPS f g (CPS c) = CPS (mapK f . c . mapK g)
-
 refoldCPS :: Traversable f => CPS r (f b) b -> CPS r a (f a) -> CPS r a b
 refoldCPS f g = go where go = f Cat.<<< traversing go Cat.<<< g
 
@@ -963,6 +959,9 @@ instance ArrowChoice (CPS r) where
 
 instance ArrowApply (CPS r) where
   app = liftCPS (flip (uncurry appCPS))
+
+instance Profunctor (CPS r) where
+  dimap f g (CPS c) = CPS (mapK f . c . mapK g)
 
 
 newtype CPST r i m o = CPST { getCPST :: CPS (m r) i o }
