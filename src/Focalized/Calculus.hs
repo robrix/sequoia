@@ -85,6 +85,7 @@ module Focalized.Calculus
 import           Control.Applicative (liftA2)
 import qualified Control.Category as Cat
 import           Control.Monad (ap, join)
+import           Control.Monad.Trans.Class
 import           Data.Functor.Identity
 import           Data.Kind (Constraint)
 import           Prelude hiding (init)
@@ -126,6 +127,9 @@ runSeqM k i = runSeq k i . getSeqM
 
 newtype SeqM r i m o = SeqM { getSeqM :: Seq (m r) i o }
   deriving (Applicative, Functor, Monad)
+
+instance MonadTrans (SeqM r i) where
+  lift m = SeqM (Seq (cps (\ k _ -> m >>= k)))
 
 
 -- Contexts
