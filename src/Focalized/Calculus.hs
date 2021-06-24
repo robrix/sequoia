@@ -232,7 +232,7 @@ class Structural s where
   -- @
   -- pushR . popR = id
   -- @
-  popR :: ((a -> r) -> s r i o) -> s r i (o |> a)
+  popR :: (K r a -> s r i o) -> s r i (o |> a)
 
   poppedR :: (s r i o -> s r i' o') -> (s r i (o |> a) -> s r i' (o' |> a))
 
@@ -244,11 +244,11 @@ class Structural s where
   -- @
   -- pushR . popR = id
   -- @
-  pushR :: s r i (o |> a) -> ((a -> r) -> s r i o)
+  pushR :: s r i (o |> a) -> (K r a -> s r i o)
 
-  popR2 :: ((a -> r) -> (b -> r) -> s r i o) -> s r i (o |> b |> a)
+  popR2 :: (K r a -> K r b -> s r i o) -> s r i (o |> b |> a)
 
-  pushR2 :: s r i (o |> b |> a) -> (a -> r) -> (b -> r) -> s r i o
+  pushR2 :: s r i (o |> b |> a) -> K r a -> K r b -> s r i o
 
   mapR :: (a -> a') -> s r i (o |> a) -> s r i (o |> a')
 
@@ -267,7 +267,7 @@ class Structural s where
   poppedR f p = popR (f . pushR p)
   popR2 f = popR (popR . f)
   pushR2 p = pushR . pushR p
-  mapR f p = popR (pushR p . (. f))
+  mapR f p = popR (pushR p . mapK f)
   wkL = popL . const
   wkR = popR . const
   cnL = popL . join . pushL2
@@ -279,8 +279,8 @@ instance Structural Seq where
   popL f = sequent $ \ k -> uncurryConj (flip (runSeq k) . f)
   pushL s a = sequent $ \ k i -> runSeq k (a <| i) s
 
-  popR f = sequent $ \ k c -> runSeq (k . inl) c (f (k . inr))
-  pushR s a = sequent $ \ k i -> runSeq (k |> a) i s
+  popR f = sequent $ \ k c -> runSeq (k . inl) c (f (K (k . inr)))
+  pushR s a = sequent $ \ k i -> runSeq (k |> getK a) i s
 
 
 -- Negating
