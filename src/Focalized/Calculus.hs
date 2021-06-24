@@ -959,6 +959,10 @@ instance Strong (CPS r) where
   first' = first
   second' = second
 
+instance Choice (CPS r) where
+  left' = left
+  right' = right
+
 
 newtype CPST r i m o = CPST { getCPST :: CPS (m r) i o }
   deriving (Applicative, Functor, Monad)
