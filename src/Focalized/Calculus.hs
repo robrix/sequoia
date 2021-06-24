@@ -602,6 +602,10 @@ instance (ToPos a pa, ToNeg b nb) => Polarize N (CPS r a b) (Fun r pa nb) where
   polarize = Fun . mapCPS neutralize polarize
   neutralize = mapCPS polarize neutralize . getFun
 
+instance (ToPos na a, ToNeg nb b) => Polarize P (CPS r na nb) (Down (Fun r a b)) where
+  polarize = Down . polarize
+  neutralize = neutralize . getDown
+
 instance (Pos a, Neg b) => Polarize N (Fun r a b) (Fun r a b) where
   polarize = id
   neutralize = id
