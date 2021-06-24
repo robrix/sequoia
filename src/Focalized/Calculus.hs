@@ -540,7 +540,7 @@ instance Implicative Seq where
   funL a b = popL (\ f -> a >>> appFun f >>> exL (wkL b))
   funR = lowerLR (liftR . fun) . exR . wkR
 
-  subL b = popL (\ s -> pushL b (subA s) >>> pushL (negateL init) (subK s))
+  subL b = popL (\ s -> liftR (subA s) >>> b >>> liftL (getNegate (subK s)))
   subR a b = liftA2 Sub <$> a <*> negateR b
 
 
