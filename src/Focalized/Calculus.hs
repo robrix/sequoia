@@ -72,11 +72,12 @@ module Focalized.Calculus
 , Disj(..)
 ) where
 
-import Control.Applicative (liftA2)
-import Control.Monad (ap, join)
-import Data.Functor.Identity
-import Data.Kind (Constraint)
-import Prelude hiding (init)
+import           Control.Applicative (liftA2)
+import qualified Control.Category as Cat
+import           Control.Monad (ap, join)
+import           Data.Functor.Identity
+import           Data.Kind (Constraint)
+import           Prelude hiding (init)
 
 -- Sequents
 
@@ -718,6 +719,10 @@ instance Shifting Seq where
 -- Utilities
 
 newtype K r a = K { runK :: a -> r }
+
+instance Cat.Category K where
+  id = K id
+  K f . K g = K (g . f)
 
 mapK :: (a' -> a) -> K r a -> K r a'
 mapK f (K g) = K (g . f)
