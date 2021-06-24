@@ -95,8 +95,8 @@ sequent = Seq . cps
 newtype Seq r i o = Seq { getSeq :: CPS r i o }
   deriving (Applicative, Functor, Monad)
 
-liftLR :: (a -> b) -> Seq r (a <| i) (o |> b)
-liftLR f = sequent $ \ k -> k . inr . f . exl
+liftLR :: CPS r a b -> Seq r (a <| i) (o |> b)
+liftLR (CPS c) = Seq (CPS (mapK exl . c . mapK inr))
 
 
 lowerLR :: (CPS r a b -> Seq r i o) -> Seq r (a <| i) (o |> b) -> Seq r i o
