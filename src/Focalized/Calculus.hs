@@ -730,6 +730,12 @@ newtype NuF r f a = NuF { getNuF :: Down (Fun r a (f a)) ⊗ a }
 
 instance (Polarized N (f a), Polarized P a) => Polarized P (NuF r f a)
 
+nu :: Exists P (NuF r f) -> Nu r f
+nu = Nu
+
+runNu :: Nu r f -> Exists P (NuF r f)
+runNu = getNu
+
 
 newtype Mu r f = Mu { getMu :: forall x . Neg x => Fun r (Down (Fun r (f x) x)) x }
 
@@ -771,11 +777,11 @@ class (Core s, Structural s, Implicative s, Quantifying s) => Recursive s where
 
 
 instance Recursive Seq where
+  nuL = mapL runNu
+  nuR = mapR nu
+
   muL = mapL runMu
   muR = mapR mu
-
-  nuL = mapL getNu
-  nuR = mapR Nu
 
 
 -- Polarity
