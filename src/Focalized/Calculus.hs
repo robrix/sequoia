@@ -61,6 +61,7 @@ module Focalized.Calculus
 , Polarized
 , Neg
 , Pos
+, Polarize(..)
 , Up(..)
 , Down(..)
 , Shifting(..)
