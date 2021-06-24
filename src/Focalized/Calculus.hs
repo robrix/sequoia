@@ -56,7 +56,6 @@ module Focalized.Calculus
 , NuF(..)
 , Mu(..)
 , MuF(..)
-, mu
 , foldMu
 , unfoldMu
 , refold
@@ -732,22 +731,25 @@ newtype NuF r f a = NuF { getNuF :: Down (Fun r a (f a)) ⊗ a }
 instance (Polarized N (f a), Polarized P a) => Polarized P (NuF r f a)
 
 
-newtype Mu r f = Mu { getMu :: ForAll N (MuF r f) }
+newtype Mu r f = Mu { getMu :: forall x . Neg x => Fun r (Down (Fun r (f x) x)) x }
 
-instance Polarized P (Mu r f) where
+instance Polarized N (Mu r f) where
 
 newtype MuF r f a = MuF { getMuF :: Fun r (Down (Fun r (f a) a)) a }
 
-instance (Polarized P (f a), Polarized N a) => Polarized N (MuF r f a) where
+instance (Pos (f a), Neg a) => Polarized N (MuF r f a) where
 
-mu :: (forall a . Fun r (Down (Fun r (f a) a)) a) -> Mu r f
-mu r = Mu (ForAll (MuF r))
+mu :: ForAll N (MuF r f) -> Mu r f
+mu r = Mu (getMuF (runForAll r))
+
+runMu :: Mu r f -> ForAll N (MuF r f)
+runMu m = ForAll (MuF (getMu m))
 
 foldMu :: Polarized N a => Down (Fun r (f a) a) -> CPS r (Mu r f) a
-foldMu alg = liftCPS' $ \ (Mu (ForAll (MuF f))) -> appFun f alg
+foldMu alg = liftCPS' $ \ (Mu f) -> appFun f alg
 
 unfoldMu :: Traversable f => (a -> f a) -> CPS r a (Mu r f)
-unfoldMu coalg = cps $ \ a -> mu $ liftFun' $ \ (Down (Fun alg)) -> appCPS (refoldCPS alg (cps coalg)) a
+unfoldMu coalg = cps $ \ a -> Mu $ liftFun' $ \ (Down (Fun alg)) -> appCPS (refoldCPS alg (cps coalg)) a
 
 
 refold :: Functor f => (f b -> b) -> (a -> f a) -> a -> b
@@ -769,8 +771,8 @@ class (Core s, Structural s, Implicative s, Quantifying s) => Recursive s where
 
 
 instance Recursive Seq where
-  muL = mapL getMu
-  muR = mapR Mu
+  muL = mapL runMu
+  muR = mapR mu
 
   nuL = mapL getNu
   nuR = mapR Nu
