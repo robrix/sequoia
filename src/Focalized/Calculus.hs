@@ -116,8 +116,8 @@ lowerL k p = popR k >>> p
 lowerR :: (Core p, Structural p) => (a -> p r i o) -> p r i (o |> a) -> p r i o
 lowerR k p = p >>> popL k
 
-lowerLR :: (((b -> r) -> (a -> r)) -> Seq r i o) -> Seq r (a <| i) (o |> b) -> Seq r i o
-lowerLR f p = sequent $ \ k c -> runSeq k c (f (\ kb a -> runSeq (k |> kb) (a <| c) p))
+lowerLR :: ((K r b -> K r a) -> Seq r i o) -> Seq r (a <| i) (o |> b) -> Seq r i o
+lowerLR f p = sequent $ \ k c -> runSeq k c (f (\ kb -> K (\ a -> runSeq (k |> getK kb) (a <| c) p)))
 
 
 -- Effectful sequents
@@ -558,7 +558,7 @@ class (Core s, Structural s, Negative s) => Implicative s where
 
 instance Implicative Seq where
   funL a b = popL (\ f -> a >>> notR' (exR (negateL' (appFun f))) >>> exL (wkL b))
-  funR = lowerLR (liftR . Fun . cps) . exR . wkR
+  funR = lowerLR (liftR . Fun . CPS) . exR . wkR
 
   subL b = popL (\ s -> pushL b (subA s) >>> pushL (negateL init) (subK s))
   subR a b = liftA2 Sub <$> a <*> negateR b
