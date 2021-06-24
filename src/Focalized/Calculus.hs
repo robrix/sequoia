@@ -85,36 +85,31 @@ import           Prelude hiding (init)
 -- Sequents
 
 runSeq :: (o -> r) -> i -> Seq r i o -> r
-runSeq k c (Seq run) = run k c
+runSeq k c = runCPS k c . getSeq
 
+sequent :: ((o -> r) -> (i -> r)) -> Seq r i o
+sequent = Seq . cps
 
-newtype Seq r i o = Seq { appSeq :: (o -> r) -> (i -> r) }
-  deriving (Functor)
-
-instance Applicative (Seq r i) where
-  pure a = Seq $ \ k _ -> k a
-  (<*>) = ap
-
-instance Monad (Seq r i) where
-  Seq a >>= f = Seq $ \ k c -> a (runSeq k c . f) c
+newtype Seq r i o = Seq { getSeq :: CPS r i o }
+  deriving (Applicative, Functor, Monad)
 
 liftL :: (a -> r) -> Seq r (a <| i) o
-liftL ka = Seq $ \ _ -> ka . fst
+liftL ka = sequent $ \ _ -> ka . fst
 
 liftR :: a -> Seq r i (o |> a)
 liftR = pure . pure
 
 liftLR :: (a -> b) -> Seq r (a <| i) (o |> b)
-liftLR f = Seq $ \ k -> k . pure . f . fst
+liftLR f = sequent $ \ k -> k . pure . f . fst
 
 lowerL :: ((a -> r) -> Seq r i o) -> Seq r (a <| i) o -> Seq r i o
-lowerL f p = Seq $ \ k c -> runSeq k c (f (appSeq p k . (, c)))
+lowerL f p = sequent $ \ k c -> runSeq k c (f (\ a -> runSeq k (a, c) p))
 
 lowerR :: (Core p, Structural p) => (a -> p r i o) -> p r i (o |> a) -> p r i o
 lowerR k p = p >>> popL k
 
 lowerLR :: (((b -> r) -> (a -> r)) -> Seq r i o) -> Seq r (a <| i) (o |> b) -> Seq r i o
-lowerLR f p = Seq $ \ k c -> runSeq k c (f (\ kb -> appSeq p (either k kb) . (, c)))
+lowerLR f p = sequent $ \ k c -> runSeq k c (f (\ kb a -> runSeq (either k kb) (a, c) p))
 
 
 -- Contexts
@@ -233,11 +228,11 @@ class Structural s where
   exR = popR2 . flip . pushR2
 
 instance Structural Seq where
-  popL f = Seq $ \ k -> uncurry (flip (runSeq k) . f)
-  pushL (Seq run) a = Seq $ \ k -> run k . (a,)
+  popL f = sequent $ \ k -> uncurry (flip (runSeq k) . f)
+  pushL s a = sequent $ \ k i -> runSeq k (a, i) s
 
-  popR f = Seq $ \ k c -> let (k', ka) = split k in runSeq k' c (f ka)
-  pushR (Seq run) a = Seq $ \ k -> run (either k a)
+  popR f = sequent $ \ k c -> let (k', ka) = split k in runSeq k' c (f ka)
+  pushR s a = sequent $ \ k i -> runSeq (either k a) i s
 
 
 -- Negating
