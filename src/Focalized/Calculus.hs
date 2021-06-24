@@ -594,8 +594,8 @@ instance (Pos a, Neg b) => Polarize N (Fun r a b) (Fun r a b) where
   polarize = id
   neutralize = id
 
-appFun :: Fun r a b -> Seq r (a <| i) (o |> b)
-appFun = Seq . mapCPS exl inr . getFun
+runFun :: Fun r a b -> Seq r (a <| i) (o |> b)
+runFun = Seq . mapCPS exl inr . getFun
 
 
 data Sub r a b = Sub { subA :: !a, subK :: !(Negate r b) }
@@ -630,7 +630,7 @@ class (Core s, Structural s, Negative s) => Implicative s where
 
 
 instance Implicative Seq where
-  funL a b = popL (\ f -> a >>> appFun f >>> exL (wkL b))
+  funL a b = popL (\ f -> a >>> runFun f >>> exL (wkL b))
   funR = lowerLR (liftR . Fun) . exR . wkR
 
   subL b = popL (\ s -> liftR (subA s) >>> b >>> liftL (getNegate (subK s)))
