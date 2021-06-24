@@ -110,8 +110,8 @@ liftR = pure . inr
 liftLR :: (a -> b) -> Seq r (a <| i) (o |> b)
 liftLR f = sequent $ \ k -> k . inr . f . exl
 
-lowerL :: ((a -> r) -> Seq r i o) -> Seq r (a <| i) o -> Seq r i o
-lowerL f p = sequent $ \ k c -> runSeq k c (f (\ a -> runSeq k (a <| c) p))
+lowerL :: (K r a -> Seq r i o) -> Seq r (a <| i) o -> Seq r i o
+lowerL f p = sequent $ \ k c -> runSeq k c (f (K (\ a -> runSeq k (a <| c) p)))
 
 lowerR :: (Core p, Structural p) => (a -> p r i o) -> p r i (o |> a) -> p r i o
 lowerR k p = p >>> popL k
@@ -313,10 +313,10 @@ class (Core s, Structural s) => Negative s where
 
 instance Negative Seq where
   negateL p = popL (\ negateA -> p >>> liftL (getK (getNegate negateA)))
-  negateR = lowerL (liftR . Negate . K) . wkR
+  negateR = lowerL (liftR . Negate) . wkR
 
   notL p = popL (\ notA -> p >>> liftL (getK (getNot notA)))
-  notR = lowerL (liftR . Not . K) . wkR
+  notR = lowerL (liftR . Not) . wkR
 
 
 -- Additive
