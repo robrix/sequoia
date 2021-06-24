@@ -500,7 +500,7 @@ instance Multiplicative Seq where
 -- Implicative
 
 fun :: CPS r a b -> Fun r a b
-fun (CPS c) = Fun (CPS (mapK exl . c . mapK inr))
+fun c = Fun (mapCPS exl inr c)
 
 newtype Fun r a b = Fun { getFun :: forall i o . CPS r (a <| i) (o |> b) }
 
