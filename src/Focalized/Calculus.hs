@@ -15,8 +15,8 @@ module Focalized.Calculus
 , lowerR
 , lowerLR
   -- * Effectful sequents
-, runSeqM
-, SeqM(..)
+, runSeqT
+, SeqT(..)
   -- * Contexts
 , type (<|)
 , (<|)
@@ -122,14 +122,14 @@ lowerLR f p = sequent $ \ k c -> runSeq k c (f (\ kb a -> runSeq (k |> kb) (a <|
 
 -- Effectful sequents
 
-runSeqM :: (o -> m r) -> i -> SeqM r i m o -> m r
-runSeqM k i = runSeq k i . getSeqM
+runSeqT :: (o -> m r) -> i -> SeqT r i m o -> m r
+runSeqT k i = runSeq k i . getSeqT
 
-newtype SeqM r i m o = SeqM { getSeqM :: Seq (m r) i o }
+newtype SeqT r i m o = SeqT { getSeqT :: Seq (m r) i o }
   deriving (Applicative, Functor, Monad)
 
-instance MonadTrans (SeqM r i) where
-  lift m = SeqM (Seq (cps (\ k _ -> m >>= k)))
+instance MonadTrans (SeqT r i) where
+  lift m = SeqT (Seq (cps (\ k _ -> m >>= k)))
 
 
 -- Contexts
