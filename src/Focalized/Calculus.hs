@@ -56,7 +56,7 @@ module Focalized.Calculus
   -- * Polarity
 , N(..)
 , P(..)
-, Polarized(..)
+, Polarized
 , Neg
 , Pos
 , Up(..)
@@ -83,7 +83,7 @@ import qualified Control.Category as Cat
 import           Control.Monad (ap, join)
 import           Control.Monad.Trans.Class
 import           Data.Functor.Identity
-import           Data.Kind (Constraint)
+import           Data.Kind (Constraint, Type)
 import           Prelude hiding (init)
 
 -- Sequents
@@ -547,12 +547,12 @@ instance Implicative Seq where
 
 newtype ForAll p f = ForAll { runForAll :: forall x . Polarized p x => f x }
 
-instance ForAllC (Polarized p) Neg f => Polarized N (ForAll p f)
+instance Polarized N (ForAll p f)
 
 
 data Exists p f = forall x . Polarized p x => Exists (f x)
 
-instance ForAllC (Polarized p) Pos f => Polarized P (Exists p f)
+instance Polarized P (Exists p f)
 
 runExists :: (forall x . Polarized p x => f x -> r) -> Exists p f -> r
 runExists f (Exists r) = f r
@@ -600,7 +600,7 @@ instance (Polarized N (f a), Polarized P a) => Polarized P (NuF r f a)
 
 newtype Mu r f = Mu { getMu :: ForAll N (MuF r f) }
 
-instance ForAllC Neg Pos f => Polarized N (Mu r f) where
+instance Polarized N (Mu r f) where
 
 newtype MuF r f a = MuF { getMuF :: Fun r (Down (Fun r (f a) a)) a }
 
@@ -641,21 +641,7 @@ newtype P a = P { getP :: a }
   deriving (Applicative, Monad) via Identity
 
 
-class Polarity p where
-  polarize' :: a -> p a
-
-instance Polarity N where
-  polarize' = N
-
-instance Polarity P where
-  polarize' = P
-
-
-class Polarized p c | c -> p where
-  polarize :: c -> p c
-  default polarize :: Polarity p => c -> p c
-  polarize = polarize'
-
+class Polarized (p :: Type -> Type) c | c -> p
 instance Polarized N (N a)
 instance Polarized P (P a)
 
@@ -754,7 +740,7 @@ newtype (f · g) a = C { getC :: f (g a) }
 
 infixr 7 ·
 
-instance (Polarity p, Polarized p (f (g a))) => Polarized p ((f · g) a) where
+instance Polarized p (f (g a)) => Polarized p ((f · g) a) where
 
 instance (Applicative f, Applicative g) => Applicative (f · g) where
   pure = C . pure . pure
