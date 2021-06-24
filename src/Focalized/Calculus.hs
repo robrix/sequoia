@@ -191,7 +191,7 @@ infixr 1 >>>
 instance Core Seq where
   f >>> g = f >>= pure |> pushL g
 
-  init = popL (pure . inr)
+  init = popL liftR
 
 
 class Structural s where
@@ -404,7 +404,7 @@ class (Core s, Structural s, Negative s) => Additive s where
 instance Additive Seq where
   zeroL = popL absurdP
 
-  topR = pure (inr Top)
+  topR = liftR Top
 
   sumL a b = popL (exlr (pushL a) (pushL b))
   sumR1 = mapR inl
@@ -497,7 +497,7 @@ instance Multiplicative Seq where
   botR = fmap inl
 
   oneL = wkL
-  oneR = pure (inr One)
+  oneR = liftR One
 
   parL a b = popL (exlr (pushL a) (pushL b))
   parR ab = (>>= inr . inl) |> inr . inr <$> ab
