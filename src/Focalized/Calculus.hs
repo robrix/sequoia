@@ -78,7 +78,6 @@ import Data.Functor.Adjunction hiding (splitL)
 import Data.Functor.Identity
 import Data.Functor.Rep
 import Data.Kind (Constraint)
-import Data.Profunctor hiding ((:->))
 import Prelude hiding (init)
 
 -- Sequents
@@ -104,9 +103,6 @@ instance Applicative (Seq r i) where
 
 instance Monad (Seq r i) where
   Seq a >>= f = Seq $ \ k c -> a (runSeq k c . f) c
-
-instance Profunctor (Seq r) where
-  dimap f g (Seq run) = Seq (\ k -> run (k . g) . f)
 
 liftL :: (a -> r) -> Seq r (a <| i) o
 liftL ka = Seq $ \ _ -> ka . fst
