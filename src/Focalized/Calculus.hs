@@ -782,6 +782,11 @@ class Conj c where
   exl :: (a `c` b) -> a
   exr :: (a `c` b) -> b
 
+instance Conj (,) where
+  inlr = (,)
+  exl = fst
+  exr = snd
+
 curryConj :: Conj p => ((a `p` b) -> r) -> (a -> b -> r)
 curryConj f = fmap f . inlr
 
