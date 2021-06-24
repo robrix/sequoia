@@ -805,6 +805,11 @@ class Disj d where
   inr :: b -> (a `d` b)
   exlr :: (a -> r) -> (b -> r) -> ((a `d` b) -> r)
 
+instance Disj Either where
+  inl = Left
+  inr = Right
+  exlr = either
+
 foldMapDisj :: (Disj p, Monoid m) => (b -> m) -> (a `p` b) -> m
 foldMapDisj = exlr (const mempty)
 
