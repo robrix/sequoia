@@ -82,8 +82,8 @@ import Prelude hiding (init)
 runSeq :: (o -> r) -> i -> Seq r i o -> r
 runSeq k c (Seq run) = run k c
 
-runSeqIO :: (o -> IO ()) -> i -> Seq Δ i o -> IO ()
-runSeqIO k i (Seq run) = absurdΔ (run (throw . Escape . k) i) `catch` getEscape
+runSeqIO :: (o -> IO ()) -> i -> Seq (IO ()) i o -> IO ()
+runSeqIO k i (Seq run) = run (throw . Escape . k) i `catch` getEscape
 
 newtype Escape = Escape { getEscape :: IO () }
 
@@ -137,9 +137,6 @@ data Γ = Γ
 
 
 data Δ
-
-absurdΔ :: Δ -> a
-absurdΔ = \case
 
 
 -- Core rules
