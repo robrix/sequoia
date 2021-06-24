@@ -122,7 +122,7 @@ type (<|) = (,)
 infixr 4 <|
 
 (<|) :: i -> is -> i <| is
-(<|) = (,)
+(<|) = inlr
 
 type (|>) = Either
 infixl 4 |>
