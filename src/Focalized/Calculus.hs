@@ -84,9 +84,12 @@ module Focalized.Calculus
 , appCPS
 , pappCPS
 , execCPS
+, evalCPS
+, mapCPS
 , refoldCPS
 , traversing
-, mapCPS
+, resetCPS
+, shiftCPS
 , CPS(..)
 , Conj(..)
 , curryConj
@@ -908,6 +911,9 @@ pappCPS c a = c Cat.<<< pure a
 execCPS :: CPS r () a -> (a -> r) -> r
 execCPS c = appCPS c ()
 
+evalCPS :: CPS r i r -> i -> r
+evalCPS c = getK (getCPS c (K id))
+
 -- | CPS is a Profunctor.
 mapCPS :: (a' -> a) -> (b -> b') -> CPS r a b -> CPS r a' b'
 mapCPS f g (CPS c) = CPS (mapK f . c . mapK g)
@@ -917,6 +923,12 @@ refoldCPS f g = go where go = f Cat.<<< traversing go Cat.<<< g
 
 traversing :: Traversable f => CPS r a b -> CPS r (f a) (f b)
 traversing c = liftCPS' $ \ a -> execCPS (traverse (pappCPS c) a)
+
+resetCPS :: CPS o i o -> CPS r i o
+resetCPS c = liftCPS $ \ k -> k . evalCPS c
+
+shiftCPS :: ((o -> r) -> CPS r i r) -> CPS r i o
+shiftCPS f = liftCPS (evalCPS . f)
 
 newtype CPS r a b = CPS { getCPS :: K r b -> K r a }
 
