@@ -110,8 +110,8 @@ liftR = pure . inr
 liftLR :: (a -> b) -> Seq r (a <| i) (o |> b)
 liftLR f = sequent $ \ k -> k . inr . f . exl
 
-lowerL :: (K r a -> Seq r i o) -> Seq r (a <| i) o -> Seq r i o
-lowerL f p = sequent $ \ k c -> runSeq k c (f (K (\ a -> runSeq k (a <| c) p)))
+lowerL :: (Core p, Structural p) => (K r a -> p r i o) -> p r (a <| i) o -> p r i o
+lowerL k p = popR k >>> p
 
 lowerR :: (Core p, Structural p) => (a -> p r i o) -> p r i (o |> a) -> p r i o
 lowerR k p = p >>> popL k
