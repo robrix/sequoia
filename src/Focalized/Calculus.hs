@@ -105,13 +105,13 @@ liftLR :: (a -> b) -> Seq r (a <| i) (o |> b)
 liftLR f = sequent $ \ k -> k . pure . f . fst
 
 lowerL :: ((a -> r) -> Seq r i o) -> Seq r (a <| i) o -> Seq r i o
-lowerL f p = sequent $ \ k c -> runSeq k c (f (\ a -> runSeq k (a, c) p))
+lowerL f p = sequent $ \ k c -> runSeq k c (f (\ a -> runSeq k (a <| c) p))
 
 lowerR :: (Core p, Structural p) => (a -> p r i o) -> p r i (o |> a) -> p r i o
 lowerR k p = p >>> popL k
 
 lowerLR :: (((b -> r) -> (a -> r)) -> Seq r i o) -> Seq r (a <| i) (o |> b) -> Seq r i o
-lowerLR f p = sequent $ \ k c -> runSeq k c (f (\ kb a -> runSeq (either k kb) (a, c) p))
+lowerLR f p = sequent $ \ k c -> runSeq k c (f (\ kb a -> runSeq (k |> kb) (a <| c) p))
 
 
 -- Contexts
@@ -237,10 +237,10 @@ class Structural s where
 
 instance Structural Seq where
   popL f = sequent $ \ k -> uncurry (flip (runSeq k) . f)
-  pushL s a = sequent $ \ k i -> runSeq k (a, i) s
+  pushL s a = sequent $ \ k i -> runSeq k (a <| i) s
 
   popR f = sequent $ \ k c -> let (k', ka) = split k in runSeq k' c (f ka)
-  pushR s a = sequent $ \ k i -> runSeq (either k a) i s
+  pushR s a = sequent $ \ k i -> runSeq (k |> a) i s
 
 
 -- Negating
