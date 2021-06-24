@@ -16,7 +16,9 @@ module Focalized.Calculus
 , lowerLR
   -- * Contexts
 , type (<|)
+, (<|)
 , type (|>)
+, (|>)
 , Γ(..)
 , Δ
   -- * Core rules
@@ -117,8 +119,14 @@ lowerLR f p = sequent $ \ k c -> runSeq k c (f (\ kb a -> runSeq (either k kb) (
 type (<|) = (,)
 infixr 4 <|
 
+(<|) :: i -> is -> i <| is
+(<|) = (,)
+
 type (|>) = Either
 infixl 4 |>
+
+(|>) :: (os -> r) -> (o -> r) -> ((os |> o) -> r)
+(|>) = either
 
 split :: (o |> a -> r) -> (o -> r, a -> r)
 split f = (f . Left, f . Right)
