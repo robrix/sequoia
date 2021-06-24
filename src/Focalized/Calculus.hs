@@ -125,6 +125,7 @@ runSeqM :: (o -> m r) -> i -> SeqM r i m o -> m r
 runSeqM k i = runSeq k i . getSeqM
 
 newtype SeqM r i m o = SeqM { getSeqM :: Seq (m r) i o }
+  deriving (Applicative, Functor, Monad)
 
 
 -- Contexts
