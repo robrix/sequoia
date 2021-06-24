@@ -953,6 +953,7 @@ instance Arrow (CPS r) where
   first  f = liftCPS (\ k (l, r) -> appCPS f l (k . (, r)))
   second g = liftCPS (\ k (l, r) -> appCPS g r (k . (l,)))
   f *** g = liftCPS (\ k (l, r) -> appCPS f l (appCPS g r . fmap k . (,)))
+  f &&& g = liftCPS (\ k a -> appCPS f a (appCPS g a . fmap k . (,)))
 
 
 newtype CPST r i m o = CPST { getCPST :: CPS (m r) i o }
