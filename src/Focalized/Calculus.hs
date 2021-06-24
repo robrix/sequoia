@@ -569,7 +569,7 @@ instance Conj (⊗) where
 
 class (Core s, Structural s, Negative s) => Multiplicative s where
   botL :: s r (Bot <| i) o
-  botL = popL absurdN
+  botL = liftL (K absurdN)
   botR :: s r i o -> s r i (o |> Bot)
   botR = wkR
   botR' :: s r i (o |> Bot) -> s r i o
