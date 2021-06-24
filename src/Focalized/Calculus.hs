@@ -41,9 +41,7 @@ module Focalized.Calculus
 , Multiplicative(..)
   -- * Implicative
 , Fun(..)
-, type (-->)
 , Sub(..)
-, type (--<)
 , Implicative(..)
   -- * Quantifying
 , ForAll(..)
@@ -505,10 +503,6 @@ fun (CPS c) = Fun (CPS (mapK exl . c . mapK inr))
 
 newtype Fun r a b = Fun { getFun :: forall i o . CPS r (a <| i) (o |> b) }
 
-type (-->) = Fun Δ
-
-infixr 5 -->
-
 instance (Pos a, Neg b) => Polarized N (Fun r a b) where
 
 appFun :: Fun r a b -> Seq r (a <| i) (o |> b)
@@ -516,10 +510,6 @@ appFun = Seq . getFun
 
 
 data Sub r a b = Sub { subA :: !a, subK :: !(Negate r b) }
-
-type (--<) = Sub Δ
-
-infixr 5 --<
 
 instance (Pos a, Neg b) => Polarized P (Sub r a b) where
 
