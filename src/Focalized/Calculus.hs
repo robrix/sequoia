@@ -117,7 +117,7 @@ lowerR :: (Core p, Structural p) => (a -> p r i o) -> p r i (o |> a) -> p r i o
 lowerR k p = p >>> popL k
 
 lowerLR :: (CPS r a b -> Seq r i o) -> Seq r (a <| i) (o |> b) -> Seq r i o
-lowerLR f p = sequent $ \ k c -> runSeq k c (f (CPS (\ kb -> K (\ a -> runSeq (k |> getK kb) (a <| c) p))))
+lowerLR f p = sequent $ \ k c -> runSeq k c (f (cps (\ kb a -> runSeq (k |> kb) (a <| c) p)))
 
 
 -- Effectful sequents
