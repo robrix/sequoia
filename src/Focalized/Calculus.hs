@@ -951,6 +951,9 @@ instance Monad (CPS r a) where
 newtype CPST r i m o = CPST { getCPST :: CPS (m r) i o }
   deriving (Applicative, Functor, Monad)
 
+instance MonadTrans (CPST r i) where
+  lift m = CPST (liftCPS (const . (m >>=)))
+
 
 newtype (f · g) a = C { getC :: f (g a) }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
