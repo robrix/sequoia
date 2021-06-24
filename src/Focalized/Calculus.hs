@@ -261,6 +261,9 @@ class Core s => Structural s where
   mapR :: (a -> a') -> s r i (o |> a) -> s r i (o |> a')
   mapR f p = popR (pushR p . mapK f)
 
+  mapR2 :: (a -> b -> c) -> s r i (o |> a) -> s r i (o |> b) -> s r i (o |> c)
+  mapR2 f a b = popR (pushR (exR (wkR a)) . mapK f) >>> popL (\ f -> popR (pushR b . mapK f))
+
   liftR :: a -> s r i (o |> a)
 
   lowerR :: (a -> s r i o) -> s r i (o |> a) -> s r i o
