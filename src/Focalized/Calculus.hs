@@ -64,6 +64,9 @@ module Focalized.Calculus
 , Down(..)
 , Shifting(..)
   -- * Utilities
+, K(..)
+, mapK
+, CPS(..)
 , Conj(..)
 , Disj(..)
 ) where
@@ -712,6 +715,17 @@ instance Shifting Seq where
 
 
 -- Utilities
+
+newtype K r a = K { runK :: a -> r }
+
+mapK :: (a' -> a) -> K r a -> K r a'
+mapK f (K g) = K (g . f)
+
+newtype CPS r a b = CPS { runCPS :: K r b -> K r a }
+
+instance Functor (CPS r a) where
+  fmap f (CPS r) = CPS (r . mapK f)
+
 
 newtype (f · g) a = C { getC :: f (g a) }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
