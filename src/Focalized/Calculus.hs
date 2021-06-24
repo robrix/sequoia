@@ -42,6 +42,8 @@ module Focalized.Calculus
   -- * Implicative
 , runFun
 , appFun
+, liftFun
+, liftFun'
 , Fun(..)
 , Sub(..)
 , Implicative(..)
@@ -608,6 +610,12 @@ runFun = Seq . mapCPS exl inr . getFun
 
 appFun :: Fun r a b -> a -> (b -> r) -> r
 appFun = appCPS . getFun
+
+liftFun :: ((b -> r) -> (a -> r)) -> Fun r a b
+liftFun = Fun . liftCPS
+
+liftFun' :: (a -> (b -> r) -> r) -> Fun r a b
+liftFun' = liftFun . flip
 
 newtype Fun r a b = Fun { getFun :: CPS r a b }
 
