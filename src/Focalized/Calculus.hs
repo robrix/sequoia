@@ -888,7 +888,7 @@ instance Cat.Category K where
 
 
 cps :: (a -> b) -> CPS r a b
-cps f = CPS (. f)
+cps = CPS . flip (.)
 
 liftCPS :: (a -> (b -> r) -> r) -> CPS r a b
 liftCPS = CPS . flip
