@@ -223,6 +223,10 @@ class Core s => Structural s where
   mapL :: (a' -> a) -> s r (a <| i) o -> s r (a' <| i) o
   mapL f p = popL (pushL p . f)
 
+  -- FIXME: this is clearly possible, tho it’s less clear that it’s a good idea.
+  -- mapL2 :: (c -> (b, a)) -> s r (a <| i) o -> s r (b <| i) o -> s r (c <| i) o
+  -- mapL2 f a b = popL (pushL b . exl . f) <|> popL (pushL a . exr . f)
+
   liftL :: K r a -> s r (a <| i) o
 
   lowerL :: (K r a -> s r i o) -> s r (a <| i) o -> s r i o
