@@ -499,15 +499,12 @@ instance Multiplicative Seq where
 
 -- Implicative
 
-fun :: CPS r a b -> Fun r a b
-fun c = Fun (mapCPS exl inr c)
-
-newtype Fun r a b = Fun { getFun :: forall i o . CPS r (a <| i) (o |> b) }
+newtype Fun r a b = Fun { getFun :: CPS r a b }
 
 instance (Pos a, Neg b) => Polarized N (Fun r a b) where
 
 appFun :: Fun r a b -> Seq r (a <| i) (o |> b)
-appFun = Seq . getFun
+appFun = Seq . mapCPS exl inr . getFun
 
 
 data Sub r a b = Sub { subA :: !a, subK :: !(Negate r b) }
@@ -539,7 +536,7 @@ class (Core s, Structural s, Negative s) => Implicative s where
 
 instance Implicative Seq where
   funL a b = popL (\ f -> a >>> appFun f >>> exL (wkL b))
-  funR = lowerLR (liftR . fun) . exR . wkR
+  funR = lowerLR (liftR . Fun) . exR . wkR
 
   subL b = popL (\ s -> liftR (subA s) >>> b >>> liftL (getNegate (subK s)))
   subR a b = liftA2 Sub <$> a <*> negateR b
