@@ -955,6 +955,10 @@ instance ArrowApply (CPS r) where
 instance Profunctor (CPS r) where
   dimap f g (CPS c) = CPS ((. f) . c . (. g))
 
+instance Strong (CPS r) where
+  first' = first
+  second' = second
+
 
 newtype CPST r i m o = CPST { getCPST :: CPS (m r) i o }
   deriving (Applicative, Functor, Monad)
