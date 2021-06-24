@@ -7,7 +7,6 @@
 module Focalized.Calculus
 ( -- * Sequents
   runSeq
-, runSeqIO
 , Seq(..)
 , liftL
 , liftR
@@ -71,7 +70,6 @@ module Focalized.Calculus
 ) where
 
 import Control.Applicative (liftA2)
-import Control.Exception (Exception, catch, throw)
 import Control.Monad (ap, join)
 import Data.Functor.Identity
 import Data.Kind (Constraint)
@@ -81,14 +79,6 @@ import Prelude hiding (init)
 
 runSeq :: (o -> r) -> i -> Seq r i o -> r
 runSeq k c (Seq run) = run k c
-
-runSeqIO :: (o -> IO ()) -> i -> Seq (IO ()) i o -> IO ()
-runSeqIO k i (Seq run) = run (throw . Escape . k) i `catch` getEscape
-
-newtype Escape = Escape { getEscape :: IO () }
-
-instance Show Escape where show _ = "Escape"
-instance Exception Escape
 
 
 newtype Seq r i o = Seq { appSeq :: (o -> r) -> (i -> r) }
