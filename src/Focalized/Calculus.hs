@@ -138,7 +138,7 @@ infixl 4 |>
 (|>) = exlr
 
 split :: (o |> a -> r) -> (o -> r, a -> r)
-split f = (f . Left, f . Right)
+split f = (f . inl, f . inr)
 
 
 data Γ = Γ
@@ -463,7 +463,7 @@ class (Core s, Structural s, Negative s) => Multiplicative s where
 
 instance Multiplicative Seq where
   botL = popL absurdN
-  botR = fmap Left
+  botR = fmap inl
 
   oneL = wkL
   oneR = pure (inr One)
