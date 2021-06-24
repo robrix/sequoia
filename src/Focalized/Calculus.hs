@@ -64,7 +64,6 @@ module Focalized.Calculus
 , Down(..)
 , Shifting(..)
   -- * Utilities
-, I(..)
 , Conj(..)
 , Disj(..)
 ) where
