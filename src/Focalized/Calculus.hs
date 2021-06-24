@@ -8,11 +8,7 @@ module Focalized.Calculus
 ( -- * Sequents
   runSeq
 , Seq(..)
-, liftL
-, liftR
 , liftLR
-, lowerL
-, lowerR
 , lowerLR
   -- * Effectful sequents
 , runSeqT
@@ -101,20 +97,9 @@ sequent = Seq . cps
 newtype Seq r i o = Seq { getSeq :: CPS r i o }
   deriving (Applicative, Functor, Monad)
 
-liftL :: K r a -> Seq r (a <| i) o
-liftL ka = sequent $ \ _ -> getK ka . exl
-
-liftR :: a -> Seq r i (o |> a)
-liftR = pure . inr
-
 liftLR :: (a -> b) -> Seq r (a <| i) (o |> b)
 liftLR f = sequent $ \ k -> k . inr . f . exl
 
-lowerL :: (Core p, Structural p) => (K r a -> p r i o) -> p r (a <| i) o -> p r i o
-lowerL k p = popR k >>> p
-
-lowerR :: (Core p, Structural p) => (a -> p r i o) -> p r i (o |> a) -> p r i o
-lowerR k p = p >>> popL k
 
 lowerLR :: (CPS r a b -> Seq r i o) -> Seq r (a <| i) (o |> b) -> Seq r i o
 lowerLR f p = sequent $ \ k c -> runSeq k c (f (cps (\ kb a -> runSeq (k |> kb) (a <| c) p)))
@@ -194,7 +179,7 @@ instance Core Seq where
   init = popL liftR
 
 
-class Structural s where
+class Core s => Structural s where
   -- | Pop something off the input context which can later be pushed. Used with 'pushL', this provides a generalized context restructuring facility.
   --
   -- @
@@ -226,6 +211,11 @@ class Structural s where
 
   mapL :: (a' -> a) -> s r (a <| i) o -> s r (a' <| i) o
   mapL f p = popL (pushL p . f)
+
+  liftL :: K r a -> s r (a <| i) o
+
+  lowerL :: (K r a -> s r i o) -> s r (a <| i) o -> s r i o
+  lowerL k p = popR k >>> p
 
 
   -- | Pop something off the output context which can later be pushed. Used with 'pushR', this provides a generalized context restructuring facility.
@@ -260,6 +250,11 @@ class Structural s where
   mapR :: (a -> a') -> s r i (o |> a) -> s r i (o |> a')
   mapR f p = popR (pushR p . mapK f)
 
+  liftR :: a -> s r i (o |> a)
+
+  lowerR :: (a -> s r i o) -> s r i (o |> a) -> s r i o
+  lowerR k p = p >>> popL k
+
 
   wkL :: s r i o -> s r (a <| i) o
   wkL = popL . const
@@ -277,9 +272,11 @@ class Structural s where
 instance Structural Seq where
   popL f = sequent $ \ k -> uncurryConj (flip (runSeq k) . f)
   pushL s a = sequent $ \ k i -> runSeq k (a <| i) s
+  liftL ka = sequent $ \ _ -> getK ka . exl
 
   popR f = sequent $ \ k c -> runSeq (k . inl) c (f (K (k . inr)))
   pushR s a = sequent $ \ k i -> runSeq (k |> getK a) i s
+  liftR = pure . inr
 
 
 -- Negating
