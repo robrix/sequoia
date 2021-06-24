@@ -40,6 +40,8 @@ module Focalized.Calculus
 , type (⊗)(..)
 , Multiplicative(..)
   -- * Implicative
+, runFun
+, appFun
 , Fun(..)
 , Sub(..)
 , Implicative(..)
@@ -582,6 +584,12 @@ instance Multiplicative Seq where
 
 -- Implicative
 
+runFun :: Fun r a b -> Seq r (a <| i) (o |> b)
+runFun = Seq . mapCPS exl inr . getFun
+
+appFun :: Fun r a b -> a -> (b -> r) -> r
+appFun = appCPS . getFun
+
 newtype Fun r a b = Fun { getFun :: CPS r a b }
 
 instance (Pos a, Neg b) => Polarized N (Fun r a b) where
@@ -593,9 +601,6 @@ instance (ToPos a pa, ToNeg b nb) => Polarize N (CPS r a b) (Fun r pa nb) where
 instance (Pos a, Neg b) => Polarize N (Fun r a b) (Fun r a b) where
   polarize = id
   neutralize = id
-
-runFun :: Fun r a b -> Seq r (a <| i) (o |> b)
-runFun = Seq . mapCPS exl inr . getFun
 
 
 data Sub r a b = Sub { subA :: !a, subK :: !(Negate r b) }
