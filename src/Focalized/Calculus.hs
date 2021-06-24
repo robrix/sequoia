@@ -955,6 +955,9 @@ instance Arrow (CPS r) where
   f *** g = liftCPS (\ k (l, r) -> appCPS f l (appCPS g r . fmap k . (,)))
   f &&& g = liftCPS (\ k a -> appCPS f a (appCPS g a . fmap k . (,)))
 
+instance ArrowChoice (CPS r) where
+  f +++ g = liftCPS (\ k -> exlr (lowerCPS f (k . inl)) (lowerCPS g (k . inr)))
+
 
 newtype CPST r i m o = CPST { getCPST :: CPS (m r) i o }
   deriving (Applicative, Functor, Monad)
