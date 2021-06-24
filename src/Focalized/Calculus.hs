@@ -699,7 +699,7 @@ instance (Polarized N (f a), Polarized P a) => Polarized P (NuF r f a)
 
 newtype Mu r f = Mu { getMu :: ForAll N (MuF r f) }
 
-instance Polarized N (Mu r f) where
+instance Polarized P (Mu r f) where
 
 newtype MuF r f a = MuF { getMuF :: Fun r (Down (Fun r (f a) a)) a }
 
