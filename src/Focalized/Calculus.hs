@@ -131,8 +131,26 @@ instance Conj (<|) where
 (<|) :: i -> is -> i <| is
 (<|) = inlr
 
-type (|>) = Either
+data a |> b
+  = L a
+  | R b
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+
 infixl 4 |>
+
+instance Disj (|>) where
+  inl = L
+  inr = R
+  exlr f g = \case
+    L a -> f a
+    R b -> g b
+
+instance Applicative ((|>) a) where
+  pure = R
+  (<*>) = ap
+
+instance Monad ((|>) a) where
+  (>>=) = flip (exlr inl)
 
 (|>) :: (os -> r) -> (o -> r) -> ((os |> o) -> r)
 (|>) = exlr
