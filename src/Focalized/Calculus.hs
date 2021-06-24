@@ -77,6 +77,8 @@ module Focalized.Calculus
 , lowerCPS
 , runCPS
 , appCPS
+, pappCPS
+, execCPS
 , mapCPS
 , CPS(..)
 , Conj(..)
@@ -860,6 +862,12 @@ runCPS k a c = runK a (getCPS c (K k))
 
 appCPS :: CPS r a b -> a -> (b -> r) -> r
 appCPS c a k = getK (getCPS c (K k)) a
+
+pappCPS :: CPS r a b -> a -> CPS r () b
+pappCPS c a = c Cat.<<< pure a
+
+execCPS :: CPS r () a -> (a -> r) -> r
+execCPS c = appCPS c ()
 
 -- | CPS is a Profunctor.
 mapCPS :: (a' -> a) -> (b -> b') -> CPS r a b -> CPS r a' b'
