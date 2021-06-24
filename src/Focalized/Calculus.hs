@@ -710,8 +710,8 @@ class (Core s, Structural s, Implicative s, Quantifying s) => Recursive s where
   muL' :: ForAllC (Polarized N) Pos f => s r (Mu r f <| i) o -> s r (ForAll N (MuF r f) <| i) o
   muL' p = muR init >>> exL (wkL p)
   muR :: ForAllC (Polarized N) Pos f => s r i (o |> ForAll N (MuF r f)) -> s r i (o |> Mu r f)
-  muLFold :: (ForAllC (Polarized N) Pos f, Neg a) => s r i (o |> Fun r (f a) a) -> s r i (o |> Mu r f) -> s r i (o |> a)
-  muLFold f mu = exR (wkR mu) >>> muL (forAllL (mapL getMuF (funL (downR (exR (wkR f))) init)))
+  muLFold :: (ForAllC (Polarized N) Pos f, Neg a) => s r i (o |> Fun r (f a) a) -> s r (a <| i) o -> s r (Mu r f <| i) o
+  muLFold f k = muL (forAllL (mapL getMuF (funL (downR (exR (wkR f))) init))) >>> exL (wkL k)
 
 
 instance Recursive Seq where
