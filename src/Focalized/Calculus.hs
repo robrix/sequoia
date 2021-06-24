@@ -9,6 +9,9 @@ module Focalized.Calculus
   runSeq
 , runSeqIO
 , Seq(..)
+, liftL
+, liftR
+, liftLR
   -- * Contexts
 , type (<|)
 , type (|>)
@@ -102,6 +105,15 @@ instance Monad (Seq r i) where
 
 instance Profunctor (Seq r) where
   dimap f g (Seq run) = Seq (\ k -> run (k . g) . f)
+
+liftL :: (a -> r) -> Seq r (a <| i) o
+liftL ka = Seq $ \ _ -> ka . fst
+
+liftR :: a -> Seq r i (o |> a)
+liftR = pure . pure
+
+liftLR :: (a -> b) -> Seq r (a <| i) (o |> b)
+liftLR f = Seq $ \ k -> k . pure . f . fst
 
 
 -- Contexts
