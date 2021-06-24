@@ -99,6 +99,7 @@ module Focalized.Calculus
 ) where
 
 import           Control.Applicative (liftA2)
+import           Control.Arrow hiding ((>>>))
 import qualified Control.Category as Cat
 import           Control.Monad (ap, join)
 import           Control.Monad.Trans.Class
@@ -946,6 +947,10 @@ instance Applicative (CPS r a) where
 
 instance Monad (CPS r a) where
   r >>= f = liftCPS $ \ k a -> runCPS (runCPS k a . f) a r
+
+instance Arrow (CPS r) where
+  arr = cps
+  f *** g = liftCPS (\ k (l, r) -> appCPS f l (appCPS g r . fmap k . (,)))
 
 
 newtype CPST r i m o = CPST { getCPST :: CPS (m r) i o }
