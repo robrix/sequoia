@@ -7,6 +7,7 @@
 module Focalized.Calculus
 ( -- * Sequents
   runSeq
+, evalSeq
 , Seq(..)
 , liftLR
 , lowerLR
@@ -111,6 +112,9 @@ import           Prelude hiding (init)
 
 runSeq :: (o -> r) -> i -> Seq r i o -> r
 runSeq k c = runCPS k c . getSeq
+
+evalSeq :: i -> Seq o i o -> o
+evalSeq = runSeq id
 
 sequent :: ((o -> r) -> (i -> r)) -> Seq r i o
 sequent = Seq . CPS
