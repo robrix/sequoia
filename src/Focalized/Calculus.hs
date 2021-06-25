@@ -587,6 +587,7 @@ instance Disj (⅋) where
 
 
 class (Core s, Structural s, Negating s) => MultiplicativeDisj s where
+  {-# MINIMAL (parL | parLTensor), parR #-}
   parL :: (Neg a, Neg b) => s r (a <| i) o -> s r (b <| i) o -> s r (a ⅋ b <| i) o
   default parL :: (Neg a, Neg b, MultiplicativeConj s) => s r (a <| i) o -> s r (b <| i) o -> s r (a ⅋ b <| i) o
   parL p1 p2 = parLTensor (tensorR (negateR p1) (negateR p2))
