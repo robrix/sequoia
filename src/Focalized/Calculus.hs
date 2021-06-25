@@ -246,7 +246,7 @@ class Core s => Structural s where
   liftL :: K r a -> s r (a <| i) o
   liftL = pushR init
 
-  lowerL :: (K r a -> s r i o) -> s r (a <| i) o -> s r i o
+  lowerL :: (K r a -> s r i o) -> (s r (a <| i) o -> s r i o)
   lowerL k p = popR k >>> p
 
 
@@ -288,7 +288,7 @@ class Core s => Structural s where
   liftR :: a -> s r i (o |> a)
   liftR = pushL init
 
-  lowerR :: (a -> s r i o) -> s r i (o |> a) -> s r i o
+  lowerR :: (a -> s r i o) -> (s r i (o |> a) -> s r i o)
   lowerR k p = p >>> popL k
 
 
