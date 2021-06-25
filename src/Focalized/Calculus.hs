@@ -882,6 +882,8 @@ instance Neg a => Polarized P (Down a) where
 
 class (Core s, Structural s) => ShiftingP s where
   downL :: Neg a => s r (a <| i) o -> s r (Down a <| i) o
+  default downL :: (ShiftingN s, NegatingP s, Neg a) => s r (a <| i) o -> s r (Down a <| i) o
+  downL s = downLUp (upR (negateR s))
   downLUp :: Neg a => s r i (o |> Up (Negate r a)) -> s r (Down a <| i) o
   default downLUp :: (ShiftingN s, NegatingP s, Neg a) => s r i (o |> Up (Negate r a)) -> s r (Down a <| i) o
   downLUp s = wkL s >>> upL (negateL (downL init))
