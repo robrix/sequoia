@@ -617,6 +617,7 @@ instance Conj (⊗) where
 
 
 class (Core s, Structural s, Negating s) => MultiplicativeConj s where
+  {-# MINIMAL (tensorL | tensorLPar), tensorR #-}
   tensorL :: (Pos a, Pos b) => s r (a <| b <| i) o -> s r (a ⊗ b <| i) o
   default tensorL :: (Pos a, Pos b, MultiplicativeDisj s) => s r (a <| b <| i) o -> s r (a ⊗ b <| i) o
   tensorL = tensorLPar . parR . notR . notR
