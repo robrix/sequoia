@@ -59,9 +59,10 @@ module Focalized.Calculus
 , liftFun'
 , Fun(..)
 , type (-->)
+, Implicative(..)
 , Sub(..)
 , type (--<)
-, Implicative(..)
+, Coimplicative(..)
   -- * Quantifying
 , ForAll(..)
 , Exists(..)
@@ -654,17 +655,12 @@ instance (Pos a, Neg b) => Polarized N (Fun r a b) where
 type (a --> b) r = Fun r a b
 
 
-data Sub r a b = Sub { subA :: !a, subK :: !(Negate r b) }
-
-instance (Pos a, Neg b) => Polarized P (Sub r a b) where
-
-type (a --< b) r = Sub r a b
-
-
 class (Core s, Structural s, Negating s) => Implicative s where
   funL :: (Pos a, Neg b) => s r i (o |> a) -> s r (b <| i) o -> s r ((a --> b) r <| i) o
+  default funL :: (Pos a, Neg b, Coimplicative s) => s r i (o |> a) -> s r (b <| i) o -> s r ((a --> b) r <| i) o
   funL pa pb = funLSub (subR pa pb)
   funLSub :: (Pos a, Neg b) => s r i (o |> (a --< b) r) -> s r ((a --> b) r <| i) o
+  default funLSub :: (Pos a, Neg b, Coimplicative s) => s r i (o |> (a --< b) r) -> s r ((a --> b) r <| i) o
   funLSub p = wkL p >>> subL (exL (funL init init))
   funL2 :: (Pos a, Neg b) => s r ((a --> b) r <| a <| i)  (o |> b)
   funL2 = funL init init
@@ -674,19 +670,30 @@ class (Core s, Structural s, Negating s) => Implicative s where
   funR' :: (Pos a, Neg b) => s r i (o |> (a --> b) r) -> s r (a <| i) (o |> b)
   funR' p = wkL (wkR' p) >>> funL2
 
+instance Implicative Seq where
+  funL a b = popL (\ f -> a >>> runFun f >>> wkL' b)
+  funR = lowerLR (liftR . Fun) . wkR'
+
+
+data Sub r a b = Sub { subA :: !a, subK :: !(Negate r b) }
+
+instance (Pos a, Neg b) => Polarized P (Sub r a b) where
+
+type (a --< b) r = Sub r a b
+
+
+class (Core s, Structural s, Negating s) => Coimplicative s where
   subL :: (Pos a, Neg b) => s r (a <| i) (o |> b) -> s r ((a --< b) r <| i) o
+  default subL :: (Pos a, Neg b, Implicative s) => s r (a <| i) (o |> b) -> s r ((a --< b) r <| i) o
   subL = subLFun . funR
   subLFun :: (Pos a, Neg b) => s r i (o |> (a --> b) r) -> s r ((a --< b) r <| i) o
+  default subLFun :: (Pos a, Neg b, Implicative s) => s r i (o |> (a --> b) r) -> s r ((a --< b) r <| i) o
   subLFun p = wkL p >>> exL (subL (exL (funL init init)))
   subL' :: (Pos a, Neg b) => s r ((a --< b) r <| i) o -> s r (a <| i) (o |> b)
   subL' p = subR init init >>> wkR (wkL' p)
   subR :: (Pos a, Neg b) => s r i (o |> a) -> s r (b <| i) o -> s r i (o |> (a --< b) r)
 
-
-instance Implicative Seq where
-  funL a b = popL (\ f -> a >>> runFun f >>> wkL' b)
-  funR = lowerLR (liftR . Fun) . wkR'
-
+instance Coimplicative Seq where
   subL b = popL (\ s -> liftR (subA s) >>> b >>> liftL (getNegate (subK s)))
   subR a b = liftA2 Sub <$> a <*> negateR b
 
