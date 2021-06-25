@@ -321,7 +321,7 @@ instance Structural Seq where
 
 class (Core s, Structural s) => Control s where
   reset :: s o i o -> s r i o
-  shift :: s r (K r a <| i) r -> s r i (o |> a)
+  shift :: s r (K r a <| i) (o |> r) -> s r i (o |> a)
 
   kL :: s r i (o |> a) -> s r (K r a <| i) o
   kL = popL . pushR
@@ -338,7 +338,7 @@ class (Core s, Structural s) => Control s where
 
 instance Control Seq where
   reset s = sequent (. evalSeq s)
-  shift p = sequent (\ k -> evalSeq p . (K (k . inr) <|))
+  shift p = sequent (\ k -> runSeq p (k . inl |> id) . (K (k . inr) <|))
 
 
 -- Negating
