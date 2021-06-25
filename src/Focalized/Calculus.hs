@@ -292,19 +292,6 @@ class Core s => Structural s where
   lowerR k p = p >>> popL k
 
 
-  kL :: s r i (o |> a) -> s r (K r a <| i) o
-  kL = popL . pushR
-
-  kL' :: s r (K r a <| i) o -> s r i (o |> a)
-  kL' s = kR init >>> wkR s
-
-  kR :: s r (a <| i) o -> s r i (o |> K r a)
-  kR s = lowerL (pushL init) (wkR s)
-
-  kR' :: s r i (o |> K r a) -> s r (a <| i) o
-  kR' s = wkL s >>> kL init
-
-
   wkL :: s r i o -> s r (a <| i) o
   wkL = popL . const
   wkL' :: s r (a <| i) o -> s r (a <| b <| i) o
@@ -719,6 +706,18 @@ instance Recursive Seq where
 class (Core s, Structural s) => Control s where
   reset :: s o i o -> s r i o
   shift :: s r (K r o <| i) r -> s r i o
+
+  kL :: s r i (o |> a) -> s r (K r a <| i) o
+  kL = popL . pushR
+
+  kL' :: s r (K r a <| i) o -> s r i (o |> a)
+  kL' s = kR init >>> wkR s
+
+  kR :: s r (a <| i) o -> s r i (o |> K r a)
+  kR s = lowerL (pushL init) (wkR s)
+
+  kR' :: s r i (o |> K r a) -> s r (a <| i) o
+  kR' s = wkL s >>> kL init
 
 
 instance Control Seq where
