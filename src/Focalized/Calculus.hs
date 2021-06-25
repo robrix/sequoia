@@ -58,6 +58,7 @@ module Focalized.Calculus
 , MuF(..)
 , foldMu
 , unfoldMu
+, refoldMu
 , refold
 , Recursive(..)
   -- * Polarity
@@ -658,6 +659,9 @@ foldMu alg = liftCPS $ \ (Mu f) -> appFun f (Down (Fun alg))
 
 unfoldMu :: Traversable f => CPS r a (f a) -> CPS r a (Mu r f)
 unfoldMu coalg = cps $ \ a -> Mu $ liftFun' $ \ (Down (Fun alg)) -> appCPS (refoldCPS alg coalg) a
+
+refoldMu :: (Traversable f, Neg b) => CPS r (f b) b -> CPS r a (f a) -> CPS r a b
+refoldMu f g = foldMu f Cat.<<< unfoldMu g
 
 
 refold :: Functor f => (f b -> b) -> (a -> f a) -> a -> b
