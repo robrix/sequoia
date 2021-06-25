@@ -970,6 +970,7 @@ instance Choice (CPS r) where
 
 instance Traversing (CPS r) where
   traverse' c = liftCPS (execCPS . traverse (pappCPS c))
+  wander traverse c = liftCPS (execCPS . traverse (pappCPS c))
 
 
 newtype CPST r i m o = CPST { getCPST :: CPS (m r) i o }
