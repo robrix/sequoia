@@ -1,4 +1,5 @@
 {-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE QuantifiedConstraints #-}
@@ -30,11 +31,15 @@ module Focalized.Calculus
 , Negate(..)
 , Negating(..)
   -- * Additive
+, Additive
 , Top(..)
+, AdditiveTruth(..)
 , Zero
+, AdditiveFalsity(..)
 , type (&)(..)
-, type (⊕)
-, Additive(..)
+, AdditiveConj(..)
+, type (⊕)(..)
+, AdditiveDisj(..)
   -- * Multiplicative
 , Bot
 , One(..)
@@ -398,10 +403,20 @@ instance Negating Seq where
 
 -- Additive
 
+type Additive s = (AdditiveTruth s, AdditiveFalsity s, AdditiveConj s, AdditiveDisj s)
+
+
 data Top = Top
   deriving (Eq, Ord, Show)
 
 instance Polarized N Top where
+
+
+class (Core s, Structural s, Negating s) => AdditiveTruth s where
+  topR :: s r i (o |> Top)
+  topR = liftR Top
+
+instance AdditiveTruth Seq where
 
 
 data Zero
@@ -410,6 +425,13 @@ instance Polarized P Zero where
 
 absurdP :: Zero -> a
 absurdP = \case
+
+
+class (Core s, Structural s, Negating s) => AdditiveFalsity s where
+  zeroL :: s r (Zero <| i) o
+  zeroL = popL absurdP
+
+instance AdditiveFalsity Seq where
 
 
 newtype a & b = With (forall r . (a -> b -> r) -> r)
@@ -431,6 +453,28 @@ instance Conj (&) where
   exr (With run) = run (const id)
 
 
+class (Core s, Structural s, Negating s) => AdditiveConj s where
+  withL1 :: (Neg a, Neg b) => s r (a <| i) o -> s r (a & b <| i) o
+  default withL1 :: (Neg a, Neg b, AdditiveDisj s) => s r (a <| i) o -> s r (a & b <| i) o
+  withL1 = withLSum . sumR1 . negateR
+  withL2 :: (Neg a, Neg b) => s r (b <| i) o -> s r (a & b <| i) o
+  default withL2 :: (Neg a, Neg b, AdditiveDisj s) => s r (b <| i) o -> s r (a & b <| i) o
+  withL2 = withLSum . sumR2 . negateR
+  withLSum :: (Neg a, Neg b) => s r i (o |> Negate r a ⊕ Negate r b) -> s r (a & b <| i) o
+  default withLSum :: (Neg a, Neg b, AdditiveDisj s) => s r i (o |> Negate r a ⊕ Negate r b) -> s r (a & b <| i) o
+  withLSum p = wkL p >>> sumL (negateL (withL1 init)) (negateL (withL2 init))
+  withR :: (Neg a, Neg b) => s r i (o |> a) -> s r i (o |> b) -> s r i (o |> (a & b))
+  withR1' :: (Neg a, Neg b) => s r i (o |> (a & b)) -> s r i (o |> a)
+  withR1' t = wkR' t >>> withL1 init
+  withR2' :: (Neg a, Neg b) => s r i (o |> (a & b)) -> s r i (o |> b)
+  withR2' t = wkR' t >>> withL2 init
+
+instance AdditiveConj Seq where
+  withL1 p = popL (pushL p . exl)
+  withL2 p = popL (pushL p . exr)
+  withR = liftA2 (liftA2 inlr)
+
+
 data a ⊕ b
   = InL !a
   | InR !b
@@ -448,45 +492,25 @@ instance Disj (⊕) where
     InR r -> ifr r
 
 
-class (Core s, Structural s, Negating s) => Additive s where
-  zeroL :: s r (Zero <| i) o
-  zeroL = popL absurdP
-
-  topR :: s r i (o |> Top)
-  topR = liftR Top
-
+class (Core s, Structural s, Negating s) => AdditiveDisj s where
   sumL :: (Pos a, Pos b) => s r (a <| i) o -> s r (b <| i) o -> s r (a ⊕ b <| i) o
+  default sumL :: (Pos a, Pos b, AdditiveConj s) => s r (a <| i) o -> s r (b <| i) o -> s r (a ⊕ b <| i) o
   sumL p1 p2 = sumLWith (withR (notR p1) (notR p2))
   sumL1' :: (Pos a, Pos b) => s r (a ⊕ b <| i) o -> s r (a <| i) o
   sumL1' p = sumR1 init >>> wkL' p
   sumL2' :: (Pos a, Pos b) => s r (a ⊕ b <| i) o -> s r (b <| i) o
   sumL2' p = sumR2 init >>> wkL' p
   sumLWith :: (Pos a, Pos b) => s r i (o |> Not r a & Not r b) -> s r (a ⊕ b <| i) o
+  default sumLWith :: (Pos a, Pos b, AdditiveConj s) => s r i (o |> Not r a & Not r b) -> s r (a ⊕ b <| i) o
   sumLWith p = sumL (wkL p >>> withL1 (notL init)) (wkL p >>> withL2 (notL init))
   sumR1 :: (Pos a, Pos b) => s r i (o |> a) -> s r i (o |> a ⊕ b)
   sumR2 :: (Pos a, Pos b) => s r i (o |> b) -> s r i (o |> a ⊕ b)
 
-  withL1 :: (Neg a, Neg b) => s r (a <| i) o -> s r (a & b <| i) o
-  withL1 = withLSum . sumR1 . negateR
-  withL2 :: (Neg a, Neg b) => s r (b <| i) o -> s r (a & b <| i) o
-  withL2 = withLSum . sumR2 . negateR
-  withLSum :: (Neg a, Neg b) => s r i (o |> Negate r a ⊕ Negate r b) -> s r (a & b <| i) o
-  withLSum p = wkL p >>> sumL (negateL (withL1 init)) (negateL (withL2 init))
-  withR :: (Neg a, Neg b) => s r i (o |> a) -> s r i (o |> b) -> s r i (o |> (a & b))
-  withR1' :: (Neg a, Neg b) => s r i (o |> (a & b)) -> s r i (o |> a)
-  withR1' t = wkR' t >>> withL1 init
-  withR2' :: (Neg a, Neg b) => s r i (o |> (a & b)) -> s r i (o |> b)
-  withR2' t = wkR' t >>> withL2 init
 
-
-instance Additive Seq where
+instance AdditiveDisj Seq where
   sumL a b = popL (exlr (pushL a) (pushL b))
   sumR1 = mapR inl
   sumR2 = mapR inr
-
-  withL1 p = popL (pushL p . exl)
-  withL2 p = popL (pushL p . exr)
-  withR = liftA2 (liftA2 inlr)
 
 
 -- Multiplicative
