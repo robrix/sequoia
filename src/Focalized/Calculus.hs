@@ -857,6 +857,9 @@ instance (Pos (f x), Neg x) => Polarized N (MAlg r f x)
 class Iterative s where
   iterL :: (Pos (f a), Neg a) => s r i (o |> MAlg r f a) -> s r (a <| i) o -> s r (Iter r f <| i) o
 
+instance Iterative Seq where
+  iterL alg k = wkL alg >>> exL (mapL getIter (funL (downR init) (wkL' k)))
+
 
 -- Polarity
 
