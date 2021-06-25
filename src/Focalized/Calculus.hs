@@ -841,7 +841,7 @@ instance (Neg (f x), Pos x) => Polarized N (MCoalg r f x)
 
 
 class Coiterative s where
-  coiterR :: Neg a => s r i (o |> MCoalg r f a) -> s r i (o |> a) -> s r (Coiter r f <| i) o
+  coiterR :: Neg a => s r i (o |> MCoalg r f a) -> s r i (o |> a) -> s r i (o |> Coiter r f)
 
 
 newtype Iter r f = Iter { getIter :: forall x . Neg x => (Down (MAlg r f x) --> x) r }
