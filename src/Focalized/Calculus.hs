@@ -112,8 +112,8 @@ import           Prelude hiding (init)
 runSeq :: Seq r i o -> (o -> r) -> (i -> r)
 runSeq = runCPS . getSeq
 
-evalSeq :: i -> Seq o i o -> o
-evalSeq = flip (`runSeq` id)
+evalSeq :: Seq o i o -> i -> o
+evalSeq = (`runSeq` id)
 
 sequent :: ((o -> r) -> (i -> r)) -> Seq r i o
 sequent = Seq . CPS
