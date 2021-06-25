@@ -857,6 +857,8 @@ instance Pos a => Polarized N (Up a) where
 
 class (Core s, Structural s) => ShiftingN s where
   upL :: Pos a => s r (a <| i) o -> s r (Up a <| i) o
+  default upL :: (ShiftingP s, NegatingN s, Pos a) => s r (a <| i) o -> s r (Up a <| i) o
+  upL s = upLDown (downR (notR s))
   upLDown :: Pos a => s r i (o |> Down (Not r a)) -> s r (Up a <| i) o
   default upLDown :: (ShiftingP s, NegatingN s, Pos a) => s r i (o |> Down (Not r a)) -> s r (Up a <| i) o
   upLDown s = wkL s >>> downL (notL (upL init))
