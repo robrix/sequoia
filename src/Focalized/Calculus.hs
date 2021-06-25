@@ -767,6 +767,7 @@ runExists f (Exists r) = f r
 
 
 class (Core s, Structural s, Negating s, Shifting s) => Existential s where
+  {-# MINIMAL (existsL | existsLForAll), existsR #-}
   -- FIXME: the correct signature should be s r ((forall x . f x) <| i) o -> s r (Exists f <| i) o, but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
   existsL :: (forall x . Polarized n x => s r (f x <| i) o) -> s r (Exists n f <| i) o
   default existsL :: (ForAllC (Polarized n) Pos f, Universal s) => (forall x . Polarized n x => s r (f x <| i) o) -> s r (Exists n f <| i) o
