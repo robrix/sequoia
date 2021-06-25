@@ -733,7 +733,7 @@ instance Polarized N (Nu r f) where
 
 newtype NuF r f a = NuF { getNuF :: Down (Fun r a (f a)) ⊗ a }
 
-instance (Polarized N (f a), Polarized P a) => Polarized P (NuF r f a)
+instance (Neg (f a), Pos a) => Polarized P (NuF r f a)
 
 nu :: Exists P (NuF r f) -> Nu r f
 nu (Exists (NuF r)) = Nu r
