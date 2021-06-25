@@ -312,11 +312,9 @@ class Core s => Structural s where
 instance Structural Seq where
   popL f = sequent $ \ k -> uncurryConj ((`runSeq` k) . f)
   pushL s a = sequent $ \ k -> runSeq s k . (a <|)
-  liftL ka = sequent $ \ _ -> runK ka . exl
 
   popR f = sequent $ \ k -> runSeq (f (K (k . inr))) (k . inl)
   pushR s a = sequent $ \ k -> runSeq s (k |> runK a)
-  liftR = pure . inr
 
 
 -- Negating
