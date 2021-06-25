@@ -84,7 +84,6 @@ module Focalized.Calculus
 , execCPS
 , evalCPS
 , refoldCPS
-, traversing
 , resetCPS
 , shiftCPS
 , curryCPS
@@ -105,6 +104,7 @@ import           Control.Monad.Trans.Class
 import           Data.Functor.Identity
 import           Data.Kind (Constraint, Type)
 import           Data.Profunctor
+import           Data.Profunctor.Traversing
 import           Data.Void
 import           Prelude hiding (init)
 
@@ -911,10 +911,7 @@ evalCPS :: CPS r i r -> i -> r
 evalCPS c = getCPS c id
 
 refoldCPS :: Traversable f => CPS r (f b) b -> CPS r a (f a) -> CPS r a b
-refoldCPS f g = go where go = f Cat.<<< traversing go Cat.<<< g
-
-traversing :: Traversable f => CPS r a b -> CPS r (f a) (f b)
-traversing c = liftCPS (execCPS . traverse (pappCPS c))
+refoldCPS f g = go where go = f Cat.<<< traverse' go Cat.<<< g
 
 resetCPS :: CPS o i o -> CPS r i o
 resetCPS c = CPS (. evalCPS c)
@@ -970,6 +967,9 @@ instance Strong (CPS r) where
 instance Choice (CPS r) where
   left' = left
   right' = right
+
+instance Traversing (CPS r) where
+  traverse' c = liftCPS (execCPS . traverse (pappCPS c))
 
 
 newtype CPST r i m o = CPST { getCPST :: CPS (m r) i o }
