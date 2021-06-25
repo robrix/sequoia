@@ -109,10 +109,10 @@ import           Prelude hiding (init)
 
 -- Sequents
 
-runSeq :: Seq r i o -> (o -> r) -> (i -> r)
+runSeq :: Seq r i o -> ((o -> r) -> (i -> r))
 runSeq = runCPS . getSeq
 
-evalSeq :: Seq o i o -> i -> o
+evalSeq :: Seq o i o -> (i -> o)
 evalSeq = (`runSeq` id)
 
 sequent :: ((o -> r) -> (i -> r)) -> Seq r i o
@@ -131,7 +131,7 @@ lowerLR f p = sequent $ \ k i -> runSeq (f (CPS (\ kb a -> runSeq p (k |> kb) (a
 
 -- Effectful sequents
 
-runSeqT :: SeqT r i m o -> (o -> m r) -> (i -> m r)
+runSeqT :: SeqT r i m o -> ((o -> m r) -> (i -> m r))
 runSeqT = runSeq . getSeqT
 
 newtype SeqT r i m o = SeqT { getSeqT :: Seq (m r) i o }
