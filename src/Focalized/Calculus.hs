@@ -653,8 +653,8 @@ instance (Pos (f a), Neg a) => Polarized N (MuF r f a) where
 mu :: ForAll N (MuF r f) -> Mu r f
 mu r = Mu (getMuF (runForAll r))
 
-foldMu :: Neg a => Fun r (f a) a -> CPS r (Mu r f) a
-foldMu alg = liftCPS $ \ (Mu f) -> appFun f (Down alg)
+foldMu :: Neg a => CPS r (f a) a -> CPS r (Mu r f) a
+foldMu alg = liftCPS $ \ (Mu f) -> appFun f (Down (Fun alg))
 
 unfoldMu :: Traversable f => CPS r a (f a) -> CPS r a (Mu r f)
 unfoldMu coalg = cps $ \ a -> Mu $ liftFun' $ \ (Down (Fun alg)) -> appCPS (refoldCPS alg coalg) a
