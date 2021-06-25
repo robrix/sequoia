@@ -704,6 +704,11 @@ class (Core s, Structural s) => Control s where
   shiftR :: s r (K r o <| i) r -> s r i o
 
 
+instance Control Seq where
+  resetR = Seq . resetCPS . getSeq
+  shiftR p = sequent $ \ k -> evalSeq p . (K k <|)
+
+
 -- Polarity
 
 newtype N a = N { getN :: a }
