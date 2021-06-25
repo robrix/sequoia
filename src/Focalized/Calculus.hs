@@ -360,17 +360,23 @@ class (Core s, Structural s, Control s) => Negating s where
   notLK = mapL getNot
   notL' :: Pos a => s r (Not r a <| i) o -> s r i (o |> a)
   notL' p = notR init >>> wkR p
+  notLK' :: Pos a => s r (Not r a <| i) o -> s r (K r a <| i) o
+  notLK' = mapL Not
   notR :: Pos a => s r (a <| i) o -> s r i (o |> Not r a)
   notR = notRK . kR
   notRK :: Pos a => s r i (o |> K r a) -> s r i (o |> Not r a)
   notRK = mapR Not
   notR' :: Pos a => s r i (o |> Not r a) -> s r (a <| i) o
   notR' p = wkL p >>> notL init
+  notRK' :: Pos a => s r i (o |> Not r a) -> s r i (o |> K r a)
+  notRK' = mapR getNot
 
   negateL :: Neg a => s r i (o |> a) -> s r (Negate r a <| i) o
   negateL = negateLK . kL
   negateLK :: Neg a => s r (K r a <| i) o -> s r (Negate r a <| i) o
   negateLK = mapL getNegate
+  negateLK' :: Neg a => s r (Negate r a <| i) o -> s r (K r a <| i) o
+  negateLK' = mapL Negate
   negateL' :: Neg a => s r (Negate r a <| i) o -> s r i (o |> a)
   negateL' p = negateR init >>> wkR p
   negateR :: Neg a => s r (a <| i) o -> s r i (o |> Negate r a)
@@ -379,6 +385,8 @@ class (Core s, Structural s, Control s) => Negating s where
   negateRK = mapR Negate
   negateR' :: Neg a => s r i (o |> Negate r a) -> s r (a <| i) o
   negateR' p = wkL p >>> negateL init
+  negateRK' :: Neg a => s r i (o |> Negate r a) -> s r i (o |> K r a)
+  negateRK' = mapR getNegate
 
 instance Negating Seq where
 
