@@ -45,7 +45,9 @@ module Focalized.Calculus
 , liftFun
 , liftFun'
 , Fun(..)
+, type (-->)
 , Sub(..)
+, type (--<)
 , Implicative(..)
   -- * Quantifying
 , ForAll(..)
@@ -550,10 +552,14 @@ newtype Fun r a b = Fun { getFun :: CPS r a b }
 
 instance (Pos a, Neg b) => Polarized N (Fun r a b) where
 
+type (a --> b) r = Fun r a b
+
 
 data Sub r a b = Sub { subA :: !a, subK :: !(Negate r b) }
 
 instance (Pos a, Neg b) => Polarized P (Sub r a b) where
+
+type (a --< b) r = Sub r a b
 
 
 class (Core s, Structural s, Negative s) => Implicative s where
