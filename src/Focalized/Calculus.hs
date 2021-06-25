@@ -229,7 +229,7 @@ class Core s => Structural s where
   -- @
   -- pushL . popL = id
   -- @
-  pushL :: s r (a <| i) o -> a -> s r i o
+  pushL :: s r (a <| i) o -> (a -> s r i o)
 
   popL2 :: (a -> b -> s r i o) -> s r (a <| b <| i) o
   popL2 f = popL (popL . f)
