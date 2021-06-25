@@ -104,6 +104,7 @@ import           Control.Applicative (liftA2)
 import qualified Control.Category as Cat
 import           Control.Monad (ap, join)
 import           Control.Monad.Trans.Class
+import           Data.Functor.Contravariant (contramap)
 import           Data.Functor.Identity
 import           Data.Kind (Constraint, Type)
 import           Data.Profunctor
@@ -284,10 +285,10 @@ class Core s => Structural s where
   pushR2 p = pushR . pushR p
 
   mapR :: (a -> a') -> s r i (o |> a) -> s r i (o |> a')
-  mapR f p = popR (pushR p . mapK f)
+  mapR f p = popR (pushR p . contramap f)
 
   mapR2 :: (a -> b -> c) -> s r i (o |> a) -> s r i (o |> b) -> s r i (o |> c)
-  mapR2 f a b = popR (pushR (wkR' a) . mapK f) >>> popL (\ f -> popR (pushR b . mapK f))
+  mapR2 f a b = popR (pushR (wkR' a) . contramap f) >>> popL (\ f -> popR (pushR b . contramap f))
 
   liftR :: a -> s r i (o |> a)
   liftR = pushL init
@@ -355,10 +356,10 @@ newtype Not    r a = Not    { getNot    :: K r a }
 instance Pos a => Polarized N (Not r a) where
 
 notNegate :: K r (K r a) -> Not r (Negate r a)
-notNegate = Not . mapK getNegate
+notNegate = Not . contramap getNegate
 
 getNotNegate :: Not r (Negate r a) -> K r (K r a)
-getNotNegate = mapK Negate . getNot
+getNotNegate = contramap Negate . getNot
 
 
 class (Core s, Structural s, Control s) => NegatingN s where
@@ -402,10 +403,10 @@ newtype Negate r a = Negate { getNegate :: K r a }
 instance Neg a => Polarized P (Negate r a) where
 
 negateNot :: K r (K r a) -> Negate r (Not r a)
-negateNot = Negate . mapK getNot
+negateNot = Negate . contramap getNot
 
 getNegateNot :: Negate r (Not r a) -> K r (K r a)
-getNegateNot = mapK Not . getNegate
+getNegateNot = contramap Not . getNegate
 
 
 class (Core s, Structural s, Control s) => NegatingP s where
@@ -823,7 +824,7 @@ newtype MuF r f a = MuF { getMuF :: (Down (FAlg r f a) --> a) r }
 instance (Pos (f a), Neg a) => Polarized N (MuF r f a) where
 
 mu :: ForAll r N (MuF r f) -> Mu r f
-mu r = Mu (dne (mapK (mapK getMuF) (runForAll r)))
+mu r = Mu (dne (contramap (contramap getMuF) (runForAll r)))
 
 dne :: K r (K r ((a --> b) r)) -> (a --> b) r
 dne f = Fun (CPS (\ k a -> runK f (K (\ f -> appFun f a k))))

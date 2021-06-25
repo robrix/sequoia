@@ -1,7 +1,6 @@
 module Focalized.CPS
 ( -- * Continuations
-  mapK
-, K(..)
+  K(..)
   -- * CPS
 , cps
 , liftCPS
@@ -28,9 +27,6 @@ import           Data.Profunctor.Traversing
 import           Focalized.Connective
 
 -- Continuations
-
-mapK :: (a' -> a) -> K r a -> K r a'
-mapK f (K g) = K (g . f)
 
 newtype K r a = K { runK :: a -> r }
 
