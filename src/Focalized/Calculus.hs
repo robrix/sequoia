@@ -140,7 +140,7 @@ instance MonadTrans (SeqT r i) where
 data a <| b = a :<| b
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
-infixr 4 <|
+infixr 4 <|, :<|
 
 instance Conj (<|) where
   inlr = (:<|)
@@ -653,9 +653,6 @@ instance (Pos (f a), Neg a) => Polarized N (MuF r f a) where
 mu :: ForAll N (MuF r f) -> Mu r f
 mu r = Mu (getMuF (runForAll r))
 
-runMu :: Mu r f -> ForAll N (MuF r f)
-runMu m = ForAll (MuF (getMu m))
-
 foldMu :: Neg a => Down (Fun r (f a) a) -> CPS r (Mu r f) a
 foldMu alg = liftCPS $ \ (Mu f) -> appFun f alg
 
@@ -687,7 +684,7 @@ instance Recursive Seq where
   nuL = mapL runNu
   nuR = mapR nu
 
-  muL f k = mapL runMu (forAllL (mapL getMuF (funL (downR (wkR' f)) init))) >>> wkL' k
+  muL f k = wkL (downR f) >>> sequent (\ k (f :<| Mu r :<| _) -> appFun r f (k . inr)) >>> wkL' (wkL' k)
   muR = mapR mu
 
 
