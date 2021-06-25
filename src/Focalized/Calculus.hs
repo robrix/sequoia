@@ -856,6 +856,7 @@ instance Pos a => Polarized N (Up a) where
 
 
 class (Core s, Structural s) => ShiftingN s where
+  {-# MINIMAL (upL | upLDown), upR #-}
   upL :: Pos a => s r (a <| i) o -> s r (Up a <| i) o
   default upL :: (ShiftingP s, NegatingN s, Pos a) => s r (a <| i) o -> s r (Up a <| i) o
   upL = upLDown . downR . notR
@@ -881,6 +882,7 @@ instance Neg a => Polarized P (Down a) where
 
 
 class (Core s, Structural s) => ShiftingP s where
+  {-# MINIMAL (downL | downLUp), downR #-}
   downL :: Neg a => s r (a <| i) o -> s r (Down a <| i) o
   default downL :: (ShiftingN s, NegatingP s, Neg a) => s r (a <| i) o -> s r (Down a <| i) o
   downL = downLUp . upR . negateR
