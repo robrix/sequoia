@@ -833,22 +833,26 @@ instance Recursive Seq where
 
 -- (Co-)Iteration
 
-data Coiter r f = forall x . Coiter { getCoiter :: Down (MCoalg r f x) ⊗ x }
+data Coiter r f = forall x . Pos x => Coiter { getCoiter :: Down (MCoalg r f x) ⊗ x }
 
-newtype MCoalg r f x = MCoalg { getMCoalg :: forall y . Neg y => ((Down ((x --> y) r) --> x) r --> f y) r }
+newtype MCoalg r f x = MCoalg { getMCoalg :: forall y . Neg y => (Down ((x --> y) r) --> (x --> f y) r) r }
+
+instance (Neg (f x), Pos x) => Polarized N (MCoalg r f x)
 
 
 class Coiterative s where
   coiterR :: Neg a => s r i (o |> MCoalg r f a) -> s r i (o |> a) -> s r (Coiter r f <| i) o
 
 
-newtype Iter r f = Iter { getIter :: forall x . (MAlg r f x --> x) r }
+newtype Iter r f = Iter { getIter :: forall x . Neg x => (Down (MAlg r f x) --> x) r }
 
-newtype MAlg r f x = MAlg { getMAlg :: forall y . Pos y => ((Down ((y --> x) r) --> f y) r --> x) r }
+newtype MAlg r f x = MAlg { getMAlg :: forall y . Pos y => (Down ((y --> x) r) --> (f y --> x) r) r }
+
+instance (Pos (f x), Neg x) => Polarized N (MAlg r f x)
 
 
 class Iterative s where
-  iterL :: Pos a => s r i (o |> MAlg r f a) -> s r (a <| i) o -> s r (Iter r f <| i) o
+  iterL :: (Pos (f a), Neg a) => s r i (o |> MAlg r f a) -> s r (a <| i) o -> s r (Iter r f <| i) o
 
 
 -- Polarity
