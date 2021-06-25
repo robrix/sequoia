@@ -745,18 +745,18 @@ instance Neg a => Polarized P (Down a) where
 
 
 class (Core s, Structural s) => Shifting s where
-  upL   :: Pos a => s r (a <| i) o -> s r (Up   a <| i) o
-  upL'   :: Pos a => s r (Up   a <| i) o -> s r (a <| i) o
+  upL :: Pos a => s r (a <| i) o -> s r (Up a <| i) o
+  upL' :: Pos a => s r (Up a <| i) o -> s r (a <| i) o
   upL' p = upR init >>> wkL' p
-  upR   :: Pos a => s r i (o |> a) -> s r i (o |> Up   a)
-  upR'   :: Pos a => s r i (o |> Up   a) -> s r i (o |> a)
+  upR :: Pos a => s r i (o |> a) -> s r i (o |> Up a)
+  upR' :: Pos a => s r i (o |> Up a) -> s r i (o |> a)
   upR' p = wkR' p >>> upL init
 
   downL :: Neg a => s r (a <| i) o -> s r (Down a <| i) o
-  downL'   :: Neg a => s r (Down a <| i) o -> s r (a <| i) o
+  downL' :: Neg a => s r (Down a <| i) o -> s r (a <| i) o
   downL' p = downR init >>> wkL' p
   downR :: Neg a => s r i (o |> a) -> s r i (o |> Down a)
-  downR'   :: Neg a => s r i (o |> Down a) -> s r i (o |> a)
+  downR' :: Neg a => s r i (o |> Down a) -> s r i (o |> a)
   downR' p = wkR' p >>> downL init
 
 
