@@ -705,8 +705,8 @@ class (Core s, Structural s) => Control s where
 
 
 instance Control Seq where
-  resetR = Seq . resetCPS . getSeq
-  shiftR p = sequent $ \ k -> evalSeq p . (K k <|)
+  resetR s = sequent (. evalSeq s)
+  shiftR p = sequent (fmap (evalSeq p) . (<|) . K)
 
 
 -- Polarity
