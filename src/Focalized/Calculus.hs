@@ -244,6 +244,7 @@ class Core s => Structural s where
   -- mapL2 f a b = popL (pushL b . exl . f) <|> popL (pushL a . exr . f)
 
   liftL :: K r a -> s r (a <| i) o
+  liftL = pushR init
 
   lowerL :: (K r a -> s r i o) -> s r (a <| i) o -> s r i o
   lowerL k p = popR k >>> p
