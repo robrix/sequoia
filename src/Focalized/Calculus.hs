@@ -373,11 +373,6 @@ class (Core s, Structural s, Control s) => Negative s where
   negateR' p = wkL p >>> negateL init
 
 instance Negative Seq where
-  negateL p = popL (\ negateA -> p >>> liftL (getNegate negateA))
-  negateR = lowerL (liftR . Negate) . wkR
-
-  notL p = popL (\ notA -> p >>> liftL (getNot notA))
-  notR = lowerL (liftR . Not) . wkR
 
 
 -- Additive
