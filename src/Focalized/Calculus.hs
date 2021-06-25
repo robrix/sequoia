@@ -656,6 +656,7 @@ type (a --> b) r = Fun r a b
 
 
 class (Core s, Structural s, Negating s) => Implicative s where
+  {-# MINIMAL (funL | funLSub), funR #-}
   funL :: (Pos a, Neg b) => s r i (o |> a) -> s r (b <| i) o -> s r ((a --> b) r <| i) o
   default funL :: (Pos a, Neg b, Coimplicative s) => s r i (o |> a) -> s r (b <| i) o -> s r ((a --> b) r <| i) o
   funL pa pb = funLSub (subR pa pb)
