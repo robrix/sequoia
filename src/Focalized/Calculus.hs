@@ -80,6 +80,13 @@ module Focalized.Calculus
 , refoldMu
 , refold
 , Recursive(..)
+  -- * (Co-)Iteration
+, Coiter(..)
+, MCoalg(..)
+, Coiterative(..)
+, Iter(..)
+, MAlg(..)
+, Iterative(..)
   -- * Polarity
 , N(..)
 , P(..)
@@ -822,6 +829,26 @@ class (Core s, Structural s, Implicative s, Universal s) => Recursive s where
 instance Recursive Seq where
   muL f k = wkL (downR f) >>> exL (mapL getMu (funL init (wkL' k)))
   muR = mapR mu
+
+
+-- (Co-)Iteration
+
+data Coiter r f = forall x . Coiter { getCoiter :: Down (MCoalg r f x) ⊗ x }
+
+newtype MCoalg r f x = MCoalg { getMCoalg :: forall y . Neg y => ((Down ((x --> y) r) --> x) r --> f y) r }
+
+
+class Coiterative s where
+  coiterR :: Neg a => s r i (o |> MCoalg r f a) -> s r i (o |> a) -> s r (Coiter r f <| i) o
+
+
+newtype Iter r f = Iter { getIter :: forall x . (MAlg r f x --> x) r }
+
+newtype MAlg r f x = MAlg { getMAlg :: forall y . Pos y => ((Down ((y --> x) r) --> f y) r --> x) r }
+
+
+class Iterative s where
+  iterL :: Pos a => s r i (o |> MAlg r f a) -> s r (a <| i) o -> s r (Iter r f <| i) o
 
 
 -- Polarity
