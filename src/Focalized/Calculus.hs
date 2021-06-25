@@ -536,16 +536,16 @@ instance Multiplicative Seq where
 
 -- Implicative
 
-runFun :: Fun r a b -> Seq r (a <| i) (o |> b)
+runFun :: (a --> b) r -> Seq r (a <| i) (o |> b)
 runFun = Seq . dimap exl inr . getFun
 
-appFun :: Fun r a b -> a -> (b -> r) -> r
+appFun :: (a --> b) r -> a -> (b -> r) -> r
 appFun = appCPS . getFun
 
-liftFun :: ((b -> r) -> (a -> r)) -> Fun r a b
+liftFun :: ((b -> r) -> (a -> r)) -> (a --> b) r
 liftFun = Fun . CPS
 
-liftFun' :: (a -> (b -> r) -> r) -> Fun r a b
+liftFun' :: (a -> (b -> r) -> r) -> (a --> b) r
 liftFun' = liftFun . flip
 
 newtype Fun r a b = Fun { getFun :: CPS r a b }
@@ -563,25 +563,25 @@ type (a --< b) r = Sub r a b
 
 
 class (Core s, Structural s, Negative s) => Implicative s where
-  funL :: (Pos a, Neg b) => s r i (o |> a) -> s r (b <| i) o -> s r (Fun r a b <| i) o
+  funL :: (Pos a, Neg b) => s r i (o |> a) -> s r (b <| i) o -> s r ((a --> b) r <| i) o
   funL pa pb = funLSub (subR pa pb)
-  funLSub :: (Pos a, Neg b) => s r i (o |> Sub r a b) -> s r (Fun r a b <| i) o
+  funLSub :: (Pos a, Neg b) => s r i (o |> (a --< b) r) -> s r ((a --> b) r <| i) o
   funLSub p = wkL p >>> subL (exL (funL init init))
-  funL2 :: (Pos a, Neg b) => s r (Fun r a b <| a <| i)  (o |> b)
+  funL2 :: (Pos a, Neg b) => s r ((a --> b) r <| a <| i)  (o |> b)
   funL2 = funL init init
-  funR :: (Pos a, Neg b) => s r (a <| i) (o |> b) -> s r i (o |> Fun r a b)
-  ($$) :: (Pos a, Neg b) => s r i (o |> Fun r a b) -> s r i (o |> a) -> s r i (o |> b)
+  funR :: (Pos a, Neg b) => s r (a <| i) (o |> b) -> s r i (o |> (a --> b) r)
+  ($$) :: (Pos a, Neg b) => s r i (o |> (a --> b) r) -> s r i (o |> a) -> s r i (o |> b)
   f $$ a = wkR' f >>> wkR' a `funL` init
-  funR' :: (Pos a, Neg b) => s r i (o |> Fun r a b) -> s r (a <| i) (o |> b)
+  funR' :: (Pos a, Neg b) => s r i (o |> (a --> b) r) -> s r (a <| i) (o |> b)
   funR' p = wkL (wkR' p) >>> funL2
 
-  subL :: (Pos a, Neg b) => s r (a <| i) (o |> b) -> s r (Sub r a b <| i) o
+  subL :: (Pos a, Neg b) => s r (a <| i) (o |> b) -> s r ((a --< b) r <| i) o
   subL = subLFun . funR
-  subLFun :: (Pos a, Neg b) => s r i (o |> Fun r a b) -> s r (Sub r a b <| i) o
+  subLFun :: (Pos a, Neg b) => s r i (o |> (a --> b) r) -> s r ((a --< b) r <| i) o
   subLFun p = wkL p >>> exL (subL (exL (funL init init)))
-  subL' :: (Pos a, Neg b) => s r (Sub r a b <| i) o -> s r (a <| i) (o |> b)
+  subL' :: (Pos a, Neg b) => s r ((a --< b) r <| i) o -> s r (a <| i) (o |> b)
   subL' p = subR init init >>> wkR (wkL' p)
-  subR :: (Pos a, Neg b) => s r i (o |> a) -> s r (b <| i) o -> s r i (o |> Sub r a b)
+  subR :: (Pos a, Neg b) => s r i (o |> a) -> s r (b <| i) o -> s r i (o |> (a --< b) r)
 
 
 instance Implicative Seq where
@@ -638,11 +638,11 @@ instance Quantifying Seq where
 
 -- Recursive
 
-data Nu r f = forall x . Polarized P x => Nu { getNu :: Down (Fun r x (f x)) ⊗ x }
+data Nu r f = forall x . Polarized P x => Nu { getNu :: Down ((x --> f x) r) ⊗ x }
 
 instance Polarized N (Nu r f) where
 
-newtype NuF r f a = NuF { getNuF :: Down (Fun r a (f a)) ⊗ a }
+newtype NuF r f a = NuF { getNuF :: Down ((a --> f a) r) ⊗ a }
 
 instance (Neg (f a), Pos a) => Polarized P (NuF r f a)
 
@@ -653,11 +653,11 @@ runNu :: Nu r f -> Exists P (NuF r f)
 runNu (Nu r) = Exists (NuF r)
 
 
-newtype Mu r f = Mu { getMu :: forall x . Neg x => Fun r (Down (Fun r (f x) x)) x }
+newtype Mu r f = Mu { getMu :: forall x . Neg x => (Down ((f x --> x) r) --> x) r }
 
 instance Polarized N (Mu r f) where
 
-newtype MuF r f a = MuF { getMuF :: Fun r (Down (Fun r (f a) a)) a }
+newtype MuF r f a = MuF { getMuF :: (Down ((f a --> a) r) --> a) r }
 
 instance (Pos (f a), Neg a) => Polarized N (MuF r f a) where
 
@@ -686,7 +686,7 @@ class (Core s, Structural s, Implicative s, Quantifying s) => Recursive s where
 
   muL
     :: (ForAllC Neg Pos f, Neg a)
-    => s r i (o |> Fun r (f a) a)   ->   s r (a <| i) o
+    => s r i (o |> (f a --> a) r)   ->   s r (a <| i) o
     ---------------------------------------------------
     -> s r (Mu r f <| i) o
   muL' :: ForAllC Neg Pos f => s r (Mu r f <| i) o -> s r (ForAll N (MuF r f) <| i) o
