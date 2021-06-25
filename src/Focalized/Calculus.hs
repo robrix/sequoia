@@ -684,7 +684,7 @@ instance Recursive Seq where
   nuL = mapL runNu
   nuR = mapR nu
 
-  muL f k = wkL (downR f) >>> sequent (\ k (f :<| Mu r :<| _) -> appFun r f (k . inr)) >>> wkL' (wkL' k)
+  muL f k = wkL (downR f) >>> exL (mapL getMu (funL init (wkL' k)))
   muR = mapR mu
 
 
