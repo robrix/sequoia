@@ -23,6 +23,8 @@ module Focalized.Calculus
   -- * Core rules
 , Core(..)
 , Structural(..)
+  -- * Control
+, Control(..)
   -- * Negating
 , Not(..)
 , Negate(..)
@@ -63,8 +65,6 @@ module Focalized.Calculus
 , refoldMu
 , refold
 , Recursive(..)
-  -- * Control
-, Control(..)
   -- * Polarity
 , N(..)
 , P(..)
@@ -315,6 +315,30 @@ instance Structural Seq where
 
   popR f = sequent $ \ k -> runSeq (f (K (k . inr))) (k . inl)
   pushR s a = sequent $ \ k -> runSeq s (k |> runK a)
+
+
+-- Control
+
+class (Core s, Structural s) => Control s where
+  reset :: s o i o -> s r i o
+  shift :: s r (K r o <| i) r -> s r i o
+
+  kL :: s r i (o |> a) -> s r (K r a <| i) o
+  kL = popL . pushR
+
+  kL' :: s r (K r a <| i) o -> s r i (o |> a)
+  kL' s = kR init >>> wkR s
+
+  kR :: s r (a <| i) o -> s r i (o |> K r a)
+  kR s = lowerL (pushL init) (wkR s)
+
+  kR' :: s r i (o |> K r a) -> s r (a <| i) o
+  kR' s = wkL s >>> kL init
+
+
+instance Control Seq where
+  reset s = sequent (. evalSeq s)
+  shift p = sequent (fmap (evalSeq p) . (<|) . K)
 
 
 -- Negating
@@ -699,30 +723,6 @@ instance Recursive Seq where
 
   muL f k = wkL (downR f) >>> exL (mapL getMu (funL init (wkL' k)))
   muR = mapR mu
-
-
--- Control
-
-class (Core s, Structural s) => Control s where
-  reset :: s o i o -> s r i o
-  shift :: s r (K r o <| i) r -> s r i o
-
-  kL :: s r i (o |> a) -> s r (K r a <| i) o
-  kL = popL . pushR
-
-  kL' :: s r (K r a <| i) o -> s r i (o |> a)
-  kL' s = kR init >>> wkR s
-
-  kR :: s r (a <| i) o -> s r i (o |> K r a)
-  kR s = lowerL (pushL init) (wkR s)
-
-  kR' :: s r i (o |> K r a) -> s r (a <| i) o
-  kR' s = wkL s >>> kL init
-
-
-instance Control Seq where
-  reset s = sequent (. evalSeq s)
-  shift p = sequent (fmap (evalSeq p) . (<|) . K)
 
 
 -- Polarity
