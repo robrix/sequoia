@@ -454,6 +454,7 @@ instance Conj (&) where
 
 
 class (Core s, Structural s, Negating s) => AdditiveConj s where
+  {-# MINIMAL (withL1, withL2 | withLSum), withR #-}
   withL1 :: (Neg a, Neg b) => s r (a <| i) o -> s r (a & b <| i) o
   default withL1 :: (Neg a, Neg b, AdditiveDisj s) => s r (a <| i) o -> s r (a & b <| i) o
   withL1 = withLSum . sumR1 . negateR
