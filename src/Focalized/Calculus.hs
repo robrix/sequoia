@@ -76,7 +76,6 @@ module Focalized.Calculus
 , Shifting(..)
   -- * Utilities
 , mapK
-, runK
 , K(..)
 , cps
 , liftCPS
@@ -311,10 +310,10 @@ class Core s => Structural s where
 instance Structural Seq where
   popL f = sequent $ \ k -> uncurryConj ((`runSeq` k) . f)
   pushL s a = sequent $ \ k -> runSeq s k . (a <|)
-  liftL ka = sequent $ \ _ -> getK ka . exl
+  liftL ka = sequent $ \ _ -> runK ka . exl
 
   popR f = sequent $ \ k -> runSeq (f (K (k . inr))) (k . inl)
-  pushR s a = sequent $ \ k -> runSeq s (k |> getK a)
+  pushR s a = sequent $ \ k -> runSeq s (k |> runK a)
   liftR = pure . inr
 
 
@@ -778,10 +777,7 @@ instance Shifting Seq where
 mapK :: (a' -> a) -> K r a -> K r a'
 mapK f (K g) = K (g . f)
 
-runK :: a -> K r a -> r
-runK = flip getK
-
-newtype K r a = K { getK :: a -> r }
+newtype K r a = K { runK :: a -> r }
 
 instance Cat.Category K where
   id = K id
