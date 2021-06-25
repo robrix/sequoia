@@ -194,7 +194,7 @@ data Δ
 
 -- Core rules
 
-class (forall r i . Functor (s r i)) => Core s where
+class Core s where
   (>>>) :: s r i (o |> a) -> s r (a <| i) o -> s r i o
 
   init :: s r (a <| i) (o |> a)
