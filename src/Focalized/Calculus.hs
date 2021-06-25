@@ -395,6 +395,19 @@ class (Core s, Structural s, Control s) => NegatingN s where
   shiftP :: Pos a => s r (Not r a <| i) (o |> r) -> s r i (o |> a)
   shiftP = shift . notLK'
 
+  dneNL :: Neg a => s r (a <| i) o -> s r (Not r (Negate r a) <| i) o
+  default dneNL :: (NegatingP s, Neg a) => s r (a <| i) o -> s r (Not r (Negate r a) <| i) o
+  dneNL = notL . negateR
+  dneNLK :: Neg a => s r (K r (K r a) <| i) o -> s r (Not r (Negate r a) <| i) o
+  default dneNLK :: s r (K r (K r a) <| i) o -> s r (Not r (Negate r a) <| i) o
+  dneNLK = mapL (mapK Negate . getNot)
+  dneNR :: Neg a => s r i (o |> a) -> s r i (o |> Not r (Negate r a))
+  default dneNR :: (NegatingP s, Neg a) => s r i (o |> a) -> s r i (o |> Not r (Negate r a))
+  dneNR = notR . negateL
+  dneNRK :: Neg a => s r i (o |> K r (K r a)) -> s r i (o |> Not r (Negate r a))
+  default dneNRK :: s r i (o |> K r (K r a)) -> s r i (o |> Not r (Negate r a))
+  dneNRK = mapR (Not . mapK getNegate)
+
 instance NegatingN Seq where
 
 
@@ -422,6 +435,19 @@ class (Core s, Structural s, Control s) => NegatingP s where
   negateRK' = mapR getNegate
   shiftN :: Neg a => s r (Negate r a <| i) (o |> r) -> s r i (o |> a)
   shiftN = shift . negateLK'
+
+  dnePL :: Pos a => s r (a <| i) o -> s r (Negate r (Not r a) <| i) o
+  default dnePL :: (NegatingN s, Pos a) => s r (a <| i) o -> s r (Negate r (Not r a) <| i) o
+  dnePL = negateL . notR
+  dnePLK :: Pos a => s r (K r (K r a) <| i) o -> s r (Negate r (Not r a) <| i) o
+  default dnePLK :: s r (K r (K r a) <| i) o -> s r (Negate r (Not r a) <| i) o
+  dnePLK = mapL (mapK Not . getNegate)
+  dnePR :: Pos a => s r i (o |> a) -> s r i (o |> Negate r (Not r a))
+  default dnePR :: (NegatingN s, Pos a) => s r i (o |> a) -> s r i (o |> Negate r (Not r a))
+  dnePR = negateR . notL
+  dnePRK :: Pos a => s r i (o |> K r (K r a)) -> s r i (o |> Negate r (Not r a))
+  default dnePRK :: s r i (o |> K r (K r a)) -> s r i (o |> Negate r (Not r a))
+  dnePRK = mapR (Negate . mapK getNot)
 
 instance NegatingP Seq where
 
