@@ -715,6 +715,8 @@ instance Polarized N (ForAll p f)
 
 class (Core s, Structural s, Negating s, Shifting s) => Universal s where
   forAllL :: (Polarized n x, Neg (f x)) => s r (f x <| i) o -> s r (ForAll n f <| i) o
+  default forAllL :: (Polarized n x, ForAllC (Polarized n) Neg f, Existential s) => s r (f x <| i) o -> s r (ForAll n f <| i) o
+  forAllL p = forAllLExists (existsR (mapR C (negateR p)))
   forAllLExists :: ForAllC (Polarized n) Neg f => s r i (o |> Exists n (Negate r · f)) -> s r (ForAll n f <| i) o
   default forAllLExists :: (ForAllC (Polarized n) Neg f, Existential s) => s r i (o |> Exists n (Negate r · f)) -> s r (ForAll n f <| i) o
   forAllLExists p = wkL p >>> existsL (mapL getC (negateL (forAllL init)))
