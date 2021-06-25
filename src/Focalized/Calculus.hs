@@ -374,6 +374,12 @@ newtype Not    r a = Not    { getNot    :: K r a }
 
 instance Pos a => Polarized N (Not r a) where
 
+notNegate :: K r (K r a) -> Not r (Negate r a)
+notNegate = Not . mapK getNegate
+
+getNotNegate :: Not r (Negate r a) -> K r (K r a)
+getNotNegate = mapK Negate . getNot
+
 
 class (Core s, Structural s, Control s) => NegatingN s where
   notL :: Pos a => s r i (o |> a) -> s r (Not r a <| i) o
@@ -400,13 +406,13 @@ class (Core s, Structural s, Control s) => NegatingN s where
   dneNL = notL . negateR
   dneNLK :: Neg a => s r (K r (K r a) <| i) o -> s r (Not r (Negate r a) <| i) o
   default dneNLK :: s r (K r (K r a) <| i) o -> s r (Not r (Negate r a) <| i) o
-  dneNLK = mapL (mapK Negate . getNot)
+  dneNLK = mapL getNotNegate
   dneNR :: Neg a => s r i (o |> a) -> s r i (o |> Not r (Negate r a))
   default dneNR :: (NegatingP s, Neg a) => s r i (o |> a) -> s r i (o |> Not r (Negate r a))
   dneNR = notR . negateL
   dneNRK :: Neg a => s r i (o |> K r (K r a)) -> s r i (o |> Not r (Negate r a))
   default dneNRK :: s r i (o |> K r (K r a)) -> s r i (o |> Not r (Negate r a))
-  dneNRK = mapR (Not . mapK getNegate)
+  dneNRK = mapR notNegate
 
 instance NegatingN Seq where
 
@@ -414,6 +420,12 @@ instance NegatingN Seq where
 newtype Negate r a = Negate { getNegate :: K r a }
 
 instance Neg a => Polarized P (Negate r a) where
+
+negateNot :: K r (K r a) -> Negate r (Not r a)
+negateNot = Negate . mapK getNot
+
+getNegateNot :: Negate r (Not r a) -> K r (K r a)
+getNegateNot = mapK Not . getNegate
 
 
 class (Core s, Structural s, Control s) => NegatingP s where
@@ -441,13 +453,13 @@ class (Core s, Structural s, Control s) => NegatingP s where
   dnePL = negateL . notR
   dnePLK :: Pos a => s r (K r (K r a) <| i) o -> s r (Negate r (Not r a) <| i) o
   default dnePLK :: s r (K r (K r a) <| i) o -> s r (Negate r (Not r a) <| i) o
-  dnePLK = mapL (mapK Not . getNegate)
+  dnePLK = mapL getNegateNot
   dnePR :: Pos a => s r i (o |> a) -> s r i (o |> Negate r (Not r a))
   default dnePR :: (NegatingN s, Pos a) => s r i (o |> a) -> s r i (o |> Negate r (Not r a))
   dnePR = negateR . notL
   dnePRK :: Pos a => s r i (o |> K r (K r a)) -> s r i (o |> Negate r (Not r a))
   default dnePRK :: s r i (o |> K r (K r a)) -> s r i (o |> Negate r (Not r a))
-  dnePRK = mapR (Negate . mapK getNot)
+  dnePRK = mapR negateNot
 
 instance NegatingP Seq where
 
