@@ -86,9 +86,11 @@ module Focalized.Calculus
 , Polarized
 , Neg
 , Pos
+, Shifting
 , Up(..)
+, ShiftingN(..)
 , Down(..)
-, Shifting(..)
+, ShiftingP(..)
   -- * Utilities
 , mapK
 , K(..)
@@ -843,11 +845,27 @@ type Neg = Polarized N
 type Pos = Polarized P
 
 
+type Shifting s = (ShiftingN s, ShiftingP s)
+
+
 newtype Up   a = Up   { getUp   :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
   deriving (Applicative, Monad) via Identity
 
 instance Pos a => Polarized N (Up a) where
+
+
+class (Core s, Structural s) => ShiftingN s where
+  upL :: Pos a => s r (a <| i) o -> s r (Up a <| i) o
+  upL' :: Pos a => s r (Up a <| i) o -> s r (a <| i) o
+  upL' p = upR init >>> wkL' p
+  upR :: Pos a => s r i (o |> a) -> s r i (o |> Up a)
+  upR' :: Pos a => s r i (o |> Up a) -> s r i (o |> a)
+  upR' p = wkR' p >>> upL init
+
+instance ShiftingN Seq where
+  upL   = mapL getUp
+  upR   = mapR Up
 
 
 newtype Down a = Down { getDown :: a }
@@ -857,14 +875,7 @@ newtype Down a = Down { getDown :: a }
 instance Neg a => Polarized P (Down a) where
 
 
-class (Core s, Structural s) => Shifting s where
-  upL :: Pos a => s r (a <| i) o -> s r (Up a <| i) o
-  upL' :: Pos a => s r (Up a <| i) o -> s r (a <| i) o
-  upL' p = upR init >>> wkL' p
-  upR :: Pos a => s r i (o |> a) -> s r i (o |> Up a)
-  upR' :: Pos a => s r i (o |> Up a) -> s r i (o |> a)
-  upR' p = wkR' p >>> upL init
-
+class (Core s, Structural s) => ShiftingP s where
   downL :: Neg a => s r (a <| i) o -> s r (Down a <| i) o
   downL' :: Neg a => s r (Down a <| i) o -> s r (a <| i) o
   downL' p = downR init >>> wkL' p
@@ -872,11 +883,7 @@ class (Core s, Structural s) => Shifting s where
   downR' :: Neg a => s r i (o |> Down a) -> s r i (o |> a)
   downR' p = wkR' p >>> downL init
 
-
-instance Shifting Seq where
-  upL   = mapL getUp
-  upR   = mapR Up
-
+instance ShiftingP Seq where
   downL = mapL getDown
   downR = mapR Down
 
