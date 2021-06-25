@@ -880,9 +880,11 @@ newtype MAlg r f x = MAlg { getMAlg :: forall y . Pos y => (Down ((y --> x) r) -
 instance (Pos (f x), Neg x) => Polarized N (MAlg r f x)
 
 
-class Iterative s where
+class (Core s, Structural s) => Iterative s where
   iterL :: (Pos (f a), Neg a) => s r i (o |> MAlg r f a) -> s r (a <| i) o -> s r (Iter r f <| i) o
   iterR :: ForAllC Neg Pos f => (forall a . Neg a => s r (MAlg r f a <| i) (o |> a)) -> s r i (o |> Iter r f)
+  iterR' :: (ForAllC Neg Pos f, Neg a) => s r i (o |> Iter r f) -> s r (MAlg r f a <| i) (o |> a)
+  iterR' s = wkR' (wkL s) >>> iterL init init
 
 instance Iterative Seq where
   iterL alg k = wkL alg >>> exL (mapL getIter (funL (downR init) (wkL' k)))
