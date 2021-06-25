@@ -22,6 +22,7 @@ import           Control.Arrow
 import qualified Control.Category as Cat
 import           Control.Monad (ap)
 import           Control.Monad.Trans.Class
+import           Data.Functor.Contravariant
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
 import           Focalized.Connective
@@ -36,6 +37,9 @@ newtype K r a = K { runK :: a -> r }
 instance Cat.Category K where
   id = K id
   K f . K g = K (g . f)
+
+instance Contravariant (K r) where
+  contramap f = K . (. f) . runK
 
 
 -- CPS
