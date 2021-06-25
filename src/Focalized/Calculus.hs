@@ -656,8 +656,8 @@ mu r = Mu (getMuF (runForAll r))
 foldMu :: Neg a => Down (Fun r (f a) a) -> CPS r (Mu r f) a
 foldMu alg = liftCPS $ \ (Mu f) -> appFun f alg
 
-unfoldMu :: Traversable f => (a -> f a) -> CPS r a (Mu r f)
-unfoldMu coalg = cps $ \ a -> Mu $ liftFun' $ \ (Down (Fun alg)) -> appCPS (refoldCPS alg (cps coalg)) a
+unfoldMu :: Traversable f => CPS r a (f a) -> CPS r a (Mu r f)
+unfoldMu coalg = cps $ \ a -> Mu $ liftFun' $ \ (Down (Fun alg)) -> appCPS (refoldCPS alg coalg) a
 
 
 refold :: Functor f => (f b -> b) -> (a -> f a) -> a -> b
