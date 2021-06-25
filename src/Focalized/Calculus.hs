@@ -109,11 +109,11 @@ import           Prelude hiding (init)
 
 -- Sequents
 
-runSeq :: (o -> r) -> i -> Seq r i o -> r
-runSeq k c s = runCPS (getSeq s) k c
+runSeq :: Seq r i o -> (o -> r) -> i -> r
+runSeq = runCPS . getSeq
 
 evalSeq :: i -> Seq o i o -> o
-evalSeq = runSeq id
+evalSeq = flip (`runSeq` id)
 
 sequent :: ((o -> r) -> (i -> r)) -> Seq r i o
 sequent = Seq . CPS
@@ -126,13 +126,13 @@ liftLR = Seq . dimap exl inr
 
 
 lowerLR :: (CPS r a b -> Seq r i o) -> Seq r (a <| i) (o |> b) -> Seq r i o
-lowerLR f p = sequent $ \ k c -> runSeq k c (f (CPS (\ kb a -> runSeq (k |> kb) (a <| c) p)))
+lowerLR f p = sequent $ \ k i -> runSeq (f (CPS (\ kb a -> runSeq p (k |> kb) (a <| i)))) k i
 
 
 -- Effectful sequents
 
-runSeqT :: (o -> m r) -> i -> SeqT r i m o -> m r
-runSeqT k i = runSeq k i . getSeqT
+runSeqT :: SeqT r i m o -> (o -> m r) -> i -> m r
+runSeqT = runSeq . getSeqT
 
 newtype SeqT r i m o = SeqT { getSeqT :: Seq (m r) i o }
   deriving (Applicative, Functor, Monad)
@@ -308,12 +308,12 @@ class Core s => Structural s where
   exR = popR2 . flip . pushR2
 
 instance Structural Seq where
-  popL f = sequent $ \ k -> uncurryConj (flip (runSeq k) . f)
-  pushL s a = sequent $ \ k i -> runSeq k (a <| i) s
+  popL f = sequent $ \ k -> uncurryConj ((`runSeq` k) . f)
+  pushL s a = sequent $ \ k -> runSeq s k . (a <|)
   liftL ka = sequent $ \ _ -> getK ka . exl
 
-  popR f = sequent $ \ k c -> runSeq (k . inl) c (f (K (k . inr)))
-  pushR s a = sequent $ \ k i -> runSeq (k |> getK a) i s
+  popR f = sequent $ \ k -> runSeq (f (K (k . inr))) (k . inl)
+  pushR s a = sequent $ \ k -> runSeq s (k |> getK a)
   liftR = pure . inr
 
 
