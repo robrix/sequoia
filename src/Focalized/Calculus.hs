@@ -27,9 +27,11 @@ module Focalized.Calculus
   -- * Control
 , Control(..)
   -- * Negating
+, Negating
 , Not(..)
+, NegatingN(..)
 , Negate(..)
-, Negating(..)
+, NegatingP(..)
   -- * Additive
 , Additive
 , Top(..)
@@ -348,17 +350,15 @@ instance Control Seq where
 
 -- Negating
 
+type Negating s = (NegatingN s, NegatingP s)
+
+
 newtype Not    r a = Not    { getNot    :: K r a }
 
 instance Pos a => Polarized N (Not r a) where
 
 
-newtype Negate r a = Negate { getNegate :: K r a }
-
-instance Neg a => Polarized P (Negate r a) where
-
-
-class (Core s, Structural s, Control s) => Negating s where
+class (Core s, Structural s, Control s) => NegatingN s where
   notL :: Pos a => s r i (o |> a) -> s r (Not r a <| i) o
   notL = notLK . kL
   notLK :: Pos a => s r (K r a <| i) o -> s r (Not r a <| i) o
@@ -378,6 +378,15 @@ class (Core s, Structural s, Control s) => Negating s where
   shiftP :: Pos a => s r (Not r a <| i) (o |> r) -> s r i (o |> a)
   shiftP = shift . notLK'
 
+instance NegatingN Seq where
+
+
+newtype Negate r a = Negate { getNegate :: K r a }
+
+instance Neg a => Polarized P (Negate r a) where
+
+
+class (Core s, Structural s, Control s) => NegatingP s where
   negateL :: Neg a => s r i (o |> a) -> s r (Negate r a <| i) o
   negateL = negateLK . kL
   negateLK :: Neg a => s r (K r a <| i) o -> s r (Negate r a <| i) o
@@ -397,8 +406,7 @@ class (Core s, Structural s, Control s) => Negating s where
   shiftN :: Neg a => s r (Negate r a <| i) (o |> r) -> s r i (o |> a)
   shiftN = shift . negateLK'
 
-
-instance Negating Seq where
+instance NegatingP Seq where
 
 
 -- Additive
