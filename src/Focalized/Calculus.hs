@@ -87,6 +87,7 @@ module Focalized.Calculus
 , traversing
 , resetCPS
 , shiftCPS
+, curryCPS
 , CPS(..)
 , CPST(..)
 , Conj(..)
@@ -919,6 +920,9 @@ resetCPS c = CPS (. evalCPS c)
 
 shiftCPS :: ((o -> r) -> CPS r i r) -> CPS r i o
 shiftCPS f = CPS (evalCPS . f)
+
+curryCPS :: CPS r (a, b) c -> CPS r a (CPS r b c)
+curryCPS c = CPS (\ k -> k . (`lmap` c) . (,))
 
 newtype CPS r a b = CPS { getCPS :: (b -> r) -> (a -> r) }
 
