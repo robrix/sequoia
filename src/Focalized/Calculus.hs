@@ -700,13 +700,13 @@ instance Recursive Seq where
 -- Control
 
 class (Core s, Structural s) => Control s where
-  resetR :: s o i o -> s r i o
-  shiftR :: s r (K r o <| i) r -> s r i o
+  reset :: s o i o -> s r i o
+  shift :: s r (K r o <| i) r -> s r i o
 
 
 instance Control Seq where
-  resetR s = sequent (. evalSeq s)
-  shiftR p = sequent (fmap (evalSeq p) . (<|) . K)
+  reset s = sequent (. evalSeq s)
+  shift p = sequent (fmap (evalSeq p) . (<|) . K)
 
 
 -- Polarity
