@@ -28,7 +28,7 @@ module Focalized.Calculus
   -- * Negating
 , Not(..)
 , Negate(..)
-, Negative(..)
+, Negating(..)
   -- * Additive
 , Top(..)
 , Zero
@@ -353,7 +353,7 @@ newtype Negate r a = Negate { getNegate :: K r a }
 instance Neg a => Polarized P (Negate r a) where
 
 
-class (Core s, Structural s, Control s) => Negative s where
+class (Core s, Structural s, Control s) => Negating s where
   notL :: Pos a => s r i (o |> a) -> s r (Not r a <| i) o
   notL = mapL getNot . kL
   notL' :: Pos a => s r (Not r a <| i) o -> s r i (o |> a)
@@ -372,7 +372,7 @@ class (Core s, Structural s, Control s) => Negative s where
   negateR' :: Neg a => s r i (o |> Negate r a) -> s r (a <| i) o
   negateR' p = wkL p >>> negateL init
 
-instance Negative Seq where
+instance Negating Seq where
 
 
 -- Additive
@@ -427,7 +427,7 @@ instance Disj (⊕) where
     InR r -> ifr r
 
 
-class (Core s, Structural s, Negative s) => Additive s where
+class (Core s, Structural s, Negating s) => Additive s where
   zeroL :: s r (Zero <| i) o
   zeroL = popL absurdP
 
@@ -516,7 +516,7 @@ instance Conj (⊗) where
   exr (_ :⊗ r) = r
 
 
-class (Core s, Structural s, Negative s) => Multiplicative s where
+class (Core s, Structural s, Negating s) => Multiplicative s where
   botL :: s r (Bot <| i) o
   botL = liftL (K absurdN)
   botR :: s r i o -> s r i (o |> Bot)
@@ -584,7 +584,7 @@ instance (Pos a, Neg b) => Polarized P (Sub r a b) where
 type (a --< b) r = Sub r a b
 
 
-class (Core s, Structural s, Negative s) => Implicative s where
+class (Core s, Structural s, Negating s) => Implicative s where
   funL :: (Pos a, Neg b) => s r i (o |> a) -> s r (b <| i) o -> s r ((a --> b) r <| i) o
   funL pa pb = funLSub (subR pa pb)
   funLSub :: (Pos a, Neg b) => s r i (o |> (a --< b) r) -> s r ((a --> b) r <| i) o
@@ -632,7 +632,7 @@ runExists f (Exists r) = f r
 type ForAllC cx cf f = (forall x . cx x => cf (f x)) :: Constraint
 
 
-class (Core s, Structural s, Negative s, Shifting s) => Quantifying s where
+class (Core s, Structural s, Negating s, Shifting s) => Quantifying s where
   forAllL :: (Polarized n x, Neg (f x)) => s r (f x <| i) o -> s r (ForAll n f <| i) o
   forAllLExists :: ForAllC (Polarized n) Neg f => s r i (o |> Exists n (Negate r · f)) -> s r (ForAll n f <| i) o
   forAllLExists p = wkL p >>> existsL (mapL getC (negateL (forAllL init)))
