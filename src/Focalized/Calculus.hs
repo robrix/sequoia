@@ -741,7 +741,7 @@ instance Polarized N (ForAll r p f)
 
 
 class (Core s, Structural s, Negating s, Shifting s) => Universal s where
-  {-# MINIMAL (forAllL | forAllLExists) #-}
+  {-# MINIMAL (forAllL | forAllLExists), forAllR #-}
   forAllL :: (Polarized n x, Neg (f x)) => s r (Not r (Negate r (f x)) <| i) o -> s r (ForAll r n f <| i) o
   default forAllL :: (Polarized n x, ForAllC (Polarized n) Neg f, Existential s) => s r (Not r (Negate r (f x)) <| i) o -> s r (ForAll r n f <| i) o
   forAllL p = forAllLExists (existsR (mapR C (notL' p)))
@@ -749,13 +749,13 @@ class (Core s, Structural s, Negating s, Shifting s) => Universal s where
   default forAllLExists :: (ForAllC (Polarized n) Neg f, Existential s) => s r i (o |> Exists n (Negate r · f)) -> s r (ForAll r n f <| i) o
   forAllLExists p = wkL p >>> existsL (mapL getC (negateL (forAllL (notL (negateR init)))))
   -- FIXME: the correct signature should be s r i (o |> (forall x . Polarized n x => f x)) -> s r i (o |> ForAll f), but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
-  -- forAllR :: ForAllC (Polarized n) Neg f => (forall x . Polarized n x => s r i (o |> f x)) -> s r i (o |> ForAll n f)
+  forAllR :: ForAllC (Polarized n) Neg f => (forall x . Polarized n x => s r i (o |> f x)) -> s r i (o |> ForAll r n f)
   forAllR' :: ForAllC (Polarized n) Neg f => s r i (o |> ForAll r n f) -> (forall x . Polarized n x => s r i (o |> f x))
   forAllR' p = wkR' p >>> forAllL (dneNL init)
 
 instance Universal Seq where
   forAllL p = mapL (notNegate . runForAll) p
-  -- forAllR p = mapR ForAll p
+  forAllR p = sequent $ \ k a -> k (inr (ForAll (K (\ k' -> runSeq p (k . inl |> runK k') a))))
 
 
 data Exists p f = forall x . Polarized p x => Exists (f x)
