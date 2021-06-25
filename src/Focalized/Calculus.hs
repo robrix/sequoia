@@ -392,6 +392,7 @@ class (Core s, Structural s, Control s) => Negating s where
   shiftN :: Neg a => s r (Negate r a <| i) (o |> r) -> s r i (o |> a)
   shiftN = shift . negateLK'
 
+
 instance Negating Seq where
 
 
