@@ -79,7 +79,6 @@ module Focalized.Calculus
 , K(..)
 , cps
 , liftCPS
-, runCPS
 , appCPS
 , pappCPS
 , execCPS
@@ -111,7 +110,7 @@ import           Prelude hiding (init)
 -- Sequents
 
 runSeq :: (o -> r) -> i -> Seq r i o -> r
-runSeq k c = runCPS k c . getSeq
+runSeq k c s = runCPS (getSeq s) k c
 
 evalSeq :: i -> Seq o i o -> o
 evalSeq = runSeq id
@@ -785,11 +784,8 @@ cps = CPS . flip (.)
 liftCPS :: (a -> (b -> r) -> r) -> CPS r a b
 liftCPS = CPS . flip
 
-runCPS :: (b -> r) -> a -> CPS r a b -> r
-runCPS k a c = getCPS c k a
-
 appCPS :: CPS r a b -> a -> (b -> r) -> r
-appCPS c a k = getCPS c k a
+appCPS c a k = runCPS c k a
 
 pappCPS :: CPS r a b -> a -> CPS r () b
 pappCPS c a = c Cat.<<< pure a
@@ -798,7 +794,7 @@ execCPS :: CPS r () a -> (a -> r) -> r
 execCPS c = appCPS c ()
 
 evalCPS :: CPS r i r -> i -> r
-evalCPS c = getCPS c id
+evalCPS c = runCPS c id
 
 refoldCPS :: Traversable f => CPS r (f b) b -> CPS r a (f a) -> CPS r a b
 refoldCPS f g = go where go = f Cat.<<< traverse' go Cat.<<< g
@@ -813,9 +809,9 @@ curryCPS :: CPS r (a, b) c -> CPS r a (CPS r b c)
 curryCPS c = CPS (\ k -> k . (`lmap` c) . (,))
 
 uncurryCPS :: CPS r a (CPS r b c) -> CPS r (a, b) c
-uncurryCPS c = CPS (\ k -> uncurry (flip (getCPS c . runCPS k)))
+uncurryCPS c = CPS (\ k -> uncurry (flip (runCPS c . flip (`runCPS` k))))
 
-newtype CPS r a b = CPS { getCPS :: (b -> r) -> (a -> r) }
+newtype CPS r a b = CPS { runCPS :: (b -> r) -> (a -> r) }
 
 instance Cat.Category (CPS r) where
   id = CPS id
@@ -829,7 +825,7 @@ instance Applicative (CPS r a) where
   (<*>) = ap
 
 instance Monad (CPS r a) where
-  r >>= f = CPS $ \ k a -> runCPS (runCPS k a . f) a r
+  r >>= f = CPS $ \ k a -> runCPS r (\ a' -> runCPS (f a') k a) a
 
 instance Arrow (CPS r) where
   arr = cps
@@ -839,10 +835,10 @@ instance Arrow (CPS r) where
   f &&& g = CPS (\ k a -> appCPS f a (appCPS g a . fmap k . (,)))
 
 instance ArrowChoice (CPS r) where
-  left  f = CPS (\ k -> exlr (getCPS f (k . inl)) (k . inr))
-  right g = CPS (\ k -> exlr (k . inl) (getCPS g (k . inr)))
-  f +++ g = CPS (\ k -> exlr (getCPS f (k . inl)) (getCPS g (k . inr)))
-  f ||| g = CPS (exlr <$> getCPS f <*> getCPS g)
+  left  f = CPS (\ k -> exlr (runCPS f (k . inl)) (k . inr))
+  right g = CPS (\ k -> exlr (k . inl) (runCPS g (k . inr)))
+  f +++ g = CPS (\ k -> exlr (runCPS f (k . inl)) (runCPS g (k . inr)))
+  f ||| g = CPS (exlr <$> runCPS f <*> runCPS g)
 
 instance ArrowApply (CPS r) where
   app = CPS (flip (uncurry appCPS))
