@@ -684,6 +684,7 @@ type (a --< b) r = Sub r a b
 
 
 class (Core s, Structural s, Negating s) => Coimplicative s where
+  {-# MINIMAL (subL | subLFun), subR #-}
   subL :: (Pos a, Neg b) => s r (a <| i) (o |> b) -> s r ((a --< b) r <| i) o
   default subL :: (Pos a, Neg b, Implicative s) => s r (a <| i) (o |> b) -> s r ((a --< b) r <| i) o
   subL = subLFun . funR
