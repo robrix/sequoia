@@ -508,7 +508,6 @@ class (Core s, Structural s, Negating s) => AdditiveDisj s where
   sumR1 :: (Pos a, Pos b) => s r i (o |> a) -> s r i (o |> a ⊕ b)
   sumR2 :: (Pos a, Pos b) => s r i (o |> b) -> s r i (o |> a ⊕ b)
 
-
 instance AdditiveDisj Seq where
   sumL a b = popL (exlr (pushL a) (pushL b))
   sumR1 = mapR inl
