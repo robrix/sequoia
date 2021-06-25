@@ -88,6 +88,7 @@ module Focalized.Calculus
 , resetCPS
 , shiftCPS
 , curryCPS
+, uncurryCPS
 , CPS(..)
 , CPST(..)
 , Conj(..)
@@ -923,6 +924,9 @@ shiftCPS f = CPS (evalCPS . f)
 
 curryCPS :: CPS r (a, b) c -> CPS r a (CPS r b c)
 curryCPS c = CPS (\ k -> k . (`lmap` c) . (,))
+
+uncurryCPS :: CPS r a (CPS r b c) -> CPS r (a, b) c
+uncurryCPS c = CPS (\ k -> uncurry (flip (getCPS c . runCPS k)))
 
 newtype CPS r a b = CPS { getCPS :: (b -> r) -> (a -> r) }
 
