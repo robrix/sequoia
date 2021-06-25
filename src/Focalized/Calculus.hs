@@ -355,20 +355,28 @@ instance Neg a => Polarized P (Negate r a) where
 
 class (Core s, Structural s, Control s) => Negating s where
   notL :: Pos a => s r i (o |> a) -> s r (Not r a <| i) o
-  notL = mapL getNot . kL
+  notL = notLK . kL
+  notLK :: Pos a => s r (K r a <| i) o -> s r (Not r a <| i) o
+  notLK = mapL getNot
   notL' :: Pos a => s r (Not r a <| i) o -> s r i (o |> a)
   notL' p = notR init >>> wkR p
   notR :: Pos a => s r (a <| i) o -> s r i (o |> Not r a)
-  notR = mapR Not . kR
+  notR = notRK . kR
+  notRK :: Pos a => s r i (o |> K r a) -> s r i (o |> Not r a)
+  notRK = mapR Not
   notR' :: Pos a => s r i (o |> Not r a) -> s r (a <| i) o
   notR' p = wkL p >>> notL init
 
   negateL :: Neg a => s r i (o |> a) -> s r (Negate r a <| i) o
-  negateL = mapL getNegate . kL
+  negateL = negateLK . kL
+  negateLK :: Neg a => s r (K r a <| i) o -> s r (Negate r a <| i) o
+  negateLK = mapL getNegate
   negateL' :: Neg a => s r (Negate r a <| i) o -> s r i (o |> a)
   negateL' p = negateR init >>> wkR p
   negateR :: Neg a => s r (a <| i) o -> s r i (o |> Negate r a)
-  negateR = mapR Negate . kR
+  negateR = negateRK . kR
+  negateRK :: Neg a => s r i (o |> K r a) -> s r i (o |> Negate r a)
+  negateRK = mapR Negate
   negateR' :: Neg a => s r i (o |> Negate r a) -> s r (a <| i) o
   negateR' p = wkL p >>> negateL init
 
