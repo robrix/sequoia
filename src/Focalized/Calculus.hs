@@ -746,8 +746,8 @@ class (Core s, Structural s, Negating s, Shifting s) => Universal s where
   forAllL :: (Polarized n x, Neg (f x)) => s r (Not r (Negate r (f x)) <| i) o -> s r (ForAll r n f <| i) o
   default forAllL :: (Polarized n x, ForAllC (Polarized n) Neg f, Existential s) => s r (Not r (Negate r (f x)) <| i) o -> s r (ForAll r n f <| i) o
   forAllL p = forAllLExists (existsR (mapR C (notL' p)))
-  forAllLExists :: ForAllC (Polarized n) Neg f => s r i (o |> Exists n (Negate r · f)) -> s r (ForAll r n f <| i) o
-  default forAllLExists :: (ForAllC (Polarized n) Neg f, Existential s) => s r i (o |> Exists n (Negate r · f)) -> s r (ForAll r n f <| i) o
+  forAllLExists :: ForAllC (Polarized n) Neg f => s r i (o |> Exists r n (Negate r · f)) -> s r (ForAll r n f <| i) o
+  default forAllLExists :: (ForAllC (Polarized n) Neg f, Existential s) => s r i (o |> Exists r n (Negate r · f)) -> s r (ForAll r n f <| i) o
   forAllLExists p = wkL p >>> existsL (mapL getC (negateL (forAllL (notL (negateR init)))))
   -- FIXME: the correct signature should be s r i (o |> (forall x . Polarized n x => f x)) -> s r i (o |> ForAll f), but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
   forAllR :: ForAllC (Polarized n) Neg f => (forall x . Polarized n x => s r i (o |> f x)) -> s r i (o |> ForAll r n f)
@@ -759,26 +759,26 @@ instance Universal Seq where
   forAllR p = sequent $ \ k a -> k (inr (ForAll (K (\ k' -> runSeq p (k . inl |> runK k') a))))
 
 
-data Exists p f = forall x . Polarized p x => Exists (f x)
+data Exists r p f = forall x . Polarized p x => Exists (f x)
 
-instance Polarized P (Exists p f)
+instance Polarized P (Exists r p f)
 
-runExists :: (forall x . Polarized p x => f x -> r) -> Exists p f -> r
+runExists :: (forall x . Polarized p x => f x -> a) -> Exists r p f -> a
 runExists f (Exists r) = f r
 
 
 class (Core s, Structural s, Negating s, Shifting s) => Existential s where
   {-# MINIMAL (existsL | existsLForAll), existsR #-}
   -- FIXME: the correct signature should be s r ((forall x . f x) <| i) o -> s r (Exists f <| i) o, but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
-  existsL :: (forall x . Polarized n x => s r (f x <| i) o) -> s r (Exists n f <| i) o
-  default existsL :: (ForAllC (Polarized n) Pos f, Universal s) => (forall x . Polarized n x => s r (f x <| i) o) -> s r (Exists n f <| i) o
+  existsL :: (forall x . Polarized n x => s r (f x <| i) o) -> s r (Exists r n f <| i) o
+  default existsL :: (ForAllC (Polarized n) Pos f, Universal s) => (forall x . Polarized n x => s r (f x <| i) o) -> s r (Exists r n f <| i) o
   existsL s = existsLForAll (forAllR (mapR C (notR s)))
-  existsL' :: ForAllC (Polarized n) Pos f => s r (Exists n f <| i) o -> (forall x . Polarized n x => s r (f x <| i) o)
+  existsL' :: ForAllC (Polarized n) Pos f => s r (Exists r n f <| i) o -> (forall x . Polarized n x => s r (f x <| i) o)
   existsL' p = existsR init >>> wkL' p
-  existsLForAll :: ForAllC (Polarized n) Pos f => s r i (o |> ForAll r n (Not r · f)) -> s r (Exists n f <| i) o
-  default existsLForAll :: (ForAllC (Polarized n) Pos f, Universal s) => s r i (o |> ForAll r n (Not r · f)) -> s r (Exists n f <| i) o
+  existsLForAll :: ForAllC (Polarized n) Pos f => s r i (o |> ForAll r n (Not r · f)) -> s r (Exists r n f <| i) o
+  default existsLForAll :: (ForAllC (Polarized n) Pos f, Universal s) => s r i (o |> ForAll r n (Not r · f)) -> s r (Exists r n f <| i) o
   existsLForAll p = wkL p >>> exL (existsL (exL (forAllL (notL (negateR (mapL getC (notL init)))))))
-  existsR :: (Polarized n x, Pos (f x)) => s r i (o |> f x) -> s r i (o |> Exists n f)
+  existsR :: (Polarized n x, Pos (f x)) => s r i (o |> f x) -> s r i (o |> Exists r n f)
 
 instance Existential Seq where
   existsL p = popL (runExists (pushL p))
@@ -795,17 +795,17 @@ newtype NuF r f a = NuF { getNuF :: Down ((a --> f a) r) ⊗ a }
 
 instance (Neg (f a), Pos a) => Polarized P (NuF r f a)
 
-nu :: Exists P (NuF r f) -> Nu r f
+nu :: Exists r P (NuF r f) -> Nu r f
 nu (Exists (NuF r)) = Nu r
 
-runNu :: Nu r f -> Exists P (NuF r f)
+runNu :: Nu r f -> Exists r P (NuF r f)
 runNu (Nu r) = Exists (NuF r)
 
 
 class (Core s, Structural s, Implicative s) => Corecursive s where
-  nuL :: ForAllC Pos Neg f => s r (Exists P (NuF r f) <| i) o -> s r (Nu r f <| i) o
-  nuR :: ForAllC Pos Neg f => s r i (o |> Exists P (NuF r f)) -> s r i (o |> Nu r f)
-  nuR' :: ForAllC Pos Neg f => s r i (o |> Nu r f) -> s r i (o |> Exists P (NuF r f))
+  nuL :: ForAllC Pos Neg f => s r (Exists r P (NuF r f) <| i) o -> s r (Nu r f <| i) o
+  nuR :: ForAllC Pos Neg f => s r i (o |> Exists r P (NuF r f)) -> s r i (o |> Nu r f)
+  nuR' :: ForAllC Pos Neg f => s r i (o |> Nu r f) -> s r i (o |> Exists r P (NuF r f))
   nuR' p = wkR' p >>> nuL init
 
 instance Corecursive Seq where
