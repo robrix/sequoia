@@ -673,23 +673,21 @@ class (Core s, Structural s, Implicative s, Quantifying s) => Recursive s where
   nuR' :: ForAllC Pos Neg f => s r i (o |> Nu r f) -> s r i (o |> Exists P (NuF r f))
   nuR' p = wkR' p >>> nuL init
 
-  muL :: ForAllC Neg Pos f => s r (ForAll N (MuF r f) <| i) o -> s r (Mu r f <| i) o
-  muL' :: ForAllC Neg Pos f => s r (Mu r f <| i) o -> s r (ForAll N (MuF r f) <| i) o
-  muL' p = muR init >>> wkL' p
-  muR :: ForAllC Neg Pos f => s r i (o |> ForAll N (MuF r f)) -> s r i (o |> Mu r f)
-  muLFold
+  muL
     :: (ForAllC Neg Pos f, Neg a)
     => s r i (o |> Fun r (f a) a)   ->   s r (a <| i) o
     ---------------------------------------------------
     -> s r (Mu r f <| i) o
-  muLFold f k = muL (forAllL (mapL getMuF (funL (downR (wkR' f)) init))) >>> wkL' k
+  muL' :: ForAllC Neg Pos f => s r (Mu r f <| i) o -> s r (ForAll N (MuF r f) <| i) o
+  muL' p = muR init >>> wkL' p
+  muR :: ForAllC Neg Pos f => s r i (o |> ForAll N (MuF r f)) -> s r i (o |> Mu r f)
 
 
 instance Recursive Seq where
   nuL = mapL runNu
   nuR = mapR nu
 
-  muL = mapL runMu
+  muL f k = mapL runMu (forAllL (mapL getMuF (funL (downR (wkR' f)) init))) >>> wkL' k
   muR = mapR mu
 
 
