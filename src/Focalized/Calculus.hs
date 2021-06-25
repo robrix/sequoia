@@ -768,17 +768,17 @@ refold f g = go where go = f . fmap go . g
 
 
 class (Core s, Structural s, Implicative s, Quantifying s) => Recursive s where
-  nuL :: ForAllC (Polarized P) Neg f => s r (Exists P (NuF r f) <| i) o -> s r (Nu r f <| i) o
-  nuR :: ForAllC (Polarized P) Neg f => s r i (o |> Exists P (NuF r f)) -> s r i (o |> Nu r f)
-  nuR' :: ForAllC (Polarized P) Neg f => s r i (o |> Nu r f) -> s r i (o |> Exists P (NuF r f))
+  nuL :: ForAllC Pos Neg f => s r (Exists P (NuF r f) <| i) o -> s r (Nu r f <| i) o
+  nuR :: ForAllC Pos Neg f => s r i (o |> Exists P (NuF r f)) -> s r i (o |> Nu r f)
+  nuR' :: ForAllC Pos Neg f => s r i (o |> Nu r f) -> s r i (o |> Exists P (NuF r f))
   nuR' p = wkR' p >>> nuL init
 
-  muL :: ForAllC (Polarized N) Pos f => s r (ForAll N (MuF r f) <| i) o -> s r (Mu r f <| i) o
-  muL' :: ForAllC (Polarized N) Pos f => s r (Mu r f <| i) o -> s r (ForAll N (MuF r f) <| i) o
+  muL :: ForAllC Neg Pos f => s r (ForAll N (MuF r f) <| i) o -> s r (Mu r f <| i) o
+  muL' :: ForAllC Neg Pos f => s r (Mu r f <| i) o -> s r (ForAll N (MuF r f) <| i) o
   muL' p = muR init >>> wkL' p
-  muR :: ForAllC (Polarized N) Pos f => s r i (o |> ForAll N (MuF r f)) -> s r i (o |> Mu r f)
+  muR :: ForAllC Neg Pos f => s r i (o |> ForAll N (MuF r f)) -> s r i (o |> Mu r f)
   muLFold
-    :: (ForAllC (Polarized N) Pos f, Neg a)
+    :: (ForAllC Neg Pos f, Neg a)
     => s r i (o |> Fun r (f a) a)   ->   s r (a <| i) o
     ---------------------------------------------------
     -> s r (Mu r f <| i) o
