@@ -353,18 +353,22 @@ newtype Negate r a = Negate { getNegate :: K r a }
 instance Neg a => Polarized P (Negate r a) where
 
 
-class (Core s, Structural s) => Negative s where
+class (Core s, Structural s, Control s) => Negative s where
   notL :: Pos a => s r i (o |> a) -> s r (Not r a <| i) o
+  notL = mapL getNot . kL
   notL' :: Pos a => s r (Not r a <| i) o -> s r i (o |> a)
   notL' p = notR init >>> wkR p
   notR :: Pos a => s r (a <| i) o -> s r i (o |> Not r a)
+  notR = mapR Not . kR
   notR' :: Pos a => s r i (o |> Not r a) -> s r (a <| i) o
   notR' p = wkL p >>> notL init
 
   negateL :: Neg a => s r i (o |> a) -> s r (Negate r a <| i) o
+  negateL = mapL getNegate . kL
   negateL' :: Neg a => s r (Negate r a <| i) o -> s r i (o |> a)
   negateL' p = negateR init >>> wkR p
   negateR :: Neg a => s r (a <| i) o -> s r i (o |> Negate r a)
+  negateR = mapR Negate . kR
   negateR' :: Neg a => s r i (o |> Negate r a) -> s r (a <| i) o
   negateR' p = wkL p >>> negateL init
 
