@@ -61,6 +61,8 @@ module Focalized.Calculus
 , refoldMu
 , refold
 , Recursive(..)
+  -- * Control
+, Control(..)
   -- * Polarity
 , N(..)
 , P(..)
@@ -690,6 +692,13 @@ instance Recursive Seq where
 
   muL f k = wkL (downR f) >>> exL (mapL getMu (funL init (wkL' k)))
   muR = mapR mu
+
+
+-- Control
+
+class (Core s, Structural s) => Control s where
+  resetR :: s o i o -> s r i o
+  shiftR :: s r (K r o <| i) r -> s r i o
 
 
 -- Polarity
