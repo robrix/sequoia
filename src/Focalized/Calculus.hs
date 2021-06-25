@@ -494,6 +494,7 @@ instance Disj (⊕) where
 
 
 class (Core s, Structural s, Negating s) => AdditiveDisj s where
+  {-# MINIMAL (sumL | sumLWith), sumR1, sumR2 #-}
   sumL :: (Pos a, Pos b) => s r (a <| i) o -> s r (b <| i) o -> s r (a ⊕ b <| i) o
   default sumL :: (Pos a, Pos b, AdditiveConj s) => s r (a <| i) o -> s r (b <| i) o -> s r (a ⊕ b <| i) o
   sumL p1 p2 = sumLWith (withR (notR p1) (notR p2))
