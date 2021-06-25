@@ -861,6 +861,8 @@ instance Recursive Seq where
 
 data Coiter r f = forall x . Pos x => Coiter { getCoiter :: Down (MCoalg r f x) ⊗ x }
 
+instance Polarized P (Coiter r f)
+
 newtype MCoalg r f x = MCoalg { getMCoalg :: forall y . Neg y => (Down ((x --> y) r) --> (x --> f y) r) r }
 
 instance (Neg (f x), Pos x) => Polarized N (MCoalg r f x)
@@ -874,6 +876,8 @@ instance Coiterative Seq where
 
 
 newtype Iter r f = Iter { getIter :: forall x . Neg x => (Down (MAlg r f x) --> x) r }
+
+instance Polarized N (Iter r f)
 
 newtype MAlg r f x = MAlg { getMAlg :: forall y . Pos y => (Down ((y --> x) r) --> (f y --> x) r) r }
 
