@@ -769,6 +769,8 @@ runExists f (Exists r) = f r
 class (Core s, Structural s, Negating s, Shifting s) => Existential s where
   -- FIXME: the correct signature should be s r ((forall x . f x) <| i) o -> s r (Exists f <| i) o, but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
   existsL :: (forall x . Polarized n x => s r (f x <| i) o) -> s r (Exists n f <| i) o
+  default existsL :: (ForAllC (Polarized n) Pos f, Universal s) => (forall x . Polarized n x => s r (f x <| i) o) -> s r (Exists n f <| i) o
+  existsL s = existsLForAll (forAllR (mapR C (notR s)))
   existsL' :: ForAllC (Polarized n) Pos f => s r (Exists n f <| i) o -> (forall x . Polarized n x => s r (f x <| i) o)
   existsL' p = existsR init >>> wkL' p
   existsLForAll :: ForAllC (Polarized n) Pos f => s r i (o |> ForAll r n (Not r · f)) -> s r (Exists n f <| i) o
