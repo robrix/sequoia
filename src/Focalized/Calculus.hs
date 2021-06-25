@@ -787,7 +787,7 @@ instance Existential Seq where
 
 -- Recursive
 
-data Nu r f = forall x . Polarized P x => Nu { getNu :: Down ((x --> f x) r) ⊗ x }
+data Nu r f = forall x . Pos x => Nu { getNu :: Down ((x --> f x) r) ⊗ x }
 
 instance Polarized N (Nu r f) where
 
