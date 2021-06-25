@@ -843,6 +843,9 @@ instance (Neg (f x), Pos x) => Polarized N (MCoalg r f x)
 class Coiterative s where
   coiterR :: (Neg (f a), Pos a) => s r i (o |> MCoalg r f a) -> s r i (o |> a) -> s r i (o |> Coiter r f)
 
+instance Coiterative Seq where
+  coiterR coalg a = wkR' coalg >>> wkR' (wkL a) >>> mapR Coiter (tensorR (wkL (downR init)) init)
+
 
 newtype Iter r f = Iter { getIter :: forall x . Neg x => (Down (MAlg r f x) --> x) r }
 
