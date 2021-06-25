@@ -72,6 +72,7 @@ module Focalized.Calculus
   -- * Recursive
 , Nu(..)
 , NuF(..)
+, Corecursive(..)
 , Mu(..)
 , MuF(..)
 , foldMu
@@ -767,6 +768,17 @@ runNu :: Nu r f -> Exists P (NuF r f)
 runNu (Nu r) = Exists (NuF r)
 
 
+class (Core s, Structural s, Implicative s) => Corecursive s where
+  nuL :: ForAllC Pos Neg f => s r (Exists P (NuF r f) <| i) o -> s r (Nu r f <| i) o
+  nuR :: ForAllC Pos Neg f => s r i (o |> Exists P (NuF r f)) -> s r i (o |> Nu r f)
+  nuR' :: ForAllC Pos Neg f => s r i (o |> Nu r f) -> s r i (o |> Exists P (NuF r f))
+  nuR' p = wkR' p >>> nuL init
+
+instance Corecursive Seq where
+  nuL = mapL runNu
+  nuR = mapR nu
+
+
 newtype Mu r f = Mu { getMu :: forall x . Neg x => (Down ((f x --> x) r) --> x) r }
 
 instance Polarized N (Mu r f) where
@@ -792,12 +804,7 @@ refold :: Functor f => (f b -> b) -> (a -> f a) -> a -> b
 refold f g = go where go = f . fmap go . g
 
 
-class (Core s, Structural s, Implicative s, Quantifying s) => Recursive s where
-  nuL :: ForAllC Pos Neg f => s r (Exists P (NuF r f) <| i) o -> s r (Nu r f <| i) o
-  nuR :: ForAllC Pos Neg f => s r i (o |> Exists P (NuF r f)) -> s r i (o |> Nu r f)
-  nuR' :: ForAllC Pos Neg f => s r i (o |> Nu r f) -> s r i (o |> Exists P (NuF r f))
-  nuR' p = wkR' p >>> nuL init
-
+class (Core s, Structural s, Implicative s, Universal s) => Recursive s where
   muL
     :: (ForAllC Neg Pos f, Neg a)
     => s r i (o |> (f a --> a) r)   ->   s r (a <| i) o
@@ -807,11 +814,7 @@ class (Core s, Structural s, Implicative s, Quantifying s) => Recursive s where
   muL' p = muR init >>> wkL' p
   muR :: ForAllC Neg Pos f => s r i (o |> ForAll N (MuF r f)) -> s r i (o |> Mu r f)
 
-
 instance Recursive Seq where
-  nuL = mapL runNu
-  nuR = mapR nu
-
   muL f k = wkL (downR f) >>> exL (mapL getMu (funL init (wkL' k)))
   muR = mapR mu
 
