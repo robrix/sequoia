@@ -735,26 +735,26 @@ instance Coimplicative Seq where
 type Quantifying s = (Universal s, Existential s)
 
 
-newtype ForAll r p f = ForAll { runForAll :: forall x . Polarized p x => f x }
+newtype ForAll r p f = ForAll { runForAll :: forall x . Polarized p x => K r (K r (f x)) }
 
 instance Polarized N (ForAll r p f)
 
 
 class (Core s, Structural s, Negating s, Shifting s) => Universal s where
   {-# MINIMAL (forAllL | forAllLExists) #-}
-  forAllL :: (Polarized n x, Neg (f x)) => s r (f x <| i) o -> s r (ForAll r n f <| i) o
-  default forAllL :: (Polarized n x, ForAllC (Polarized n) Neg f, Existential s) => s r (f x <| i) o -> s r (ForAll r n f <| i) o
-  forAllL p = forAllLExists (existsR (mapR C (negateR p)))
+  forAllL :: (Polarized n x, Neg (f x)) => s r (Not r (Negate r (f x)) <| i) o -> s r (ForAll r n f <| i) o
+  default forAllL :: (Polarized n x, ForAllC (Polarized n) Neg f, Existential s) => s r (Not r (Negate r (f x)) <| i) o -> s r (ForAll r n f <| i) o
+  forAllL p = forAllLExists (existsR (mapR C (notL' p)))
   forAllLExists :: ForAllC (Polarized n) Neg f => s r i (o |> Exists n (Negate r · f)) -> s r (ForAll r n f <| i) o
   default forAllLExists :: (ForAllC (Polarized n) Neg f, Existential s) => s r i (o |> Exists n (Negate r · f)) -> s r (ForAll r n f <| i) o
-  forAllLExists p = wkL p >>> existsL (mapL getC (negateL (forAllL init)))
+  forAllLExists p = wkL p >>> existsL (mapL getC (negateL (forAllL (notL (negateR init)))))
   -- FIXME: the correct signature should be s r i (o |> (forall x . Polarized n x => f x)) -> s r i (o |> ForAll f), but we can’t write that until (at least) quick look impredicativity lands in ghc (likely 9.2)
   -- forAllR :: ForAllC (Polarized n) Neg f => (forall x . Polarized n x => s r i (o |> f x)) -> s r i (o |> ForAll n f)
   forAllR' :: ForAllC (Polarized n) Neg f => s r i (o |> ForAll r n f) -> (forall x . Polarized n x => s r i (o |> f x))
-  forAllR' p = wkR' p >>> forAllL init
+  forAllR' p = wkR' p >>> forAllL (dneNL init)
 
 instance Universal Seq where
-  forAllL p = mapL runForAll p
+  forAllL p = mapL (notNegate . runForAll) p
   -- forAllR p = mapR ForAll p
 
 
@@ -773,7 +773,7 @@ class (Core s, Structural s, Negating s, Shifting s) => Existential s where
   existsL' p = existsR init >>> wkL' p
   existsLForAll :: ForAllC (Polarized n) Pos f => s r i (o |> ForAll r n (Not r · f)) -> s r (Exists n f <| i) o
   default existsLForAll :: (ForAllC (Polarized n) Pos f, Universal s) => s r i (o |> ForAll r n (Not r · f)) -> s r (Exists n f <| i) o
-  existsLForAll p = wkL p >>> exL (existsL (exL (forAllL (mapL getC (notL init)))))
+  existsLForAll p = wkL p >>> exL (existsL (exL (forAllL (notL (negateR (mapL getC (notL init)))))))
   existsR :: (Polarized n x, Pos (f x)) => s r i (o |> f x) -> s r i (o |> Exists n f)
 
 instance Existential Seq where
@@ -809,16 +809,21 @@ instance Corecursive Seq where
   nuR = mapR nu
 
 
-newtype Mu r f = Mu { getMu :: forall x . Neg x => (Down ((f x --> x) r) --> x) r }
+newtype Mu r f = Mu { getMu :: forall x . Neg x => (Down (FAlg r f x) --> x) r }
+
+type FAlg r f x = (f x --> x) r
 
 instance Polarized N (Mu r f) where
 
-newtype MuF r f a = MuF { getMuF :: (Down ((f a --> a) r) --> a) r }
+newtype MuF r f a = MuF { getMuF :: (Down (FAlg r f a) --> a) r }
 
 instance (Pos (f a), Neg a) => Polarized N (MuF r f a) where
 
 mu :: ForAll r N (MuF r f) -> Mu r f
-mu r = Mu (getMuF (runForAll r))
+mu r = Mu (dne (mapK (mapK getMuF) (runForAll r)))
+
+dne :: K r (K r ((a --> b) r)) -> (a --> b) r
+dne f = Fun (CPS (\ k a -> runK f (K (\ f -> appFun f a k))))
 
 foldMu :: Neg a => CPS r (f a) a -> CPS r (Mu r f) a
 foldMu alg = liftCPS $ \ (Mu f) -> appFun f (Down (Fun alg))
