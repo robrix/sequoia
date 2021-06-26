@@ -193,6 +193,7 @@ data Δ
 -- Core rules
 
 class Core s where
+  {-# MINIMAL ((>>>) | (<<<)), init #-}
   (>>>)
     :: s r i (o |> a)   ->   s r (a <| i) o
     ---------------------------------------
