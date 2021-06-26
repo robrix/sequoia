@@ -1,6 +1,8 @@
 module Focalized.CPS
 ( -- * Continuations
-  K(..)
+  dnI
+, dnE
+, K(..)
   -- * CPS
 , cps
 , liftCPS
@@ -27,6 +29,12 @@ import           Data.Profunctor.Traversing
 import           Focalized.Connective
 
 -- Continuations
+
+dnI :: a -> K r (K r a)
+dnI = K . flip runK
+
+dnE :: K r (K r (CPS r a b)) -> CPS r a b
+dnE f = CPS (\ k a -> runK f (K (\ f -> runCPS f k a)))
 
 newtype K r a = K { runK :: a -> r }
 
