@@ -7,6 +7,7 @@ module Focalized.CPS
 , cps
 , liftCPS
 , appCPS
+, appCPS2
 , pappCPS
 , execCPS
 , evalCPS
@@ -56,6 +57,9 @@ liftCPS = CPS . flip
 
 appCPS :: CPS r a b -> a -> (b -> r) -> r
 appCPS c a k = runCPS c k a
+
+appCPS2 :: CPS r a (CPS r b c) -> a -> b -> (c -> r) -> r
+appCPS2 c a b = appCPS c a . flip (`appCPS` b)
 
 pappCPS :: CPS r a b -> a -> CPS r () b
 pappCPS c a = c Cat.<<< pure a
