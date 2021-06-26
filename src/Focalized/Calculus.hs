@@ -376,30 +376,30 @@ class (Core s, Structural s) => Control s where
     -> i -|s r|- o
   shift
     :: r •a < i -|s r|- o > r
-    -- -------------------------
-    ->          i -|s r|- o > a
+    -- ----------------------
+    ->        i -|s r|- o > a
 
   kL
-    ::          i -|s r|- o > a
-    -- -------------------------
+    ::        i -|s r|- o > a
+    -- ----------------------
     -> r •a < i -|s r|- o
   kL = popL . pushR
 
   kL'
     :: r •a < i -|s r|- o
-    -- -------------------------
-    ->          i -|s r|- o > a
+    -- ----------------------
+    ->        i -|s r|- o > a
   kL' s = kR init >>> wkR s
 
   kR
     :: a < i -|s r|- o
-    -- -------------------------
-    ->      i -|s r|- o > r •a
+    -- ----------------------
+    ->     i -|s r|- o > r •a
   kR s = lowerL (pushL init) (wkR s)
 
   kR'
-    ::      i -|s r|- o > r •a
-    -- -------------------------
+    ::     i -|s r|- o > r •a
+    -- ----------------------
     -> a < i -|s r|- o
   kR' s = wkL s >>> kL init
 
@@ -433,99 +433,99 @@ infixr 9 ¬, ¬-
 class (Core s, Structural s, Control s) => NegatingN s where
   notL
     :: Pos a
-    =>         i -|s r|- o > a
-    -- ------------------------
+    =>        i -|s r|- o > a
+    -- ----------------------
     -> r ¬a < i -|s r|- o
   notL = notLK . kL
   notLK
     :: Pos a
-    => r •a < i -|s r|- o
-    -- --------------------
+    =>  r •a < i -|s r|- o
+    -- -------------------
     ->  r ¬a < i -|s r|- o
   notLK = mapL getNot
   notL'
     :: Pos a
     => r ¬a < i -|s r|- o
-    -- -------------------------
-    ->          i -|s r|- o > a
+    -- ----------------------
+    ->        i -|s r|- o > a
   notL' p = notR init >>> wkR p
   notLK'
     :: Pos a
     =>  r ¬a < i -|s r|- o
     -- --------------------
-    -> r •a < i -|s r|- o
+    ->  r •a < i -|s r|- o
   notLK' = mapL Not
   notR
     :: Pos a
     => a < i -|s r|- o
-    -- ------------------------
-    ->      i -|s r|- o > r ¬a
+    -- ----------------------
+    ->     i -|s r|- o > r ¬a
   notR = notRK . kR
   notRK
     :: Pos a
     => i -|s r|- o > r •a
-    -- --------------------
+    -- ------------------
     -> i -|s r|- o > r ¬a
   notRK = mapR Not
   notR'
     :: Pos a
-    =>      i -|s r|- o > r ¬a
-    -- ------------------------
+    =>     i -|s r|- o > r ¬a
+    -- ----------------------
     -> a < i -|s r|- o
   notR' p = wkL p >>> notL init
   notRK'
     :: Pos a
     => i -|s r|- o > r ¬a
-    -- --------------------
+    -- ------------------
     -> i -|s r|- o > r •a
   notRK' = mapR getNot
   shiftP
     :: Pos a
     => r ¬a < i -|s r|- o > r
-    -- ------------------------
-    ->         i -|s r|- o > a
+    -- ----------------------
+    ->        i -|s r|- o > a
   shiftP = shift . notLK'
 
   dneNL
     :: Neg a
-    =>             a < i -|s r|- o
-    -- ----------------------------
+    =>     a < i -|s r|- o
+    -- -------------------
     -> r ¬-a < i -|s r|- o
   default dneNL
     :: (NegatingP s, Neg a)
-    =>             a < i -|s r|- o
-    -- ----------------------------
+    =>     a < i -|s r|- o
+    -- -------------------
     -> r ¬-a < i -|s r|- o
   dneNL = notL . negateR
   dneNLK
     :: Neg a
-    =>         r ••a < i -|s r|- o
-    -- ----------------------------
+    => r ••a < i -|s r|- o
+    -- -------------------
     -> r ¬-a < i -|s r|- o
   default dneNLK
-    ::         r ••a < i -|s r|- o
-    -- ----------------------------
+    :: r ••a < i -|s r|- o
+    -- -------------------
     -> r ¬-a < i -|s r|- o
   dneNLK = mapL getNotNegate
   dneNR
     :: Neg a
     => i -|s r|- o > a
-    -- --------------------
+    -- -------------------
     -> i -|s r|- o > r ¬-a
   default dneNR
     :: (NegatingP s, Neg a)
     => i -|s r|- o > a
-    -- --------------------
+    -- -------------------
     -> i -|s r|- o > r ¬-a
   dneNR = notR . negateL
   dneNRK
     :: Neg a
     => i -|s r|- o > r ••a
-    -- ---------------------
+    -- -------------------
     -> i -|s r|- o > r ¬-a
   default dneNRK
     :: i -|s r|- o > r ••a
-    -- ---------------------
+    -- -------------------
     -> i -|s r|- o > r ¬-a
   dneNRK = mapR notNegate
 
@@ -551,99 +551,99 @@ infixr 9 -, -¬
 class (Core s, Structural s, Control s) => NegatingP s where
   negateL
     :: Neg a
-    =>         i -|s r|- o > a
-    -- ------------------------
+    =>        i -|s r|- o > a
+    -- ----------------------
     -> r -a < i -|s r|- o
   negateL = negateLK . kL
   negateLK
     :: Neg a
     => r •a < i -|s r|- o
-    -- -------------------
+    -- ------------------
     -> r -a < i -|s r|- o
   negateLK = mapL getNegate
   negateLK'
     :: Neg a
     => r -a < i -|s r|- o
-    -- -------------------------
-    ->      r •a < i -|s r|- o
+    -- ------------------
+    -> r •a < i -|s r|- o
   negateLK' = mapL Negate
   negateL'
     :: Neg a
     => r -a < i -|s r|- o
-    -- ------------------------------
-    ->               i -|s r|- o > a
+    -- ----------------------
+    ->        i -|s r|- o > a
   negateL' p = negateR init >>> wkR p
   negateR
     :: Neg a
     => a < i -|s r|- o
-    -- ------------------------------
-    ->      i -|s r|- o > r -a
+    -- ----------------------
+    ->     i -|s r|- o > r -a
   negateR = negateRK . kR
   negateRK
     :: Neg a
     => i -|s r|- o > r •a
-    -- -------------------------
+    -- ------------------
     -> i -|s r|- o > r -a
   negateRK = mapR Negate
   negateR'
     :: Neg a
-    => i -|s r|- o > r -a
-    -- -------------------------
+    =>     i -|s r|- o > r -a
+    -- ----------------------
     -> a < i -|s r|- o
   negateR' p = wkL p >>> negateL init
   negateRK'
     :: Neg a
     => i -|s r|- o > r -a
-    -- -------------------------
+    -- ------------------
     -> i -|s r|- o > r •a
   negateRK' = mapR getNegate
   shiftN
     :: Neg a
     => r -a < i -|s r|- o > r
-    -- ------------------------------
-    ->               i -|s r|- o > a
+    -- ----------------------
+    ->        i -|s r|- o > a
   shiftN = shift . negateLK'
 
   dnePL
     :: Pos a
-    =>               a < i -|s r|- o
-    -- ------------------------------
+    =>     a < i -|s r|- o
+    -- -------------------
     -> r -¬a < i -|s r|- o
   default dnePL
     :: (NegatingN s, Pos a)
-    =>               a < i -|s r|- o
-    -- ------------------------------
+    =>     a < i -|s r|- o
+    -- -------------------
     -> r -¬a < i -|s r|- o
   dnePL = negateL . notR
   dnePLK
     :: Pos a
-    =>           r ••a < i -|s r|- o
-    -- ------------------------------
+    => r ••a < i -|s r|- o
+    -- -------------------
     -> r -¬a < i -|s r|- o
   default dnePLK
-    ::           r ••a < i -|s r|- o
-    -- ------------------------------
+    :: r ••a < i -|s r|- o
+    -- -------------------
     -> r -¬a < i -|s r|- o
   dnePLK = mapL getNegateNot
   dnePR
     :: Pos a
     => i -|s r|- o > a
-    -- --------------------
+    -- -------------------
     -> i -|s r|- o > r -¬a
   default dnePR
     :: (NegatingN s, Pos a)
     => i -|s r|- o > a
-    -- --------------------
+    -- -------------------
     -> i -|s r|- o > r -¬a
   dnePR = negateR . notL
   dnePRK
     :: Pos a
     => i -|s r|- o > r ••a
-    -- --------------------
+    -- -------------------
     -> i -|s r|- o > r -¬a
   default dnePRK
     :: i -|s r|- o > r ••a
-    -- --------------------
+    -- -------------------
     -> i -|s r|- o > r -¬a
   dnePRK = mapR negateNot
 
