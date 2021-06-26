@@ -197,6 +197,7 @@ class Core s where
     :: s r i (o |> a)   ->   s r (a <| i) o
     ---------------------------------------
     -> s r i o
+  (>>>) = flip (<<<)
 
   (<<<)
     :: s r (a <| i) o   ->   s r i (o |> a)
