@@ -63,6 +63,7 @@ module Focalized.Calculus
 , liftFun'
 , Fun(..)
 , type (-->)
+, type (>--)
 , Implicative(..)
 , Sub(..)
 , type (--<)
@@ -859,42 +860,45 @@ instance MultiplicativeConj Seq where
 
 -- Implicative
 
-runFun :: (a --> b) r -> Seq r (a <| i) (o |> b)
+runFun :: (a >--r--> b) -> Seq r (a <| i) (o |> b)
 runFun = Seq . dimap exl inr . getFun
 
-appFun :: (a --> b) r -> a -> (b -> r) -> r
+appFun :: (a >--r--> b) -> a -> (b -> r) -> r
 appFun = appCPS . getFun
 
-appFun2 :: (a --> (b --> c) r) r -> a -> b -> (c -> r) -> r
+appFun2 :: (a >--r--> b >--r--> c) -> a -> b -> (c -> r) -> r
 appFun2 = appCPS2 . fmap getFun . getFun
 
-liftFun :: ((b -> r) -> (a -> r)) -> (a --> b) r
+liftFun :: ((b -> r) -> (a -> r)) -> a >--r--> b
 liftFun = Fun . CPS
 
-liftFun' :: (a -> (b -> r) -> r) -> (a --> b) r
+liftFun' :: (a -> (b -> r) -> r) -> a >--r--> b
 liftFun' = liftFun . flip
 
 newtype Fun r a b = Fun { getFun :: CPS r a b }
 
 instance (Pos a, Neg b) => Polarized N (Fun r a b) where
 
-type (a --> b) r = Fun r a b
+type a >-- r = Fun r a
+type f --> b = f b
 
+infixr 6 >--
+infixr 5 -->
 
 class (Core s, Structural s, Negating s) => Implicative s where
   {-# MINIMAL (funL | funLSub), funR #-}
-  funL :: (Pos a, Neg b) => s r i (o |> a) -> s r (b <| i) o -> s r ((a --> b) r <| i) o
-  default funL :: (Pos a, Neg b, Coimplicative s) => s r i (o |> a) -> s r (b <| i) o -> s r ((a --> b) r <| i) o
+  funL :: (Pos a, Neg b) => s r i (o |> a) -> s r (b <| i) o -> s r (a >--r--> b <| i) o
+  default funL :: (Pos a, Neg b, Coimplicative s) => s r i (o |> a) -> s r (b <| i) o -> s r (a >--r--> b <| i) o
   funL pa pb = funLSub (subR pa pb)
-  funLSub :: (Pos a, Neg b) => s r i (o |> (a --< b) r) -> s r ((a --> b) r <| i) o
-  default funLSub :: (Pos a, Neg b, Coimplicative s) => s r i (o |> (a --< b) r) -> s r ((a --> b) r <| i) o
+  funLSub :: (Pos a, Neg b) => s r i (o |> (a --< b) r) -> s r (a >--r--> b <| i) o
+  default funLSub :: (Pos a, Neg b, Coimplicative s) => s r i (o |> (a --< b) r) -> s r (a >--r--> b <| i) o
   funLSub p = wkL p >>> subL (exL (funL init init))
-  funL2 :: (Pos a, Neg b) => s r ((a --> b) r <| a <| i)  (o |> b)
+  funL2 :: (Pos a, Neg b) => s r (a >--r--> b <| a <| i)  (o |> b)
   funL2 = funL init init
-  funR :: (Pos a, Neg b) => s r (a <| i) (o |> b) -> s r i (o |> (a --> b) r)
-  ($$) :: (Pos a, Neg b) => s r i (o |> (a --> b) r) -> s r i (o |> a) -> s r i (o |> b)
+  funR :: (Pos a, Neg b) => s r (a <| i) (o |> b) -> s r i (o |> a >--r--> b)
+  ($$) :: (Pos a, Neg b) => s r i (o |> a >--r--> b) -> s r i (o |> a) -> s r i (o |> b)
   f $$ a = wkR' f >>> wkR' a `funL` init
-  funR' :: (Pos a, Neg b) => s r i (o |> (a --> b) r) -> s r (a <| i) (o |> b)
+  funR' :: (Pos a, Neg b) => s r i (o |> a >--r--> b) -> s r (a <| i) (o |> b)
   funR' p = wkL (wkR' p) >>> funL2
 
 instance Implicative Seq where
@@ -914,8 +918,8 @@ class (Core s, Structural s, Negating s) => Coimplicative s where
   subL :: (Pos a, Neg b) => s r (a <| i) (o |> b) -> s r ((a --< b) r <| i) o
   default subL :: (Pos a, Neg b, Implicative s) => s r (a <| i) (o |> b) -> s r ((a --< b) r <| i) o
   subL = subLFun . funR
-  subLFun :: (Pos a, Neg b) => s r i (o |> (a --> b) r) -> s r ((a --< b) r <| i) o
-  default subLFun :: (Pos a, Neg b, Implicative s) => s r i (o |> (a --> b) r) -> s r ((a --< b) r <| i) o
+  subLFun :: (Pos a, Neg b) => s r i (o |> a >--r--> b) -> s r ((a --< b) r <| i) o
+  default subLFun :: (Pos a, Neg b, Implicative s) => s r i (o |> a >--r--> b) -> s r ((a --< b) r <| i) o
   subLFun p = wkL p >>> exL (subL (exL (funL init init)))
   subL' :: (Pos a, Neg b) => s r ((a --< b) r <| i) o -> s r (a <| i) (o |> b)
   subL' p = subR init init >>> wkR (wkL' p)
@@ -982,11 +986,11 @@ instance Existential Seq where
 
 -- Recursive
 
-data Nu r f = forall x . Pos x => Nu { getNu :: Down ((x --> f x) r) ⊗ x }
+data Nu r f = forall x . Pos x => Nu { getNu :: Down (x >--r--> f x) ⊗ x }
 
 instance Polarized N (Nu r f) where
 
-newtype NuF r f a = NuF { getNuF :: Down ((a --> f a) r) ⊗ a }
+newtype NuF r f a = NuF { getNuF :: Down (a >--r--> f a) ⊗ a }
 
 instance (Neg (f a), Pos a) => Polarized P (NuF r f a)
 
@@ -1008,13 +1012,13 @@ instance Corecursive Seq where
   nuR s = wkR' s >>> existsL (mapL nu init)
 
 
-newtype Mu r f = Mu { getMu :: forall x . Neg x => (Down (FAlg r f x) --> x) r }
+newtype Mu r f = Mu { getMu :: forall x . Neg x => Down (FAlg r f x) >--r--> x }
 
-type FAlg r f x = (f x --> x) r
+type FAlg r f x = f x >--r--> x
 
 instance Polarized N (Mu r f) where
 
-newtype MuF r f a = MuF { getMuF :: (Down (FAlg r f a) --> a) r }
+newtype MuF r f a = MuF { getMuF :: Down (FAlg r f a) >--r--> a }
 
 instance (Pos (f a), Neg a) => Polarized N (MuF r f a) where
 
@@ -1037,14 +1041,14 @@ refold f g = go where go = f . fmap go . g
 dnESeq :: K r (K r (Seq r a b)) -> Seq r a b
 dnESeq = Seq . dnE . contramap (contramap getSeq)
 
-dnEFun :: K r (K r ((a --> b) r)) -> (a --> b) r
+dnEFun :: K r (K r (a >--r--> b)) -> (a >--r--> b)
 dnEFun = Fun . dnE . contramap (contramap getFun)
 
 
 class (Core s, Structural s, Implicative s, Universal s) => Recursive s where
   muL
     :: (ForAllC Neg Pos f, Neg a)
-    => s r i (o |> (f a --> a) r)   ->   s r (a <| i) o
+    => s r i (o |> f a >--r--> a)   ->   s r (a <| i) o
     ---------------------------------------------------
     -> s r (Mu r f <| i) o
   muL' :: ForAllC Neg Pos f => s r (Mu r f <| i) o -> s r (ForAll r N (MuF r f) <| i) o
