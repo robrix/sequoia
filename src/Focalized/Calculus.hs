@@ -417,10 +417,10 @@ newtype Not    r a = Not    { getNot    :: K r a }
 
 instance Pos a => Polarized N (Not r a) where
 
-notNegate :: K r (K r a) -> Not r (Negate r a)
+notNegate :: K r (K r a) -> r ¬Negate r a
 notNegate = Not . contramap getNegate
 
-getNotNegate :: Not r (Negate r a) -> K r (K r a)
+getNotNegate :: r ¬Negate r a -> K r (K r a)
 getNotNegate = contramap Negate . getNot
 
 
@@ -432,100 +432,100 @@ infixr 7 ¬
 class (Core s, Structural s, Control s) => NegatingN s where
   notL
     :: Pos a
-    =>            i -|s r|- o |> a
-    -- ---------------------------
-    -> Not r a <| i -|s r|- o
+    =>         i -|s r|- o |> a
+    -- ------------------------
+    -> r ¬a <| i -|s r|- o
   notL = notLK . kL
   notLK
     :: Pos a
-    =>   K r a <| i -|s r|- o
-    -- ----------------------
-    -> Not r a <| i -|s r|- o
+    => K r a <| i -|s r|- o
+    -- --------------------
+    ->  r ¬a <| i -|s r|- o
   notLK = mapL getNot
   notL'
     :: Pos a
-    => Not r a <| i -|s r|- o
-    -- ---------------------------
-    ->            i -|s r|- o |> a
+    => r ¬a <| i -|s r|- o
+    -- -------------------------
+    ->          i -|s r|- o |> a
   notL' p = notR init >>> wkR p
   notLK'
     :: Pos a
-    => Not r a <| i -|s r|- o
-    -- ----------------------
-    ->   K r a <| i -|s r|- o
+    =>  r ¬a <| i -|s r|- o
+    -- --------------------
+    -> K r a <| i -|s r|- o
   notLK' = mapL Not
   notR
     :: Pos a
     => a <| i -|s r|- o
-    -- ---------------------------
-    ->      i -|s r|- o |> Not r a
+    -- ------------------------
+    ->      i -|s r|- o |> r ¬a
   notR = notRK . kR
   notRK
     :: Pos a
     => i -|s r|- o |> K r a
-    -- ----------------------
-    -> i -|s r|- o |> Not r a
+    -- --------------------
+    -> i -|s r|- o |> r ¬a
   notRK = mapR Not
   notR'
     :: Pos a
-    =>      i -|s r|- o |> Not r a
-    -- ---------------------------
+    =>      i -|s r|- o |> r ¬a
+    -- ------------------------
     -> a <| i -|s r|- o
   notR' p = wkL p >>> notL init
   notRK'
     :: Pos a
-    => i -|s r|- o |> Not r a
-    -- ----------------------
+    => i -|s r|- o |> r ¬a
+    -- --------------------
     -> i -|s r|- o |> K r a
   notRK' = mapR getNot
   shiftP
     :: Pos a
-    => Not r a <| i -|s r|- o |> r
-    -- ---------------------------
-    ->            i -|s r|- o |> a
+    => r ¬a <| i -|s r|- o |> r
+    -- ------------------------
+    ->         i -|s r|- o |> a
   shiftP = shift . notLK'
 
   dneNL
     :: Neg a
-    =>                  a <| i -|s r|- o
-    -- ---------------------------------
-    -> Not r (Negate r a) <| i -|s r|- o
+    =>             a <| i -|s r|- o
+    -- ----------------------------
+    -> r ¬Negate r a <| i -|s r|- o
   default dneNL
     :: (NegatingP s, Neg a)
-    =>                  a <| i -|s r|- o
-    -- ---------------------------------
-    -> Not r (Negate r a) <| i -|s r|- o
+    =>             a <| i -|s r|- o
+    -- ----------------------------
+    -> r ¬Negate r a <| i -|s r|- o
   dneNL = notL . negateR
   dneNLK
     :: Neg a
-    =>        K r (K r a) <| i -|s r|- o
-    -- ---------------------------------
-    -> Not r (Negate r a) <| i -|s r|- o
+    =>   K r (K r a) <| i -|s r|- o
+    -- ----------------------------
+    -> r ¬Negate r a <| i -|s r|- o
   default dneNLK
-    ::        K r (K r a) <| i -|s r|- o
-    -- ---------------------------------
-    -> Not r (Negate r a) <| i -|s r|- o
+    ::   K r (K r a) <| i -|s r|- o
+    -- ----------------------------
+    -> r ¬Negate r a <| i -|s r|- o
   dneNLK = mapL getNotNegate
   dneNR
     :: Neg a
     => i -|s r|- o |> a
-    -- ---------------------------------
-    -> i -|s r|- o |> Not r (Negate r a)
+    -- ----------------------------
+    -> i -|s r|- o |> r ¬Negate r a
   default dneNR
     :: (NegatingP s, Neg a)
     => i -|s r|- o |> a
-    -- ---------------------------------
-    -> i -|s r|- o |> Not r (Negate r a)
+    -- ----------------------------
+    -> i -|s r|- o |> r ¬Negate r a
   dneNR = notR . negateL
   dneNRK
     :: Neg a
     => i -|s r|- o |> K r (K r a)
-    -- ---------------------------------
-    -> i -|s r|- o |> Not r (Negate r a)
+    -- ----------------------------
+    -> i -|s r|- o |> r ¬Negate r a
   default dneNRK
     :: i -|s r|- o |> K r (K r a)
-    -- ---------------------------------
-    -> i -|s r|- o |> Not r (Negate r a)
+    -- ----------------------------
+    -> i -|s r|- o |> r ¬Negate r a
   dneNRK = mapR notNegate
 
 instance NegatingN Seq where
