@@ -50,7 +50,7 @@ instance Contravariant ((•) r) where
 
 type r •• a = r •r •a
 
-infixr 8 •, ••
+infixr 9 •, ••
 
 
 -- CPS
