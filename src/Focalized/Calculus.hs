@@ -536,36 +536,102 @@ getNegateNot = contramap Not . getNegate
 
 
 class (Core s, Structural s, Control s) => NegatingP s where
-  negateL :: Neg a => s r i (o |> a) -> s r (Negate r a <| i) o
+  negateL
+    :: Neg a
+    =>               i -|s r|- o |> a
+    -- ------------------------------
+    -> Negate r a <| i -|s r|- o
   negateL = negateLK . kL
-  negateLK :: Neg a => s r (K r a <| i) o -> s r (Negate r a <| i) o
+  negateLK
+    :: Neg a
+    =>      K r a <| i -|s r|- o
+    -- -------------------------
+    -> Negate r a <| i -|s r|- o
   negateLK = mapL getNegate
-  negateLK' :: Neg a => s r (Negate r a <| i) o -> s r (K r a <| i) o
+  negateLK'
+    :: Neg a
+    => Negate r a <| i -|s r|- o
+    -- -------------------------
+    ->      K r a <| i -|s r|- o
   negateLK' = mapL Negate
-  negateL' :: Neg a => s r (Negate r a <| i) o -> s r i (o |> a)
+  negateL'
+    :: Neg a
+    => Negate r a <| i -|s r|- o
+    -- ------------------------------
+    ->               i -|s r|- o |> a
   negateL' p = negateR init >>> wkR p
-  negateR :: Neg a => s r (a <| i) o -> s r i (o |> Negate r a)
+  negateR
+    :: Neg a
+    => a <| i -|s r|- o
+    -- ------------------------------
+    ->      i -|s r|- o |> Negate r a
   negateR = negateRK . kR
-  negateRK :: Neg a => s r i (o |> K r a) -> s r i (o |> Negate r a)
+  negateRK
+    :: Neg a
+    => i -|s r|- o |> K r a
+    -- -------------------------
+    -> i -|s r|- o |> Negate r a
   negateRK = mapR Negate
-  negateR' :: Neg a => s r i (o |> Negate r a) -> s r (a <| i) o
+  negateR'
+    :: Neg a
+    => i -|s r|- o |> Negate r a
+    -- -------------------------
+    -> a <| i -|s r|- o
   negateR' p = wkL p >>> negateL init
-  negateRK' :: Neg a => s r i (o |> Negate r a) -> s r i (o |> K r a)
+  negateRK'
+    :: Neg a
+    => i -|s r|- o |> Negate r a
+    -- -------------------------
+    -> i -|s r|- o |> K r a
   negateRK' = mapR getNegate
-  shiftN :: Neg a => s r (Negate r a <| i) (o |> r) -> s r i (o |> a)
+  shiftN
+    :: Neg a
+    => Negate r a <| i -|s r|- o |> r
+    -- ------------------------------
+    ->               i -|s r|- o |> a
   shiftN = shift . negateLK'
 
-  dnePL :: Pos a => s r (a <| i) o -> s r (Negate r (Not r a) <| i) o
-  default dnePL :: (NegatingN s, Pos a) => s r (a <| i) o -> s r (Negate r (Not r a) <| i) o
+  dnePL
+    :: Pos a
+    =>                  a <| i -|s r|- o
+    -- ---------------------------------
+    -> Negate r (Not r a) <| i -|s r|- o
+  default dnePL
+    :: (NegatingN s, Pos a)
+    =>                  a <| i -|s r|- o
+    -- ---------------------------------
+    -> Negate r (Not r a) <| i -|s r|- o
   dnePL = negateL . notR
-  dnePLK :: Pos a => s r (K r (K r a) <| i) o -> s r (Negate r (Not r a) <| i) o
-  default dnePLK :: s r (K r (K r a) <| i) o -> s r (Negate r (Not r a) <| i) o
+  dnePLK
+    :: Pos a
+    =>        K r (K r a) <| i -|s r|- o
+    -- ---------------------------------
+    -> Negate r (Not r a) <| i -|s r|- o
+  default dnePLK
+    ::        K r (K r a) <| i -|s r|- o
+    -- ---------------------------------
+    -> Negate r (Not r a) <| i -|s r|- o
   dnePLK = mapL getNegateNot
-  dnePR :: Pos a => s r i (o |> a) -> s r i (o |> Negate r (Not r a))
-  default dnePR :: (NegatingN s, Pos a) => s r i (o |> a) -> s r i (o |> Negate r (Not r a))
+  dnePR
+    :: Pos a
+    => i -|s r|- o |> a
+    -- ---------------------------------
+    -> i -|s r|- o |> Negate r (Not r a)
+  default dnePR
+    :: (NegatingN s, Pos a)
+    => i -|s r|- o |> a
+    -- ---------------------------------
+    -> i -|s r|- o |> Negate r (Not r a)
   dnePR = negateR . notL
-  dnePRK :: Pos a => s r i (o |> K r (K r a)) -> s r i (o |> Negate r (Not r a))
-  default dnePRK :: s r i (o |> K r (K r a)) -> s r i (o |> Negate r (Not r a))
+  dnePRK
+    :: Pos a
+    => i -|s r|- o |> K r (K r a)
+    -- ---------------------------------
+    -> i -|s r|- o |> Negate r (Not r a)
+  default dnePRK
+    :: i -|s r|- o |> K r (K r a)
+    -- ---------------------------------
+    -> i -|s r|- o |> Negate r (Not r a)
   dnePRK = mapR negateNot
 
 instance NegatingP Seq where
