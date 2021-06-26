@@ -3,6 +3,7 @@ module Focalized.CPS
   dnI
 , dnE
 , K(..)
+, type (•)
   -- * CPS
 , cps
 , liftCPS
@@ -45,6 +46,11 @@ instance Cat.Category K where
 
 instance Contravariant (K r) where
   contramap f = K . (. f) . runK
+
+
+type (•) = K
+
+infixr 8 •
 
 
 -- CPS
