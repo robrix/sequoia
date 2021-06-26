@@ -305,21 +305,45 @@ class Core s => Structural s where
   lowerR k p = p >>> popL k
 
 
-  wkL :: s r i o -> s r (a <| i) o
+  wkL
+    :: s r i o
+    -----------------
+    -> s r (a <| i) o
   wkL = popL . const
-  wkL' :: s r (a <| i) o -> s r (a <| b <| i) o
+  wkL'
+    :: s r (a <| i) o
+    ----------------------
+    -> s r (a <| b <| i) o
   wkL' = exL . wkL
-  wkR :: s r i o -> s r i (o |> a)
+  wkR
+    :: s r i o
+    -----------------
+    -> s r i (o |> a)
   wkR = popR . const
-  wkR' :: s r i (o |> a) -> s r i (o |> b |> a)
+  wkR'
+    :: s r i (o |> a)
+    ----------------------
+    -> s r i (o |> b |> a)
   wkR' = exR . wkR
-  cnL :: s r (a <| a <| i) o -> s r (a <| i) o
+  cnL
+    :: s r (a <| a <| i) o
+    ----------------------
+    -> s r (a <| i) o
   cnL = popL . join . pushL2
-  cnR :: s r i (o |> a |> a) -> s r i (o |> a)
+  cnR
+    :: s r i (o |> a |> a)
+    ----------------------
+    -> s r i (o |> a)
   cnR = popR . join . pushR2
-  exL :: s r (a <| b <| c) o -> s r (b <| a <| c) o
+  exL
+    :: s r (a <| b <| c) o
+    ----------------------
+    -> s r (b <| a <| c) o
   exL = popL2 . flip . pushL2
-  exR :: s r i (o |> a |> b) -> s r i (o |> b |> a)
+  exR
+    :: s r i (o |> a |> b)
+    ----------------------
+    -> s r i (o |> b |> a)
   exR = popR2 . flip . pushR2
 
 instance Structural Seq where
