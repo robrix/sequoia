@@ -2,6 +2,7 @@
 {-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Focalized.Calculus
@@ -987,9 +988,11 @@ type ForAllC cx cf f = (forall x . cx x => cf (f x)) :: Constraint
 
 
 newtype (f · g) a = C { getC :: f (g a) }
-  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+  deriving (Eq, Foldable, Functor, Ord, Show)
 
 infixr 7 ·
+
+deriving instance (Traversable f, Traversable g) => Traversable (f · g)
 
 instance Polarized p (f (g a)) => Polarized p ((f · g) a) where
 
