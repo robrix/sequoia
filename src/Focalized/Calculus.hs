@@ -759,12 +759,12 @@ instance Universal Seq where
   forAllR p = sequent $ \ k a -> k (inr (ForAll (K (\ k' -> runSeq p (k . inl |> runK k') a))))
 
 
-data Exists r p f = forall x . Polarized p x => Exists (f x)
+data Exists r p f = forall x . Polarized p x => Exists (K r (K r (f x)))
 
 instance Polarized P (Exists r p f)
 
-runExists :: (forall x . Polarized p x => f x -> a) -> Exists r p f -> a
-runExists f (Exists r) = f r
+runExists :: (forall x . Polarized p x => f x -> a) -> Exists r p f -> K r (K r a)
+runExists f (Exists r) = K (\ k -> runK r (K (runK k . f)))
 
 
 class (Core s, Structural s, Negating s, Shifting s) => Existential s where
@@ -781,8 +781,8 @@ class (Core s, Structural s, Negating s, Shifting s) => Existential s where
   existsR :: (Polarized n x, Pos (f x)) => s r i (o |> f x) -> s r i (o |> Exists r n f)
 
 instance Existential Seq where
-  existsL p = popL (runExists (pushL p))
-  existsR p = mapR Exists p
+  existsL p = popL (dnESeq . runExists (pushL p))
+  existsR p = mapR (Exists . dnI) p
 
 
 -- Recursive
@@ -795,11 +795,11 @@ newtype NuF r f a = NuF { getNuF :: Down ((a --> f a) r) ⊗ a }
 
 instance (Neg (f a), Pos a) => Polarized P (NuF r f a)
 
-nu :: Exists r P (NuF r f) -> Nu r f
-nu (Exists (NuF r)) = Nu r
+nu :: Pos x => NuF r f x -> Nu r f
+nu r = Nu (getNuF r)
 
 runNu :: Nu r f -> Exists r P (NuF r f)
-runNu (Nu r) = Exists (NuF r)
+runNu (Nu r) = Exists (dnI (NuF r))
 
 
 class (Core s, Structural s, Implicative s) => Corecursive s where
@@ -810,7 +810,7 @@ class (Core s, Structural s, Implicative s) => Corecursive s where
 
 instance Corecursive Seq where
   nuL = mapL runNu
-  nuR = mapR nu
+  nuR s = wkR' s >>> existsL (mapL nu init)
 
 
 newtype Mu r f = Mu { getMu :: forall x . Neg x => (Down (FAlg r f x) --> x) r }
@@ -824,10 +824,7 @@ newtype MuF r f a = MuF { getMuF :: (Down (FAlg r f a) --> a) r }
 instance (Pos (f a), Neg a) => Polarized N (MuF r f a) where
 
 mu :: ForAll r N (MuF r f) -> Mu r f
-mu r = Mu (dne (contramap (contramap getMuF) (runForAll r)))
-
-dne :: K r (K r ((a --> b) r)) -> (a --> b) r
-dne f = Fun (CPS (\ k a -> runK f (K (\ f -> appFun f a k))))
+mu r = Mu (dnEFun (contramap (contramap getMuF) (runForAll r)))
 
 foldMu :: Neg a => CPS r (f a) a -> CPS r (Mu r f) a
 foldMu alg = liftCPS $ \ (Mu f) -> appFun f (Down (Fun alg))
@@ -841,6 +838,12 @@ refoldMu f g = foldMu f Cat.<<< unfoldMu g
 
 refold :: Functor f => (f b -> b) -> (a -> f a) -> a -> b
 refold f g = go where go = f . fmap go . g
+
+dnESeq :: K r (K r (Seq r a b)) -> Seq r a b
+dnESeq = Seq . dnE . contramap (contramap getSeq)
+
+dnEFun :: K r (K r ((a --> b) r)) -> (a --> b) r
+dnEFun = Fun . dnE . contramap (contramap getFun)
 
 
 class (Core s, Structural s, Implicative s, Universal s) => Recursive s where
