@@ -55,6 +55,7 @@ module Focalized.Calculus
   -- * Implicative
 , runFun
 , appFun
+, appFun2
 , liftFun
 , liftFun'
 , Fun(..)
@@ -672,6 +673,9 @@ runFun = Seq . dimap exl inr . getFun
 
 appFun :: (a --> b) r -> a -> (b -> r) -> r
 appFun = appCPS . getFun
+
+appFun2 :: (a --> (b --> c) r) r -> a -> b -> (c -> r) -> r
+appFun2 = appCPS2 . fmap getFun . getFun
 
 liftFun :: ((b -> r) -> (a -> r)) -> (a --> b) r
 liftFun = Fun . CPS
