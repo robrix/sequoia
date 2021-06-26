@@ -367,19 +367,37 @@ instance Structural Seq where
 -- Control
 
 class (Core s, Structural s) => Control s where
-  reset :: s o i o -> s r i o
-  shift :: s r (K r a <| i) (o |> r) -> s r i (o |> a)
+  reset
+    :: i -|s o|- o
+    -- -----------
+    -> i -|s r|- o
+  shift
+    :: K r a <| i -|s r|- o |> r
+    -- -------------------------
+    ->          i -|s r|- o |> a
 
-  kL :: s r i (o |> a) -> s r (K r a <| i) o
+  kL
+    ::          i -|s r|- o |> a
+    -- -------------------------
+    -> K r a <| i -|s r|- o
   kL = popL . pushR
 
-  kL' :: s r (K r a <| i) o -> s r i (o |> a)
+  kL'
+    :: K r a <| i -|s r|- o
+    -- -------------------------
+    ->          i -|s r|- o |> a
   kL' s = kR init >>> wkR s
 
-  kR :: s r (a <| i) o -> s r i (o |> K r a)
+  kR
+    :: a <| i -|s r|- o
+    -- -------------------------
+    ->      i -|s r|- o |> K r a
   kR s = lowerL (pushL init) (wkR s)
 
-  kR' :: s r i (o |> K r a) -> s r (a <| i) o
+  kR'
+    ::      i -|s r|- o |> K r a
+    -- -------------------------
+    -> a <| i -|s r|- o
   kR' s = wkL s >>> kL init
 
 
