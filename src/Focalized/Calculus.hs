@@ -33,9 +33,11 @@ module Focalized.Calculus
 , Negating
 , Not(..)
 , type (¬)
+, type (¬~)
 , NegatingN(..)
 , Negate(..)
 , type (∽)
+, type (~¬)
 , NegatingP(..)
   -- * Additive
 , Additive
@@ -426,8 +428,9 @@ getNotNegate = contramap Negate . getNot
 
 
 type (¬) = Not
+type r ¬~ a = Not r (Negate r a)
 
-infixr 7 ¬
+infixr 7 ¬, ¬~
 
 
 class (Core s, Structural s, Control s) => NegatingN s where
@@ -544,8 +547,9 @@ getNegateNot = contramap Not . getNegate
 
 
 type (∽) = Negate
+type a ~¬ r = Negate r (Not r a)
 
-infixr 7 ∽
+infixr 7 ∽, ~¬
 
 
 class (Core s, Structural s, Control s) => NegatingP s where
