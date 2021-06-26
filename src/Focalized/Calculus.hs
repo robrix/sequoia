@@ -872,7 +872,7 @@ refoldMu :: (Traversable f, Neg b) => CPS r (f b) b -> CPS r a (f a) -> CPS r a 
 refoldMu f g = foldMu f Cat.<<< unfoldMu g
 
 
-refold :: Functor f => (f b -> b) -> (a -> f a) -> a -> b
+refold :: Functor f => (f b -> b) -> (a -> f a) -> (a -> b)
 refold f g = go where go = f . fmap go . g
 
 dnESeq :: K r (K r (Seq r a b)) -> Seq r a b
