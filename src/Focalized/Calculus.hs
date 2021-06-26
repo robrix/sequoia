@@ -31,13 +31,12 @@ module Focalized.Calculus
 , Control(..)
   -- * Negating
 , Negating
-, Not(..)
-, type (¬)
-, type (¬~)
+, type (¬)(..)
+, type (¬-)
 , NegatingN(..)
 , Negate(..)
 , type (∽)
-, type (~¬)
+, type (-¬)
 , NegatingP(..)
   -- * Additive
 , Additive
@@ -416,9 +415,9 @@ instance Control Seq where
 type Negating s = (NegatingN s, NegatingP s)
 
 
-newtype Not    r a = Not    { getNot    :: r •a }
+newtype r ¬a = Not    { getNot    :: r •a }
 
-instance Pos a => Polarized N (Not r a) where
+instance Pos a => Polarized N (r ¬a) where
 
 notNegate :: r ••a -> r ¬Negate r a
 notNegate = Not . contramap getNegate
@@ -427,10 +426,9 @@ getNotNegate :: r ¬Negate r a -> r ••a
 getNotNegate = contramap Negate . getNot
 
 
-type (¬) = Not
-type r ¬~ a = Not r (Negate r a)
+type r ¬- a = r ¬Negate r a
 
-infixr 9 ¬, ¬~
+infixr 9 ¬, ¬-
 
 
 class (Core s, Structural s, Control s) => NegatingN s where
@@ -539,17 +537,17 @@ newtype Negate r a = Negate { getNegate :: r •a }
 
 instance Neg a => Polarized P (Negate r a) where
 
-negateNot :: r ••a -> Negate r (Not r a)
+negateNot :: r ••a -> r -¬a
 negateNot = Negate . contramap getNot
 
-getNegateNot :: Negate r (Not r a) -> r ••a
+getNegateNot :: r -¬a -> r ••a
 getNegateNot = contramap Not . getNegate
 
 
 type (∽) = Negate
-type a ~¬ r = Negate r (Not r a)
+type r -¬ a = Negate r (r ¬a)
 
-infixr 9 ∽, ~¬
+infixr 9 ∽, -¬
 
 
 class (Core s, Structural s, Control s) => NegatingP s where
@@ -610,45 +608,45 @@ class (Core s, Structural s, Control s) => NegatingP s where
 
   dnePL
     :: Pos a
-    =>                  a <| i -|s r|- o
-    -- ---------------------------------
-    -> Negate r (Not r a) <| i -|s r|- o
+    =>               a <| i -|s r|- o
+    -- ------------------------------
+    -> Negate r (r ¬a) <| i -|s r|- o
   default dnePL
     :: (NegatingN s, Pos a)
-    =>                  a <| i -|s r|- o
-    -- ---------------------------------
-    -> Negate r (Not r a) <| i -|s r|- o
+    =>               a <| i -|s r|- o
+    -- ------------------------------
+    -> Negate r (r ¬a) <| i -|s r|- o
   dnePL = negateL . notR
   dnePLK
     :: Pos a
-    =>              r ••a <| i -|s r|- o
-    -- ---------------------------------
-    -> Negate r (Not r a) <| i -|s r|- o
+    =>           r ••a <| i -|s r|- o
+    -- ------------------------------
+    -> Negate r (r ¬a) <| i -|s r|- o
   default dnePLK
-    ::              r ••a <| i -|s r|- o
-    -- ---------------------------------
-    -> Negate r (Not r a) <| i -|s r|- o
+    ::           r ••a <| i -|s r|- o
+    -- ------------------------------
+    -> Negate r (r ¬a) <| i -|s r|- o
   dnePLK = mapL getNegateNot
   dnePR
     :: Pos a
     => i -|s r|- o |> a
     -- ---------------------------------
-    -> i -|s r|- o |> Negate r (Not r a)
+    -> i -|s r|- o |> Negate r (r ¬a)
   default dnePR
     :: (NegatingN s, Pos a)
     => i -|s r|- o |> a
     -- ---------------------------------
-    -> i -|s r|- o |> Negate r (Not r a)
+    -> i -|s r|- o |> Negate r (r ¬a)
   dnePR = negateR . notL
   dnePRK
     :: Pos a
     => i -|s r|- o |> r ••a
     -- ---------------------------------
-    -> i -|s r|- o |> Negate r (Not r a)
+    -> i -|s r|- o |> Negate r (r ¬a)
   default dnePRK
     :: i -|s r|- o |> r ••a
     -- ---------------------------------
-    -> i -|s r|- o |> Negate r (Not r a)
+    -> i -|s r|- o |> Negate r (r ¬a)
   dnePRK = mapR negateNot
 
 instance NegatingP Seq where
@@ -755,8 +753,8 @@ class (Core s, Structural s, Negating s) => AdditiveDisj s where
   sumL1' p = sumR1 init >>> wkL' p
   sumL2' :: (Pos a, Pos b) => s r (a ⊕ b <| i) o -> s r (b <| i) o
   sumL2' p = sumR2 init >>> wkL' p
-  sumLWith :: (Pos a, Pos b) => s r i (o |> Not r a & Not r b) -> s r (a ⊕ b <| i) o
-  default sumLWith :: (Pos a, Pos b, AdditiveConj s) => s r i (o |> Not r a & Not r b) -> s r (a ⊕ b <| i) o
+  sumLWith :: (Pos a, Pos b) => s r i (o |> r ¬a & r ¬b) -> s r (a ⊕ b <| i) o
+  default sumLWith :: (Pos a, Pos b, AdditiveConj s) => s r i (o |> r ¬a & r ¬b) -> s r (a ⊕ b <| i) o
   sumLWith p = sumL (wkL p >>> withL1 (notL init)) (wkL p >>> withL2 (notL init))
   sumR1 :: (Pos a, Pos b) => s r i (o |> a) -> s r i (o |> a ⊕ b)
   sumR2 :: (Pos a, Pos b) => s r i (o |> b) -> s r i (o |> a ⊕ b)
@@ -862,8 +860,8 @@ class (Core s, Structural s, Negating s) => MultiplicativeConj s where
   tensorL :: (Pos a, Pos b) => s r (a <| b <| i) o -> s r (a ⊗ b <| i) o
   default tensorL :: (Pos a, Pos b, MultiplicativeDisj s) => s r (a <| b <| i) o -> s r (a ⊗ b <| i) o
   tensorL = tensorLPar . parR . notR . notR
-  tensorLPar :: (Pos a, Pos b) => s r i (o |> Not r a ⅋ Not r b) -> s r (a ⊗ b <| i) o
-  default tensorLPar :: (Pos a, Pos b, MultiplicativeDisj s) => s r i (o |> Not r a ⅋ Not r b) -> s r (a ⊗ b <| i) o
+  tensorLPar :: (Pos a, Pos b) => s r i (o |> r ¬a ⅋ r ¬b) -> s r (a ⊗ b <| i) o
+  default tensorLPar :: (Pos a, Pos b, MultiplicativeDisj s) => s r i (o |> r ¬a ⅋ r ¬b) -> s r (a ⊗ b <| i) o
   tensorLPar p = wkL p >>> parL (notL (tensorL init)) (notL (tensorL (wkL init)))
   tensorL' :: (Pos a, Pos b) => s r (a ⊗ b <| i) o -> s r (a <| b <| i) o
   tensorL' p = tensorR init (wkL init) >>> popL (wkL . wkL . pushL p)
@@ -960,8 +958,8 @@ instance Polarized N (ForAll r p f)
 
 class (Core s, Structural s, Negating s, Shifting s) => Universal s where
   {-# MINIMAL (forAllL | forAllLExists), forAllR #-}
-  forAllL :: (Polarized n x, Neg (f x)) => s r (Not r (Negate r (f x)) <| i) o -> s r (ForAll r n f <| i) o
-  default forAllL :: (Polarized n x, ForAllC (Polarized n) Neg f, Existential s) => s r (Not r (Negate r (f x)) <| i) o -> s r (ForAll r n f <| i) o
+  forAllL :: (Polarized n x, Neg (f x)) => s r (r ¬-f x <| i) o -> s r (ForAll r n f <| i) o
+  default forAllL :: (Polarized n x, ForAllC (Polarized n) Neg f, Existential s) => s r (r ¬-f x <| i) o -> s r (ForAll r n f <| i) o
   forAllL p = forAllLExists (existsR (mapR C (notL' p)))
   forAllLExists :: ForAllC (Polarized n) Neg f => s r i (o |> Exists r n (Negate r · f)) -> s r (ForAll r n f <| i) o
   default forAllLExists :: (ForAllC (Polarized n) Neg f, Existential s) => s r i (o |> Exists r n (Negate r · f)) -> s r (ForAll r n f <| i) o
@@ -992,8 +990,8 @@ class (Core s, Structural s, Negating s, Shifting s) => Existential s where
   existsL s = existsLForAll (forAllR (mapR C (notR s)))
   existsL' :: ForAllC (Polarized n) Pos f => s r (Exists r n f <| i) o -> (forall x . Polarized n x => s r (f x <| i) o)
   existsL' p = existsR init >>> wkL' p
-  existsLForAll :: ForAllC (Polarized n) Pos f => s r i (o |> ForAll r n (Not r · f)) -> s r (Exists r n f <| i) o
-  default existsLForAll :: (ForAllC (Polarized n) Pos f, Universal s) => s r i (o |> ForAll r n (Not r · f)) -> s r (Exists r n f <| i) o
+  existsLForAll :: ForAllC (Polarized n) Pos f => s r i (o |> ForAll r n ((¬) r · f)) -> s r (Exists r n f <| i) o
+  default existsLForAll :: (ForAllC (Polarized n) Pos f, Universal s) => s r i (o |> ForAll r n ((¬) r · f)) -> s r (Exists r n f <| i) o
   existsLForAll p = wkL p >>> exL (existsL (exL (forAllL (notL (negateR (mapL getC (notL init)))))))
   existsR :: (Polarized n x, Pos (f x)) => s r i (o |> f x) -> s r i (o |> Exists r n f)
 
@@ -1114,8 +1112,8 @@ class (Core s, Structural s) => ShiftingN s where
   upL :: Pos a => s r (a <| i) o -> s r (Up a <| i) o
   default upL :: (ShiftingP s, NegatingN s, Pos a) => s r (a <| i) o -> s r (Up a <| i) o
   upL = upLDown . downR . notR
-  upLDown :: Pos a => s r i (o |> Down (Not r a)) -> s r (Up a <| i) o
-  default upLDown :: (ShiftingP s, NegatingN s, Pos a) => s r i (o |> Down (Not r a)) -> s r (Up a <| i) o
+  upLDown :: Pos a => s r i (o |> Down (r ¬a)) -> s r (Up a <| i) o
+  default upLDown :: (ShiftingP s, NegatingN s, Pos a) => s r i (o |> Down (r ¬a)) -> s r (Up a <| i) o
   upLDown s = wkL s >>> downL (notL (upL init))
   upL' :: Pos a => s r (Up a <| i) o -> s r (a <| i) o
   upL' p = upR init >>> wkL' p
