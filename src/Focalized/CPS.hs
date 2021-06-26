@@ -48,7 +48,7 @@ instance Contravariant ((•) r) where
   contramap f = K . (. f) . runK
 
 
-type r •• a = r •r •a
+type r ••a = r •r •a
 
 infixr 9 •, ••
 

@@ -425,7 +425,7 @@ getNotNegate :: r ¬-a -> r ••a
 getNotNegate = contramap Negate . getNot
 
 
-type r ¬- a = r ¬r -a
+type r ¬-a = r ¬r -a
 
 infixr 9 ¬, ¬-
 
@@ -543,7 +543,7 @@ getNegateNot :: r -¬a -> r ••a
 getNegateNot = contramap Not . getNegate
 
 
-type r -¬ a = r -r ¬a
+type r -¬a = r -r ¬a
 
 infixr 9 -, -¬
 
