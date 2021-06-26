@@ -193,9 +193,14 @@ data Δ
 -- Core rules
 
 class Core s where
-  (>>>) :: s r i (o |> a) -> s r (a <| i) o -> s r i o
+  (>>>)
+    :: s r i (o |> a)   ->   s r (a <| i) o
+    ---------------------------------------
+    -> s r i o
 
-  init :: s r (a <| i) (o |> a)
+  init
+    ------------------------
+    :: s r (a <| i) (o |> a)
 
 infixr 1 >>>
 
