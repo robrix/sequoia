@@ -2,8 +2,7 @@ module Focalized.CPS
 ( -- * Continuations
   dnI
 , dnE
-, K(..)
-, type (•)
+, type (•)(..)
 , type (••)
   -- * CPS
 , cps
@@ -39,18 +38,17 @@ dnI = K . flip runK
 dnE :: r ••CPS r a b -> CPS r a b
 dnE f = CPS (\ k a -> runK f (K (\ f -> runCPS f k a)))
 
-newtype K r a = K { runK :: a -> r }
+newtype r •a = K { runK :: a -> r }
 
-instance Cat.Category K where
+instance Cat.Category (•) where
   id = K id
   K f . K g = K (g . f)
 
-instance Contravariant (K r) where
+instance Contravariant ((•) r) where
   contramap f = K . (. f) . runK
 
 
-type (•) = K
-type r •• a = K r (K r a)
+type r •• a = r •r •a
 
 infixr 8 •, ••
 

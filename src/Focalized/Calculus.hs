@@ -271,10 +271,10 @@ class Core s => Structural s where
   -- mapL2 :: (c -> (b, a)) -> s r (a <| i) o -> s r (b <| i) o -> s r (c <| i) o
   -- mapL2 f a b = popL (pushL b . exl . f) <|> popL (pushL a . exr . f)
 
-  liftL :: K r a -> s r (a <| i) o
+  liftL :: r •a -> s r (a <| i) o
   liftL = pushR init
 
-  lowerL :: (K r a -> s r i o) -> (s r (a <| i) o -> s r i o)
+  lowerL :: (r •a -> s r i o) -> (s r (a <| i) o -> s r i o)
   lowerL k p = popR k >>> p
 
 
@@ -286,7 +286,7 @@ class Core s => Structural s where
   -- @
   -- pushR . popR = id
   -- @
-  popR :: (K r a -> s r i o) -> s r i (o |> a)
+  popR :: (r •a -> s r i o) -> s r i (o |> a)
 
   poppedR :: (s r i o -> s r i' o') -> (s r i (o |> a) -> s r i' (o' |> a))
   poppedR f p = popR (f . pushR p)
@@ -299,12 +299,12 @@ class Core s => Structural s where
   -- @
   -- pushR . popR = id
   -- @
-  pushR :: s r i (o |> a) -> (K r a -> s r i o)
+  pushR :: s r i (o |> a) -> (r •a -> s r i o)
 
-  popR2 :: (K r a -> K r b -> s r i o) -> s r i (o |> b |> a)
+  popR2 :: (r •a -> r •b -> s r i o) -> s r i (o |> b |> a)
   popR2 f = popR (popR . f)
 
-  pushR2 :: s r i (o |> b |> a) -> K r a -> K r b -> s r i o
+  pushR2 :: s r i (o |> b |> a) -> r •a -> r •b -> s r i o
   pushR2 p = pushR . pushR p
 
   mapR :: (a -> a') -> s r i (o |> a) -> s r i (o |> a')
@@ -377,18 +377,18 @@ class (Core s, Structural s) => Control s where
     -- -----------
     -> i -|s r|- o
   shift
-    :: K r a <| i -|s r|- o |> r
+    :: r •a <| i -|s r|- o |> r
     -- -------------------------
     ->          i -|s r|- o |> a
 
   kL
     ::          i -|s r|- o |> a
     -- -------------------------
-    -> K r a <| i -|s r|- o
+    -> r •a <| i -|s r|- o
   kL = popL . pushR
 
   kL'
-    :: K r a <| i -|s r|- o
+    :: r •a <| i -|s r|- o
     -- -------------------------
     ->          i -|s r|- o |> a
   kL' s = kR init >>> wkR s
@@ -396,11 +396,11 @@ class (Core s, Structural s) => Control s where
   kR
     :: a <| i -|s r|- o
     -- -------------------------
-    ->      i -|s r|- o |> K r a
+    ->      i -|s r|- o |> r •a
   kR s = lowerL (pushL init) (wkR s)
 
   kR'
-    ::      i -|s r|- o |> K r a
+    ::      i -|s r|- o |> r •a
     -- -------------------------
     -> a <| i -|s r|- o
   kR' s = wkL s >>> kL init
@@ -416,14 +416,14 @@ instance Control Seq where
 type Negating s = (NegatingN s, NegatingP s)
 
 
-newtype Not    r a = Not    { getNot    :: K r a }
+newtype Not    r a = Not    { getNot    :: r •a }
 
 instance Pos a => Polarized N (Not r a) where
 
-notNegate :: K r (K r a) -> r ¬Negate r a
+notNegate :: r ••a -> r ¬Negate r a
 notNegate = Not . contramap getNegate
 
-getNotNegate :: r ¬Negate r a -> K r (K r a)
+getNotNegate :: r ¬Negate r a -> r ••a
 getNotNegate = contramap Negate . getNot
 
 
@@ -442,7 +442,7 @@ class (Core s, Structural s, Control s) => NegatingN s where
   notL = notLK . kL
   notLK
     :: Pos a
-    => K r a <| i -|s r|- o
+    => r •a <| i -|s r|- o
     -- --------------------
     ->  r ¬a <| i -|s r|- o
   notLK = mapL getNot
@@ -456,7 +456,7 @@ class (Core s, Structural s, Control s) => NegatingN s where
     :: Pos a
     =>  r ¬a <| i -|s r|- o
     -- --------------------
-    -> K r a <| i -|s r|- o
+    -> r •a <| i -|s r|- o
   notLK' = mapL Not
   notR
     :: Pos a
@@ -466,7 +466,7 @@ class (Core s, Structural s, Control s) => NegatingN s where
   notR = notRK . kR
   notRK
     :: Pos a
-    => i -|s r|- o |> K r a
+    => i -|s r|- o |> r •a
     -- --------------------
     -> i -|s r|- o |> r ¬a
   notRK = mapR Not
@@ -480,7 +480,7 @@ class (Core s, Structural s, Control s) => NegatingN s where
     :: Pos a
     => i -|s r|- o |> r ¬a
     -- --------------------
-    -> i -|s r|- o |> K r a
+    -> i -|s r|- o |> r •a
   notRK' = mapR getNot
   shiftP
     :: Pos a
@@ -502,11 +502,11 @@ class (Core s, Structural s, Control s) => NegatingN s where
   dneNL = notL . negateR
   dneNLK
     :: Neg a
-    =>   K r (K r a) <| i -|s r|- o
+    =>         r ••a <| i -|s r|- o
     -- ----------------------------
     -> r ¬Negate r a <| i -|s r|- o
   default dneNLK
-    ::   K r (K r a) <| i -|s r|- o
+    ::         r ••a <| i -|s r|- o
     -- ----------------------------
     -> r ¬Negate r a <| i -|s r|- o
   dneNLK = mapL getNotNegate
@@ -523,11 +523,11 @@ class (Core s, Structural s, Control s) => NegatingN s where
   dneNR = notR . negateL
   dneNRK
     :: Neg a
-    => i -|s r|- o |> K r (K r a)
+    => i -|s r|- o |> r ••a
     -- ----------------------------
     -> i -|s r|- o |> r ¬Negate r a
   default dneNRK
-    :: i -|s r|- o |> K r (K r a)
+    :: i -|s r|- o |> r ••a
     -- ----------------------------
     -> i -|s r|- o |> r ¬Negate r a
   dneNRK = mapR notNegate
@@ -535,14 +535,14 @@ class (Core s, Structural s, Control s) => NegatingN s where
 instance NegatingN Seq where
 
 
-newtype Negate r a = Negate { getNegate :: K r a }
+newtype Negate r a = Negate { getNegate :: r •a }
 
 instance Neg a => Polarized P (Negate r a) where
 
-negateNot :: K r (K r a) -> Negate r (Not r a)
+negateNot :: r ••a -> Negate r (Not r a)
 negateNot = Negate . contramap getNot
 
-getNegateNot :: Negate r (Not r a) -> K r (K r a)
+getNegateNot :: Negate r (Not r a) -> r ••a
 getNegateNot = contramap Not . getNegate
 
 
@@ -561,7 +561,7 @@ class (Core s, Structural s, Control s) => NegatingP s where
   negateL = negateLK . kL
   negateLK
     :: Neg a
-    =>      K r a <| i -|s r|- o
+    =>      r •a <| i -|s r|- o
     -- -------------------------
     -> Negate r a <| i -|s r|- o
   negateLK = mapL getNegate
@@ -569,7 +569,7 @@ class (Core s, Structural s, Control s) => NegatingP s where
     :: Neg a
     => Negate r a <| i -|s r|- o
     -- -------------------------
-    ->      K r a <| i -|s r|- o
+    ->      r •a <| i -|s r|- o
   negateLK' = mapL Negate
   negateL'
     :: Neg a
@@ -585,7 +585,7 @@ class (Core s, Structural s, Control s) => NegatingP s where
   negateR = negateRK . kR
   negateRK
     :: Neg a
-    => i -|s r|- o |> K r a
+    => i -|s r|- o |> r •a
     -- -------------------------
     -> i -|s r|- o |> Negate r a
   negateRK = mapR Negate
@@ -599,7 +599,7 @@ class (Core s, Structural s, Control s) => NegatingP s where
     :: Neg a
     => i -|s r|- o |> Negate r a
     -- -------------------------
-    -> i -|s r|- o |> K r a
+    -> i -|s r|- o |> r •a
   negateRK' = mapR getNegate
   shiftN
     :: Neg a
@@ -621,11 +621,11 @@ class (Core s, Structural s, Control s) => NegatingP s where
   dnePL = negateL . notR
   dnePLK
     :: Pos a
-    =>        K r (K r a) <| i -|s r|- o
+    =>              r ••a <| i -|s r|- o
     -- ---------------------------------
     -> Negate r (Not r a) <| i -|s r|- o
   default dnePLK
-    ::        K r (K r a) <| i -|s r|- o
+    ::              r ••a <| i -|s r|- o
     -- ---------------------------------
     -> Negate r (Not r a) <| i -|s r|- o
   dnePLK = mapL getNegateNot
@@ -642,11 +642,11 @@ class (Core s, Structural s, Control s) => NegatingP s where
   dnePR = negateR . notL
   dnePRK
     :: Pos a
-    => i -|s r|- o |> K r (K r a)
+    => i -|s r|- o |> r ••a
     -- ---------------------------------
     -> i -|s r|- o |> Negate r (Not r a)
   default dnePRK
-    :: i -|s r|- o |> K r (K r a)
+    :: i -|s r|- o |> r ••a
     -- ---------------------------------
     -> i -|s r|- o |> Negate r (Not r a)
   dnePRK = mapR negateNot
@@ -953,7 +953,7 @@ instance Coimplicative Seq where
 type Quantifying s = (Universal s, Existential s)
 
 
-newtype ForAll r p f = ForAll { runForAll :: forall x . Polarized p x => K r (K r (f x)) }
+newtype ForAll r p f = ForAll { runForAll :: forall x . Polarized p x => r ••f x }
 
 instance Polarized N (ForAll r p f)
 
@@ -976,11 +976,11 @@ instance Universal Seq where
   forAllR p = sequent $ \ k a -> k (inr (ForAll (K (\ k' -> runSeq p (k . inl |> runK k') a))))
 
 
-data Exists r p f = forall x . Polarized p x => Exists (K r (K r (f x)))
+data Exists r p f = forall x . Polarized p x => Exists (r ••f x)
 
 instance Polarized P (Exists r p f)
 
-runExists :: (forall x . Polarized p x => f x -> a) -> Exists r p f -> K r (K r a)
+runExists :: (forall x . Polarized p x => f x -> a) -> Exists r p f -> r ••a
 runExists f (Exists r) = K (\ k -> runK r (K (runK k . f)))
 
 
@@ -1056,10 +1056,10 @@ refoldMu f g = foldMu f Cat.<<< unfoldMu g
 refold :: Functor f => (f b -> b) -> (a -> f a) -> (a -> b)
 refold f g = go where go = f . fmap go . g
 
-dnESeq :: K r (K r (Seq r a b)) -> Seq r a b
+dnESeq :: r ••Seq r a b -> Seq r a b
 dnESeq = Seq . dnE . contramap (contramap getSeq)
 
-dnEFun :: K r (K r (a ~~r~> b)) -> (a ~~r~> b)
+dnEFun :: r ••(a ~~r~> b) -> (a ~~r~> b)
 dnEFun = Fun . dnE . contramap (contramap getFun)
 
 
