@@ -4,6 +4,7 @@ module Focalized.CPS
 , dnE
 , K(..)
 , type (•)
+, type (••)
   -- * CPS
 , cps
 , liftCPS
@@ -49,8 +50,9 @@ instance Contravariant (K r) where
 
 
 type (•) = K
+type r •• a = K r (K r a)
 
-infixr 8 •
+infixr 8 •, ••
 
 
 -- CPS
