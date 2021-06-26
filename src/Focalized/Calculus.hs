@@ -912,6 +912,8 @@ instance (Pos a, Neg b) => Polarized P (Sub r a b) where
 
 type (a --< b) r = Sub r a b
 
+infixr 5 --<
+
 
 class (Core s, Structural s, Negating s) => Coimplicative s where
   {-# MINIMAL (subL | subLFun), subR #-}
