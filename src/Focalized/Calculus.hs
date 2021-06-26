@@ -206,11 +206,12 @@ class Core s where
     -> s r i o
   (<<<) = flip (>>>)
 
+  infixr 1 >>>, <<<
+
   init
     ------------------------
     :: s r (a <| i) (o |> a)
 
-infixr 1 >>>
 
 instance Core Seq where
   f >>> g = f >>= pure |> pushL g
