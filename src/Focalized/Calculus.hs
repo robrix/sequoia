@@ -21,6 +21,8 @@ module Focalized.Calculus
 , (|>)
 , Γ(..)
 , Δ
+, type (-|)
+, type (|-)
   -- * Core rules
 , Core(..)
 , Structural(..)
@@ -188,6 +190,12 @@ data Γ = Γ
 
 
 data Δ
+
+
+type l -| r = r l
+type l |- r = l r
+
+infixl 2 |-, -|
 
 
 -- Core rules
