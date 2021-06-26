@@ -81,13 +81,6 @@ module Focalized.Calculus
 , refoldMu
 , refold
 , Recursive(..)
-  -- * (Co-)Iteration
-, Iter(..)
-, MAlg(..)
-, Iterative(..)
-, Coiter(..)
-, MCoalg(..)
-, Coiterative(..)
   -- * Polarity
 , N(..)
 , P(..)
@@ -863,44 +856,6 @@ class (Core s, Structural s, Implicative s, Universal s) => Recursive s where
 instance Recursive Seq where
   muL f k = wkL (downR f) >>> exL (mapL getMu (funL init (wkL' k)))
   muR = mapR mu
-
-
--- (Co-)Iteration
-
-newtype Iter r f = Iter { getIter :: forall x . Neg x => (Down (MAlg r f x) --> x) r }
-
-instance Polarized N (Iter r f)
-
-newtype MAlg r f x = MAlg { getMAlg :: forall y . Pos y => (Down ((y --> x) r) --> (f y --> x) r) r }
-
-instance (Pos (f x), Neg x) => Polarized N (MAlg r f x)
-
-
-class (Core s, Structural s) => Iterative s where
-  iterL :: (Pos (f a), Neg a) => s r i (o |> MAlg r f a) -> s r (a <| i) o -> s r (Iter r f <| i) o
-  iterR :: ForAllC Neg Pos f => (forall a . Neg a => s r (MAlg r f a <| i) (o |> a)) -> s r i (o |> Iter r f)
-  iterR' :: (ForAllC Neg Pos f, Neg a) => s r i (o |> Iter r f) -> s r (MAlg r f a <| i) (o |> a)
-  iterR' s = wkR' (wkL s) >>> iterL init init
-
-instance Iterative Seq where
-  iterL alg k = wkL alg >>> exL (mapL getIter (funL (downR init) (wkL' k)))
-  iterR body = sequent $ \ k i -> k (inr (Iter (liftFun (\ k' (Down a) -> runSeq body (k . inl |> k') (a <| i)))))
-
-
-data Coiter r f = forall x . Pos x => Coiter { getCoiter :: Down (MCoalg r f x) ⊗ x }
-
-instance Polarized P (Coiter r f)
-
-newtype MCoalg r f x = MCoalg { getMCoalg :: forall y . Neg y => (Down ((x --> y) r) --> (x --> f y) r) r }
-
-instance (Neg (f x), Pos x) => Polarized N (MCoalg r f x)
-
-
-class Coiterative s where
-  coiterR :: (Neg (f a), Pos a) => s r i (o |> MCoalg r f a) -> s r i (o |> a) -> s r i (o |> Coiter r f)
-
-instance Coiterative Seq where
-  coiterR coalg a = wkR' coalg >>> wkR' (wkL a) >>> mapR Coiter (tensorR (wkL (downR init)) init)
 
 
 -- Polarity
