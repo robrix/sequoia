@@ -101,7 +101,8 @@ import           Focalized.Calculus.Core
 import           Focalized.Calculus.Falsity
 import           Focalized.Calculus.Negation
 import           Focalized.Calculus.Truth
-import           Focalized.Connective
+import           Focalized.Conjunction
+import           Focalized.Disjunction
 import           Focalized.Polarity
 import           Prelude hiding (init)
 
@@ -194,25 +195,6 @@ instance AdditiveFalsity Seq where
   zeroL = liftL (K absurdP)
 
 
-newtype a & b = With (forall r . (a -> b -> r) -> r)
-  deriving (Functor)
-
-infixr 6 &
-
-instance (Neg a, Neg b) => Polarized N (a & b) where
-
-instance Foldable ((&) f) where
-  foldMap = foldMapConj
-
-instance Traversable ((&) f) where
-  traverse = traverseConj
-
-instance Conj (&) where
-  inlr a b = With $ \ f -> f a b
-  exl (With run) = run const
-  exr (With run) = run (const id)
-
-
 class (Core s, Structural s, Negation s) => AdditiveConj s where
   {-# MINIMAL (withL1, withL2 | withLSum), withR #-}
   withL1
@@ -270,23 +252,6 @@ instance AdditiveConj Seq where
   withL1 p = popL (pushL p . exl)
   withL2 p = popL (pushL p . exr)
   withR = liftA2 (liftA2 inlr)
-
-
-data a ⊕ b
-  = InL !a
-  | InR !b
-  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-
-infixr 6 ⊕
-
-instance (Pos a, Pos b) => Polarized P (a ⊕ b)
-
-instance Disj (⊕) where
-  inl = InL
-  inr = InR
-  exlr ifl ifr = \case
-    InL l -> ifl l
-    InR r -> ifr r
 
 
 class (Core s, Structural s, Negation s) => AdditiveDisj s where
@@ -356,25 +321,6 @@ instance MultiplicativeTruth Seq where
   oneR = liftR One
 
 
-newtype a ⅋ b = Par (forall r . (a -> r) -> (b -> r) -> r)
-  deriving (Functor)
-
-infixr 7 ⅋
-
-instance (Neg a, Neg b) => Polarized N (a ⅋ b) where
-
-instance Foldable ((⅋) f) where
-  foldMap = foldMapDisj
-
-instance Traversable ((⅋) f) where
-  traverse = traverseDisj
-
-instance Disj (⅋) where
-  inl l = Par $ \ ifl _ -> ifl l
-  inr r = Par $ \ _ ifr -> ifr r
-  exlr ifl ifr (Par run) = run ifl ifr
-
-
 class (Core s, Structural s, Negation s, Contextual s) => MultiplicativeDisj s where
   {-# MINIMAL (parL | parLTensor), parR #-}
   parL
@@ -414,19 +360,6 @@ class (Core s, Structural s, Negation s, Contextual s) => MultiplicativeDisj s w
 instance MultiplicativeDisj Seq where
   parL a b = popL (exlr (pushL a) (pushL b))
   parR ab = (>>= inr . inl) |> inr . inr <$> ab
-
-
-data a ⊗ b = !a :⊗ !b
-  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-
-infixr 7 ⊗, :⊗
-
-instance (Pos a, Pos b) => Polarized P (a ⊗ b) where
-
-instance Conj (⊗) where
-  inlr = (:⊗)
-  exl (l :⊗ _) = l
-  exr (_ :⊗ r) = r
 
 
 class (Core s, Structural s, Negation s, Contextual s) => MultiplicativeConj s where

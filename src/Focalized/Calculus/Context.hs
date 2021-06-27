@@ -21,7 +21,8 @@ import Control.Monad (ap)
 import Data.Bifoldable
 import Data.Bifunctor
 import Data.Bitraversable
-import Focalized.Connective
+import Focalized.Conjunction
+import Focalized.Disjunction
 
 -- Γ
 

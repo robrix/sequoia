@@ -28,7 +28,7 @@ import           Control.Monad.Trans.Class
 import           Data.Functor.Contravariant
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
-import           Focalized.Connective
+import           Focalized.Disjunction
 
 -- Continuations
 
