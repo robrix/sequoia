@@ -179,8 +179,12 @@ instance Control Seq where
 -- Negation
 
 instance NegNegation Seq where
+  notL = notLK . kL
+  notR = notRK . kR
 
 instance PosNegation Seq where
+  negateL = negateLK . kL
+  negateR = negateRK . kR
 
 
 -- Additive
@@ -194,10 +198,14 @@ data Top = Top
 instance Polarized N Top where
 
 
-class (Core s, Structural s, Negation s) => AdditiveTruth s where
+class AdditiveTruth s where
   topR
     -- -----------------
     :: i -|s r|- o > Top
+  default topR
+    :: Contextual s
+    -- -----------------
+    => i -|s r|- o > Top
   topR = liftR Top
 
 instance AdditiveTruth Seq where
@@ -211,10 +219,14 @@ absurdP :: Zero -> a
 absurdP = \case
 
 
-class (Core s, Structural s, Negation s) => AdditiveFalsity s where
+class AdditiveFalsity s where
   zeroL
     -- ------------------
     :: Zero < i -|s r|- o
+  default zeroL
+    :: Contextual s
+    -- ------------------
+    => Zero < i -|s r|- o
   zeroL = popL absurdP
 
 instance AdditiveFalsity Seq where
@@ -381,7 +393,7 @@ absurdN :: Bot -> a
 absurdN = \case
 
 
-class (Core s, Structural s, Negation s) => MultiplicativeFalsity s where
+class (Core s, Contextual s, Structural s, Negation s) => MultiplicativeFalsity s where
   botL
     -- -----------------
     :: Bot < i -|s r|- o
@@ -406,7 +418,7 @@ data One = One
 instance Polarized P One where
 
 
-class (Core s, Structural s, Negation s) => MultiplicativeTruth s where
+class (Core s, Contextual s, Structural s, Negation s) => MultiplicativeTruth s where
   oneL
     :: i -|s r|- o
     -- -----------------
@@ -444,7 +456,7 @@ instance Disj (⅋) where
   exlr ifl ifr (Par run) = run ifl ifr
 
 
-class (Core s, Structural s, Negation s) => MultiplicativeDisj s where
+class (Core s, Structural s, Negation s, Contextual s) => MultiplicativeDisj s where
   {-# MINIMAL (parL | parLTensor), parR #-}
   parL
     :: (Neg a, Neg b)
@@ -498,7 +510,7 @@ instance Conj (⊗) where
   exr (_ :⊗ r) = r
 
 
-class (Core s, Structural s, Negation s) => MultiplicativeConj s where
+class (Core s, Structural s, Negation s, Contextual s) => MultiplicativeConj s where
   {-# MINIMAL (tensorL | tensorLPar), tensorR #-}
   tensorL
     :: (Pos a, Pos b)
@@ -681,7 +693,7 @@ newtype ForAll r p f = ForAll { runForAll :: forall x . Polarized p x => r •�
 instance Polarized N (ForAll r p f)
 
 
-class (Core s, Structural s, Negation s, Shifting s) => Universal s where
+class (Core s, Structural s, Negation s, Contextual s, Shifting s) => Universal s where
   {-# MINIMAL (forAllL | forAllLExists), forAllR #-}
   forAllL
     :: (Polarized n x, Neg (f x))
@@ -715,7 +727,7 @@ class (Core s, Structural s, Negation s, Shifting s) => Universal s where
     =>                              i -|s r|- o > ForAll r n f
     -- ---------------------------------------
     -> (forall x . Polarized n x => i -|s r|- o >            f x)
-  forAllR' p = wkR' p >>> forAllL (dneNL init)
+  forAllR' p = wkR' p >>> forAllL (dneN init)
 
 instance Universal Seq where
   forAllL p = mapL (notNegate . runForAll) p
@@ -730,7 +742,7 @@ runExists :: (forall x . Polarized p x => f x -> a) -> Exists r p f -> r ••a
 runExists f (Exists r) = K (\ k -> runK r (K (runK k . f)))
 
 
-class (Core s, Structural s, Negation s, Shifting s) => Existential s where
+class (Core s, Structural s, Negation s, Contextual s, Shifting s) => Existential s where
   {-# MINIMAL (existsL | existsLForAll), existsR #-}
   existsL
     :: (forall x . Polarized n x => f x < i -|s r|- o)
