@@ -105,6 +105,7 @@ import           Focalized.Calculus.Context
 import           Focalized.Calculus.Control
 import           Focalized.Calculus.Core
 import           Focalized.Connective
+import           Focalized.Polarity
 import           Prelude hiding (init)
 
 -- Sequents
@@ -1098,16 +1099,6 @@ instance Recursive Seq where
 
 
 -- Polarity
-
-newtype N a = N { getN :: a }
-  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-  deriving (Applicative, Monad) via Identity
-
-
-newtype P a = P { getP :: a }
-  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-  deriving (Applicative, Monad) via Identity
-
 
 class Polarized (p :: Type -> Type) c | c -> p
 instance Polarized N (N a)
