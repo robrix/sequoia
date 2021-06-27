@@ -12,6 +12,7 @@ module Focalized.Calculus.Core
 , Exchange(..)
   -- * Contextual
 , Contextual(..)
+, Contextually(..)
 ) where
 
 import Control.Monad (join)
@@ -219,3 +220,19 @@ class Core s => Contextual s where
 
   lowerR :: (a -> s r i o) -> (s r i (o > a) -> s r i o)
   lowerR k p = p >>> popL k
+
+
+newtype Contextually s r i o = Contextually { getContextually :: s r i o }
+  deriving (Core)
+
+instance Contextual s => Weaken (Contextually s) where
+  wkL = Contextually . popL . const . getContextually
+  wkR = Contextually . popR . const . getContextually
+
+instance Contextual s => Contract (Contextually s) where
+  cnL = Contextually . popL . join . pushL2 . getContextually
+  cnR = Contextually . popR . join . pushR2 . getContextually
+
+instance Contextual s => Exchange (Contextually s) where
+  exL = Contextually . popL2 . flip . pushL2 . getContextually
+  exR = Contextually . popR2 . flip . pushR2 . getContextually
