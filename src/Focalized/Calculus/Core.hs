@@ -6,6 +6,8 @@ module Focalized.Calculus.Core
   -- * Structural
 , Structural
 , Weaken(..)
+, wkL'
+, wkR'
 , Contract(..)
 , Exchange(..)
   -- * Contextual
@@ -66,26 +68,20 @@ class Core s => Weaken s where
     -- ---------------
     -> i -|s r|- o > a
   wkR = popR . const
-  wkL'
-    :: a     < i -|s r|- o
-    -- -------------------
-    -> a < b < i -|s r|- o
-  default wkL'
-    :: Exchange s
-    => a     < i -|s r|- o
-    -- -------------------
-    -> a < b < i -|s r|- o
-  wkL' = exL . wkL
-  wkR'
-    :: i -|s r|- o > a
-    -- -------------------
-    -> i -|s r|- o > b > a
-  default wkR'
-    :: Exchange s
-    => i -|s r|- o > a
-    -- -------------------
-    -> i -|s r|- o > b > a
-  wkR' = exR . wkR
+
+wkL'
+  :: (Weaken s, Exchange s)
+  => a     < i -|s r|- o
+  -- -------------------
+  -> a < b < i -|s r|- o
+wkL' = exL . wkL
+
+wkR'
+  :: (Weaken s, Exchange s)
+  => i -|s r|- o > a
+  -- -------------------
+  -> i -|s r|- o > b > a
+wkR' = exR . wkR
 
 
 class Core s => Contract s where
@@ -211,7 +207,7 @@ class Core s => Contextual s where
   mapR f p = popR (pushR p . contramap f)
 
   mapR2 :: (a -> b -> c) -> s r i (o > a) -> s r i (o > b) -> s r i (o > c)
-  default mapR2 :: Weaken s => (a -> b -> c) -> s r i (o > a) -> s r i (o > b) -> s r i (o > c)
+  default mapR2 :: (Weaken s, Exchange s) => (a -> b -> c) -> s r i (o > a) -> s r i (o > b) -> s r i (o > c)
   mapR2 f a b = popR (pushR (wkR' a) . contramap f) >>> popL (\ f -> popR (pushR b . contramap f))
 
   liftR :: a -> s r i (o > a)
