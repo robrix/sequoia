@@ -65,9 +65,11 @@ library
   exposed-modules:
     Focalized.B
     Focalized.Calculus
+    Focalized.Calculus.Conjunction
     Focalized.Calculus.Context
     Focalized.Calculus.Control
     Focalized.Calculus.Core
+    Focalized.Calculus.Disjunction
     Focalized.Calculus.Falsity
     Focalized.Calculus.Negation
     Focalized.Calculus.Truth
