@@ -11,6 +11,7 @@ module Focalized.Connective
 , traverseConj
 , bifoldMapConj
 , bimapConj
+, bitraverseConj
 ) where
 
 class Disj d where
@@ -57,3 +58,6 @@ bifoldMapConj f g = (<>) <$> f . exl <*> g . exr
 
 bimapConj :: Conj p => (a -> a') -> (b -> b') -> (a `p` b -> a' `p` b')
 bimapConj f g = inlr <$> f . exl <*> g . exr
+
+bitraverseConj :: (Conj p, Applicative m) => (a -> m a') -> (b -> m b') -> (a `p` b -> m (a' `p` b'))
+bitraverseConj f g c = inlr <$> f (exl c) <*> g (exr c)
