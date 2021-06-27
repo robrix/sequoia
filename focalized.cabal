@@ -66,6 +66,7 @@ library
     Focalized.B
     Focalized.Calculus
     Focalized.Calculus.Context
+    Focalized.Calculus.Control
     Focalized.Calculus.Core
     Focalized.Connective
     Focalized.CPS
