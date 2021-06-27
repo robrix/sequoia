@@ -20,7 +20,7 @@ module Focalized.Calculus
   -- * Core rules
 , module Focalized.Calculus.Core
   -- * Control
-, Control(..)
+, module Focalized.Calculus.Control
   -- * Negation
 , module Focalized.Calculus.Negation
   -- * Additive
