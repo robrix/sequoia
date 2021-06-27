@@ -1033,6 +1033,7 @@ type f ~> b = f b
 infixr 6 ~~
 infixr 5 ~>
 
+
 class (Core s, Structural s, Negating s) => Implicative s where
   {-# MINIMAL (funL | funLSub), funR #-}
   funL
