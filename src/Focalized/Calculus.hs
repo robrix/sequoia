@@ -103,6 +103,7 @@ import           Focalized.Calculus.Negation
 import           Focalized.Connective
 import           Focalized.Falsity
 import           Focalized.Polarity
+import           Focalized.Truth
 import           Prelude hiding (init)
 
 -- Sequents
@@ -185,12 +186,6 @@ instance PosNegation Seq where
 -- Additive
 
 type Additive s = (AdditiveTruth s, AdditiveFalsity s, AdditiveConj s, AdditiveDisj s)
-
-
-data Top = Top
-  deriving (Eq, Ord, Show)
-
-instance Polarized N Top where
 
 
 class AdditiveTruth s where
@@ -381,12 +376,6 @@ class (Core s, Contextual s, Structural s, Negation s) => MultiplicativeFalsity 
   botR' = (>>> botL)
 
 instance MultiplicativeFalsity Seq where
-
-
-data One = One
-  deriving (Eq, Ord, Show)
-
-instance Polarized P One where
 
 
 class (Core s, Contextual s, Structural s, Negation s) => MultiplicativeTruth s where
