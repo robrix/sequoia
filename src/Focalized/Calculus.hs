@@ -662,7 +662,9 @@ instance Polarized N Top where
 
 
 class (Core s, Structural s, Negating s) => AdditiveTruth s where
-  topR :: s r i (o > Top)
+  topR
+    -- -----------------
+    :: i -|s r|- o > Top
   topR = liftR Top
 
 instance AdditiveTruth Seq where
@@ -677,7 +679,9 @@ absurdP = \case
 
 
 class (Core s, Structural s, Negating s) => AdditiveFalsity s where
-  zeroL :: s r (Zero < i) o
+  zeroL
+    -- ------------------
+    :: Zero < i -|s r|- o
   zeroL = popL absurdP
 
 instance AdditiveFalsity Seq where
@@ -704,19 +708,55 @@ instance Conj (&) where
 
 class (Core s, Structural s, Negating s) => AdditiveConj s where
   {-# MINIMAL (withL1, withL2 | withLSum), withR #-}
-  withL1 :: (Neg a, Neg b) => s r (a < i) o -> s r (a & b < i) o
-  default withL1 :: (Neg a, Neg b, AdditiveDisj s) => s r (a < i) o -> s r (a & b < i) o
+  withL1
+    :: (Neg a, Neg b)
+    => a     < i -|s r|- o
+    -- -------------------
+    -> a & b < i -|s r|- o
+  default withL1
+    :: (Neg a, Neg b, AdditiveDisj s)
+    => a     < i -|s r|- o
+    -- -------------------
+    -> a & b < i -|s r|- o
   withL1 = withLSum . sumR1 . negateR
-  withL2 :: (Neg a, Neg b) => s r (b < i) o -> s r (a & b < i) o
-  default withL2 :: (Neg a, Neg b, AdditiveDisj s) => s r (b < i) o -> s r (a & b < i) o
+  withL2
+    :: (Neg a, Neg b)
+    =>     b < i -|s r|- o
+    -- -------------------
+    -> a & b < i -|s r|- o
+  default withL2
+    :: (Neg a, Neg b, AdditiveDisj s)
+    =>     b < i -|s r|- o
+    -- -------------------
+    -> a & b < i -|s r|- o
   withL2 = withLSum . sumR2 . negateR
-  withLSum :: (Neg a, Neg b) => s r i (o > r -a ⊕ r -b) -> s r (a & b < i) o
-  default withLSum :: (Neg a, Neg b, AdditiveDisj s) => s r i (o > r -a ⊕ r -b) -> s r (a & b < i) o
+  withLSum
+    :: (Neg a, Neg b)
+    =>         i -|s r|- o > r -a ⊕ r -b
+    -- ---------------------------------
+    -> a & b < i -|s r|- o
+  default withLSum
+    :: (Neg a, Neg b, AdditiveDisj s)
+    =>         i -|s r|- o > r -a ⊕ r -b
+    -- ---------------------------------
+    -> a & b < i -|s r|- o
   withLSum p = wkL p >>> sumL (negateL (withL1 init)) (negateL (withL2 init))
-  withR :: (Neg a, Neg b) => s r i (o > a) -> s r i (o > b) -> s r i (o > (a & b))
-  withR1' :: (Neg a, Neg b) => s r i (o > (a & b)) -> s r i (o > a)
+  withR
+    :: (Neg a, Neg b)
+    => i -|s r|- o > a   ->   i -|s r|- o > b
+    -- --------------------------------------
+    ->           i -|s r|- o > a & b
+  withR1'
+    :: (Neg a, Neg b)
+    => i -|s r|- o > a & b
+    -- -------------------
+    -> i -|s r|- o > a
   withR1' t = wkR' t >>> withL1 init
-  withR2' :: (Neg a, Neg b) => s r i (o > (a & b)) -> s r i (o > b)
+  withR2'
+    :: (Neg a, Neg b)
+    => i -|s r|- o > a & b
+    -- -------------------
+    -> i -|s r|- o > b
   withR2' t = wkR' t >>> withL2 init
 
 instance AdditiveConj Seq where
@@ -744,18 +784,50 @@ instance Disj (⊕) where
 
 class (Core s, Structural s, Negating s) => AdditiveDisj s where
   {-# MINIMAL (sumL | sumLWith), sumR1, sumR2 #-}
-  sumL :: (Pos a, Pos b) => s r (a < i) o -> s r (b < i) o -> s r (a ⊕ b < i) o
-  default sumL :: (Pos a, Pos b, AdditiveConj s) => s r (a < i) o -> s r (b < i) o -> s r (a ⊕ b < i) o
+  sumL
+    :: (Pos a, Pos b)
+    => a < i -|s r|- o   ->   b < i -|s r|- o
+    -- --------------------------------------
+    ->           a ⊕ b < i -|s r|- o
+  default sumL
+    :: (Pos a, Pos b, AdditiveConj s)
+    => a < i -|s r|- o   ->   b < i -|s r|- o
+    -- --------------------------------------
+    ->           a ⊕ b < i -|s r|- o
   sumL p1 p2 = sumLWith (withR (notR p1) (notR p2))
-  sumL1' :: (Pos a, Pos b) => s r (a ⊕ b < i) o -> s r (a < i) o
+  sumL1'
+    :: (Pos a, Pos b)
+    => a ⊕ b < i -|s r|- o
+    -- -------------------
+    -> a     < i -|s r|- o
   sumL1' p = sumR1 init >>> wkL' p
-  sumL2' :: (Pos a, Pos b) => s r (a ⊕ b < i) o -> s r (b < i) o
+  sumL2'
+    :: (Pos a, Pos b)
+    => a ⊕ b < i -|s r|- o
+    -- -------------------
+    ->     b < i -|s r|- o
   sumL2' p = sumR2 init >>> wkL' p
-  sumLWith :: (Pos a, Pos b) => s r i (o > r ¬a & r ¬b) -> s r (a ⊕ b < i) o
-  default sumLWith :: (Pos a, Pos b, AdditiveConj s) => s r i (o > r ¬a & r ¬b) -> s r (a ⊕ b < i) o
+  sumLWith
+    :: (Pos a, Pos b)
+    =>         i -|s r|- o > r ¬a & r ¬b
+    -- ---------------------------------
+    -> a ⊕ b < i -|s r|- o
+  default sumLWith
+    :: (Pos a, Pos b, AdditiveConj s)
+    =>         i -|s r|- o > r ¬a & r ¬b
+    -- ---------------------------------
+    -> a ⊕ b < i -|s r|- o
   sumLWith p = sumL (wkL p >>> withL1 (notL init)) (wkL p >>> withL2 (notL init))
-  sumR1 :: (Pos a, Pos b) => s r i (o > a) -> s r i (o > a ⊕ b)
-  sumR2 :: (Pos a, Pos b) => s r i (o > b) -> s r i (o > a ⊕ b)
+  sumR1
+    :: (Pos a, Pos b)
+    => i -|s r|- o > a
+    -- -------------------
+    -> i -|s r|- o > a ⊕ b
+  sumR2
+    :: (Pos a, Pos b)
+    => i -|s r|- o >     b
+    -- -------------------
+    -> i -|s r|- o > a ⊕ b
 
 instance AdditiveDisj Seq where
   sumL a b = popL (exlr (pushL a) (pushL b))
