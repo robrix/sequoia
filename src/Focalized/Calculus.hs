@@ -1363,16 +1363,44 @@ instance Pos a => Polarized N (Up a) where
 
 class (Core s, Structural s) => ShiftingN s where
   {-# MINIMAL (upL | upLDown), upR #-}
-  upL :: Pos a => s r (a < i) o -> s r (Up a < i) o
-  default upL :: (ShiftingP s, NegatingN s, Pos a) => s r (a < i) o -> s r (Up a < i) o
+  upL
+    :: Pos a
+    =>    a < i -|s r|- o
+    -- ------------------
+    -> Up a < i -|s r|- o
+  default upL
+    :: (ShiftingP s, NegatingN s, Pos a)
+    =>    a < i -|s r|- o
+    -- ------------------
+    -> Up a < i -|s r|- o
   upL = upLDown . downR . notR
-  upLDown :: Pos a => s r i (o > Down (r ¬a)) -> s r (Up a < i) o
-  default upLDown :: (ShiftingP s, NegatingN s, Pos a) => s r i (o > Down (r ¬a)) -> s r (Up a < i) o
+  upLDown
+    :: Pos a
+    =>        i -|s r|- o > Down (r ¬a)
+    -- --------------------------------
+    -> Up a < i -|s r|- o
+  default upLDown
+    :: (ShiftingP s, NegatingN s, Pos a)
+    =>        i -|s r|- o > Down (r ¬a)
+    -- --------------------------------
+    -> Up a < i -|s r|- o
   upLDown s = wkL s >>> downL (notL (upL init))
-  upL' :: Pos a => s r (Up a < i) o -> s r (a < i) o
+  upL'
+    :: Pos a
+    => Up a < i -|s r|- o
+    -- ------------------
+    ->    a < i -|s r|- o
   upL' p = upR init >>> wkL' p
-  upR :: Pos a => s r i (o > a) -> s r i (o > Up a)
-  upR' :: Pos a => s r i (o > Up a) -> s r i (o > a)
+  upR
+    :: Pos a
+    => i -|s r|- o >    a
+    -- ------------------
+    -> i -|s r|- o > Up a
+  upR'
+    :: Pos a
+    => i -|s r|- o > Up a
+    -- ------------------
+    -> i -|s r|- o >    a
   upR' p = wkR' p >>> upL init
 
 instance ShiftingN Seq where
@@ -1389,16 +1417,44 @@ instance Neg a => Polarized P (Down a) where
 
 class (Core s, Structural s) => ShiftingP s where
   {-# MINIMAL (downL | downLUp), downR #-}
-  downL :: Neg a => s r (a < i) o -> s r (Down a < i) o
-  default downL :: (ShiftingN s, NegatingP s, Neg a) => s r (a < i) o -> s r (Down a < i) o
+  downL
+    :: Neg a
+    =>      a < i -|s r|- o
+    -- --------------------
+    -> Down a < i -|s r|- o
+  default downL
+    :: (ShiftingN s, NegatingP s, Neg a)
+    =>      a < i -|s r|- o
+    -- --------------------
+    -> Down a < i -|s r|- o
   downL = downLUp . upR . negateR
-  downLUp :: Neg a => s r i (o > Up (r -a)) -> s r (Down a < i) o
-  default downLUp :: (ShiftingN s, NegatingP s, Neg a) => s r i (o > Up (r -a)) -> s r (Down a < i) o
+  downLUp
+    :: Neg a
+    =>          i -|s r|- o > Up (r -a)
+    -- --------------------------------
+    -> Down a < i -|s r|- o
+  default downLUp
+    :: (ShiftingN s, NegatingP s, Neg a)
+    =>          i -|s r|- o > Up (r -a)
+    -- --------------------------------
+    -> Down a < i -|s r|- o
   downLUp s = wkL s >>> upL (negateL (downL init))
-  downL' :: Neg a => s r (Down a < i) o -> s r (a < i) o
+  downL'
+    :: Neg a
+    => Down a < i -|s r|- o
+    -- --------------------
+    ->      a < i -|s r|- o
   downL' p = downR init >>> wkL' p
-  downR :: Neg a => s r i (o > a) -> s r i (o > Down a)
-  downR' :: Neg a => s r i (o > Down a) -> s r i (o > a)
+  downR
+    :: Neg a
+    => i -|s r|- o >      a
+    -- --------------------
+    -> i -|s r|- o > Down a
+  downR'
+    :: Neg a
+    => i -|s r|- o > Down a
+    -- --------------------
+    -> i -|s r|- o >      a
   downR' p = wkR' p >>> downL init
 
 instance ShiftingP Seq where
