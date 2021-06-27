@@ -106,6 +106,7 @@ import           Focalized.Calculus.Context
 import           Focalized.Calculus.Control
 import           Focalized.Calculus.Core
 import           Focalized.Connective
+import           Focalized.Negation
 import           Focalized.Polarity
 import           Prelude hiding (init)
 
@@ -178,22 +179,6 @@ instance Control Seq where
 -- Negating
 
 type Negating s = (NegatingN s, NegatingP s)
-
-
-newtype r ¬a = Not    { getNot    :: r •a }
-
-instance Pos a => Polarized N (r ¬a) where
-
-notNegate :: r ••a -> r ¬-a
-notNegate = Not . contramap getNegate
-
-getNotNegate :: r ¬-a -> r ••a
-getNotNegate = contramap Negate . getNot
-
-
-type r ¬-a = r ¬r -a
-
-infixr 9 ¬, ¬-
 
 
 class (Core s, Structural s, Contextual s, Control s) => NegatingN s where
@@ -296,22 +281,6 @@ class (Core s, Structural s, Contextual s, Control s) => NegatingN s where
   dneNRK = mapR notNegate
 
 instance NegatingN Seq where
-
-
-newtype r -a = Negate { getNegate :: r •a }
-
-instance Neg a => Polarized P (r -a) where
-
-negateNot :: r ••a -> r -¬a
-negateNot = Negate . contramap getNot
-
-getNegateNot :: r -¬a -> r ••a
-getNegateNot = contramap Not . getNegate
-
-
-type r -¬a = r -r ¬a
-
-infixr 9 -, -¬
 
 
 class (Core s, Structural s, Control s, Contextual s) => NegatingP s where
