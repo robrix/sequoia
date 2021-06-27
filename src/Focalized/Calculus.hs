@@ -42,7 +42,7 @@ module Focalized.Calculus
 , MultiplicativeDisj(..)
 , type (⊗)(..)
 , MultiplicativeConj(..)
-  -- * Implicative
+  -- * Implication
 , runFun
 , appFun
 , appFun2
@@ -51,11 +51,11 @@ module Focalized.Calculus
 , Fun(..)
 , type (~>)
 , type (~~)
-, Implicative(..)
+, Implication(..)
 , Sub(..)
 , type (-<)
 , type (~-)
-, Coimplicative(..)
+, Subtraction(..)
   -- * Quantifying
 , Quantifying
 , ForAll(..)
@@ -101,9 +101,9 @@ import           Focalized.Calculus.Control
 import           Focalized.Calculus.Core
 import           Focalized.Calculus.Disjunction
 import           Focalized.Calculus.Falsity
+import           Focalized.Calculus.Implication
 import           Focalized.Calculus.Negation
 import           Focalized.Calculus.Truth
-import           Focalized.Implication
 import           Focalized.Polarity
 import           Prelude hiding (init)
 
@@ -237,95 +237,12 @@ instance MultiplicativeConj Seq where
 runFun :: (a ~~r~> b) -> Seq r (a < i) (o > b)
 runFun = Seq . dimap exl inr . getFun
 
-class (Core s, Structural s, Negation s) => Implicative s where
-  {-# MINIMAL (funL | funLSub), funR #-}
-  funL
-    :: (Pos a, Neg b)
-    => i -|s r|- o > a   ->   b < i -|s r|- o
-    -- --------------------------------------
-    ->        a ~~r~> b < i -|s r|- o
-  default funL
-    :: (Pos a, Neg b, Coimplicative s)
-    => i -|s r|- o > a   ->   b < i -|s r|- o
-    -- --------------------------------------
-    ->        a ~~r~> b < i -|s r|- o
-  funL pa pb = funLSub (subR pa pb)
-  funLSub
-    :: (Pos a, Neg b)
-    =>             i -|s r|- o > a ~-r-< b
-    -- -----------------------------------
-    -> a ~~r~> b < i -|s r|- o
-  default funLSub
-    :: (Pos a, Neg b, Coimplicative s)
-    =>             i -|s r|- o > a ~-r-< b
-    -- -----------------------------------
-    -> a ~~r~> b < i -|s r|- o
-  funLSub p = wkL p >>> subL (exL (funL init init))
-  funL2
-    :: (Pos a, Neg b)
-    -- -------------------------------
-    => a ~~r~> b < a < i -|s r|- o > b
-  funL2 = funL init init
-  funR
-    :: (Pos a, Neg b)
-    => a < i -|s r|- o > b
-    -- ---------------------------
-    ->     i -|s r|- o > a ~~r~> b
-  ($$)
-    :: (Pos a, Neg b)
-    => i -|s r|- o > a ~~r~> b   ->   i -|s r|- o > a
-    -- ----------------------------------------------
-    ->                i -|s r|- o > b
-  f $$ a = wkR' f >>> wkR' a `funL` init
-  funR'
-    :: (Pos a, Neg b)
-    =>     i -|s r|- o > a ~~r~> b
-    -- ---------------------------
-    -> a < i -|s r|- o > b
-  funR' p = wkL (wkR' p) >>> funL2
 
-instance Implicative Seq where
+instance Implication Seq where
   funL a b = popL (\ f -> a >>> runFun f >>> wkL' b)
   funR = lowerLR (liftR . Fun) . wkR'
 
-
-class (Core s, Structural s, Negation s) => Coimplicative s where
-  {-# MINIMAL (subL | subLFun), subR #-}
-  subL
-    :: (Pos a, Neg b)
-    =>         a < i -|s r|- o > b
-    -- ---------------------------
-    -> a ~-r-< b < i -|s r|- o
-  default subL
-    :: (Pos a, Neg b, Implicative s)
-    =>         a < i -|s r|- o > b
-    -- ---------------------------
-    -> a ~-r-< b < i -|s r|- o
-  subL = subLFun . funR
-  subLFun
-    :: (Pos a, Neg b)
-    =>             i -|s r|- o > a ~~r~> b
-    -- -----------------------------------
-    -> a ~-r-< b < i -|s r|- o
-  default subLFun
-    :: (Pos a, Neg b, Implicative s)
-    =>             i -|s r|- o > a ~~r~> b
-    -- -----------------------------------
-    -> a ~-r-< b < i -|s r|- o
-  subLFun p = wkL p >>> exL (subL (exL (funL init init)))
-  subL'
-    :: (Pos a, Neg b)
-    => a ~-r-< b < i -|s r|- o
-    -- ---------------------------
-    ->         a < i -|s r|- o > b
-  subL' p = subR init init >>> wkR (wkL' p)
-  subR
-    :: (Pos a, Neg b)
-    => i -|s r|- o > a   ->   b < i -|s r|- o
-    -- --------------------------------------
-    ->        i -|s r|- o > a ~-r-< b
-
-instance Coimplicative Seq where
+instance Subtraction Seq where
   subL b = popL (\ s -> liftR (subA s) >>> b >>> liftL (getNegate (subK s)))
   subR a b = liftA2 Sub <$> a <*> negateR b
 
@@ -446,7 +363,7 @@ runNu :: Nu r f -> Exists r P (NuF r f)
 runNu (Nu r) = Exists (dnI (NuF r))
 
 
-class (Core s, Structural s, Implicative s) => Corecursive s where
+class (Core s, Structural s, Implication s) => Corecursive s where
   nuL
     :: ForAllC Pos Neg f
     => Exists r P (NuF r f) < i -|s r|- o
@@ -502,7 +419,7 @@ dnEFun :: r ••(a ~~r~> b) -> (a ~~r~> b)
 dnEFun = Fun . dnE . contramap (contramap getFun)
 
 
-class (Core s, Structural s, Implicative s, Universal s) => Recursive s where
+class (Core s, Structural s, Implication s, Universal s) => Recursive s where
   muL
     :: (ForAllC Neg Pos f, Neg a)
     => i -|s r|- o > f a ~~r~> a   ->   a < i -|s r|- o
