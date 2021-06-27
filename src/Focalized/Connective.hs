@@ -9,6 +9,7 @@ module Focalized.Connective
 , uncurryConj
 , foldMapConj
 , traverseConj
+, bifoldMapConj
 , bimapConj
 ) where
 
@@ -50,6 +51,9 @@ foldMapConj f = f . exr
 
 traverseConj :: (Conj p, Applicative m) => (b -> m b') -> (a `p` b) -> m (a `p` b')
 traverseConj f c = inlr (exl c) <$> f (exr c)
+
+bifoldMapConj :: (Conj p, Monoid m) => (a -> m) -> (b -> m) -> (a `p` b -> m)
+bifoldMapConj f g = (<>) <$> f . exl <*> g . exr
 
 bimapConj :: Conj p => (a -> a') -> (b -> b') -> (a `p` b -> a' `p` b')
 bimapConj f g = inlr <$> f . exl <*> g . exr
