@@ -71,8 +71,10 @@ library
     Focalized.Calculus.Falsity
     Focalized.Calculus.Negation
     Focalized.Calculus.Truth
+    Focalized.Conjunction
     Focalized.Connective
     Focalized.CPS
+    Focalized.Disjunction
     Focalized.Falsity
     Focalized.HOAS
     Focalized.Multiset
