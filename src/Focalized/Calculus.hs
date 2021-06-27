@@ -21,14 +21,14 @@ module Focalized.Calculus
 , module Focalized.Calculus.Core
   -- * Control
 , Control(..)
-  -- * Negating
-, Negating
+  -- * Negation
+, Negation
 , type (¬)(..)
 , type (¬-)
-, NegatingN(..)
+, NegNegation(..)
 , type (-)(..)
 , type (-¬)
-, NegatingP(..)
+, PosNegation(..)
   -- * Additive
 , Additive
 , Top(..)
@@ -105,8 +105,8 @@ import           Focalized.CPS
 import           Focalized.Calculus.Context
 import           Focalized.Calculus.Control
 import           Focalized.Calculus.Core
+import           Focalized.Calculus.Negation
 import           Focalized.Connective
-import           Focalized.Negation
 import           Focalized.Polarity
 import           Prelude hiding (init)
 
@@ -176,213 +176,11 @@ instance Control Seq where
   shift p = sequent (\ k -> runSeq p (k . inl |> id) . (K (k . inr) <|))
 
 
--- Negating
+-- Negation
 
-type Negating s = (NegatingN s, NegatingP s)
+instance NegNegation Seq where
 
-
-class (Core s, Structural s, Contextual s, Control s) => NegatingN s where
-  notL
-    :: Pos a
-    =>        i -|s r|- o > a
-    -- ----------------------
-    -> r ¬a < i -|s r|- o
-  notL = notLK . kL
-  notLK
-    :: Pos a
-    =>  r •a < i -|s r|- o
-    -- -------------------
-    ->  r ¬a < i -|s r|- o
-  notLK = mapL getNot
-  notL'
-    :: Pos a
-    => r ¬a < i -|s r|- o
-    -- ----------------------
-    ->        i -|s r|- o > a
-  notL' p = notR init >>> wkR p
-  notLK'
-    :: Pos a
-    =>  r ¬a < i -|s r|- o
-    -- --------------------
-    ->  r •a < i -|s r|- o
-  notLK' = mapL Not
-  notR
-    :: Pos a
-    => a < i -|s r|- o
-    -- ----------------------
-    ->     i -|s r|- o > r ¬a
-  notR = notRK . kR
-  notRK
-    :: Pos a
-    => i -|s r|- o > r •a
-    -- ------------------
-    -> i -|s r|- o > r ¬a
-  notRK = mapR Not
-  notR'
-    :: Pos a
-    =>     i -|s r|- o > r ¬a
-    -- ----------------------
-    -> a < i -|s r|- o
-  notR' p = wkL p >>> notL init
-  notRK'
-    :: Pos a
-    => i -|s r|- o > r ¬a
-    -- ------------------
-    -> i -|s r|- o > r •a
-  notRK' = mapR getNot
-  shiftP
-    :: Pos a
-    => r ¬a < i -|s r|- o > r
-    -- ----------------------
-    ->        i -|s r|- o > a
-  shiftP = shift . notLK'
-
-  dneNL
-    :: Neg a
-    =>     a < i -|s r|- o
-    -- -------------------
-    -> r ¬-a < i -|s r|- o
-  default dneNL
-    :: (NegatingP s, Neg a)
-    =>     a < i -|s r|- o
-    -- -------------------
-    -> r ¬-a < i -|s r|- o
-  dneNL = notL . negateR
-  dneNLK
-    :: Neg a
-    => r ••a < i -|s r|- o
-    -- -------------------
-    -> r ¬-a < i -|s r|- o
-  default dneNLK
-    :: r ••a < i -|s r|- o
-    -- -------------------
-    -> r ¬-a < i -|s r|- o
-  dneNLK = mapL getNotNegate
-  dneNR
-    :: Neg a
-    => i -|s r|- o > a
-    -- -------------------
-    -> i -|s r|- o > r ¬-a
-  default dneNR
-    :: (NegatingP s, Neg a)
-    => i -|s r|- o > a
-    -- -------------------
-    -> i -|s r|- o > r ¬-a
-  dneNR = notR . negateL
-  dneNRK
-    :: Neg a
-    => i -|s r|- o > r ••a
-    -- -------------------
-    -> i -|s r|- o > r ¬-a
-  default dneNRK
-    :: i -|s r|- o > r ••a
-    -- -------------------
-    -> i -|s r|- o > r ¬-a
-  dneNRK = mapR notNegate
-
-instance NegatingN Seq where
-
-
-class (Core s, Structural s, Control s, Contextual s) => NegatingP s where
-  negateL
-    :: Neg a
-    =>        i -|s r|- o > a
-    -- ----------------------
-    -> r -a < i -|s r|- o
-  negateL = negateLK . kL
-  negateLK
-    :: Neg a
-    => r •a < i -|s r|- o
-    -- ------------------
-    -> r -a < i -|s r|- o
-  negateLK = mapL getNegate
-  negateLK'
-    :: Neg a
-    => r -a < i -|s r|- o
-    -- ------------------
-    -> r •a < i -|s r|- o
-  negateLK' = mapL Negate
-  negateL'
-    :: Neg a
-    => r -a < i -|s r|- o
-    -- ----------------------
-    ->        i -|s r|- o > a
-  negateL' p = negateR init >>> wkR p
-  negateR
-    :: Neg a
-    => a < i -|s r|- o
-    -- ----------------------
-    ->     i -|s r|- o > r -a
-  negateR = negateRK . kR
-  negateRK
-    :: Neg a
-    => i -|s r|- o > r •a
-    -- ------------------
-    -> i -|s r|- o > r -a
-  negateRK = mapR Negate
-  negateR'
-    :: Neg a
-    =>     i -|s r|- o > r -a
-    -- ----------------------
-    -> a < i -|s r|- o
-  negateR' p = wkL p >>> negateL init
-  negateRK'
-    :: Neg a
-    => i -|s r|- o > r -a
-    -- ------------------
-    -> i -|s r|- o > r •a
-  negateRK' = mapR getNegate
-  shiftN
-    :: Neg a
-    => r -a < i -|s r|- o > r
-    -- ----------------------
-    ->        i -|s r|- o > a
-  shiftN = shift . negateLK'
-
-  dnePL
-    :: Pos a
-    =>     a < i -|s r|- o
-    -- -------------------
-    -> r -¬a < i -|s r|- o
-  default dnePL
-    :: (NegatingN s, Pos a)
-    =>     a < i -|s r|- o
-    -- -------------------
-    -> r -¬a < i -|s r|- o
-  dnePL = negateL . notR
-  dnePLK
-    :: Pos a
-    => r ••a < i -|s r|- o
-    -- -------------------
-    -> r -¬a < i -|s r|- o
-  default dnePLK
-    :: r ••a < i -|s r|- o
-    -- -------------------
-    -> r -¬a < i -|s r|- o
-  dnePLK = mapL getNegateNot
-  dnePR
-    :: Pos a
-    => i -|s r|- o > a
-    -- -------------------
-    -> i -|s r|- o > r -¬a
-  default dnePR
-    :: (NegatingN s, Pos a)
-    => i -|s r|- o > a
-    -- -------------------
-    -> i -|s r|- o > r -¬a
-  dnePR = negateR . notL
-  dnePRK
-    :: Pos a
-    => i -|s r|- o > r ••a
-    -- -------------------
-    -> i -|s r|- o > r -¬a
-  default dnePRK
-    :: i -|s r|- o > r ••a
-    -- -------------------
-    -> i -|s r|- o > r -¬a
-  dnePRK = mapR negateNot
-
-instance NegatingP Seq where
+instance PosNegation Seq where
 
 
 -- Additive
@@ -396,7 +194,7 @@ data Top = Top
 instance Polarized N Top where
 
 
-class (Core s, Structural s, Negating s) => AdditiveTruth s where
+class (Core s, Structural s, Negation s) => AdditiveTruth s where
   topR
     -- -----------------
     :: i -|s r|- o > Top
@@ -413,7 +211,7 @@ absurdP :: Zero -> a
 absurdP = \case
 
 
-class (Core s, Structural s, Negating s) => AdditiveFalsity s where
+class (Core s, Structural s, Negation s) => AdditiveFalsity s where
   zeroL
     -- ------------------
     :: Zero < i -|s r|- o
@@ -441,7 +239,7 @@ instance Conj (&) where
   exr (With run) = run (const id)
 
 
-class (Core s, Structural s, Negating s) => AdditiveConj s where
+class (Core s, Structural s, Negation s) => AdditiveConj s where
   {-# MINIMAL (withL1, withL2 | withLSum), withR #-}
   withL1
     :: (Neg a, Neg b)
@@ -517,7 +315,7 @@ instance Disj (⊕) where
     InR r -> ifr r
 
 
-class (Core s, Structural s, Negating s) => AdditiveDisj s where
+class (Core s, Structural s, Negation s) => AdditiveDisj s where
   {-# MINIMAL (sumL | sumLWith), sumR1, sumR2 #-}
   sumL
     :: (Pos a, Pos b)
@@ -583,7 +381,7 @@ absurdN :: Bot -> a
 absurdN = \case
 
 
-class (Core s, Structural s, Negating s) => MultiplicativeFalsity s where
+class (Core s, Structural s, Negation s) => MultiplicativeFalsity s where
   botL
     -- -----------------
     :: Bot < i -|s r|- o
@@ -608,7 +406,7 @@ data One = One
 instance Polarized P One where
 
 
-class (Core s, Structural s, Negating s) => MultiplicativeTruth s where
+class (Core s, Structural s, Negation s) => MultiplicativeTruth s where
   oneL
     :: i -|s r|- o
     -- -----------------
@@ -646,7 +444,7 @@ instance Disj (⅋) where
   exlr ifl ifr (Par run) = run ifl ifr
 
 
-class (Core s, Structural s, Negating s) => MultiplicativeDisj s where
+class (Core s, Structural s, Negation s) => MultiplicativeDisj s where
   {-# MINIMAL (parL | parLTensor), parR #-}
   parL
     :: (Neg a, Neg b)
@@ -700,7 +498,7 @@ instance Conj (⊗) where
   exr (_ :⊗ r) = r
 
 
-class (Core s, Structural s, Negating s) => MultiplicativeConj s where
+class (Core s, Structural s, Negation s) => MultiplicativeConj s where
   {-# MINIMAL (tensorL | tensorLPar), tensorR #-}
   tensorL
     :: (Pos a, Pos b)
@@ -769,7 +567,7 @@ infixr 6 ~~
 infixr 5 ~>
 
 
-class (Core s, Structural s, Negating s) => Implicative s where
+class (Core s, Structural s, Negation s) => Implicative s where
   {-# MINIMAL (funL | funLSub), funR #-}
   funL
     :: (Pos a, Neg b)
@@ -832,7 +630,7 @@ infixr 6 ~-
 infixr 5 -<
 
 
-class (Core s, Structural s, Negating s) => Coimplicative s where
+class (Core s, Structural s, Negation s) => Coimplicative s where
   {-# MINIMAL (subL | subLFun), subR #-}
   subL
     :: (Pos a, Neg b)
@@ -883,7 +681,7 @@ newtype ForAll r p f = ForAll { runForAll :: forall x . Polarized p x => r •�
 instance Polarized N (ForAll r p f)
 
 
-class (Core s, Structural s, Negating s, Shifting s) => Universal s where
+class (Core s, Structural s, Negation s, Shifting s) => Universal s where
   {-# MINIMAL (forAllL | forAllLExists), forAllR #-}
   forAllL
     :: (Polarized n x, Neg (f x))
@@ -932,7 +730,7 @@ runExists :: (forall x . Polarized p x => f x -> a) -> Exists r p f -> r ••a
 runExists f (Exists r) = K (\ k -> runK r (K (runK k . f)))
 
 
-class (Core s, Structural s, Negating s, Shifting s) => Existential s where
+class (Core s, Structural s, Negation s, Shifting s) => Existential s where
   {-# MINIMAL (existsL | existsLForAll), existsR #-}
   existsL
     :: (forall x . Polarized n x => f x < i -|s r|- o)
@@ -1088,7 +886,7 @@ class (Core s, Structural s) => ShiftingN s where
     -- ------------------
     -> Up a < i -|s r|- o
   default upL
-    :: (ShiftingP s, NegatingN s, Pos a)
+    :: (ShiftingP s, NegNegation s, Pos a)
     =>    a < i -|s r|- o
     -- ------------------
     -> Up a < i -|s r|- o
@@ -1099,7 +897,7 @@ class (Core s, Structural s) => ShiftingN s where
     -- --------------------------------
     -> Up a < i -|s r|- o
   default upLDown
-    :: (ShiftingP s, NegatingN s, Pos a)
+    :: (ShiftingP s, NegNegation s, Pos a)
     =>        i -|s r|- o > Down (r ¬a)
     -- --------------------------------
     -> Up a < i -|s r|- o
@@ -1142,7 +940,7 @@ class (Core s, Structural s) => ShiftingP s where
     -- --------------------
     -> Down a < i -|s r|- o
   default downL
-    :: (ShiftingN s, NegatingP s, Neg a)
+    :: (ShiftingN s, PosNegation s, Neg a)
     =>      a < i -|s r|- o
     -- --------------------
     -> Down a < i -|s r|- o
@@ -1153,7 +951,7 @@ class (Core s, Structural s) => ShiftingP s where
     -- --------------------------------
     -> Down a < i -|s r|- o
   default downLUp
-    :: (ShiftingN s, NegatingP s, Neg a)
+    :: (ShiftingN s, PosNegation s, Neg a)
     =>          i -|s r|- o > Up (r -a)
     -- --------------------------------
     -> Down a < i -|s r|- o
