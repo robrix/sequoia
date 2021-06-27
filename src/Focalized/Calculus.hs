@@ -101,13 +101,14 @@ module Focalized.Calculus
 
 import           Control.Applicative (liftA2)
 import qualified Control.Category as Cat
-import           Control.Monad (ap, join)
+import           Control.Monad (join)
 import           Control.Monad.Trans.Class
 import           Data.Functor.Contravariant (contramap)
 import           Data.Functor.Identity
 import           Data.Kind (Constraint, Type)
 import           Data.Profunctor
 import           Focalized.CPS
+import           Focalized.Calculus.Context
 import           Focalized.Connective
 import           Prelude hiding (init)
 
@@ -143,55 +144,6 @@ newtype SeqT r i m o = SeqT { getSeqT :: Seq (m r) i o }
 
 instance MonadTrans (SeqT r i) where
   lift m = SeqT (Seq (CPS (\ k _ -> m >>= k)))
-
-
--- Contexts
-
-data a < b = a :< b
-  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-
-infixr 4 <, :<, <|
-
-instance Conj (<) where
-  inlr = (:<)
-  exl (a :< _) = a
-  exr (_ :< b) = b
-
-(<|) :: i -> is -> i < is
-(<|) = inlr
-
-data a > b
-  = L a
-  | R b
-  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-
-infixl 4 >, |>
-
-instance Disj (>) where
-  inl = L
-  inr = R
-  exlr f g = \case
-    L a -> f a
-    R b -> g b
-
-instance Applicative ((>) a) where
-  pure = R
-  (<*>) = ap
-
-instance Monad ((>) a) where
-  (>>=) = flip (exlr inl)
-
--- | Discrimination of values in '>'.
---
--- @¬A ✕ ¬B -> ¬(A + B)@
-(|>) :: (os -> r) -> (o -> r) -> ((os > o) -> r)
-(|>) = exlr
-
-
-type l -| r = r l
-type l |- r = l r
-
-infixl 2 |-, -|
 
 
 -- Core rules
