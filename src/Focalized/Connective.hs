@@ -4,6 +4,7 @@ module Focalized.Connective
 , foldMapDisj
 , traverseDisj
 , bifoldMapDisj
+, bimapDisj
   -- * Conjunction
 , Conj(..)
 , curryConj
@@ -33,6 +34,9 @@ traverseDisj f = exlr (pure . inl) (fmap inr . f)
 
 bifoldMapDisj :: Disj p => (a -> m) -> (b -> m) -> (a `p` b -> m)
 bifoldMapDisj = exlr
+
+bimapDisj :: Disj p => (a -> a') -> (b -> b') -> (a `p` b -> a' `p` b')
+bimapDisj f g = exlr (inl . f) (inr . g)
 
 
 class Conj c where
