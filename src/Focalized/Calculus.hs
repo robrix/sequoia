@@ -101,6 +101,7 @@ import           Focalized.Calculus.Control
 import           Focalized.Calculus.Core
 import           Focalized.Calculus.Negation
 import           Focalized.Connective
+import           Focalized.Falsity
 import           Focalized.Polarity
 import           Prelude hiding (init)
 
@@ -199,14 +200,6 @@ class AdditiveTruth s where
 
 instance AdditiveTruth Seq where
   topR = pure (inr Top)
-
-
-data Zero
-
-instance Polarized P Zero where
-
-absurdP :: Zero -> a
-absurdP = \case
 
 
 class AdditiveFalsity s where
@@ -369,14 +362,6 @@ instance AdditiveDisj Seq where
 -- Multiplicative
 
 type Multiplicative s = (MultiplicativeFalsity s, MultiplicativeTruth s, MultiplicativeDisj s, MultiplicativeConj s)
-
-
-data Bot
-
-instance Polarized N Bot where
-
-absurdN :: Bot -> a
-absurdN = \case
 
 
 class (Core s, Contextual s, Structural s, Negation s) => MultiplicativeFalsity s where
