@@ -102,6 +102,7 @@ import           Data.Kind (Constraint, Type)
 import           Data.Profunctor
 import           Focalized.CPS
 import           Focalized.Calculus.Context
+import           Focalized.Calculus.Control
 import           Focalized.Calculus.Core
 import           Focalized.Connective
 import           Prelude hiding (init)
@@ -167,41 +168,6 @@ instance Contextual Seq where
 
 -- Control
 
-class (Core s, Structural s, Contextual s) => Control s where
-  reset
-    :: i -|s o|- o
-    -- -----------
-    -> i -|s r|- o
-  shift
-    :: r •a < i -|s r|- o > r
-    -- ----------------------
-    ->        i -|s r|- o > a
-
-  kL
-    ::        i -|s r|- o > a
-    -- ----------------------
-    -> r •a < i -|s r|- o
-  kL = popL . pushR
-
-  kL'
-    :: r •a < i -|s r|- o
-    -- ----------------------
-    ->        i -|s r|- o > a
-  kL' s = kR init >>> wkR s
-
-  kR
-    :: a < i -|s r|- o
-    -- ----------------------
-    ->     i -|s r|- o > r •a
-  kR s = lowerL (pushL init) (wkR s)
-
-  kR'
-    ::     i -|s r|- o > r •a
-    -- ----------------------
-    -> a < i -|s r|- o
-  kR' s = wkL s >>> kL init
-
-
 instance Control Seq where
   reset s = sequent (. evalSeq s)
   shift p = sequent (\ k -> runSeq p (k . inl |> id) . (K (k . inr) <|))
@@ -228,7 +194,7 @@ type r ¬-a = r ¬r -a
 infixr 9 ¬, ¬-
 
 
-class (Core s, Structural s, Control s) => NegatingN s where
+class (Core s, Structural s, Contextual s, Control s) => NegatingN s where
   notL
     :: Pos a
     =>        i -|s r|- o > a
@@ -346,7 +312,7 @@ type r -¬a = r -r ¬a
 infixr 9 -, -¬
 
 
-class (Core s, Structural s, Control s) => NegatingP s where
+class (Core s, Structural s, Control s, Contextual s) => NegatingP s where
   negateL
     :: Neg a
     =>        i -|s r|- o > a
