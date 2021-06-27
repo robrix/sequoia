@@ -124,7 +124,7 @@ sequent :: ((o -> r) -> (i -> r)) -> Seq r i o
 sequent = Seq . CPS
 
 newtype Seq r i o = Seq { getSeq :: CPS r i o }
-  deriving (Applicative, Functor, Monad)
+  deriving (Applicative, Cat.Category, Functor, Monad, Profunctor)
 
 liftLR :: CPS r a b -> Seq r (a < i) (o > b)
 liftLR = Seq . dimap exl inr
