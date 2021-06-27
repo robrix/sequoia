@@ -12,6 +12,9 @@ module Focalized.Calculus.Context
 ) where
 
 import Control.Monad (ap)
+import Data.Bifoldable
+import Data.Bifunctor
+import Data.Bitraversable
 import Focalized.Connective
 
 -- Γ
@@ -25,6 +28,15 @@ instance Conj (<) where
   inlr = (:<)
   exl (a :< _) = a
   exr (_ :< b) = b
+
+instance Bifoldable (<) where
+  bifoldMap = bifoldMapConj
+
+instance Bifunctor (<) where
+  bimap = bimapConj
+
+instance Bitraversable (<) where
+  bitraverse = bitraverseConj
 
 (<|) :: i -> is -> i < is
 (<|) = inlr
@@ -45,6 +57,15 @@ instance Disj (>) where
   exlr f g = \case
     L a -> f a
     R b -> g b
+
+instance Bifoldable (>) where
+  bifoldMap = bifoldMapDisj
+
+instance Bifunctor (>) where
+  bimap = bimapDisj
+
+instance Bitraversable (>) where
+  bitraverse = bitraverseDisj
 
 instance Applicative ((>) a) where
   pure = R
