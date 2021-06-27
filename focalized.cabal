@@ -71,6 +71,7 @@ library
     Focalized.Calculus.Core
     Focalized.Calculus.Disjunction
     Focalized.Calculus.Falsity
+    Focalized.Calculus.Implication
     Focalized.Calculus.Negation
     Focalized.Calculus.Truth
     Focalized.Conjunction
