@@ -23,11 +23,12 @@ module Focalized.Calculus
 , module Focalized.Calculus.Control
   -- * Negation
 , module Focalized.Calculus.Negation
+  -- * Units
+, module Focalized.Calculus.Falsity
+, module Focalized.Calculus.Truth
   -- * Additive
 , Additive
-, Top(..)
 , AdditiveTruth(..)
-, Zero
 , AdditiveFalsity(..)
 , type (&)(..)
 , AdditiveConj(..)
@@ -35,9 +36,7 @@ module Focalized.Calculus
 , AdditiveDisj(..)
   -- * Multiplicative
 , Multiplicative
-, Bot
 , MultiplicativeFalsity(..)
-, One(..)
 , MultiplicativeTruth(..)
 , type (⅋)(..)
 , MultiplicativeDisj(..)
@@ -99,11 +98,11 @@ import           Focalized.CPS
 import           Focalized.Calculus.Context
 import           Focalized.Calculus.Control
 import           Focalized.Calculus.Core
+import           Focalized.Calculus.Falsity
 import           Focalized.Calculus.Negation
+import           Focalized.Calculus.Truth
 import           Focalized.Connective
-import           Focalized.Falsity
 import           Focalized.Polarity
-import           Focalized.Truth
 import           Prelude hiding (init)
 
 -- Sequents
@@ -188,19 +187,8 @@ instance PosNegation Seq where
 type Additive s = (AdditiveTruth s, AdditiveFalsity s, AdditiveConj s, AdditiveDisj s)
 
 
-class AdditiveTruth s where
-  topR
-    -- -----------------
-    :: i -|s r|- o > Top
-
 instance AdditiveTruth Seq where
   topR = pure (inr Top)
-
-
-class AdditiveFalsity s where
-  zeroL
-    -- ------------------
-    :: Zero < i -|s r|- o
 
 instance AdditiveFalsity Seq where
   zeroL = liftL (K absurdP)
@@ -359,42 +347,13 @@ instance AdditiveDisj Seq where
 type Multiplicative s = (MultiplicativeFalsity s, MultiplicativeTruth s, MultiplicativeDisj s, MultiplicativeConj s)
 
 
-class (Core s, Contextual s, Structural s, Negation s) => MultiplicativeFalsity s where
-  botL
-    -- -----------------
-    :: Bot < i -|s r|- o
-  botL = liftL (K absurdN)
-  botR
-    :: i -|s r|- o
-    -- -----------------
-    -> i -|s r|- o > Bot
-  botR = wkR
-  botR'
-    :: i -|s r|- o > Bot
-    -- -----------------
-    -> i -|s r|- o
-  botR' = (>>> botL)
-
 instance MultiplicativeFalsity Seq where
-
-
-class (Core s, Contextual s, Structural s, Negation s) => MultiplicativeTruth s where
-  oneL
-    :: i -|s r|- o
-    -- -----------------
-    -> One < i -|s r|- o
-  oneL = wkL
-  oneL'
-    :: One < i -|s r|- o
-    -- -----------------
-    -> i -|s r|- o
-  oneL' = (oneR >>>)
-  oneR
-    -- -----------------
-    :: i -|s r|- o > One
-  oneR = liftR One
+  botL = liftL (K absurdN)
+  botR = wkR
 
 instance MultiplicativeTruth Seq where
+  oneL = wkL
+  oneR = liftR One
 
 
 newtype a ⅋ b = Par (forall r . (a -> r) -> (b -> r) -> r)
