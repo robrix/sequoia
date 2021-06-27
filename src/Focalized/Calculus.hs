@@ -1103,7 +1103,6 @@ instance Recursive Seq where
 class Polarized (p :: Type -> Type) c | c -> p
 instance Polarized N (N a)
 instance Polarized P (P a)
-instance (Pos a, Neg b) => Polarized N (a -> b)
 
 type Neg = Polarized N
 type Pos = Polarized P
