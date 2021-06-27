@@ -68,7 +68,9 @@ library
     Focalized.Calculus.Context
     Focalized.Calculus.Control
     Focalized.Calculus.Core
+    Focalized.Calculus.Falsity
     Focalized.Calculus.Negation
+    Focalized.Calculus.Truth
     Focalized.Connective
     Focalized.CPS
     Focalized.HOAS
