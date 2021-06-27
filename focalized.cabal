@@ -73,6 +73,7 @@ library
     Focalized.Calculus.Truth
     Focalized.Connective
     Focalized.CPS
+    Focalized.Falsity
     Focalized.HOAS
     Focalized.Multiset
     Focalized.Negation
@@ -80,6 +81,7 @@ library
     Focalized.Polarized
     Focalized.Snoc
     Focalized.Snoc.NonEmpty
+    Focalized.Truth
 
   -- Modules included in this library but not exported.
   -- other-modules:
