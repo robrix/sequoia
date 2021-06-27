@@ -22,13 +22,7 @@ module Focalized.Calculus
   -- * Control
 , Control(..)
   -- * Negation
-, Negation
-, type (¬)(..)
-, type (¬-)
-, NegNegation(..)
-, type (-)(..)
-, type (-¬)
-, PosNegation(..)
+, module Focalized.Calculus.Negation
   -- * Additive
 , Additive
 , Top(..)
