@@ -1,8 +1,15 @@
+{-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE DefaultSignatures #-}
 module Focalized.Calculus.Core
 ( -- * Core
   Core(..)
   -- * Structural
-, Structural(..)
+, Structural
+, Weaken(..)
+, Contract(..)
+, Exchange(..)
+  -- * Contextual
+, Contextual(..)
 ) where
 
 import Control.Monad (join)
@@ -35,7 +42,99 @@ class Core s where
 
 -- Structural
 
-class Core s => Structural s where
+type Structural s = (Weaken s, Contract s, Exchange s)
+
+
+class Core s => Weaken s where
+  wkL
+    ::     i -|s r|- o
+    -- ---------------
+    -> a < i -|s r|- o
+  default wkL
+    :: Contextual s
+    =>     i -|s r|- o
+    -- ---------------
+    -> a < i -|s r|- o
+  wkL = popL . const
+  wkR
+    :: i -|s r|- o
+    -- ---------------
+    -> i -|s r|- o > a
+  default wkR
+    :: Contextual s
+    => i -|s r|- o
+    -- ---------------
+    -> i -|s r|- o > a
+  wkR = popR . const
+  wkL'
+    :: a     < i -|s r|- o
+    -- -------------------
+    -> a < b < i -|s r|- o
+  default wkL'
+    :: Exchange s
+    => a     < i -|s r|- o
+    -- -------------------
+    -> a < b < i -|s r|- o
+  wkL' = exL . wkL
+  wkR'
+    :: i -|s r|- o > a
+    -- -------------------
+    -> i -|s r|- o > b > a
+  default wkR'
+    :: Exchange s
+    => i -|s r|- o > a
+    -- -------------------
+    -> i -|s r|- o > b > a
+  wkR' = exR . wkR
+
+
+class Core s => Contract s where
+  cnL
+    :: a < a < i -|s r|- o
+    -- -------------------
+    ->     a < i -|s r|- o
+  default cnL
+    :: Contextual s
+    => a < a < i -|s r|- o
+    -- -------------------
+    ->     a < i -|s r|- o
+  cnL = popL . join . pushL2
+  cnR
+    :: i -|s r|- o > a > a
+    -- -------------------
+    -> i -|s r|- o > a
+  default cnR
+    :: Contextual s
+    => i -|s r|- o > a > a
+    -- -------------------
+    -> i -|s r|- o > a
+  cnR = popR . join . pushR2
+
+
+class Core s => Exchange s where
+  exL
+    :: a < b < c -|s r|- o
+    -- -------------------
+    -> b < a < c -|s r|- o
+  default exL
+    :: Contextual s
+    => a < b < c -|s r|- o
+    -- -------------------
+    -> b < a < c -|s r|- o
+  exL = popL2 . flip . pushL2
+  exR
+    :: i -|s r|- o > a > b
+    -- -------------------
+    -> i -|s r|- o > b > a
+  default exR
+    :: Contextual s
+    => i -|s r|- o > a > b
+    -- -------------------
+    -> i -|s r|- o > b > a
+  exR = popR2 . flip . pushR2
+
+
+class Core s => Contextual s where
   -- | Pop something off the input context which can later be pushed. Used with 'pushL', this provides a generalized context restructuring facility.
   --
   -- @
@@ -112,6 +211,7 @@ class Core s => Structural s where
   mapR f p = popR (pushR p . contramap f)
 
   mapR2 :: (a -> b -> c) -> s r i (o > a) -> s r i (o > b) -> s r i (o > c)
+  default mapR2 :: Weaken s => (a -> b -> c) -> s r i (o > a) -> s r i (o > b) -> s r i (o > c)
   mapR2 f a b = popR (pushR (wkR' a) . contramap f) >>> popL (\ f -> popR (pushR b . contramap f))
 
   liftR :: a -> s r i (o > a)
@@ -119,45 +219,3 @@ class Core s => Structural s where
 
   lowerR :: (a -> s r i o) -> (s r i (o > a) -> s r i o)
   lowerR k p = p >>> popL k
-
-
-  wkL
-    ::     i -|s r|- o
-    -- ---------------
-    -> a < i -|s r|- o
-  wkL = popL . const
-  wkL'
-    :: a     < i -|s r|- o
-    -- -------------------
-    -> a < b < i -|s r|- o
-  wkL' = exL . wkL
-  wkR
-    :: i -|s r|- o
-    -- ---------------
-    -> i -|s r|- o > a
-  wkR = popR . const
-  wkR'
-    :: i -|s r|- o > a
-    -- -------------------
-    -> i -|s r|- o > b > a
-  wkR' = exR . wkR
-  cnL
-    :: a < a < i -|s r|- o
-    -- -------------------
-    ->     a < i -|s r|- o
-  cnL = popL . join . pushL2
-  cnR
-    :: i -|s r|- o > a > a
-    -- -------------------
-    -> i -|s r|- o > a
-  cnR = popR . join . pushR2
-  exL
-    :: a < b < c -|s r|- o
-    -- -------------------
-    -> b < a < c -|s r|- o
-  exL = popL2 . flip . pushL2
-  exR
-    :: i -|s r|- o > a > b
-    -- -------------------
-    -> i -|s r|- o > b > a
-  exR = popR2 . flip . pushR2

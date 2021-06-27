@@ -16,15 +16,9 @@ module Focalized.Calculus
 , runSeqT
 , SeqT(..)
   -- * Contexts
-, type (<)
-, (<|)
-, type (>)
-, (|>)
-, type (-|)
-, type (|-)
+, module Focalized.Calculus.Context
   -- * Core rules
-, Core(..)
-, Structural(..)
+, module Focalized.Calculus.Core
   -- * Control
 , Control(..)
   -- * Negating
@@ -156,7 +150,14 @@ instance Core Seq where
 
 -- Structural rules
 
-instance Structural Seq where
+instance Weaken Seq where
+instance Contract Seq where
+instance Exchange Seq where
+
+
+-- Contextual rules
+
+instance Contextual Seq where
   popL f = sequent $ \ k -> uncurryConj ((`runSeq` k) . f)
   pushL s a = sequent $ \ k -> runSeq s k . (a <|)
 
@@ -166,7 +167,7 @@ instance Structural Seq where
 
 -- Control
 
-class (Core s, Structural s) => Control s where
+class (Core s, Structural s, Contextual s) => Control s where
   reset
     :: i -|s o|- o
     -- -----------
