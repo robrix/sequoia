@@ -1,4 +1,7 @@
+{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Focalized.Calculus.Context
 ( -- * Γ
   type (<)(..)
@@ -9,6 +12,9 @@ module Focalized.Calculus.Context
   -- * Mixfix syntax
 , type (|-)
 , type (-|)
+  -- * Membership
+, ContextL(..)
+, ContextR(..)
 ) where
 
 import Control.Monad (ap)
@@ -87,3 +93,53 @@ type l -| r = r l
 type l |- r = l r
 
 infixl 2 |-, -|
+
+
+-- Membership
+
+class ContextL a as as' | as a -> as', as as' -> a, as' a -> as where
+  {-# MINIMAL ((selectL, dropL) | removeL), insertL #-}
+  selectL :: as -> a
+  selectL = exl . removeL
+  dropL :: as -> as'
+  dropL = exr . removeL
+  removeL :: as -> (a, as')
+  removeL = (,) <$> selectL <*> dropL
+  insertL :: a -> as' -> as
+  replaceL :: (ContextL b bs bs', bs' ~ as') => (a -> b) -> as -> bs
+  replaceL f = uncurry (insertL . f) . removeL
+
+instance {-# OVERLAPPING #-} ContextL a (a < as) as where
+  selectL = exl
+  dropL = exr
+  removeL = inlr <$> exl <*> exr
+  insertL = (<|)
+
+instance {-# OVERLAPPING #-} ContextL a as as' => ContextL a (b < as) (b < as') where
+  selectL = selectL . exr
+  dropL (b :< as') = b <| dropL as'
+  removeL (b :< as') = (b <|) <$> removeL as'
+  insertL a (b :< as') = b <| insertL a as'
+
+
+class ContextR a as as' | as a -> as', as as' -> a, as' a -> as where
+  selectR :: as -> Maybe a
+  selectR = exlr (const Nothing) Just . removeR
+  dropR :: as -> Maybe as'
+  dropR = exlr Just (const Nothing) . removeR
+  removeR :: as -> Either as' a
+  insertR :: Either as' a -> as
+  replaceR :: (ContextR b bs bs', bs' ~ as') => (a -> b) -> as -> bs
+  replaceR f = insertR . fmap f . removeR
+
+instance {-# OVERLAPPING #-} ContextR a (as > a) as where
+  selectR = exlr (const Nothing) Just
+  dropR = exlr Just (const Nothing)
+  removeR = exlr inl inr
+  insertR = exlr inl inr
+
+instance {-# OVERLAPPING #-} ContextR a as as' => ContextR a (as > b) (as' > b) where
+  selectR = exlr selectR (const Nothing)
+  dropR = exlr (fmap inl . dropR) (Just . inr)
+  removeR = exlr (first inl . removeR) (inl . inr)
+  insertR = first insertR . exlr (exlr (inl . inl) inr) (inl . inr)
