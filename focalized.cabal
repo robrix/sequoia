@@ -73,6 +73,7 @@ library
     Focalized.CPS
     Focalized.HOAS
     Focalized.Multiset
+    Focalized.Polarity
     Focalized.Polarized
     Focalized.Snoc
     Focalized.Snoc.NonEmpty
