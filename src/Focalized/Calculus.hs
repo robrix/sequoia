@@ -95,14 +95,14 @@ import           Data.Functor.Identity
 import           Data.Kind (Constraint)
 import           Data.Profunctor
 import           Focalized.CPS
+import           Focalized.Calculus.Conjunction
 import           Focalized.Calculus.Context
 import           Focalized.Calculus.Control
 import           Focalized.Calculus.Core
+import           Focalized.Calculus.Disjunction
 import           Focalized.Calculus.Falsity
 import           Focalized.Calculus.Negation
 import           Focalized.Calculus.Truth
-import           Focalized.Conjunction
-import           Focalized.Disjunction
 import           Focalized.Polarity
 import           Prelude hiding (init)
 

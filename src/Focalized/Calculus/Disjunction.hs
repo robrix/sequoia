@@ -1,2 +1,5 @@
 module Focalized.Calculus.Disjunction
-() where
+( module Focalized.Disjunction
+) where
+
+import Focalized.Disjunction

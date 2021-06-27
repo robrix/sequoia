@@ -1,2 +1,5 @@
 module Focalized.Calculus.Conjunction
-() where
+( module Focalized.Conjunction
+) where
+
+import Focalized.Conjunction
