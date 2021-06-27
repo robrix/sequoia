@@ -52,4 +52,4 @@ traverseConj :: (Conj p, Applicative m) => (b -> m b') -> (a `p` b) -> m (a `p` 
 traverseConj f c = inlr (exl c) <$> f (exr c)
 
 bimapConj :: Conj p => (a -> a') -> (b -> b') -> (a `p` b -> a' `p` b')
-bimapConj f g = inlr . f . exl <*> g . exr
+bimapConj f g = inlr <$> f . exl <*> g . exr
