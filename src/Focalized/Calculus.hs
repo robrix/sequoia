@@ -1101,6 +1101,7 @@ instance Recursive Seq where
 -- Polarity
 
 class Polarized (p :: Type -> Type) c | c -> p
+
 instance Polarized N (N a)
 instance Polarized P (P a)
 
