@@ -196,13 +196,9 @@ class AdditiveTruth s where
   topR
     -- -----------------
     :: i -|s r|- o > Top
-  default topR
-    :: Contextual s
-    -- -----------------
-    => i -|s r|- o > Top
-  topR = liftR Top
 
 instance AdditiveTruth Seq where
+  topR = pure (inr Top)
 
 
 data Zero
@@ -217,13 +213,9 @@ class AdditiveFalsity s where
   zeroL
     -- ------------------
     :: Zero < i -|s r|- o
-  default zeroL
-    :: Contextual s
-    -- ------------------
-    => Zero < i -|s r|- o
-  zeroL = popL absurdP
 
 instance AdditiveFalsity Seq where
+  zeroL = liftL (K absurdP)
 
 
 newtype a & b = With (forall r . (a -> b -> r) -> r)
