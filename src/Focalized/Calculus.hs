@@ -20,8 +20,6 @@ module Focalized.Calculus
 , (<|)
 , type (>)
 , (|>)
-, Γ(..)
-, Δ
 , type (-|)
 , type (|-)
   -- * Core rules
@@ -188,13 +186,6 @@ instance Monad ((>) a) where
 -- @¬A ✕ ¬B -> ¬(A + B)@
 (|>) :: (os -> r) -> (o -> r) -> ((os > o) -> r)
 (|>) = exlr
-
-
-data Γ = Γ
-  deriving (Eq, Ord, Show)
-
-
-data Δ
 
 
 type l -| r = r l
