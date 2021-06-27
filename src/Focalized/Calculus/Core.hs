@@ -58,6 +58,7 @@ class Core s => Weaken s where
     -- ---------------
     -> a < i -|s r|- o
   wkL = popL . const
+
   wkR
     :: i -|s r|- o
     -- ---------------
@@ -95,6 +96,7 @@ class Core s => Contract s where
     -- -------------------
     ->     a < i -|s r|- o
   cnL = popL . join . pushL2
+
   cnR
     :: i -|s r|- o > a > a
     -- -------------------
@@ -118,6 +120,7 @@ class Core s => Exchange s where
     -- -------------------
     -> b < a < c -|s r|- o
   exL = popL2 . flip . pushL2
+
   exR
     :: i -|s r|- o > a > b
     -- -------------------
