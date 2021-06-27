@@ -1252,9 +1252,21 @@ runNu (Nu r) = Exists (dnI (NuF r))
 
 
 class (Core s, Structural s, Implicative s) => Corecursive s where
-  nuL :: ForAllC Pos Neg f => s r (Exists r P (NuF r f) < i) o -> s r (Nu r f < i) o
-  nuR :: ForAllC Pos Neg f => s r i (o > Exists r P (NuF r f)) -> s r i (o > Nu r f)
-  nuR' :: ForAllC Pos Neg f => s r i (o > Nu r f) -> s r i (o > Exists r P (NuF r f))
+  nuL
+    :: ForAllC Pos Neg f
+    => Exists r P (NuF r f) < i -|s r|- o
+    -- ----------------------------------
+    ->             Nu  r f  < i -|s r|- o
+  nuR
+    :: ForAllC Pos Neg f
+    => i -|s r|- o > Exists r P (NuF r f)
+    -- ----------------------------------
+    -> i -|s r|- o >             Nu  r f
+  nuR'
+    :: ForAllC Pos Neg f
+    => i -|s r|- o >             Nu  r f
+    -- ----------------------------------
+    -> i -|s r|- o > Exists r P (NuF r f)
   nuR' p = wkR' p >>> nuL init
 
 instance Corecursive Seq where
@@ -1298,12 +1310,20 @@ dnEFun = Fun . dnE . contramap (contramap getFun)
 class (Core s, Structural s, Implicative s, Universal s) => Recursive s where
   muL
     :: (ForAllC Neg Pos f, Neg a)
-    => s r i (o > f a ~~r~> a)   ->   s r (a < i) o
-    -------------------------------------------------
-    -> s r (Mu r f < i) o
-  muL' :: ForAllC Neg Pos f => s r (Mu r f < i) o -> s r (ForAll r N (MuF r f) < i) o
+    => i -|s r|- o > f a ~~r~> a   ->   a < i -|s r|- o
+    -- ------------------------------------------------
+    ->              Mu r f < i -|s r|- o
+  muL'
+    :: ForAllC Neg Pos f
+    =>             Mu  r f  < i -|s r|- o
+    -- ----------------------------------
+    -> ForAll r N (MuF r f) < i -|s r|- o
   muL' p = muR init >>> wkL' p
-  muR :: ForAllC Neg Pos f => s r i (o > ForAll r N (MuF r f)) -> s r i (o > Mu r f)
+  muR
+    :: ForAllC Neg Pos f
+    => i -|s r|- o > ForAll r N (MuF r f)
+    -- ----------------------------------
+    -> i -|s r|- o >             Mu  r f
 
 instance Recursive Seq where
   muL f k = wkL (downR f) >>> exL (mapL getMu (funL init (wkL' k)))
