@@ -53,23 +53,11 @@ class Core s => Weaken s where
     ::     i -|s r|- o
     -- ---------------
     -> a < i -|s r|- o
-  default wkL
-    :: Contextual s
-    =>     i -|s r|- o
-    -- ---------------
-    -> a < i -|s r|- o
-  wkL = popL . const
 
   wkR
     :: i -|s r|- o
     -- ---------------
     -> i -|s r|- o > a
-  default wkR
-    :: Contextual s
-    => i -|s r|- o
-    -- ---------------
-    -> i -|s r|- o > a
-  wkR = popR . const
 
 
 wkL'
@@ -92,23 +80,11 @@ class Core s => Contract s where
     :: a < a < i -|s r|- o
     -- -------------------
     ->     a < i -|s r|- o
-  default cnL
-    :: Contextual s
-    => a < a < i -|s r|- o
-    -- -------------------
-    ->     a < i -|s r|- o
-  cnL = popL . join . pushL2
 
   cnR
     :: i -|s r|- o > a > a
     -- -------------------
     -> i -|s r|- o > a
-  default cnR
-    :: Contextual s
-    => i -|s r|- o > a > a
-    -- -------------------
-    -> i -|s r|- o > a
-  cnR = popR . join . pushR2
 
 
 class Core s => Exchange s where
@@ -116,23 +92,11 @@ class Core s => Exchange s where
     :: a < b < c -|s r|- o
     -- -------------------
     -> b < a < c -|s r|- o
-  default exL
-    :: Contextual s
-    => a < b < c -|s r|- o
-    -- -------------------
-    -> b < a < c -|s r|- o
-  exL = popL2 . flip . pushL2
 
   exR
     :: i -|s r|- o > a > b
     -- -------------------
     -> i -|s r|- o > b > a
-  default exR
-    :: Contextual s
-    => i -|s r|- o > a > b
-    -- -------------------
-    -> i -|s r|- o > b > a
-  exR = popR2 . flip . pushR2
 
 
 class Core s => Contextual s where
