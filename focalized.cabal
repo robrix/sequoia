@@ -79,6 +79,7 @@ library
     Focalized.Disjunction
     Focalized.Falsity
     Focalized.HOAS
+    Focalized.Implication
     Focalized.Multiset
     Focalized.Negation
     Focalized.Polarity
