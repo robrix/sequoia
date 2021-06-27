@@ -849,11 +849,19 @@ absurdN = \case
 
 
 class (Core s, Structural s, Negating s) => MultiplicativeFalsity s where
-  botL :: s r (Bot < i) o
+  botL
+    -- -----------------
+    :: Bot < i -|s r|- o
   botL = liftL (K absurdN)
-  botR :: s r i o -> s r i (o > Bot)
+  botR
+    :: i -|s r|- o
+    -- -----------------
+    -> i -|s r|- o > Bot
   botR = wkR
-  botR' :: s r i (o > Bot) -> s r i o
+  botR'
+    :: i -|s r|- o > Bot
+    -- -----------------
+    -> i -|s r|- o
   botR' = (>>> botL)
 
 instance MultiplicativeFalsity Seq where
@@ -866,11 +874,19 @@ instance Polarized P One where
 
 
 class (Core s, Structural s, Negating s) => MultiplicativeTruth s where
-  oneL :: s r i o -> s r (One < i) o
+  oneL
+    :: i -|s r|- o
+    -- -----------------
+    -> One < i -|s r|- o
   oneL = wkL
-  oneL' :: s r (One < i) o -> s r i o
+  oneL'
+    :: One < i -|s r|- o
+    -- -----------------
+    -> i -|s r|- o
   oneL' = (oneR >>>)
-  oneR :: s r i (o > One)
+  oneR
+    -- -----------------
+    :: i -|s r|- o > One
   oneR = liftR One
 
 instance MultiplicativeTruth Seq where
@@ -897,14 +913,38 @@ instance Disj (⅋) where
 
 class (Core s, Structural s, Negating s) => MultiplicativeDisj s where
   {-# MINIMAL (parL | parLTensor), parR #-}
-  parL :: (Neg a, Neg b) => s r (a < i) o -> s r (b < i) o -> s r (a ⅋ b < i) o
-  default parL :: (Neg a, Neg b, MultiplicativeConj s) => s r (a < i) o -> s r (b < i) o -> s r (a ⅋ b < i) o
+  parL
+    :: (Neg a, Neg b)
+    => a < i -|s r|- o   ->   b < i -|s r|- o
+    -- --------------------------------------
+    ->          a ⅋ b < i -|s r|- o
+  default parL
+    :: (Neg a, Neg b, MultiplicativeConj s)
+    => a < i -|s r|- o   ->   b < i -|s r|- o
+    -- --------------------------------------
+    ->          a ⅋ b < i -|s r|- o
   parL p1 p2 = parLTensor (tensorR (negateR p1) (negateR p2))
-  parLTensor :: (Neg a, Neg b) => s r i (o > r -a ⊗ r -b) -> s r (a ⅋ b < i) o
-  default parLTensor :: (Neg a, Neg b, MultiplicativeConj s) => s r i (o > r -a ⊗ r -b) -> s r (a ⅋ b < i) o
+  parLTensor
+    :: (Neg a, Neg b)
+    =>         i -|s r|- o > r -a ⊗ r -b
+    -- ---------------------------------
+    -> a ⅋ b < i -|s r|- o
+  default parLTensor
+    :: (Neg a, Neg b, MultiplicativeConj s)
+    =>         i -|s r|- o > r -a ⊗ r -b
+    -- ---------------------------------
+    -> a ⅋ b < i -|s r|- o
   parLTensor p = wkL p >>> tensorL (negateL (negateL (parL (wkR init) init)))
-  parR :: (Neg a, Neg b) => s r i (o > a > b) -> s r i (o > a ⅋ b)
-  parR' :: (Neg a, Neg b) => s r i (o > a ⅋ b) -> s r i (o > a > b)
+  parR
+    :: (Neg a, Neg b)
+    => i -|s r|- o > a > b
+    -- -------------------
+    -> i -|s r|- o > a ⅋ b
+  parR'
+    :: (Neg a, Neg b)
+    => i -|s r|- o > a ⅋ b
+    -- -------------------
+    -> i -|s r|- o > a > b
   parR' p = poppedR (wkR . wkR) p >>> parL (wkR init) init
 
 instance MultiplicativeDisj Seq where
@@ -927,15 +967,39 @@ instance Conj (⊗) where
 
 class (Core s, Structural s, Negating s) => MultiplicativeConj s where
   {-# MINIMAL (tensorL | tensorLPar), tensorR #-}
-  tensorL :: (Pos a, Pos b) => s r (a < b < i) o -> s r (a ⊗ b < i) o
-  default tensorL :: (Pos a, Pos b, MultiplicativeDisj s) => s r (a < b < i) o -> s r (a ⊗ b < i) o
+  tensorL
+    :: (Pos a, Pos b)
+    => a < b < i -|s r|- o
+    -- -------------------
+    -> a ⊗ b < i -|s r|- o
+  default tensorL
+    :: (Pos a, Pos b, MultiplicativeDisj s)
+    => a < b < i -|s r|- o
+    -- -------------------
+    -> a ⊗ b < i -|s r|- o
   tensorL = tensorLPar . parR . notR . notR
-  tensorLPar :: (Pos a, Pos b) => s r i (o > r ¬a ⅋ r ¬b) -> s r (a ⊗ b < i) o
-  default tensorLPar :: (Pos a, Pos b, MultiplicativeDisj s) => s r i (o > r ¬a ⅋ r ¬b) -> s r (a ⊗ b < i) o
+  tensorLPar
+    :: (Pos a, Pos b)
+    =>         i -|s r|- o > r ¬a ⅋ r ¬b
+    -- ---------------------------------
+    -> a ⊗ b < i -|s r|- o
+  default tensorLPar
+    :: (Pos a, Pos b, MultiplicativeDisj s)
+    =>         i -|s r|- o > r ¬a ⅋ r ¬b
+    -- ---------------------------------
+    -> a ⊗ b < i -|s r|- o
   tensorLPar p = wkL p >>> parL (notL (tensorL init)) (notL (tensorL (wkL init)))
-  tensorL' :: (Pos a, Pos b) => s r (a ⊗ b < i) o -> s r (a < b < i) o
+  tensorL'
+    :: (Pos a, Pos b)
+    => a ⊗ b < i -|s r|- o
+    -- -------------------
+    -> a < b < i -|s r|- o
   tensorL' p = tensorR init (wkL init) >>> popL (wkL . wkL . pushL p)
-  tensorR :: (Pos a, Pos b) => s r i (o > a) -> s r i (o > b) -> s r i (o > a ⊗ b)
+  tensorR
+    :: (Pos a, Pos b)
+    => i -|s r|- o > a   ->   i -|s r|- o > b
+    -- --------------------------------------
+    ->          i -|s r|- o > a ⊗ b
 
 instance MultiplicativeConj Seq where
   tensorL p = popL (pushL2 p . exl <*> exr)
