@@ -83,6 +83,7 @@ module Focalized.Calculus
   -- * Polarity
 , N(..)
 , P(..)
+  -- * Polarity shifts
 , Polarized
 , Neg
 , Pos
@@ -98,7 +99,7 @@ import qualified Control.Category as Cat
 import           Control.Monad.Trans.Class
 import           Data.Functor.Contravariant (contramap)
 import           Data.Functor.Identity
-import           Data.Kind (Constraint, Type)
+import           Data.Kind (Constraint)
 import           Data.Profunctor
 import           Focalized.CPS
 import           Focalized.Calculus.Context
@@ -1098,16 +1099,7 @@ instance Recursive Seq where
   muR = mapR mu
 
 
--- Polarity
-
-class Polarized (p :: Type -> Type) c | c -> p
-
-instance Polarized N (N a)
-instance Polarized P (P a)
-
-type Neg = Polarized N
-type Pos = Polarized P
-
+-- Polarity shifts
 
 type Shifting s = (ShiftingN s, ShiftingP s)
 
