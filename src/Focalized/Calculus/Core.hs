@@ -70,6 +70,7 @@ class Core s => Weaken s where
     -> i -|s r|- o > a
   wkR = popR . const
 
+
 wkL'
   :: (Weaken s, Exchange s)
   => a     < i -|s r|- o
