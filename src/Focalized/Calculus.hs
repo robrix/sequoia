@@ -68,7 +68,8 @@ module Focalized.Calculus
 , type (~~)
 , Implicative(..)
 , Sub(..)
-, type (--<)
+, type (-<)
+, type (~-)
 , Coimplicative(..)
   -- * Quantifying
 , Quantifying
@@ -1049,13 +1050,13 @@ class (Core s, Structural s, Negating s) => Implicative s where
   funL pa pb = funLSub (subR pa pb)
   funLSub
     :: (Pos a, Neg b)
-    =>             i -|s r|- o > (a --< b) r
-    -- -------------------------------------
+    =>             i -|s r|- o > a ~-r-< b
+    -- -----------------------------------
     -> a ~~r~> b < i -|s r|- o
   default funLSub
     :: (Pos a, Neg b, Coimplicative s)
-    =>             i -|s r|- o > (a --< b) r
-    -- -------------------------------------
+    =>             i -|s r|- o > a ~-r-< b
+    -- -----------------------------------
     -> a ~~r~> b < i -|s r|- o
   funLSub p = wkL p >>> subL (exL (funL init init))
   funL2
@@ -1090,46 +1091,48 @@ data Sub r a b = Sub { subA :: !a, subK :: !(r -b) }
 
 instance (Pos a, Neg b) => Polarized P (Sub r a b) where
 
-type (a --< b) r = Sub r a b
+type a ~-r = Sub r a
+type r-< b = r b
 
-infixr 5 --<
+infixr 6 ~-
+infixr 5 -<
 
 
 class (Core s, Structural s, Negating s) => Coimplicative s where
   {-# MINIMAL (subL | subLFun), subR #-}
   subL
     :: (Pos a, Neg b)
-    =>           a < i -|s r|- o > b
-    -- -----------------------------
-    -> (a --< b) r < i -|s r|- o
+    =>         a < i -|s r|- o > b
+    -- ---------------------------
+    -> a ~-r-< b < i -|s r|- o
   default subL
     :: (Pos a, Neg b, Implicative s)
-    =>           a < i -|s r|- o > b
-    -- -----------------------------
-    -> (a --< b) r < i -|s r|- o
+    =>         a < i -|s r|- o > b
+    -- ---------------------------
+    -> a ~-r-< b < i -|s r|- o
   subL = subLFun . funR
   subLFun
     :: (Pos a, Neg b)
-    =>               i -|s r|- o > a ~~r~> b
-    -- -------------------------------------
-    -> (a --< b) r < i -|s r|- o
+    =>             i -|s r|- o > a ~~r~> b
+    -- -----------------------------------
+    -> a ~-r-< b < i -|s r|- o
   default subLFun
     :: (Pos a, Neg b, Implicative s)
-    =>               i -|s r|- o > a ~~r~> b
-    -- -------------------------------------
-    -> (a --< b) r < i -|s r|- o
+    =>             i -|s r|- o > a ~~r~> b
+    -- -----------------------------------
+    -> a ~-r-< b < i -|s r|- o
   subLFun p = wkL p >>> exL (subL (exL (funL init init)))
   subL'
     :: (Pos a, Neg b)
-    => (a --< b) r < i -|s r|- o
-    -- -----------------------------
-    ->           a < i -|s r|- o > b
+    => a ~-r-< b < i -|s r|- o
+    -- ---------------------------
+    ->         a < i -|s r|- o > b
   subL' p = subR init init >>> wkR (wkL' p)
   subR
     :: (Pos a, Neg b)
     => i -|s r|- o > a   ->   b < i -|s r|- o
     -- --------------------------------------
-    ->       i -|s r|- o > (a --< b) r
+    ->        i -|s r|- o > a ~-r-< b
 
 instance Coimplicative Seq where
   subL b = popL (\ s -> liftR (subA s) >>> b >>> liftL (getNegate (subK s)))
