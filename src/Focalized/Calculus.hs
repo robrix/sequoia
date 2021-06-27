@@ -21,41 +21,19 @@ module Focalized.Calculus
 , module Focalized.Calculus.Core
   -- * Control
 , module Focalized.Calculus.Control
-  -- * Negation
+  -- * Connectives
 , module Focalized.Calculus.Negation
-  -- * Units
 , module Focalized.Calculus.Falsity
 , module Focalized.Calculus.Truth
+, module Focalized.Calculus.Conjunction
+, module Focalized.Calculus.Disjunction
+, module Focalized.Calculus.Implication
   -- * Additive
 , Additive
-, AdditiveTruth(..)
-, AdditiveFalsity(..)
-, type (&)(..)
-, AdditiveConj(..)
-, type (⊕)(..)
-, AdditiveDisj(..)
   -- * Multiplicative
 , Multiplicative
-, MultiplicativeFalsity(..)
-, MultiplicativeTruth(..)
-, type (⅋)(..)
-, MultiplicativeDisj(..)
-, type (⊗)(..)
-, MultiplicativeConj(..)
   -- * Implication
 , runFun
-, appFun
-, appFun2
-, liftFun
-, liftFun'
-, Fun(..)
-, type (~>)
-, type (~~)
-, Implication(..)
-, Sub(..)
-, type (-<)
-, type (~-)
-, Subtraction(..)
   -- * Quantifying
 , Quantifying
 , ForAll(..)
