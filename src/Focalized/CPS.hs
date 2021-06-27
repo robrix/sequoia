@@ -139,7 +139,7 @@ instance Traversing (CPS r) where
   wander traverse c = liftCPS (execCPS . traverse (pappCPS c))
 
 
-newtype CPST r i m o = CPST { runCPST :: CPS (m r) i o }
+newtype CPST r a m b = CPST { runCPST :: CPS (m r) a b }
   deriving (Applicative, Functor, Monad)
 
 instance MonadTrans (CPST r i) where
