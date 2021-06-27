@@ -1035,18 +1035,49 @@ infixr 5 ~>
 
 class (Core s, Structural s, Negating s) => Implicative s where
   {-# MINIMAL (funL | funLSub), funR #-}
-  funL :: (Pos a, Neg b) => s r i (o > a) -> s r (b < i) o -> s r (a ~~r~> b < i) o
-  default funL :: (Pos a, Neg b, Coimplicative s) => s r i (o > a) -> s r (b < i) o -> s r (a ~~r~> b < i) o
+  funL
+    :: (Pos a, Neg b)
+    => i -|s r|- o > a   ->   b < i -|s r|- o
+    -- --------------------------------------
+    ->        a ~~r~> b < i -|s r|- o
+  default funL
+    :: (Pos a, Neg b, Coimplicative s)
+    => i -|s r|- o > a   ->   b < i -|s r|- o
+    -- --------------------------------------
+    ->        a ~~r~> b < i -|s r|- o
   funL pa pb = funLSub (subR pa pb)
-  funLSub :: (Pos a, Neg b) => s r i (o > (a --< b) r) -> s r (a ~~r~> b < i) o
-  default funLSub :: (Pos a, Neg b, Coimplicative s) => s r i (o > (a --< b) r) -> s r (a ~~r~> b < i) o
+  funLSub
+    :: (Pos a, Neg b)
+    =>             i -|s r|- o > (a --< b) r
+    -- -------------------------------------
+    -> a ~~r~> b < i -|s r|- o
+  default funLSub
+    :: (Pos a, Neg b, Coimplicative s)
+    =>             i -|s r|- o > (a --< b) r
+    -- -------------------------------------
+    -> a ~~r~> b < i -|s r|- o
   funLSub p = wkL p >>> subL (exL (funL init init))
-  funL2 :: (Pos a, Neg b) => s r (a ~~r~> b < a < i)  (o > b)
+  funL2
+    :: (Pos a, Neg b)
+    -- -------------------------------
+    => a ~~r~> b < a < i -|s r|- o > b
   funL2 = funL init init
-  funR :: (Pos a, Neg b) => s r (a < i) (o > b) -> s r i (o > a ~~r~> b)
-  ($$) :: (Pos a, Neg b) => s r i (o > a ~~r~> b) -> s r i (o > a) -> s r i (o > b)
+  funR
+    :: (Pos a, Neg b)
+    => a < i -|s r|- o > b
+    -- ---------------------------
+    ->     i -|s r|- o > a ~~r~> b
+  ($$)
+    :: (Pos a, Neg b)
+    => i -|s r|- o > a ~~r~> b   ->   i -|s r|- o > a
+    -- ----------------------------------------------
+    ->                i -|s r|- o > b
   f $$ a = wkR' f >>> wkR' a `funL` init
-  funR' :: (Pos a, Neg b) => s r i (o > a ~~r~> b) -> s r (a < i) (o > b)
+  funR'
+    :: (Pos a, Neg b)
+    =>     i -|s r|- o > a ~~r~> b
+    -- ---------------------------
+    -> a < i -|s r|- o > b
   funR' p = wkL (wkR' p) >>> funL2
 
 instance Implicative Seq where
@@ -1065,15 +1096,39 @@ infixr 5 --<
 
 class (Core s, Structural s, Negating s) => Coimplicative s where
   {-# MINIMAL (subL | subLFun), subR #-}
-  subL :: (Pos a, Neg b) => s r (a < i) (o > b) -> s r ((a --< b) r < i) o
-  default subL :: (Pos a, Neg b, Implicative s) => s r (a < i) (o > b) -> s r ((a --< b) r < i) o
+  subL
+    :: (Pos a, Neg b)
+    =>           a < i -|s r|- o > b
+    -- -----------------------------
+    -> (a --< b) r < i -|s r|- o
+  default subL
+    :: (Pos a, Neg b, Implicative s)
+    =>           a < i -|s r|- o > b
+    -- -----------------------------
+    -> (a --< b) r < i -|s r|- o
   subL = subLFun . funR
-  subLFun :: (Pos a, Neg b) => s r i (o > a ~~r~> b) -> s r ((a --< b) r < i) o
-  default subLFun :: (Pos a, Neg b, Implicative s) => s r i (o > a ~~r~> b) -> s r ((a --< b) r < i) o
+  subLFun
+    :: (Pos a, Neg b)
+    =>               i -|s r|- o > a ~~r~> b
+    -- -------------------------------------
+    -> (a --< b) r < i -|s r|- o
+  default subLFun
+    :: (Pos a, Neg b, Implicative s)
+    =>               i -|s r|- o > a ~~r~> b
+    -- -------------------------------------
+    -> (a --< b) r < i -|s r|- o
   subLFun p = wkL p >>> exL (subL (exL (funL init init)))
-  subL' :: (Pos a, Neg b) => s r ((a --< b) r < i) o -> s r (a < i) (o > b)
+  subL'
+    :: (Pos a, Neg b)
+    => (a --< b) r < i -|s r|- o
+    -- -----------------------------
+    ->           a < i -|s r|- o > b
   subL' p = subR init init >>> wkR (wkL' p)
-  subR :: (Pos a, Neg b) => s r i (o > a) -> s r (b < i) o -> s r i (o > (a --< b) r)
+  subR
+    :: (Pos a, Neg b)
+    => i -|s r|- o > a   ->   b < i -|s r|- o
+    -- --------------------------------------
+    ->       i -|s r|- o > (a --< b) r
 
 instance Coimplicative Seq where
   subL b = popL (\ s -> liftR (subA s) >>> b >>> liftL (getNegate (subK s)))
