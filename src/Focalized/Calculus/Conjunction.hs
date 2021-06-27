@@ -24,6 +24,7 @@ class AdditiveConj s where
     => a     < i -|s r|- o
     -- -------------------
     -> a & b < i -|s r|- o
+
   withL2
     :: (Neg a, Neg b)
     =>     b < i -|s r|- o
@@ -60,6 +61,7 @@ class MultiplicativeConj s where
     => a < b < i -|s r|- o
     -- -------------------
     -> a ⊗ b < i -|s r|- o
+
   tensorR
     :: (Pos a, Pos b)
     => i -|s r|- o > a   ->   i -|s r|- o > b
