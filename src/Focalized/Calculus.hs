@@ -103,6 +103,7 @@ import           Focalized.Calculus.Disjunction
 import           Focalized.Calculus.Falsity
 import           Focalized.Calculus.Negation
 import           Focalized.Calculus.Truth
+import           Focalized.Implication
 import           Focalized.Polarity
 import           Prelude hiding (init)
 
@@ -231,33 +232,10 @@ instance MultiplicativeConj Seq where
   tensorR = liftA2 (liftA2 inlr)
 
 
--- Implicative
+-- Implication
 
 runFun :: (a ~~r~> b) -> Seq r (a < i) (o > b)
 runFun = Seq . dimap exl inr . getFun
-
-appFun :: (a ~~r~> b) -> a -> (b -> r) -> r
-appFun = appCPS . getFun
-
-appFun2 :: (a ~~r~> b ~~r~> c) -> a -> b -> (c -> r) -> r
-appFun2 = appCPS2 . fmap getFun . getFun
-
-liftFun :: ((b -> r) -> (a -> r)) -> a ~~r~> b
-liftFun = Fun . CPS
-
-liftFun' :: (a -> (b -> r) -> r) -> a ~~r~> b
-liftFun' = liftFun . flip
-
-newtype Fun r a b = Fun { getFun :: CPS r a b }
-
-instance (Pos a, Neg b) => Polarized N (Fun r a b) where
-
-type a ~~ r = Fun r a
-type f ~> b = f b
-
-infixr 6 ~~
-infixr 5 ~>
-
 
 class (Core s, Structural s, Negation s) => Implicative s where
   {-# MINIMAL (funL | funLSub), funR #-}
@@ -309,17 +287,6 @@ class (Core s, Structural s, Negation s) => Implicative s where
 instance Implicative Seq where
   funL a b = popL (\ f -> a >>> runFun f >>> wkL' b)
   funR = lowerLR (liftR . Fun) . wkR'
-
-
-data Sub r a b = Sub { subA :: !a, subK :: !(r -b) }
-
-instance (Pos a, Neg b) => Polarized P (Sub r a b) where
-
-type a ~-r = Sub r a
-type r-< b = r b
-
-infixr 6 ~-
-infixr 5 -<
 
 
 class (Core s, Structural s, Negation s) => Coimplicative s where
