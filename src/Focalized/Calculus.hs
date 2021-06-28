@@ -69,7 +69,6 @@ import           Control.Applicative (liftA2)
 import qualified Control.Category as Cat
 import           Control.Monad.Trans.Class
 import           Data.Functor.Contravariant (contramap)
-import           Data.Functor.Identity
 import           Data.Kind (Constraint)
 import           Data.Profunctor
 import           Focalized.CPS
@@ -425,13 +424,6 @@ instance Recursive Seq where
 type Shifting s = (ShiftingN s, ShiftingP s)
 
 
-newtype Up   a = Up   { getUp   :: a }
-  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-  deriving (Applicative, Monad) via Identity
-
-instance Pos a => Polarized N (Up a) where
-
-
 class (Core s, Structural s) => ShiftingN s where
   {-# MINIMAL (upL | upLDown), upR #-}
   upL
@@ -477,13 +469,6 @@ class (Core s, Structural s) => ShiftingN s where
 instance ShiftingN Seq where
   upL   = mapL getUp
   upR   = mapR Up
-
-
-newtype Down a = Down { getDown :: a }
-  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-  deriving (Applicative, Monad) via Identity
-
-instance Neg a => Polarized P (Down a) where
 
 
 class (Core s, Structural s) => ShiftingP s where
