@@ -65,18 +65,34 @@ library
   exposed-modules:
     Focalized.B
     Focalized.Calculus
+    Focalized.Calculus.Bottom
     Focalized.Calculus.Conjunction
     Focalized.Calculus.Context
     Focalized.Calculus.Control
     Focalized.Calculus.Core
     Focalized.Calculus.Disjunction
+    Focalized.Calculus.Exists
     Focalized.Calculus.Falsity
+    Focalized.Calculus.ForAll
+    Focalized.Calculus.Function
     Focalized.Calculus.Implication
+    Focalized.Calculus.Mu
+    Focalized.Calculus.Negate
     Focalized.Calculus.Negation
+    Focalized.Calculus.Not
+    Focalized.Calculus.Nu
+    Focalized.Calculus.One
+    Focalized.Calculus.Par
     Focalized.Calculus.Quantification
     Focalized.Calculus.Recursion
     Focalized.Calculus.Shift
+    Focalized.Calculus.Subtraction
+    Focalized.Calculus.Sum
+    Focalized.Calculus.Tensor
+    Focalized.Calculus.Top
     Focalized.Calculus.Truth
+    Focalized.Calculus.With
+    Focalized.Calculus.Zero
     Focalized.Conjunction
     Focalized.Connective
     Focalized.CPS
