@@ -74,6 +74,7 @@ library
     Focalized.Calculus.Implication
     Focalized.Calculus.Negation
     Focalized.Calculus.Quantification
+    Focalized.Calculus.Recursion
     Focalized.Calculus.Shift
     Focalized.Calculus.Truth
     Focalized.Conjunction
@@ -89,6 +90,7 @@ library
     Focalized.Polarity
     Focalized.Polarized
     Focalized.Quantification
+    Focalized.Recursion
     Focalized.Snoc
     Focalized.Snoc.NonEmpty
     Focalized.Truth
