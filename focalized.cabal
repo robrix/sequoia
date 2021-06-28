@@ -97,7 +97,6 @@ library
     Focalized.ForAll
     Focalized.Function
     Focalized.Functor.C
-    Focalized.HOAS
     Focalized.Mu
     Focalized.Negate
     Focalized.Negation
