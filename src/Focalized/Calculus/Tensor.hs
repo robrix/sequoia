@@ -17,20 +17,20 @@ import Prelude hiding (init)
 class PosConjunction s where
   tensorL
     :: (Pos a, Pos b)
-    => a < b < i -|s r|- o
-    -- -------------------
-    -> a ⊗ b < i -|s r|- o
+    => a < b < _Γ -|s r|- _Δ
+    -- ---------------------
+    -> a ⊗ b < _Γ -|s r|- _Δ
 
   tensorR
     :: (Pos a, Pos b)
-    => i -|s r|- o > a   ->   i -|s r|- o > b
-    -- --------------------------------------
-    ->          i -|s r|- o > a ⊗ b
+    => _Γ -|s r|- _Δ > a   ->   _Γ -|s r|- _Δ > b
+    -- ------------------------------------------
+    ->           _Γ -|s r|- _Δ > a ⊗ b
 
 
 tensorL'
   :: (Contextual s, Weaken s, PosConjunction s, Pos a, Pos b)
-  => a ⊗ b < i -|s r|- o
-  -- -------------------
-  -> a < b < i -|s r|- o
+  => a ⊗ b < _Γ -|s r|- _Δ
+  -- ---------------------
+  -> a < b < _Γ -|s r|- _Δ
 tensorL' p = tensorR init (wkL init) >>> popL (wkL . wkL . pushL p)

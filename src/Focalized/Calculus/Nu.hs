@@ -19,20 +19,20 @@ import Prelude hiding (init)
 class Corecursion s where
   nuL
     :: (Pos ==> Neg) f
-    => Exists r P (NuF r f) < i -|s r|- o
-    -- ----------------------------------
-    ->             Nu  r f  < i -|s r|- o
+    => Exists r P (NuF r f) < _Γ -|s r|- _Δ
+    -- ------------------------------------
+    ->             Nu  r f  < _Γ -|s r|- _Δ
 
   nuR
     :: (Pos ==> Neg) f
-    => i -|s r|- o > Exists r P (NuF r f)
-    -- ----------------------------------
-    -> i -|s r|- o >             Nu  r f
+    => _Γ -|s r|- _Δ > Exists r P (NuF r f)
+    -- ------------------------------------
+    -> _Γ -|s r|- _Δ >             Nu  r f
 
 
 nuR'
   :: (Weaken s, Exchange s, Corecursion s, (Pos ==> Neg) f)
-  => i -|s r|- o >             Nu  r f
-  -- ----------------------------------
-  -> i -|s r|- o > Exists r P (NuF r f)
+  => _Γ -|s r|- _Δ >             Nu  r f
+  -- ------------------------------------
+  -> _Γ -|s r|- _Δ > Exists r P (NuF r f)
 nuR' p = wkR' p >>> nuL init

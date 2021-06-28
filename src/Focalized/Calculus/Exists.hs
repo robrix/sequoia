@@ -19,20 +19,20 @@ import Prelude hiding (init)
 
 class Existential s where
   existsL
-    :: (forall x . Polarized n x => f x < i -|s r|- o)
-    -- -----------------------------------------------
-    ->                   Exists r n f   < i -|s r|- o
+    :: (forall x . Polarized n x => f x < _Γ -|s r|- _Δ)
+    -- -------------------------------------------------
+    ->                   Exists r n f   < _Γ -|s r|- _Δ
 
   existsR
     :: (Polarized n x, Pos (f x))
-    => i -|s r|- o >            f x
-    -- ----------------------------
-    -> i -|s r|- o > Exists r n f
+    => _Γ -|s r|- _Δ >            f x
+    -- ------------------------------
+    -> _Γ -|s r|- _Δ > Exists r n f
 
 
 existsL'
   :: (Weaken s, Exchange s, Existential s, (Polarized n ==> Pos) f)
-  =>                   Exists r n f   < i -|s r|- o
-  -- -----------------------------------------------
-  -> (forall x . Polarized n x => f x < i -|s r|- o)
+  =>                   Exists r n f   < _Γ -|s r|- _Δ
+  -- -------------------------------------------------
+  -> (forall x . Polarized n x => f x < _Γ -|s r|- _Δ)
 existsL' p = existsR init >>> wkL' p

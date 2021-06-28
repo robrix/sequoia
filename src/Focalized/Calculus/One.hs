@@ -14,18 +14,18 @@ import Focalized.One
 
 class PosTruth s where
   oneL
-    :: i -|s r|- o
-    -- -----------------
-    -> One < i -|s r|- o
+    :: _Γ -|s r|- _Δ
+    -- -------------------
+    -> One < _Γ -|s r|- _Δ
 
   oneR
-    -- -----------------
-    :: i -|s r|- o > One
+    -- -------------------
+    :: _Γ -|s r|- _Δ > One
 
 
 oneL'
   :: (Core s, PosTruth s)
-  => One < i -|s r|- o
-  -- -----------------
-  -> i -|s r|- o
+  => One < _Γ -|s r|- _Δ
+  -- -------------------
+  -> _Γ -|s r|- _Δ
 oneL' = (oneR >>>)

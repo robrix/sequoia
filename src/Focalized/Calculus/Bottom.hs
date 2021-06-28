@@ -14,18 +14,18 @@ import Focalized.Calculus.Core
 
 class NegFalsity s where
   botL
-    -- -----------------
-    :: Bot < i -|s r|- o
+    -- -------------------
+    :: Bot < _Γ -|s r|- _Δ
 
   botR
-    :: i -|s r|- o
-    -- -----------------
-    -> i -|s r|- o > Bot
+    :: _Γ -|s r|- _Δ
+    -- -------------------
+    -> _Γ -|s r|- _Δ > Bot
 
 
 botR'
   :: (Core s, NegFalsity s)
-  => i -|s r|- o > Bot
-  -- -----------------
-  -> i -|s r|- o
+  => _Γ -|s r|- _Δ > Bot
+  -- -------------------
+  -> _Γ -|s r|- _Δ
 botR' = (>>> botL)

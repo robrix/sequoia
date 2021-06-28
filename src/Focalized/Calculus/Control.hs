@@ -17,41 +17,41 @@ import Prelude hiding (init)
 
 class  Control s where
   reset
-    :: i -|s o|- o
-    -- -----------
-    -> i -|s r|- o
+    :: _Γ -|s _Δ|- _Δ
+    -- --------------
+    -> _Γ -|s r |- _Δ
   shift
-    :: r •a < i -|s r|- o > r
-    -- ----------------------
-    ->        i -|s r|- o > a
+    :: r •a < _Γ -|s r|- _Δ > r
+    -- ------------------------
+    ->        _Γ -|s r|- _Δ > a
 
 
 -- Continuations
 
 kL
   :: Contextual s
-  =>       i -|s r|- o > a
-  -- ----------------------
-  -> r •a < i -|s r|- o
+  =>       _Γ -|s r|- _Δ > a
+  -- ------------------------
+  -> r •a < _Γ -|s r|- _Δ
 kL = popL . pushR
 
 kR
   :: (Contextual s, Weaken s)
-  => a < i -|s r|- o
-  -- ----------------------
-  ->     i -|s r|- o > r •a
+  => a < _Γ -|s r|- _Δ
+  -- ------------------------
+  ->     _Γ -|s r|- _Δ > r •a
 kR s = lowerL (pushL init) (wkR s)
 
 kL'
   :: (Contextual s, Weaken s)
-  => r •a < i -|s r|- o
-  -- ----------------------
-  ->        i -|s r|- o > a
+  => r •a < _Γ -|s r|- _Δ
+  -- ------------------------
+  ->        _Γ -|s r|- _Δ > a
 kL' s = kR init >>> wkR s
 
 kR'
   :: (Contextual s, Weaken s)
-  =>     i -|s r|- o > r •a
-  -- ----------------------
-  -> a < i -|s r|- o
+  =>     _Γ -|s r|- _Δ > r •a
+  -- ------------------------
+  -> a < _Γ -|s r|- _Δ
 kR' s = wkL s >>> kL init

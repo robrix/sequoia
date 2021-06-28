@@ -21,20 +21,20 @@ import Prelude hiding (init)
 class Universal s where
   forAllL
     :: (Polarized n x, Neg (f x))
-    =>        r ¬-f x < i -|s r|- o
-    -- ----------------------------
-    -> ForAll r n f   < i -|s r|- o
+    =>        r ¬-f x < _Γ -|s r|- _Δ
+    -- ------------------------------
+    -> ForAll r n f   < _Γ -|s r|- _Δ
 
   forAllR
     :: (Polarized n ==> Neg) f
-    => (forall x . Polarized n x => i -|s r|- o >            f x)
-    -- ---------------------------------------
-    ->                              i -|s r|- o > ForAll r n f
+    => (forall x . Polarized n x => _Γ -|s r|- _Δ >            f x)
+    -- ------------------------------------------------------------
+    ->                              _Γ -|s r|- _Δ > ForAll r n f
 
 
 forAllR'
   :: (Weaken s, Exchange s, Universal s, Negation s, (Polarized n ==> Neg) f)
-  =>                              i -|s r|- o > ForAll r n f
-  -- ---------------------------------------
-  -> (forall x . Polarized n x => i -|s r|- o >            f x)
+  =>                              _Γ -|s r|- _Δ > ForAll r n f
+  -- ------------------------------------------------------------------------
+  -> (forall x . Polarized n x => _Γ -|s r|- _Δ >            f x)
 forAllR' p = wkR' p >>> forAllL (dneN init)

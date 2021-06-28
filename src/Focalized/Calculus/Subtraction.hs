@@ -17,20 +17,20 @@ import Prelude hiding (init)
 class Subtraction s where
   subL
     :: (Pos a, Neg b)
-    =>         a < i -|s r|- o > b
-    -- ---------------------------
-    -> a ~-r-< b < i -|s r|- o
+    =>         a < _Γ -|s r|- _Δ > b
+    -- -----------------------------
+    -> a ~-r-< b < _Γ -|s r|- _Δ
 
   subR
     :: (Pos a, Neg b)
-    => i -|s r|- o > a   ->   b < i -|s r|- o
-    -- --------------------------------------
-    ->        i -|s r|- o > a ~-r-< b
+    => _Γ -|s r|- _Δ > a   ->   b < _Γ -|s r|- _Δ
+    -- ------------------------------------------
+    ->        _Γ -|s r|- _Δ > a ~-r-< b
 
 
 subL'
   :: (Weaken s, Exchange s, Subtraction s, Pos a, Neg b)
-  => a ~-r-< b < i -|s r|- o
-  -- ---------------------------
-  ->         a < i -|s r|- o > b
+  => a ~-r-< b < _Γ -|s r|- _Δ
+  -- -----------------------------
+  ->         a < _Γ -|s r|- _Δ > b
 subL' p = subR init init >>> wkR (wkL' p)

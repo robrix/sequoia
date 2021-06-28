@@ -18,27 +18,27 @@ import Prelude hiding (init)
 class PosShift s where
   downL
     :: Neg a
-    =>      a < i -|s r|- o
-    -- --------------------
-    -> Down a < i -|s r|- o
+    =>      a < _Γ -|s r|- _Δ
+    -- ----------------------
+    -> Down a < _Γ -|s r|- _Δ
 
   downR
     :: Neg a
-    => i -|s r|- o >      a
-    -- --------------------
-    -> i -|s r|- o > Down a
+    => _Γ -|s r|- _Δ >      a
+    -- ----------------------
+    -> _Γ -|s r|- _Δ > Down a
 
 
 downL'
   :: (Weaken s, Exchange s, PosShift s, Neg a)
-  => Down a < i -|s r|- o
-  -- --------------------
-  ->      a < i -|s r|- o
+  => Down a < _Γ -|s r|- _Δ
+  -- ----------------------
+  ->      a < _Γ -|s r|- _Δ
 downL' p = downR init >>> wkL' p
 
 downR'
   :: (Weaken s, Exchange s, PosShift s, Neg a)
-  => i -|s r|- o > Down a
-  -- --------------------
-  -> i -|s r|- o >      a
+  => _Γ -|s r|- _Δ > Down a
+  -- ----------------------
+  -> _Γ -|s r|- _Δ >      a
 downR' p = wkR' p >>> downL init

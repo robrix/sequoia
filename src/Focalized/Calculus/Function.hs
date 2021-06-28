@@ -19,33 +19,33 @@ import Prelude hiding (init)
 class Implication s where
   funL
     :: (Pos a, Neg b)
-    => i -|s r|- o > a   ->   b < i -|s r|- o
-    -- --------------------------------------
-    ->        a ~~r~> b < i -|s r|- o
+    => _Γ -|s r|- _Δ > a   ->   b < _Γ -|s r|- _Δ
+    -- ------------------------------------------
+    ->        a ~~r~> b < _Γ -|s r|- _Δ
 
   funR
     :: (Pos a, Neg b)
-    => a < i -|s r|- o > b
-    -- ---------------------------
-    ->     i -|s r|- o > a ~~r~> b
+    => a < _Γ -|s r|- _Δ > b
+    -- -----------------------------
+    ->     _Γ -|s r|- _Δ > a ~~r~> b
 
 
 funL2
   :: (Core s, Implication s, Pos a, Neg b)
-  -- -------------------------------
-  => a ~~r~> b < a < i -|s r|- o > b
+  -- ---------------------------------
+  => a ~~r~> b < a < _Γ -|s r|- _Δ > b
 funL2 = funL init init
 
 ($$)
   :: (Weaken s, Exchange s, Implication s, Pos a, Neg b)
-  => i -|s r|- o > a ~~r~> b   ->   i -|s r|- o > a
-  -- ----------------------------------------------
-  ->                i -|s r|- o > b
+  => _Γ -|s r|- _Δ > a ~~r~> b   ->   _Γ -|s r|- _Δ > a
+  -- --------------------------------------------------
+  ->                _Γ -|s r|- _Δ > b
 f $$ a = wkR' f >>> wkR' a `funL` init
 
 funR'
   :: (Weaken s, Exchange s, Implication s, Pos a, Neg b)
-  =>     i -|s r|- o > a ~~r~> b
-  -- ---------------------------
-  -> a < i -|s r|- o > b
+  =>     _Γ -|s r|- _Δ > a ~~r~> b
+  -- -----------------------------
+  -> a < _Γ -|s r|- _Δ > b
 funR' p = wkL (wkR' p) >>> funL2

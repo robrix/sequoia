@@ -30,16 +30,16 @@ type Negation s = (NegNegation s, PosNegation s)
 
 dneN
   :: (NegNegation s, PosNegation s, Neg a)
-  =>     a < i -|s r|- o
-  -- -------------------
-  -> r ¬-a < i -|s r|- o
+  =>     a < _Γ -|s r|- _Δ
+  -- ---------------------
+  -> r ¬-a < _Γ -|s r|- _Δ
 dneN = notL . negateR
 
 dniN
   :: (NegNegation s, PosNegation s, Neg a)
-  => i -|s r|- o > a
-  -- -------------------
-  -> i -|s r|- o > r ¬-a
+  => _Γ -|s r|- _Δ > a
+  -- ---------------------
+  -> _Γ -|s r|- _Δ > r ¬-a
 dniN = notR . negateL
 
 
@@ -47,14 +47,14 @@ dniN = notR . negateL
 
 dneP
   :: (NegNegation s, PosNegation s, Pos a)
-  =>     a < i -|s r|- o
-  -- -------------------
-  -> r -¬a < i -|s r|- o
+  =>     a < _Γ -|s r|- _Δ
+  -- ---------------------
+  -> r -¬a < _Γ -|s r|- _Δ
 dneP = negateL . notR
 
 dniP
   :: (NegNegation s, PosNegation s, Pos a)
-  => i -|s r|- o > a
-  -- -------------------
-  -> i -|s r|- o > r -¬a
+  => _Γ -|s r|- _Δ > a
+  -- ---------------------
+  -> _Γ -|s r|- _Δ > r -¬a
 dniP = negateR . notL

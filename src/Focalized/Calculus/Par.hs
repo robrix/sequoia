@@ -17,20 +17,20 @@ import Prelude hiding (init)
 class NegDisjunction s where
   parL
     :: (Neg a, Neg b)
-    => a < i -|s r|- o   ->   b < i -|s r|- o
-    -- --------------------------------------
-    ->          a ⅋ b < i -|s r|- o
+    => a < _Γ -|s r|- _Δ   ->   b < _Γ -|s r|- _Δ
+    -- ------------------------------------------
+    ->          a ⅋ b < _Γ -|s r|- _Δ
 
   parR
     :: (Neg a, Neg b)
-    => i -|s r|- o > a > b
-    -- -------------------
-    -> i -|s r|- o > a ⅋ b
+    => _Γ -|s r|- _Δ > a > b
+    -- ---------------------
+    -> _Γ -|s r|- _Δ > a ⅋ b
 
 
 parR'
   :: (Weaken s, Contextual s, NegDisjunction s, Neg a, Neg b)
-  => i -|s r|- o > a ⅋ b
-  -- -------------------
-  -> i -|s r|- o > a > b
+  => _Γ -|s r|- _Δ > a ⅋ b
+  -- ---------------------
+  -> _Γ -|s r|- _Δ > a > b
 parR' p = poppedR (wkR . wkR) p >>> parL (wkR init) init

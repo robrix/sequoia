@@ -18,33 +18,33 @@ import Prelude hiding (init)
 class PosDisjunction s where
   sumL
     :: (Pos a, Pos b)
-    => a < i -|s r|- o   ->   b < i -|s r|- o
-    -- --------------------------------------
-    ->           a ⊕ b < i -|s r|- o
+    => a < _Γ -|s r|- _Δ   ->   b < _Γ -|s r|- _Δ
+    -- ------------------------------------------
+    ->           a ⊕ b < _Γ -|s r|- _Δ
 
   sumR1
     :: (Pos a, Pos b)
-    => i -|s r|- o > a
-    -- -------------------
-    -> i -|s r|- o > a ⊕ b
+    => _Γ -|s r|- _Δ > a
+    -- ---------------------
+    -> _Γ -|s r|- _Δ > a ⊕ b
 
   sumR2
     :: (Pos a, Pos b)
-    => i -|s r|- o >     b
-    -- -------------------
-    -> i -|s r|- o > a ⊕ b
+    => _Γ -|s r|- _Δ >     b
+    -- ---------------------
+    -> _Γ -|s r|- _Δ > a ⊕ b
 
 
 sumL1'
   :: (Weaken s, Exchange s, PosDisjunction s, Pos a, Pos b)
-  => a ⊕ b < i -|s r|- o
-  -- -------------------
-  -> a     < i -|s r|- o
+  => a ⊕ b < _Γ -|s r|- _Δ
+  -- ---------------------
+  -> a     < _Γ -|s r|- _Δ
 sumL1' p = sumR1 init >>> wkL' p
 
 sumL2'
   :: (Weaken s, Exchange s, PosDisjunction s, Pos a, Pos b)
-  => a ⊕ b < i -|s r|- o
-  -- -------------------
-  ->     b < i -|s r|- o
+  => a ⊕ b < _Γ -|s r|- _Δ
+  -- ---------------------
+  ->     b < _Γ -|s r|- _Δ
 sumL2' p = sumR2 init >>> wkL' p

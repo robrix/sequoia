@@ -20,20 +20,20 @@ import Prelude hiding (init)
 class Recursion s where
   muL
     :: ((Neg ==> Pos) f, Neg a)
-    => i -|s r|- o > f a ~~r~> a   ->   a < i -|s r|- o
-    -- ------------------------------------------------
-    ->              Mu r f < i -|s r|- o
+    => _Γ -|s r|- _Δ > f a ~~r~> a   ->   a < _Γ -|s r|- _Δ
+    -- ----------------------------------------------------
+    ->              Mu r f < _Γ -|s r|- _Δ
 
   muR
     :: (Neg ==> Pos) f
-    => i -|s r|- o > ForAll r N (MuF r f)
-    -- ----------------------------------
-    -> i -|s r|- o >             Mu  r f
+    => _Γ -|s r|- _Δ > ForAll r N (MuF r f)
+    -- ------------------------------------
+    -> _Γ -|s r|- _Δ >             Mu  r f
 
 
 muL'
   :: (Weaken s, Exchange s, Recursion s, (Neg ==> Pos) f)
-  =>             Mu  r f  < i -|s r|- o
-  -- ----------------------------------
-  -> ForAll r N (MuF r f) < i -|s r|- o
+  =>             Mu  r f  < _Γ -|s r|- _Δ
+  -- ------------------------------------
+  -> ForAll r N (MuF r f) < _Γ -|s r|- _Δ
 muL' p = muR init >>> wkL' p
