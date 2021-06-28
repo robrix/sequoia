@@ -122,7 +122,10 @@ class Core s => Contextual s where
   -- @
   -- pushL . popL = id
   -- @
-  popL :: (a -> s r i o) -> s r (a < i) o
+  popL
+    :: (a -> _Γ -|s r|- _Δ)
+    -- --------------------
+    ->  a  < _Γ -|s r|- _Δ
 
   -- | Pop something off the output context which can later be pushed. Used with 'pushR', this provides a generalized context restructuring facility.
   --
@@ -132,10 +135,13 @@ class Core s => Contextual s where
   -- @
   -- pushR . popR = id
   -- @
-  popR :: (r •a -> s r i o) -> s r i (o > a)
+  popR
+    :: (r •a -> _Γ -|s r|- _Δ)
+    -- --------------------------
+    ->          _Γ -|s r|- _Δ > a
 
 
-  -- | Push something onto the input context which was previously popped off it. Used with 'popL', this provides a generalized context restructuring facility. It i undefined what will happen if you push something which was not previously popped.
+  -- | Push something onto the input context which was previously popped off it. Used with 'popL', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
   --
   -- @
   -- popL . pushL = id
@@ -143,9 +149,12 @@ class Core s => Contextual s where
   -- @
   -- pushL . popL = id
   -- @
-  pushL :: s r (a < i) o -> (a -> s r i o)
+  pushL
+    ::  a  < _Γ -|s r|- _Δ
+    -- --------------------
+    -> (a -> _Γ -|s r|- _Δ)
 
-  -- | Push something onto the output context which was previously popped off it. Used with 'popR', this provides a generalized context restructuring facility. It i undefined what will happen if you push something which was not previously popped.
+  -- | Push something onto the output context which was previously popped off it. Used with 'popR', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
   --
   -- @
   -- popR . pushR = id
@@ -153,61 +162,121 @@ class Core s => Contextual s where
   -- @
   -- pushR . popR = id
   -- @
-  pushR :: s r i (o > a) -> (r •a -> s r i o)
+  pushR
+    ::          _Γ -|s r|- _Δ > a
+    -- --------------------------
+    -> (r •a -> _Γ -|s r|- _Δ)
 
 
-poppedL :: Contextual s => (s r i o -> s r i' o') -> (s r (a < i) o -> s r (a < i') o')
+poppedL
+  :: Contextual s
+  => (_Γ -|s r|- _Δ     ->     _Γ' -|s r|- _Δ')
+  -- ------------------------------------------
+  -> (a < _Γ -|s r|- _Δ -> a < _Γ' -|s r|- _Δ')
 poppedL f p = popL (f . pushL p)
 
-poppedR :: Contextual s => (s r i o -> s r i' o') -> (s r i (o > a) -> s r i' (o' > a))
+poppedR
+  :: Contextual s
+  => (_Γ -|s r|- _Δ     -> _Γ' -|s r|- _Δ')
+  -- ------------------------------------------
+  -> (_Γ -|s r|- _Δ > a -> _Γ' -|s r|- _Δ' > a)
 poppedR f p = popR (f . pushR p)
 
 
-popL2 :: Contextual s => (a -> b -> s r i o) -> s r (a < b < i) o
+popL2
+  :: Contextual s
+  => (a -> b -> _Γ -|s r|- _Δ)
+  -- -------------------------
+  ->  a  < b  < _Γ -|s r|- _Δ
 popL2 f = popL (popL . f)
 
-popR2 :: Contextual s => (r •a -> r •b -> s r i o) -> s r i (o > b > a)
+popR2
+  :: Contextual s
+  => (r •a -> r •b -> _Γ -|s r|- _Δ)
+  -- --------------------------------------
+  ->                  _Γ -|s r|- _Δ > b > a
 popR2 f = popR (popR . f)
 
 
-pushL2 :: Contextual s => s r (a < b < i) o -> a -> b -> s r i o
+pushL2
+  :: Contextual s
+  => a < b < _Γ -|s r|- _Δ   ->   a   ->   b
+  -- ---------------------------------------
+  ->         _Γ -|s r|- _Δ
 pushL2 p = pushL . pushL p
 
-pushR2 :: Contextual s => s r i (o > b > a) -> r •a -> r •b -> s r i o
+pushR2
+  :: Contextual s
+  => _Γ -|s r|- _Δ > b > a   ->   r •a   ->   r •b
+  -- -----------------
+  -> _Γ -|s r|- _Δ
 pushR2 p = pushR . pushR p
 
 
-mapL :: Contextual s => (a' -> a) -> s r (a < i) o -> s r (a' < i) o
+mapL
+  :: Contextual s
+  => (a' -> a)
+  -> a  < _Γ -|s r|- _Δ
+  -- ------------------
+  -> a' < _Γ -|s r|- _Δ
 mapL f p = popL (pushL p . f)
 
-mapR :: Contextual s => (a -> a') -> s r i (o > a) -> s r i (o > a')
+mapR
+  :: Contextual s
+  => (a -> a')
+  -> _Γ -|s r|- _Δ > a
+  -- ------------------
+  -> _Γ -|s r|- _Δ > a'
 mapR f p = popR (pushR p . contramap f)
 
 
 -- FIXME: this is clearly possible, tho it’s less clear that it’s a good idea.
--- mapL2 :: (c -> (b, a)) -> s r (a < i) o -> s r (b < i) o -> s r (c < i) o
+-- mapL2
+--  :: (c -> (b, a)) -> a < _Γ -|s r|- _Δ -> b < _Γ -|s r|- _Δ
+--  -- -------------------------------------------------------
+--  ->                  c < _Γ -|s r|- _Δ
 -- mapL2 f a b = popL (pushL b . exl . f) <> popL (pushL a . exr . f)
 
-mapR2 :: Contextual s => (a -> b -> c) -> s r i (o > a) -> s r i (o > b) -> s r i (o > c)
+mapR2
+  :: Contextual s
+  => (a -> b -> c) -> _Γ -|s r|- _Δ > a   ->   _Γ -|s r|- _Δ > b
+  -- -----------------------------------------------------------
+  ->                     _Γ -|s r|- _Δ > c
 mapR2 f a b = mapR f (wkR' a) >>> popL (`mapR` b)
   where wkR' = popR2 . flip . const . pushR
 
 
-liftL :: Contextual s => r •a -> s r (a < i) o
+liftL
+  :: Contextual s
+  => r •a
+  -- -----------------
+  -> a < _Γ -|s r|- _Δ
 liftL = pushR init
 
-liftR :: Contextual s => a -> s r i (o > a)
+liftR
+  :: Contextual s
+  => a
+  -- -----------------
+  -> _Γ -|s r|- _Δ > a
 liftR = pushL init
 
 
-lowerL :: Contextual s => (r •a -> s r i o) -> (s r (a < i) o -> s r i o)
+lowerL
+  :: Contextual s
+  => (r •a              -> _Γ -|s r|- _Δ)
+  -- ------------------------------------
+  -> (a < _Γ -|s r|- _Δ -> _Γ -|s r|- _Δ)
 lowerL k p = popR k >>> p
 
-lowerR :: Contextual s => (a -> s r i o) -> (s r i (o > a) -> s r i o)
+lowerR
+  :: Contextual s
+  => (a                 -> _Γ -|s r|- _Δ)
+  -- ------------------------------------
+  -> (_Γ -|s r|- _Δ > a -> _Γ -|s r|- _Δ)
 lowerR k p = p >>> popL k
 
 
-newtype Contextually s r i o = Contextually { getContextually :: s r i o }
+newtype Contextually s r _Γ _Δ = Contextually { getContextually :: _Γ -|s r|- _Δ }
   deriving (Core)
 
 instance Contextual s => Weaken (Contextually s) where
