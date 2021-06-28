@@ -108,7 +108,6 @@ library
     Focalized.Polarity
     Focalized.Polarized
     Focalized.Quantification
-    Focalized.Recursion
     Focalized.Snoc
     Focalized.Snoc.NonEmpty
     Focalized.Subtraction
