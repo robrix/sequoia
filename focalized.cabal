@@ -94,6 +94,7 @@ library
     Focalized.Down
     Focalized.Exists
     Focalized.ForAll
+    Focalized.Function
     Focalized.Functor.C
     Focalized.HOAS
     Focalized.Implication
@@ -111,6 +112,7 @@ library
     Focalized.Recursion
     Focalized.Snoc
     Focalized.Snoc.NonEmpty
+    Focalized.Subtraction
     Focalized.Sum
     Focalized.Tensor
     Focalized.Top

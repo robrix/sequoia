@@ -1,0 +1,2 @@
+module Focalized.Function
+() where
