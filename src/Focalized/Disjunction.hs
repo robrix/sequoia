@@ -1,6 +1,7 @@
 module Focalized.Disjunction
 ( -- * Disjunction
   Disj(..)
+, (<-->)
 , exlD
 , exrD
 , foldMapDisj
@@ -21,6 +22,11 @@ instance Disj Either where
   inl = Left
   inr = Right
   exlr = either
+
+(<-->) :: Disj d => (a -> r) -> (b -> r) -> (a `d` b -> r)
+(<-->) = exlr
+
+infix 3 <-->
 
 exlD :: Disj d => a `d` b -> Maybe a
 exlD = Just `exlr` const Nothing

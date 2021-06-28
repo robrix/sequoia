@@ -1,6 +1,7 @@
 module Focalized.Conjunction
 ( -- * Conjunction
   Conj(..)
+, (-><-)
 , curryConj
 , uncurryConj
 , foldMapConj
@@ -21,6 +22,11 @@ instance Conj (,) where
   inlr = (,)
   exl = fst
   exr = snd
+
+(-><-) :: Conj c => a -> b -> (a `c` b)
+(-><-) = inlr
+
+infix 4 -><-
 
 curryConj :: Conj p => ((a `p` b) -> r) -> (a -> b -> r)
 curryConj f = fmap f . inlr
