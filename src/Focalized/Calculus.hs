@@ -23,20 +23,15 @@ module Focalized.Calculus
 , module Focalized.Calculus.Control
   -- * Connectives
 , module Focalized.Calculus.Additive
-, module Focalized.Calculus.Bottom
 , module Focalized.Calculus.Exists
 , module Focalized.Calculus.ForAll
 , module Focalized.Calculus.Function
 , module Focalized.Calculus.Mu
+, module Focalized.Calculus.Multiplicative
 , module Focalized.Calculus.Negation
 , module Focalized.Calculus.Nu
-, module Focalized.Calculus.One
-, module Focalized.Calculus.Par
 , module Focalized.Calculus.Shift
 , module Focalized.Calculus.Subtraction
-, module Focalized.Calculus.Tensor
-  -- * Multiplicative
-, Multiplicative
   -- * Implication
 , runFun
   -- * Quantification
@@ -56,7 +51,6 @@ import           Data.Functor.Contravariant (contramap)
 import           Data.Profunctor
 import           Focalized.CPS
 import           Focalized.Calculus.Additive
-import           Focalized.Calculus.Bottom
 import           Focalized.Calculus.Context
 import           Focalized.Calculus.Control
 import           Focalized.Calculus.Core
@@ -64,13 +58,11 @@ import           Focalized.Calculus.Exists
 import           Focalized.Calculus.ForAll
 import           Focalized.Calculus.Function
 import           Focalized.Calculus.Mu
+import           Focalized.Calculus.Multiplicative
 import           Focalized.Calculus.Negation
 import           Focalized.Calculus.Nu
-import           Focalized.Calculus.One
-import           Focalized.Calculus.Par
 import           Focalized.Calculus.Shift
 import           Focalized.Calculus.Subtraction
-import           Focalized.Calculus.Tensor
 import           Focalized.Conjunction
 import           Focalized.Disjunction
 import           Focalized.Polarity
@@ -177,9 +169,6 @@ instance PosDisjunction Seq where
 
 -- Multiplicative
 
-type Multiplicative s = (NegFalsity s, PosTruth s, NegDisjunction s, PosConjunction s)
-
-
 instance NegFalsity Seq where
   botL = liftL (K absurdN)
   botR = wkR
@@ -188,11 +177,9 @@ instance PosTruth Seq where
   oneL = wkL
   oneR = liftR One
 
-
 instance NegDisjunction Seq where
   parL a b = popL (pushL a <--> pushL b)
   parR ab = (>>= inr . inl) |> inr . inr <$> ab
-
 
 instance PosConjunction Seq where
   tensorL p = popL (pushL2 p . exl <*> exr)

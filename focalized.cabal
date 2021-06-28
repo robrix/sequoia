@@ -75,6 +75,7 @@ library
     Focalized.Calculus.ForAll
     Focalized.Calculus.Function
     Focalized.Calculus.Mu
+    Focalized.Calculus.Multiplicative
     Focalized.Calculus.Negate
     Focalized.Calculus.Negation
     Focalized.Calculus.Not
