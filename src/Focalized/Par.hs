@@ -8,7 +8,7 @@ import Focalized.Polarity
 
 -- Negative disjunction
 
-newtype a ⅋ b = Par (forall r . (a -> r) -> (b -> r) -> r)
+newtype a ⅋ b = Par { getPar :: forall r . (a -> r) -> (b -> r) -> r }
   deriving (Functor)
 
 infixr 7 ⅋
@@ -24,4 +24,4 @@ instance Traversable ((⅋) f) where
 instance Disj (⅋) where
   inl l = Par $ \ ifl _ -> ifl l
   inr r = Par $ \ _ ifr -> ifr r
-  exlr ifl ifr (Par run) = run ifl ifr
+  ifl <--> ifr = \ par -> getPar par ifl ifr

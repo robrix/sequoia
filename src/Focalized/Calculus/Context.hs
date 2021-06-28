@@ -61,7 +61,7 @@ infixl 4 >, |>
 instance Disj (>) where
   inl = L
   inr = R
-  exlr f g = \case
+  f <--> g = \case
     L a -> f a
     R b -> g b
 
@@ -79,13 +79,13 @@ instance Applicative ((>) a) where
   (<*>) = ap
 
 instance Monad ((>) a) where
-  (>>=) = flip (exlr inl)
+  (>>=) = flip (inl <-->)
 
 -- | Discrimination of values in '>'.
 --
 -- @¬A ✕ ¬B -> ¬(A + B)@
 (|>) :: (os -> r) -> (o -> r) -> ((os > o) -> r)
-(|>) = exlr
+(|>) = (<-->)
 
 
 -- Mixfix syntax
@@ -143,4 +143,4 @@ instance {-# OVERLAPPING #-} ContextR a as as' => ContextR a (as > b) (as' > b) 
   selectR = selectR <--> const Nothing
   dropR = fmap inl . dropR <--> Just . inr
   removeR = first inl . removeR <--> inl . inr
-  insertR = first insertR . exlr (exlr (inl . inl) inr) (inl . inr)
+  insertR = first insertR . ((inl . inl <--> inr) <--> inl . inr)

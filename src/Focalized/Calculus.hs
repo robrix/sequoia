@@ -170,7 +170,7 @@ instance NegConjunction Seq where
   withR = liftA2 (liftA2 inlr)
 
 instance PosDisjunction Seq where
-  sumL a b = popL (exlr (pushL a) (pushL b))
+  sumL a b = popL (pushL a <--> pushL b)
   sumR1 = mapR inl
   sumR2 = mapR inr
 
@@ -190,7 +190,7 @@ instance PosTruth Seq where
 
 
 instance NegDisjunction Seq where
-  parL a b = popL (exlr (pushL a) (pushL b))
+  parL a b = popL (pushL a <--> pushL b)
   parR ab = (>>= inr . inl) |> inr . inr <$> ab
 
 

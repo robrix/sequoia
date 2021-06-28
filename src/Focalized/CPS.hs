@@ -115,10 +115,10 @@ instance Arrow (CPS r) where
   f &&& g = CPS (\ k a -> appCPS f a (appCPS g a . fmap k . (,)))
 
 instance ArrowChoice (CPS r) where
-  left  f = CPS (\ k -> exlr (runCPS f (k . inl)) (k . inr))
-  right g = CPS (\ k -> exlr (k . inl) (runCPS g (k . inr)))
-  f +++ g = CPS (\ k -> exlr (runCPS f (k . inl)) (runCPS g (k . inr)))
-  f ||| g = CPS (exlr <$> runCPS f <*> runCPS g)
+  left  f = CPS (\ k -> runCPS f (k . inl) <--> k . inr)
+  right g = CPS (\ k -> k . inl <--> runCPS g (k . inr))
+  f +++ g = CPS (\ k -> runCPS f (k . inl) <--> runCPS g (k . inr))
+  f ||| g = CPS ((<-->) <$> runCPS f <*> runCPS g)
 
 instance ArrowApply (CPS r) where
   app = CPS (flip (uncurry appCPS))

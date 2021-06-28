@@ -20,6 +20,6 @@ instance (Pos a, Pos b) => Polarized P (a ⊕ b)
 instance Disj (⊕) where
   inl = InL
   inr = InR
-  exlr ifl ifr = \case
+  ifl <--> ifr = \case
     InL l -> ifl l
     InR r -> ifr r
