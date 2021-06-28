@@ -89,7 +89,6 @@ library
     Focalized.Calculus.Sum
     Focalized.Calculus.Tensor
     Focalized.Calculus.Top
-    Focalized.Calculus.Truth
     Focalized.Calculus.With
     Focalized.Calculus.Zero
     Focalized.Conjunction
