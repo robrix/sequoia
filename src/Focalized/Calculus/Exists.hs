@@ -5,11 +5,12 @@ module Focalized.Calculus.Exists
   Existential(..)
 , existsL'
   -- * Connectives
-, module Focalized.Quantification
+, module Focalized.Exists
 ) where
 
 import Focalized.Calculus.Context
 import Focalized.Calculus.Core
+import Focalized.Exists
 import Focalized.Polarity
 import Focalized.Quantification
 import Prelude hiding (init)

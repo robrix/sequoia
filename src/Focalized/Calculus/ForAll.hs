@@ -5,12 +5,13 @@ module Focalized.Calculus.ForAll
   Universal(..)
 , forAllR'
   -- * Connectives
-, module Focalized.Quantification
+, module Focalized.ForAll
 ) where
 
 import Focalized.Calculus.Context
 import Focalized.Calculus.Core
 import Focalized.Calculus.Negation
+import Focalized.ForAll
 import Focalized.Polarity
 import Focalized.Quantification
 import Prelude hiding (init)
