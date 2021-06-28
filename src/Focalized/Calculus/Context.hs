@@ -136,11 +136,11 @@ class ContextR a as as' | as a -> as', as as' -> a, as' a -> as where
 instance {-# OVERLAPPING #-} ContextR a (as > a) as where
   selectR = exrD
   dropR = exlD
-  removeR = inl `exlr` inr
-  insertR = inl `exlr` inr
+  removeR = inl <--> inr
+  insertR = inl <--> inr
 
 instance {-# OVERLAPPING #-} ContextR a as as' => ContextR a (as > b) (as' > b) where
-  selectR = selectR `exlr` const Nothing
-  dropR = (fmap inl . dropR) `exlr` (Just . inr)
-  removeR = (first inl . removeR) `exlr` (inl . inr)
+  selectR = selectR <--> const Nothing
+  dropR = fmap inl . dropR <--> Just . inr
+  removeR = first inl . removeR <--> inl . inr
   insertR = first insertR . exlr (exlr (inl . inl) inr) (inl . inr)

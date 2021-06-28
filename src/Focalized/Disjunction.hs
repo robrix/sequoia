@@ -38,13 +38,13 @@ foldMapDisj :: (Disj p, Monoid m) => (b -> m) -> (a `p` b) -> m
 foldMapDisj = exlr (const mempty)
 
 traverseDisj :: (Disj p, Applicative m) => (b -> m b') -> (a `p` b) -> m (a `p` b')
-traverseDisj f = exlr (pure . inl) (fmap inr . f)
+traverseDisj f = pure . inl <--> fmap inr . f
 
 bifoldMapDisj :: Disj p => (a -> m) -> (b -> m) -> (a `p` b -> m)
 bifoldMapDisj = exlr
 
 bimapDisj :: Disj p => (a -> a') -> (b -> b') -> (a `p` b -> a' `p` b')
-bimapDisj f g = exlr (inl . f) (inr . g)
+bimapDisj f g = inl . f <--> inr . g
 
 bitraverseDisj :: (Disj p, Functor m) => (a -> m a') -> (b -> m b') -> (a `p` b -> m (a' `p` b'))
-bitraverseDisj f g = exlr (fmap inl . f) (fmap inr . g)
+bitraverseDisj f g = fmap inl . f <--> fmap inr . g
