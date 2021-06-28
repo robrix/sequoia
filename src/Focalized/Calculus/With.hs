@@ -4,13 +4,13 @@ module Focalized.Calculus.With
 , withR1'
 , withR2'
   -- * Connectives
-, module Focalized.Conjunction
+, module Focalized.With
 ) where
 
 import Focalized.Calculus.Context
 import Focalized.Calculus.Core
-import Focalized.Conjunction
 import Focalized.Polarity
+import Focalized.With
 import Prelude hiding (init)
 
 -- Negative conjunction

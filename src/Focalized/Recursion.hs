@@ -19,10 +19,10 @@ module Focalized.Recursion
 import qualified Control.Category as Cat
 import           Data.Functor.Contravariant
 import           Focalized.CPS
-import           Focalized.Conjunction
 import           Focalized.Implication
 import           Focalized.Polarity
 import           Focalized.Quantification
+import           Focalized.Tensor
 
 -- Corecursion
 

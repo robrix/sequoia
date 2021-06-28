@@ -3,13 +3,13 @@ module Focalized.Calculus.Tensor
   PosConjunction(..)
 , tensorL'
   -- * Connectives
-, module Focalized.Conjunction
+, module Focalized.Tensor
 ) where
 
 import Focalized.Calculus.Context
 import Focalized.Calculus.Core
-import Focalized.Conjunction
 import Focalized.Polarity
+import Focalized.Tensor
 import Prelude hiding (init)
 
 -- Positive conjunction
