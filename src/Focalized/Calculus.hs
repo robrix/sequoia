@@ -23,23 +23,16 @@ module Focalized.Calculus
 , module Focalized.Calculus.Control
   -- * Connectives
 , module Focalized.Calculus.Additive
-, module Focalized.Calculus.Exists
-, module Focalized.Calculus.ForAll
 , module Focalized.Calculus.Function
 , module Focalized.Calculus.Mu
 , module Focalized.Calculus.Multiplicative
 , module Focalized.Calculus.Negation
 , module Focalized.Calculus.Nu
+, module Focalized.Calculus.Quantification
 , module Focalized.Calculus.Shift
 , module Focalized.Calculus.Subtraction
   -- * Implication
 , runFun
-  -- * Quantification
-, Quantification
-, ForAll(..)
-, Universal(..)
-, Exists(..)
-, Existential(..)
   -- * Polarity
 , module Focalized.Polarity
 ) where
@@ -54,13 +47,12 @@ import           Focalized.Calculus.Additive
 import           Focalized.Calculus.Context
 import           Focalized.Calculus.Control
 import           Focalized.Calculus.Core
-import           Focalized.Calculus.Exists
-import           Focalized.Calculus.ForAll
 import           Focalized.Calculus.Function
 import           Focalized.Calculus.Mu
 import           Focalized.Calculus.Multiplicative
 import           Focalized.Calculus.Negation
 import           Focalized.Calculus.Nu
+import           Focalized.Calculus.Quantification
 import           Focalized.Calculus.Shift
 import           Focalized.Calculus.Subtraction
 import           Focalized.Conjunction
@@ -203,13 +195,9 @@ instance Subtraction Seq where
 
 -- Quantification
 
-type Quantification s = (Universal s, Existential s)
-
-
 instance Universal Seq where
   forAllL p = mapL (notNegate . runForAll) p
   forAllR p = sequent $ \ k a -> k (inr (ForAll (K (\ k' -> runSeq p (k . inl |> runK k') a))))
-
 
 instance Existential Seq where
   existsL p = popL (dnESeq . runExists (pushL p))
