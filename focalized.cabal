@@ -107,7 +107,6 @@ library
     Focalized.One
     Focalized.Par
     Focalized.Polarity
-    Focalized.Polarized
     Focalized.Quantification
     Focalized.Snoc
     Focalized.Snoc.NonEmpty
