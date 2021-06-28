@@ -81,6 +81,7 @@ library
     Focalized.CPS
     Focalized.Disjunction
     Focalized.Falsity
+    Focalized.Functor.C
     Focalized.HOAS
     Focalized.Implication
     Focalized.Multiset
