@@ -59,10 +59,7 @@ module Focalized.Calculus
 , Neg
 , Pos
 , Shifting
-, Up(..)
-, ShiftingN(..)
-, Down(..)
-, ShiftingP(..)
+, module Focalized.Calculus.Shift
 ) where
 
 import           Control.Applicative (liftA2)
@@ -80,6 +77,7 @@ import           Focalized.Calculus.Disjunction
 import           Focalized.Calculus.Falsity
 import           Focalized.Calculus.Implication
 import           Focalized.Calculus.Negation
+import           Focalized.Calculus.Shift
 import           Focalized.Calculus.Truth
 import           Focalized.Polarity
 import           Prelude hiding (init)
@@ -421,99 +419,14 @@ instance Recursive Seq where
 
 -- Polarity shifts
 
-type Shifting s = (ShiftingN s, ShiftingP s)
+type Shifting s = (NegShift s, PosShift s)
 
 
-class (Core s, Structural s) => ShiftingN s where
-  {-# MINIMAL (upL | upLDown), upR #-}
-  upL
-    :: Pos a
-    =>    a < i -|s r|- o
-    -- ------------------
-    -> Up a < i -|s r|- o
-  default upL
-    :: (ShiftingP s, NegNegation s, Pos a)
-    =>    a < i -|s r|- o
-    -- ------------------
-    -> Up a < i -|s r|- o
-  upL = upLDown . downR . notR
-  upLDown
-    :: Pos a
-    =>        i -|s r|- o > Down (r ¬a)
-    -- --------------------------------
-    -> Up a < i -|s r|- o
-  default upLDown
-    :: (ShiftingP s, NegNegation s, Pos a)
-    =>        i -|s r|- o > Down (r ¬a)
-    -- --------------------------------
-    -> Up a < i -|s r|- o
-  upLDown s = wkL s >>> downL (notL (upL init))
-  upL'
-    :: Pos a
-    => Up a < i -|s r|- o
-    -- ------------------
-    ->    a < i -|s r|- o
-  upL' p = upR init >>> wkL' p
-  upR
-    :: Pos a
-    => i -|s r|- o >    a
-    -- ------------------
-    -> i -|s r|- o > Up a
-  upR'
-    :: Pos a
-    => i -|s r|- o > Up a
-    -- ------------------
-    -> i -|s r|- o >    a
-  upR' p = wkR' p >>> upL init
-
-instance ShiftingN Seq where
+instance NegShift Seq where
   upL   = mapL getUp
   upR   = mapR Up
 
-
-class (Core s, Structural s) => ShiftingP s where
-  {-# MINIMAL (downL | downLUp), downR #-}
-  downL
-    :: Neg a
-    =>      a < i -|s r|- o
-    -- --------------------
-    -> Down a < i -|s r|- o
-  default downL
-    :: (ShiftingN s, PosNegation s, Neg a)
-    =>      a < i -|s r|- o
-    -- --------------------
-    -> Down a < i -|s r|- o
-  downL = downLUp . upR . negateR
-  downLUp
-    :: Neg a
-    =>          i -|s r|- o > Up (r -a)
-    -- --------------------------------
-    -> Down a < i -|s r|- o
-  default downLUp
-    :: (ShiftingN s, PosNegation s, Neg a)
-    =>          i -|s r|- o > Up (r -a)
-    -- --------------------------------
-    -> Down a < i -|s r|- o
-  downLUp s = wkL s >>> upL (negateL (downL init))
-  downL'
-    :: Neg a
-    => Down a < i -|s r|- o
-    -- --------------------
-    ->      a < i -|s r|- o
-  downL' p = downR init >>> wkL' p
-  downR
-    :: Neg a
-    => i -|s r|- o >      a
-    -- --------------------
-    -> i -|s r|- o > Down a
-  downR'
-    :: Neg a
-    => i -|s r|- o > Down a
-    -- --------------------
-    -> i -|s r|- o >      a
-  downR' p = wkR' p >>> downL init
-
-instance ShiftingP Seq where
+instance PosShift Seq where
   downL = mapL getDown
   downR = mapR Down
 
