@@ -22,16 +22,16 @@ module Focalized.Calculus
   -- * Control
 , module Focalized.Calculus.Control
   -- * Connectives
-, module Focalized.Calculus.Negation
 , module Focalized.Calculus.Bottom
-, module Focalized.Calculus.Zero
-, module Focalized.Calculus.One
-, module Focalized.Calculus.Top
 , module Focalized.Calculus.Conjunction
 , module Focalized.Calculus.Disjunction
 , module Focalized.Calculus.Implication
+, module Focalized.Calculus.Negation
+, module Focalized.Calculus.One
 , module Focalized.Calculus.Quantification
 , module Focalized.Calculus.Recursion
+, module Focalized.Calculus.Top
+, module Focalized.Calculus.Zero
   -- * Additive
 , Additive
   -- * Multiplicative
