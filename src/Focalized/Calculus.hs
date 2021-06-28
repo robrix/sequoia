@@ -28,6 +28,8 @@ module Focalized.Calculus
 , module Focalized.Calculus.Conjunction
 , module Focalized.Calculus.Disjunction
 , module Focalized.Calculus.Implication
+, module Focalized.Calculus.Quantification
+, module Focalized.Calculus.Recursion
   -- * Additive
 , Additive
   -- * Multiplicative
@@ -40,17 +42,6 @@ module Focalized.Calculus
 , Universal(..)
 , Exists(..)
 , Existential(..)
-  -- * Recursive
-, Nu(..)
-, NuF(..)
-, Corecursive(..)
-, Mu(..)
-, MuF(..)
-, foldMu
-, unfoldMu
-, refoldMu
-, refold
-, Recursive(..)
   -- * Polarity
 , module Focalized.Polarity
   -- * Polarity shifts
@@ -89,6 +80,9 @@ evalSeq = (`runSeq` id)
 
 sequent :: ((o -> r) -> (i -> r)) -> Seq r i o
 sequent = Seq . CPS
+
+dnESeq :: r ••Seq r a b -> Seq r a b
+dnESeq = Seq . dnE . contramap (contramap getSeq)
 
 newtype Seq r i o = Seq { getSeq :: CPS r i o }
   deriving (Applicative, Cat.Category, Functor, Monad, Profunctor)
@@ -234,54 +228,13 @@ instance Existential Seq where
   existsR p = mapR (Exists . dnI) p
 
 
--- Recursive
+-- Recursion
 
-class (Core s, Structural s, Implication s) => Corecursive s where
-  nuL
-    :: (Pos ==> Neg) f
-    => Exists r P (NuF r f) < i -|s r|- o
-    -- ----------------------------------
-    ->             Nu  r f  < i -|s r|- o
-  nuR
-    :: (Pos ==> Neg) f
-    => i -|s r|- o > Exists r P (NuF r f)
-    -- ----------------------------------
-    -> i -|s r|- o >             Nu  r f
-  nuR'
-    :: (Pos ==> Neg) f
-    => i -|s r|- o >             Nu  r f
-    -- ----------------------------------
-    -> i -|s r|- o > Exists r P (NuF r f)
-  nuR' p = wkR' p >>> nuL init
-
-instance Corecursive Seq where
+instance Corecursion Seq where
   nuL = mapL runNu
   nuR s = wkR' s >>> existsL (mapL nu init)
 
-
-dnESeq :: r ••Seq r a b -> Seq r a b
-dnESeq = Seq . dnE . contramap (contramap getSeq)
-
-
-class (Core s, Structural s, Implication s, Universal s) => Recursive s where
-  muL
-    :: ((Neg ==> Pos) f, Neg a)
-    => i -|s r|- o > f a ~~r~> a   ->   a < i -|s r|- o
-    -- ------------------------------------------------
-    ->              Mu r f < i -|s r|- o
-  muL'
-    :: (Neg ==> Pos) f
-    =>             Mu  r f  < i -|s r|- o
-    -- ----------------------------------
-    -> ForAll r N (MuF r f) < i -|s r|- o
-  muL' p = muR init >>> wkL' p
-  muR
-    :: (Neg ==> Pos) f
-    => i -|s r|- o > ForAll r N (MuF r f)
-    -- ----------------------------------
-    -> i -|s r|- o >             Mu  r f
-
-instance Recursive Seq where
+instance Recursion Seq where
   muL f k = wkL (downR f) >>> exL (mapL getMu (funL init (wkL' k)))
   muR = mapR mu
 
