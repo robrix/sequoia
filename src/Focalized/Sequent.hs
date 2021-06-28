@@ -7,7 +7,6 @@ module Focalized.Sequent
 , Seq(..)
 , liftLR
 , lowerLR
-, runFun
   -- * Effectful sequents
 , runSeqT
 , SeqT(..)
@@ -155,12 +154,8 @@ instance PosConjunction Seq where
 
 -- Implication
 
-runFun :: (a ~~r~> b) -> Seq r (a < _Γ) (_Δ > b)
-runFun = Seq . dimap exl inr . getFun
-
-
 instance Implication Seq where
-  funL a b = popL (\ f -> a >>> runFun f >>> wkL' b)
+  funL a b = popL (\ f -> a >>> liftLR (getFun f) >>> wkL' b)
   funR = lowerLR (liftR . Fun) . wkR'
 
 instance Subtraction Seq where
