@@ -23,14 +23,15 @@ module Focalized.Calculus
 , module Focalized.Calculus.Control
   -- * Connectives
 , module Focalized.Calculus.Bottom
-, module Focalized.Calculus.Conjunction
 , module Focalized.Calculus.Disjunction
 , module Focalized.Calculus.Implication
 , module Focalized.Calculus.Negation
 , module Focalized.Calculus.One
 , module Focalized.Calculus.Quantification
 , module Focalized.Calculus.Recursion
+, module Focalized.Calculus.Tensor
 , module Focalized.Calculus.Top
+, module Focalized.Calculus.With
 , module Focalized.Calculus.Zero
   -- * Additive
 , Additive
@@ -58,7 +59,6 @@ import           Data.Functor.Contravariant (contramap)
 import           Data.Profunctor
 import           Focalized.CPS
 import           Focalized.Calculus.Bottom
-import           Focalized.Calculus.Conjunction
 import           Focalized.Calculus.Context
 import           Focalized.Calculus.Control
 import           Focalized.Calculus.Core
@@ -69,7 +69,9 @@ import           Focalized.Calculus.One
 import           Focalized.Calculus.Quantification
 import           Focalized.Calculus.Recursion
 import           Focalized.Calculus.Shift
+import           Focalized.Calculus.Tensor
 import           Focalized.Calculus.Top
+import           Focalized.Calculus.With
 import           Focalized.Calculus.Zero
 import           Focalized.Polarity
 import           Prelude hiding (init)
@@ -156,7 +158,7 @@ instance PosNegation Seq where
 
 -- Additive
 
-type Additive s = (NegTruth s, PosFalsity s, AdditiveConj s, AdditiveDisj s)
+type Additive s = (NegTruth s, PosFalsity s, NegConjunction s, AdditiveDisj s)
 
 
 instance NegTruth Seq where
@@ -166,7 +168,7 @@ instance PosFalsity Seq where
   zeroL = liftL (K absurdP)
 
 
-instance AdditiveConj Seq where
+instance NegConjunction Seq where
   withL1 p = popL (pushL p . exl)
   withL2 p = popL (pushL p . exr)
   withR = liftA2 (liftA2 inlr)
@@ -180,7 +182,7 @@ instance AdditiveDisj Seq where
 
 -- Multiplicative
 
-type Multiplicative s = (NegFalsity s, PosTruth s, MultiplicativeDisj s, MultiplicativeConj s)
+type Multiplicative s = (NegFalsity s, PosTruth s, MultiplicativeDisj s, PosConjunction s)
 
 
 instance NegFalsity Seq where
@@ -197,7 +199,7 @@ instance MultiplicativeDisj Seq where
   parR ab = (>>= inr . inl) |> inr . inr <$> ab
 
 
-instance MultiplicativeConj Seq where
+instance PosConjunction Seq where
   tensorL p = popL (pushL2 p . exl <*> exr)
   tensorR = liftA2 (liftA2 inlr)
 
