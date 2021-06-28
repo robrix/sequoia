@@ -11,6 +11,7 @@ module Focalized.Mu
 import qualified Control.Category as Cat
 import           Data.Functor.Contravariant
 import           Focalized.CPS
+import           Focalized.Down
 import           Focalized.Function
 import           Focalized.Polarity
 import           Focalized.Quantification

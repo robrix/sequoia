@@ -7,11 +7,16 @@ module Focalized.Calculus.Shift
 , PosShift(..)
 , downL'
 , downR'
+  -- * Connectives
+, module Focalized.Down
+, module Focalized.Up
 ) where
 
 import Focalized.Calculus.Context
 import Focalized.Calculus.Core
+import Focalized.Down
 import Focalized.Polarity
+import Focalized.Up
 import Prelude hiding (init)
 
 -- Negative shift

@@ -8,15 +8,12 @@ module Focalized.Polarity
 , Polarized
 , Neg
 , Pos
-  -- * Shifts
-, Up(..)
-, Down(..)
 ) where
-
--- Polarities
 
 import Data.Functor.Identity
 import Data.Kind (Type)
+
+-- Polarities
 
 newtype N a = N { getN :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
@@ -36,19 +33,3 @@ instance Polarized P (P a)
 
 type Neg = Polarized N
 type Pos = Polarized P
-
-
--- Shifts
-
-newtype Up   a = Up   { getUp   :: a }
-  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-  deriving (Applicative, Monad) via Identity
-
-instance Pos a => Polarized N (Up a) where
-
-
-newtype Down a = Down { getDown :: a }
-  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-  deriving (Applicative, Monad) via Identity
-
-instance Neg a => Polarized P (Down a) where

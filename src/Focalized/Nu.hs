@@ -8,6 +8,7 @@ module Focalized.Nu
 ) where
 
 import Focalized.CPS
+import Focalized.Down
 import Focalized.Function
 import Focalized.Polarity
 import Focalized.Quantification
