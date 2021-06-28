@@ -1,0 +1,2 @@
+module Focalized.Not
+() where

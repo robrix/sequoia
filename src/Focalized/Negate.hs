@@ -1,0 +1,2 @@
+module Focalized.Negate
+() where

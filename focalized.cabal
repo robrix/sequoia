@@ -64,6 +64,7 @@ library
   import: common
   exposed-modules:
     Focalized.B
+    Focalized.Bottom
     Focalized.Calculus
     Focalized.Calculus.Bottom
     Focalized.Calculus.Context
@@ -90,19 +91,34 @@ library
     Focalized.Connective
     Focalized.CPS
     Focalized.Disjunction
+    Focalized.Down
+    Focalized.Exists
     Focalized.Falsity
+    Focalized.ForAll
     Focalized.Functor.C
     Focalized.HOAS
     Focalized.Implication
+    Focalized.Mu
     Focalized.Multiset
+    Focalized.Negate
     Focalized.Negation
+    Focalized.Not
+    Focalized.Nu
+    Focalized.One
+    Focalized.Par
     Focalized.Polarity
     Focalized.Polarized
     Focalized.Quantification
     Focalized.Recursion
     Focalized.Snoc
     Focalized.Snoc.NonEmpty
+    Focalized.Sum
+    Focalized.Tensor
+    Focalized.Top
     Focalized.Truth
+    Focalized.Up
+    Focalized.With
+    Focalized.Zero
 
   -- Modules included in this library but not exported.
   -- other-modules:
