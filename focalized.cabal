@@ -70,6 +70,7 @@ library
     Focalized.Calculus.Context
     Focalized.Calculus.Control
     Focalized.Calculus.Core
+    Focalized.Calculus.Down
     Focalized.Calculus.Exists
     Focalized.Calculus.ForAll
     Focalized.Calculus.Function
@@ -85,6 +86,7 @@ library
     Focalized.Calculus.Sum
     Focalized.Calculus.Tensor
     Focalized.Calculus.Top
+    Focalized.Calculus.Up
     Focalized.Calculus.With
     Focalized.Calculus.Zero
     Focalized.Conjunction
