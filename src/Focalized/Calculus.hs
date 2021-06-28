@@ -224,11 +224,6 @@ instance Subtraction Seq where
 type Quantifying s = (Universal s, Existential s)
 
 
-newtype ForAll r p f = ForAll { runForAll :: forall x . Polarized p x => r ••f x }
-
-instance Polarized N (ForAll r p f)
-
-
 class (Core s, Structural s, Negation s, Contextual s, Shifting s) => Universal s where
   {-# MINIMAL (forAllL | forAllLExists), forAllR #-}
   forAllL
@@ -268,14 +263,6 @@ class (Core s, Structural s, Negation s, Contextual s, Shifting s) => Universal 
 instance Universal Seq where
   forAllL p = mapL (notNegate . runForAll) p
   forAllR p = sequent $ \ k a -> k (inr (ForAll (K (\ k' -> runSeq p (k . inl |> runK k') a))))
-
-
-data Exists r p f = forall x . Polarized p x => Exists (r ••f x)
-
-instance Polarized P (Exists r p f)
-
-runExists :: (forall x . Polarized p x => f x -> a) -> Exists r p f -> r ••a
-runExists f (Exists r) = K (\ k -> runK r (K (runK k . f)))
 
 
 class (Core s, Structural s, Negation s, Contextual s, Shifting s) => Existential s where
