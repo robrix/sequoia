@@ -1,10 +1,14 @@
 module Focalized.Not
 ( -- * Not
-  type (¬)(..)
+  runNot
+, type (¬)(..)
 ) where
 
 import Focalized.CPS
 import Focalized.Polarity
+
+runNot :: r ¬a -> (a -> r)
+runNot = runK . getNot
 
 newtype r ¬a = Not { getNot :: r •a }
 
