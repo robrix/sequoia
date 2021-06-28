@@ -32,7 +32,7 @@ data a < b = a :< b
 infixr 4 <, :<, <|
 
 instance Conj (<) where
-  inlr = (:<)
+  (-><-) = (:<)
   exl (a :< _) = a
   exr (_ :< b) = b
 
@@ -46,7 +46,7 @@ instance Bitraversable (<) where
   bitraverse = bitraverseConj
 
 (<|) :: i -> is -> i < is
-(<|) = inlr
+(<|) = (-><-)
 
 
 -- Δ
@@ -113,7 +113,7 @@ class ContextL a as as' | as a -> as', as as' -> a, as' a -> as where
 instance {-# OVERLAPPING #-} ContextL a (a < as) as where
   selectL = exl
   dropL = exr
-  removeL = inlr <$> exl <*> exr
+  removeL = (-><-) <$> exl <*> exr
   insertL = (<|)
 
 instance {-# OVERLAPPING #-} ContextL a as as' => ContextL a (b < as) (b < as') where

@@ -167,7 +167,7 @@ instance PosFalsity Seq where
 instance NegConjunction Seq where
   withL1 p = popL (pushL p . exl)
   withL2 p = popL (pushL p . exr)
-  withR = liftA2 (liftA2 inlr)
+  withR = liftA2 (liftA2 (-><-))
 
 instance PosDisjunction Seq where
   sumL a b = popL (pushL a <--> pushL b)
@@ -196,7 +196,7 @@ instance NegDisjunction Seq where
 
 instance PosConjunction Seq where
   tensorL p = popL (pushL2 p . exl <*> exr)
-  tensorR = liftA2 (liftA2 inlr)
+  tensorR = liftA2 (liftA2 (-><-))
 
 
 -- Implication

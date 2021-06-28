@@ -22,6 +22,6 @@ instance Traversable ((&) f) where
   traverse = traverseConj
 
 instance Conj (&) where
-  inlr a b = With $ \ f -> f a b
+  a -><- b = With $ \ f -> f a b
   exl (With run) = run const
   exr (With run) = run (const id)

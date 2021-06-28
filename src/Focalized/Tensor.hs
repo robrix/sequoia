@@ -16,6 +16,6 @@ infixr 7 ⊗, :⊗
 instance (Pos a, Pos b) => Polarized P (a ⊗ b) where
 
 instance Conj (⊗) where
-  inlr = (:⊗)
+  (-><-) = (:⊗)
   exl (l :⊗ _) = l
   exr (_ :⊗ r) = r
