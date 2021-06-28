@@ -99,7 +99,6 @@ library
     Focalized.Functor.C
     Focalized.HOAS
     Focalized.Mu
-    Focalized.Multiset
     Focalized.Negate
     Focalized.Negation
     Focalized.Not
@@ -125,8 +124,6 @@ library
   -- other-extensions:
   build-depends:
     , base ^>=4.14.1.0
-    , containers
-    , fused-effects
     , profunctors
     , transformers
   hs-source-dirs:   src
@@ -136,10 +133,7 @@ test-suite test
   import: common
   type: exitcode-stdio-1.0
   hs-source-dirs: test
-  other-modules:
-    Focalized.Multiset.Test
   main-is: Test.hs
   build-depends:
     , base
-    , focalized
     , hedgehog ^>= 1
