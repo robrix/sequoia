@@ -1,8 +1,8 @@
 {-# LANGUAGE ExistentialQuantification #-}
-module Focalized.Quantifier
-( -- * Universal quantifier
+module Focalized.Quantification
+( -- * Universal quantification
   ForAll(..)
-  -- * Existential quantifier
+  -- * Existential quantification
 , Exists(..)
 , runExists
 ) where
@@ -10,14 +10,14 @@ module Focalized.Quantifier
 import Focalized.CPS
 import Focalized.Polarity
 
--- Universal quantifier
+-- Universal quantification
 
 newtype ForAll r p f = ForAll { runForAll :: forall x . Polarized p x => r ••f x }
 
 instance Polarized N (ForAll r p f)
 
 
--- Universal quantifier
+-- Universal quantification
 
 data Exists r p f = forall x . Polarized p x => Exists (r ••f x)
 
