@@ -4,6 +4,7 @@ module Focalized.Implication
 , appFun2
 , liftFun
 , liftFun'
+, dnEFun
 , Fun(..)
 , type (~~)
 , type (~>)
@@ -13,6 +14,7 @@ module Focalized.Implication
 , type (-<)
 ) where
 
+import Data.Functor.Contravariant
 import Focalized.CPS
 import Focalized.Negation
 import Focalized.Polarity
@@ -30,6 +32,9 @@ liftFun = Fun . CPS
 
 liftFun' :: (a -> (b -> r) -> r) -> a ~~r~> b
 liftFun' = liftFun . flip
+
+dnEFun :: r ••(a ~~r~> b) -> (a ~~r~> b)
+dnEFun = Fun . dnE . contramap (contramap getFun)
 
 newtype Fun r a b = Fun { getFun :: CPS r a b }
 

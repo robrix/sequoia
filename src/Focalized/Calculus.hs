@@ -73,6 +73,7 @@ import           Focalized.Calculus.Falsity
 import           Focalized.Calculus.Implication
 import           Focalized.Calculus.Negation
 import           Focalized.Calculus.Quantification
+import           Focalized.Calculus.Recursion
 import           Focalized.Calculus.Shift
 import           Focalized.Calculus.Truth
 import           Focalized.Polarity
@@ -235,21 +236,6 @@ instance Existential Seq where
 
 -- Recursive
 
-data Nu r f = forall x . Pos x => Nu { getNu :: Down (x ~~r~> f x) ⊗ x }
-
-instance Polarized N (Nu r f) where
-
-newtype NuF r f a = NuF { getNuF :: Down (a ~~r~> f a) ⊗ a }
-
-instance (Neg (f a), Pos a) => Polarized P (NuF r f a)
-
-nu :: Pos x => NuF r f x -> Nu r f
-nu r = Nu (getNuF r)
-
-runNu :: Nu r f -> Exists r P (NuF r f)
-runNu (Nu r) = Exists (dnI (NuF r))
-
-
 class (Core s, Structural s, Implication s) => Corecursive s where
   nuL
     :: (Pos ==> Neg) f
@@ -273,37 +259,8 @@ instance Corecursive Seq where
   nuR s = wkR' s >>> existsL (mapL nu init)
 
 
-newtype Mu r f = Mu { getMu :: forall x . Neg x => Down (FAlg r f x) ~~r~> x }
-
-type FAlg r f x = f x ~~r~> x
-
-instance Polarized N (Mu r f) where
-
-newtype MuF r f a = MuF { getMuF :: Down (FAlg r f a) ~~r~> a }
-
-instance (Pos (f a), Neg a) => Polarized N (MuF r f a) where
-
-mu :: ForAll r N (MuF r f) -> Mu r f
-mu r = Mu (dnEFun (contramap (contramap getMuF) (runForAll r)))
-
-foldMu :: Neg a => CPS r (f a) a -> CPS r (Mu r f) a
-foldMu alg = liftCPS $ \ (Mu f) -> appFun f (Down (Fun alg))
-
-unfoldMu :: Traversable f => CPS r a (f a) -> CPS r a (Mu r f)
-unfoldMu coalg = cps $ \ a -> Mu $ liftFun' $ \ (Down (Fun alg)) -> appCPS (refoldCPS alg coalg) a
-
-refoldMu :: (Traversable f, Neg b) => CPS r (f b) b -> CPS r a (f a) -> CPS r a b
-refoldMu f g = foldMu f Cat.<<< unfoldMu g
-
-
-refold :: Functor f => (f b -> b) -> (a -> f a) -> (a -> b)
-refold f g = go where go = f . fmap go . g
-
 dnESeq :: r ••Seq r a b -> Seq r a b
 dnESeq = Seq . dnE . contramap (contramap getSeq)
-
-dnEFun :: r ••(a ~~r~> b) -> (a ~~r~> b)
-dnEFun = Fun . dnE . contramap (contramap getFun)
 
 
 class (Core s, Structural s, Implication s, Universal s) => Recursive s where

@@ -1,2 +1,6 @@
 module Focalized.Calculus.Recursion
-() where
+( -- * Connectives
+  module Focalized.Recursion
+) where
+
+import Focalized.Recursion
