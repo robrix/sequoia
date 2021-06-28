@@ -23,7 +23,8 @@ module Focalized.Calculus
 , module Focalized.Calculus.Control
   -- * Connectives
 , module Focalized.Calculus.Negation
-, module Focalized.Calculus.Falsity
+, module Focalized.Calculus.Bottom
+, module Focalized.Calculus.Zero
 , module Focalized.Calculus.Truth
 , module Focalized.Calculus.Conjunction
 , module Focalized.Calculus.Disjunction
@@ -55,18 +56,19 @@ import           Control.Monad.Trans.Class
 import           Data.Functor.Contravariant (contramap)
 import           Data.Profunctor
 import           Focalized.CPS
+import           Focalized.Calculus.Bottom
 import           Focalized.Calculus.Conjunction
 import           Focalized.Calculus.Context
 import           Focalized.Calculus.Control
 import           Focalized.Calculus.Core
 import           Focalized.Calculus.Disjunction
-import           Focalized.Calculus.Falsity
 import           Focalized.Calculus.Implication
 import           Focalized.Calculus.Negation
 import           Focalized.Calculus.Quantification
 import           Focalized.Calculus.Recursion
 import           Focalized.Calculus.Shift
 import           Focalized.Calculus.Truth
+import           Focalized.Calculus.Zero
 import           Focalized.Polarity
 import           Prelude hiding (init)
 

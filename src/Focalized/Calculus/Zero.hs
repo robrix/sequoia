@@ -1,2 +1,16 @@
 module Focalized.Calculus.Zero
-() where
+( -- * Additive falsity
+  AdditiveFalsity(..)
+  -- * Connectives
+, module Focalized.Falsity
+) where
+
+import Focalized.Calculus.Context
+import Focalized.Falsity
+
+-- Additive falsity
+
+class AdditiveFalsity s where
+  zeroL
+    -- ------------------
+    :: Zero < i -|s r|- o
