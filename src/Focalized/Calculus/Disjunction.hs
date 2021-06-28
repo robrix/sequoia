@@ -1,9 +1,9 @@
 module Focalized.Calculus.Disjunction
-( -- * Multiplicative disjunction
-  MultiplicativeDisj(..)
+( -- * Negative disjunction
+  NegDisjunction(..)
 , parR'
-  -- * Additive disjunction
-, AdditiveDisj(..)
+  -- * Positive disjunction
+, PosDisjunction(..)
 , sumL1'
 , sumL2'
   -- * Connectives
@@ -16,9 +16,9 @@ import Focalized.Disjunction
 import Focalized.Polarity
 import Prelude hiding (init)
 
--- Multiplicative disjunction
+-- Negative disjunction
 
-class MultiplicativeDisj s where
+class NegDisjunction s where
   parL
     :: (Neg a, Neg b)
     => a < i -|s r|- o   ->   b < i -|s r|- o
@@ -33,16 +33,16 @@ class MultiplicativeDisj s where
 
 
 parR'
-  :: (Weaken s, Contextual s, MultiplicativeDisj s, Neg a, Neg b)
+  :: (Weaken s, Contextual s, NegDisjunction s, Neg a, Neg b)
   => i -|s r|- o > a ⅋ b
   -- -------------------
   -> i -|s r|- o > a > b
 parR' p = poppedR (wkR . wkR) p >>> parL (wkR init) init
 
 
--- Additive disjunction
+-- Positive disjunction
 
-class AdditiveDisj s where
+class PosDisjunction s where
   sumL
     :: (Pos a, Pos b)
     => a < i -|s r|- o   ->   b < i -|s r|- o
@@ -63,14 +63,14 @@ class AdditiveDisj s where
 
 
 sumL1'
-  :: (Weaken s, Exchange s, AdditiveDisj s, Pos a, Pos b)
+  :: (Weaken s, Exchange s, PosDisjunction s, Pos a, Pos b)
   => a ⊕ b < i -|s r|- o
   -- -------------------
   -> a     < i -|s r|- o
 sumL1' p = sumR1 init >>> wkL' p
 
 sumL2'
-  :: (Weaken s, Exchange s, AdditiveDisj s, Pos a, Pos b)
+  :: (Weaken s, Exchange s, PosDisjunction s, Pos a, Pos b)
   => a ⊕ b < i -|s r|- o
   -- -------------------
   ->     b < i -|s r|- o

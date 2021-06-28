@@ -69,7 +69,6 @@ library
     Focalized.Calculus.Context
     Focalized.Calculus.Control
     Focalized.Calculus.Core
-    Focalized.Calculus.Disjunction
     Focalized.Calculus.Exists
     Focalized.Calculus.ForAll
     Focalized.Calculus.Function

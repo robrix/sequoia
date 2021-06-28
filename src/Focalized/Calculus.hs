@@ -23,12 +23,13 @@ module Focalized.Calculus
 , module Focalized.Calculus.Control
   -- * Connectives
 , module Focalized.Calculus.Bottom
-, module Focalized.Calculus.Disjunction
 , module Focalized.Calculus.Implication
 , module Focalized.Calculus.Negation
 , module Focalized.Calculus.One
+, module Focalized.Calculus.Par
 , module Focalized.Calculus.Quantification
 , module Focalized.Calculus.Recursion
+, module Focalized.Calculus.Sum
 , module Focalized.Calculus.Tensor
 , module Focalized.Calculus.Top
 , module Focalized.Calculus.With
@@ -62,13 +63,14 @@ import           Focalized.Calculus.Bottom
 import           Focalized.Calculus.Context
 import           Focalized.Calculus.Control
 import           Focalized.Calculus.Core
-import           Focalized.Calculus.Disjunction
 import           Focalized.Calculus.Implication
 import           Focalized.Calculus.Negation
 import           Focalized.Calculus.One
+import           Focalized.Calculus.Par
 import           Focalized.Calculus.Quantification
 import           Focalized.Calculus.Recursion
 import           Focalized.Calculus.Shift
+import           Focalized.Calculus.Sum
 import           Focalized.Calculus.Tensor
 import           Focalized.Calculus.Top
 import           Focalized.Calculus.With
@@ -158,7 +160,7 @@ instance PosNegation Seq where
 
 -- Additive
 
-type Additive s = (NegTruth s, PosFalsity s, NegConjunction s, AdditiveDisj s)
+type Additive s = (NegTruth s, PosFalsity s, NegConjunction s, PosDisjunction s)
 
 
 instance NegTruth Seq where
@@ -174,7 +176,7 @@ instance NegConjunction Seq where
   withR = liftA2 (liftA2 inlr)
 
 
-instance AdditiveDisj Seq where
+instance PosDisjunction Seq where
   sumL a b = popL (exlr (pushL a) (pushL b))
   sumR1 = mapR inl
   sumR2 = mapR inr
@@ -182,7 +184,7 @@ instance AdditiveDisj Seq where
 
 -- Multiplicative
 
-type Multiplicative s = (NegFalsity s, PosTruth s, MultiplicativeDisj s, PosConjunction s)
+type Multiplicative s = (NegFalsity s, PosTruth s, NegDisjunction s, PosConjunction s)
 
 
 instance NegFalsity Seq where
@@ -194,7 +196,7 @@ instance PosTruth Seq where
   oneR = liftR One
 
 
-instance MultiplicativeDisj Seq where
+instance NegDisjunction Seq where
   parL a b = popL (exlr (pushL a) (pushL b))
   parR ab = (>>= inr . inl) |> inr . inr <$> ab
 
