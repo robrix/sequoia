@@ -1,6 +1,8 @@
 module Focalized.Disjunction
 ( -- * Disjunction
   Disj(..)
+, exlD
+, exrD
 , foldMapDisj
 , traverseDisj
 , bifoldMapDisj
@@ -19,6 +21,12 @@ instance Disj Either where
   inl = Left
   inr = Right
   exlr = either
+
+exlD :: Disj d => a `d` b -> Maybe a
+exlD = Just `exlr` const Nothing
+
+exrD :: Disj d => a `d` b -> Maybe b
+exrD = const Nothing `exlr` Just
 
 foldMapDisj :: (Disj p, Monoid m) => (b -> m) -> (a `p` b) -> m
 foldMapDisj = exlr (const mempty)

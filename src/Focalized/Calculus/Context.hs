@@ -107,7 +107,7 @@ class ContextL a as as' | as a -> as', as as' -> a, as' a -> as where
   removeL :: as -> (a, as')
   removeL = (,) <$> selectL <*> dropL
   insertL :: a -> as' -> as
-  replaceL :: (ContextL b bs bs', bs' ~ as') => (a -> b) -> as -> bs
+  replaceL :: (ContextL b bs bs', bs' ~ as') => (a -> b) -> (as -> bs)
   replaceL f = uncurry (insertL . f) . removeL
 
 instance {-# OVERLAPPING #-} ContextL a (a < as) as where
@@ -125,22 +125,22 @@ instance {-# OVERLAPPING #-} ContextL a as as' => ContextL a (b < as) (b < as') 
 
 class ContextR a as as' | as a -> as', as as' -> a, as' a -> as where
   selectR :: as -> Maybe a
-  selectR = exlr (const Nothing) Just . removeR
+  selectR = exrD . removeR
   dropR :: as -> Maybe as'
-  dropR = exlr Just (const Nothing) . removeR
+  dropR = exlD . removeR
   removeR :: as -> Either as' a
   insertR :: Either as' a -> as
-  replaceR :: (ContextR b bs bs', bs' ~ as') => (a -> b) -> as -> bs
+  replaceR :: (ContextR b bs bs', bs' ~ as') => (a -> b) -> (as -> bs)
   replaceR f = insertR . fmap f . removeR
 
 instance {-# OVERLAPPING #-} ContextR a (as > a) as where
-  selectR = exlr (const Nothing) Just
-  dropR = exlr Just (const Nothing)
-  removeR = exlr inl inr
-  insertR = exlr inl inr
+  selectR = exrD
+  dropR = exlD
+  removeR = inl `exlr` inr
+  insertR = inl `exlr` inr
 
 instance {-# OVERLAPPING #-} ContextR a as as' => ContextR a (as > b) (as' > b) where
-  selectR = exlr selectR (const Nothing)
-  dropR = exlr (fmap inl . dropR) (Just . inr)
-  removeR = exlr (first inl . removeR) (inl . inr)
+  selectR = selectR `exlr` const Nothing
+  dropR = (fmap inl . dropR) `exlr` (Just . inr)
+  removeR = (first inl . removeR) `exlr` (inl . inr)
   insertR = first insertR . exlr (exlr (inl . inl) inr) (inl . inr)
