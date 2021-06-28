@@ -1,6 +1,7 @@
 module Focalized.Negate
 ( -- * Negate
   runNegate
+, appNegate
 , type (-)(..)
 ) where
 
@@ -9,6 +10,9 @@ import Focalized.Polarity
 
 runNegate :: r -a -> (a -> r)
 runNegate = runK . getNegate
+
+appNegate :: a -> r -a -> r
+appNegate = flip runNegate
 
 newtype r -a = Negate { getNegate :: r •a }
 
