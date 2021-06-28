@@ -37,38 +37,38 @@ import           Prelude hiding (init)
 
 -- Sequents
 
-runSeq :: Seq r i o -> ((o -> r) -> (i -> r))
+runSeq :: _Γ -|Seq r|- _Δ -> ((_Δ -> r) -> (_Γ -> r))
 runSeq = runCPS . getSeq
 
-evalSeq :: Seq o i o -> (i -> o)
+evalSeq :: _Γ -|Seq _Δ|- _Δ -> (_Γ -> _Δ)
 evalSeq = (`runSeq` id)
 
-sequent :: ((o -> r) -> (i -> r)) -> Seq r i o
+sequent :: ((_Δ -> r) -> (_Γ -> r)) -> _Γ -|Seq r|- _Δ
 sequent = Seq . CPS
 
-dnESeq :: r ••Seq r a b -> Seq r a b
+dnESeq :: r ••(_Γ -|Seq r|- _Δ) -> _Γ -|Seq r|- _Δ
 dnESeq = Seq . dnE . contramap (contramap getSeq)
 
-newtype Seq r i o = Seq { getSeq :: CPS r i o }
+newtype Seq r _Γ _Δ = Seq { getSeq :: _Γ -|CPS r|- _Δ }
   deriving (Applicative, Cat.Category, Functor, Monad, Profunctor)
 
-liftLR :: CPS r a b -> Seq r (a < i) (o > b)
+liftLR :: CPS r a b -> Seq r (a < _Γ) (_Δ > b)
 liftLR = Seq . dimap exl inr
 
 
-lowerLR :: (CPS r a b -> Seq r i o) -> Seq r (a < i) (o > b) -> Seq r i o
+lowerLR :: (a -|CPS r|- b -> _Γ -|Seq r|- _Δ) -> a < _Γ -|Seq r|- _Δ > b -> _Γ -|Seq r|- _Δ
 lowerLR f p = sequent $ \ k i -> runSeq (f (CPS (\ kb a -> runSeq p (k |> kb) (a <| i)))) k i
 
 
 -- Effectful sequents
 
-runSeqT :: SeqT r i m o -> ((o -> m r) -> (i -> m r))
+runSeqT :: SeqT r _Γ m _Δ -> ((_Δ -> m r) -> (_Γ -> m r))
 runSeqT = runSeq . getSeqT
 
-newtype SeqT r i m o = SeqT { getSeqT :: Seq (m r) i o }
+newtype SeqT r _Γ m _Δ = SeqT { getSeqT :: Seq (m r) _Γ _Δ }
   deriving (Applicative, Functor, Monad)
 
-instance MonadTrans (SeqT r i) where
+instance MonadTrans (SeqT r _Γ) where
   lift m = SeqT (Seq (CPS (\ k _ -> m >>= k)))
 
 
@@ -155,7 +155,7 @@ instance PosConjunction Seq where
 
 -- Implication
 
-runFun :: (a ~~r~> b) -> Seq r (a < i) (o > b)
+runFun :: (a ~~r~> b) -> Seq r (a < _Γ) (_Δ > b)
 runFun = Seq . dimap exl inr . getFun
 
 
