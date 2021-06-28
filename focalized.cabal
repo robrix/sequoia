@@ -65,6 +65,7 @@ library
   exposed-modules:
     Focalized.Bottom
     Focalized.Calculus
+    Focalized.Calculus.Additive
     Focalized.Calculus.Bottom
     Focalized.Calculus.Context
     Focalized.Calculus.Control

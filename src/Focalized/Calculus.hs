@@ -22,6 +22,7 @@ module Focalized.Calculus
   -- * Control
 , module Focalized.Calculus.Control
   -- * Connectives
+, module Focalized.Calculus.Additive
 , module Focalized.Calculus.Bottom
 , module Focalized.Calculus.Exists
 , module Focalized.Calculus.ForAll
@@ -33,13 +34,7 @@ module Focalized.Calculus
 , module Focalized.Calculus.Par
 , module Focalized.Calculus.Shift
 , module Focalized.Calculus.Subtraction
-, module Focalized.Calculus.Sum
 , module Focalized.Calculus.Tensor
-, module Focalized.Calculus.Top
-, module Focalized.Calculus.With
-, module Focalized.Calculus.Zero
-  -- * Additive
-, Additive
   -- * Multiplicative
 , Multiplicative
   -- * Implication
@@ -60,6 +55,7 @@ import           Control.Monad.Trans.Class
 import           Data.Functor.Contravariant (contramap)
 import           Data.Profunctor
 import           Focalized.CPS
+import           Focalized.Calculus.Additive
 import           Focalized.Calculus.Bottom
 import           Focalized.Calculus.Context
 import           Focalized.Calculus.Control
@@ -74,11 +70,7 @@ import           Focalized.Calculus.One
 import           Focalized.Calculus.Par
 import           Focalized.Calculus.Shift
 import           Focalized.Calculus.Subtraction
-import           Focalized.Calculus.Sum
 import           Focalized.Calculus.Tensor
-import           Focalized.Calculus.Top
-import           Focalized.Calculus.With
-import           Focalized.Calculus.Zero
 import           Focalized.Conjunction
 import           Focalized.Disjunction
 import           Focalized.Polarity
@@ -166,21 +158,16 @@ instance PosNegation Seq where
 
 -- Additive
 
-type Additive s = (NegTruth s, PosFalsity s, NegConjunction s, PosDisjunction s)
-
-
 instance NegTruth Seq where
   topR = pure (inr Top)
 
 instance PosFalsity Seq where
   zeroL = liftL (K absurdP)
 
-
 instance NegConjunction Seq where
   withL1 p = popL (pushL p . exl)
   withL2 p = popL (pushL p . exr)
   withR = liftA2 (liftA2 inlr)
-
 
 instance PosDisjunction Seq where
   sumL a b = popL (exlr (pushL a) (pushL b))
