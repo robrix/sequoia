@@ -1,4 +1,5 @@
 {-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Focalized.Calculus.Quantification
@@ -9,7 +10,7 @@ module Focalized.Calculus.Quantification
 , Existential(..)
 , existsL'
   -- * Quantified constraints
-, ForAllC
+, type (==>)
   -- * Connectives
 , module Focalized.Quantification
 ) where
@@ -32,14 +33,14 @@ class Universal s where
     -> ForAll r n f   < i -|s r|- o
 
   forAllR
-    :: ForAllC (Polarized n) Neg f
+    :: (Polarized n ==> Neg) f
     => (forall x . Polarized n x => i -|s r|- o >            f x)
     -- ---------------------------------------
     ->                              i -|s r|- o > ForAll r n f
 
 
 forAllR'
-  :: (Weaken s, Exchange s, Universal s, Negation s, ForAllC (Polarized n) Neg f)
+  :: (Weaken s, Exchange s, Universal s, Negation s, (Polarized n ==> Neg) f)
   =>                              i -|s r|- o > ForAll r n f
   -- ---------------------------------------
   -> (forall x . Polarized n x => i -|s r|- o >            f x)
@@ -62,7 +63,7 @@ class Existential s where
 
 
 existsL'
-  :: (Weaken s, Exchange s, Existential s, ForAllC (Polarized n) Pos f)
+  :: (Weaken s, Exchange s, Existential s, (Polarized n ==> Pos) f)
   =>                   Exists r n f   < i -|s r|- o
   -- -----------------------------------------------
   -> (forall x . Polarized n x => f x < i -|s r|- o)
@@ -71,4 +72,6 @@ existsL' p = existsR init >>> wkL' p
 
 -- Quantified constraints
 
-type ForAllC cx cf f = (forall x . cx x => cf (f x)) :: Constraint
+type (cx ==> cf) f = (forall x . cx x => cf (f x)) :: Constraint
+
+infix 5 ==>

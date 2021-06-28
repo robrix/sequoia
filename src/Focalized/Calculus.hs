@@ -252,17 +252,17 @@ runNu (Nu r) = Exists (dnI (NuF r))
 
 class (Core s, Structural s, Implication s) => Corecursive s where
   nuL
-    :: ForAllC Pos Neg f
+    :: (Pos ==> Neg) f
     => Exists r P (NuF r f) < i -|s r|- o
     -- ----------------------------------
     ->             Nu  r f  < i -|s r|- o
   nuR
-    :: ForAllC Pos Neg f
+    :: (Pos ==> Neg) f
     => i -|s r|- o > Exists r P (NuF r f)
     -- ----------------------------------
     -> i -|s r|- o >             Nu  r f
   nuR'
-    :: ForAllC Pos Neg f
+    :: (Pos ==> Neg) f
     => i -|s r|- o >             Nu  r f
     -- ----------------------------------
     -> i -|s r|- o > Exists r P (NuF r f)
@@ -308,18 +308,18 @@ dnEFun = Fun . dnE . contramap (contramap getFun)
 
 class (Core s, Structural s, Implication s, Universal s) => Recursive s where
   muL
-    :: (ForAllC Neg Pos f, Neg a)
+    :: ((Neg ==> Pos) f, Neg a)
     => i -|s r|- o > f a ~~r~> a   ->   a < i -|s r|- o
     -- ------------------------------------------------
     ->              Mu r f < i -|s r|- o
   muL'
-    :: ForAllC Neg Pos f
+    :: (Neg ==> Pos) f
     =>             Mu  r f  < i -|s r|- o
     -- ----------------------------------
     -> ForAll r N (MuF r f) < i -|s r|- o
   muL' p = muR init >>> wkL' p
   muR
-    :: ForAllC Neg Pos f
+    :: (Neg ==> Pos) f
     => i -|s r|- o > ForAll r N (MuF r f)
     -- ----------------------------------
     -> i -|s r|- o >             Mu  r f
