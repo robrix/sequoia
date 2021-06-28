@@ -9,7 +9,7 @@ module Focalized.Calculus.Mu
 
 import Focalized.Calculus.Context
 import Focalized.Calculus.Core
-import Focalized.Implication
+import Focalized.Function
 import Focalized.Polarity
 import Focalized.Quantification
 import Focalized.Recursion

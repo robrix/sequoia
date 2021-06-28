@@ -5,12 +5,12 @@ module Focalized.Calculus.Function
 , ($$)
 , funR'
   -- * Connectives
-, module Focalized.Implication
+, module Focalized.Function
 ) where
 
 import Focalized.Calculus.Context
 import Focalized.Calculus.Core
-import Focalized.Implication
+import Focalized.Function
 import Focalized.Polarity
 import Prelude hiding (init)
 
