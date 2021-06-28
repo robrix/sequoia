@@ -1,2 +1,0 @@
-module Focalized.Connective
-() where

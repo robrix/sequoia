@@ -90,7 +90,6 @@ library
     Focalized.Calculus.With
     Focalized.Calculus.Zero
     Focalized.Conjunction
-    Focalized.Connective
     Focalized.CPS
     Focalized.Disjunction
     Focalized.Down
