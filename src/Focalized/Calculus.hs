@@ -73,6 +73,7 @@ import           Focalized.Calculus.Disjunction
 import           Focalized.Calculus.Falsity
 import           Focalized.Calculus.Implication
 import           Focalized.Calculus.Negation
+import           Focalized.Calculus.Quantifier
 import           Focalized.Calculus.Shift
 import           Focalized.Calculus.Truth
 import           Focalized.Polarity

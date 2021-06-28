@@ -1,0 +1,2 @@
+module Focalized.Quantifier
+() where
