@@ -25,7 +25,8 @@ module Focalized.Calculus
 , module Focalized.Calculus.Negation
 , module Focalized.Calculus.Bottom
 , module Focalized.Calculus.Zero
-, module Focalized.Calculus.Truth
+, module Focalized.Calculus.One
+, module Focalized.Calculus.Top
 , module Focalized.Calculus.Conjunction
 , module Focalized.Calculus.Disjunction
 , module Focalized.Calculus.Implication
@@ -64,10 +65,11 @@ import           Focalized.Calculus.Core
 import           Focalized.Calculus.Disjunction
 import           Focalized.Calculus.Implication
 import           Focalized.Calculus.Negation
+import           Focalized.Calculus.One
 import           Focalized.Calculus.Quantification
 import           Focalized.Calculus.Recursion
 import           Focalized.Calculus.Shift
-import           Focalized.Calculus.Truth
+import           Focalized.Calculus.Top
 import           Focalized.Calculus.Zero
 import           Focalized.Polarity
 import           Prelude hiding (init)
@@ -154,10 +156,10 @@ instance PosNegation Seq where
 
 -- Additive
 
-type Additive s = (AdditiveTruth s, PosFalsity s, AdditiveConj s, AdditiveDisj s)
+type Additive s = (NegTruth s, PosFalsity s, AdditiveConj s, AdditiveDisj s)
 
 
-instance AdditiveTruth Seq where
+instance NegTruth Seq where
   topR = pure (inr Top)
 
 instance PosFalsity Seq where
@@ -178,14 +180,14 @@ instance AdditiveDisj Seq where
 
 -- Multiplicative
 
-type Multiplicative s = (NegFalsity s, MultiplicativeTruth s, MultiplicativeDisj s, MultiplicativeConj s)
+type Multiplicative s = (NegFalsity s, PosTruth s, MultiplicativeDisj s, MultiplicativeConj s)
 
 
 instance NegFalsity Seq where
   botL = liftL (K absurdN)
   botR = wkR
 
-instance MultiplicativeTruth Seq where
+instance PosTruth Seq where
   oneL = wkL
   oneR = liftR One
 
