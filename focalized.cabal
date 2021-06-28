@@ -114,7 +114,6 @@ library
     Focalized.Sum
     Focalized.Tensor
     Focalized.Top
-    Focalized.Truth
     Focalized.Up
     Focalized.With
     Focalized.Zero

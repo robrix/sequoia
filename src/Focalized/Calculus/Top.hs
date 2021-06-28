@@ -2,11 +2,11 @@ module Focalized.Calculus.Top
 ( -- * Negative truth
   NegTruth(..)
   -- * Connctives
-, module Focalized.Truth
+, module Focalized.Top
 ) where
 
 import Focalized.Calculus.Context
-import Focalized.Truth
+import Focalized.Top
 
 -- Negative truth
 

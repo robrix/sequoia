@@ -3,12 +3,12 @@ module Focalized.Calculus.One
   PosTruth(..)
 , oneL'
   -- * Connctives
-, module Focalized.Truth
+, module Focalized.One
 ) where
 
 import Focalized.Calculus.Context
 import Focalized.Calculus.Core
-import Focalized.Truth
+import Focalized.One
 
 -- Positive truth
 
