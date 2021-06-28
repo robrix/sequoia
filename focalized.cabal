@@ -108,6 +108,7 @@ library
     Focalized.Par
     Focalized.Polarity
     Focalized.Quantification
+    Focalized.Sequent
     Focalized.Subtraction
     Focalized.Sum
     Focalized.Tensor
