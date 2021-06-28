@@ -31,6 +31,7 @@ module Focalized.Calculus
 , module Focalized.Calculus.Nu
 , module Focalized.Calculus.One
 , module Focalized.Calculus.Par
+, module Focalized.Calculus.Shift
 , module Focalized.Calculus.Subtraction
 , module Focalized.Calculus.Sum
 , module Focalized.Calculus.Tensor
@@ -51,9 +52,6 @@ module Focalized.Calculus
 , Existential(..)
   -- * Polarity
 , module Focalized.Polarity
-  -- * Polarity shifts
-, Shifting
-, module Focalized.Calculus.Shift
 ) where
 
 import           Control.Applicative (liftA2)
@@ -256,9 +254,6 @@ instance Recursion Seq where
 
 
 -- Polarity shifts
-
-type Shifting s = (NegShift s, PosShift s)
-
 
 instance NegShift Seq where
   upL   = mapL getUp
