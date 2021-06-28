@@ -1,23 +1,24 @@
 module Focalized.Negation
-( -- * Not
-  type (¬)(..)
-, notNegate
+( -- * Negative double negation
+  notNegate
 , getNotNegate
 , type (¬-)
-  -- * Negate
-, type (-)(..)
+  -- * Positive double negation
 , negateNot
 , getNegateNot
 , type (-¬)
+  -- * Not
+, module Focalized.Not
+  -- * Negate
+, module Focalized.Negate
 ) where
 
 import Data.Functor.Contravariant
 import Focalized.CPS
-import Focalized.Polarity
+import Focalized.Negate
+import Focalized.Not
 
-newtype r ¬a = Not    { getNot    :: r •a }
-
-instance Pos a => Polarized N (r ¬a) where
+-- Negative double negation
 
 notNegate :: r ••a -> r ¬-a
 notNegate = Not . contramap getNegate
@@ -28,12 +29,10 @@ getNotNegate = contramap Negate . getNot
 
 type r ¬-a = r ¬r -a
 
-infixr 9 ¬, ¬-
+infixr 9 ¬-
 
 
-newtype r -a = Negate { getNegate :: r •a }
-
-instance Neg a => Polarized P (r -a) where
+-- Positive double negation
 
 negateNot :: r ••a -> r -¬a
 negateNot = Negate . contramap getNot
@@ -44,4 +43,4 @@ getNegateNot = contramap Not . getNegate
 
 type r -¬a = r -r ¬a
 
-infixr 9 -, -¬
+infixr 9 -¬

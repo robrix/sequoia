@@ -11,7 +11,7 @@ module Focalized.Calculus.Not
 , notLK'
 , notRK'
   -- * Connectives
-, module Focalized.Negation
+, module Focalized.Not
 ) where
 
 import Focalized.CPS
@@ -19,6 +19,7 @@ import Focalized.Calculus.Context
 import Focalized.Calculus.Control
 import Focalized.Calculus.Core
 import Focalized.Negation
+import Focalized.Not
 import Focalized.Polarity
 import Prelude hiding (init)
 

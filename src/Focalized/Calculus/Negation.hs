@@ -5,6 +5,7 @@ module Focalized.Calculus.Negation
   -- * Re-exports
 , module Focalized.Calculus.Not
 , module Focalized.Calculus.Negate
+, module Focalized.Negation
   -- * Negative double negation
 , dneN
 , dniN
@@ -16,6 +17,7 @@ module Focalized.Calculus.Negation
 import Focalized.Calculus.Context
 import Focalized.Calculus.Negate
 import Focalized.Calculus.Not
+import Focalized.Negation
 import Focalized.Polarity
 import Prelude hiding (init)
 
