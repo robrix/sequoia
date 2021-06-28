@@ -73,6 +73,7 @@ library
     Focalized.Calculus.Falsity
     Focalized.Calculus.Implication
     Focalized.Calculus.Negation
+    Focalized.Calculus.Shift
     Focalized.Calculus.Truth
     Focalized.Conjunction
     Focalized.Connective
