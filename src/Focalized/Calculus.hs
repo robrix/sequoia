@@ -52,12 +52,8 @@ module Focalized.Calculus
 , refold
 , Recursive(..)
   -- * Polarity
-, N(..)
-, P(..)
+, module Focalized.Polarity
   -- * Polarity shifts
-, Polarized
-, Neg
-, Pos
 , Shifting
 , module Focalized.Calculus.Shift
 ) where
