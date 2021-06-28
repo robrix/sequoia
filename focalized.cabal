@@ -93,7 +93,6 @@ library
     Focalized.Disjunction
     Focalized.Down
     Focalized.Exists
-    Focalized.Falsity
     Focalized.ForAll
     Focalized.Functor.C
     Focalized.HOAS

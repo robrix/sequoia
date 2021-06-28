@@ -2,11 +2,11 @@ module Focalized.Calculus.Zero
 ( -- * Positive falsity
   PosFalsity(..)
   -- * Connectives
-, module Focalized.Falsity
+, module Focalized.Zero
 ) where
 
 import Focalized.Calculus.Context
-import Focalized.Falsity
+import Focalized.Zero
 
 -- Positive falsity
 

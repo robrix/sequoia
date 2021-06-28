@@ -3,12 +3,12 @@ module Focalized.Calculus.Bottom
   NegFalsity(..)
 , botR'
   -- * Connectives
-, module Focalized.Falsity
+, module Focalized.Bottom
 ) where
 
+import Focalized.Bottom
 import Focalized.Calculus.Context
 import Focalized.Calculus.Core
-import Focalized.Falsity
 
 -- Negative falsity
 
