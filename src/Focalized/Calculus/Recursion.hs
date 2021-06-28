@@ -12,9 +12,9 @@ module Focalized.Calculus.Recursion
 
 import Focalized.Calculus.Context
 import Focalized.Calculus.Core
-import Focalized.Calculus.Quantification
 import Focalized.Implication
 import Focalized.Polarity
+import Focalized.Quantification
 import Focalized.Recursion
 import Prelude hiding (init)
 

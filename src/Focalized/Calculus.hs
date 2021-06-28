@@ -23,11 +23,12 @@ module Focalized.Calculus
 , module Focalized.Calculus.Control
   -- * Connectives
 , module Focalized.Calculus.Bottom
+, module Focalized.Calculus.Exists
+, module Focalized.Calculus.ForAll
 , module Focalized.Calculus.Function
 , module Focalized.Calculus.Negation
 , module Focalized.Calculus.One
 , module Focalized.Calculus.Par
-, module Focalized.Calculus.Quantification
 , module Focalized.Calculus.Recursion
 , module Focalized.Calculus.Subtraction
 , module Focalized.Calculus.Sum
@@ -64,11 +65,12 @@ import           Focalized.Calculus.Bottom
 import           Focalized.Calculus.Context
 import           Focalized.Calculus.Control
 import           Focalized.Calculus.Core
+import           Focalized.Calculus.Exists
+import           Focalized.Calculus.ForAll
 import           Focalized.Calculus.Function
 import           Focalized.Calculus.Negation
 import           Focalized.Calculus.One
 import           Focalized.Calculus.Par
-import           Focalized.Calculus.Quantification
 import           Focalized.Calculus.Recursion
 import           Focalized.Calculus.Shift
 import           Focalized.Calculus.Subtraction
