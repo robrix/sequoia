@@ -154,13 +154,13 @@ instance PosNegation Seq where
 
 -- Additive
 
-type Additive s = (AdditiveTruth s, AdditiveFalsity s, AdditiveConj s, AdditiveDisj s)
+type Additive s = (AdditiveTruth s, PosFalsity s, AdditiveConj s, AdditiveDisj s)
 
 
 instance AdditiveTruth Seq where
   topR = pure (inr Top)
 
-instance AdditiveFalsity Seq where
+instance PosFalsity Seq where
   zeroL = liftL (K absurdP)
 
 
@@ -178,10 +178,10 @@ instance AdditiveDisj Seq where
 
 -- Multiplicative
 
-type Multiplicative s = (MultiplicativeFalsity s, MultiplicativeTruth s, MultiplicativeDisj s, MultiplicativeConj s)
+type Multiplicative s = (NegFalsity s, MultiplicativeTruth s, MultiplicativeDisj s, MultiplicativeConj s)
 
 
-instance MultiplicativeFalsity Seq where
+instance NegFalsity Seq where
   botL = liftL (K absurdN)
   botR = wkR
 

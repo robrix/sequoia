@@ -1,6 +1,6 @@
 module Focalized.Calculus.Bottom
-( -- * Multiplicative falsity
-  MultiplicativeFalsity(..)
+( -- * Negative falsity
+  NegFalsity(..)
 , botR'
   -- * Connectives
 , module Focalized.Falsity
@@ -10,9 +10,9 @@ import Focalized.Calculus.Context
 import Focalized.Calculus.Core
 import Focalized.Falsity
 
--- Multiplicative falsity
+-- Negative falsity
 
-class MultiplicativeFalsity s where
+class NegFalsity s where
   botL
     -- -----------------
     :: Bot < i -|s r|- o
@@ -24,7 +24,7 @@ class MultiplicativeFalsity s where
 
 
 botR'
-  :: (Core s, MultiplicativeFalsity s)
+  :: (Core s, NegFalsity s)
   => i -|s r|- o > Bot
   -- -----------------
   -> i -|s r|- o

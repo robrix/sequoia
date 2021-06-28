@@ -1,6 +1,6 @@
 module Focalized.Calculus.Zero
-( -- * Additive falsity
-  AdditiveFalsity(..)
+( -- * Positive falsity
+  PosFalsity(..)
   -- * Connectives
 , module Focalized.Falsity
 ) where
@@ -8,9 +8,9 @@ module Focalized.Calculus.Zero
 import Focalized.Calculus.Context
 import Focalized.Falsity
 
--- Additive falsity
+-- Positive falsity
 
-class AdditiveFalsity s where
+class PosFalsity s where
   zeroL
     -- ------------------
     :: Zero < i -|s r|- o
