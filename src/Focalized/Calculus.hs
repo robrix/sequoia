@@ -34,8 +34,8 @@ module Focalized.Calculus
 , Multiplicative
   -- * Implication
 , runFun
-  -- * Quantifying
-, Quantifying
+  -- * Quantification
+, Quantification
 , ForAll(..)
 , Universal(..)
 , Exists(..)
@@ -62,7 +62,6 @@ import           Control.Applicative (liftA2)
 import qualified Control.Category as Cat
 import           Control.Monad.Trans.Class
 import           Data.Functor.Contravariant (contramap)
-import           Data.Kind (Constraint)
 import           Data.Profunctor
 import           Focalized.CPS
 import           Focalized.Calculus.Conjunction
@@ -219,86 +218,15 @@ instance Subtraction Seq where
   subR a b = liftA2 Sub <$> a <*> negateR b
 
 
--- Quantifying
+-- Quantification
 
-type Quantifying s = (Universal s, Existential s)
+type Quantification s = (Universal s, Existential s)
 
-
-class (Core s, Structural s, Negation s, Contextual s, Shifting s) => Universal s where
-  {-# MINIMAL (forAllL | forAllLExists), forAllR #-}
-  forAllL
-    :: (Polarized n x, Neg (f x))
-    =>        r ¬-f x < i -|s r|- o
-    -- ----------------------------
-    -> ForAll r n f   < i -|s r|- o
-  default forAllL
-    :: (Polarized n x, ForAllC (Polarized n) Neg f, Existential s)
-    =>        r ¬-f x < i -|s r|- o
-    -- ----------------------------
-    -> ForAll r n f   < i -|s r|- o
-  forAllL p = forAllLExists (existsR (mapR C (notL' p)))
-  forAllLExists
-    :: ForAllC (Polarized n) Neg f
-    =>                i -|s r|- o > Exists r n ((-) r · f)
-    -- ---------------------------------------------------
-    -> ForAll r n f < i -|s r|- o
-  default forAllLExists
-    :: (ForAllC (Polarized n) Neg f, Existential s)
-    =>                i -|s r|- o > Exists r n ((-) r · f)
-    -- ---------------------------------------
-    -> ForAll r n f < i -|s r|- o
-  forAllLExists p = wkL p >>> existsL (mapL getC (negateL (forAllL (notL (negateR init)))))
-  forAllR
-    :: ForAllC (Polarized n) Neg f
-    => (forall x . Polarized n x => i -|s r|- o >            f x)
-    -- ---------------------------------------
-    ->                              i -|s r|- o > ForAll r n f
-  forAllR'
-    :: ForAllC (Polarized n) Neg f
-    =>                              i -|s r|- o > ForAll r n f
-    -- ---------------------------------------
-    -> (forall x . Polarized n x => i -|s r|- o >            f x)
-  forAllR' p = wkR' p >>> forAllL (dneN init)
 
 instance Universal Seq where
   forAllL p = mapL (notNegate . runForAll) p
   forAllR p = sequent $ \ k a -> k (inr (ForAll (K (\ k' -> runSeq p (k . inl |> runK k') a))))
 
-
-class (Core s, Structural s, Negation s, Contextual s, Shifting s) => Existential s where
-  {-# MINIMAL (existsL | existsLForAll), existsR #-}
-  existsL
-    :: (forall x . Polarized n x => f x < i -|s r|- o)
-    -- -----------------------------------------------
-    ->                   Exists r n f   < i -|s r|- o
-  default existsL
-    :: (ForAllC (Polarized n) Pos f, Universal s)
-    => (forall x . Polarized n x => f x < i -|s r|- o)
-    -- -----------------------------------------------
-    ->                   Exists r n f   < i -|s r|- o
-  existsL s = existsLForAll (forAllR (mapR C (notR s)))
-  existsL'
-    :: ForAllC (Polarized n) Pos f
-    =>                   Exists r n f   < i -|s r|- o
-    -- -----------------------------------------------
-    -> (forall x . Polarized n x => f x < i -|s r|- o)
-  existsL' p = existsR init >>> wkL' p
-  existsLForAll
-    :: ForAllC (Polarized n) Pos f
-    =>                i -|s r|- o > ForAll r n ((¬) r · f)
-    -- ---------------------------------------------------
-    -> Exists r n f < i -|s r|- o
-  default existsLForAll
-    :: (ForAllC (Polarized n) Pos f, Universal s)
-    =>                i -|s r|- o > ForAll r n ((¬) r · f)
-    -- ---------------------------------------------------
-    -> Exists r n f < i -|s r|- o
-  existsLForAll p = wkL p >>> exL (existsL (exL (forAllL (notL (negateR (mapL getC (notL init)))))))
-  existsR
-    :: (Polarized n x, Pos (f x))
-    => i -|s r|- o >            f x
-    -- ----------------------------
-    -> i -|s r|- o > Exists r n f
 
 instance Existential Seq where
   existsL p = popL (dnESeq . runExists (pushL p))
@@ -416,9 +344,6 @@ instance PosShift Seq where
 
 
 -- Utilities
-
-type ForAllC cx cf f = (forall x . cx x => cf (f x)) :: Constraint
-
 
 newtype (f · g) a = C { getC :: f (g a) }
   deriving (Eq, Foldable, Functor, Ord, Show)
