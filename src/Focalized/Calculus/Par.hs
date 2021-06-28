@@ -3,12 +3,12 @@ module Focalized.Calculus.Par
   NegDisjunction(..)
 , parR'
   -- * Connectives
-, module Focalized.Disjunction
+, module Focalized.Par
 ) where
 
 import Focalized.Calculus.Context
 import Focalized.Calculus.Core
-import Focalized.Disjunction
+import Focalized.Par
 import Focalized.Polarity
 import Prelude hiding (init)
 

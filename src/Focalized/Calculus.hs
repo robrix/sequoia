@@ -82,6 +82,7 @@ import           Focalized.Calculus.Top
 import           Focalized.Calculus.With
 import           Focalized.Calculus.Zero
 import           Focalized.Conjunction
+import           Focalized.Disjunction
 import           Focalized.Polarity
 import           Prelude hiding (init)
 

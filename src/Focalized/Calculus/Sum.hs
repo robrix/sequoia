@@ -4,13 +4,13 @@ module Focalized.Calculus.Sum
 , sumL1'
 , sumL2'
   -- * Connectives
-, module Focalized.Disjunction
+, module Focalized.Sum
 ) where
 
 import Focalized.Calculus.Context
 import Focalized.Calculus.Core
-import Focalized.Disjunction
 import Focalized.Polarity
+import Focalized.Sum
 import Prelude hiding (init)
 
 -- Positive disjunction

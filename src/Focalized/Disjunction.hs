@@ -1,58 +1,12 @@
 module Focalized.Disjunction
-( -- * Negative disjunction
-  type (⅋)(..)
-  -- * Positive disjunction
-, type (⊕)(..)
-  -- * Disjunction
-, Disj(..)
+( -- * Disjunction
+  Disj(..)
 , foldMapDisj
 , traverseDisj
 , bifoldMapDisj
 , bimapDisj
 , bitraverseDisj
 ) where
-
-import Focalized.Polarity
-
--- Negative disjunction
-
-newtype a ⅋ b = Par (forall r . (a -> r) -> (b -> r) -> r)
-  deriving (Functor)
-
-infixr 7 ⅋
-
-instance (Neg a, Neg b) => Polarized N (a ⅋ b) where
-
-instance Foldable ((⅋) f) where
-  foldMap = foldMapDisj
-
-instance Traversable ((⅋) f) where
-  traverse = traverseDisj
-
-instance Disj (⅋) where
-  inl l = Par $ \ ifl _ -> ifl l
-  inr r = Par $ \ _ ifr -> ifr r
-  exlr ifl ifr (Par run) = run ifl ifr
-
-
--- Positive disjunction
-
-data a ⊕ b
-  = InL !a
-  | InR !b
-  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-
-infixr 6 ⊕
-
-instance (Pos a, Pos b) => Polarized P (a ⊕ b)
-
-instance Disj (⊕) where
-  inl = InL
-  inr = InR
-  exlr ifl ifr = \case
-    InL l -> ifl l
-    InR r -> ifr r
-
 
 -- Disjunction
 
