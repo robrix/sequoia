@@ -89,11 +89,11 @@ deriving via Contextually Seq instance Exchange Seq
 -- Contextual rules
 
 instance Contextual Seq where
-  popL f = sequent $ \ k -> uncurryConj ((`runSeq` k) . f)
-  pushL s a = sequent $ \ k -> runSeq s k . (a <|)
+  popLn f = sequent $ \ k _Γ -> runSeq (f _Γ) k Γ
+  popRn f = sequent $ \ k _Γ -> runSeq (f (K k)) absurdΔ _Γ
 
-  popR f = sequent $ \ k -> runSeq (f (K (k . inr))) (k . inl)
-  pushR s a = sequent $ \ k -> runSeq s (k |> runK a)
+  pushLn s _Γ = sequent $ \ k -> runSeq s k . const _Γ
+  pushRn s _Δ = sequent $ \ _ -> runSeq s (runK _Δ)
 
 
 -- Control

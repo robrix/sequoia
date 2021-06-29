@@ -12,6 +12,10 @@ module Focalized.Calculus.Core
 , Exchange(..)
   -- * Contextual
 , Contextual(..)
+, popL
+, popR
+, pushL
+, pushR
 , poppedL
 , poppedR
 , popL2
@@ -33,6 +37,8 @@ import Control.Monad (join)
 import Data.Functor.Contravariant
 import Focalized.CPS
 import Focalized.Calculus.Context
+import Focalized.Conjunction
+import Focalized.Disjunction
 import Prelude hiding (init)
 
 class Core s where
@@ -114,58 +120,120 @@ class Core s => Exchange s where
 
 
 class Core s => Contextual s where
-  -- | Pop something off the input context which can later be pushed. Used with 'pushL', this provides a generalized context restructuring facility.
+  -- | Pop something off the input context which can later be pushed. Used with 'pushLn', this provides a generalized context restructuring facility.
   --
   -- @
-  -- popL . pushL = id
+  -- popLn . pushLn = id
   -- @
   -- @
-  -- pushL . popL = id
+  -- pushLn . popLn = id
   -- @
-  popL
-    :: (a -> _Γ -|s r|- _Δ)
+  popLn
+    :: (_Γ -> Γ -|s r|- _Δ)
     -- --------------------
-    ->  a  < _Γ -|s r|- _Δ
+    ->  _Γ      -|s r|- _Δ
 
-  -- | Pop something off the output context which can later be pushed. Used with 'pushR', this provides a generalized context restructuring facility.
+  -- | Pop something off the output context which can later be pushed. Used with 'pushRn', this provides a generalized context restructuring facility.
   --
   -- @
-  -- popR . pushR = id
+  -- popRn . pushRn = id
   -- @
   -- @
-  -- pushR . popR = id
+  -- pushRn . popRn = id
   -- @
-  popR
-    :: (r •a -> _Γ -|s r|- _Δ)
-    -- --------------------------
-    ->          _Γ -|s r|- _Δ > a
+  popRn
+    :: (r •_Δ -> _Γ -|s r|-  Δ)
+    -- ------------------------
+    ->           _Γ -|s r|- _Δ
 
 
-  -- | Push something onto the input context which was previously popped off it. Used with 'popL', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
+  -- | Push something onto the input context which was previously popped off it. Used with 'popLn', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
   --
   -- @
-  -- popL . pushL = id
+  -- popLn . pushLn = id
   -- @
   -- @
-  -- pushL . popL = id
+  -- pushLn . popLn = id
   -- @
-  pushL
-    ::  a  < _Γ -|s r|- _Δ
+  pushLn
+    ::  _Γ      -|s r|- _Δ
     -- --------------------
-    -> (a -> _Γ -|s r|- _Δ)
+    -> (_Γ -> Γ -|s r|- _Δ)
 
-  -- | Push something onto the output context which was previously popped off it. Used with 'popR', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
+  -- | Push something onto the output context which was previously popped off it. Used with 'popRn', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
   --
   -- @
-  -- popR . pushR = id
+  -- popRn . pushRn = id
   -- @
   -- @
-  -- pushR . popR = id
+  -- pushRn . popRn = id
   -- @
-  pushR
-    ::          _Γ -|s r|- _Δ > a
-    -- --------------------------
-    -> (r •a -> _Γ -|s r|- _Δ)
+  pushRn
+    ::           _Γ -|s r|- _Δ
+    -- ------------------------
+    -> (r •_Δ -> _Γ -|s r|-  Δ)
+
+
+-- | Pop something off the input context which can later be pushed. Used with 'pushL', this provides a generalized context restructuring facility.
+--
+-- @
+-- popL . pushL = id
+-- @
+-- @
+-- pushL . popL = id
+-- @
+popL
+  :: Contextual s
+  => (a -> _Γ -|s r|- _Δ)
+  -- --------------------
+  ->  a  < _Γ -|s r|- _Δ
+popL f = popLn (\ c -> pushLn (f (exl c)) (exr c))
+
+-- | Pop something off the output context which can later be pushed. Used with 'pushR', this provides a generalized context restructuring facility.
+--
+-- @
+-- popR . pushR = id
+-- @
+-- @
+-- pushR . popR = id
+-- @
+popR
+  :: Contextual s
+  => (r •a -> _Γ -|s r|- _Δ)
+  -- --------------------------
+  ->          _Γ -|s r|- _Δ > a
+popR f = popRn (\ c -> pushRn (f (contramap inr c)) (contramap inl c))
+
+
+-- | Push something onto the input context which was previously popped off it. Used with 'popL', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
+--
+-- @
+-- popL . pushL = id
+-- @
+-- @
+-- pushL . popL = id
+-- @
+pushL
+  :: Contextual s
+  =>  a  < _Γ -|s r|- _Δ
+  -- --------------------
+  -> (a -> _Γ -|s r|- _Δ)
+pushL s a = popLn (\ c -> pushLn s (a <| c))
+
+-- | Push something onto the output context which was previously popped off it. Used with 'popR', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
+--
+-- @
+-- popR . pushR = id
+-- @
+-- @
+-- pushR . popR = id
+-- @
+pushR
+  :: Contextual s
+  =>          _Γ -|s r|- _Δ > a
+  -- --------------------------
+  -> (r •a -> _Γ -|s r|- _Δ)
+pushR s a = popRn (\ c -> pushRn s (c ||> a))
 
 
 poppedL
