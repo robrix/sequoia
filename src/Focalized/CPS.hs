@@ -2,6 +2,8 @@ module Focalized.CPS
 ( -- * Continuations
   dnI
 , dnE
+, liftK
+, liftK2
 , type (•)(..)
 , type (••)
   -- * CPS
@@ -37,6 +39,12 @@ dnI = K . flip runK
 
 dnE :: r ••CPS r a b -> CPS r a b
 dnE f = CPS (\ k a -> runK f (K (\ f -> runCPS f k a)))
+
+liftK :: ((a -> r) -> (b -> r)) -> (r •a -> r •b)
+liftK f (K a) = K (f a)
+
+liftK2 :: ((a -> r) -> (b -> r) -> (c -> r)) -> (r •a -> r •b -> r •c)
+liftK2 f (K a) (K b) = K (f a b)
 
 newtype r •a = K { runK :: a -> r }
 
