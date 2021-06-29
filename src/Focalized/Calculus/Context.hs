@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -21,13 +22,14 @@ module Focalized.Calculus.Context
 , ContextR(..)
 ) where
 
-import Control.Monad (ap)
 import Data.Bifoldable
 import Data.Bifunctor
 import Data.Bitraversable
+import Data.Functor.Identity
 import Focalized.CPS
 import Focalized.Conjunction
 import Focalized.Disjunction
+import GHC.Base
 
 -- Γ
 
@@ -117,29 +119,35 @@ infixl 2 |-, -|
 
 -- Membership
 
-class ContextL a as as' | as a -> as', as as' -> a, as' a -> as where
+newtype (n :: Symbol) ? a = Q { getQ :: a }
+  deriving (Functor)
+  deriving (Applicative, Monad) via Identity
+
+infix 8 ?
+
+class ContextL (n :: Symbol) a as as' | as a -> as', as as' -> a, as' a -> as where
   {-# MINIMAL ((selectL, dropL) | removeL), insertL #-}
-  selectL :: as -> a
-  selectL = exl . removeL
-  dropL :: as -> as'
-  dropL = exr . removeL
-  removeL :: as -> (a, as')
-  removeL = (,) <$> selectL <*> dropL
-  insertL :: a -> as' -> as
-  replaceL :: (ContextL b bs bs', bs' ~ as') => (a -> b) -> (as -> bs)
-  replaceL f = uncurry (insertL . f) . removeL
+  selectL :: n ? as -> n ? a
+  selectL = fmap exl . removeL
+  dropL :: n ? as -> n ? as'
+  dropL = fmap exr . removeL
+  removeL :: n ? as -> n ? (a, as')
+  removeL = liftA2 (,) <$> selectL <*> dropL
+  insertL :: n ? (a, as') -> n ? as
+  replaceL :: (ContextL n' b bs bs', n ~ n', bs' ~ as') => (a -> b) -> (n ? as -> n ? bs)
+  replaceL f = insertL . fmap (first f) . removeL
 
-instance {-# OVERLAPPING #-} ContextL a (a < as) as where
-  selectL = exl
-  dropL = exr
-  removeL = (-><-) <$> exl <*> exr
-  insertL = (<|)
+instance {-# OVERLAPPING #-} ContextL n a (a < as) as where
+  selectL = fmap exl
+  dropL = fmap exr
+  removeL = liftA2 (-><-) <$> fmap exl <*> fmap exr
+  insertL = fmap (uncurry (<|))
 
-instance {-# OVERLAPPING #-} ContextL a as as' => ContextL a (b < as) (b < as') where
-  selectL = selectL . exr
-  dropL (b :< as') = b <| dropL as'
-  removeL (b :< as') = (b <|) <$> removeL as'
-  insertL a (b :< as') = b <| insertL a as'
+instance {-# OVERLAPPING #-} ContextL n a as as' => ContextL n a (b < as) (b < as') where
+  selectL = selectL . fmap exr
+  dropL = fmap . (<|) <$> exl . getQ <*> dropL . fmap exr
+  removeL = fmap . fmap . (<|) <$> exl . getQ <*> removeL . fmap exr
+  insertL = fmap . (<|) <$> exl . exr . getQ <*> insertL . fmap (fmap exr)
 
 
 class ContextR a as as' | as a -> as', as as' -> a, as' a -> as where
