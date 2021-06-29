@@ -16,6 +16,7 @@ module Focalized.Calculus.Context
 , type (-|)
   -- * Membership
 , Δ
+, absurdΔ
 , ContextL(..)
 , ContextR(..)
 ) where
@@ -58,6 +59,10 @@ instance Bitraversable (<) where
 -- Δ
 
 data Δ
+
+absurdΔ :: Δ -> a
+absurdΔ = \case
+
 
 data a > b
   = L a
