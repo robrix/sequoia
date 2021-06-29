@@ -158,7 +158,7 @@ instance Adjunction ((:::) n) ((:::) n) where
   rightAdjunct = coerce
 
 
-class ContextL (n :: Symbol) a as as' | as a -> as', as as' -> a, as' a -> as where
+class ContextL (n :: Symbol) a as as' | as a -> as', as as' -> a, as n -> a, as' n a -> as where
   {-# MINIMAL ((selectL, dropL) | removeL), insertL #-}
   selectL :: n ? as -> n ? a
   selectL = fmap exl . removeL
@@ -170,11 +170,11 @@ class ContextL (n :: Symbol) a as as' | as a -> as', as as' -> a, as' a -> as wh
   replaceL :: (ContextL n' b bs bs', n ~ n', bs' ~ as') => (a -> b) -> (n ? as -> n ? bs)
   replaceL f = insertL . fmap (first f) . removeL
 
-instance {-# OVERLAPPING #-} ContextL n a (a < as) as where
-  selectL = fmap exl
+instance {-# OVERLAPPING #-} ContextL n a ((n ::: a) < as) as where
+  selectL = fmap (getB . exl)
   dropL = fmap exr
-  removeL = liftA2 (-><-) <$> fmap exl <*> fmap exr
-  insertL = fmap (uncurry (<|))
+  removeL = liftA2 (-><-) <$> fmap (getB . exl) <*> fmap exr
+  insertL = fmap (uncurry ((<|) . B))
 
 instance {-# OVERLAPPING #-} ContextL n a as as' => ContextL n a (b < as) (b < as') where
   selectL = selectL . fmap exr
@@ -183,7 +183,7 @@ instance {-# OVERLAPPING #-} ContextL n a as as' => ContextL n a (b < as) (b < a
   insertL = fmap . (<|) <$> exl . exr . getQ <*> insertL . fmap (fmap exr)
 
 
-class ContextR (n :: Symbol) a as as' | as a -> as', as as' -> a, as' a -> as where
+class ContextR (n :: Symbol) a as as' | as a -> as', as as' -> a, as n -> a, as' n a -> as where
   selectR :: n ? as -> n ? Maybe a
   selectR = fmap exrD . removeR
   dropR :: n ? as -> n ? Maybe as'
@@ -193,11 +193,11 @@ class ContextR (n :: Symbol) a as as' | as a -> as', as as' -> a, as' a -> as wh
   replaceR :: (ContextR n b bs bs', bs' ~ as') => (a -> b) -> (n ? as -> n ? bs)
   replaceR f = insertR . fmap (fmap f) . removeR
 
-instance {-# OVERLAPPING #-} ContextR n a (as > a) as where
-  selectR = fmap exrD
+instance {-# OVERLAPPING #-} ContextR n a (as > (n ::: a)) as where
+  selectR = fmap (fmap getB . exrD)
   dropR = fmap exlD
-  removeR = fmap (inl <--> inr)
-  insertR = fmap (inl <--> inr)
+  removeR = fmap (inl <--> inr . getB)
+  insertR = fmap (fmap B . (inl <--> inr))
 
 instance {-# OVERLAPPING #-} ContextR n a as as' => ContextR n a (as > b) (as' > b) where
   selectR = selectR -||- const (pure Nothing)
