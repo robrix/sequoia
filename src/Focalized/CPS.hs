@@ -9,6 +9,7 @@ module Focalized.CPS
   -- * CPS
 , cps
 , liftCPS
+, contToCPS
 , appCPS
 , appCPS2
 , pappCPS
@@ -70,6 +71,9 @@ cps = CPS . flip (.)
 
 liftCPS :: (a -> (b -> r) -> r) -> CPS r a b
 liftCPS = CPS . flip
+
+contToCPS :: (a -> Cont r b) -> CPS r a b
+contToCPS f = liftCPS ((•) . contramap K . runCont . f)
 
 appCPS :: CPS r a b -> a -> (b -> r) -> r
 appCPS c a k = runCPS c k a
