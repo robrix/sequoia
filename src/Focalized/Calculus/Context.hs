@@ -8,6 +8,8 @@ module Focalized.Calculus.Context
 , type (<)(..)
 , (<|)
   -- * Δ
+, Δ
+, absurdΔ
 , type (>)(..)
 , (|>)
 , (||>)
@@ -15,8 +17,6 @@ module Focalized.Calculus.Context
 , type (|-)
 , type (-|)
   -- * Membership
-, Δ
-, absurdΔ
 , ContextL(..)
 , ContextR(..)
 ) where
