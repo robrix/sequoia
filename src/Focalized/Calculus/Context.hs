@@ -25,7 +25,10 @@ module Focalized.Calculus.Context
 import Data.Bifoldable
 import Data.Bifunctor
 import Data.Bitraversable
+import Data.Distributive
+import Data.Functor.Adjunction
 import Data.Functor.Identity
+import Data.Functor.Rep
 import Focalized.CPS
 import Focalized.Conjunction
 import Focalized.Disjunction
@@ -121,9 +124,20 @@ infixl 2 |-, -|
 
 newtype (n :: Symbol) ? a = Q { getQ :: a }
   deriving (Functor)
-  deriving (Applicative, Monad) via Identity
+  deriving (Applicative, Monad, Representable) via Identity
 
 infix 8 ?
+
+instance Distributive ((?) n) where
+  distribute = Q . fmap getQ
+
+instance Adjunction ((?) n) ((?) n) where
+  unit   = coerce
+  counit = coerce
+
+  leftAdjunct  = coerce
+  rightAdjunct = coerce
+
 
 class ContextL (n :: Symbol) a as as' | as a -> as', as as' -> a, as' a -> as where
   {-# MINIMAL ((selectL, dropL) | removeL), insertL #-}
