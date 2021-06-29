@@ -66,9 +66,9 @@ instance Contravariant ((•) r) where
 
 -- Double negation
 
-type r ••a = r •r •a
+type r ••a = r •(r •a)
 
-infixr 9 •, ••
+infixl 9 •, ••
 
 
 dnI :: a -> r ••a
