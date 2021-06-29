@@ -112,7 +112,7 @@ appCPS :: CPS r a b -> a -> r ••b
 appCPS c a = K $ \ k -> runCPS c k • a
 
 appCPS2 :: CPS r a (CPS r b c) -> a -> b -> r ••c
-appCPS2 c a b = appCPS c a Cat.>>> K (\ k -> K (\ c -> appCPS c b • k))
+appCPS2 c a b = appCPS c a Cat.>>> K (>>- (`appCPS` b))
 
 pappCPS :: CPS r a b -> a -> CPS r () b
 pappCPS c a = c Cat.<<< pure a
@@ -173,7 +173,7 @@ f <••> g = K $ (f •) <--> (g •)
 infix 3 <••>
 
 instance ArrowApply (CPS r) where
-  app = CPS $ K . \ k -> (• k) . uncurry appCPS
+  app = CPS (>>- uncurry appCPS)
 
 instance Profunctor (CPS r) where
   dimap f g (CPS c) = CPS (dimap (contramap g) (contramap f) c)
