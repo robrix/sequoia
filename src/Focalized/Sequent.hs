@@ -37,13 +37,13 @@ import           Prelude hiding (init)
 -- Sequents
 
 runSeq :: _Γ -|Seq r|- _Δ -> ((_Δ -> r) -> (_Γ -> r))
-runSeq = runCPS . getSeq
+runSeq = lowerK . runCPS . getSeq
 
 evalSeq :: _Γ -|Seq _Δ|- _Δ -> (_Γ -> _Δ)
 evalSeq = (`runSeq` id)
 
 sequent :: ((_Δ -> r) -> (_Γ -> r)) -> _Γ -|Seq r|- _Δ
-sequent = Seq . CPS
+sequent = Seq . CPS . liftK
 
 dnESeq :: r ••(_Γ -|Seq r|- _Δ) -> _Γ -|Seq r|- _Δ
 dnESeq = Seq . dnE . contramap (contramap getSeq)
@@ -56,7 +56,7 @@ liftLR = Seq . dimap exl inr
 
 
 lowerLR :: (a -|CPS r|- b -> _Γ -|Seq r|- _Δ) -> a < _Γ -|Seq r|- _Δ > b -> _Γ -|Seq r|- _Δ
-lowerLR f p = sequent $ \ k i -> runSeq (f (CPS (\ kb a -> runSeq p (k |> kb) (a <| i)))) k i
+lowerLR f p = sequent $ \ k i -> runSeq (f (CPS (liftK (\ kb a -> runSeq p (k |> kb) (a <| i))))) k i
 
 
 -- Effectful sequents
@@ -68,7 +68,7 @@ newtype SeqT r _Γ m _Δ = SeqT { getSeqT :: Seq (m r) _Γ _Δ }
   deriving (Applicative, Functor, Monad)
 
 instance MonadTrans (SeqT r _Γ) where
-  lift m = SeqT (Seq (CPS (\ k _ -> m >>= k)))
+  lift m = SeqT (Seq (CPS (liftK (const . (m >>=)))))
 
 
 -- Core rules

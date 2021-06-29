@@ -17,13 +17,13 @@ import Focalized.Polarity
 -- Implication
 
 appFun :: (a ~~r~> b) -> a -> (b -> r) -> r
-appFun = appCPS . getFun
+appFun = flip . lowerK . runCPS . getFun
 
 appFun2 :: (a ~~r~> b ~~r~> c) -> a -> b -> (c -> r) -> r
-appFun2 = appCPS2 . fmap getFun . getFun
+appFun2 f a b = appFun f a . flip (`appFun` b)
 
 liftFun :: ((b -> r) -> (a -> r)) -> a ~~r~> b
-liftFun = Fun . CPS
+liftFun = Fun . CPS . liftK
 
 liftFun' :: (a -> (b -> r) -> r) -> a ~~r~> b
 liftFun' = liftFun . flip
