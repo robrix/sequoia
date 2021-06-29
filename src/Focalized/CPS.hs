@@ -6,10 +6,12 @@ module Focalized.CPS
 , type (•)(..)
 , type (••)
   -- * Double negation
-, liftDN
-, lowerDN
 , dnI
 , dnE
+, liftDN
+, lowerDN
+, (>>-)
+, (-<<)
   -- * CPS
 , cps
 , liftCPS
@@ -80,6 +82,16 @@ liftDN = K . lmap (•)
 
 lowerDN :: r ••a -> (a -> r) -> r
 lowerDN = lmap K . (•)
+
+(>>-) :: a -> (b -> r •a) -> r •b
+(>>-) f g = K ((• f) . g)
+
+infixl 1 >>-
+
+(-<<) :: (b -> r •a) -> (a -> r •b)
+(-<<) g f = K ((• f) . g)
+
+infixr 1 -<<
 
 
 -- CPS
