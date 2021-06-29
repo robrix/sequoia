@@ -159,8 +159,8 @@ instance Implication Seq where
   funR = lowerLR (liftR . Fun) . wkR'
 
 instance Subtraction Seq where
-  subL b = popL (\ s -> liftR (subA s) >>> b >>> liftL (getNegate (subK s)))
-  subR a b = liftA2 Sub <$> a <*> negateR b
+  subL b = popL (\ s -> liftR (subA s) >>> b >>> liftL (subK s))
+  subR a b = liftA2 Sub <$> a <*> kR b
 
 
 -- Quantification
