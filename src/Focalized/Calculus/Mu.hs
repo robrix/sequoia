@@ -1,4 +1,3 @@
-{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE QuantifiedConstraints #-}
 module Focalized.Calculus.Mu
 ( -- * Recursion
@@ -18,23 +17,23 @@ import Prelude hiding (init)
 
 -- Recursion
 
-class Recursion r s | s -> r where
+class Recursion s where
   muL
     :: ((Neg ==> Pos) f, Neg a)
-    => _Γ -|s|- _Δ > f a ~~r~> a   ->   a < _Γ -|s|- _Δ
-    -- ------------------------------------------------
-    ->              Mu r f < _Γ -|s|- _Δ
+    => _Γ -|s r|- _Δ > f a ~~r~> a   ->   a < _Γ -|s r|- _Δ
+    -- ----------------------------------------------------
+    ->              Mu r f < _Γ -|s r|- _Δ
 
   muR
     :: (Neg ==> Pos) f
-    => _Γ -|s|- _Δ > ForAll r N (MuF r f)
-    -- ----------------------------------
-    -> _Γ -|s|- _Δ >             Mu  r f
+    => _Γ -|s r|- _Δ > ForAll r N (MuF r f)
+    -- ------------------------------------
+    -> _Γ -|s r|- _Δ >             Mu  r f
 
 
 muL'
-  :: (Weaken s, Exchange s, Recursion r s, (Neg ==> Pos) f)
-  =>             Mu  r f  < _Γ -|s|- _Δ
-  -- ----------------------------------
-  -> ForAll r N (MuF r f) < _Γ -|s|- _Δ
+  :: (Weaken s, Exchange s, Recursion s, (Neg ==> Pos) f)
+  =>             Mu  r f  < _Γ -|s r|- _Δ
+  -- ------------------------------------
+  -> ForAll r N (MuF r f) < _Γ -|s r|- _Δ
 muL' p = muR init >>> wkL' p

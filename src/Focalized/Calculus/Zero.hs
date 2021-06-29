@@ -12,5 +12,5 @@ import Focalized.Zero
 
 class PosFalsity s where
   zeroL
-    -- ------------------
-    :: Zero < _Γ -|s|- _Δ
+    -- --------------------
+    :: Zero < _Γ -|s r|- _Δ

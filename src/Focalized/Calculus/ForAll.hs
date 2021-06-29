@@ -1,4 +1,3 @@
-{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Focalized.Calculus.ForAll
@@ -19,23 +18,23 @@ import Prelude hiding (init)
 
 -- Universal quantification
 
-class Universal r s | s -> r where
+class Universal s where
   forAllL
     :: (Polarized n x, Neg (f x))
-    =>        r ¬-f x < _Γ -|s|- _Δ
-    -- ----------------------------
-    -> ForAll r n f   < _Γ -|s|- _Δ
+    =>        r ¬-f x < _Γ -|s r|- _Δ
+    -- ------------------------------
+    -> ForAll r n f   < _Γ -|s r|- _Δ
 
   forAllR
     :: (Polarized n ==> Neg) f
-    => (forall x . Polarized n x => _Γ -|s|- _Δ >            f x)
-    -- ----------------------------------------------------------
-    ->                              _Γ -|s|- _Δ > ForAll r n f
+    => (forall x . Polarized n x => _Γ -|s r|- _Δ >            f x)
+    -- ------------------------------------------------------------
+    ->                              _Γ -|s r|- _Δ > ForAll r n f
 
 
 forAllR'
-  :: (Weaken s, Exchange s, Universal r s, Negation r s, (Polarized n ==> Neg) f)
-  =>                              _Γ -|s|- _Δ > ForAll r n f
-  -- ----------------------------------------------------------
-  -> (forall x . Polarized n x => _Γ -|s|- _Δ >            f x)
+  :: (Weaken s, Exchange s, Universal s, Negation s, (Polarized n ==> Neg) f)
+  =>                              _Γ -|s r|- _Δ > ForAll r n f
+  -- ------------------------------------------------------------------------
+  -> (forall x . Polarized n x => _Γ -|s r|- _Δ >            f x)
 forAllR' p = wkR' p >>> forAllL (dneN init)

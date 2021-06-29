@@ -23,38 +23,38 @@ import Prelude hiding (init)
 
 -- Negation
 
-type Negation r s = (NegNegation r s, PosNegation r s)
+type Negation s = (NegNegation s, PosNegation s)
 
 
 -- Negative double negation
 
 dneN
-  :: (Negation r s, Neg a)
-  =>     a < _Γ -|s|- _Δ
-  -- -------------------
-  -> r ¬-a < _Γ -|s|- _Δ
+  :: (NegNegation s, PosNegation s, Neg a)
+  =>     a < _Γ -|s r|- _Δ
+  -- ---------------------
+  -> r ¬-a < _Γ -|s r|- _Δ
 dneN = notL . negateR
 
 dniN
-  :: (Negation r s, Neg a)
-  => _Γ -|s|- _Δ > a
-  -- -------------------
-  -> _Γ -|s|- _Δ > r ¬-a
+  :: (NegNegation s, PosNegation s, Neg a)
+  => _Γ -|s r|- _Δ > a
+  -- ---------------------
+  -> _Γ -|s r|- _Δ > r ¬-a
 dniN = notR . negateL
 
 
 -- Positive double negation
 
 dneP
-  :: (Negation r s, Pos a)
-  =>     a < _Γ -|s|- _Δ
-  -- -------------------
-  -> r -¬a < _Γ -|s|- _Δ
+  :: (NegNegation s, PosNegation s, Pos a)
+  =>     a < _Γ -|s r|- _Δ
+  -- ---------------------
+  -> r -¬a < _Γ -|s r|- _Δ
 dneP = negateL . notR
 
 dniP
-  :: (Negation r s, Pos a)
-  => _Γ -|s|- _Δ > a
-  -- -------------------
-  -> _Γ -|s|- _Δ > r -¬a
+  :: (NegNegation s, PosNegation s, Pos a)
+  => _Γ -|s r|- _Δ > a
+  -- ---------------------
+  -> _Γ -|s r|- _Δ > r -¬a
 dniP = negateR . notL

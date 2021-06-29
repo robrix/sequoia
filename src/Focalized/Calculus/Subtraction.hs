@@ -1,4 +1,3 @@
-{-# LANGUAGE FunctionalDependencies #-}
 module Focalized.Calculus.Subtraction
 ( -- * Subtraction
   Subtraction(..)
@@ -15,23 +14,23 @@ import Prelude hiding (init)
 
 -- Subtraction
 
-class Subtraction r s | s -> r where
+class Subtraction s where
   subL
     :: (Pos a, Neg b)
-    =>         a < _Γ -|s|- _Δ > b
-    -- ---------------------------
-    -> a ~-r-< b < _Γ -|s|- _Δ
+    =>         a < _Γ -|s r|- _Δ > b
+    -- -----------------------------
+    -> a ~-r-< b < _Γ -|s r|- _Δ
 
   subR
     :: (Pos a, Neg b)
-    => _Γ -|s|- _Δ > a   ->   b < _Γ -|s|- _Δ
-    -- --------------------------------------
-    ->        _Γ -|s|- _Δ > a ~-r-< b
+    => _Γ -|s r|- _Δ > a   ->   b < _Γ -|s r|- _Δ
+    -- ------------------------------------------
+    ->        _Γ -|s r|- _Δ > a ~-r-< b
 
 
 subL'
-  :: (Weaken s, Exchange s, Subtraction r s, Pos a, Neg b)
-  => a ~-r-< b < _Γ -|s|- _Δ
-  -- ---------------------------
-  ->         a < _Γ -|s|- _Δ > b
+  :: (Weaken s, Exchange s, Subtraction s, Pos a, Neg b)
+  => a ~-r-< b < _Γ -|s r|- _Δ
+  -- -----------------------------
+  ->         a < _Γ -|s r|- _Δ > b
 subL' p = subR init init >>> wkR (wkL' p)
