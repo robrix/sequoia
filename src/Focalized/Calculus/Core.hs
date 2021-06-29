@@ -14,6 +14,7 @@ module Focalized.Calculus.Core
 , Contextual(..)
 , popL
 , popR
+, popLR
 , pushL
 , pushR
 , poppedL
@@ -206,6 +207,14 @@ popR
   -- --------------------------
   ->          _Γ -|s r|- _Δ > a
 popR f = popRn (\ c -> pushRn (f (contramap inr c)) (contramap inl c))
+
+
+popLR
+  :: Contextual s
+  => (a -> r •b -> _Γ -|s r|- _Δ)
+  -- -------------------------------
+  ->           a < _Γ -|s r|- _Δ > b
+popLR f = popL (popR . f)
 
 
 -- | Push something onto the input context which was previously popped off it. Used with 'popL', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
