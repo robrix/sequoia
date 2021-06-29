@@ -175,7 +175,7 @@ class ContextR (n :: Symbol) a as as' | as a -> as', as as' -> a, as n -> a wher
   replaceR :: (ContextR n b bs bs', bs' ~ as') => (a -> b) -> (n :. as -> n :. bs)
   replaceR f = insertR . fmap (fmap f) . removeR
 
-instance {-# OVERLAPPING #-} ContextR n a (as > (n :. a)) as where
+instance {-# OVERLAPPING #-} ContextR n a (as > n :. a) as where
   selectR = fmap (fmap getV . exrD)
   dropR = fmap exlD
   removeR = fmap (inl <--> inr . getV)
