@@ -145,7 +145,7 @@ newtype (n :: Symbol) :. a = B { getB :: a }
   deriving (Functor)
   deriving (Applicative, Monad, Representable) via Identity
 
-infix 5 :.
+infixr 5 :.
 
 instance Distributive ((:.) n) where
   distribute = B . fmap getB
