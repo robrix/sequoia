@@ -279,7 +279,7 @@ pushL2 p = pushL . pushL p
 pushR2
   :: Contextual s
   => _Γ -|s r|- _Δ > b > a   ->   r •a   ->   r •b
-  -- -----------------
+  -- ---------------------------------------------
   -> _Γ -|s r|- _Δ
 pushR2 p = pushR . pushR p
 
