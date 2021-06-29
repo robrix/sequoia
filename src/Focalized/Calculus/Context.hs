@@ -181,7 +181,7 @@ instance {-# OVERLAPPING #-} ContextR n a (as > n :. a) as where
   removeR = fmap (inl <--> inr . getV)
   insertR = fmap (fmap V . (inl <--> inr))
 
-instance {-# OVERLAPPING #-} ContextR n a as as' => ContextR n a (as > b) (as' > b) where
+instance {-# OVERLAPPING #-} ContextR n a as as' => ContextR n a (as > n' :. b) (as' > n' :. b) where
   selectR = selectR -||- const (pure Nothing)
   dropR = fmap (fmap inl) . dropR -||- fmap (Just . inr)
   removeR = fmap (first inl) . removeR -||- fmap (inl . inr)
