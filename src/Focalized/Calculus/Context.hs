@@ -18,6 +18,8 @@ module Focalized.Calculus.Context
 , type (|-)
 , type (-|)
   -- * Membership
+, type (?)(..)
+, type (:::)(..)
 , ContextL(..)
 , ContextR(..)
 ) where
@@ -132,6 +134,23 @@ instance Distributive ((?) n) where
   distribute = Q . fmap getQ
 
 instance Adjunction ((?) n) ((?) n) where
+  unit   = coerce
+  counit = coerce
+
+  leftAdjunct  = coerce
+  rightAdjunct = coerce
+
+
+newtype (n :: Symbol) ::: a = B { getB :: a }
+  deriving (Functor)
+  deriving (Applicative, Monad, Representable) via Identity
+
+infix 3 :::
+
+instance Distributive ((:::) n) where
+  distribute = B . fmap getB
+
+instance Adjunction ((:::) n) ((:::) n) where
   unit   = coerce
   counit = coerce
 
