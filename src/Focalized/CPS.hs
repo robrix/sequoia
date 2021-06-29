@@ -42,7 +42,7 @@ dnI :: a -> r ••a
 dnI = K . flip (•)
 
 dnE :: r ••CPS r a b -> CPS r a b
-dnE f = CPS (\ k a -> (•) f (K (\ f -> runCPS f k a)))
+dnE f = CPS (\ k a -> f • K (\ f -> runCPS f k a))
 
 liftK :: ((a -> r) -> (b -> r)) -> (r •a -> r •b)
 liftK f (K a) = K (f a)
