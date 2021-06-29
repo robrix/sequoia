@@ -9,7 +9,7 @@ import Focalized.CPS
 import Focalized.Polarity
 
 runNegate :: r -a -> (a -> r)
-runNegate = runK . getNegate
+runNegate = (•) . getNegate
 
 appNegate :: a -> r -a -> r
 appNegate = flip runNegate

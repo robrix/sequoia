@@ -93,7 +93,7 @@ instance Contextual Seq where
   popRn f = sequent $ \ k _Γ -> runSeq (f (K k)) absurdΔ _Γ
 
   pushLn s _Γ = sequent $ \ k -> runSeq s k . const _Γ
-  pushRn s _Δ = sequent $ \ _ -> runSeq s (runK _Δ)
+  pushRn s _Δ = sequent $ \ _ -> runSeq s (_Δ •)
 
 
 -- Control
@@ -167,7 +167,7 @@ instance Subtraction Seq where
 
 instance Universal Seq where
   forAllL p = mapL (notNegate . runForAll) p
-  forAllR p = sequent $ \ k a -> k (inr (ForAll (K (\ k' -> runSeq p (k . inl |> runK k') a))))
+  forAllR p = sequent $ \ k a -> k (inr (ForAll (K (\ k' -> runSeq p (k . inl |> (k' •)) a))))
 
 instance Existential Seq where
   existsL p = popL (dnESeq . runExists (pushL p))

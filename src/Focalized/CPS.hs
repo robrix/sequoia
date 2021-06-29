@@ -35,10 +35,10 @@ import           Focalized.Disjunction
 -- Continuations
 
 dnI :: a -> r ••a
-dnI = K . flip runK
+dnI = K . flip (•)
 
 dnE :: r ••CPS r a b -> CPS r a b
-dnE f = CPS (\ k a -> runK f (K (\ f -> runCPS f k a)))
+dnE f = CPS (\ k a -> (•) f (K (\ f -> runCPS f k a)))
 
 liftK :: ((a -> r) -> (b -> r)) -> (r •a -> r •b)
 liftK f (K a) = K (f a)
@@ -46,14 +46,14 @@ liftK f (K a) = K (f a)
 liftK2 :: ((a -> r) -> (b -> r) -> (c -> r)) -> (r •a -> r •b -> r •c)
 liftK2 f (K a) (K b) = K (f a b)
 
-newtype r •a = K { runK :: a -> r }
+newtype r •a = K { (•) :: a -> r }
 
 instance Cat.Category (•) where
   id = K id
   K f . K g = K (g . f)
 
 instance Contravariant ((•) r) where
-  contramap f = K . (. f) . runK
+  contramap f = K . (. f) . (•)
 
 
 type r ••a = r •r •a

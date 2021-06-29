@@ -9,7 +9,7 @@ import Focalized.CPS
 import Focalized.Polarity
 
 runNot :: r ¬a -> (a -> r)
-runNot = runK . getNot
+runNot = (•) . getNot
 
 appNot :: a -> r ¬a -> r
 appNot = flip runNot
