@@ -320,16 +320,18 @@ mapR f = mapRn (fmap f)
 
 -- FIXME: this is clearly possible, tho it’s less clear that it’s a good idea.
 -- mapL2
---  :: (c -> (b, a)) -> a < _Γ -|s r|- _Δ -> b < _Γ -|s r|- _Δ
---  -- -------------------------------------------------------
---  ->                  c < _Γ -|s r|- _Δ
+--  :: (c -> (b, a))
+--  -> a < _Γ -|s r|- _Δ   ->   b < _Γ -|s r|- _Δ
+--  -- ------------------------------------------
+--  ->             c < _Γ -|s r|- _Δ
 -- mapL2 f a b = popL (pushL b . exl . f) <> popL (pushL a . exr . f)
 
 mapR2
   :: Contextual s
-  => (a -> b -> c) -> _Γ -|s r|- _Δ > a   ->   _Γ -|s r|- _Δ > b
-  -- -----------------------------------------------------------
-  ->                     _Γ -|s r|- _Δ > c
+  => (a -> b -> c)
+  -> _Γ -|s r|- _Δ > a   ->   _Γ -|s r|- _Δ > b
+  -- ------------------------------------------
+  ->             _Γ -|s r|- _Δ > c
 mapR2 f a b = mapR f (wkR' a) >>> popL (`mapR` b)
   where wkR' = popR2 . flip . const . pushR
 
