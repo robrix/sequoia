@@ -164,24 +164,24 @@ instance {-# OVERLAPPING #-} ContextL n a as as' => ContextL n a (b < as) (b < a
   insertL = fmap . (<|) <$> exl . exr . getQ <*> insertL . fmap (fmap exr)
 
 
-class ContextR a as as' | as a -> as', as as' -> a, as' a -> as where
-  selectR :: as -> Maybe a
-  selectR = exrD . removeR
-  dropR :: as -> Maybe as'
-  dropR = exlD . removeR
-  removeR :: as -> Either as' a
-  insertR :: Either as' a -> as
-  replaceR :: (ContextR b bs bs', bs' ~ as') => (a -> b) -> (as -> bs)
-  replaceR f = insertR . fmap f . removeR
+class ContextR (n :: Symbol) a as as' | as a -> as', as as' -> a, as' a -> as where
+  selectR :: n ? as -> n ? Maybe a
+  selectR = fmap exrD . removeR
+  dropR :: n ? as -> n ? Maybe as'
+  dropR = fmap exlD . removeR
+  removeR :: n ? as -> n ? Either as' a
+  insertR :: n ? Either as' a -> n ? as
+  replaceR :: (ContextR n b bs bs', bs' ~ as') => (a -> b) -> (n ? as -> n ? bs)
+  replaceR f = insertR . fmap (fmap f) . removeR
 
-instance {-# OVERLAPPING #-} ContextR a (as > a) as where
-  selectR = exrD
-  dropR = exlD
-  removeR = inl <--> inr
-  insertR = inl <--> inr
+instance {-# OVERLAPPING #-} ContextR n a (as > a) as where
+  selectR = fmap exrD
+  dropR = fmap exlD
+  removeR = fmap (inl <--> inr)
+  insertR = fmap (inl <--> inr)
 
-instance {-# OVERLAPPING #-} ContextR a as as' => ContextR a (as > b) (as' > b) where
-  selectR = selectR <--> const Nothing
-  dropR = fmap inl . dropR <--> Just . inr
-  removeR = first inl . removeR <--> inl . inr
-  insertR = first insertR . ((inl . inl <--> inr) <--> inl . inr)
+instance {-# OVERLAPPING #-} ContextR n a as as' => ContextR n a (as > b) (as' > b) where
+  selectR = selectR -||- const (pure Nothing)
+  dropR = fmap (fmap inl) . dropR -||- fmap (Just . inr)
+  removeR = fmap (first inl) . removeR -||- fmap (inl . inr)
+  insertR = (fmap inl . insertR . fmap inl -||- fmap inr) -||- fmap inl . insertR . fmap inr
