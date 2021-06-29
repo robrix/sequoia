@@ -19,7 +19,7 @@ module Focalized.Calculus.Context
 , type (-|)
   -- * Membership
 , type (?)(..)
-, type (:::)(..)
+, type (:.)(..)
 , ContextL(..)
 , ContextR(..)
 ) where
@@ -141,16 +141,16 @@ instance Adjunction ((?) n) ((?) n) where
   rightAdjunct = coerce
 
 
-newtype (n :: Symbol) ::: a = B { getB :: a }
+newtype (n :: Symbol) :. a = B { getB :: a }
   deriving (Functor)
   deriving (Applicative, Monad, Representable) via Identity
 
-infix 3 :::
+infix 5 :.
 
-instance Distributive ((:::) n) where
+instance Distributive ((:.) n) where
   distribute = B . fmap getB
 
-instance Adjunction ((:::) n) ((:::) n) where
+instance Adjunction ((:.) n) ((:.) n) where
   unit   = coerce
   counit = coerce
 
@@ -170,13 +170,13 @@ class ContextL (n :: Symbol) a as as' | as a -> as', as as' -> a, as n -> a, as'
   replaceL :: (ContextL n' b bs bs', n ~ n', bs' ~ as') => (a -> b) -> (n ? as -> n ? bs)
   replaceL f = insertL . fmap (first f) . removeL
 
-instance {-# OVERLAPPING #-} ContextL n a ((n ::: a) < as) as where
+instance {-# OVERLAPPING #-} ContextL n a (n :. a < as) as where
   selectL = fmap (getB . exl)
   dropL = fmap exr
   removeL = liftA2 (-><-) <$> fmap (getB . exl) <*> fmap exr
   insertL = fmap (uncurry ((<|) . B))
 
-instance {-# OVERLAPPING #-} ContextL n a as as' => ContextL n a (b < as) (b < as') where
+instance {-# OVERLAPPING #-} ContextL n a as as' => ContextL n a (n' :. b < as) (n' :. b < as') where
   selectL = selectL . fmap exr
   dropL = fmap . (<|) <$> exl . getQ <*> dropL . fmap exr
   removeL = fmap . fmap . (<|) <$> exl . getQ <*> removeL . fmap exr
@@ -193,7 +193,7 @@ class ContextR (n :: Symbol) a as as' | as a -> as', as as' -> a, as n -> a, as'
   replaceR :: (ContextR n b bs bs', bs' ~ as') => (a -> b) -> (n ? as -> n ? bs)
   replaceR f = insertR . fmap (fmap f) . removeR
 
-instance {-# OVERLAPPING #-} ContextR n a (as > (n ::: a)) as where
+instance {-# OVERLAPPING #-} ContextR n a (as > (n :. a)) as where
   selectR = fmap (fmap getB . exrD)
   dropR = fmap exlD
   removeR = fmap (inl <--> inr . getB)
