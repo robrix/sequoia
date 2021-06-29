@@ -10,6 +10,7 @@ module Focalized.Calculus.Context
   -- * Δ
 , type (>)(..)
 , (|>)
+, (||>)
   -- * Mixfix syntax
 , type (|-)
 , type (-|)
@@ -23,6 +24,7 @@ import Control.Monad (ap)
 import Data.Bifoldable
 import Data.Bifunctor
 import Data.Bitraversable
+import Focalized.CPS
 import Focalized.Conjunction
 import Focalized.Disjunction
 
@@ -92,6 +94,12 @@ instance Monad ((>) a) where
 -- @¬A ✕ ¬B -> ¬(A + B)@
 (|>) :: (os -> r) -> (o -> r) -> ((os > o) -> r)
 (|>) = (<-->)
+
+-- | Discrimination of continuations in '>'.
+--
+-- @¬A ✕ ¬B -> ¬(A + B)@
+(||>) :: r •os -> r •o -> r •(os > o)
+(||>) = liftK2 (<-->)
 
 
 -- Mixfix syntax
