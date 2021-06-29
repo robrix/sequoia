@@ -36,6 +36,7 @@ module Focalized.Calculus.Core
 ) where
 
 import Control.Monad (join)
+import Data.Bifunctor
 import Data.Functor.Contravariant
 import Focalized.CPS
 import Focalized.Calculus.Context
@@ -306,7 +307,7 @@ mapL
   -> a  < _Γ -|s r|- _Δ
   -- ------------------
   -> a' < _Γ -|s r|- _Δ
-mapL f p = popL (pushL p . f)
+mapL f = mapLn (first f)
 
 mapR
   :: Contextual s
@@ -314,7 +315,7 @@ mapR
   -> _Γ -|s r|- _Δ > a
   -- ------------------
   -> _Γ -|s r|- _Δ > a'
-mapR f p = popR (pushR p . contramap f)
+mapR f = mapRn (fmap f)
 
 
 -- FIXME: this is clearly possible, tho it’s less clear that it’s a good idea.
