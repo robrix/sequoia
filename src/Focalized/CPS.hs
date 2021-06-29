@@ -100,8 +100,8 @@ refoldCPS f g = go where go = f Cat.<<< traverse' go Cat.<<< g
 resetCPS :: CPS o i o -> CPS r i o
 resetCPS c = CPS (. evalCPS c)
 
-shiftCPS :: ((o -> r) -> CPS r i r) -> CPS r i o
-shiftCPS f = CPS (evalCPS . f)
+shiftCPS :: (r •o -> CPS r i r) -> CPS r i o
+shiftCPS f = CPS (evalCPS . f . K)
 
 curryCPS :: CPS r (a, b) c -> CPS r a (CPS r b c)
 curryCPS c = CPS (\ k -> k . (`lmap` c) . (,))
