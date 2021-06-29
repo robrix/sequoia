@@ -4,7 +4,8 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Focalized.Calculus.Context
 ( -- * Γ
-  type (<)(..)
+  Γ(..)
+, type (<)(..)
 , (<|)
   -- * Δ
 , type (>)(..)
@@ -13,6 +14,7 @@ module Focalized.Calculus.Context
 , type (|-)
 , type (-|)
   -- * Membership
+, Δ
 , ContextL(..)
 , ContextR(..)
 ) where
@@ -25,6 +27,8 @@ import Focalized.Conjunction
 import Focalized.Disjunction
 
 -- Γ
+
+data Γ = Γ
 
 data a < b = a :< b
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
@@ -50,6 +54,8 @@ instance Bitraversable (<) where
 
 
 -- Δ
+
+data Δ
 
 data a > b
   = L a
