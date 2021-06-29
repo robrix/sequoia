@@ -103,13 +103,13 @@ instance Monad ((>) a) where
 
 -- | Discrimination of values in '>'.
 --
--- @¬A ✕ ¬B -> ¬(A + B)@
+-- @¬A ✕ ¬B -> ¬(A + V)@
 (|>) :: (os -> r) -> (o -> r) -> ((os > o) -> r)
 (|>) = (<-->)
 
 -- | Discrimination of continuations in '>'.
 --
--- @¬A ✕ ¬B -> ¬(A + B)@
+-- @¬A ✕ ¬B -> ¬(A + V)@
 (||>) :: r •os -> r •o -> r •(os > o)
 (||>) = liftK2 (<-->)
 
@@ -141,14 +141,14 @@ instance Adjunction ((?) n) ((?) n) where
   rightAdjunct = coerce
 
 
-newtype (n :: Symbol) :. a = B { getB :: a }
+newtype (n :: Symbol) :. a = V { getV :: a }
   deriving (Functor)
   deriving (Applicative, Monad, Representable) via Identity
 
 infixr 5 :.
 
 instance Distributive ((:.) n) where
-  distribute = B . fmap getB
+  distribute = V . fmap getV
 
 instance Adjunction ((:.) n) ((:.) n) where
   unit   = coerce
@@ -171,10 +171,10 @@ class ContextL (n :: Symbol) a as as' | as a -> as', as as' -> a, as n -> a wher
   replaceL f = insertL . fmap (first f) . removeL
 
 instance {-# OVERLAPPING #-} ContextL n a (n :. a < as) as where
-  selectL = fmap (getB . exl)
+  selectL = fmap (getV . exl)
   dropL = fmap exr
-  removeL = liftA2 (-><-) <$> fmap (getB . exl) <*> fmap exr
-  insertL = fmap (uncurry ((<|) . B))
+  removeL = liftA2 (-><-) <$> fmap (getV . exl) <*> fmap exr
+  insertL = fmap (uncurry ((<|) . V))
 
 instance {-# OVERLAPPING #-} ContextL n a as as' => ContextL n a (n' :. b < as) (n' :. b < as') where
   selectL = selectL . fmap exr
@@ -194,10 +194,10 @@ class ContextR (n :: Symbol) a as as' | as a -> as', as as' -> a, as n -> a wher
   replaceR f = insertR . fmap (fmap f) . removeR
 
 instance {-# OVERLAPPING #-} ContextR n a (as > (n :. a)) as where
-  selectR = fmap (fmap getB . exrD)
+  selectR = fmap (fmap getV . exrD)
   dropR = fmap exlD
-  removeR = fmap (inl <--> inr . getB)
-  insertR = fmap (fmap B . (inl <--> inr))
+  removeR = fmap (inl <--> inr . getV)
+  insertR = fmap (fmap V . (inl <--> inr))
 
 instance {-# OVERLAPPING #-} ContextR n a as as' => ContextR n a (as > b) (as' > b) where
   selectR = selectR -||- const (pure Nothing)
