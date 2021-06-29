@@ -73,7 +73,7 @@ instance MonadTrans (SeqT r _Γ) where
 
 -- Core rules
 
-instance Core Seq where
+instance Core (Seq r) where
   f >>> g = f >>= pure |> pushL g
 
   init = popL liftR
@@ -81,14 +81,14 @@ instance Core Seq where
 
 -- Structural rules
 
-deriving via Contextually Seq instance Weaken   Seq
-deriving via Contextually Seq instance Contract Seq
-deriving via Contextually Seq instance Exchange Seq
+deriving via Contextually (Seq r) r instance Weaken   (Seq r)
+deriving via Contextually (Seq r) r instance Contract (Seq r)
+deriving via Contextually (Seq r) r instance Exchange (Seq r)
 
 
 -- Contextual rules
 
-instance Contextual Seq where
+instance Contextual r (Seq r) where
   popL f = sequent $ \ k -> uncurryConj ((`runSeq` k) . f)
   pushL s a = sequent $ \ k -> runSeq s k . (a <|)
 
@@ -105,29 +105,29 @@ instance Control Seq where
 
 -- Negation
 
-instance NegNegation Seq where
+instance NegNegation r (Seq r) where
   notL = notLK . kL
   notR = notRK . kR
 
-instance PosNegation Seq where
+instance PosNegation r (Seq r) where
   negateL = negateLK . kL
   negateR = negateRK . kR
 
 
 -- Additive
 
-instance NegTruth Seq where
+instance NegTruth (Seq r) where
   topR = pure (inr Top)
 
-instance PosFalsity Seq where
+instance PosFalsity (Seq r) where
   zeroL = liftL (K absurdP)
 
-instance NegConjunction Seq where
+instance NegConjunction (Seq r) where
   withL1 p = popL (pushL p . exl)
   withL2 p = popL (pushL p . exr)
   withR = liftA2 (liftA2 (-><-))
 
-instance PosDisjunction Seq where
+instance PosDisjunction (Seq r) where
   sumL a b = popL (pushL a <--> pushL b)
   sumR1 = mapR inl
   sumR2 = mapR inr
@@ -135,62 +135,62 @@ instance PosDisjunction Seq where
 
 -- Multiplicative
 
-instance NegFalsity Seq where
+instance NegFalsity (Seq r) where
   botL = liftL (K absurdN)
   botR = wkR
 
-instance PosTruth Seq where
+instance PosTruth (Seq r) where
   oneL = wkL
   oneR = liftR One
 
-instance NegDisjunction Seq where
+instance NegDisjunction (Seq r) where
   parL a b = popL (pushL a <--> pushL b)
   parR ab = (>>= inr . inl) |> inr . inr <$> ab
 
-instance PosConjunction Seq where
+instance PosConjunction (Seq r) where
   tensorL p = popL (pushL2 p . exl <*> exr)
   tensorR = liftA2 (liftA2 (-><-))
 
 
 -- Implication
 
-instance Implication Seq where
+instance Implication r (Seq r) where
   funL a b = popL (\ f -> a >>> liftLR (getFun f) >>> wkL' b)
   funR = lowerLR (liftR . Fun) . wkR'
 
-instance Subtraction Seq where
+instance Subtraction r (Seq r) where
   subL b = popL (\ s -> liftR (subA s) >>> b >>> liftL (getNegate (subK s)))
   subR a b = liftA2 Sub <$> a <*> negateR b
 
 
 -- Quantification
 
-instance Universal Seq where
+instance Universal r (Seq r) where
   forAllL p = mapL (notNegate . runForAll) p
   forAllR p = sequent $ \ k a -> k (inr (ForAll (K (\ k' -> runSeq p (k . inl |> runK k') a))))
 
-instance Existential Seq where
+instance Existential r (Seq r) where
   existsL p = popL (dnESeq . runExists (pushL p))
   existsR p = mapR (Exists . dnI) p
 
 
 -- Recursion
 
-instance Corecursion Seq where
+instance Corecursion r (Seq r) where
   nuL = mapL runNu
   nuR s = wkR' s >>> existsL (mapL nu init)
 
-instance Recursion Seq where
+instance Recursion r (Seq r) where
   muL f k = wkL (downR f) >>> exL (mapL getMu (funL init (wkL' k)))
   muR = mapR mu
 
 
 -- Polarity shifts
 
-instance NegShift Seq where
+instance NegShift (Seq r) where
   upL   = mapL getUp
   upR   = mapR Up
 
-instance PosShift Seq where
+instance PosShift (Seq r) where
   downL = mapL getDown
   downR = mapR Down

@@ -12,5 +12,5 @@ import Focalized.Top
 
 class NegTruth s where
   topR
-    -- -------------------
-    :: _Γ -|s r|- _Δ > Top
+    -- -----------------
+    :: _Γ -|s|- _Δ > Top

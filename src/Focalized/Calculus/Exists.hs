@@ -1,3 +1,4 @@
+{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Focalized.Calculus.Exists
@@ -17,22 +18,22 @@ import Prelude hiding (init)
 
 -- Existential quantification
 
-class Existential s where
+class Existential r s | s -> r where
   existsL
-    :: (forall x . Polarized n x => f x < _Γ -|s r|- _Δ)
-    -- -------------------------------------------------
-    ->                   Exists r n f   < _Γ -|s r|- _Δ
+    :: (forall x . Polarized n x => f x < _Γ -|s|- _Δ)
+    -- -----------------------------------------------
+    ->                   Exists r n f   < _Γ -|s|- _Δ
 
   existsR
     :: (Polarized n x, Pos (f x))
-    => _Γ -|s r|- _Δ >            f x
-    -- ------------------------------
-    -> _Γ -|s r|- _Δ > Exists r n f
+    => _Γ -|s|- _Δ >            f x
+    -- ----------------------------
+    -> _Γ -|s|- _Δ > Exists r n f
 
 
 existsL'
-  :: (Weaken s, Exchange s, Existential s, (Polarized n ==> Pos) f)
-  =>                   Exists r n f   < _Γ -|s r|- _Δ
-  -- -------------------------------------------------
-  -> (forall x . Polarized n x => f x < _Γ -|s r|- _Δ)
+  :: (Weaken s, Exchange s, Existential r s, (Polarized n ==> Pos) f)
+  =>                   Exists r n f   < _Γ -|s|- _Δ
+  -- -----------------------------------------------
+  -> (forall x . Polarized n x => f x < _Γ -|s|- _Δ)
 existsL' p = existsR init >>> wkL' p

@@ -1,3 +1,4 @@
+{-# LANGUAGE FunctionalDependencies #-}
 module Focalized.Calculus.Negate
 ( -- * Positive negation
   PosNegation(..)
@@ -25,36 +26,36 @@ import Prelude hiding (init)
 
 -- Positive negation
 
-class PosNegation s where
+class PosNegation r s | s -> r where
   negateL
     :: Neg a
-    =>        _Γ -|s r|- _Δ > a
-    -- ------------------------
-    -> r -a < _Γ -|s r|- _Δ
+    =>        _Γ -|s|- _Δ > a
+    -- ----------------------
+    -> r -a < _Γ -|s|- _Δ
   negateR
     :: Neg a
-    => a < _Γ -|s r|- _Δ
-    -- ------------------------
-    ->     _Γ -|s r|- _Δ > r -a
+    => a < _Γ -|s|- _Δ
+    -- ----------------------
+    ->     _Γ -|s|- _Δ > r -a
 
 
 negateL'
-  :: (PosNegation s, Weaken s, Neg a)
-  => r -a < _Γ -|s r|- _Δ
-  -- ------------------------
-  ->        _Γ -|s r|- _Δ > a
+  :: (PosNegation r s, Weaken s, Neg a)
+  => r -a < _Γ -|s|- _Δ
+  -- ----------------------
+  ->        _Γ -|s|- _Δ > a
 negateL' p = negateR init >>> wkR p
 
 negateR'
-  :: (PosNegation s, Weaken s, Neg a)
-  =>     _Γ -|s r|- _Δ > r -a
-  -- ------------------------
-  -> a < _Γ -|s r|- _Δ
+  :: (PosNegation r s, Weaken s, Neg a)
+  =>     _Γ -|s|- _Δ > r -a
+  -- ----------------------
+  -> a < _Γ -|s|- _Δ
 negateR' p = wkL p >>> negateL init
 
 
 shiftN
-  :: (Control s, Contextual s)
+  :: (Control s, Contextual r (s r))
   => r -a < _Γ -|s r|- _Δ > r
   -- ------------------------
   ->        _Γ -|s r|- _Δ > a
@@ -62,45 +63,45 @@ shiftN = shift . negateLK'
 
 
 dnePK
-  :: Contextual s
-  => r ••a < _Γ -|s r|- _Δ
-  -- ---------------------
-  -> r -¬a < _Γ -|s r|- _Δ
+  :: Contextual r s
+  => r ••a < _Γ -|s|- _Δ
+  -- -------------------
+  -> r -¬a < _Γ -|s|- _Δ
 dnePK = mapL getNegateNot
 
 dniPK
-  :: Contextual s
-  => _Γ -|s r|- _Δ > r ••a
-  -- ---------------------
-  -> _Γ -|s r|- _Δ > r -¬a
+  :: Contextual r s
+  => _Γ -|s|- _Δ > r ••a
+  -- -------------------
+  -> _Γ -|s|- _Δ > r -¬a
 dniPK = mapR negateNot
 
 
 negateLK
-  :: Contextual s
-  => r •a < _Γ -|s r|- _Δ
-  -- --------------------
-  -> r -a < _Γ -|s r|- _Δ
+  :: Contextual r s
+  => r •a < _Γ -|s|- _Δ
+  -- ------------------
+  -> r -a < _Γ -|s|- _Δ
 negateLK = mapL getNegate
 
 negateRK
-  :: Contextual s
-  => _Γ -|s r|- _Δ > r •a
-  -- --------------------
-  -> _Γ -|s r|- _Δ > r -a
+  :: Contextual r s
+  => _Γ -|s|- _Δ > r •a
+  -- ------------------
+  -> _Γ -|s|- _Δ > r -a
 negateRK = mapR Negate
 
 
 negateLK'
-  :: Contextual s
-  => r -a < _Γ -|s r|- _Δ
-  -- --------------------
-  -> r •a < _Γ -|s r|- _Δ
+  :: Contextual r s
+  => r -a < _Γ -|s|- _Δ
+  -- ------------------
+  -> r •a < _Γ -|s|- _Δ
 negateLK' = mapL Negate
 
 negateRK'
-  :: Contextual s
-  => _Γ -|s r|- _Δ > r -a
-  -- --------------------
-  -> _Γ -|s r|- _Δ > r •a
+  :: Contextual r s
+  => _Γ -|s|- _Δ > r -a
+  -- ------------------
+  -> _Γ -|s|- _Δ > r •a
 negateRK' = mapR getNegate
