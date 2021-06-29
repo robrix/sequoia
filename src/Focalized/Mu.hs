@@ -32,7 +32,7 @@ mu :: ForAll r N (MuF r f) -> Mu r f
 mu r = Mu (dnEFun (contramap (contramap getMuF) (runForAll r)))
 
 foldMu :: Neg a => CPS r (f a) a -> CPS r (Mu r f) a
-foldMu alg = liftCPS $ \ (Mu f) -> appFun f (Down (Fun alg)) . (•)
+foldMu alg = liftCPS $ \ (Mu f) -> (appFun f (Down (Fun alg)) •)
 
 unfoldMu :: Traversable f => CPS r a (f a) -> CPS r a (Mu r f)
 unfoldMu coalg = cps $ \ a -> Mu $ liftFun' $ \ (Down (Fun alg)) -> lowerDN (appCPS (refoldCPS alg coalg) a)
