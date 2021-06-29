@@ -183,7 +183,7 @@ instance {-# OVERLAPPING #-} ContextL n a as as' => ContextL n a (n' :. b < as) 
   insertL = fmap . (<|) <$> exl . exr . getQ <*> insertL . fmap (fmap exr)
 
 
-class ContextR (n :: Symbol) a as as' | as a -> as', as as' -> a, as n -> a, as' n a -> as where
+class ContextR (n :: Symbol) a as as' | as a -> as', as as' -> a, as n -> a where
   selectR :: n ? as -> n ? Maybe a
   selectR = fmap exrD . removeR
   dropR :: n ? as -> n ? Maybe as'
