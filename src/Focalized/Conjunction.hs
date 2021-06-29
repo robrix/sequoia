@@ -1,6 +1,7 @@
 module Focalized.Conjunction
 ( -- * Conjunction
   Conj(..)
+, exlrC
 , curryConj
 , uncurryConj
 , foldMapConj
@@ -11,6 +12,8 @@ module Focalized.Conjunction
 ) where
 
 -- Conjunction
+
+import Control.Applicative (liftA2)
 
 class Conj c where
   (-><-) :: a -> b -> (a `c` b)
@@ -23,23 +26,26 @@ instance Conj (,) where
   exl = fst
   exr = snd
 
+exlrC :: Conj c => (a' -> b' -> r) -> (a -> a') -> (b -> b') -> (a `c` b -> r)
+exlrC h f g = h <$> f . exl <*> g . exr
+
 curryConj :: Conj p => ((a `p` b) -> r) -> (a -> b -> r)
 curryConj f = fmap f . (-><-)
 
 uncurryConj :: Conj p => (a -> b -> r) -> ((a `p` b) -> r)
-uncurryConj f = f <$> exl <*> exr
+uncurryConj f = exlrC f id id
 
 foldMapConj :: Conj p => (b -> m) -> (a `p` b) -> m
 foldMapConj f = f . exr
 
 traverseConj :: (Conj p, Applicative m) => (b -> m b') -> (a `p` b) -> m (a `p` b')
-traverseConj f c = (exl c -><-) <$> f (exr c)
+traverseConj = exlrC (liftA2 (-><-)) pure
 
 bifoldMapConj :: (Conj p, Monoid m) => (a -> m) -> (b -> m) -> (a `p` b -> m)
-bifoldMapConj f g = (<>) <$> f . exl <*> g . exr
+bifoldMapConj = exlrC (<>)
 
 bimapConj :: Conj p => (a -> a') -> (b -> b') -> (a `p` b -> a' `p` b')
-bimapConj f g = (-><-) <$> f . exl <*> g . exr
+bimapConj = exlrC (-><-)
 
 bitraverseConj :: (Conj p, Applicative m) => (a -> m a') -> (b -> m b') -> (a `p` b -> m (a' `p` b'))
-bitraverseConj f g c = (-><-) <$> f (exl c) <*> g (exr c)
+bitraverseConj = exlrC (liftA2 (-><-))
