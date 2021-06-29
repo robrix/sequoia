@@ -26,7 +26,7 @@ module Focalized.Calculus.Core
 , mapRn
 , mapL
 , mapR
--- , mapL2
+, mapL2
 , mapR2
 , liftL
 , liftR
@@ -318,13 +318,13 @@ mapR
 mapR f = mapRn (fmap f)
 
 
--- FIXME: this is clearly possible, tho it’s less clear that it’s a good idea.
--- mapL2
---  :: (c -> (b, a))
---  -> a < _Γ -|s r|- _Δ   ->   b < _Γ -|s r|- _Δ
---  -- ------------------------------------------
---  ->             c < _Γ -|s r|- _Δ
--- mapL2 f a b = popL (pushL b . exl . f) <> popL (pushL a . exr . f)
+mapL2
+ :: Contextual s
+ => (c -> Either b a)
+ -> a < _Γ -|s r|- _Δ   ->   b < _Γ -|s r|- _Δ
+ -- ------------------------------------------
+ ->             c < _Γ -|s r|- _Δ
+mapL2 f a b = popL ((pushL b <--> pushL a) . f)
 
 mapR2
   :: Contextual s
