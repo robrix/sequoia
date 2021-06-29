@@ -158,7 +158,7 @@ instance Adjunction ((:.) n) ((:.) n) where
   rightAdjunct = coerce
 
 
-class ContextL (n :: Symbol) a as as' | as a -> as', as as' -> a, as n -> a, as' n a -> as where
+class ContextL (n :: Symbol) a as as' | as a -> as', as as' -> a, as n -> a where
   {-# MINIMAL ((selectL, dropL) | removeL), insertL #-}
   selectL :: n ? as -> n ? a
   selectL = fmap exl . removeL
