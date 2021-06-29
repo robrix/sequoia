@@ -128,7 +128,7 @@ newtype (n :: Symbol) ? a = Q { getQ :: a }
   deriving (Functor)
   deriving (Applicative, Monad, Representable) via Identity
 
-infix 8 ?
+infixr 8 ?
 
 instance Distributive ((?) n) where
   distribute = Q . fmap getQ
