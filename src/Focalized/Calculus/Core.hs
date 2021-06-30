@@ -294,7 +294,7 @@ pushR
   =>          _Γ -|s r|- _Δ > a
   -- --------------------------
   -> (r •a -> _Γ -|s r|- _Δ)
-pushR s a = popΔ (\ c -> pushΔ s (c ||> a))
+pushR s a = popΔ (\ c -> pushΔ s (c |> a))
 
 
 pushLR
