@@ -129,11 +129,27 @@ class Core s => Exchange s where
 
 
 class Core s => Contextual s where
+  -- | Remove the input and output contexts, which can later be restored. Used with 'pushΓΔ', this provides a generalized context restructuring facility.
+  --
+  -- @
+  -- popΓΔ . pushΓΔ = id
+  -- @
+  -- @
+  -- pushΓΔ . popΓΔ = id
+  -- @
   popΓΔ
     :: (r •_Δ -> _Γ -> Γ -|s r|-  r)
     -- -----------------------------
     ->                _Γ -|s r|- _Δ
 
+  -- | Restore input and output contexts which had previously been removed. Used with 'popΓΔ', this provides a generalized context restructuring facility.
+  --
+  -- @
+  -- popΓΔ . popΓΔ = id
+  -- @
+  -- @
+  -- popΓΔ . popΓΔ = id
+  -- @
   pushΓΔ
     ::                _Γ -|s r|- _Δ
     -- -----------------------------
