@@ -366,7 +366,7 @@ mapΓ
   -> _Γ  -|s r|- _Δ
   -- --------------
   -> _Γ' -|s r|- _Δ
-mapΓ f p = popΓ (pushΓ p . f)
+mapΓ = (`mapΓΔ` id)
 
 mapΔ
   :: Contextual s
@@ -374,7 +374,7 @@ mapΔ
   -> _Γ -|s r|- _Δ
   -- --------------
   -> _Γ -|s r|- _Δ'
-mapΔ f p = popΔ (pushΔ p . contramap f)
+mapΔ = (id `mapΓΔ`)
 
 
 mapL
