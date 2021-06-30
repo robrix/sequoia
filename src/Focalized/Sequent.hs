@@ -36,14 +36,14 @@ import           Prelude hiding (init)
 
 -- Sequents
 
-runSeq :: _Γ -|Seq r|- _Δ -> ((_Δ -> r) -> (_Γ -> r))
-runSeq = lowerK . runCPS . getSeq
+runSeq :: _Γ -|Seq r|- _Δ -> (r •_Δ -> r •_Γ)
+runSeq = runCPS . getSeq
 
 evalSeq :: _Γ -|Seq _Δ|- _Δ -> (_Γ -> _Δ)
-evalSeq = (`runSeq` id)
+evalSeq = flip (dimap K (•) . runSeq) id
 
-sequent :: ((_Δ -> r) -> (_Γ -> r)) -> _Γ -|Seq r|- _Δ
-sequent = Seq . CPS . liftK
+sequent :: (r •_Δ -> r •_Γ) -> _Γ -|Seq r|- _Δ
+sequent = Seq . CPS
 
 dnESeq :: r ••(_Γ -|Seq r|- _Δ) -> _Γ -|Seq r|- _Δ
 dnESeq = Seq . dnE . contramap (contramap getSeq)
@@ -56,12 +56,12 @@ liftLR = Seq . dimap exl inr
 
 
 lowerLR :: (a -|CPS r|- b -> _Γ -|Seq r|- _Δ) -> a < _Γ -|Seq r|- _Δ > b -> _Γ -|Seq r|- _Δ
-lowerLR f p = sequent $ \ k i -> runSeq (f (CPS (liftK (\ kb a -> runSeq p (k |> kb) (a <| i))))) k i
+lowerLR f p = sequent $ K . \ k i -> runSeq (f (CPS (\ kb -> runSeq p (k ||> kb) >$$< (<| i)))) k • i
 
 
 -- Effectful sequents
 
-runSeqT :: SeqT r _Γ m _Δ -> ((_Δ -> m r) -> (_Γ -> m r))
+runSeqT :: SeqT r _Γ m _Δ -> (m r •_Δ -> m r •_Γ)
 runSeqT = runSeq . getSeqT
 
 newtype SeqT r _Γ m _Δ = SeqT { getSeqT :: Seq (m r) _Γ _Δ }
@@ -89,18 +89,18 @@ deriving via Contextually Seq instance Exchange Seq
 -- Contextual rules
 
 instance Contextual Seq where
-  popΓ f = sequent $ \ k _Γ -> runSeq (f _Γ) k Γ
-  popΔ f = sequent $ \ k _Γ -> runSeq (f (K k)) absurdΔ _Γ
+  popΓ f = sequent $ K . \ k _Γ -> runSeq (f _Γ) k • Γ
+  popΔ f = sequent $ K . \ k _Γ -> runSeq (f k) (K absurdΔ) • _Γ
 
-  pushΓ s _Γ = sequent $ \ k -> runSeq s k . const _Γ
-  pushΔ s _Δ = sequent $ \ _ -> runSeq s (_Δ •)
+  pushΓ s _Γ = sequent $ K . \ k -> (runSeq s k •) . const _Γ
+  pushΔ s _Δ = sequent $ K . const (runSeq s (K (_Δ •)) •)
 
 
 -- Control
 
 instance Control Seq where
-  reset s = sequent (. evalSeq s)
-  shift p = sequent (\ k -> runSeq p (k . inl |> id) . (K (k . inr) <|))
+  reset s = sequent (evalSeq s >$<)
+  shift p = sequent (\ k -> runSeq p (k >$$< inl ||> Cat.id) >$$< (k >$$< inr <|))
 
 
 -- Negation
@@ -167,7 +167,7 @@ instance Subtraction Seq where
 
 instance Universal Seq where
   forAllL p = mapL (notNegate . runForAll) p
-  forAllR p = sequent $ \ k a -> k (inr (ForAll (K (\ k' -> runSeq p (k . inl |> (k' •)) a))))
+  forAllR p = sequent $ K . \ k a -> k • inr (ForAll (K ((• a) . runSeq p . (k >$$< inl ||>))))
 
 instance Existential Seq where
   existsL p = popL (dnESeq . runExists (pushL p))
