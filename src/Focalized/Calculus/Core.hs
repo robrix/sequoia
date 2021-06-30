@@ -49,6 +49,7 @@ module Focalized.Calculus.Core
 import Control.Monad (join)
 import Data.Bifunctor
 import Data.Functor.Contravariant
+import Data.Profunctor
 import Focalized.CPS
 import Focalized.Calculus.Context
 import Focalized.Conjunction
@@ -456,3 +457,6 @@ instance Contextual s => Contract (Contextually s) where
 instance Contextual s => Exchange (Contextually s) where
   exL = Contextually . popL2 . flip . pushL2 . getContextually
   exR = Contextually . popR2 . flip . pushR2 . getContextually
+
+instance Contextual s => Profunctor (Contextually s r) where
+  dimap f g (Contextually p) = Contextually (mapΓΔ f g p)
