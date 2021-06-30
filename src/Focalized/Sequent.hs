@@ -90,7 +90,7 @@ deriving via Contextually Seq instance Exchange Seq
 
 instance Contextual Seq where
   popΓ f = sequent $ K . \ k _Γ -> runSeq (f _Γ) k • Γ
-  popΔ f = sequent $ K . \ k _Γ -> runSeq (f k) (K absurdΔ) • _Γ
+  popΔ f = sequent (K . evalSeq . f)
 
   pushΓ s _Γ = sequent $ K . \ k -> (runSeq s k •) . const _Γ
   pushΔ s _Δ = sequent $ K . const (runSeq s (K (_Δ •)) •)
