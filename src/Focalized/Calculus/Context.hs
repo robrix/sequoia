@@ -12,7 +12,6 @@ module Focalized.Calculus.Context
 , Δ
 , absurdΔ
 , type (>)(..)
-, (|>)
 , (||>)
   -- * Mixfix syntax
 , type (|-)
@@ -76,7 +75,7 @@ data a > b
   | R b
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
-infixl 4 >, |>, ||>
+infixl 4 >, ||>
 
 instance Disj (>) where
   inl = L
@@ -100,12 +99,6 @@ instance Applicative ((>) a) where
 
 instance Monad ((>) a) where
   (>>=) = flip (inl <-->)
-
--- | Discrimination of values in '>'.
---
--- @¬A ✕ ¬B -> ¬(A + V)@
-(|>) :: (os -> r) -> (o -> r) -> ((os > o) -> r)
-(|>) = (<-->)
 
 -- | Discrimination of continuations in '>'.
 --

@@ -74,7 +74,7 @@ instance MonadTrans (SeqT r _Γ) where
 -- Core rules
 
 instance Core Seq where
-  f >>> g = f >>= pure |> pushL g
+  f >>> g = f >>= pure <--> pushL g
 
   init = popL liftR
 
@@ -141,7 +141,7 @@ instance PosTruth Seq where
 
 instance NegDisjunction Seq where
   parL a b = popL (pushL a <--> pushL b)
-  parR ab = (>>= inr . inl) |> inr . inr <$> ab
+  parR = fmap ((>>= inr . inl) <--> inr . inr)
 
 instance PosConjunction Seq where
   tensorL p = popL (pushL2 p . exl <*> exr)
