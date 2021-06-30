@@ -95,6 +95,7 @@ instance Contextual Seq where
 
   pushΓ s _Γ = sequent $ K . \ k -> (runSeq s k •) . const _Γ
   pushΔ s _Δ = sequent $ K . const (runSeq s (K (_Δ •)) •)
+  pushΓΔ s _Γ _Δ = sequent $ K . \ k Γ -> k • (runSeq s _Δ • _Γ)
 
 
 -- Control
