@@ -12,6 +12,7 @@ module Focalized.Calculus.Core
 , Exchange(..)
   -- * Contextual
 , Contextual(..)
+, popΓΔ
 , popΓ
 , popΔ
 , popL
@@ -19,6 +20,7 @@ module Focalized.Calculus.Core
 , popLR
 , pushL
 , pushR
+, pushΓΔ
 , pushΓ
 , pushΔ
 , pushLR
@@ -134,6 +136,13 @@ class Core s => Contextual s where
     -> (r •_Δ' -> _Γ' -> _Γ  -|s r|- _Δ)
 
 
+popΓΔ
+  :: Contextual s
+  => (r •_Δ -> _Γ -> Γ -|s r|-  r)
+  -- -----------------------------
+  ->                _Γ -|s r|- _Δ
+popΓΔ f = replaceΓΔ f idK Γ
+
 -- | Pop something off the input context which can later be pushed. Used with 'pushΓ', this provides a generalized context restructuring facility.
 --
 -- @
@@ -203,6 +212,13 @@ popLR
   ->           a < _Γ -|s r|- _Δ > b
 popLR f = popL (popR . f)
 
+
+pushΓΔ
+  :: Contextual s
+  =>                _Γ -|s r|- _Δ
+  -- -----------------------------
+  -> (r •_Δ -> _Γ -> Γ -|s r|-  r)
+pushΓΔ = replaceΓΔ . const . const
 
 -- | Push something onto the input context which was previously popped off it. Used with 'popΓ', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
 --
