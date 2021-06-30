@@ -32,6 +32,7 @@ module Focalized.Calculus.Core
 , popR2
 , pushL2
 , pushR2
+, mapΓΔ
 , mapΓ
 , mapΔ
 , mapL
@@ -349,6 +350,15 @@ pushR2
   -> _Γ -|s r|- _Δ
 pushR2 p = pushR . pushR p
 
+
+mapΓΔ
+  :: Contextual s
+  => (_Γ' -> _Γ)
+  -> (_Δ -> _Δ')
+  -> _Γ  -|s r|- _Δ
+  -- ---------------
+  -> _Γ' -|s r|- _Δ'
+mapΓΔ f g p = popΓΔ (\ _Δ _Γ -> pushΓΔ p (g >$< _Δ) (f _Γ))
 
 mapΓ
   :: Contextual s
