@@ -156,6 +156,12 @@ class Core s => Contextual s where
     -> (r •_Δ -> _Γ -> Γ -|s r|-  r)
 
 
+  replaceΓΔ
+    :: (r •_Δ  -> _Γ  -> _Γ' -|s r|- _Δ')
+    -> (r •_Δ' -> _Γ' -> _Γ  -|s r|- _Δ)
+  replaceΓΔ f _Δ' _Γ' = popΓΔ (\ _Δ _Γ -> pushΓΔ (f _Δ _Γ) _Δ' _Γ')
+
+
 -- | Pop something off the input context which can later be pushed. Used with 'pushΓ', this provides a generalized context restructuring facility.
 --
 -- @
