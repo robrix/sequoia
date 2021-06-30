@@ -1,6 +1,7 @@
 module Focalized.CPS
 ( -- * Continuations
-  liftK
+  idK
+, liftK
 , lowerK
 , liftK2
 , type (•)(..)
@@ -44,6 +45,9 @@ import           Data.Profunctor.Traversing
 import           Focalized.Disjunction
 
 -- Continuations
+
+idK :: r •r
+idK = Cat.id
 
 liftK :: ((a -> r) -> (b -> r)) -> (r •a -> r •b)
 liftK = dimap (•) K
