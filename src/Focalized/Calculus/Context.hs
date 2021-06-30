@@ -76,7 +76,7 @@ data a > b
   | R b
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
-infixl 4 >, |>
+infixl 4 >, |>, ||>
 
 instance Disj (>) where
   inl = L
