@@ -162,7 +162,7 @@ popΔ
   => (r •_Δ -> _Γ -|s r|-  r)
   -- ------------------------
   ->           _Γ -|s r|- _Δ
-popΔ f = replaceΓΔ (\ k _Γ -> mapΓ (const _Γ) (f k)) idK Γ
+popΔ f = replaceΓΔ (\ _Δ _Γ -> mapΓ (const _Γ) (f _Δ)) idK Γ
 
 
 -- | Pop something off the input context which can later be pushed. Used with 'pushL', this provides a generalized context restructuring facility.
