@@ -12,11 +12,15 @@ module Focalized.Calculus.Core
 , Exchange(..)
   -- * Contextual
 , Contextual(..)
+, popΓ
+, popΔ
 , popL
 , popR
 , popLR
 , pushL
 , pushR
+, pushΓ
+, pushΔ
 , pushLR
 , poppedL
 , poppedR
@@ -125,75 +129,46 @@ class Core s => Exchange s where
 
 
 class Core s => Contextual s where
-  -- | Pop something off the input context which can later be pushed. Used with 'pushΓ', this provides a generalized context restructuring facility.
-  --
-  -- @
-  -- popΓ . pushΓ = id
-  -- @
-  -- @
-  -- pushΓ . popΓ = id
-  -- @
-  popΓ
-    :: (_Γ -> Γ -|s r|- _Δ)
-    -- --------------------
-    ->  _Γ      -|s r|- _Δ
-  popΓ f = popΓΔ (\ k -> mapΔ (k •) . f)
-
-  -- | Pop something off the output context which can later be pushed. Used with 'pushΔ', this provides a generalized context restructuring facility.
-  --
-  -- @
-  -- popΔ . pushΔ = id
-  -- @
-  -- @
-  -- pushΔ . popΔ = id
-  -- @
-  popΔ
-    :: (r •_Δ -> _Γ -|s r|-  r)
-    -- ------------------------
-    ->           _Γ -|s r|- _Δ
-  popΔ f = popΓΔ (\ k _Γ -> mapΓ (const _Γ) (f k))
-
-
   popΓΔ
     :: (r •_Δ -> _Γ -> Γ -|s r|-  r)
     -- -----------------------------
     ->                _Γ -|s r|- _Δ
-  popΓΔ f = popΔ (popΓ . f)
-
-
-  -- | Push something onto the input context which was previously popped off it. Used with 'popΓ', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
-  --
-  -- @
-  -- popΓ . pushΓ = id
-  -- @
-  -- @
-  -- pushΓ . popΓ = id
-  -- @
-  pushΓ
-    ::  _Γ      -|s r|- _Δ
-    -- --------------------
-    -> (_Γ -> Γ -|s r|- _Δ)
-  pushΓ = fmap popΔ . pushΓΔ
-
-  -- | Push something onto the output context which was previously popped off it. Used with 'popΔ', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
-  --
-  -- @
-  -- popΔ . pushΔ = id
-  -- @
-  -- @
-  -- pushΔ . popΔ = id
-  -- @
-  pushΔ
-    ::           _Γ -|s r|- _Δ
-    -- ------------------------
-    -> (r •_Δ -> _Γ -|s r|-  r)
-  pushΔ = fmap popΓ . flip . pushΓΔ
 
   pushΓΔ
     ::                _Γ -|s r|- _Δ
     -- -----------------------------
     -> (_Γ -> r •_Δ -> Γ -|s r|-  r)
-  pushΓΔ s = pushΔ . pushΓ s
+
+
+-- | Pop something off the input context which can later be pushed. Used with 'pushΓ', this provides a generalized context restructuring facility.
+--
+-- @
+-- popΓ . pushΓ = id
+-- @
+-- @
+-- pushΓ . popΓ = id
+-- @
+popΓ
+  :: Contextual s
+  => (_Γ -> Γ -|s r|- _Δ)
+  -- --------------------
+  ->  _Γ      -|s r|- _Δ
+popΓ f = popΓΔ (\ k -> mapΔ (k •) . f)
+
+-- | Pop something off the output context which can later be pushed. Used with 'pushΔ', this provides a generalized context restructuring facility.
+--
+-- @
+-- popΔ . pushΔ = id
+-- @
+-- @
+-- pushΔ . popΔ = id
+-- @
+popΔ
+  :: Contextual s
+  => (r •_Δ -> _Γ -|s r|-  r)
+  -- ------------------------
+  ->           _Γ -|s r|- _Δ
+popΔ f = popΓΔ (\ k _Γ -> mapΓ (const _Γ) (f k))
 
 
 -- | Pop something off the input context which can later be pushed. Used with 'pushL', this provides a generalized context restructuring facility.
@@ -233,6 +208,37 @@ popLR
   -- -------------------------------
   ->           a < _Γ -|s r|- _Δ > b
 popLR f = popL (popR . f)
+
+
+-- | Push something onto the input context which was previously popped off it. Used with 'popΓ', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
+--
+-- @
+-- popΓ . pushΓ = id
+-- @
+-- @
+-- pushΓ . popΓ = id
+-- @
+pushΓ
+  :: Contextual s
+  =>  _Γ      -|s r|- _Δ
+  -- --------------------
+  -> (_Γ -> Γ -|s r|- _Δ)
+pushΓ = fmap popΔ . pushΓΔ
+
+-- | Push something onto the output context which was previously popped off it. Used with 'popΔ', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
+--
+-- @
+-- popΔ . pushΔ = id
+-- @
+-- @
+-- pushΔ . popΔ = id
+-- @
+pushΔ
+  :: Contextual s
+  =>           _Γ -|s r|- _Δ
+  -- ------------------------
+  -> (r •_Δ -> _Γ -|s r|-  r)
+pushΔ = fmap popΓ . flip . pushΓΔ
 
 
 -- | Push something onto the input context which was previously popped off it. Used with 'popL', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
