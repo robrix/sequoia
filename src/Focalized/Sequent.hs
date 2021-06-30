@@ -93,6 +93,8 @@ instance Contextual Seq where
 
   pushΓΔ s _Δ _Γ = sequent $ K . \ k Γ -> k • (runSeq s _Δ • _Γ)
 
+  replaceΓΔ f _Δ' _Γ' = sequent $ K . \ _Δ _Γ -> runSeq (f _Δ _Γ) _Δ' • _Γ'
+
 
 -- Control
 
