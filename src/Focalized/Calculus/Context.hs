@@ -18,6 +18,7 @@ module Focalized.Calculus.Context
 , type (|-)
 , type (-|)
   -- * Membership
+, mkV
 , type (:.)(..)
 , ContextL(..)
 , ContextR(..)
@@ -122,6 +123,10 @@ infixl 2 |-, -|
 
 
 -- Membership
+
+-- | Convenience to construct a named variable given the same name available for use inside. This can obviate the need for @-XScopedTypeVariables@ in some situations which would otherwise require them.
+mkV :: (n :. () -> a) -> n :. a
+mkV f = V (f (V ()))
 
 newtype (n :: Symbol) :. a = V { getV :: a }
   deriving (Functor)
