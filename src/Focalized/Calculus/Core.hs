@@ -19,7 +19,6 @@ module Focalized.Calculus.Core
 , popΔ
 , popL
 , popR
-, popLR
 , pushL
 , pushR
 , pushΓΔ
@@ -220,14 +219,6 @@ popR
   -- --------------------------
   ->          _Γ -|s r|- _Δ > a
 popR f = popΔ (\ c -> pushΔ (f (contramap inr c)) (contramap inl c))
-
-
-popLR
-  :: Contextual s
-  => (a -> r •b -> _Γ -|s r|- _Δ)
-  -- -------------------------------
-  ->           a < _Γ -|s r|- _Δ > b
-popLR f = popL (popR . f)
 
 
 pushΓΔ
