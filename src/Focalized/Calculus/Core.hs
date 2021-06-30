@@ -129,39 +129,9 @@ class Core s => Exchange s where
 
 
 class Core s => Contextual s where
-  -- | Remove the input and output contexts, which can later be restored. Used with 'pushΓΔ', this provides a generalized context restructuring facility.
-  --
-  -- @
-  -- popΓΔ . pushΓΔ = id
-  -- @
-  -- @
-  -- pushΓΔ . popΓΔ = id
-  -- @
-  popΓΔ
-    :: (r •_Δ -> _Γ -> Γ -|s r|-  r)
-    -- -----------------------------
-    ->                _Γ -|s r|- _Δ
-  popΓΔ f = replaceΓΔ f idK Γ
-
-  -- | Restore input and output contexts which had previously been removed. Used with 'popΓΔ', this provides a generalized context restructuring facility.
-  --
-  -- @
-  -- popΓΔ . popΓΔ = id
-  -- @
-  -- @
-  -- popΓΔ . popΓΔ = id
-  -- @
-  pushΓΔ
-    ::                _Γ -|s r|- _Δ
-    -- -----------------------------
-    -> (r •_Δ -> _Γ -> Γ -|s r|-  r)
-  pushΓΔ s _Δ _Γ = replaceΓΔ (\ _Δ _Γ -> s) _Δ _Γ
-
-
   replaceΓΔ
     :: (r •_Δ  -> _Γ  -> _Γ' -|s r|- _Δ')
     -> (r •_Δ' -> _Γ' -> _Γ  -|s r|- _Δ)
-  replaceΓΔ f _Δ' _Γ' = popΓΔ (\ _Δ _Γ -> pushΓΔ (f _Δ _Γ) _Δ' _Γ')
 
 
 -- | Pop something off the input context which can later be pushed. Used with 'pushΓ', this provides a generalized context restructuring facility.
@@ -177,7 +147,7 @@ popΓ
   => (_Γ -> Γ -|s r|- _Δ)
   -- --------------------
   ->  _Γ      -|s r|- _Δ
-popΓ f = popΓΔ (\ k -> mapΔ (k •) . f)
+popΓ f = replaceΓΔ (\ _Δ -> mapΔ (_Δ •) . f) idK Γ
 
 -- | Pop something off the output context which can later be pushed. Used with 'pushΔ', this provides a generalized context restructuring facility.
 --
@@ -192,7 +162,7 @@ popΔ
   => (r •_Δ -> _Γ -|s r|-  r)
   -- ------------------------
   ->           _Γ -|s r|- _Δ
-popΔ f = popΓΔ (\ k _Γ -> mapΓ (const _Γ) (f k))
+popΔ f = replaceΓΔ (\ k _Γ -> mapΓ (const _Γ) (f k)) idK Γ
 
 
 -- | Pop something off the input context which can later be pushed. Used with 'pushL', this provides a generalized context restructuring facility.
@@ -247,7 +217,7 @@ pushΓ
   =>  _Γ      -|s r|- _Δ
   -- --------------------
   -> (_Γ -> Γ -|s r|- _Δ)
-pushΓ = fmap popΔ . flip . pushΓΔ
+pushΓ = fmap popΔ . flip . replaceΓΔ . const . const
 
 -- | Push something onto the output context which was previously popped off it. Used with 'popΔ', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
 --
@@ -262,7 +232,7 @@ pushΔ
   =>           _Γ -|s r|- _Δ
   -- ------------------------
   -> (r •_Δ -> _Γ -|s r|-  r)
-pushΔ = fmap popΓ . pushΓΔ
+pushΔ = fmap popΓ . replaceΓΔ . const . const
 
 
 -- | Push something onto the input context which was previously popped off it. Used with 'popL', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
