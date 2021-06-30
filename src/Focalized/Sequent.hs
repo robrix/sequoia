@@ -89,10 +89,6 @@ deriving via Contextually Seq instance Exchange Seq
 -- Contextual rules
 
 instance Contextual Seq where
-  popΓΔ f = sequent (K . fmap (`evalSeq` Γ) . f)
-
-  pushΓΔ s _Δ _Γ = sequent $ K . \ k Γ -> k • (runSeq s _Δ • _Γ)
-
   replaceΓΔ f _Δ' _Γ' = sequent $ K . \ _Δ _Γ -> runSeq (f _Δ _Γ) _Δ' • _Γ'
 
 
