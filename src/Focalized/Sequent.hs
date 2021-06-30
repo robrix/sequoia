@@ -91,7 +91,7 @@ deriving via Contextually Seq instance Exchange Seq
 instance Contextual Seq where
   popΓΔ f = sequent (K . fmap (`evalSeq` Γ) . f)
 
-  pushΓΔ s _Γ _Δ = sequent $ K . \ k Γ -> k • (runSeq s _Δ • _Γ)
+  pushΓΔ s _Δ _Γ = sequent $ K . \ k Γ -> k • (runSeq s _Δ • _Γ)
 
 
 -- Control

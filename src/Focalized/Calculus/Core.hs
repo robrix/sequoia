@@ -153,7 +153,7 @@ class Core s => Contextual s where
   pushΓΔ
     ::                _Γ -|s r|- _Δ
     -- -----------------------------
-    -> (_Γ -> r •_Δ -> Γ -|s r|-  r)
+    -> (r •_Δ -> _Γ -> Γ -|s r|-  r)
 
 
 -- | Pop something off the input context which can later be pushed. Used with 'pushΓ', this provides a generalized context restructuring facility.
@@ -239,7 +239,7 @@ pushΓ
   =>  _Γ      -|s r|- _Δ
   -- --------------------
   -> (_Γ -> Γ -|s r|- _Δ)
-pushΓ = fmap popΔ . pushΓΔ
+pushΓ = fmap popΔ . flip . pushΓΔ
 
 -- | Push something onto the output context which was previously popped off it. Used with 'popΔ', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
 --
@@ -254,7 +254,7 @@ pushΔ
   =>           _Γ -|s r|- _Δ
   -- ------------------------
   -> (r •_Δ -> _Γ -|s r|-  r)
-pushΔ = fmap popΓ . flip . pushΓΔ
+pushΔ = fmap popΓ . pushΓΔ
 
 
 -- | Push something onto the input context which was previously popped off it. Used with 'popL', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
