@@ -141,6 +141,7 @@ class Core s => Contextual s where
     :: (r •_Δ -> _Γ -> Γ -|s r|-  r)
     -- -----------------------------
     ->                _Γ -|s r|- _Δ
+  popΓΔ f = replaceΓΔ f idK Γ
 
   -- | Restore input and output contexts which had previously been removed. Used with 'popΓΔ', this provides a generalized context restructuring facility.
   --
@@ -154,6 +155,7 @@ class Core s => Contextual s where
     ::                _Γ -|s r|- _Δ
     -- -----------------------------
     -> (r •_Δ -> _Γ -> Γ -|s r|-  r)
+  pushΓΔ s _Δ _Γ = replaceΓΔ (\ _Δ _Γ -> s) _Δ _Γ
 
 
   replaceΓΔ
