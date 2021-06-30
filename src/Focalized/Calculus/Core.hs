@@ -12,6 +12,8 @@ module Focalized.Calculus.Core
 , Exchange(..)
   -- * Contextual
 , Contextual(..)
+, replaceΓ
+, replaceΔ
 , popΓΔ
 , popΓ
 , popΔ
@@ -134,6 +136,19 @@ class Core s => Contextual s where
   replaceΓΔ
     :: (r •_Δ  -> _Γ  -> _Γ' -|s r|- _Δ')
     -> (r •_Δ' -> _Γ' -> _Γ  -|s r|- _Δ)
+
+
+replaceΓ
+  :: Contextual s
+  => (_Γ  -> _Γ' -|s r|- _Δ)
+  -> (_Γ' -> _Γ  -|s r|- _Δ)
+replaceΓ f _Γ' = popΓΔ (\ _Δ _Γ -> pushΓΔ (f _Γ) _Δ _Γ')
+
+replaceΔ
+  :: Contextual s
+  => (r •_Δ  -> _Γ -|s r|- _Δ')
+  -> (r •_Δ' -> _Γ -|s r|- _Δ)
+replaceΔ f _Δ' = popΓΔ (\ _Δ -> pushΓΔ (f _Δ) _Δ')
 
 
 popΓΔ
