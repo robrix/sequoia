@@ -181,7 +181,7 @@ shiftCPS :: (r •o -> CPS r i r) -> CPS r i o
 shiftCPS f = CPS (evalCPS . f)
 
 curryCPS :: CPS r (a, b) c -> CPS r a (CPS r b c)
-curryCPS c = CPS ((`lmap` c) . (,) >$<)
+curryCPS c = CPS (•<< (`lmap` c) . (,))
 
 uncurryCPS :: CPS r a (CPS r b c) -> CPS r (a, b) c
 uncurryCPS c = CPS (\ k -> K ((• k) . uncurry (appCPS2 c)))
@@ -204,15 +204,15 @@ instance Monad (CPS r a) where
 
 instance Arrow (CPS r) where
   arr = cps
-  first  f = CPS (K . (\ k (l, r) -> appCPS f l • ((,r) >$< k)))
-  second g = CPS (K . (\ k (l, r) -> appCPS g r • ((l,) >$< k)))
-  f *** g = CPS (K . (\ k (l, r) -> appCPS f l • ((>$< k) . (,) >$< appCPS g r)))
+  first  f = CPS (K . (\ k (l, r) -> appCPS f l • (k •<< (,r))))
+  second g = CPS (K . (\ k (l, r) -> appCPS g r • (k •<< (l,))))
+  f *** g = CPS (K . (\ k (l, r) -> appCPS f l • (appCPS g r •<< (k •<<) . (,))))
   (&&&) = liftA2 (,)
 
 instance ArrowChoice (CPS r) where
-  left  f = CPS (\ k -> runCPS f (inl >$< k) <••> (inr >$< k))
-  right g = CPS (\ k -> inl >$< k <••> runCPS g (inr >$< k))
-  f +++ g = CPS (\ k -> runCPS f (inl >$< k) <••> runCPS g (inr >$< k))
+  left  f = CPS (\ k -> runCPS f (k •<< inl) <••> (k •<< inr))
+  right g = CPS (\ k -> (k •<< inl) <••> runCPS g (k •<< inr))
+  f +++ g = CPS (\ k -> runCPS f (k •<< inl) <••> runCPS g (k •<< inr))
   f ||| g = CPS ((<••>) <$> runCPS f <*> runCPS g)
 
 (<••>) :: Disj d => c •a -> c •b -> c •(a `d` b)

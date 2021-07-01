@@ -56,7 +56,7 @@ liftLR = Seq . dimap exl inr
 
 
 lowerLR :: (a -|CPS r|- b -> _Γ -|Seq r|- _Δ) -> a < _Γ -|Seq r|- _Δ > b -> _Γ -|Seq r|- _Δ
-lowerLR f p = sequent $ K . \ k i -> runSeq (f (CPS (\ kb -> runSeq p (k |> kb) >$$< (<| i)))) k • i
+lowerLR f p = sequent $ K . \ k i -> runSeq (f (CPS (\ kb -> runSeq p (k |> kb) •<< (<| i)))) k • i
 
 
 -- Effectful sequents
@@ -95,8 +95,8 @@ instance Contextual Seq where
 -- Control
 
 instance Control Seq where
-  reset s = sequent ((evalSeq s •) >$<)
-  shift p = sequent (\ k -> runSeq p (k >$$< inl |> idK) >$$< (k >$$< inr <|))
+  reset s = sequent (•<< (evalSeq s •))
+  shift p = sequent (\ k -> runSeq p ((k •<< inl) |> idK) •<< ((k •<< inr) <|))
 
 
 -- Negation
@@ -163,7 +163,7 @@ instance Subtraction Seq where
 
 instance Universal Seq where
   forAllL p = mapL (notNegate . runForAll) p
-  forAllR p = sequent $ K . \ k a -> k • inr (ForAll (K ((• a) . runSeq p . (k >$$< inl |>))))
+  forAllR p = sequent $ K . \ k a -> k • inr (ForAll (K ((• a) . runSeq p . ((k •<< inl) |>))))
 
 instance Existential Seq where
   existsL p = popL (dnESeq . runExists (pushL p))
