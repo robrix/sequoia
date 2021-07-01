@@ -6,6 +6,7 @@ module Focalized.CPS
 , liftK2
 , type (•)(..)
 , type (••)
+, (|•|)
   -- * Double negation
 , dnI
 , dnE
@@ -39,6 +40,7 @@ import           Control.Arrow
 import qualified Control.Category as Cat
 import           Control.Monad (ap)
 import           Control.Monad.Trans.Class
+import           Data.Functor.Adjunction
 import           Data.Functor.Contravariant
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
@@ -66,6 +68,15 @@ instance Cat.Category (•) where
 
 instance Contravariant ((•) r) where
   contramap f = K . (. f) . (•)
+
+
+(|•|) :: (Adjunction f u, Disj d)
+  => (f i -> u (r •a))
+  -> (f i -> u (r •b))
+  -> (f i -> u (r •(a `d` b)))
+f |•| g = leftAdjunct (liftK2 (<-->) <$> rightAdjunct f <*> rightAdjunct g)
+
+infix 3 |•|
 
 
 -- Double negation
