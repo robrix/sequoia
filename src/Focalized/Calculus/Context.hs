@@ -28,6 +28,7 @@ import Data.Bifunctor
 import Data.Bitraversable
 import Data.Distributive
 import Data.Functor.Adjunction
+import Data.Functor.Contravariant
 import Data.Functor.Identity
 import Data.Functor.Rep
 import Focalized.CPS
@@ -164,23 +165,25 @@ instance {-# OVERLAPPING #-} ContextL n a as as' => ContextL n a (n' :. b < as) 
 
 
 class ContextR (n :: Symbol) a as as' | as a -> as', as as' -> a, as n -> a where
-  selectR :: n :. as -> n :. Maybe a
-  selectR = fmap exrD . removeR
-  dropR :: n :. as -> n :. Maybe as'
-  dropR = fmap exlD . removeR
-  removeR :: n :. as -> n :. Either as' a
-  insertR :: n :. Either as' a -> n :. as
-  replaceR :: (ContextR n b bs bs', bs' ~ as') => (a -> b) -> (n :. as -> n :. bs)
-  replaceR f = insertR . fmap (fmap f) . removeR
+  {-# MINIMAL ((selectR, dropR) | removeR), insertR #-}
+  selectR :: n :. r •as -> n :. r •a
+  selectR = fmap exr . removeR
+  dropR :: n :. r •as -> n :. r •as'
+  dropR = fmap exl . removeR
+  removeR :: n :. r •as -> n :. (r •as', r •a)
+  removeR = liftA2 (,) <$> dropR <*> selectR
+  insertR :: n :. (r •as', r •a) -> n :. r•as
+  replaceR :: (ContextR n b bs bs', bs' ~ as') => (a -> b) -> (n :. r• bs -> n :. r•as)
+  replaceR f = insertR . fmap (fmap (contramap f)) . removeR
 
 instance {-# OVERLAPPING #-} ContextR n a (as > n :. a) as where
-  selectR = fmap (fmap getV . exrD)
-  dropR = fmap exlD
-  removeR = fmap (inl <--> inr . getV)
-  insertR = fmap (fmap V . (inl <--> inr))
+  selectR = fmap (contramap (inr . V))
+  dropR = fmap (contramap inl)
+  removeR = fmap ((,) <$> contramap inl <*> contramap (inr . V))
+  insertR = fmap (uncurry (|>) . fmap (contramap getV))
 
 instance {-# OVERLAPPING #-} ContextR n a as as' => ContextR n a (as > n' :. b) (as' > n' :. b) where
-  selectR = selectR -||- const (pure Nothing)
-  dropR = fmap (fmap inl) . dropR -||- fmap (Just . inr)
-  removeR = fmap (first inl) . removeR -||- fmap (inl . inr)
-  insertR = (fmap inl . insertR . fmap inl -||- fmap inr) -||- fmap inl . insertR . fmap inr
+  selectR = selectR . fmap (contramap inl)
+  dropR = dropR +•+ id
+  removeR v = (,) <$> dropR v <*> selectR v
+  insertR = insertR . fmap (first (contramap inl)) |•| fmap (contramap inr . exl)
