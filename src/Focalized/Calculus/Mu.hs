@@ -1,7 +1,7 @@
 {-# LANGUAGE QuantifiedConstraints #-}
 module Focalized.Calculus.Mu
 ( -- * Recursion
-  Recursion(..)
+  MuIntro(..)
 , muL'
   -- * Connectives
 , module Focalized.Mu
@@ -17,7 +17,7 @@ import Prelude hiding (init)
 
 -- Recursion
 
-class Recursion s where
+class MuIntro s where
   muL
     :: ((Neg ==> Pos) f, Neg a)
     => _Γ -|s r|- _Δ > f a ~~r~> a   ->   a < _Γ -|s r|- _Δ
@@ -32,7 +32,7 @@ class Recursion s where
 
 
 muL'
-  :: (Weaken s, Exchange s, Recursion s, (Neg ==> Pos) f)
+  :: (Weaken s, Exchange s, MuIntro s, (Neg ==> Pos) f)
   =>             Mu  r f  < _Γ -|s r|- _Δ
   -- ------------------------------------
   -> ForAll r N (MuF r f) < _Γ -|s r|- _Δ

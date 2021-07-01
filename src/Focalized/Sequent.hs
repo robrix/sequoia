@@ -171,11 +171,11 @@ instance ExistentialIntro Seq where
 
 -- Recursion
 
-instance Corecursion Seq where
+instance NuIntro Seq where
   nuL = mapL runNu
   nuR s = wkR' s >>> existsL (mapL nu init)
 
-instance Recursion Seq where
+instance MuIntro Seq where
   muL f k = wkL (downR f) >>> exL (mapL getMu (funL init (wkL' k)))
   muR = mapR mu
 

@@ -1,7 +1,7 @@
 {-# LANGUAGE QuantifiedConstraints #-}
 module Focalized.Calculus.Nu
 ( -- * Corecursion
-  Corecursion(..)
+  NuIntro(..)
 , nuR'
   -- * Connectives
 , module Focalized.Nu
@@ -16,7 +16,7 @@ import Prelude hiding (init)
 
 -- Corecursion
 
-class Corecursion s where
+class NuIntro s where
   nuL
     :: (Pos ==> Neg) f
     => Exists r P (NuF r f) < _Γ -|s r|- _Δ
@@ -31,7 +31,7 @@ class Corecursion s where
 
 
 nuR'
-  :: (Weaken s, Exchange s, Corecursion s, (Pos ==> Neg) f)
+  :: (Weaken s, Exchange s, NuIntro s, (Pos ==> Neg) f)
   => _Γ -|s r|- _Δ >             Nu  r f
   -- ------------------------------------
   -> _Γ -|s r|- _Δ > Exists r P (NuF r f)
