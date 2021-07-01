@@ -33,7 +33,7 @@ class UniversalIntro s where
 
 
 forAllR'
-  :: (Weaken s, Exchange s, UniversalIntro s, Negation s, (Polarized n ==> Neg) f)
+  :: (Weaken s, Exchange s, UniversalIntro s, NegationIntro s, (Polarized n ==> Neg) f)
   =>                              _Γ -|s r|- _Δ > ForAll r n f
   -- ------------------------------------------------------------------------
   -> (forall x . Polarized n x => _Γ -|s r|- _Δ >            f x)

@@ -100,11 +100,11 @@ instance Control Seq where
 
 -- Negation
 
-instance NegNegation Seq where
+instance NotIntro Seq where
   notL = notLK . kL
   notR = notRK . kR
 
-instance PosNegation Seq where
+instance NegateIntro Seq where
   negateL = negateLK . kL
   negateR = negateRK . kR
 

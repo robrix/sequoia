@@ -1,6 +1,6 @@
 module Focalized.Calculus.Negate
-( -- * Positive negation
-  PosNegation(..)
+( -- * Negate
+  NegateIntro(..)
 , negateL'
 , negateR'
 , shiftN
@@ -23,9 +23,9 @@ import Focalized.Negation
 import Focalized.Polarity
 import Prelude hiding (init)
 
--- Positive negation
+-- Negate
 
-class PosNegation s where
+class NegateIntro s where
   negateL
     :: Neg a
     =>        _Γ -|s r|- _Δ > a
@@ -39,14 +39,14 @@ class PosNegation s where
 
 
 negateL'
-  :: (PosNegation s, Weaken s, Neg a)
+  :: (NegateIntro s, Weaken s, Neg a)
   => r -a < _Γ -|s r|- _Δ
   -- ------------------------
   ->        _Γ -|s r|- _Δ > a
 negateL' p = negateR init >>> wkR p
 
 negateR'
-  :: (PosNegation s, Weaken s, Neg a)
+  :: (NegateIntro s, Weaken s, Neg a)
   =>     _Γ -|s r|- _Δ > r -a
   -- ------------------------
   -> a < _Γ -|s r|- _Δ

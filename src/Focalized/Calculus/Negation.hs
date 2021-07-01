@@ -1,7 +1,7 @@
 {-# LANGUAGE ConstraintKinds #-}
 module Focalized.Calculus.Negation
 ( -- * Negation
-  Negation
+  NegationIntro
   -- * Re-exports
 , module Focalized.Calculus.Not
 , module Focalized.Calculus.Negate
@@ -23,20 +23,20 @@ import Prelude hiding (init)
 
 -- Negation
 
-type Negation s = (NegNegation s, PosNegation s)
+type NegationIntro s = (NotIntro s, NegateIntro s)
 
 
 -- Negative double negation
 
 dneN
-  :: (NegNegation s, PosNegation s, Neg a)
+  :: (NotIntro s, NegateIntro s, Neg a)
   =>     a < _Γ -|s r|- _Δ
   -- ---------------------
   -> r ¬-a < _Γ -|s r|- _Δ
 dneN = notL . negateR
 
 dniN
-  :: (NegNegation s, PosNegation s, Neg a)
+  :: (NotIntro s, NegateIntro s, Neg a)
   => _Γ -|s r|- _Δ > a
   -- ---------------------
   -> _Γ -|s r|- _Δ > r ¬-a
@@ -46,14 +46,14 @@ dniN = notR . negateL
 -- Positive double negation
 
 dneP
-  :: (NegNegation s, PosNegation s, Pos a)
+  :: (NotIntro s, NegateIntro s, Pos a)
   =>     a < _Γ -|s r|- _Δ
   -- ---------------------
   -> r -¬a < _Γ -|s r|- _Δ
 dneP = negateL . notR
 
 dniP
-  :: (NegNegation s, PosNegation s, Pos a)
+  :: (NotIntro s, NegateIntro s, Pos a)
   => _Γ -|s r|- _Δ > a
   -- ---------------------
   -> _Γ -|s r|- _Δ > r -¬a
