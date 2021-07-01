@@ -208,3 +208,29 @@ instance ConcatΔ as Δ as where
 
 instance ConcatΔ as bs cs => ConcatΔ (as > a) bs (cs > a) where
   concatΔ as bs = concatΔ (contramap inl as) bs |> contramap inr as
+
+
+class MemberΓ n a as as' | n a as -> as', as as' -> n a, n a as' -> as where
+  injectΓ :: n :. (a, as') -> n :. as
+  rejectΓ :: n :. as -> n :. (a, as')
+
+instance MemberΓ n a (n :. a < as) as where
+  injectΓ = liftA2 (<|) <$> fmap (V . exl) <*> fmap exr
+  rejectΓ = liftA2 (,) <$> fmap (getV . exl) <*> fmap exr
+
+instance MemberΓ n a as as' => MemberΓ n a (n' :. b < as) (n' :. b < as') where
+  injectΓ = liftA2 (<|) <$> fmap (exl . exr) <*> injectΓ . fmap (fmap exr)
+  rejectΓ = rightAdjunct (\ (b :< as) -> leftAdjunct (fmap (fmap (b <|)) . rejectΓ) as)
+
+
+class MemberΔ n a as as' | n a as -> as', as as' -> n a, n a as' -> as where
+  injectΔ :: n :. (r •as', r •a) -> n :. r •as
+  rejectΔ :: n :. r •as -> n :. (r •as', r •a)
+
+instance MemberΔ n a (as > n :. a) as where
+  injectΔ = liftA2 (|>) <$> fmap exl <*> fmap (contramap getV . exr)
+  rejectΔ = liftA2 (,) <$> fmap (contramap inl) <*> fmap (contramap (inr . V))
+
+instance MemberΔ n a as as' => MemberΔ n a (as > n' :. b) (as' > n' :. b) where
+  injectΔ = liftA2 (|>) <$> injectΔ . fmap (first (contramap inl)) <*> fmap (contramap inr . exl)
+  rejectΔ = rightAdjunct (\ as -> leftAdjunct (fmap (first (|> contramap inr as)) . rejectΔ) (contramap inl as))
