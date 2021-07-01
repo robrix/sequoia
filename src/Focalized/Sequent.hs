@@ -149,11 +149,11 @@ instance TensorIntro Seq where
 
 -- Implication
 
-instance Function Seq where
+instance FunctionIntro Seq where
   funL a b = popL (\ f -> a >>> liftLR (getFun f) >>> wkL' b)
   funR = lowerLR (liftR . Fun) . wkR'
 
-instance Subtraction Seq where
+instance SubtractionIntro Seq where
   subL b = popL (\ s -> liftR (subA s) >>> b >>> liftL (subK s))
   subR a b = liftA2 Sub <$> a <*> kR b
 

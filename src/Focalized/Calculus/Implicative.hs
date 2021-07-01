@@ -1,7 +1,7 @@
 {-# LANGUAGE ConstraintKinds #-}
 module Focalized.Calculus.Implicative
 ( -- * Implicative rules
-  Implicative
+  ImplicativeIntro
   -- * Re-exports
 , module Focalized.Calculus.Function
 , module Focalized.Calculus.Subtraction
@@ -10,4 +10,4 @@ module Focalized.Calculus.Implicative
 import Focalized.Calculus.Function
 import Focalized.Calculus.Subtraction
 
-type Implicative s = (Function s, Subtraction s)
+type ImplicativeIntro s = (FunctionIntro s, SubtractionIntro s)

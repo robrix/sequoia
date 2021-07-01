@@ -1,6 +1,6 @@
 module Focalized.Calculus.Function
 ( -- * Function
-  Function(..)
+  FunctionIntro(..)
 , funL2
 , ($$)
 , funR'
@@ -16,7 +16,7 @@ import Prelude hiding (init)
 
 -- Function
 
-class Function s where
+class FunctionIntro s where
   funL
     :: (Pos a, Neg b)
     => _Γ -|s r|- _Δ > a   ->   b < _Γ -|s r|- _Δ
@@ -31,20 +31,20 @@ class Function s where
 
 
 funL2
-  :: (Core s, Function s, Pos a, Neg b)
+  :: (Core s, FunctionIntro s, Pos a, Neg b)
   -- ---------------------------------
   => a ~~r~> b < a < _Γ -|s r|- _Δ > b
 funL2 = funL init init
 
 ($$)
-  :: (Weaken s, Exchange s, Function s, Pos a, Neg b)
+  :: (Weaken s, Exchange s, FunctionIntro s, Pos a, Neg b)
   => _Γ -|s r|- _Δ > a ~~r~> b   ->   _Γ -|s r|- _Δ > a
   -- --------------------------------------------------
   ->                _Γ -|s r|- _Δ > b
 f $$ a = wkR' f >>> wkR' a `funL` init
 
 funR'
-  :: (Weaken s, Exchange s, Function s, Pos a, Neg b)
+  :: (Weaken s, Exchange s, FunctionIntro s, Pos a, Neg b)
   =>     _Γ -|s r|- _Δ > a ~~r~> b
   -- -----------------------------
   -> a < _Γ -|s r|- _Δ > b

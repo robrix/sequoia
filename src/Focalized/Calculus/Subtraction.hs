@@ -1,6 +1,6 @@
 module Focalized.Calculus.Subtraction
 ( -- * Subtraction
-  Subtraction(..)
+  SubtractionIntro(..)
 , subL'
   -- * Connectives
 , module Focalized.Subtraction
@@ -14,7 +14,7 @@ import Prelude hiding (init)
 
 -- Subtraction
 
-class Subtraction s where
+class SubtractionIntro s where
   subL
     :: (Pos a, Neg b)
     =>         a < _Γ -|s r|- _Δ > b
@@ -29,7 +29,7 @@ class Subtraction s where
 
 
 subL'
-  :: (Weaken s, Exchange s, Subtraction s, Pos a, Neg b)
+  :: (Weaken s, Exchange s, SubtractionIntro s, Pos a, Neg b)
   => a ~-r-< b < _Γ -|s r|- _Δ
   -- -----------------------------
   ->         a < _Γ -|s r|- _Δ > b
