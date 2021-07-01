@@ -23,6 +23,8 @@ module Focalized.Calculus.Core
 , popRn
 , pushL
 , pushR
+, pushLn
+, pushRn
 , pushΓΔ
 , pushΓ
 , pushΔ
@@ -304,6 +306,21 @@ pushR
   -- --------------------------
   -> (r •a -> _Γ -|s r|- _Δ)
 pushR s a = popΔ (\ c -> pushΔ s (c |> a))
+
+
+pushLn
+  :: (Contextual s, ContextL n a _Γ _Γ')
+  =>             _Γ -|s r|- _Δ
+  -- --------------------------
+  -> (n :. a -> _Γ' -|s r|- _Δ)
+pushLn s a = popΓ (pushΓ s . getV . insertL . (<$> a) . flip (,))
+
+pushRn
+  :: (Contextual s, ContextR n a _Δ _Δ')
+  =>          _Γ -|s r|- _Δ
+  -- --------------------------
+  -> ( n :. r •a -> _Γ -|s r|- _Δ')
+pushRn s a = popΔ (pushΔ s . getV . insertR . (<$> a) . (,))
 
 
 poppedL
