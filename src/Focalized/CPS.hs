@@ -7,6 +7,7 @@ module Focalized.CPS
 , type (•)(..)
 , type (••)
 , (|•|)
+, (+•+)
   -- * Double negation
 , dnI
 , dnE
@@ -77,6 +78,14 @@ instance Contravariant ((•) r) where
 f |•| g = leftAdjunct (liftK2 (<-->) <$> rightAdjunct f <*> rightAdjunct g)
 
 infix 3 |•|
+
+(+•+) :: (Adjunction f u, Disj d, Disj e)
+  => (f (r • a) -> u (r •a'))
+  -> (f (r • b) -> u (r •b'))
+  -> (f (r • (a `d` b)) -> u (r •(a' `e` b')))
+fl +•+ fr = fl . fmap (contramap inl) |•| fr . fmap (contramap inr)
+
+infix 3 +•+
 
 
 -- Double negation
