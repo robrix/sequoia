@@ -5,6 +5,8 @@ module Focalized.CPS
 , lowerK
 , liftK2
 , runK
+, (•<<)
+, (>>•)
 , type (•)(..)
 , type (••)
 , (|•|)
@@ -64,6 +66,14 @@ liftK2 f (K a) (K b) = K (f a b)
 
 runK :: r •a -> a -> r
 runK = (•)
+
+(•<<) :: r •a -> (b -> a) -> r •b
+(•<<) = flip contramap
+
+(>>•) :: (b -> a) -> r •a -> r •b
+(>>•) = contramap
+
+infixr 1 •<<, >>•
 
 newtype r •a = K { (•) :: a -> r }
 
