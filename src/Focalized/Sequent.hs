@@ -182,10 +182,10 @@ instance MuIntro Seq where
 
 -- Polarity shifts
 
-instance NegShift Seq where
+instance UpIntro Seq where
   upL   = mapL getUp
   upR   = mapR Up
 
-instance PosShift Seq where
+instance DownIntro Seq where
   downL = mapL getDown
   downR = mapR Down

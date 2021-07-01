@@ -1,6 +1,6 @@
 module Focalized.Calculus.Down
-( -- * Positive shift
-  PosShift(..)
+( -- * Down
+  DownIntro(..)
 , downL'
 , downR'
   -- * Connectives
@@ -13,9 +13,9 @@ import Focalized.Down
 import Focalized.Polarity
 import Prelude hiding (init)
 
--- Positive shift
+-- Down
 
-class PosShift s where
+class DownIntro s where
   downL
     :: Neg a
     =>      a < _Γ -|s r|- _Δ
@@ -30,14 +30,14 @@ class PosShift s where
 
 
 downL'
-  :: (Weaken s, Exchange s, PosShift s, Neg a)
+  :: (Weaken s, Exchange s, DownIntro s, Neg a)
   => Down a < _Γ -|s r|- _Δ
   -- ----------------------
   ->      a < _Γ -|s r|- _Δ
 downL' p = downR init >>> wkL' p
 
 downR'
-  :: (Weaken s, Exchange s, PosShift s, Neg a)
+  :: (Weaken s, Exchange s, DownIntro s, Neg a)
   => _Γ -|s r|- _Δ > Down a
   -- ----------------------
   -> _Γ -|s r|- _Δ >      a

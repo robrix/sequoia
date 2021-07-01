@@ -1,6 +1,6 @@
 module Focalized.Calculus.Up
-( -- * Negative shift
-  NegShift(..)
+( -- * Up
+  UpIntro(..)
 , upL'
 , upR'
   -- * Connectives
@@ -13,9 +13,9 @@ import Focalized.Polarity
 import Focalized.Up
 import Prelude hiding (init)
 
--- Negative shift
+-- Up
 
-class NegShift s where
+class UpIntro s where
   upL
     :: Pos a
     =>    a < _Γ -|s r|- _Δ
@@ -30,14 +30,14 @@ class NegShift s where
 
 
 upL'
-  :: (Weaken s, Exchange s, NegShift s, Pos a)
+  :: (Weaken s, Exchange s, UpIntro s, Pos a)
   => Up a < _Γ -|s r|- _Δ
   -- --------------------
   ->    a < _Γ -|s r|- _Δ
 upL' p = upR init >>> wkL' p
 
 upR'
-  :: (Weaken s, Exchange s, NegShift s, Pos a)
+  :: (Weaken s, Exchange s, UpIntro s, Pos a)
   => _Γ -|s r|- _Δ > Up a
   -- --------------------
   -> _Γ -|s r|- _Δ >    a
