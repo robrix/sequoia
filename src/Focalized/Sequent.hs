@@ -22,14 +22,13 @@ import           Focalized.Calculus.Additive
 import           Focalized.Calculus.Context
 import           Focalized.Calculus.Control
 import           Focalized.Calculus.Core
-import           Focalized.Calculus.Function
+import           Focalized.Calculus.Implicative
 import           Focalized.Calculus.Mu
 import           Focalized.Calculus.Multiplicative
 import           Focalized.Calculus.Negation
 import           Focalized.Calculus.Nu
 import           Focalized.Calculus.Quantification
 import           Focalized.Calculus.Shift
-import           Focalized.Calculus.Subtraction
 import           Focalized.Conjunction
 import           Focalized.Disjunction
 import           Prelude hiding (init)
