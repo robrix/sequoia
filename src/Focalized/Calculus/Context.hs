@@ -1,6 +1,5 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE PolyKinds #-}
-{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Focalized.Calculus.Context
 ( -- * Γ
@@ -19,7 +18,9 @@ module Focalized.Calculus.Context
 , mkV
 , type (:.)(..)
 , ContextL(..)
+, replaceL
 , ContextR(..)
+, replaceR
 , MemberΓ(..)
 , replaceΓ
 , MemberΔ(..)
@@ -153,8 +154,6 @@ class ContextL (n :: k) a as as' | as a -> as', as as' -> a, as n -> a where
   removeL :: n :. as -> n :. (a, as')
   removeL = liftA2 (,) <$> selectL <*> dropL
   insertL :: n :. (a, as') -> n :. as
-  replaceL :: (ContextL n' b bs bs', n ~ n', bs' ~ as') => (a -> b) -> (n :. as -> n :. bs)
-  replaceL f = insertL . fmap (first f) . removeL
 
 instance ContextL n a (n :. a < as) as where
   selectL = fmap (getV . exl)
@@ -168,6 +167,9 @@ instance ContextL n a as as' => ContextL n a (n' :. b < as) (n' :. b < as') wher
   removeL = fmap . fmap . (<|) <$> exl . getV <*> removeL . fmap exr
   insertL = fmap . (<|) <$> exl . exr . getV <*> insertL . fmap (fmap exr)
 
+replaceL :: (ContextL n a as as', ContextL n b bs as') => (a -> b) -> (n :. as -> n :. bs)
+replaceL f = insertL . fmap (first f) . removeL
+
 
 class ContextR (n :: k) a as as' | as a -> as', as as' -> a, as n -> a where
   {-# MINIMAL ((selectR, dropR) | removeR), insertR #-}
@@ -178,8 +180,6 @@ class ContextR (n :: k) a as as' | as a -> as', as as' -> a, as n -> a where
   removeR :: n :. r •as -> n :. (r •as', r •a)
   removeR = liftA2 (,) <$> dropR <*> selectR
   insertR :: n :. (r •as', r •a) -> n :. r•as
-  replaceR :: (ContextR n b bs bs', bs' ~ as') => (a -> b) -> (n :. r• bs -> n :. r•as)
-  replaceR f = insertR . fmap (fmap (contramap f)) . removeR
 
 instance ContextR n a (as > n :. a) as where
   selectR = fmap (contramap (inr . V))
@@ -192,6 +192,9 @@ instance ContextR n a as as' => ContextR n a (as > n' :. b) (as' > n' :. b) wher
   dropR = dropR +•+ id
   removeR v = (,) <$> dropR v <*> selectR v
   insertR = insertR . fmap (first (contramap inl)) |•| fmap (contramap inr . exl)
+
+replaceR :: (ContextR n a as as', ContextR n b bs as') => (a -> b) -> (n :. r• bs -> n :. r•as)
+replaceR f = insertR . fmap (fmap (contramap f)) . removeR
 
 
 class ConcatΓ as bs cs | as bs -> cs, as cs -> bs, bs cs -> as where
@@ -226,7 +229,7 @@ instance MemberΓ n a as as' => MemberΓ n a (n' :. b < as) (n' :. b < as') wher
   injectΓ = liftA2 (<|) <$> fmap (exl . exr) <*> injectΓ . fmap (fmap exr)
   rejectΓ = rightAdjunct (\ (b :< as) -> leftAdjunct (fmap (fmap (b <|)) . rejectΓ) as)
 
-replaceΓ :: (MemberΓ n a as as', MemberΓ n b bs bs', as' ~ bs') => (a -> b) -> (n :. as -> n :. bs)
+replaceΓ :: (MemberΓ n a as as', MemberΓ n b bs as') => (a -> b) -> (n :. as -> n :. bs)
 replaceΓ f = injectΓ . fmap (first f) . rejectΓ
 
 
@@ -242,5 +245,5 @@ instance MemberΔ n a as as' => MemberΔ n a (as > n' :. b) (as' > n' :. b) wher
   injectΔ = liftA2 (|>) <$> injectΔ . fmap (first (contramap inl)) <*> fmap (contramap inr . exl)
   rejectΔ = rightAdjunct (\ as -> leftAdjunct (fmap (first (|> contramap inr as)) . rejectΔ) (contramap inl as))
 
-replaceΔ :: (MemberΔ n a as as', MemberΔ n b bs bs', as' ~ bs') => (b -> a) -> (n :. r •as -> n :. r •bs)
+replaceΔ :: (MemberΔ n a as as', MemberΔ n b bs as') => (b -> a) -> (n :. r •as -> n :. r •bs)
 replaceΔ f = injectΔ . fmap (fmap (contramap f)) . rejectΔ
