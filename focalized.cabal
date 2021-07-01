@@ -84,6 +84,7 @@ library
     Focalized.Calculus.One
     Focalized.Calculus.Par
     Focalized.Calculus.Quantification
+    Focalized.Calculus.Recursive
     Focalized.Calculus.Shift
     Focalized.Calculus.Subtraction
     Focalized.Calculus.Sum
