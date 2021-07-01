@@ -8,7 +8,7 @@ import Focalized.Polarity
 
 -- Positive-to-negative shift
 
-newtype Up   a = Up   { getUp   :: a }
+newtype Up a = Up { getUp :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
   deriving (Applicative, Monad) via Identity
 
