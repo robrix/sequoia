@@ -152,13 +152,13 @@ class ContextL (n :: k) a as as' | as a -> as', as as' -> a, as n -> a where
   replaceL :: (ContextL n' b bs bs', n ~ n', bs' ~ as') => (a -> b) -> (n :. as -> n :. bs)
   replaceL f = insertL . fmap (first f) . removeL
 
-instance {-# OVERLAPPING #-} ContextL n a (n :. a < as) as where
+instance ContextL n a (n :. a < as) as where
   selectL = fmap (getV . exl)
   dropL = fmap exr
   removeL = liftA2 (-><-) <$> fmap (getV . exl) <*> fmap exr
   insertL = fmap (uncurry ((<|) . V))
 
-instance {-# OVERLAPPING #-} ContextL n a as as' => ContextL n a (n' :. b < as) (n' :. b < as') where
+instance ContextL n a as as' => ContextL n a (n' :. b < as) (n' :. b < as') where
   selectL = selectL . fmap exr
   dropL = fmap . (<|) <$> exl . getV <*> dropL . fmap exr
   removeL = fmap . fmap . (<|) <$> exl . getV <*> removeL . fmap exr
@@ -177,13 +177,13 @@ class ContextR (n :: k) a as as' | as a -> as', as as' -> a, as n -> a where
   replaceR :: (ContextR n b bs bs', bs' ~ as') => (a -> b) -> (n :. r• bs -> n :. r•as)
   replaceR f = insertR . fmap (fmap (contramap f)) . removeR
 
-instance {-# OVERLAPPING #-} ContextR n a (as > n :. a) as where
+instance ContextR n a (as > n :. a) as where
   selectR = fmap (contramap (inr . V))
   dropR = fmap (contramap inl)
   removeR = fmap ((,) <$> contramap inl <*> contramap (inr . V))
   insertR = fmap (uncurry (|>) . fmap (contramap getV))
 
-instance {-# OVERLAPPING #-} ContextR n a as as' => ContextR n a (as > n' :. b) (as' > n' :. b) where
+instance ContextR n a as as' => ContextR n a (as > n' :. b) (as' > n' :. b) where
   selectR = selectR . fmap (contramap inl)
   dropR = dropR +•+ id
   removeR v = (,) <$> dropR v <*> selectR v
