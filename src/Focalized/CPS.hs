@@ -7,6 +7,8 @@ module Focalized.CPS
 , runK
 , (•<<)
 , (>>•)
+, (<<•)
+, (•>>)
 , type (•)(..)
 , type (••)
 , (|•|)
@@ -74,6 +76,14 @@ runK = (•)
 (>>•) = contramap
 
 infixr 1 •<<, >>•
+
+(<<•) :: (r -> s) -> r •a -> s •a
+f <<• k = K (f . runK k)
+
+(•>>) :: r •a -> (r -> s) -> s •a
+k •>> f = K (f . runK k)
+
+infixr 1 <<•, •>>
 
 newtype r •a = K { (•) :: a -> r }
 
