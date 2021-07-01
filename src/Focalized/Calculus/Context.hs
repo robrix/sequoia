@@ -20,6 +20,8 @@ module Focalized.Calculus.Context
 , type (:.)(..)
 , ContextL(..)
 , ContextR(..)
+, MemberΓ(..)
+, MemberΔ(..)
 ) where
 
 import Control.Applicative (liftA2)
