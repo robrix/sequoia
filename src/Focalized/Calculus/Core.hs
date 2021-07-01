@@ -226,7 +226,7 @@ popLn
   :: (Contextual s, ContextL n a _Γ _Γ')
   => (n :. a -> _Γ' -|s r|- _Δ)
   -- --------------------------
-  ->             _Γ -|s r|- _Δ
+  ->            _Γ  -|s r|- _Δ
 popLn f = popΓ (\ _Γ -> let v@(V (a, _Γ')) = removeL (V _Γ) in pushΓ (f (a <$ v)) _Γ')
 
 popRn
