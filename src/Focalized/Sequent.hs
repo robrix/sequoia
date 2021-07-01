@@ -150,7 +150,7 @@ instance PosConjunction Seq where
 
 -- Implication
 
-instance Implication Seq where
+instance Function Seq where
   funL a b = popL (\ f -> a >>> liftLR (getFun f) >>> wkL' b)
   funR = lowerLR (liftR . Fun) . wkR'
 
