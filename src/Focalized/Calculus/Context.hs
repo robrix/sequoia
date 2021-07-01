@@ -188,3 +188,23 @@ instance ContextR n a as as' => ContextR n a (as > n' :. b) (as' > n' :. b) wher
   dropR = dropR +•+ id
   removeR v = (,) <$> dropR v <*> selectR v
   insertR = insertR . fmap (first (contramap inl)) |•| fmap (contramap inr . exl)
+
+
+class ConcatΓ as bs cs | as bs -> cs, as cs -> bs, bs cs -> as where
+  concatΓ :: as -> bs -> cs
+
+instance ConcatΓ as Γ as where
+  concatΓ = const
+
+instance ConcatΓ as bs cs => ConcatΓ (a < as) bs (a < cs) where
+  concatΓ (a :< as) bs = a :< concatΓ as bs
+
+
+class ConcatΔ as bs cs | as bs -> cs, as cs -> bs, bs cs -> as where
+  concatΔ :: r •as -> r •bs -> r •cs
+
+instance ConcatΔ as Δ as where
+  concatΔ = const
+
+instance ConcatΔ as bs cs => ConcatΔ (as > a) bs (cs > a) where
+  concatΔ as bs = concatΔ (contramap inl as) bs |> contramap inr as
