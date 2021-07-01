@@ -130,19 +130,19 @@ instance PosDisjunction Seq where
 
 -- Multiplicative
 
-instance NegFalsity Seq where
+instance BottomIntro Seq where
   botL = liftL (K absurdN)
   botR = wkR
 
-instance PosTruth Seq where
+instance OneIntro Seq where
   oneL = wkL
   oneR = liftR One
 
-instance NegDisjunction Seq where
+instance ParIntro Seq where
   parL a b = popL (pushL a <--> pushL b)
   parR = fmap ((>>= inr . inl) <--> inr . inr)
 
-instance PosConjunction Seq where
+instance TensorIntro Seq where
   tensorL p = popL (pushL2 p . exl <*> exr)
   tensorR = liftA2 (liftA2 (-><-))
 

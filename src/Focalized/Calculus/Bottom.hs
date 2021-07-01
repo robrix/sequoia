@@ -1,6 +1,6 @@
 module Focalized.Calculus.Bottom
-( -- * Negative falsity
-  NegFalsity(..)
+( -- * Bottom
+  BottomIntro(..)
 , botR'
   -- * Connectives
 , module Focalized.Bottom
@@ -10,9 +10,9 @@ import Focalized.Bottom
 import Focalized.Calculus.Context
 import Focalized.Calculus.Core
 
--- Negative falsity
+-- Bottom
 
-class NegFalsity s where
+class BottomIntro s where
   botL
     -- -------------------
     :: Bot < _Γ -|s r|- _Δ
@@ -24,7 +24,7 @@ class NegFalsity s where
 
 
 botR'
-  :: (Core s, NegFalsity s)
+  :: (Core s, BottomIntro s)
   => _Γ -|s r|- _Δ > Bot
   -- -------------------
   -> _Γ -|s r|- _Δ

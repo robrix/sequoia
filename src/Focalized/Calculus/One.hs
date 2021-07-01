@@ -1,6 +1,6 @@
 module Focalized.Calculus.One
-( -- * Positive truth
-  PosTruth(..)
+( -- * One
+  OneIntro(..)
 , oneL'
   -- * Connctives
 , module Focalized.One
@@ -10,9 +10,9 @@ import Focalized.Calculus.Context
 import Focalized.Calculus.Core
 import Focalized.One
 
--- Positive truth
+-- One
 
-class PosTruth s where
+class OneIntro s where
   oneL
     ::       _Γ -|s r|- _Δ
     -- -------------------
@@ -24,7 +24,7 @@ class PosTruth s where
 
 
 oneL'
-  :: (Core s, PosTruth s)
+  :: (Core s, OneIntro s)
   => One < _Γ -|s r|- _Δ
   -- -------------------
   ->       _Γ -|s r|- _Δ

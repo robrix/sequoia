@@ -1,7 +1,7 @@
 {-# LANGUAGE ConstraintKinds #-}
 module Focalized.Calculus.Multiplicative
 ( -- * Multiplicative rules
-  Multiplicative
+  MultiplicativeIntro
   -- * Re-exports
 , module Focalized.Calculus.Bottom
 , module Focalized.Calculus.One
@@ -14,4 +14,4 @@ import Focalized.Calculus.One
 import Focalized.Calculus.Par
 import Focalized.Calculus.Tensor
 
-type Multiplicative s = (NegFalsity s, PosTruth s, NegDisjunction s, PosConjunction s)
+type MultiplicativeIntro s = (BottomIntro s, OneIntro s, ParIntro s, TensorIntro s)

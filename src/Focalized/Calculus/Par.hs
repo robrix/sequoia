@@ -1,6 +1,6 @@
 module Focalized.Calculus.Par
-( -- * Negative disjunction
-  NegDisjunction(..)
+( -- * Par
+  ParIntro(..)
 , parR'
   -- * Connectives
 , module Focalized.Par
@@ -12,9 +12,9 @@ import Focalized.Par
 import Focalized.Polarity
 import Prelude hiding (init)
 
--- Negative disjunction
+-- Par
 
-class NegDisjunction s where
+class ParIntro s where
   parL
     :: (Neg a, Neg b)
     => a < _Γ -|s r|- _Δ   ->   b < _Γ -|s r|- _Δ
@@ -29,7 +29,7 @@ class NegDisjunction s where
 
 
 parR'
-  :: (Weaken s, Contextual s, NegDisjunction s, Neg a, Neg b)
+  :: (Weaken s, Contextual s, ParIntro s, Neg a, Neg b)
   => _Γ -|s r|- _Δ > a ⅋ b
   -- ---------------------
   -> _Γ -|s r|- _Δ > a > b

@@ -1,6 +1,6 @@
 module Focalized.Calculus.Tensor
-( -- * Positive conjunction
-  PosConjunction(..)
+( -- * Tensor
+  TensorIntro(..)
 , tensorL'
   -- * Connectives
 , module Focalized.Tensor
@@ -12,9 +12,9 @@ import Focalized.Polarity
 import Focalized.Tensor
 import Prelude hiding (init)
 
--- Positive conjunction
+-- Tensor
 
-class PosConjunction s where
+class TensorIntro s where
   tensorL
     :: (Pos a, Pos b)
     => a < b < _Γ -|s r|- _Δ
@@ -29,7 +29,7 @@ class PosConjunction s where
 
 
 tensorL'
-  :: (Contextual s, Weaken s, PosConjunction s, Pos a, Pos b)
+  :: (Contextual s, Weaken s, TensorIntro s, Pos a, Pos b)
   => a ⊗ b < _Γ -|s r|- _Δ
   -- ---------------------
   -> a < b < _Γ -|s r|- _Δ
