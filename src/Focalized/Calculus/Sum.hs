@@ -1,6 +1,6 @@
 module Focalized.Calculus.Sum
-( -- * Positive disjunction
-  PosDisjunction(..)
+( -- * Sum
+  SumIntro(..)
 , sumL1'
 , sumL2'
   -- * Connectives
@@ -13,9 +13,9 @@ import Focalized.Polarity
 import Focalized.Sum
 import Prelude hiding (init)
 
--- Positive disjunction
+-- Sum
 
-class PosDisjunction s where
+class SumIntro s where
   sumL
     :: (Pos a, Pos b)
     => a < _Γ -|s r|- _Δ   ->   b < _Γ -|s r|- _Δ
@@ -36,14 +36,14 @@ class PosDisjunction s where
 
 
 sumL1'
-  :: (Weaken s, Exchange s, PosDisjunction s, Pos a, Pos b)
+  :: (Weaken s, Exchange s, SumIntro s, Pos a, Pos b)
   => a ⊕ b < _Γ -|s r|- _Δ
   -- ---------------------
   -> a     < _Γ -|s r|- _Δ
 sumL1' p = sumR1 init >>> wkL' p
 
 sumL2'
-  :: (Weaken s, Exchange s, PosDisjunction s, Pos a, Pos b)
+  :: (Weaken s, Exchange s, SumIntro s, Pos a, Pos b)
   => a ⊕ b < _Γ -|s r|- _Δ
   -- ---------------------
   ->     b < _Γ -|s r|- _Δ

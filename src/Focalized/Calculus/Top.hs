@@ -1,6 +1,6 @@
 module Focalized.Calculus.Top
-( -- * Negative truth
-  NegTruth(..)
+( -- * Top
+  TopIntro(..)
   -- * Connctives
 , module Focalized.Top
 ) where
@@ -8,9 +8,9 @@ module Focalized.Calculus.Top
 import Focalized.Calculus.Context
 import Focalized.Top
 
--- Negative truth
+-- Top
 
-class NegTruth s where
+class TopIntro s where
   topR
     -- -------------------
     :: _Γ -|s r|- _Δ > Top

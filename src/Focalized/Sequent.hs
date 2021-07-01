@@ -111,18 +111,18 @@ instance PosNegation Seq where
 
 -- Additive
 
-instance NegTruth Seq where
+instance TopIntro Seq where
   topR = pure (inr Top)
 
-instance PosFalsity Seq where
+instance ZeroIntro Seq where
   zeroL = liftL (K absurdP)
 
-instance NegConjunction Seq where
+instance WithIntro Seq where
   withL1 p = popL (pushL p . exl)
   withL2 p = popL (pushL p . exr)
   withR = liftA2 (liftA2 (-><-))
 
-instance PosDisjunction Seq where
+instance SumIntro Seq where
   sumL a b = popL (pushL a <--> pushL b)
   sumR1 = mapR inl
   sumR2 = mapR inr

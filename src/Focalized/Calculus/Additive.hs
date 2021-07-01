@@ -1,7 +1,7 @@
 {-# LANGUAGE ConstraintKinds #-}
 module Focalized.Calculus.Additive
 ( -- * Additive rules
-  Additive
+  AdditiveIntro
   -- * Re-exports
 , module Focalized.Calculus.Top
 , module Focalized.Calculus.Zero
@@ -14,4 +14,4 @@ import Focalized.Calculus.Top
 import Focalized.Calculus.With
 import Focalized.Calculus.Zero
 
-type Additive s = (NegTruth s, PosFalsity s, NegConjunction s, PosDisjunction s)
+type AdditiveIntro s = (TopIntro s, ZeroIntro s, WithIntro s, SumIntro s)

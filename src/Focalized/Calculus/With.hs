@@ -1,6 +1,6 @@
 module Focalized.Calculus.With
-( -- * Negative conjunction
-  NegConjunction(..)
+( -- * With
+  WithIntro(..)
 , withR1'
 , withR2'
   -- * Connectives
@@ -13,9 +13,9 @@ import Focalized.Polarity
 import Focalized.With
 import Prelude hiding (init)
 
--- Negative conjunction
+-- With
 
-class NegConjunction s where
+class WithIntro s where
   withL1
     :: (Neg a, Neg b)
     => a     < _Γ -|s r|- _Δ
@@ -36,14 +36,14 @@ class NegConjunction s where
 
 
 withR1'
-  :: (Weaken s, Exchange s, NegConjunction s, Neg a, Neg b)
+  :: (Weaken s, Exchange s, WithIntro s, Neg a, Neg b)
   => _Γ -|s r|- _Δ > a & b
   -- ---------------------
   -> _Γ -|s r|- _Δ > a
 withR1' t = wkR' t >>> withL1 init
 
 withR2'
-  :: (Weaken s, Exchange s, NegConjunction s, Neg a, Neg b)
+  :: (Weaken s, Exchange s, WithIntro s, Neg a, Neg b)
   => _Γ -|s r|- _Δ > a & b
   -- ---------------------
   -> _Γ -|s r|- _Δ > b
