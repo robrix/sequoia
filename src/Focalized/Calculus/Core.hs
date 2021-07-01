@@ -12,8 +12,8 @@ module Focalized.Calculus.Core
 , Exchange(..)
   -- * Contextual
 , Contextual(..)
-, replaceΓ
-, replaceΔ
+, swapΓ
+, swapΔ
 , popΓΔ
 , popΓ
 , popΔ
@@ -53,7 +53,7 @@ import Data.Bifunctor
 import Data.Functor.Contravariant
 import Data.Profunctor
 import Focalized.CPS
-import Focalized.Calculus.Context hiding (replaceΓ, replaceΔ)
+import Focalized.Calculus.Context
 import Focalized.Conjunction
 import Focalized.Disjunction
 import Prelude hiding (init)
@@ -137,22 +137,22 @@ class Core s => Exchange s where
 
 
 class Core s => Contextual s where
-  replaceΓΔ
+  swapΓΔ
     :: (r •_Δ  -> _Γ  -> _Γ' -|s r|- _Δ')
     -> (r •_Δ' -> _Γ' -> _Γ  -|s r|- _Δ)
 
 
-replaceΓ
+swapΓ
   :: Contextual s
   => (_Γ  -> _Γ' -|s r|- _Δ)
   -> (_Γ' -> _Γ  -|s r|- _Δ)
-replaceΓ f _Γ' = popΓΔ (\ _Δ _Γ -> pushΓΔ (f _Γ) _Δ _Γ')
+swapΓ f _Γ' = popΓΔ (\ _Δ _Γ -> pushΓΔ (f _Γ) _Δ _Γ')
 
-replaceΔ
+swapΔ
   :: Contextual s
   => (r •_Δ  -> _Γ -|s r|- _Δ')
   -> (r •_Δ' -> _Γ -|s r|- _Δ)
-replaceΔ f _Δ' = popΓΔ (\ _Δ -> pushΓΔ (f _Δ) _Δ')
+swapΔ f _Δ' = popΓΔ (\ _Δ -> pushΓΔ (f _Δ) _Δ')
 
 
 popΓΔ
@@ -160,7 +160,7 @@ popΓΔ
   => (r •_Δ -> _Γ -> Γ -|s r|-  r)
   -- -----------------------------
   ->                _Γ -|s r|- _Δ
-popΓΔ f = replaceΓΔ f idK Γ
+popΓΔ f = swapΓΔ f idK Γ
 
 -- | Pop something off the input context which can later be pushed. Used with 'pushΓ', this provides a generalized context restructuring facility.
 --
@@ -175,7 +175,7 @@ popΓ
   => (_Γ -> Γ -|s r|- _Δ)
   -- --------------------
   ->  _Γ      -|s r|- _Δ
-popΓ f = replaceΓ f Γ
+popΓ f = swapΓ f Γ
 
 -- | Pop something off the output context which can later be pushed. Used with 'pushΔ', this provides a generalized context restructuring facility.
 --
@@ -190,7 +190,7 @@ popΔ
   => (r •_Δ -> _Γ -|s r|-  r)
   -- ------------------------
   ->           _Γ -|s r|- _Δ
-popΔ f = replaceΔ f idK
+popΔ f = swapΔ f idK
 
 
 -- | Pop something off the input context which can later be pushed. Used with 'pushL', this provides a generalized context restructuring facility.
@@ -244,7 +244,7 @@ pushΓΔ
   =>                _Γ -|s r|- _Δ
   -- -----------------------------
   -> (r •_Δ -> _Γ -> Γ -|s r|-  r)
-pushΓΔ = replaceΓΔ . const . const
+pushΓΔ = swapΓΔ . const . const
 
 -- | Push something onto the input context which was previously popped off it. Used with 'popΓ', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
 --
@@ -259,7 +259,7 @@ pushΓ
   =>  _Γ      -|s r|- _Δ
   -- --------------------
   -> (_Γ -> Γ -|s r|- _Δ)
-pushΓ = replaceΓ . const
+pushΓ = swapΓ . const
 
 -- | Push something onto the output context which was previously popped off it. Used with 'popΔ', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
 --
@@ -274,7 +274,7 @@ pushΔ
   =>           _Γ -|s r|- _Δ
   -- ------------------------
   -> (r •_Δ -> _Γ -|s r|-  r)
-pushΔ = replaceΔ . const
+pushΔ = swapΔ . const
 
 
 -- | Push something onto the input context which was previously popped off it. Used with 'popL', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.

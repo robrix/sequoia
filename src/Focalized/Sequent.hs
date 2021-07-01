@@ -89,7 +89,7 @@ deriving via Contextually Seq instance Exchange Seq
 -- Contextual rules
 
 instance Contextual Seq where
-  replaceΓΔ f _Δ' _Γ' = sequent $ K . \ _Δ _Γ -> runSeq (f _Δ _Γ) _Δ' • _Γ'
+  swapΓΔ f _Δ' _Γ' = sequent $ K . \ _Δ _Γ -> runSeq (f _Δ _Γ) _Δ' • _Γ'
 
 
 -- Control
