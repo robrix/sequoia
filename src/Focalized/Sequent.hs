@@ -160,11 +160,11 @@ instance SubtractionIntro Seq where
 
 -- Quantification
 
-instance Universal Seq where
+instance UniversalIntro Seq where
   forAllL p = mapL (notNegate . runForAll) p
   forAllR p = sequent $ K . \ k a -> k • inr (ForAll (K ((• a) . runSeq p . ((k •<< inl) |>))))
 
-instance Existential Seq where
+instance ExistentialIntro Seq where
   existsL p = popL (dnESeq . runExists (pushL p))
   existsR p = mapR (Exists . dnI) p
 

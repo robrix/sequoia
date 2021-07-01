@@ -1,7 +1,7 @@
 {-# LANGUAGE ConstraintKinds #-}
 module Focalized.Calculus.Quantification
 ( -- * Quantification rules
-  Quantification
+  QuantificationIntro
   -- * Re-exports
 , module Focalized.Calculus.ForAll
 , module Focalized.Calculus.Exists
@@ -12,4 +12,4 @@ import Focalized.Calculus.ForAll
 
 -- Quantification rules
 
-type Quantification s = (Universal s, Existential s)
+type QuantificationIntro s = (UniversalIntro s, ExistentialIntro s)

@@ -2,7 +2,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Focalized.Calculus.Exists
 ( -- * Existential quantification
-  Existential(..)
+  ExistentialIntro(..)
 , existsL'
   -- * Connectives
 , module Focalized.Exists
@@ -17,7 +17,7 @@ import Prelude hiding (init)
 
 -- Existential quantification
 
-class Existential s where
+class ExistentialIntro s where
   existsL
     :: (forall x . Polarized n x => f x < _Γ -|s r|- _Δ)
     -- -------------------------------------------------
@@ -31,7 +31,7 @@ class Existential s where
 
 
 existsL'
-  :: (Weaken s, Exchange s, Existential s, (Polarized n ==> Pos) f)
+  :: (Weaken s, Exchange s, ExistentialIntro s, (Polarized n ==> Pos) f)
   =>                   Exists r n f   < _Γ -|s r|- _Δ
   -- -------------------------------------------------
   -> (forall x . Polarized n x => f x < _Γ -|s r|- _Δ)

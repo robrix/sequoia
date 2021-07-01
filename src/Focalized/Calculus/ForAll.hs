@@ -2,7 +2,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Focalized.Calculus.ForAll
 ( -- * Universal quantification
-  Universal(..)
+  UniversalIntro(..)
 , forAllR'
   -- * Connectives
 , module Focalized.ForAll
@@ -18,7 +18,7 @@ import Prelude hiding (init)
 
 -- Universal quantification
 
-class Universal s where
+class UniversalIntro s where
   forAllL
     :: (Polarized n x, Neg (f x))
     =>        r ¬-f x < _Γ -|s r|- _Δ
@@ -33,7 +33,7 @@ class Universal s where
 
 
 forAllR'
-  :: (Weaken s, Exchange s, Universal s, Negation s, (Polarized n ==> Neg) f)
+  :: (Weaken s, Exchange s, UniversalIntro s, Negation s, (Polarized n ==> Neg) f)
   =>                              _Γ -|s r|- _Δ > ForAll r n f
   -- ------------------------------------------------------------------------
   -> (forall x . Polarized n x => _Γ -|s r|- _Δ >            f x)
