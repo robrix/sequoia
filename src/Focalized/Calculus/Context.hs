@@ -1,4 +1,3 @@
-{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -23,9 +22,12 @@ module Focalized.Calculus.Context
 , ContextR(..)
 ) where
 
+import Control.Applicative (liftA2)
+import Control.Monad (ap)
 import Data.Bifoldable
 import Data.Bifunctor
 import Data.Bitraversable
+import Data.Coerce (coerce)
 import Data.Distributive
 import Data.Functor.Adjunction
 import Data.Functor.Contravariant
@@ -34,7 +36,6 @@ import Data.Functor.Rep
 import Focalized.CPS
 import Focalized.Conjunction
 import Focalized.Disjunction
-import GHC.Base
 
 -- Γ
 
@@ -122,7 +123,7 @@ infixl 2 |-, -|
 mkV :: (n :. () -> a) -> n :. a
 mkV f = V (f (V ()))
 
-newtype (n :: Symbol) :. a = V { getV :: a }
+newtype (n :: k) :. a = V { getV :: a }
   deriving (Functor)
   deriving (Applicative, Monad, Representable) via Identity
 
@@ -139,7 +140,7 @@ instance Adjunction ((:.) n) ((:.) n) where
   rightAdjunct = coerce
 
 
-class ContextL (n :: Symbol) a as as' | as a -> as', as as' -> a, as n -> a where
+class ContextL (n :: k) a as as' | as a -> as', as as' -> a, as n -> a where
   {-# MINIMAL ((selectL, dropL) | removeL), insertL #-}
   selectL :: n :. as -> n :. a
   selectL = fmap exl . removeL
@@ -164,7 +165,7 @@ instance {-# OVERLAPPING #-} ContextL n a as as' => ContextL n a (n' :. b < as) 
   insertL = fmap . (<|) <$> exl . exr . getV <*> insertL . fmap (fmap exr)
 
 
-class ContextR (n :: Symbol) a as as' | as a -> as', as as' -> a, as n -> a where
+class ContextR (n :: k) a as as' | as a -> as', as as' -> a, as n -> a where
   {-# MINIMAL ((selectR, dropR) | removeR), insertR #-}
   selectR :: n :. r •as -> n :. r •a
   selectR = fmap exr . removeR
