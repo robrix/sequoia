@@ -3,6 +3,7 @@ module Focalized.Calculus.Multiplicative
 ( -- * Multiplicative rules
   MultiplicativeIntro
 , parLTensor
+, tensorLPar
   -- * Re-exports
 , module Focalized.Calculus.Bottom
 , module Focalized.Calculus.One
@@ -13,7 +14,7 @@ module Focalized.Calculus.Multiplicative
 import Focalized.Calculus.Bottom
 import Focalized.Calculus.Context
 import Focalized.Calculus.Core
-import Focalized.Calculus.Negate
+import Focalized.Calculus.Negation
 import Focalized.Calculus.One
 import Focalized.Calculus.Par
 import Focalized.Calculus.Tensor
@@ -28,3 +29,9 @@ parLTensor
   =>         _Γ -|s r|- _Δ > r -a ⊗ r -b
   -> a ⅋ b < _Γ -|s r|- _Δ
 parLTensor s = wkL s >>> tensorL (negateL (negateL (parL (wkR init) init)))
+
+tensorLPar
+  :: (Weaken s, ParIntro s, TensorIntro s, NotIntro s, Pos a, Pos b)
+  =>         _Γ -|s r|- _Δ > r ¬a ⅋ r ¬b
+  -> a ⊗ b < _Γ -|s r|- _Δ
+tensorLPar s = wkL s >>> parL (notL (tensorL init)) (notL (tensorL (wkL init)))
