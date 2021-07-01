@@ -21,7 +21,9 @@ module Focalized.Calculus.Context
 , ContextL(..)
 , ContextR(..)
 , MemberΓ(..)
+, replaceΓ
 , MemberΔ(..)
+, replaceΔ
 ) where
 
 import Control.Applicative (liftA2)
@@ -224,6 +226,9 @@ instance MemberΓ n a as as' => MemberΓ n a (n' :. b < as) (n' :. b < as') wher
   injectΓ = liftA2 (<|) <$> fmap (exl . exr) <*> injectΓ . fmap (fmap exr)
   rejectΓ = rightAdjunct (\ (b :< as) -> leftAdjunct (fmap (fmap (b <|)) . rejectΓ) as)
 
+replaceΓ :: (MemberΓ n a as as', MemberΓ n b bs bs', as' ~ bs') => (a -> b) -> (n :. as -> n :. bs)
+replaceΓ f = injectΓ . fmap (first f) . rejectΓ
+
 
 class MemberΔ n a as as' | n a as -> as', as as' -> n a where
   injectΔ :: n :. (r •as', r •a) -> n :. r •as
@@ -236,3 +241,6 @@ instance MemberΔ n a (as > n :. a) as where
 instance MemberΔ n a as as' => MemberΔ n a (as > n' :. b) (as' > n' :. b) where
   injectΔ = liftA2 (|>) <$> injectΔ . fmap (first (contramap inl)) <*> fmap (contramap inr . exl)
   rejectΔ = rightAdjunct (\ as -> leftAdjunct (fmap (first (|> contramap inr as)) . rejectΔ) (contramap inl as))
+
+replaceΔ :: (MemberΔ n a as as', MemberΔ n b bs bs', as' ~ bs') => (b -> a) -> (n :. r •as -> n :. r •bs)
+replaceΔ f = injectΔ . fmap (fmap (contramap f)) . rejectΔ

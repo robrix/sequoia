@@ -22,7 +22,7 @@ module Focalized.Calculus
 ) where
 
 import Focalized.Calculus.Additive
-import Focalized.Calculus.Context
+import Focalized.Calculus.Context hiding (replaceΓ, replaceΔ)
 import Focalized.Calculus.Control
 import Focalized.Calculus.Core
 import Focalized.Calculus.Function

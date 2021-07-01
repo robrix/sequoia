@@ -53,7 +53,7 @@ import Data.Bifunctor
 import Data.Functor.Contravariant
 import Data.Profunctor
 import Focalized.CPS
-import Focalized.Calculus.Context
+import Focalized.Calculus.Context hiding (replaceΓ, replaceΔ)
 import Focalized.Conjunction
 import Focalized.Disjunction
 import Prelude hiding (init)
