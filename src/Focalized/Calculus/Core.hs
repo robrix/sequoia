@@ -19,6 +19,8 @@ module Focalized.Calculus.Core
 , popΔ
 , popL
 , popR
+, popLn
+, popRn
 , pushL
 , pushR
 , pushΓΔ
@@ -219,6 +221,21 @@ popR
   -- --------------------------
   ->          _Γ -|s r|- _Δ > a
 popR f = popΔ (\ c -> pushΔ (f (contramap inr c)) (contramap inl c))
+
+
+popLn
+  :: (Contextual s, ContextL n a _Γ _Γ')
+  => (n :. a -> _Γ' -|s r|- _Δ)
+  -- --------------------
+  ->  _Γ -|s r|- _Δ
+popLn f = popΓ (\ _Γ -> let v@(V (a, _Γ')) = removeL (V _Γ) in pushΓ (f (a <$ v)) _Γ')
+
+popRn
+  :: (Contextual s, ContextR n a _Δ _Δ')
+  => ( n :. r •a -> _Γ -|s r|- _Δ')
+  -- --------------------------
+  ->          _Γ -|s r|- _Δ
+popRn f = popΔ (\ _Δ -> let v@(V (_Δ', a)) = removeR (V _Δ) in pushΔ (f (a <$ v)) _Δ')
 
 
 pushΓΔ
