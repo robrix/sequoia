@@ -216,7 +216,7 @@ instance ArrowChoice (CPS r) where
   f ||| g = CPS ((<••>) <$> runCPS f <*> runCPS g)
 
 (<••>) :: Disj d => c •a -> c •b -> c •(a `d` b)
-f <••> g = K $ (f •) <--> (g •)
+(<••>) = liftK2 (<-->)
 
 infix 3 <••>
 
