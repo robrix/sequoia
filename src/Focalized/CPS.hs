@@ -4,6 +4,7 @@ module Focalized.CPS
 , liftK
 , lowerK
 , liftK2
+, runK
 , type (•)(..)
 , type (••)
 , (|•|)
@@ -60,6 +61,9 @@ lowerK = dimap K (•)
 
 liftK2 :: ((a -> r) -> (b -> r) -> (c -> r)) -> (r •a -> r •b -> r •c)
 liftK2 f (K a) (K b) = K (f a b)
+
+runK :: r •a -> a -> r
+runK = (•)
 
 newtype r •a = K { (•) :: a -> r }
 
