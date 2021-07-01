@@ -210,7 +210,7 @@ instance ConcatΔ as bs cs => ConcatΔ (as > a) bs (cs > a) where
   concatΔ as bs = concatΔ (contramap inl as) bs |> contramap inr as
 
 
-class MemberΓ n a as as' | n a as -> as', as as' -> n a, n a as' -> as where
+class MemberΓ n a as as' | n a as -> as', as as' -> n a where
   injectΓ :: n :. (a, as') -> n :. as
   rejectΓ :: n :. as -> n :. (a, as')
 
@@ -223,7 +223,7 @@ instance MemberΓ n a as as' => MemberΓ n a (n' :. b < as) (n' :. b < as') wher
   rejectΓ = rightAdjunct (\ (b :< as) -> leftAdjunct (fmap (fmap (b <|)) . rejectΓ) as)
 
 
-class MemberΔ n a as as' | n a as -> as', as as' -> n a, n a as' -> as where
+class MemberΔ n a as as' | n a as -> as', as as' -> n a where
   injectΔ :: n :. (r •as', r •a) -> n :. r •as
   rejectΔ :: n :. r •as -> n :. (r •as', r •a)
 
