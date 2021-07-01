@@ -3,6 +3,7 @@ module Focalized.Calculus.Additive
 ( -- * Additive rules
   AdditiveIntro
 , withLSum
+, sumLWith
   -- * Re-exports
 , module Focalized.Calculus.Top
 , module Focalized.Calculus.Zero
@@ -12,7 +13,7 @@ module Focalized.Calculus.Additive
 
 import Focalized.Calculus.Context
 import Focalized.Calculus.Core
-import Focalized.Calculus.Negate
+import Focalized.Calculus.Negation
 import Focalized.Calculus.Sum
 import Focalized.Calculus.Top
 import Focalized.Calculus.With
@@ -27,3 +28,9 @@ withLSum
   =>         _Γ -|s r|- _Δ > r -a ⊕ r -b
   -> a & b < _Γ -|s r|- _Δ
 withLSum s = wkL s >>> sumL (negateL (withL1 init)) (negateL (withL2 init))
+
+sumLWith
+  :: (Weaken s, Exchange s, SumIntro s, WithIntro s, NotIntro s, Pos a, Pos b)
+  =>         _Γ -|s r|- _Δ > r ¬a & r ¬b
+  -> a ⊕ b < _Γ -|s r|- _Δ
+sumLWith s = wkL s >>> exL (sumL (exL (withL1 (notL init))) (exL (withL2 (notL init))))
