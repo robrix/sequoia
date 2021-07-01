@@ -39,8 +39,8 @@ import           Prelude hiding (init)
 runSeq :: _Γ -|Seq r|- _Δ -> (r •_Δ -> r •_Γ)
 runSeq = runCPS . getSeq
 
-evalSeq :: _Γ -|Seq _Δ|- _Δ -> (_Γ -> _Δ)
-evalSeq = flip (dimap K (•) . runSeq) id
+evalSeq :: _Γ -|Seq _Δ|- _Δ -> _Δ •_Γ
+evalSeq = (`runSeq` idK)
 
 sequent :: (r •_Δ -> r •_Γ) -> _Γ -|Seq r|- _Δ
 sequent = Seq . CPS
@@ -95,8 +95,8 @@ instance Contextual Seq where
 -- Control
 
 instance Control Seq where
-  reset s = sequent (evalSeq s >$<)
-  shift p = sequent (\ k -> runSeq p (k >$$< inl |> Cat.id) >$$< (k >$$< inr <|))
+  reset s = sequent ((evalSeq s •) >$<)
+  shift p = sequent (\ k -> runSeq p (k >$$< inl |> idK) >$$< (k >$$< inr <|))
 
 
 -- Negation
