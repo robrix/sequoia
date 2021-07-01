@@ -225,18 +225,18 @@ popR f = popΔ (\ c -> pushΔ (f (contramap inr c)) (contramap inl c))
 
 
 popLn
-  :: (Contextual s, ContextL n a _Γ _Γ')
+  :: (Contextual s, MemberΓ n a _Γ _Γ')
   => (n :. a -> _Γ' -|s r|- _Δ)
   -- --------------------------
   ->            _Γ  -|s r|- _Δ
-popLn f = popΓ (\ _Γ -> let v@(V (a, _Γ')) = removeL (V _Γ) in pushΓ (f (a <$ v)) _Γ')
+popLn f = popΓ (\ _Γ -> let v@(V (a, _Γ')) = rejectΓ (V _Γ) in pushΓ (f (a <$ v)) _Γ')
 
 popRn
-  :: (Contextual s, ContextR n a _Δ _Δ')
+  :: (Contextual s, MemberΔ n a _Δ _Δ')
   => ( n :. r •a -> _Γ -|s r|- _Δ')
   -- ------------------------------
   ->                _Γ -|s r|- _Δ
-popRn f = popΔ (\ _Δ -> let v@(V (_Δ', a)) = removeR (V _Δ) in pushΔ (f (a <$ v)) _Δ')
+popRn f = popΔ (\ _Δ -> let v@(V (_Δ', a)) = rejectΔ (V _Δ) in pushΔ (f (a <$ v)) _Δ')
 
 
 pushΓΔ
@@ -309,18 +309,18 @@ pushR s a = popΔ (\ c -> pushΔ s (c |> a))
 
 
 pushLn
-  :: (Contextual s, ContextL n a _Γ _Γ')
+  :: (Contextual s, MemberΓ n a _Γ _Γ')
   =>             _Γ -|s r|- _Δ
   -- --------------------------
   -> (n :. a -> _Γ' -|s r|- _Δ)
-pushLn s a = popΓ (pushΓ s . getV . insertL . (<$> a) . flip (,))
+pushLn s a = popΓ (pushΓ s . getV . injectΓ . (<$> a) . flip (,))
 
 pushRn
-  :: (Contextual s, ContextR n a _Δ _Δ')
+  :: (Contextual s, MemberΔ n a _Δ _Δ')
   =>          _Γ -|s r|- _Δ
   -- --------------------------
   -> ( n :. r •a -> _Γ -|s r|- _Δ')
-pushRn s a = popΔ (pushΔ s . getV . insertR . (<$> a) . (,))
+pushRn s a = popΔ (pushΔ s . getV . injectΔ . (<$> a) . (,))
 
 
 poppedL

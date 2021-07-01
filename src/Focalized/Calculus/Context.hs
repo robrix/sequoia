@@ -17,10 +17,6 @@ module Focalized.Calculus.Context
   -- * Membership
 , mkV
 , type (:.)(..)
-, ContextL(..)
-, replaceL
-, ContextR(..)
-, replaceR
 , MemberΓ(..)
 , replaceΓ
 , MemberΔ(..)
@@ -143,58 +139,6 @@ instance Adjunction ((:.) n) ((:.) n) where
 
   leftAdjunct  = coerce
   rightAdjunct = coerce
-
-
-class ContextL (n :: k) a as as' | as a -> as', as as' -> a, as n -> a where
-  {-# MINIMAL ((selectL, dropL) | removeL), insertL #-}
-  selectL :: n :. as -> n :. a
-  selectL = fmap exl . removeL
-  dropL :: n :. as -> n :. as'
-  dropL = fmap exr . removeL
-  removeL :: n :. as -> n :. (a, as')
-  removeL = liftA2 (,) <$> selectL <*> dropL
-  insertL :: n :. (a, as') -> n :. as
-
-instance ContextL n a (n :. a < as) as where
-  selectL = fmap (getV . exl)
-  dropL = fmap exr
-  removeL = liftA2 (-><-) <$> fmap (getV . exl) <*> fmap exr
-  insertL = fmap (uncurry ((<|) . V))
-
-instance ContextL n a as as' => ContextL n a (n' :. b < as) (n' :. b < as') where
-  selectL = selectL . fmap exr
-  dropL = fmap . (<|) <$> exl . getV <*> dropL . fmap exr
-  removeL = fmap . fmap . (<|) <$> exl . getV <*> removeL . fmap exr
-  insertL = fmap . (<|) <$> exl . exr . getV <*> insertL . fmap (fmap exr)
-
-replaceL :: (ContextL n a as as', ContextL n b bs as') => (a -> b) -> (n :. as -> n :. bs)
-replaceL f = insertL . fmap (first f) . removeL
-
-
-class ContextR (n :: k) a as as' | as a -> as', as as' -> a, as n -> a where
-  {-# MINIMAL ((selectR, dropR) | removeR), insertR #-}
-  selectR :: n :. r •as -> n :. r •a
-  selectR = fmap exr . removeR
-  dropR :: n :. r •as -> n :. r •as'
-  dropR = fmap exl . removeR
-  removeR :: n :. r •as -> n :. (r •as', r •a)
-  removeR = liftA2 (,) <$> dropR <*> selectR
-  insertR :: n :. (r •as', r •a) -> n :. r•as
-
-instance ContextR n a (as > n :. a) as where
-  selectR = fmap (contramap (inr . V))
-  dropR = fmap (contramap inl)
-  removeR = fmap ((,) <$> contramap inl <*> contramap (inr . V))
-  insertR = fmap (uncurry (|>) . fmap (contramap getV))
-
-instance ContextR n a as as' => ContextR n a (as > n' :. b) (as' > n' :. b) where
-  selectR = selectR . fmap (contramap inl)
-  dropR = dropR +•+ id
-  removeR v = (,) <$> dropR v <*> selectR v
-  insertR = insertR . fmap (first (contramap inl)) |•| fmap (contramap inr . exl)
-
-replaceR :: (ContextR n a as as', ContextR n b bs as') => (a -> b) -> (n :. r• bs -> n :. r•as)
-replaceR f = insertR . fmap (fmap (contramap f)) . removeR
 
 
 class ConcatΓ as bs cs | as bs -> cs, as cs -> bs, bs cs -> as where
