@@ -1,2 +1,6 @@
 module Focalized.Calculus.Iff
-() where
+( -- * Connectives
+  module Focalized.Connective.Iff
+) where
+
+import Focalized.Connective.Iff
