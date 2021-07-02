@@ -2,6 +2,7 @@ module Focalized.Calculus.Tensor
 ( -- * Tensor
   TensorIntro(..)
 , tensorL'
+, tensorAssociativity
 , tensorCommutativity
   -- * Connectives
 , module Focalized.Tensor
@@ -36,6 +37,12 @@ tensorL'
   -> a < b < _Γ -|s r|- _Δ
 tensorL' p = tensorR init (wkL init) >>> popL (wkL . wkL . pushL p)
 
+
+tensorAssociativity
+  :: (Weaken s, Exchange s, TensorIntro s, Pos a, Pos b, Pos c)
+  -- -----------------------------------------
+  => a ⊗ (b ⊗ c) < _Γ -|s r|- _Δ > (a ⊗ b) ⊗ c
+tensorAssociativity = tensorL (exL (tensorL (tensorR (tensorR (wkL (exL init)) init) (exL init))))
 
 tensorCommutativity
   :: (Exchange s, TensorIntro s, Pos a, Pos b)
