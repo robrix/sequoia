@@ -152,9 +152,9 @@ instance TensorIntro Seq where
 -- Logical biconditional/exclusive disjunction
 
 instance IffIntro Seq where
-  iffL1 s1 s2 = popL (\ (Iff f _) -> pushL (funL (downR s1) s2) f)
+  iffL1 s1 s2 = popL (pushL (funL (downR s1) s2) . iffl)
 
-  iffL2 s1 s2 = popL (\ (Iff _ g) -> pushL (funL (downR s1) s2) g)
+  iffL2 s1 s2 = popL (pushL (funL (downR s1) s2) . iffr)
 
   iffR s1 s2 = liftA2 Iff <$> funR (downL s1) <*> funR (downL s2)
 
