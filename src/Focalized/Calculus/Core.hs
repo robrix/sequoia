@@ -32,6 +32,8 @@ module Focalized.Calculus.Core
 , pushΔ
 , poppedL
 , poppedR
+, poppedL2
+, poppedR2
 , popL2
 , popR2
 , pushL2
@@ -353,6 +355,20 @@ poppedR
   -- ------------------------------------------
   -> (_Γ -|s r|- _Δ > a -> _Γ' -|s r|- _Δ' > a)
 poppedR f p = popR (f . pushR p)
+
+poppedL2
+  :: Contextual s
+  =>         (_Γ -|s r|- _Δ ->         _Γ' -|s r|- _Δ')
+  -- --------------------------------------------------
+  -> (a < b < _Γ -|s r|- _Δ -> a < b < _Γ' -|s r|- _Δ')
+poppedL2 = poppedL . poppedL
+
+poppedR2
+  :: Contextual s
+  => (_Γ -|s r|- _Δ         -> _Γ' -|s r|- _Δ')
+  -- --------------------------------------------------
+  -> (_Γ -|s r|- _Δ > a > b -> _Γ' -|s r|- _Δ' > a > b)
+poppedR2 = poppedR . poppedR
 
 
 popL2
