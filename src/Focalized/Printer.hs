@@ -30,6 +30,7 @@ newtype Prec = Prec { getPrec :: Int }
   deriving (Eq, Ord, Show)
 
 newtype PrecPrinter p a = PrecPrinter { runPrecPrinter :: Prec -> p a }
+  deriving (Functor)
 
 
 parensIf :: Print p => Bool -> p -> p
