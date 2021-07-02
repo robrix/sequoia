@@ -8,10 +8,11 @@ module Focalized.Connective.Iff
 import Focalized.Down
 import Focalized.Function
 import Focalized.Polarity
+import Focalized.With
 
 -- Logical biconditional
 
-newtype Iff r a b = Iff { getIff :: (Down a ~~r~> b, Down b ~~r~> a) }
+newtype Iff r a b = Iff { getIff :: (Down a ~~r~> b) & (Down b ~~r~> a) }
 
 instance (Neg a, Neg b) => Polarized N (Iff r a b)
 
