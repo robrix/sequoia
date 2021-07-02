@@ -5,15 +5,13 @@ module Focalized.Connective.Iff
 , type (~>)
 ) where
 
-import Focalized.CPS
-import Focalized.Function (type (~>))
+import Focalized.Down
+import Focalized.Function
 import Focalized.Polarity
 
 -- Logical biconditional
 
-data Iff r a b
-  = IffT a b
-  | IffF (r •a) (r •b)
+data Iff r a b = Iff (Down a ~~r~> b) (Down b ~~r~> a)
 
 instance (Neg a, Neg b) => Polarized N (Iff r a b)
 
