@@ -21,6 +21,10 @@ module Focalized.Calculus.Context
 , replaceΓ
 , MemberΔ(..)
 , replaceΔ
+, ElemL(..)
+, replaceL
+, ElemR(..)
+, replaceR
 ) where
 
 import Control.Applicative (liftA2)
@@ -191,3 +195,35 @@ instance MemberΔ n a as as' => MemberΔ n a (as > n' :. b) (as' > n' :. b) wher
 
 replaceΔ :: (MemberΔ n a as as', MemberΔ n b bs as') => (b -> a) -> (n :. r •as -> n :. r •bs)
 replaceΔ f = injectΔ . fmap (fmap (contramap f)) . rejectΔ
+
+
+class ElemL a as as' | a as -> as', as as' -> a where
+  injectL :: (a, as') -> as
+  rejectL :: as -> (a, as')
+
+instance ElemL a (a < as) as where
+  injectL = (<|) <$> exl <*> exr
+  rejectL = (,)  <$> exl <*> exr
+
+instance ElemL a as as' => ElemL a (b < as) (b < as') where
+  injectL =        (<|) <$> exl . exr <*> injectL . fmap exr
+  rejectL = fmap . (<|) <$> exl       <*> rejectL .      exr
+
+replaceL :: (ElemL a as as', ElemL b bs as') => (a -> b) -> (as -> bs)
+replaceL f = injectL . first f . rejectL
+
+
+class ElemR a as as' | a as -> as', as as' -> a where
+  injectR :: (r •as', r •a) -> r •as
+  rejectR :: r •as -> (r •as', r •a)
+
+instance ElemR a (as > a) as where
+  injectR = (|>) <$>           exl <*>           exr
+  rejectR = (,)  <$> contramap inl <*> contramap inr
+
+instance ElemR a as as' => ElemR a (as > b) (as' > b) where
+  injectR =              (|>) <$> injectR . first (contramap inl) <*>           contramap inr . exl
+  rejectR = first . flip (|>) <$>                  contramap inr  <*> rejectR . contramap inl
+
+replaceR :: (ElemR a as as', ElemR b bs as') => (b -> a) -> (r •as -> r •bs)
+replaceR f = injectR . fmap (contramap f) . rejectR
