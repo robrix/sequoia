@@ -61,6 +61,6 @@ tensorCommutativity = tensorL (tensorR (exL init) init)
 
 tensorDistributivity
   :: (Exchange s, TensorIntro s, SumIntro s, Pos a, Pos b, Pos c)
-  -- -----------------------------
+  -- -------------------------------------------
   => a ⊗ (b ⊕ c) < _Γ -|s r|- _Δ > a ⊗ b ⊕ a ⊗ c
 tensorDistributivity = tensorL (exL (sumL (sumR1 (tensorR (exL init) init)) (sumR2 (tensorR (exL init) init))))
