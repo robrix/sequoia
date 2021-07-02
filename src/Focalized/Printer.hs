@@ -9,7 +9,12 @@ module Focalized.Printer
 , Print(..)
 ) where
 
+import Data.Functor.Contravariant
+
 newtype Printer a = Printer { runPrinter :: a -> ShowS }
+
+instance Contravariant Printer where
+  contramap f (Printer r) = Printer (r . f)
 
 
 prec :: Print (p a) => Prec -> p a -> PrecPrinter p a
