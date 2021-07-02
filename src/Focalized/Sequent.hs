@@ -159,10 +159,11 @@ instance IffIntro Seq where
   iffR s1 s2 = liftA2 Iff <$> funR (downL s1) <*> funR (downL s2)
 
 instance XOrIntro Seq where
-  xorL s1 s2 = popL ((uncurry ((. pushR s1) . flip pushL) <--> uncurry ((. pushR s2) . flip pushL)) . getXOr)
+  xorL s1 s2 = popL ((pushL (subL (upR s1)) <--> pushL (subL (upR s2))) . getXOr)
 
-  xorR1 s1 s2 = wkR' s1 >>> popL (popR . fmap liftR . curry (XOr . inl)) >>> wkL' (wkR s2)
-  xorR2 s1 s2 = wkR' s1 >>> popL (popR . fmap liftR . curry (XOr . inr)) >>> wkL' (wkR s2)
+  xorR1 s1 s2 = mapR (XOr . inl) (subR s1 (upL s2))
+
+  xorR2 s1 s2 = mapR (XOr . inr) (subR s1 (upL s2))
 
 
 -- Implication
