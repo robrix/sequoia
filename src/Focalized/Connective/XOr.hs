@@ -7,13 +7,12 @@ module Focalized.Connective.XOr
 ) where
 
 import Focalized.CPS
+import Focalized.Disjunction
 import Focalized.Polarity
 
 -- Exclusive disjunction
 
-data XOr r a b
-  = XOrL a (r •b)
-  | XOrR b (r •a)
+newtype XOr r a b = XOr { getXOr :: Either (a, r •b) (b, r •a) }
 
 instance (Pos a, Pos b) => Polarized P (XOr r a b)
 
@@ -24,6 +23,4 @@ infixr 6 </
 infixr 5 />
 
 exxor :: (a -> r •b -> c) -> (b -> r •a -> c) -> ((a </r/> b) -> c)
-exxor f g = \case
-  XOrL a kb -> f a kb
-  XOrR b ka -> g b ka
+exxor f g = (uncurry f <--> uncurry g) . getXOr

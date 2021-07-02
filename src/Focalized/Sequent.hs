@@ -161,8 +161,8 @@ instance IffIntro Seq where
 instance XOrIntro Seq where
   xorL s1 s2 = popL (exxor ((. pushR s1) . flip pushL) ((. pushR s2) . flip pushL))
 
-  xorR1 s1 s2 = wkR' s1 >>> popL (popR . fmap liftR . XOrL) >>> wkL' (wkR s2)
-  xorR2 s1 s2 = wkR' s1 >>> popL (popR . fmap liftR . XOrR) >>> wkL' (wkR s2)
+  xorR1 s1 s2 = wkR' s1 >>> popL (popR . fmap liftR . curry (XOr . inl)) >>> wkL' (wkR s2)
+  xorR2 s1 s2 = wkR' s1 >>> popL (popR . fmap liftR . curry (XOr . inr)) >>> wkL' (wkR s2)
 
 
 -- Implication
