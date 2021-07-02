@@ -6,6 +6,7 @@ module Focalized.Connective.Iff
 ) where
 
 import Focalized.CPS
+import Focalized.Function (type (~>))
 
 -- Logical biconditional
 
@@ -14,7 +15,5 @@ data Iff r a b
   | IffF (r •a) (r •b)
 
 type a <~r = Iff r a
-type r~> b = r b
 
 infixr 6 <~
-infixr 5 ~>
