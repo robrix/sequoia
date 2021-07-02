@@ -1,2 +1,6 @@
 module Focalized.Calculus.XOr
-() where
+( -- * Connectives
+  module Focalized.Connective.XOr
+) where
+
+import Focalized.Connective.XOr
