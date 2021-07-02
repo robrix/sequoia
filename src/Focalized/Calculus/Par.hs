@@ -6,6 +6,8 @@ module Focalized.Calculus.Par
 , parIdentityR
 , parAssociativity
 , parCommutativity
+, parDistributivityL
+, parDistributivityR
   -- * Connectives
 , module Focalized.Par
 ) where
@@ -13,6 +15,7 @@ module Focalized.Calculus.Par
 import Focalized.Calculus.Bottom
 import Focalized.Calculus.Context
 import Focalized.Calculus.Core
+import Focalized.Calculus.With
 import Focalized.Par
 import Focalized.Polarity
 import Prelude hiding (init)
@@ -64,3 +67,15 @@ parCommutativity
   -- -----------------------------
   => a ⅋ b < _Γ -|s r|- _Δ > b ⅋ a
 parCommutativity = parR (parL init (exR init))
+
+parDistributivityL
+  :: (Exchange s, ParIntro s, WithIntro s, Neg a, Neg b, Neg c)
+  -- -------------------------------------------
+  => a ⅋ c & b ⅋ c < _Γ -|s r|- _Δ > (a & b) ⅋ c
+parDistributivityL = parR (exR (withR (withL1 (parL init (exR init))) (withL2 (parL init (exR init)))))
+
+parDistributivityR
+  :: (Exchange s, ParIntro s, WithIntro s, Neg a, Neg b, Neg c)
+  -- -------------------------------------------
+  => a ⅋ (b & c) < _Γ -|s r|- _Δ > a ⅋ b & a ⅋ c
+parDistributivityR = withR (parR (parL (exR init) (withL1 init))) (parR (parL (exR init) (withL2 init)))
