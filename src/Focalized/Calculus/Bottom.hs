@@ -14,18 +14,18 @@ import Focalized.Calculus.Core
 
 class BottomIntro s where
   botL
-    -- -------------------
-    :: Bot < _Γ -|s r|- _Δ
+    -- ----------------------
+    :: Bottom < _Γ -|s r|- _Δ
 
   botR
     :: _Γ -|s r|- _Δ
-    -- -------------------
-    -> _Γ -|s r|- _Δ > Bot
+    -- ----------------------
+    -> _Γ -|s r|- _Δ > Bottom
 
 
 botR'
   :: (Core s, BottomIntro s)
-  => _Γ -|s r|- _Δ > Bot
-  -- -------------------
+  => _Γ -|s r|- _Δ > Bottom
+  -- ----------------------
   -> _Γ -|s r|- _Δ
 botR' = (>>> botL)

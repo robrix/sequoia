@@ -1,6 +1,6 @@
 module Focalized.Bottom
 ( -- * Negative falsity
-  Bot
+  Bottom
 , absurdN
 ) where
 
@@ -8,9 +8,9 @@ import Focalized.Polarity
 
 -- Negative falsity
 
-data Bot
+data Bottom
 
-instance Polarized N Bot where
+instance Polarized N Bottom where
 
-absurdN :: Bot -> a
+absurdN :: Bottom -> a
 absurdN = \case
