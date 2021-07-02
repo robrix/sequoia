@@ -5,12 +5,13 @@ module Focalized.Connective.Subtraction
 , type (-<)
 ) where
 
-import Focalized.CPS
+import Focalized.Connective.Negate
+import Focalized.Connective.Tensor
 import Focalized.Polarity
 
 -- Subtraction
 
-data Sub r a b = Sub { subA :: !a, subK :: !(r •b) }
+newtype Sub r a b = Sub { getSub :: a ⊗ r -b }
 
 instance (Pos a, Neg b) => Polarized P (Sub r a b) where
 
