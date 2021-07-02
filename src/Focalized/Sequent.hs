@@ -159,7 +159,7 @@ instance IffIntro Seq where
   iffR s1 s2 = mapR Iff (withR (funR (downL s1)) (funR (downL s2)))
 
 instance XOrIntro Seq where
-  xorL s1 s2 = popL ((pushL (subL (upR s1)) <--> pushL (subL (upR s2))) . getXOr)
+  xorL s1 s2 = mapL getXOr (sumL (subL (upR s1)) (subL (upR s2)))
 
   xorR1 s1 s2 = mapR (XOr . inl) (subR s1 (upL s2))
 
