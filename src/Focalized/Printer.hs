@@ -71,6 +71,9 @@ class Monoid p => Print p where
   space :: p
   space = char ' '
 
+  comma :: p
+  comma = char ','
+
   (<+>) :: p -> p -> p
   (<+>) = surround space
 
@@ -92,6 +95,7 @@ instance Print b => Print (a -> b) where
   lparen = pure lparen
   rparen = pure rparen
   space = pure space
+  comma = pure comma
 
   (<+>) = liftA2 (<+>)
 
