@@ -6,6 +6,7 @@ module Focalized.Calculus.Tensor
 , tensorAssociativity
 , tensorCommutativity
 , tensorDistributivity
+, tensorAnnihilation
   -- * Connectives
 , module Focalized.Tensor
 ) where
@@ -14,6 +15,7 @@ import Focalized.Calculus.Context
 import Focalized.Calculus.Core
 import Focalized.Calculus.One
 import Focalized.Calculus.Sum
+import Focalized.Calculus.Zero
 import Focalized.Polarity
 import Focalized.Tensor
 import Prelude hiding (init)
@@ -65,3 +67,9 @@ tensorDistributivity
   -- -------------------------------------------
   => a ⊗ (b ⊕ c) < _Γ -|s r|- _Δ > a ⊗ b ⊕ a ⊗ c
 tensorDistributivity = tensorL (exL (sumL (sumR1 (tensorR (exL init) init)) (sumR2 (tensorR (exL init) init))))
+
+tensorAnnihilation
+  :: (Exchange s, TensorIntro s, ZeroIntro s, Pos a)
+  -- -----------------------------
+  => a ⊗ Zero < _Γ -|s r|- _Δ
+tensorAnnihilation = tensorL (exL zeroL)
