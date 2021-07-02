@@ -3,12 +3,12 @@ module Focalized.Calculus.One
   OneIntro(..)
 , oneL'
   -- * Connctives
-, module Focalized.One
+, module Focalized.Connective.One
 ) where
 
 import Focalized.Calculus.Context
 import Focalized.Calculus.Core
-import Focalized.One
+import Focalized.Connective.One
 
 -- One
 

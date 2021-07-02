@@ -4,12 +4,12 @@ module Focalized.Calculus.Down
 , downL'
 , downR'
   -- * Connectives
-, module Focalized.Down
+, module Focalized.Connective.Down
 ) where
 
 import Focalized.Calculus.Context
 import Focalized.Calculus.Core
-import Focalized.Down
+import Focalized.Connective.Down
 import Focalized.Polarity
 import Prelude hiding (init)
 

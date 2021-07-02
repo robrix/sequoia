@@ -8,14 +8,14 @@ module Focalized.Calculus.Sum
 , sumAssociativity
 , sumCommutativity
   -- * Connectives
-, module Focalized.Sum
+, module Focalized.Connective.Sum
 ) where
 
 import Focalized.Calculus.Context
 import Focalized.Calculus.Core
 import Focalized.Calculus.Zero
+import Focalized.Connective.Sum
 import Focalized.Polarity
-import Focalized.Sum
 import Prelude hiding (init)
 
 -- Sum

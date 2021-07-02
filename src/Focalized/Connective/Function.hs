@@ -1,4 +1,4 @@
-module Focalized.Function
+module Focalized.Connective.Function
 ( -- * Implication
   appFun
 , appFun2

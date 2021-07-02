@@ -1,5 +1,5 @@
 {-# LANGUAGE ExistentialQuantification #-}
-module Focalized.Exists
+module Focalized.Connective.Exists
 ( -- * Existential quantification
   Exists(..)
 , runExists

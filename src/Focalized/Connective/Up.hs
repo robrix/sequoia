@@ -1,4 +1,4 @@
-module Focalized.Up
+module Focalized.Connective.Up
 ( -- * Positive-to-negative shift
   Up(..)
 ) where

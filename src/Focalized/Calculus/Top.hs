@@ -2,11 +2,11 @@ module Focalized.Calculus.Top
 ( -- * Top
   TopIntro(..)
   -- * Connctives
-, module Focalized.Top
+, module Focalized.Connective.Top
 ) where
 
 import Focalized.Calculus.Context
-import Focalized.Top
+import Focalized.Connective.Top
 
 -- Top
 

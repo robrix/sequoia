@@ -1,5 +1,5 @@
 {-# LANGUAGE ExistentialQuantification #-}
-module Focalized.Nu
+module Focalized.Connective.Nu
 ( -- * Corecursion
   Nu(..)
 , NuF(..)
@@ -8,11 +8,11 @@ module Focalized.Nu
 ) where
 
 import Focalized.CPS
-import Focalized.Down
-import Focalized.Function
+import Focalized.Connective.Down
+import Focalized.Connective.Function
 import Focalized.Polarity
-import Focalized.Quantification
-import Focalized.Tensor
+import Focalized.Connective.Quantification
+import Focalized.Connective.Tensor
 
 -- Corecursion
 

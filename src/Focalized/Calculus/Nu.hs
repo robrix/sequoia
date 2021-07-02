@@ -4,14 +4,14 @@ module Focalized.Calculus.Nu
   NuIntro(..)
 , nuR'
   -- * Connectives
-, module Focalized.Nu
+, module Focalized.Connective.Nu
 ) where
 
 import Focalized.Calculus.Context
 import Focalized.Calculus.Core
-import Focalized.Nu
+import Focalized.Connective.Nu
+import Focalized.Connective.Quantification
 import Focalized.Polarity
-import Focalized.Quantification
 import Prelude hiding (init)
 
 -- Corecursion

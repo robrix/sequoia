@@ -5,10 +5,10 @@ module Focalized.Connective.Iff
 , type (~>)
 ) where
 
-import Focalized.Down
-import Focalized.Function
+import Focalized.Connective.Down
+import Focalized.Connective.Function
+import Focalized.Connective.With
 import Focalized.Polarity
-import Focalized.With
 
 -- Logical biconditional
 

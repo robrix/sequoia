@@ -1,4 +1,4 @@
-module Focalized.With
+module Focalized.Connective.With
 ( -- * Negative conjunction
   type (&)(..)
 ) where

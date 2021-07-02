@@ -1,4 +1,4 @@
-module Focalized.Top
+module Focalized.Connective.Top
 ( -- * Negative truth
   Top(..)
 ) where

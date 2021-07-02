@@ -1,4 +1,4 @@
-module Focalized.Negation
+module Focalized.Connective.Negation
 ( -- * Negative double negation
   notNegate
 , getNotNegate
@@ -8,15 +8,15 @@ module Focalized.Negation
 , getNegateNot
 , type (-¬)
   -- * Not
-, module Focalized.Not
+, module Focalized.Connective.Not
   -- * Negate
-, module Focalized.Negate
+, module Focalized.Connective.Negate
 ) where
 
 import Data.Functor.Contravariant
 import Focalized.CPS
-import Focalized.Negate
-import Focalized.Not
+import Focalized.Connective.Negate
+import Focalized.Connective.Not
 
 -- Negative double negation
 

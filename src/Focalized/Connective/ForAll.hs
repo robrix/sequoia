@@ -1,4 +1,4 @@
-module Focalized.ForAll
+module Focalized.Connective.ForAll
 ( -- * Universal quantification
   ForAll(..)
 ) where

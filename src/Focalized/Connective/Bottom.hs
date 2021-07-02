@@ -1,4 +1,4 @@
-module Focalized.Bottom
+module Focalized.Connective.Bottom
 ( -- * Negative falsity
   Bottom
 , absurdN

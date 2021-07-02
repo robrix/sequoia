@@ -1,4 +1,4 @@
-module Focalized.Not
+module Focalized.Connective.Not
 ( -- * Not
   runNot
 , appNot

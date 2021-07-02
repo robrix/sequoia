@@ -1,4 +1,4 @@
-module Focalized.Par
+module Focalized.Connective.Par
 ( -- * Negative disjunction
   type (⅋)(..)
 ) where

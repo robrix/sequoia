@@ -1,4 +1,4 @@
-module Focalized.Zero
+module Focalized.Connective.Zero
 ( -- * Positive falsity
   Zero
 , absurdP

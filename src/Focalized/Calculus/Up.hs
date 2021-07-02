@@ -4,13 +4,13 @@ module Focalized.Calculus.Up
 , upL'
 , upR'
   -- * Connectives
-, module Focalized.Up
+, module Focalized.Connective.Up
 ) where
 
 import Focalized.Calculus.Context
 import Focalized.Calculus.Core
+import Focalized.Connective.Up
 import Focalized.Polarity
-import Focalized.Up
 import Prelude hiding (init)
 
 -- Up

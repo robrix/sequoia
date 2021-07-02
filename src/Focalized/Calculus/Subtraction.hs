@@ -3,13 +3,13 @@ module Focalized.Calculus.Subtraction
   SubtractionIntro(..)
 , subL'
   -- * Connectives
-, module Focalized.Subtraction
+, module Focalized.Connective.Subtraction
 ) where
 
 import Focalized.Calculus.Context
 import Focalized.Calculus.Core
+import Focalized.Connective.Subtraction
 import Focalized.Polarity
-import Focalized.Subtraction
 import Prelude hiding (init)
 
 -- Subtraction

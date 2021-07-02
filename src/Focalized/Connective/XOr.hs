@@ -5,10 +5,10 @@ module Focalized.Connective.XOr
 , type (/>)
 ) where
 
+import Focalized.Connective.Subtraction
+import Focalized.Connective.Sum
+import Focalized.Connective.Up
 import Focalized.Polarity
-import Focalized.Subtraction
-import Focalized.Sum
-import Focalized.Up
 
 -- Exclusive disjunction
 

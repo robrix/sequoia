@@ -1,4 +1,4 @@
-module Focalized.Tensor
+module Focalized.Connective.Tensor
 ( -- * Positive conjunction
   type (⊗)(..)
 ) where

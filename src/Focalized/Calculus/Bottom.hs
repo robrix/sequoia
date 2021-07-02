@@ -3,12 +3,12 @@ module Focalized.Calculus.Bottom
   BottomIntro(..)
 , botR'
   -- * Connectives
-, module Focalized.Bottom
+, module Focalized.Connective.Bottom
 ) where
 
-import Focalized.Bottom
 import Focalized.Calculus.Context
 import Focalized.Calculus.Core
+import Focalized.Connective.Bottom
 
 -- Bottom
 

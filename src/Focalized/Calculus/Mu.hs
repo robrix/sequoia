@@ -4,15 +4,15 @@ module Focalized.Calculus.Mu
   MuIntro(..)
 , muL'
   -- * Connectives
-, module Focalized.Mu
+, module Focalized.Connective.Mu
 ) where
 
 import Focalized.Calculus.Context
 import Focalized.Calculus.Core
-import Focalized.Function
-import Focalized.Mu
+import Focalized.Connective.Function
+import Focalized.Connective.Mu
+import Focalized.Connective.Quantification
 import Focalized.Polarity
-import Focalized.Quantification
 import Prelude hiding (init)
 
 -- Recursion

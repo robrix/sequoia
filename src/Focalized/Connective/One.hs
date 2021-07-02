@@ -1,4 +1,4 @@
-module Focalized.One
+module Focalized.Connective.One
 ( -- * Positive truth
   One(..)
 ) where

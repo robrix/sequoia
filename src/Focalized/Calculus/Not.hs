@@ -11,15 +11,15 @@ module Focalized.Calculus.Not
 , notLK'
 , notRK'
   -- * Connectives
-, module Focalized.Not
+, module Focalized.Connective.Not
 ) where
 
 import Focalized.CPS
 import Focalized.Calculus.Context
 import Focalized.Calculus.Control
 import Focalized.Calculus.Core
-import Focalized.Negation
-import Focalized.Not
+import Focalized.Connective.Negation
+import Focalized.Connective.Not
 import Focalized.Polarity
 import Prelude hiding (init)
 

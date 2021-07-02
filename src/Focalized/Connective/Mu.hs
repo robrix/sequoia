@@ -1,4 +1,4 @@
-module Focalized.Mu
+module Focalized.Connective.Mu
 ( -- * Recursion
   Mu(..)
 , MuF(..)
@@ -11,10 +11,10 @@ module Focalized.Mu
 import qualified Control.Category as Cat
 import           Data.Functor.Contravariant
 import           Focalized.CPS
-import           Focalized.Down
-import           Focalized.Function
+import           Focalized.Connective.Down
+import           Focalized.Connective.Function
 import           Focalized.Polarity
-import           Focalized.Quantification
+import           Focalized.Connective.Quantification
 
 -- Recursion
 

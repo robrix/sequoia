@@ -1,4 +1,4 @@
-module Focalized.Sum
+module Focalized.Connective.Sum
 ( -- * Positive disjunction
   type (⊕)(..)
 ) where

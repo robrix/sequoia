@@ -1,4 +1,4 @@
-module Focalized.Subtraction
+module Focalized.Connective.Subtraction
 ( -- * Subtraction
   Sub(..)
 , type (~-)

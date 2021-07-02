@@ -11,7 +11,7 @@ module Focalized.Calculus.Tensor
 , tensorAnnihilationL
 , tensorAnnihilationR
   -- * Connectives
-, module Focalized.Tensor
+, module Focalized.Connective.Tensor
 ) where
 
 import Focalized.Calculus.Context
@@ -19,8 +19,8 @@ import Focalized.Calculus.Core
 import Focalized.Calculus.One
 import Focalized.Calculus.Sum
 import Focalized.Calculus.Zero
+import Focalized.Connective.Tensor
 import Focalized.Polarity
-import Focalized.Tensor
 import Prelude hiding (init)
 
 -- Tensor

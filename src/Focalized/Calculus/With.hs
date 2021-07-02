@@ -8,14 +8,14 @@ module Focalized.Calculus.With
 , withAssociativity
 , withCommutativity
   -- * Connectives
-, module Focalized.With
+, module Focalized.Connective.With
 ) where
 
 import Focalized.Calculus.Context
 import Focalized.Calculus.Core
 import Focalized.Calculus.Top
+import Focalized.Connective.With
 import Focalized.Polarity
-import Focalized.With
 import Prelude hiding (init)
 
 -- With

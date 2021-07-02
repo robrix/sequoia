@@ -1,17 +1,17 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Focalized.Quantification
+module Focalized.Connective.Quantification
 ( -- * Quantified constraints
   type (==>)
   -- * Connectives
-, module Focalized.Exists
-, module Focalized.ForAll
+, module Focalized.Connective.Exists
+, module Focalized.Connective.ForAll
 ) where
 
 import Data.Kind (Constraint)
-import Focalized.Exists
-import Focalized.ForAll
+import Focalized.Connective.Exists
+import Focalized.Connective.ForAll
 
 -- Quantified constraints
 

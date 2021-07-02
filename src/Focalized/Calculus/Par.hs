@@ -11,7 +11,7 @@ module Focalized.Calculus.Par
 , parAnnihilationL
 , parAnnihilationR
   -- * Connectives
-, module Focalized.Par
+, module Focalized.Connective.Par
 ) where
 
 import Focalized.Calculus.Bottom
@@ -19,7 +19,7 @@ import Focalized.Calculus.Context
 import Focalized.Calculus.Core
 import Focalized.Calculus.Top
 import Focalized.Calculus.With
-import Focalized.Par
+import Focalized.Connective.Par
 import Focalized.Polarity
 import Prelude hiding (init)
 

@@ -1,4 +1,4 @@
-module Focalized.Negate
+module Focalized.Connective.Negate
 ( -- * Negate
   runNegate
 , appNegate

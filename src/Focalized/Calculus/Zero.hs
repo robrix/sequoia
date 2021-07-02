@@ -2,11 +2,11 @@ module Focalized.Calculus.Zero
 ( -- * Zero
   ZeroIntro(..)
   -- * Connectives
-, module Focalized.Zero
+, module Focalized.Connective.Zero
 ) where
 
 import Focalized.Calculus.Context
-import Focalized.Zero
+import Focalized.Connective.Zero
 
 -- Zero
 

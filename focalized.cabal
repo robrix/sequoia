@@ -63,7 +63,6 @@ common common
 library
   import: common
   exposed-modules:
-    Focalized.Bottom
     Focalized.Calculus
     Focalized.Calculus.Additive
     Focalized.Calculus.Bottom
@@ -96,32 +95,33 @@ library
     Focalized.Calculus.XOr
     Focalized.Calculus.Zero
     Focalized.Conjunction
+    Focalized.Connective.Bottom
+    Focalized.Connective.Down
+    Focalized.Connective.Exists
+    Focalized.Connective.ForAll
+    Focalized.Connective.Function
     Focalized.Connective.Iff
+    Focalized.Connective.Mu
+    Focalized.Connective.Negate
+    Focalized.Connective.Negation
+    Focalized.Connective.Not
+    Focalized.Connective.Nu
+    Focalized.Connective.One
+    Focalized.Connective.Par
+    Focalized.Connective.Quantification
+    Focalized.Connective.Subtraction
+    Focalized.Connective.Sum
+    Focalized.Connective.Tensor
+    Focalized.Connective.Top
+    Focalized.Connective.Up
+    Focalized.Connective.With
     Focalized.Connective.XOr
+    Focalized.Connective.Zero
     Focalized.CPS
     Focalized.Disjunction
-    Focalized.Down
-    Focalized.Exists
-    Focalized.ForAll
-    Focalized.Function
     Focalized.Functor.C
-    Focalized.Mu
-    Focalized.Negate
-    Focalized.Negation
-    Focalized.Not
-    Focalized.Nu
-    Focalized.One
-    Focalized.Par
     Focalized.Polarity
-    Focalized.Quantification
     Focalized.Sequent
-    Focalized.Subtraction
-    Focalized.Sum
-    Focalized.Tensor
-    Focalized.Top
-    Focalized.Up
-    Focalized.With
-    Focalized.Zero
 
   -- Modules included in this library but not exported.
   -- other-modules:

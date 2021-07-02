@@ -5,15 +5,15 @@ module Focalized.Calculus.ForAll
   UniversalIntro(..)
 , forAllR'
   -- * Connectives
-, module Focalized.ForAll
+, module Focalized.Connective.ForAll
 ) where
 
 import Focalized.Calculus.Context
 import Focalized.Calculus.Core
 import Focalized.Calculus.Negation
-import Focalized.ForAll
+import Focalized.Connective.ForAll
+import Focalized.Connective.Quantification
 import Focalized.Polarity
-import Focalized.Quantification
 import Prelude hiding (init)
 
 -- Universal quantification
