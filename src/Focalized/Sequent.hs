@@ -152,18 +152,18 @@ instance TensorIntro Seq where
 -- Logical biconditional/exclusive disjunction
 
 instance IffIntro Seq where
-  iffL1 s1 s2 = mapL getIff (withL1 (funL (downR s1) s2))
+  iffL1 s1 s2 = mapL getIff (withL1 (downR s1 ->⊢ s2))
 
-  iffL2 s1 s2 = mapL getIff (withL2 (funL (downR s1) s2))
+  iffL2 s1 s2 = mapL getIff (withL2 (downR s1 ->⊢ s2))
 
-  iffR s1 s2 = mapR Iff (withR (funR (downL s1)) (funR (downL s2)))
+  iffR s1 s2 = mapR Iff (funR (downL s1) ⊢& funR (downL s2))
 
 instance XOrIntro Seq where
-  xorL s1 s2 = mapL getXOr (sumL (subL (upR s1)) (subL (upR s2)))
+  xorL s1 s2 = mapL getXOr (subL (upR s1) ⊕⊢ subL (upR s2))
 
-  xorR1 s1 s2 = mapR XOr (sumR1 (subR s1 (upL s2)))
+  xorR1 s1 s2 = mapR XOr (sumR1 (s1 ⊢-< upL s2))
 
-  xorR2 s1 s2 = mapR XOr (sumR2 (subR s1 (upL s2)))
+  xorR2 s1 s2 = mapR XOr (sumR2 (s1 ⊢-< upL s2))
 
 
 -- Implication
