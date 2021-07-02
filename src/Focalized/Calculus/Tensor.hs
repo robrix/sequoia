@@ -44,6 +44,7 @@ tensorL' p = tensorR init (wkL init) >>> popL (wkL . wkL . pushL p)
 
 tensorIdentity
   :: (Core s, TensorIntro s, OneIntro s, Pos a)
+  -- ---------------------------
   => a < _Γ -|s r|- _Δ > a ⊗ One
 tensorIdentity = tensorR init oneR
 
