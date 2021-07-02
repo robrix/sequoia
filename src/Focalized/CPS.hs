@@ -9,6 +9,7 @@ module Focalized.CPS
 , (>>•)
 , (<<•)
 , (•>>)
+, (<••>)
 , type (•)(..)
 , type (••)
   -- * Double negation
@@ -81,6 +82,11 @@ f <<• k = K (f . runK k)
 k •>> f = K (f . runK k)
 
 infixr 1 <<•, •>>
+
+(<••>) :: Disj d => c •a -> c •b -> c •(a `d` b)
+(<••>) = liftK2 (<-->)
+
+infix 3 <••>
 
 newtype r •a = K { (•) :: a -> r }
 
@@ -194,11 +200,6 @@ instance ArrowChoice (CPS r) where
   right g = CPS (\ k -> (k •<< inl) <••> runCPS g (k •<< inr))
   f +++ g = CPS (\ k -> runCPS f (k •<< inl) <••> runCPS g (k •<< inr))
   f ||| g = CPS ((<••>) <$> runCPS f <*> runCPS g)
-
-(<••>) :: Disj d => c •a -> c •b -> c •(a `d` b)
-(<••>) = liftK2 (<-->)
-
-infix 3 <••>
 
 instance ArrowApply (CPS r) where
   app = CPS (>>- uncurry appCPS)
