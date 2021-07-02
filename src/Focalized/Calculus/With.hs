@@ -28,11 +28,14 @@ class WithIntro s where
     -- ---------------------
     -> a & b < _Γ -|s r|- _Δ
 
-  withR
+  withR, (⊢&)
     :: (Neg a, Neg b)
     => _Γ -|s r|- _Δ > a   ->   _Γ -|s r|- _Δ > b
     -- ------------------------------------------
     ->           _Γ -|s r|- _Δ > a & b
+  (⊢&) = withR
+
+  infixr 6 ⊢&
 
 
 withR1'
