@@ -3,6 +3,7 @@ module Focalized.Connective.XOr
   XOr(..)
 , type (</)
 , type (/>)
+, exxor
 ) where
 
 import Focalized.CPS
@@ -21,3 +22,8 @@ type r/> b = r b
 
 infixr 6 </
 infixr 5 />
+
+exxor :: (a -> r •b -> c) -> (b -> r •a -> c) -> ((a </r/> b) -> c)
+exxor f g = \case
+  XOrL a kb -> f a kb
+  XOrR b ka -> g b ka

@@ -159,9 +159,7 @@ instance IffIntro Seq where
   iffR s1 s2 = liftA2 Iff <$> funR (downL s1) <*> funR (downL s2)
 
 instance XOrIntro Seq where
-  xorL s1 s2 = popL (\case
-    XOrL a nb -> pushL (pushR s1 nb) a
-    XOrR b na -> pushL (pushR s2 na) b)
+  xorL s1 s2 = popL (exxor ((. pushR s1) . flip pushL) ((. pushR s2) . flip pushL))
 
   xorR1 s1 s2 = wkR' s1 >>> popL (popR . fmap liftR . XOrL) >>> wkL' (wkR s2)
   xorR2 s1 s2 = wkR' s1 >>> popL (popR . fmap liftR . XOrR) >>> wkL' (wkR s2)
