@@ -17,6 +17,7 @@ newtype Doc = Doc { getDoc :: ShowS }
   deriving (Monoid, Semigroup) via Endo String
 
 newtype Printer a = Printer { runPrinter :: a -> Doc }
+  deriving (Monoid, Semigroup)
 
 instance Contravariant Printer where
   contramap f (Printer r) = Printer (r . f)
