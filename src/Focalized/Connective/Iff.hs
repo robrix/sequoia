@@ -11,7 +11,10 @@ import Focalized.Polarity
 
 -- Logical biconditional
 
-data Iff r a b = Iff (Down a ~~r~> b) (Down b ~~r~> a)
+data Iff r a b = Iff
+  { iffl :: Down a ~~r~> b
+  , iffr :: Down b ~~r~> a
+  }
 
 instance (Neg a, Neg b) => Polarized N (Iff r a b)
 
