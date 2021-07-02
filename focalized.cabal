@@ -121,6 +121,7 @@ library
     Focalized.Disjunction
     Focalized.Functor.C
     Focalized.Polarity
+    Focalized.Printer
     Focalized.Sequent
 
   -- Modules included in this library but not exported.
