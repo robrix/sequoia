@@ -47,6 +47,7 @@ parensIf True  = parens
 parensIf False = id
 
 class Monoid p => Print p where
+  {-# MINIMAL char | string #-}
   char :: Char -> p
   char c = string [c]
   string :: String -> p
