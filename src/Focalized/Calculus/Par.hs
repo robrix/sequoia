@@ -5,6 +5,7 @@ module Focalized.Calculus.Par
 , parIdentityL
 , parIdentityR
 , parAssociativity
+, parCommutativity
   -- * Connectives
 , module Focalized.Par
 ) where
@@ -57,3 +58,9 @@ parAssociativity
   -- -----------------------------------------
   => a ⅋ (b ⅋ c) < _Γ -|s r|- _Δ > (a ⅋ b) ⅋ c
 parAssociativity = parR (exR (parR (parL (exR init) (parL init (wkR (exR init))))))
+
+parCommutativity
+  :: (Exchange s, ParIntro s, Neg a, Neg b)
+  -- -----------------------------
+  => a ⅋ b < _Γ -|s r|- _Δ > b ⅋ a
+parCommutativity = parR (parL init (exR init))
