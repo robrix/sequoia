@@ -16,11 +16,14 @@ import Prelude hiding (init)
 -- Sum
 
 class SumIntro s where
-  sumL
+  sumL, (⊕⊢)
     :: (Pos a, Pos b)
     => a < _Γ -|s r|- _Δ   ->   b < _Γ -|s r|- _Δ
     -- ------------------------------------------
     ->           a ⊕ b < _Γ -|s r|- _Δ
+  (⊕⊢) = sumL
+
+  infixr 6 ⊕⊢
 
   sumR1
     :: (Pos a, Pos b)
