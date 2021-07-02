@@ -156,7 +156,7 @@ instance IffIntro Seq where
 
   iffL2 s1 s2 = popL (pushL (funL (downR s1) s2) . exr . getIff)
 
-  iffR s1 s2 = liftA2 (fmap Iff . (-><-)) <$> funR (downL s1) <*> funR (downL s2)
+  iffR s1 s2 = mapR2 (fmap Iff . (-><-)) (funR (downL s1)) (funR (downL s2))
 
 instance XOrIntro Seq where
   xorL s1 s2 = popL ((pushL (subL (upR s1)) <--> pushL (subL (upR s2))) . getXOr)
