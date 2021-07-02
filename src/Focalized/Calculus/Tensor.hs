@@ -6,7 +6,8 @@ module Focalized.Calculus.Tensor
 , tensorIdentityR
 , tensorAssociativity
 , tensorCommutativity
-, tensorDistributivity
+, tensorDistributivityL
+, tensorDistributivityR
 , tensorAnnihilation
   -- * Connectives
 , module Focalized.Tensor
@@ -69,11 +70,17 @@ tensorCommutativity
   => a ⊗ b < _Γ -|s r|- _Δ > b ⊗ a
 tensorCommutativity = tensorL (tensorR (exL init) init)
 
-tensorDistributivity
+tensorDistributivityL
+  :: (Exchange s, TensorIntro s, SumIntro s, Pos a, Pos b, Pos c)
+  -- -------------------------------------------
+  => a ⊗ c ⊕ b ⊗ c < _Γ -|s r|- _Δ > (a ⊕ b) ⊗ c
+tensorDistributivityL = sumL (tensorL (tensorR (sumR1 init) (exL init))) (tensorL (tensorR (sumR2 init) (exL init)))
+
+tensorDistributivityR
   :: (Exchange s, TensorIntro s, SumIntro s, Pos a, Pos b, Pos c)
   -- -------------------------------------------
   => a ⊗ (b ⊕ c) < _Γ -|s r|- _Δ > a ⊗ b ⊕ a ⊗ c
-tensorDistributivity = tensorL (exL (sumL (sumR1 (tensorR (exL init) init)) (sumR2 (tensorR (exL init) init))))
+tensorDistributivityR = tensorL (exL (sumL (sumR1 (tensorR (exL init) init)) (sumR2 (tensorR (exL init) init))))
 
 tensorAnnihilation
   :: (Exchange s, TensorIntro s, ZeroIntro s, Pos a)
