@@ -162,7 +162,7 @@ instance ConcatΔ as Δ as where
   concatΔ = const
 
 instance ConcatΔ as bs cs => ConcatΔ (as > a) bs (cs > a) where
-  concatΔ as bs = concatΔ (contramap inl as) bs |> contramap inr as
+  concatΔ as bs = concatΔ (inlC as) bs |> inrC as
 
 
 class MemberΓ n a as as' | n a as -> as', as as' -> n a where
@@ -170,11 +170,11 @@ class MemberΓ n a as as' | n a as -> as', as as' -> n a where
   rejectΓ :: n :. as -> n :. (a, as')
 
 instance MemberΓ n a (n :. a < as) as where
-  injectΓ = liftA2 (<|) <$> fmap (V . exl) <*> fmap exr
-  rejectΓ = liftA2 (,) <$> fmap (getV . exl) <*> fmap exr
+  injectΓ = liftA2 (<|) <$> fmap    V . exlF <*> exrF
+  rejectΓ = liftA2 (,)  <$> fmap getV . exlF <*> exrF
 
 instance MemberΓ n a as as' => MemberΓ n a (n' :. b < as) (n' :. b < as') where
-  injectΓ = liftA2 (<|) <$> fmap (exl . exr) <*> injectΓ . fmap (fmap exr)
+  injectΓ = liftA2 (<|) <$> exlF . exrF <*> injectΓ . fmap exrF
   rejectΓ = rightAdjunct (\ (b :< as) -> leftAdjunct (fmap (fmap (b <|)) . rejectΓ) as)
 
 replaceΓ :: (MemberΓ n a as as', MemberΓ n b bs as') => (a -> b) -> (n :. as -> n :. bs)
@@ -186,12 +186,12 @@ class MemberΔ n a as as' | n a as -> as', as as' -> n a where
   rejectΔ :: n :. r •as -> n :. (r •as', r •a)
 
 instance MemberΔ n a (as > n :. a) as where
-  injectΔ = liftA2 (|>) <$> fmap exl <*> fmap (contramap getV . exr)
-  rejectΔ = liftA2 (,) <$> fmap (contramap inl) <*> fmap (contramap (inr . V))
+  injectΔ = liftA2 (|>) <$>      exlF <*> fmap (contramap getV . exr)
+  rejectΔ = liftA2 (,)  <$> fmap inlC <*> fmap (contramap (inr . V))
 
 instance MemberΔ n a as as' => MemberΔ n a (as > n' :. b) (as' > n' :. b) where
-  injectΔ = liftA2 (|>) <$> injectΔ . fmap (first (contramap inl)) <*> fmap (contramap inr . exl)
-  rejectΔ = rightAdjunct (\ as -> leftAdjunct (fmap (first (|> contramap inr as)) . rejectΔ) (contramap inl as))
+  injectΔ = liftA2 (|>) <$> injectΔ . fmap (first inlC) <*> fmap inrC . exlF
+  rejectΔ = rightAdjunct (\ as -> leftAdjunct (fmap (first (|> inrC as)) . rejectΔ) (inlC as))
 
 replaceΔ :: (MemberΔ n a as as', MemberΔ n b bs as') => (b -> a) -> (n :. r •as -> n :. r •bs)
 replaceΔ f = injectΔ . fmap (fmap (contramap f)) . rejectΔ
@@ -206,8 +206,8 @@ instance ElemL a (a < as) as where
   rejectL = (,)  <$> exl <*> exr
 
 instance ElemL a as as' => ElemL a (b < as) (b < as') where
-  injectL =        (<|) <$> exl . exr <*> injectL . fmap exr
-  rejectL = fmap . (<|) <$> exl       <*> rejectL .      exr
+  injectL =        (<|) <$> exl . exr <*> injectL . exrF
+  rejectL = fmap . (<|) <$> exl       <*> rejectL . exr
 
 replaceL :: (ElemL a as as', ElemL b bs as') => (a -> b) -> (as -> bs)
 replaceL f = injectL . first f . rejectL
@@ -218,12 +218,12 @@ class ElemR a as as' | a as -> as', as as' -> a where
   rejectR :: r •as -> (r •as', r •a)
 
 instance ElemR a (as > a) as where
-  injectR = (|>) <$>           exl <*>           exr
-  rejectR = (,)  <$> contramap inl <*> contramap inr
+  injectR = (|>) <$> exl  <*> exr
+  rejectR = (,)  <$> inlC <*> inrC
 
 instance ElemR a as as' => ElemR a (as > b) (as' > b) where
-  injectR =              (|>) <$> injectR . first (contramap inl) <*>           contramap inr . exl
-  rejectR = first . flip (|>) <$>                  contramap inr  <*> rejectR . contramap inl
+  injectR =              (|>) <$> injectR . first inlC <*>           inrC . exl
+  rejectR = first . flip (|>) <$>                 inrC <*> rejectR . inlC
 
 replaceR :: (ElemR a as as', ElemR b bs as') => (b -> a) -> (r •as -> r •bs)
 replaceR f = injectR . fmap (contramap f) . rejectR

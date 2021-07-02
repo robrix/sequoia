@@ -97,7 +97,7 @@ instance Contextual Seq where
 
 instance Control Seq where
   reset s = sequent (•<< (evalSeq s •))
-  shift p = sequent (\ k -> runSeq p ((k •<< inl) |> idK) •<< ((k •<< inr) <|))
+  shift p = sequent (\ k -> runSeq p (inlC k |> idK) •<< (inrC k <|))
 
 
 -- Negation
@@ -181,7 +181,7 @@ instance SubtractionIntro Seq where
 
 instance UniversalIntro Seq where
   forAllL p = mapL (notNegate . runForAll) p
-  forAllR p = sequent $ K . \ k a -> k • inr (ForAll (K ((• a) . runSeq p . ((k •<< inl) |>))))
+  forAllR p = sequent $ K . \ k a -> inrC k • ForAll (K ((• a) . runSeq p . (inlC k |>)))
 
 instance ExistentialIntro Seq where
   existsL p = popL (dnESeq . runExists (pushL p))
