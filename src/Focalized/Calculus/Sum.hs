@@ -6,6 +6,7 @@ module Focalized.Calculus.Sum
 , sumIdentityL
 , sumIdentityR
 , sumAssociativity
+, sumCommutativity
   -- * Connectives
 , module Focalized.Sum
 ) where
@@ -74,3 +75,9 @@ sumAssociativity
   -- -----------------------------------------
   => a ⊕ (b ⊕ c) < _Γ -|s r|- _Δ > (a ⊕ b) ⊕ c
 sumAssociativity = sumR1 (sumR1 init) ⊕⊢ sumR1 (sumR2 init) ⊕⊢ sumR2 init
+
+sumCommutativity
+  :: (Exchange s, SumIntro s, Pos a, Pos b)
+  -- -----------------------------
+  => a ⊕ b < _Γ -|s r|- _Δ > b ⊕ a
+sumCommutativity = sumR2 init ⊕⊢ sumR1 init
