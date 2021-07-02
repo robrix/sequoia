@@ -32,11 +32,14 @@ class TensorIntro s where
     -- ---------------------
     -> a ⊗ b < _Γ -|s r|- _Δ
 
-  tensorR
+  tensorR, (⊢⊗)
     :: (Pos a, Pos b)
     => _Γ -|s r|- _Δ > a   ->   _Γ -|s r|- _Δ > b
     -- ------------------------------------------
     ->           _Γ -|s r|- _Δ > a ⊗ b
+  (⊢⊗) = tensorR
+
+  infixr 7 ⊢⊗
 
 
 tensorL'
