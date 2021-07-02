@@ -47,7 +47,7 @@ tensorL'
   => a ⊗ b < _Γ -|s r|- _Δ
   -- ---------------------
   -> a < b < _Γ -|s r|- _Δ
-tensorL' p = tensorR init (wkL init) >>> popL (wkL . wkL . pushL p)
+tensorL' p = init ⊢⊗ wkL init >>> popL (wkL . wkL . pushL p)
 
 
 tensorIdentityL
@@ -60,31 +60,31 @@ tensorIdentityR
   :: (Core s, TensorIntro s, OneIntro s, Pos a)
   -- ---------------------------
   => a < _Γ -|s r|- _Δ > a ⊗ One
-tensorIdentityR = tensorR init oneR
+tensorIdentityR = init ⊢⊗ oneR
 
 tensorAssociativity
   :: (Weaken s, Exchange s, TensorIntro s, Pos a, Pos b, Pos c)
   -- -----------------------------------------
   => a ⊗ (b ⊗ c) < _Γ -|s r|- _Δ > (a ⊗ b) ⊗ c
-tensorAssociativity = tensorL (exL (tensorL (tensorR (tensorR (wkL (exL init)) init) (exL init))))
+tensorAssociativity = tensorL (exL (tensorL ((wkL (exL init) ⊢⊗ init) ⊢⊗ exL init)))
 
 tensorCommutativity
   :: (Exchange s, TensorIntro s, Pos a, Pos b)
   -- -----------------------------
   => a ⊗ b < _Γ -|s r|- _Δ > b ⊗ a
-tensorCommutativity = tensorL (tensorR (exL init) init)
+tensorCommutativity = tensorL (exL init ⊢⊗ init)
 
 tensorDistributivityL
   :: (Exchange s, TensorIntro s, SumIntro s, Pos a, Pos b, Pos c)
   -- -------------------------------------------
   => a ⊗ c ⊕ b ⊗ c < _Γ -|s r|- _Δ > (a ⊕ b) ⊗ c
-tensorDistributivityL = sumL (tensorL (tensorR (sumR1 init) (exL init))) (tensorL (tensorR (sumR2 init) (exL init)))
+tensorDistributivityL = tensorL (sumR1 init ⊢⊗ exL init) ⊕⊢ tensorL (sumR2 init ⊢⊗ exL init)
 
 tensorDistributivityR
   :: (Exchange s, TensorIntro s, SumIntro s, Pos a, Pos b, Pos c)
   -- -------------------------------------------
   => a ⊗ (b ⊕ c) < _Γ -|s r|- _Δ > a ⊗ b ⊕ a ⊗ c
-tensorDistributivityR = tensorL (exL (sumL (sumR1 (tensorR (exL init) init)) (sumR2 (tensorR (exL init) init))))
+tensorDistributivityR = tensorL (exL (sumR1 (exL init ⊢⊗ init) ⊕⊢ sumR2 (exL init ⊢⊗ init)))
 
 tensorAnnihilationL
   :: (TensorIntro s, ZeroIntro s, Pos a)
