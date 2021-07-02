@@ -94,6 +94,7 @@ library
     Focalized.Calculus.With
     Focalized.Calculus.Zero
     Focalized.Conjunction
+    Focalized.Connective.Iff
     Focalized.Connective.XOr
     Focalized.CPS
     Focalized.Disjunction
