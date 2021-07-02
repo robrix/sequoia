@@ -8,6 +8,8 @@ module Focalized.Calculus.Par
 , parCommutativity
 , parDistributivityL
 , parDistributivityR
+, parAnnihilationL
+, parAnnihilationR
   -- * Connectives
 , module Focalized.Par
 ) where
@@ -15,6 +17,7 @@ module Focalized.Calculus.Par
 import Focalized.Calculus.Bottom
 import Focalized.Calculus.Context
 import Focalized.Calculus.Core
+import Focalized.Calculus.Top
 import Focalized.Calculus.With
 import Focalized.Par
 import Focalized.Polarity
@@ -79,3 +82,15 @@ parDistributivityR
   -- -------------------------------------------
   => a ⅋ (b & c) < _Γ -|s r|- _Δ > a ⅋ b & a ⅋ c
 parDistributivityR = withR (parR (parL (exR init) (withL1 init))) (parR (parL (exR init) (withL2 init)))
+
+parAnnihilationL
+  :: TopIntro s
+  -- -----------------------------
+  => Top ⅋ a < _Γ -|s r|- _Δ > Top
+parAnnihilationL = topR
+
+parAnnihilationR
+  :: (ParIntro s, TopIntro s, Neg a)
+  -- -----------------------------
+  => Top < _Γ -|s r|- _Δ > a ⅋ Top
+parAnnihilationR = parR topR
