@@ -9,6 +9,7 @@ module Focalized.Calculus
 , module Focalized.Calculus.Control
   -- * Connectives
 , module Focalized.Calculus.Additive
+, module Focalized.Calculus.Iff
 , module Focalized.Calculus.Implicative
 , module Focalized.Calculus.Mu
 , module Focalized.Calculus.Multiplicative
@@ -16,6 +17,7 @@ module Focalized.Calculus
 , module Focalized.Calculus.Nu
 , module Focalized.Calculus.Quantification
 , module Focalized.Calculus.Shift
+, module Focalized.Calculus.XOr
   -- * Polarity
 , module Focalized.Polarity
 ) where
@@ -24,6 +26,7 @@ import Focalized.Calculus.Additive
 import Focalized.Calculus.Context
 import Focalized.Calculus.Control
 import Focalized.Calculus.Core
+import Focalized.Calculus.Iff
 import Focalized.Calculus.Implicative
 import Focalized.Calculus.Mu
 import Focalized.Calculus.Multiplicative
@@ -31,5 +34,6 @@ import Focalized.Calculus.Negation
 import Focalized.Calculus.Nu
 import Focalized.Calculus.Quantification
 import Focalized.Calculus.Shift
+import Focalized.Calculus.XOr
 import Focalized.Polarity
 import Focalized.Sequent
