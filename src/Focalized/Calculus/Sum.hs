@@ -3,12 +3,15 @@ module Focalized.Calculus.Sum
   SumIntro(..)
 , sumL1'
 , sumL2'
+, sumIdentityL
+, sumIdentityR
   -- * Connectives
 , module Focalized.Sum
 ) where
 
 import Focalized.Calculus.Context
 import Focalized.Calculus.Core
+import Focalized.Calculus.Zero
 import Focalized.Polarity
 import Focalized.Sum
 import Prelude hiding (init)
@@ -51,3 +54,16 @@ sumL2'
   -- ---------------------
   ->     b < _Γ -|s r|- _Δ
 sumL2' p = sumR2 init >>> wkL' p
+
+
+sumIdentityL
+  :: (Core s, SumIntro s, ZeroIntro s, Pos a)
+  -- ----------------------------
+  => Zero ⊕ a < _Γ -|s r|- _Δ > a
+sumIdentityL = zeroL ⊕⊢ init
+
+sumIdentityR
+  :: (Core s, SumIntro s, Pos a)
+  -- ----------------------------
+  => a < _Γ -|s r|- _Δ > a ⊕ Zero
+sumIdentityR = sumR1 init
