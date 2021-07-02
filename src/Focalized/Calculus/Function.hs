@@ -4,12 +4,15 @@ module Focalized.Calculus.Function
 , funL2
 , ($$)
 , funR'
+, funRPar
   -- * Connectives
 , module Focalized.Connective.Function
 ) where
 
 import Focalized.Calculus.Context
 import Focalized.Calculus.Core
+import Focalized.Calculus.Not
+import Focalized.Calculus.Par
 import Focalized.Connective.Function
 import Focalized.Polarity
 import Prelude hiding (init)
@@ -49,3 +52,9 @@ funR'
   -- -----------------------------
   -> a < _Γ -|s r|- _Δ > b
 funR' p = wkL (wkR' p) >>> funL2
+
+funRPar
+  :: (Weaken s, Exchange s, FunctionIntro s, ParIntro s, NotIntro s, Pos a, Neg b)
+  => _Γ -|s r|- _Δ > r ¬a ⅋ b
+  -> _Γ -|s r|- _Δ > a ~~r~> b
+funRPar s = wkR' s >>> funR (exL (notL init ⅋⊢ init))
