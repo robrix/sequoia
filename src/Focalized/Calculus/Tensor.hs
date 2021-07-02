@@ -38,7 +38,7 @@ tensorL' p = tensorR init (wkL init) >>> popL (wkL . wkL . pushL p)
 
 
 tensorCommutativity
-  :: (Weaken s, TensorIntro s, Pos a, Pos b)
+  :: (Exchange s, TensorIntro s, Pos a, Pos b)
   -- -----------------------------
   => a ⊗ b < _Γ -|s r|- _Δ > b ⊗ a
-tensorCommutativity = tensorL (tensorR (wkL init) init)
+tensorCommutativity = tensorL (tensorR (exL init) init)
