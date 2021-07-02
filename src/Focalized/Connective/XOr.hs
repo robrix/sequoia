@@ -7,11 +7,12 @@ module Focalized.Connective.XOr
 
 import Focalized.Polarity
 import Focalized.Subtraction
+import Focalized.Sum
 import Focalized.Up
 
 -- Exclusive disjunction
 
-newtype XOr r a b = XOr { getXOr :: Either (a ~-r-< Up b) (b ~-r-< Up a) }
+newtype XOr r a b = XOr { getXOr :: (a ~-r-< Up b) ⊕ (b ~-r-< Up a) }
 
 instance (Pos a, Pos b) => Polarized P (XOr r a b)
 
