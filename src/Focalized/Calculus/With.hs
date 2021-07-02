@@ -5,6 +5,8 @@ module Focalized.Calculus.With
 , withR2'
 , withIdentityL
 , withIdentityR
+, withAssociativity
+, withCommutativity
   -- * Connectives
 , module Focalized.With
 ) where
