@@ -20,11 +20,14 @@ import Prelude hiding (init)
 -- Function
 
 class FunctionIntro s where
-  funL
+  funL, (->⊢)
     :: (Pos a, Neg b)
     => _Γ -|s r|- _Δ > a   ->   b < _Γ -|s r|- _Δ
     -- ------------------------------------------
     ->        a ~~r~> b < _Γ -|s r|- _Δ
+  (->⊢) = funL
+
+  infixr 5 ->⊢
 
   funR
     :: (Pos a, Neg b)
