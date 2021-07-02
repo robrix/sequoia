@@ -67,3 +67,9 @@ withIdentityR
   -- ----------------------------
   => a < _Γ -|s r|- _Δ > a & Top
 withIdentityR = init ⊢& topR
+
+withAssociativity
+  :: (Core s, WithIntro s, Neg a, Neg b, Neg c)
+  -- -----------------------------------------
+  => a & (b & c) < _Γ -|s r|- _Δ > (a & b) & c
+withAssociativity = (withL1 init ⊢& withL2 (withL1 init)) ⊢& withL2 (withL2 init)
