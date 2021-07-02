@@ -328,12 +328,14 @@ pushRn s a = popΔ (pushΔ s . getV . injectΔ . (<$> a) . (,))
 selectL
   :: (Contextual s, ElemL a _Γ _Γ')
   => a < _Γ' -|s r|- _Δ
+  -- ------------------
   ->     _Γ  -|s r|- _Δ
 selectL s = popΓ (pushΓ s . uncurry (<|) . rejectL)
 
 selectR
   :: (Contextual s, ElemR a _Δ _Δ')
   => _Γ -|s r|- _Δ' > a
+  -- ------------------
   -> _Γ -|s r|- _Δ
 selectR s = popΔ (pushΔ s . uncurry (|>) . rejectR)
 
