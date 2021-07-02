@@ -3,12 +3,15 @@ module Focalized.Calculus.With
   WithIntro(..)
 , withR1'
 , withR2'
+, withIdentityL
+, withIdentityR
   -- * Connectives
 , module Focalized.With
 ) where
 
 import Focalized.Calculus.Context
 import Focalized.Calculus.Core
+import Focalized.Calculus.Top
 import Focalized.Polarity
 import Focalized.With
 import Prelude hiding (init)
@@ -51,3 +54,16 @@ withR2'
   -- ---------------------
   -> _Γ -|s r|- _Δ > b
 withR2' t = wkR' t >>> withL2 init
+
+
+withIdentityL
+  :: (Core s, WithIntro s, Neg a)
+  -- ----------------------------
+  => Top & a < _Γ -|s r|- _Δ > a
+withIdentityL = withL2 init
+
+withIdentityR
+  :: (Core s, WithIntro s, TopIntro s, Neg a)
+  -- ----------------------------
+  => a < _Γ -|s r|- _Δ > a & Top
+withIdentityR = init ⊢& topR
