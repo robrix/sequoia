@@ -40,14 +40,14 @@ funL2
   :: (Core s, FunctionIntro s, Pos a, Neg b)
   -- ---------------------------------
   => a ~~r~> b < a < _Γ -|s r|- _Δ > b
-funL2 = funL init init
+funL2 = init ->⊢ init
 
 ($$)
   :: (Weaken s, Exchange s, FunctionIntro s, Pos a, Neg b)
   => _Γ -|s r|- _Δ > a ~~r~> b   ->   _Γ -|s r|- _Δ > a
   -- --------------------------------------------------
   ->                _Γ -|s r|- _Δ > b
-f $$ a = wkR' f >>> wkR' a `funL` init
+f $$ a = wkR' f >>> wkR' a ->⊢ init
 
 funR'
   :: (Weaken s, Exchange s, FunctionIntro s, Pos a, Neg b)
