@@ -32,6 +32,9 @@ newtype Prec = Prec { getPrec :: Int }
 newtype PrecPrinter p a = PrecPrinter { runPrecPrinter :: Prec -> p a }
   deriving (Functor)
 
+instance Contravariant p => Contravariant (PrecPrinter p) where
+  contramap f (PrecPrinter r) = PrecPrinter (contramap f . r)
+
 
 parensIf :: Print p => Bool -> p -> p
 parensIf True  = parens
