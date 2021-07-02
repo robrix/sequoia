@@ -23,6 +23,7 @@ instance Contravariant Printer where
   contramap f (Printer r) = Printer (r . f)
 
 instance Print (Printer a) where
+  char c = Printer (const (Doc (c:)))
   string s = Printer (const (Doc (s<>)))
 
 
