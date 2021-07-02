@@ -22,6 +22,9 @@ newtype Printer a = Printer { runPrinter :: a -> Doc }
 instance Contravariant Printer where
   contramap f (Printer r) = Printer (r . f)
 
+instance Print (Printer a) where
+  string s = Printer (const (Doc (s<>)))
+
 
 prec :: Print (p a) => Prec -> p a -> PrecPrinter p a
 prec i pr = PrecPrinter $ \ i' -> parensIf (i' > i) pr
