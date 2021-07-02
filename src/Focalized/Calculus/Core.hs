@@ -25,6 +25,8 @@ module Focalized.Calculus.Core
 , pushR
 , pushLn
 , pushRn
+, selectL
+, selectR
 , pushΓΔ
 , pushΓ
 , pushΔ
@@ -321,6 +323,19 @@ pushRn
   -- --------------------------
   -> ( n :. r •a -> _Γ -|s r|- _Δ')
 pushRn s a = popΔ (pushΔ s . getV . injectΔ . (<$> a) . (,))
+
+
+selectL
+  :: (Contextual s, ElemL a _Γ _Γ')
+  => (_Γ'' -|s r|- _Δ' -> a < _Γ' -|s r|- _Δ)
+  -> (_Γ'' -|s r|- _Δ' ->     _Γ  -|s r|- _Δ)
+selectL f s = popΓ (pushΓ (f s) . uncurry (<|) . rejectL)
+
+selectR
+  :: (Contextual s, ElemR a _Δ _Δ')
+  => (_Γ' -|s r|- _Δ'' -> _Γ -|s r|- _Δ' > a)
+  -> (_Γ' -|s r|- _Δ'' -> _Γ -|s r|- _Δ)
+selectR f s = popΔ (pushΔ (f s) . uncurry (|>) . rejectR)
 
 
 poppedL
