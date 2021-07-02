@@ -111,7 +111,7 @@ instance Monad ((>) a) where
 --
 -- @¬A ✕ ¬B -> ¬(A + V)@
 (|>) :: r •os -> r •o -> r •(os > o)
-(|>) = liftK2 (<-->)
+(|>) = (<••>)
 
 
 -- Mixfix syntax
