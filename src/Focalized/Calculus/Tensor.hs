@@ -2,7 +2,8 @@ module Focalized.Calculus.Tensor
 ( -- * Tensor
   TensorIntro(..)
 , tensorL'
-, tensorIdentity
+, tensorIdentityL
+, tensorIdentityR
 , tensorAssociativity
 , tensorCommutativity
 , tensorDistributivity
@@ -44,11 +45,17 @@ tensorL'
 tensorL' p = tensorR init (wkL init) >>> popL (wkL . wkL . pushL p)
 
 
-tensorIdentity
+tensorIdentityL
+  :: (Core s, TensorIntro s, OneIntro s, Pos a)
+  -- ---------------------------
+  => One ⊗ a < _Γ -|s r|- _Δ > a
+tensorIdentityL = tensorL (oneL init)
+
+tensorIdentityR
   :: (Core s, TensorIntro s, OneIntro s, Pos a)
   -- ---------------------------
   => a < _Γ -|s r|- _Δ > a ⊗ One
-tensorIdentity = tensorR init oneR
+tensorIdentityR = tensorR init oneR
 
 tensorAssociativity
   :: (Weaken s, Exchange s, TensorIntro s, Pos a, Pos b, Pos c)
