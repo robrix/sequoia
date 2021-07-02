@@ -26,11 +26,14 @@ import Prelude hiding (init)
 -- Par
 
 class ParIntro s where
-  parL
+  parL, (⅋⊢)
     :: (Neg a, Neg b)
     => a < _Γ -|s r|- _Δ   ->   b < _Γ -|s r|- _Δ
     -- ------------------------------------------
     ->          a ⅋ b < _Γ -|s r|- _Δ
+  (⅋⊢) = parL
+
+  infixr 7 ⅋⊢
 
   parR
     :: (Neg a, Neg b)
