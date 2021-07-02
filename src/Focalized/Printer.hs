@@ -48,6 +48,7 @@ parensIf False = id
 
 class Monoid p => Print p where
   char :: Char -> p
+  char c = string [c]
   string :: String -> p
   string = foldMap char
 
