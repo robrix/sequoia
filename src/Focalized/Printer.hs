@@ -1,6 +1,7 @@
 -- | Pretty-printing.
 module Focalized.Printer
 ( Doc(..)
+, printer
 , Printer(..)
 , prec
 , atom
@@ -15,6 +16,10 @@ import Data.Monoid (Endo(..))
 
 newtype Doc = Doc { getDoc :: ShowS }
   deriving (Monoid, Semigroup) via Endo String
+
+
+printer :: (forall x . a -> Printer x) -> Printer a
+printer f = Printer (runPrinter . f <*> id)
 
 newtype Printer a = Printer { runPrinter :: a -> Doc }
   deriving (Monoid, Semigroup)
