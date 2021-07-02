@@ -4,6 +4,7 @@ module Focalized.Calculus.Function
 , funL2
 , ($$)
 , funR'
+, funLPar
 , funRPar
   -- * Connectives
 , module Focalized.Connective.Function
@@ -55,6 +56,13 @@ funR'
   -- -----------------------------
   -> a < _Γ -|s r|- _Δ > b
 funR' p = wkL (wkR' p) >>> funL2
+
+funLPar
+  :: (Weaken s, Exchange s, FunctionIntro s, ParIntro s, NotIntro s, Pos a, Neg b)
+  => r  ¬a ⅋ b < _Γ -|s r|- _Δ
+  -- -------------------------
+  -> a ~~r~> b < _Γ -|s r|- _Δ
+funLPar s = exR (parR (exR (notR (exR init)))) ->⊢ parR init >>> wkL' s
 
 funRPar
   :: (Weaken s, Exchange s, FunctionIntro s, ParIntro s, NotIntro s, Pos a, Neg b)
