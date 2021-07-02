@@ -75,3 +75,14 @@ class Monoid p => Print p where
 
   parens :: p -> p
   parens = surround lparen rparen
+
+instance Print b => Print (a -> b) where
+  char   = pure . char
+  string = pure . string
+
+  lparen = pure lparen
+  rparen = pure rparen
+
+  surround l r x = surround <$> l <*> r <*> x
+
+  parens f = parens <$> f
