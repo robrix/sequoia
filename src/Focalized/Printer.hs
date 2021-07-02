@@ -1,6 +1,7 @@
 -- | Pretty-printing.
 module Focalized.Printer
-( Printer(..)
+( Doc(..)
+, Printer(..)
 , prec
 , atom
 , withPrec
@@ -11,7 +12,9 @@ module Focalized.Printer
 
 import Data.Functor.Contravariant
 
-newtype Printer a = Printer { runPrinter :: a -> ShowS }
+newtype Doc = Doc { getDoc :: ShowS }
+
+newtype Printer a = Printer { runPrinter :: a -> Doc }
 
 instance Contravariant Printer where
   contramap f (Printer r) = Printer (r . f)
