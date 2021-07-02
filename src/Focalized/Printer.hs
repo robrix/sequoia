@@ -17,6 +17,10 @@ import Data.Monoid (Endo(..))
 newtype Doc = Doc { getDoc :: ShowS }
   deriving (Monoid, Semigroup) via Endo String
 
+instance Print Doc where
+  char c = Doc (c:)
+  string s = Doc (s<>)
+
 
 printer :: (forall x . a -> Printer x) -> Printer a
 printer f = Printer (runPrinter . f <*> id)
