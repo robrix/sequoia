@@ -3,11 +3,9 @@ module Focalized.Connective.XOr
   XOr(..)
 , type (</)
 , type (/>)
-, exxor
 ) where
 
 import Focalized.CPS
-import Focalized.Disjunction
 import Focalized.Polarity
 
 -- Exclusive disjunction
@@ -21,6 +19,3 @@ type r/> b = r b
 
 infixr 6 </
 infixr 5 />
-
-exxor :: (a -> r •b -> c) -> (b -> r •a -> c) -> ((a </r/> b) -> c)
-exxor f g = (uncurry f <--> uncurry g) . getXOr
