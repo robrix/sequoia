@@ -11,8 +11,10 @@ module Focalized.Printer
 ) where
 
 import Data.Functor.Contravariant
+import Data.Monoid (Endo(..))
 
 newtype Doc = Doc { getDoc :: ShowS }
+  deriving (Monoid, Semigroup) via Endo String
 
 newtype Printer a = Printer { runPrinter :: a -> Doc }
 
