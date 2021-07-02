@@ -66,25 +66,25 @@ parAssociativity
   :: (Weaken s, Exchange s, ParIntro s, Neg a, Neg b, Neg c)
   -- -----------------------------------------
   => a ⅋ (b ⅋ c) < _Γ -|s r|- _Δ > (a ⅋ b) ⅋ c
-parAssociativity = parR (exR (parR (parL (exR init) (parL init (wkR (exR init))))))
+parAssociativity = parR (exR (parR (exR init ⅋⊢ init ⅋⊢ wkR (exR init))))
 
 parCommutativity
   :: (Exchange s, ParIntro s, Neg a, Neg b)
   -- -----------------------------
   => a ⅋ b < _Γ -|s r|- _Δ > b ⅋ a
-parCommutativity = parR (parL init (exR init))
+parCommutativity = parR (init ⅋⊢ exR init)
 
 parDistributivityL
   :: (Exchange s, ParIntro s, WithIntro s, Neg a, Neg b, Neg c)
   -- -------------------------------------------
   => a ⅋ c & b ⅋ c < _Γ -|s r|- _Δ > (a & b) ⅋ c
-parDistributivityL = parR (exR (withR (withL1 (parL init (exR init))) (withL2 (parL init (exR init)))))
+parDistributivityL = parR (exR (withL1 (init ⅋⊢ exR init) ⊢& withL2 (init ⅋⊢ exR init)))
 
 parDistributivityR
   :: (Exchange s, ParIntro s, WithIntro s, Neg a, Neg b, Neg c)
   -- -------------------------------------------
   => a ⅋ (b & c) < _Γ -|s r|- _Δ > a ⅋ b & a ⅋ c
-parDistributivityR = withR (parR (parL (exR init) (withL1 init))) (parR (parL (exR init) (withL2 init)))
+parDistributivityR = parR (exR init ⅋⊢ withL1 init) ⊢& parR (exR init ⅋⊢ withL2 init)
 
 parAnnihilationL
   :: TopIntro s
