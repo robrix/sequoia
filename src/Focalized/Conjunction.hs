@@ -9,11 +9,22 @@ module Focalized.Conjunction
 , bifoldMapConj
 , bimapConj
 , bitraverseConj
+  -- * Lifted projections
+, exlC
+, exrC
+, exlF
+, exrF
+, exlL
+, exrL
+, exlR
+, exrR
 ) where
 
 -- Conjunction
 
 import Control.Applicative (liftA2)
+import Data.Functor.Contravariant
+import Data.Profunctor
 
 class Conj c where
   (-><-) :: a -> b -> (a `c` b)
@@ -49,3 +60,26 @@ bimapConj = exlrC (-><-)
 
 bitraverseConj :: (Conj p, Applicative m) => (a -> m a') -> (b -> m b') -> (a `p` b -> m (a' `p` b'))
 bitraverseConj = exlrC (liftA2 (-><-))
+
+
+-- Lifted projections
+
+exlC :: (Contravariant f, Conj c) => f a -> f (a `c` b)
+exrC :: (Contravariant f, Conj c) => f b -> f (a `c` b)
+exlC = contramap exl
+exrC = contramap exr
+
+exlF :: (Functor f, Conj c) => f (a `c` b) -> f a
+exrF :: (Functor f, Conj c) => f (a `c` b) -> f b
+exlF = fmap exl
+exrF = fmap exr
+
+exlL :: (Profunctor p, Conj c) => p a r -> p (a `c` b) r
+exrL :: (Profunctor p, Conj c) => p b r -> p (a `c` b) r
+exlL = lmap exl
+exrL = lmap exr
+
+exlR :: (Profunctor p, Conj c) => p l (a `c` b) -> p l a
+exrR :: (Profunctor p, Conj c) => p l (a `c` b) -> p l b
+exlR = rmap exl
+exrR = rmap exr
