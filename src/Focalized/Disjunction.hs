@@ -1,7 +1,6 @@
 module Focalized.Disjunction
 ( -- * Disjunction
   Disj(..)
-, (-||-)
 , exlD
 , exrD
 , foldMapDisj
@@ -10,8 +9,6 @@ module Focalized.Disjunction
 , bimapDisj
 , bitraverseDisj
 ) where
-
-import Data.Functor.Adjunction
 
 -- Disjunction
 
@@ -25,11 +22,6 @@ instance Disj Either where
   inl = Left
   inr = Right
   (<-->) = either
-
-(-||-) :: (Adjunction f u, Disj d) => (f l -> u m) -> (f r -> u m) -> (f (l `d` r) -> u m)
-fl -||- fr = rightAdjunct (leftAdjunct fl <--> leftAdjunct fr)
-
-infix 3 -||-
 
 exlD :: Disj d => a `d` b -> Maybe a
 exlD = Just <--> const Nothing
