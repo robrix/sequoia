@@ -14,6 +14,7 @@ module Focalized.Printer
 import Control.Applicative (liftA2)
 import Data.Functor.Contravariant
 import Data.Monoid (Endo(..))
+import Prelude hiding (print)
 
 newtype Doc = Doc { getDoc :: ShowS }
   deriving (Monoid, Semigroup) via Endo String
@@ -24,9 +25,9 @@ instance Print Doc where
 
 
 printer :: (forall x . a -> Printer x) -> Printer a
-printer f = Printer (runPrinter . f <*> id)
+printer f = Printer (print . f <*> id)
 
-newtype Printer a = Printer { runPrinter :: a -> Doc }
+newtype Printer a = Printer { print :: a -> Doc }
   deriving (Monoid, Print, Semigroup)
 
 instance Contravariant Printer where
