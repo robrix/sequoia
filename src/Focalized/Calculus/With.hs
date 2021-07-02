@@ -73,3 +73,9 @@ withAssociativity
   -- -----------------------------------------
   => a & (b & c) < _Γ -|s r|- _Δ > (a & b) & c
 withAssociativity = (withL1 init ⊢& withL2 (withL1 init)) ⊢& withL2 (withL2 init)
+
+withCommutativity
+  :: (Exchange s, WithIntro s, Neg a, Neg b)
+  -- -----------------------------
+  => a & b < _Γ -|s r|- _Δ > b & a
+withCommutativity = withL2 init ⊢& withL1 init
