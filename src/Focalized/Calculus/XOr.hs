@@ -7,21 +7,25 @@ module Focalized.Calculus.XOr
 
 import Focalized.Calculus.Context
 import Focalized.Connective.XOr
+import Focalized.Polarity
 
 -- Exclusive disjunction
 
 class XOrIntro s where
   xorL
-    :: a < _Γ -|s r|- _Δ > b   ->   b < _Γ -|s r|- _Δ > a
+    :: (Pos a, Pos b)
+    => a < _Γ -|s r|- _Δ > b   ->   b < _Γ -|s r|- _Δ > a
     -- --------------------------------------------------
     ->             a </r/> b < _Γ -|s r|- _Δ
 
   xorR1
-    :: _Γ -|s r|- _Δ > a   ->   b < _Γ -|s r|- _Δ
+    :: (Pos a, Pos b)
+    => _Γ -|s r|- _Δ > a   ->   b < _Γ -|s r|- _Δ
     -- ------------------------------------------
     ->         _Γ -|s r|- _Δ > a </r/> b
 
   xorR2
-    :: _Γ -|s r|- _Δ > b   ->   a < _Γ -|s r|- _Δ
+    :: (Pos a, Pos b)
+    => _Γ -|s r|- _Δ > b   ->   a < _Γ -|s r|- _Δ
     -- ------------------------------------------
     ->         _Γ -|s r|- _Δ > a </r/> b
