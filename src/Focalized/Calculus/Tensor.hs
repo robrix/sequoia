@@ -2,6 +2,7 @@ module Focalized.Calculus.Tensor
 ( -- * Tensor
   TensorIntro(..)
 , tensorL'
+, tensorIdentity
 , tensorAssociativity
 , tensorCommutativity
   -- * Connectives
@@ -10,6 +11,7 @@ module Focalized.Calculus.Tensor
 
 import Focalized.Calculus.Context
 import Focalized.Calculus.Core
+import Focalized.Calculus.One
 import Focalized.Polarity
 import Focalized.Tensor
 import Prelude hiding (init)
@@ -37,6 +39,11 @@ tensorL'
   -> a < b < _Γ -|s r|- _Δ
 tensorL' p = tensorR init (wkL init) >>> popL (wkL . wkL . pushL p)
 
+
+tensorIdentity
+  :: (Core s, TensorIntro s, OneIntro s, Pos a)
+  => a < _Γ -|s r|- _Δ > a ⊗ One
+tensorIdentity = tensorR init oneR
 
 tensorAssociativity
   :: (Weaken s, Exchange s, TensorIntro s, Pos a, Pos b, Pos c)
