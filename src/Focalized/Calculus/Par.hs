@@ -2,7 +2,8 @@ module Focalized.Calculus.Par
 ( -- * Par
   ParIntro(..)
 , parR'
-, parIdentity
+, parIdentityL
+, parIdentityR
   -- * Connectives
 , module Focalized.Par
 ) where
@@ -38,8 +39,14 @@ parR'
 parR' p = poppedR (wkR . wkR) p >>> parL (wkR init) init
 
 
-parIdentity
+parIdentityL
+  :: (Core s, ParIntro s, BottomIntro s, Neg a)
+  -- ---------------------------
+  => Bot ⅋ a < _Γ -|s r|- _Δ > a
+parIdentityL = parL botL init
+
+parIdentityR
   :: (Core s, ParIntro s, BottomIntro s, Neg a)
   -- ---------------------------
   => a < _Γ -|s r|- _Δ > a ⅋ Bot
-parIdentity = parR (botR init)
+parIdentityR = parR (botR init)
