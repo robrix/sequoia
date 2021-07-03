@@ -1,8 +1,6 @@
 module Focalized.CPS
-( -- * Double negation
-  dnE
-  -- * CPS
-, cps
+( -- * CPS
+  cps
 , liftCPS
 , contToCPS
 , cpsToCont
@@ -17,6 +15,7 @@ module Focalized.CPS
 , curryCPS
 , uncurryCPS
 , CPS(..)
+, dnE
 , CPST(..)
   -- * Cont
 , Cont(..)
@@ -32,10 +31,6 @@ import           Data.Profunctor
 import           Data.Profunctor.Traversing
 import           Focalized.Continuation
 import           Focalized.Disjunction
-
-dnE :: r ••CPS r a b -> CPS r a b
-dnE f = CPS (\ k -> K (\ a -> f • K (\ f -> runCPS f k • a)))
-
 
 -- CPS
 
@@ -127,6 +122,10 @@ instance Choice (CPS r) where
 instance Traversing (CPS r) where
   traverse' c = liftCPS ((•) . execCPS . traverse (pappCPS c))
   wander traverse c = liftCPS ((•) . execCPS . traverse (pappCPS c))
+
+
+dnE :: r ••CPS r a b -> CPS r a b
+dnE f = CPS (\ k -> K (\ a -> f • K (\ f -> runCPS f k • a)))
 
 
 newtype CPST r a m b = CPST { runCPST :: CPS (m r) a b }
