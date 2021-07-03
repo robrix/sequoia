@@ -3,7 +3,6 @@ module Focalized.Connective.Not
   type (¬)(..)
 ) where
 
-import Data.Functor.Contravariant
 import Focalized.Continuation
 import Focalized.Polarity
 

@@ -6,6 +6,7 @@ module Focalized.Continuation
 , appK1
 , appK2
 , Contrapplicative(..)
+, Contravariant(..)
 , coerceK
 , coerceK1
 , coerceK2
