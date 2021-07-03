@@ -217,7 +217,7 @@ applyCPS = inC (>>- uncurry appCPS)
 
 -- Traversing
 
-wanderCPS :: (CPS k c, Applicative (c ())) => (forall f . Applicative f => (a -> f b) -> (s -> f t)) -> c a b -> c s t
+wanderCPS :: (CPS k c, Applicative (c ())) => (forall f . Applicative f => (a -> f b) -> (s -> f t)) -> (c a b -> c s t)
 wanderCPS traverse c = liftCPS (exK . execCPS . traverse (pappCPS c))
 
 
