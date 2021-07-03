@@ -2,6 +2,7 @@ module Focalized.Continuation
 ( -- * Continuations
   type (•)(..)
   -- ** Composition
+, idK
 , (•<<)
 , (>>•)
 , (<<•)
@@ -26,6 +27,10 @@ instance Contravariant ((•) r) where
 
 
 -- Composition
+
+idK :: r •r
+idK = Cat.id
+
 
 (•<<) :: r •a -> (b -> a) -> r •b
 (•<<) = flip contramap

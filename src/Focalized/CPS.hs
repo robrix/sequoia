@@ -1,7 +1,6 @@
 module Focalized.CPS
 ( -- * Continuations
-  idK
-, liftK
+  liftK
 , lowerK
 , liftK2
 , runK
@@ -47,9 +46,6 @@ import           Focalized.Continuation
 import           Focalized.Disjunction
 
 -- Continuations
-
-idK :: r •r
-idK = Cat.id
 
 liftK :: ((a -> r) -> (b -> r)) -> (r •a -> r •b)
 liftK = dimap (•) K

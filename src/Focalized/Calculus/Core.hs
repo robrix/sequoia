@@ -56,7 +56,6 @@ import Control.Monad (join)
 import Data.Bifunctor
 import Data.Functor.Contravariant
 import Data.Profunctor
-import Focalized.CPS
 import Focalized.Calculus.Context
 import Focalized.Conjunction
 import Focalized.Continuation
