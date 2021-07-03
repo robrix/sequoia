@@ -40,10 +40,10 @@ cps = CPS . inK1 . flip (.)
 liftCPS :: (a -> r •b -> r) -> CPS r a b
 liftCPS = CPS . fmap K . flip
 
-contToCPS :: (a -> Cont r b) -> CPS r a b
+contToCPS :: (a -> Cont ((•) r) b) -> CPS r a b
 contToCPS f = liftCPS ((•) . runCont . f)
 
-cpsToCont :: CPS r a b -> (a -> Cont r b)
+cpsToCont :: CPS r a b -> (a -> Cont ((•) r) b)
 cpsToCont c a = Cont (appCPS c a)
 
 appCPS :: CPS r a b -> a -> r ••b

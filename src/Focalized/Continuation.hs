@@ -176,14 +176,14 @@ runDN2 f a b = runDN0 (f (liftDN0 a) (liftDN0 b))
 
 -- Cont monad
 
-newtype Cont r a = Cont { runCont :: r ••a }
+newtype Cont k a = Cont { runCont :: k (k a) }
 
-instance Functor (Cont r) where
+instance Contravariant k => Functor (Cont k) where
   fmap f = Cont . (•<< (•<< f)) . runCont
 
-instance Applicative (Cont r) where
-  pure = Cont . K . flip (•)
+instance Contrapplicative k => Applicative (Cont k) where
+  pure = Cont . liftDN
   (<*>) = ap
 
-instance Monad (Cont r) where
-  Cont m >>= f = Cont (m •<< K . \ k a -> runCont (f a) • k)
+instance Contrapplicative k => Monad (Cont k) where
+  Cont m >>= f = Cont (m •<< inK . \ k a -> exK (runCont (f a)) k)
