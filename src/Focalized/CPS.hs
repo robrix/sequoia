@@ -70,7 +70,7 @@ import           Focalized.Disjunction
 
 -- CPS
 
-class (Cat.Category c, Continuation k, Profunctor c) => CPS k c | c -> k where
+class (Cat.Category c, Representable k, Profunctor c) => CPS k c | c -> k where
   inC :: (k b -> k a) -> a `c` b
   exC :: a `c` b      -> (k b -> k a)
 
@@ -94,7 +94,7 @@ exC2 = dimap2 inC inC exC
 cps :: CPS k c => (a -> b) -> a `c` b
 cps = inC . inK1 . flip (.)
 
-liftCPS :: CPS k c => (a -> k b -> R k) -> a `c` b
+liftCPS :: CPS k c => (a -> k b -> Rep k) -> a `c` b
 liftCPS = inC . fmap inK . flip
 
 contToCPS :: CPS k c => (a -> Cont k b) -> a `c` b
@@ -118,7 +118,7 @@ pappCPS c a = c Cat.<<< inC (•<< const a)
 execCPS :: CPS k c => () `c` a -> k **a
 execCPS c = appCPS c ()
 
-evalCPS :: CPS k c => i `c` R k -> k i
+evalCPS :: CPS k c => i `c` Rep k -> k i
 evalCPS c = exC c idK
 
 dnE :: CPS k c => k **c a b -> a `c` b
@@ -136,10 +136,10 @@ uncurryCPS c = inC (\ k -> inK ((`exK` k) . uncurry (appCPS2 c)))
 
 -- Delimited continuations
 
-resetCPS :: (CPS j cj, CPS k ck) => ck i (R k) -> cj i (R k)
+resetCPS :: (CPS j cj, CPS k ck) => ck i (Rep k) -> cj i (Rep k)
 resetCPS c = inC (inK . \ k -> exK k . exK (evalCPS c))
 
-shiftCPS :: CPS k c => (k o -> c i (R k)) -> c i o
+shiftCPS :: CPS k c => (k o -> c i (Rep k)) -> c i o
 shiftCPS f = inC (evalCPS . f)
 
 

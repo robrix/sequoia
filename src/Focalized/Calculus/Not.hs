@@ -56,8 +56,8 @@ notR' p = wkL p >>> notL init
 
 shiftP
   :: (Control s, Contextual k (s k))
-  =>  k ¬a < _Γ -|s k|- _Δ > R k
-  -- ---------------------------
+  =>  k ¬a < _Γ -|s k|- _Δ > Rep k
+  -- -----------------------------
   ->         _Γ -|s k|- _Δ > a
 shiftP = shift . notLK'
 

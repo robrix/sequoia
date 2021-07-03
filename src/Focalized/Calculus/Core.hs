@@ -59,7 +59,7 @@ import Focalized.Continuation
 import Focalized.Disjunction
 import Prelude hiding (init)
 
-class Continuation k => Core k s | s -> k where
+class Representable k => Core k s | s -> k where
   {-# MINIMAL ((>>>) | (<<<)), init #-}
 
   (>>>)
@@ -158,8 +158,8 @@ swapΔ f _Δ' = popΓΔ (\ _Δ -> pushΓΔ (f _Δ) _Δ')
 
 popΓΔ
   :: Contextual k s
-  => (k _Δ -> _Γ -> Γ -|s|-  R k)
-  -- ----------------------------
+  => (k _Δ -> _Γ -> Γ -|s|- Rep k)
+  -- -----------------------------
   ->               _Γ -|s|- _Δ
 popΓΔ f = swapΓΔ f (inK id) Γ
 
@@ -188,8 +188,8 @@ popΓ f = swapΓ f Γ
 -- @
 popΔ
   :: Contextual k s
-  => (k _Δ -> _Γ -|s|-  R k)
-  -- -----------------------
+  => (k _Δ -> _Γ -|s|-  Rep k)
+  -- -------------------------
   ->          _Γ -|s|- _Δ
 popΔ f = swapΔ f (inK id)
 

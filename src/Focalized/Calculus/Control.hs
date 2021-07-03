@@ -18,15 +18,15 @@ import Prelude hiding (init)
 
 class Control s where
   reset
-    :: (Continuation j, Continuation k, R j ~ _Δ)
+    :: (Representable j, Representable k, Rep j ~ _Δ)
     => _Γ -|s j|- _Δ
     -- -------------
     -> _Γ -|s k|- _Δ
 
   shift
-    :: Continuation k
-    => k a < _Γ -|s k|- _Δ > R k
-    -- -------------------------
+    :: Representable k
+    => k a < _Γ -|s k|- _Δ > Rep k
+    -- ---------------------------
     ->       _Γ -|s k|- _Δ > a
 
 

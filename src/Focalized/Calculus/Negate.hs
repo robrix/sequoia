@@ -55,8 +55,8 @@ negateR' p = wkL p >>> negateL init
 
 shiftN
   :: (Control s, Contextual k (s k))
-  => k -a < _Γ -|s k|- _Δ > R k
-  -- --------------------------
+  => k -a < _Γ -|s k|- _Δ > Rep k
+  -- ----------------------------
   ->        _Γ -|s k|- _Δ > a
 shiftN = shift . negateLK'
 

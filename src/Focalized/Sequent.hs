@@ -34,14 +34,14 @@ import           Prelude hiding (init)
 
 -- Sequents
 
-evalSeq :: Continuation k => _Δ ~ R k => _Γ -|Seq k|- _Δ -> k _Γ
+evalSeq :: Representable k => _Δ ~ Rep k => _Γ -|Seq k|- _Δ -> k _Γ
 evalSeq = (`runSeq` idK)
 
 newtype Seq k _Γ _Δ = Seq { runSeq :: k _Δ -> k _Γ }
   deriving (Cat.Category, Profunctor) via ViaCPS (Seq k)
   deriving (Applicative, Functor, Monad) via ViaCPS (Seq k) _Γ
 
-instance Continuation k => CPS k (Seq k) where
+instance Representable k => CPS k (Seq k) where
   inC = Seq
   exC = runSeq
 
@@ -68,7 +68,7 @@ instance MonadTrans (SeqT r _Γ) where
 
 -- Core rules
 
-instance Continuation k => Core k (Seq k) where
+instance Representable k => Core k (Seq k) where
   f >>> g = f >>= pure <--> pushL g
 
   init = popL liftR
@@ -76,14 +76,14 @@ instance Continuation k => Core k (Seq k) where
 
 -- Structural rules
 
-deriving via Contextually (Seq k) instance Continuation k => Weaken   k (Seq k)
-deriving via Contextually (Seq k) instance Continuation k => Contract k (Seq k)
-deriving via Contextually (Seq k) instance Continuation k => Exchange k (Seq k)
+deriving via Contextually (Seq k) instance Representable k => Weaken   k (Seq k)
+deriving via Contextually (Seq k) instance Representable k => Contract k (Seq k)
+deriving via Contextually (Seq k) instance Representable k => Exchange k (Seq k)
 
 
 -- Contextual rules
 
-instance Continuation k => Contextual k (Seq k) where
+instance Representable k => Contextual k (Seq k) where
   swapΓΔ f _Δ' _Γ' = Seq (inK . \ _Δ _Γ -> exK (runSeq (f _Δ _Γ) _Δ') _Γ')
 
 
@@ -96,29 +96,29 @@ instance Control Seq where
 
 -- Negation
 
-instance Continuation k => NotIntro k (Seq k) where
+instance Representable k => NotIntro k (Seq k) where
   notL = notLK . kL
   notR = notRK . kR
 
-instance Continuation k => NegateIntro k (Seq k) where
+instance Representable k => NegateIntro k (Seq k) where
   negateL = negateLK . kL
   negateR = negateRK . kR
 
 
 -- Additive
 
-instance Continuation k => TopIntro k (Seq k) where
+instance Representable k => TopIntro k (Seq k) where
   topR = pure (inr Top)
 
-instance Continuation k => ZeroIntro k (Seq k) where
+instance Representable k => ZeroIntro k (Seq k) where
   zeroL = liftL (inK absurdP)
 
-instance Continuation k => WithIntro k (Seq k) where
+instance Representable k => WithIntro k (Seq k) where
   withL1 p = popL (pushL p . exl)
   withL2 p = popL (pushL p . exr)
   withR = mapR2 (-><-)
 
-instance Continuation k => SumIntro k (Seq k) where
+instance Representable k => SumIntro k (Seq k) where
   sumL a b = popL (pushL a <--> pushL b)
   sumR1 = mapR inl
   sumR2 = mapR inr
@@ -126,33 +126,33 @@ instance Continuation k => SumIntro k (Seq k) where
 
 -- Multiplicative
 
-instance Continuation k => BottomIntro k (Seq k) where
+instance Representable k => BottomIntro k (Seq k) where
   botL = liftL (inK absurdN)
   botR = wkR
 
-instance Continuation k => OneIntro k (Seq k) where
+instance Representable k => OneIntro k (Seq k) where
   oneL = wkL
   oneR = liftR One
 
-instance Continuation k => ParIntro k (Seq k) where
+instance Representable k => ParIntro k (Seq k) where
   parL a b = popL (pushL a <--> pushL b)
   parR = fmap ((>>= inr . inl) <--> inr . inr)
 
-instance Continuation k => TensorIntro k (Seq k) where
+instance Representable k => TensorIntro k (Seq k) where
   tensorL p = popL (pushL2 p . exl <*> exr)
   tensorR = mapR2 (-><-)
 
 
 -- Logical biconditional/exclusive disjunction
 
-instance Continuation k => IffIntro k (Seq k) where
+instance Representable k => IffIntro k (Seq k) where
   iffL1 s1 s2 = mapL getIff (withL1 (downR s1 ->⊢ s2))
 
   iffL2 s1 s2 = mapL getIff (withL2 (downR s1 ->⊢ s2))
 
   iffR s1 s2 = mapR Iff (funR (downL s1) ⊢& funR (downL s2))
 
-instance Continuation k => XOrIntro k (Seq k) where
+instance Representable k => XOrIntro k (Seq k) where
   xorL s1 s2 = mapL getXOr (subL (upR s1) ⊕⊢ subL (upR s2))
 
   xorR1 s1 s2 = mapR XOr (sumR1 (s1 ⊢-< upL s2))
@@ -162,43 +162,43 @@ instance Continuation k => XOrIntro k (Seq k) where
 
 -- Implication
 
-instance Continuation k => FunctionIntro k (Seq k) where
+instance Representable k => FunctionIntro k (Seq k) where
   funL a b = popL (\ f -> a >>> liftLR f >>> wkL' b)
   funR = lowerLR liftR . wkR'
 
-instance Continuation k => SubtractionIntro k (Seq k) where
+instance Representable k => SubtractionIntro k (Seq k) where
   subL f = mapL getSub (tensorL (wkL' f >>> poppedL2 negateL init))
   subR a b = mapR Sub (a ⊢⊗ negateR b)
 
 
 -- Quantification
 
-instance Continuation k => UniversalIntro k (Seq k) where
+instance Representable k => UniversalIntro k (Seq k) where
   forAllL p = mapL (notNegate . runForAll) p
   forAllR p = Seq (inK . \ k a -> exK (inrC k) (ForAll (inK ((`exK` a) . runSeq p . (inlC k |>)))))
 
-instance Continuation k => ExistentialIntro k (Seq k) where
+instance Representable k => ExistentialIntro k (Seq k) where
   existsL p = popL (dnE . runExists (pushL p))
   existsR p = mapR (Exists . liftDN) p
 
 
 -- Recursion
 
-instance Continuation k => NuIntro k (Seq k) where
+instance Representable k => NuIntro k (Seq k) where
   nuL = mapL runNu
   nuR s = wkR' s >>> existsL (mapL nu init)
 
-instance Continuation k => MuIntro k (Seq k) where
+instance Representable k => MuIntro k (Seq k) where
   muL f k = wkL (downR f) >>> exL (mapL getMu (funL init (wkL' k)))
   muR = mapR mu
 
 
 -- Polarity shifts
 
-instance Continuation k => UpIntro k (Seq k) where
+instance Representable k => UpIntro k (Seq k) where
   upL   = mapL getUp
   upR   = mapR Up
 
-instance Continuation k => DownIntro k (Seq k) where
+instance Representable k => DownIntro k (Seq k) where
   downL = mapL getDown
   downR = mapR Down
