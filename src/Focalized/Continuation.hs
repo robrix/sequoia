@@ -16,6 +16,8 @@ module Focalized.Continuation
 , (<<•)
 , (•>>)
 , (<••>)
+, (>>-)
+, (-<<)
   -- * Double negation
 , type (••)
 ) where
@@ -90,6 +92,17 @@ infixr 1 <<•, •>>
 (<••>) = liftK2 (<-->)
 
 infix 3 <••>
+
+
+(>>-) :: a -> (b -> r •a) -> r •b
+a >>- f = K ((• a) . f)
+
+infixl 1 >>-
+
+(-<<) :: (b -> r •a) -> (a -> r •b)
+f -<< a = K ((• a) . f)
+
+infixr 1 -<<
 
 
 -- Double negation

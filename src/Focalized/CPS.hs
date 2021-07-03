@@ -4,8 +4,6 @@ module Focalized.CPS
 , dnE
 , liftDN
 , lowerDN
-, (>>-)
-, (-<<)
   -- * CPS
 , cps
 , liftCPS
@@ -49,16 +47,6 @@ liftDN = K . lmap (•)
 
 lowerDN :: r ••a -> (a -> r) -> r
 lowerDN = lmap K . (•)
-
-(>>-) :: a -> (b -> r •a) -> r •b
-a >>- f = K ((• a) . f)
-
-infixl 1 >>-
-
-(-<<) :: (b -> r •a) -> (a -> r •b)
-f -<< a = K ((• a) . f)
-
-infixr 1 -<<
 
 
 -- CPS
