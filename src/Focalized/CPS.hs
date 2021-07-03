@@ -63,8 +63,8 @@ evalCPS c = exC c idK
 refoldCPS :: (Cat.Category c, Traversing c, Traversable f) => f b `c` b -> a `c` f a -> a `c` b
 refoldCPS f g = go where go = f Cat.<<< traverse' go Cat.<<< g
 
-resetCPS :: (Continuation j, Continuation k) => CPS k i (R k) -> CPS j i (R k)
-resetCPS c = CPS (inK . \ k -> exK k . exK (evalCPS c))
+resetCPS :: (CPS' c, Continuation j, Continuation k) => c k i (R k) -> c j i (R k)
+resetCPS c = inC (inK . \ k -> exK k . exK (evalCPS c))
 
 shiftCPS :: Continuation k => (k o -> CPS k i (R k)) -> CPS k i o
 shiftCPS f = CPS (evalCPS . f)
