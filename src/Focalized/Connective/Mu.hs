@@ -41,5 +41,5 @@ unfoldMu coalg = cps $ \ a -> Mu $ liftFun' $ \ (Down (Fun alg)) -> runDN0 (appC
 refoldMu :: (Traversable f, Continuation k, Neg b) => CPS k (f b) b -> CPS k a (f a) -> CPS k a b
 refoldMu f g = foldMu' f Cat.<<< unfoldMu g
   where
-  foldMu' :: (Continuation k, Neg a) => CPS k (f a) a -> CPS k (Mu k f) a
+  foldMu' :: (CPS' k c, Neg a) => c (f a) a -> c (Mu k f) a
   foldMu' = foldMu
