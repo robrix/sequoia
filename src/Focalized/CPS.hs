@@ -57,8 +57,8 @@ pappCPS c a = c Cat.<<< inC (•<< const a)
 execCPS :: (Continuation k, CPS' c) => c k () a -> k (k a)
 execCPS c = appCPS c ()
 
-evalCPS :: Continuation k => CPS k i (R k) -> k i
-evalCPS c = runCPS c idK
+evalCPS :: (Continuation k, CPS' c) => c k i (R k) -> k i
+evalCPS c = exC c idK
 
 refoldCPS :: (Continuation k, Traversable f) => CPS k (f b) b -> CPS k a (f a) -> CPS k a b
 refoldCPS f g = go where go = f Cat.<<< traverse' go Cat.<<< g
