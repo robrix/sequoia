@@ -52,6 +52,7 @@ instance Contravariant ((•) r) where
 
 class Contravariant k => Contrapplicative k where
   type R k
+
   liftK0 :: (a -> R k) -> k a
   liftK1 :: ((a -> R k) -> (b -> R k)) -> (k a -> k b)
   liftK2 :: ((a -> R k) -> (b -> R k) -> (c -> R k)) -> (k a -> k b -> k c)
