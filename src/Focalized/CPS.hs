@@ -51,8 +51,8 @@ appCPS c a = inK $ \ k -> exK (exC c k) a
 appCPS2 :: (Continuation k, CPS' s) => s k a (CPS k b c) -> a -> b -> k (k c)
 appCPS2 c = appK2 (exC (rmap exC c))
 
-pappCPS :: Continuation k => CPS k a b -> a -> CPS k () b
-pappCPS c a = c Cat.<<< pure a
+pappCPS :: (Continuation k, CPS' c) => c k a b -> a -> c k () b
+pappCPS c a = c Cat.<<< inC (•<< const a)
 
 execCPS :: Continuation k => CPS k () a -> k (k a)
 execCPS c = appCPS c ()
