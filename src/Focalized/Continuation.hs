@@ -53,28 +53,28 @@ instance Contravariant ((•) r) where
 class Contravariant k => Contrapplicative k where
   type R k
 
-  liftK0 :: (a -> R k) -> k a
-  liftK1 :: ((a -> R k) -> (b -> R k)) -> (k a -> k b)
-  liftK2 :: ((a -> R k) -> (b -> R k) -> (c -> R k)) -> (k a -> k b -> k c)
+  inK0 :: (a -> R k) -> k a
+  inK1 :: ((a -> R k) -> (b -> R k)) -> (k a -> k b)
+  inK2 :: ((a -> R k) -> (b -> R k) -> (c -> R k)) -> (k a -> k b -> k c)
 
-  runK0 :: k a -> (a -> R k)
-  runK1 :: (k a -> k b) -> ((a -> R k) -> (b -> R k))
-  runK2 :: (k a -> k b -> k c) -> ((a -> R k) -> (b -> R k) -> (c -> R k))
+  exK0 :: k a -> (a -> R k)
+  exK1 :: (k a -> k b) -> ((a -> R k) -> (b -> R k))
+  exK2 :: (k a -> k b -> k c) -> ((a -> R k) -> (b -> R k) -> (c -> R k))
 
 instance Contrapplicative ((•) r) where
   type R ((•) r) = r
 
-  liftK0 = K
+  inK0 = K
 
-  liftK1 = dimap (•) K
+  inK1 = dimap (•) K
 
-  liftK2 f (K a) (K b) = K (f a b)
+  inK2 f (K a) (K b) = K (f a b)
 
-  runK0 = (•)
+  exK0 = (•)
 
-  runK1 = dimap K (•)
+  exK1 = dimap K (•)
 
-  runK2 f a b = runK0 (f (K a) (K b))
+  exK2 f a b = exK0 (f (K a) (K b))
 
 
 -- Composition
@@ -92,16 +92,16 @@ idK = K id
 infixr 1 •<<, >>•
 
 (<<•) :: (r -> s) -> r •a -> s •a
-f <<• k = K (f . runK0 k)
+f <<• k = K (f . exK0 k)
 
 (•>>) :: r •a -> (r -> s) -> s •a
-k •>> f = K (f . runK0 k)
+k •>> f = K (f . exK0 k)
 
 infixr 1 <<•, •>>
 
 
 (<••>) :: (Disj d, Contrapplicative k) => k a -> k b -> k (a `d` b)
-(<••>) = liftK2 (<-->)
+(<••>) = inK2 (<-->)
 
 infix 3 <••>
 

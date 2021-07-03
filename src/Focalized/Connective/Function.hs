@@ -24,7 +24,7 @@ appFun2 :: (a ~~r~> b ~~r~> c) -> (a -> b -> r ••c)
 appFun2 = appCPS2 . fmap getFun . getFun
 
 liftFun :: ((b -> r) -> (a -> r)) -> (a ~~r~> b)
-liftFun = Fun . CPS . liftK1
+liftFun = Fun . CPS . inK1
 
 liftFun' :: (a -> (b -> r) -> r) -> (a ~~r~> b)
 liftFun' = liftFun . flip
