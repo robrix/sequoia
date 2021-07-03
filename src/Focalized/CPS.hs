@@ -179,8 +179,8 @@ composeCPS f g = inC (exC g . exC f)
 
 -- Functor
 
-fmapCPS :: (Continuation k, CPS' c) => (b -> b') -> (c k a b -> c k a b')
-fmapCPS = dimapCPS id
+fmapCPS :: (Contravariant k, CPS' c) => (b -> b') -> (c k a b -> c k a b')
+fmapCPS = rmapCPS
 
 
 -- Applicative
@@ -248,11 +248,11 @@ wanderCPS traverse c = liftCPS (exK . execCPS . traverse (pappCPS c))
 
 -- Profunctor
 
-dimapCPS :: (Continuation k, CPS' c) => (a' -> a) -> (b -> b') -> (c k a b -> c k a' b')
+dimapCPS :: (Contravariant k, CPS' c) => (a' -> a) -> (b -> b') -> (c k a b -> c k a' b')
 dimapCPS f g = inC . dimap (contramap g) (contramap f) . exC
 
-lmapCPS :: (Continuation k, CPS' c) => (a' -> a) -> (c k a b -> c k a' b)
+lmapCPS :: (Contravariant k, CPS' c) => (a' -> a) -> (c k a b -> c k a' b)
 lmapCPS = (`dimapCPS` id)
 
-rmapCPS :: (Continuation k, CPS' c) => (b -> b') -> (c k a b -> c k a b')
+rmapCPS :: (Contravariant k, CPS' c) => (b -> b') -> (c k a b -> c k a b')
 rmapCPS = (id `dimapCPS`)
