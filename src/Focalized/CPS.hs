@@ -122,5 +122,5 @@ instance Continuation k => Traversing (CPS k) where
   wander traverse c = liftCPS (exK . execCPS . traverse (pappCPS c))
 
 
-dnE :: Continuation k => R k ••CPS k a b -> CPS k a b
-dnE f = CPS (inK . \ k a -> f • inK (\ f -> exK (runCPS f k) a))
+dnE :: Continuation k => k (k (CPS k a b)) -> CPS k a b
+dnE f = CPS (inK . \ k a -> exK f (inK (\ f -> exK (runCPS f k) a)))
