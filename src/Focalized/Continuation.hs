@@ -33,6 +33,7 @@ module Focalized.Continuation
 , (-<<)
   -- * Double negation
 , type (**)
+, ContFn
   -- ** Construction
 , liftDN
 , liftDN0
@@ -175,30 +176,33 @@ type k **a = k (k a)
 infixl 9 **
 
 
+type ContFn k a = (a -> Rep k) -> Rep k
+
+
 -- Construction
 
 liftDN :: Representable k => a -> k **a
 liftDN = inK . flip exK
 
-liftDN0 :: Representable k => ((a -> Rep k) -> Rep k) -> k **a
+liftDN0 :: Representable k => ContFn k a -> k **a
 liftDN0 = inK . lmap exK
 
-liftDN1 :: Representable k => (((a -> Rep k) -> Rep k) -> ((b -> Rep k) -> Rep k)) -> (k **a -> k **b)
+liftDN1 :: Representable k => (ContFn k a -> ContFn k b) -> (k **a -> k **b)
 liftDN1 = dimap runDN0 liftDN0
 
-liftDN2 :: Representable k => (((a -> Rep k) -> Rep k) -> ((b -> Rep k) -> Rep k) -> ((c -> Rep k) -> Rep k)) -> (k **a -> k **b -> k **c)
+liftDN2 :: Representable k => (ContFn k a -> ContFn k b -> ContFn k c) -> (k **a -> k **b -> k **c)
 liftDN2 = dimap2 runDN0 runDN0 liftDN0
 
 
 -- Elimination
 
-runDN0 :: Representable k => k **a -> ((a -> Rep k) -> Rep k)
+runDN0 :: Representable k => k **a -> ContFn k a
 runDN0 = lmap inK . exK
 
-runDN1 :: Representable k => (k **a -> k **b) -> (((a -> Rep k) -> Rep k) -> ((b -> Rep k) -> Rep k))
+runDN1 :: Representable k => (k **a -> k **b) -> (ContFn k a -> ContFn k b)
 runDN1 = dimap liftDN0 runDN0
 
-runDN2 :: Representable k => (k **a -> k **b -> k **c) -> (((a -> Rep k) -> Rep k) -> ((b -> Rep k) -> Rep k) -> ((c -> Rep k) -> Rep k))
+runDN2 :: Representable k => (k **a -> k **b -> k **c) -> (ContFn k a -> ContFn k b -> ContFn k c)
 runDN2 = dimap2 liftDN0 liftDN0 runDN0
 
 
