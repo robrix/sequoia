@@ -78,37 +78,37 @@ uncurryCPS c = inC (\ k -> inK ((`exK` k) . uncurry (appCPS2 c)))
 newtype CPS k a b = CPS { runCPS :: k b -> k a }
 
 instance Cat.Category (CPS k) where
-  id = CPS id
-  CPS f . CPS g = CPS (g . f)
+  id = inC id
+  f . g = inC (exC g . exC f)
 
 instance Contravariant k => Functor (CPS k a) where
-  fmap f (CPS r) = CPS (r . contramap f)
+  fmap f r = inC (exC r . contramap f)
 
 instance Continuation k => Applicative (CPS k a) where
-  pure a = CPS (inK . const . (`exK` a))
+  pure a = inC (inK . const . (`exK` a))
   (<*>) = ap
 
 instance Continuation k => Monad (CPS k a) where
-  r >>= f = CPS $ inK . \ k a -> exK (runCPS r (inK (\ a' -> exK (runCPS (f a') k) a))) a
+  r >>= f = inC (inK . \ k a -> exK (exC r (inK (\ a' -> exK (exC (f a') k) a))) a)
 
 instance Continuation k => Arrow (CPS k) where
   arr = cps
-  first  f = CPS (inK . (\ k (l, r) -> exK (appCPS f l) (k •<< (,r))))
-  second g = CPS (inK . (\ k (l, r) -> exK (appCPS g r) (k •<< (l,))))
-  f *** g  = CPS (inK . (\ k (l, r) -> exK (appCPS f l) (appCPS g r •<< (k •<<) . (,))))
+  first  f = inC (inK . (\ k (l, r) -> exK (appCPS f l) (k •<< (,r))))
+  second g = inC (inK . (\ k (l, r) -> exK (appCPS g r) (k •<< (l,))))
+  f *** g  = inC (inK . (\ k (l, r) -> exK (appCPS f l) (appCPS g r •<< (k •<<) . (,))))
   (&&&) = liftA2 (,)
 
 instance Continuation k => ArrowChoice (CPS k) where
-  left  f = CPS (\ k -> runCPS f (k •<< inl) <••> (k •<< inr))
-  right g = CPS (\ k -> (k •<< inl) <••> runCPS g (k •<< inr))
-  f +++ g = CPS (\ k -> runCPS f (k •<< inl) <••> runCPS g (k •<< inr))
-  f ||| g = CPS ((<••>) <$> runCPS f <*> runCPS g)
+  left  f = inC (\ k -> exC f (k •<< inl) <••> (k •<< inr))
+  right g = inC (\ k -> (k •<< inl) <••> exC g (k •<< inr))
+  f +++ g = inC (\ k -> exC f (k •<< inl) <••> exC g (k •<< inr))
+  f ||| g = inC ((<••>) <$> exC f <*> exC g)
 
 instance Continuation k => ArrowApply (CPS k) where
-  app = CPS (>>- uncurry appCPS)
+  app = inC (>>- uncurry appCPS)
 
 instance Contravariant k => Profunctor (CPS k) where
-  dimap f g (CPS c) = CPS (dimap (contramap g) (contramap f) c)
+  dimap f g = inC . dimap (contramap g) (contramap f) . exC
 
 instance Continuation k => Strong (CPS k) where
   first' = first
