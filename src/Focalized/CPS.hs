@@ -2,24 +2,28 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Focalized.CPS
 ( -- * CPS
-  cps
+  CPS(..)
+, dnE
+, refoldCPS
+  -- * CPS abstraction
+, CPS'(..)
+  -- ** Construction
+, cps
 , liftCPS
 , contToCPS
+  -- ** Elimination
 , cpsToCont
 , appCPS
 , appCPS2
 , pappCPS
 , execCPS
 , evalCPS
-, refoldCPS
-, resetCPS
-, shiftCPS
+  -- ** Currying
 , curryCPS
 , uncurryCPS
-, CPS(..)
-, dnE
-  -- * CPS abstraction
-, CPS'(..)
+  -- * Delimited continuations
+, resetCPS
+, shiftCPS
   -- ** Category
 , idCPS
 , composeCPS
@@ -65,6 +69,34 @@ import           Focalized.Disjunction
 
 -- CPS
 
+newtype CPS k a b = CPS { runCPS :: k b -> k a }
+  deriving (Arrow, ArrowChoice, Cat.Category, Choice, Profunctor, Strong, Traversing) via (ViaCPS (CPS k))
+  deriving (Applicative, Functor, Monad) via (ViaCPS (CPS k) a)
+
+instance Continuation k => ArrowApply (CPS k) where
+  app = applyCPS
+
+
+dnE :: Continuation k => k (k (CPS k a b)) -> CPS k a b
+dnE f = CPS (inK . \ k a -> exK f (inK (\ f -> exK (runCPS f k) a)))
+
+refoldCPS :: (Cat.Category c, Traversing c, Traversable f) => f b `c` b -> a `c` f a -> a `c` b
+refoldCPS f g = go where go = f Cat.<<< traverse' go Cat.<<< g
+
+
+-- CPS abstraction
+
+class (Cat.Category c, Continuation k, Profunctor c) => CPS' k c | c -> k where
+  inC :: (k b -> k a) -> c a b
+  exC :: c a b        -> (k b -> k a)
+
+instance Continuation k => CPS' k (CPS k) where
+  inC = CPS
+  exC = runCPS
+
+
+-- Construction
+
 cps :: CPS' k c => (a -> b) -> c a b
 cps = inC . inK1 . flip (.)
 
@@ -73,6 +105,9 @@ liftCPS = inC . fmap inK . flip
 
 contToCPS :: CPS' k c => (a -> Cont k b) -> c a b
 contToCPS f = liftCPS (exK . runCont . f)
+
+
+-- Elimination
 
 cpsToCont :: CPS' k c => c a b -> (a -> Cont k b)
 cpsToCont c a = Cont (appCPS c a)
@@ -92,14 +127,8 @@ execCPS c = appCPS c ()
 evalCPS :: CPS' k c => c i (R k) -> k i
 evalCPS c = exC c idK
 
-refoldCPS :: (Cat.Category c, Traversing c, Traversable f) => f b `c` b -> a `c` f a -> a `c` b
-refoldCPS f g = go where go = f Cat.<<< traverse' go Cat.<<< g
 
-resetCPS :: (CPS' j cj, CPS' k ck) => ck i (R k) -> cj i (R k)
-resetCPS c = inC (inK . \ k -> exK k . exK (evalCPS c))
-
-shiftCPS :: CPS' k c => (k o -> c i (R k)) -> c i o
-shiftCPS f = inC (evalCPS . f)
+-- Currying
 
 curryCPS :: CPS' k c => c (a, b) d -> c a (c b d)
 curryCPS c = inC (•<< (`lmap` c) . (,))
@@ -107,27 +136,14 @@ curryCPS c = inC (•<< (`lmap` c) . (,))
 uncurryCPS :: CPS' k c => c a (c b d) -> c (a, b) d
 uncurryCPS c = inC (\ k -> inK ((`exK` k) . uncurry (appCPS2 c)))
 
-newtype CPS k a b = CPS { runCPS :: k b -> k a }
-  deriving (Arrow, ArrowChoice, Cat.Category, Choice, Profunctor, Strong, Traversing) via (ViaCPS (CPS k))
-  deriving (Applicative, Functor, Monad) via (ViaCPS (CPS k) a)
 
-instance Continuation k => ArrowApply (CPS k) where
-  app = applyCPS
+-- Delimited continuations
 
+resetCPS :: (CPS' j cj, CPS' k ck) => ck i (R k) -> cj i (R k)
+resetCPS c = inC (inK . \ k -> exK k . exK (evalCPS c))
 
-dnE :: Continuation k => k (k (CPS k a b)) -> CPS k a b
-dnE f = CPS (inK . \ k a -> exK f (inK (\ f -> exK (runCPS f k) a)))
-
-
--- CPS abstraction
-
-class (Cat.Category c, Continuation k, Profunctor c) => CPS' k c | c -> k where
-  inC :: (k b -> k a) -> c a b
-  exC :: c a b        -> (k b -> k a)
-
-instance Continuation k => CPS' k (CPS k) where
-  inC = CPS
-  exC = runCPS
+shiftCPS :: CPS' k c => (k o -> c i (R k)) -> c i o
+shiftCPS f = inC (evalCPS . f)
 
 
 -- Category
