@@ -45,6 +45,8 @@ module Focalized.Continuation
 , runDN2
   -- * Cont monad
 , type (••)(..)
+, inCont
+, exCont
 ) where
 
 import qualified Control.Category as Cat
@@ -221,3 +223,10 @@ instance Representable k => Applicative ((••) k) where
 
 instance Representable k => Monad ((••) k) where
   Cont m >>= f = Cont (m •<< inK . \ k a -> exK (runCont (f a)) k)
+
+
+inCont :: Representable k => ContFn k a -> k ••a
+inCont = Cont . inK . lmap exK
+
+exCont :: Representable k => k ••a -> ContFn k a
+exCont = lmap inK . exK . runCont
