@@ -19,15 +19,15 @@ import           Focalized.Polarity
 
 -- Recursion
 
-newtype Mu r f = Mu { getMu :: forall x . Neg x => Down (FAlg r f x) ~~r~> x }
+newtype Mu k f = Mu { getMu :: forall x . Neg x => Down (FAlg k f x) ~~k~> x }
 
-type FAlg r f x = f x ~~r~> x
+type FAlg k f x = f x ~~k~> x
 
-instance Polarized N (Mu r f) where
+instance Polarized N (Mu k f) where
 
-newtype MuF r f a = MuF { getMuF :: Down (FAlg r f a) ~~r~> a }
+newtype MuF k f a = MuF { getMuF :: Down (FAlg k f a) ~~k~> a }
 
-instance (Pos (f a), Neg a) => Polarized N (MuF r f a) where
+instance (Pos (f a), Neg a) => Polarized N (MuF k f a) where
 
 mu :: Continuation k => ForAll k N (MuF k f) -> Mu k f
 mu r = Mu (dnE (contramap (contramap getMuF) (runForAll r)))
