@@ -2,7 +2,6 @@
 module Focalized.Sequent
 ( -- * Sequents
   evalSeq
-, dnESeq
 , Seq(..)
 , liftLR
 , lowerLR
@@ -38,9 +37,6 @@ import           Prelude hiding (init)
 
 evalSeq :: Continuation k => _Δ ~ R k => _Γ -|Seq k|- _Δ -> k _Γ
 evalSeq = (`runSeq` idK)
-
-dnESeq :: Continuation k => k **(_Γ -|Seq k|- _Δ) -> _Γ -|Seq k|- _Δ
-dnESeq = dnE
 
 newtype Seq k _Γ _Δ = Seq { runSeq :: k _Δ -> k _Γ }
   deriving (Cat.Category, Profunctor) via ViaCPS (Seq k)
@@ -185,7 +181,7 @@ instance Continuation k => UniversalIntro (Seq k) where
   forAllR p = Seq (inK . \ k a -> exK (inrC k) (ForAll (inK ((`exK` a) . runSeq p . (inlC k |>)))))
 
 instance Continuation k => ExistentialIntro (Seq k) where
-  existsL p = popL (dnESeq . runExists (pushL p))
+  existsL p = popL (dnE . runExists (pushL p))
   existsR p = mapR (Exists . liftDN) p
 
 
