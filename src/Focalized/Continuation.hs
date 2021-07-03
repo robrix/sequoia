@@ -156,7 +156,7 @@ runDN2 f a b = runDN0 (f (liftDN0 a) (liftDN0 b))
 newtype Cont r a = Cont { runCont :: r ••a }
 
 instance Functor (Cont r) where
-  fmap f = Cont . contramap (contramap f) . runCont
+  fmap f = Cont . (•<< (•<< f)) . runCont
 
 instance Applicative (Cont r) where
   pure = Cont . K . flip (•)
