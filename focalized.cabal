@@ -117,6 +117,7 @@ library
     Focalized.Connective.With
     Focalized.Connective.XOr
     Focalized.Connective.Zero
+    Focalized.Continuation
     Focalized.CPS
     Focalized.Disjunction
     Focalized.Functor.C
