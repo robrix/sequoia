@@ -10,13 +10,17 @@ module Focalized.Continuation
 , inK2
 , exK1
 , exK2
-, Contravariant(..)
+  -- ** Coercion
 , coerceK
 , coerceK1
 , coerceK2
+  -- ** Contravariant
+, Contravariant(..)
 , contramapK
-  -- ** Composition
+  -- ** Category
 , idK
+, composeK
+  -- ** Composition
 , (•<<)
 , (>>•)
 , (<<•)
@@ -54,18 +58,18 @@ infixl 9 •
 
 instance Cat.Category (•) where
   id = idK
-  K f . K g = K (g . f)
+  (.) = composeK
 
 instance Contravariant ((•) r) where
-  contramap f = K . lmap f . (•)
+  contramap = contramapK
 
 
 -- Application
 
-appK1 :: Continuation k => (k b -> k a) -> (a -> k (k b))
+appK1 :: Continuation k => (k b -> k a) -> (a -> k **b)
 appK1 f a = inK (\ k -> exK (f k) a)
 
-appK2 :: Continuation k => (k (k c -> k b) -> k a) -> (a -> b -> k (k c))
+appK2 :: Continuation k => (k (k c -> k b) -> k a) -> (a -> b -> k **c)
 appK2 f a b = inK (\ k -> exK1 f (\ f -> exK (f k) b) a)
 
 
@@ -100,6 +104,8 @@ dimap2 :: (a' -> a) -> (b' -> b) -> (c -> c') -> (a -> b -> c) -> (a' -> b' -> c
 dimap2 l1 l2 r f a1 a2 = r (f (l1 a1) (l2 a2))
 
 
+-- Coercion
+
 coerceK :: (Continuation k1, Continuation k2, R k1 ~ R k2) => k1 a -> k2 a
 coerceK = inK . exK
 
@@ -110,15 +116,22 @@ coerceK2 :: (Continuation k1, Continuation k2, R k1 ~ R k2) => (k1 a -> k1 b -> 
 coerceK2 = inK2 . exK2
 
 
+-- Contravariant
+
 contramapK :: Continuation k => (a' -> a) -> (k a -> k a')
 contramapK f = inK . lmap f . exK
 
 
--- Composition
+-- Category
 
 idK :: Continuation k => k (R k)
 idK = inK id
 
+composeK :: (Continuation j, Continuation k) => j a -> k (R j) -> k a
+composeK = dimap2 exK exK inK (flip (.))
+
+
+-- Composition
 
 (•<<) :: Contravariant k => k a -> (b -> a) -> k b
 (•<<) = flip contramap
