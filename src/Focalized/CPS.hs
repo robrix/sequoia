@@ -1,3 +1,4 @@
+{-# LANGUAGE QuantifiedConstraints #-}
 module Focalized.CPS
 ( -- * CPS
   cps
@@ -16,6 +17,8 @@ module Focalized.CPS
 , uncurryCPS
 , CPS(..)
 , dnE
+  -- * CPS abstraction
+, CPS'(..)
 ) where
 
 import           Control.Applicative (liftA2)
@@ -122,3 +125,14 @@ instance Continuation k => Traversing (CPS k) where
 
 dnE :: Continuation k => k (k (CPS k a b)) -> CPS k a b
 dnE f = CPS (inK . \ k a -> exK f (inK (\ f -> exK (runCPS f k) a)))
+
+
+-- CPS abstraction
+
+class (forall k . Cat.Category (c k)) => CPS' c where
+  inC :: (k b -> k a) -> c k a b
+  exC :: c k a b      -> (k b -> k a)
+
+instance CPS' CPS where
+  inC = CPS
+  exC = runCPS
