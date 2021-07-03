@@ -49,6 +49,8 @@ module Focalized.CPS
 , dimapCPS
 , lmapCPS
 , rmapCPS
+  -- ** Deriving
+, ViaCPS(..)
 ) where
 
 import           Control.Applicative (liftA2)
@@ -56,6 +58,7 @@ import           Control.Arrow
 import qualified Control.Category as Cat
 import           Control.Monad (ap)
 import           Data.Functor.Contravariant
+import           Data.Kind (Type)
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
 import           Focalized.Continuation
@@ -256,3 +259,61 @@ lmapCPS = (`dimapCPS` id)
 
 rmapCPS :: (Contravariant k, CPS' c) => (b -> b') -> (c k a b -> c k a b')
 rmapCPS = (id `dimapCPS`)
+
+
+-- Deriving
+
+newtype ViaCPS c (k :: Type -> Type) a b = ViaCPS { runViaCPS :: c k a b }
+  deriving (CPS')
+
+instance CPS' c => Cat.Category (ViaCPS c k) where
+  id = idCPS
+  (.) = composeCPS
+
+instance (Contravariant k, CPS' c) => Functor (ViaCPS c k a) where
+  fmap = fmapCPS
+
+instance (Continuation k, CPS' c) => Applicative (ViaCPS c k a) where
+  pure = pureCPS
+
+  liftA2 = liftA2CPS
+
+  (<*>) = apCPS
+
+instance (Continuation k, CPS' c) => Monad (ViaCPS c k a) where
+  (>>=) = bindCPS
+
+instance (Continuation k, CPS' c) => Arrow (ViaCPS c k) where
+  arr = arrCPS
+  first = firstCPS
+  second = secondCPS
+  (***) = splitPrdCPS
+  (&&&) = fanoutCPS
+
+instance (Continuation k, CPS' c) => ArrowChoice (ViaCPS c k) where
+  left = leftCPS
+  right = rightCPS
+  (+++) = splitSumCPS
+  (|||) = faninCPS
+
+instance (Continuation k, CPS' c) => ArrowApply (ViaCPS c k) where
+  app = applyCPS
+
+instance (Continuation k, CPS' c) => Strong (ViaCPS c k) where
+  first' = first
+  second' = second
+
+instance (Continuation k, CPS' c) => Choice (ViaCPS c k) where
+  left' = left
+  right' = right
+
+instance (Continuation k, CPS' c) => Traversing (ViaCPS c k) where
+  traverse' = wanderCPS traverse
+  wander = wanderCPS
+
+instance (Contravariant k, CPS' c) => Profunctor (ViaCPS c k) where
+  dimap = dimapCPS
+
+  lmap = lmapCPS
+
+  rmap = rmapCPS
