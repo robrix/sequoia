@@ -14,6 +14,7 @@ module Focalized.Continuation
 , coerceK
 , coerceK1
 , coerceK2
+, contramapK
   -- ** Composition
 , idK
 , (•<<)
@@ -107,6 +108,10 @@ coerceK1 = inK1 . exK1
 
 coerceK2 :: (Continuation k1, Continuation k2, R k1 ~ R k2) => (k1 a -> k1 b -> k1 c) -> (k2 a -> k2 b -> k2 c)
 coerceK2 = inK2 . exK2
+
+
+contramapK :: Continuation k => (a' -> a) -> (k a -> k a')
+contramapK f = inK . lmap f . exK
 
 
 -- Composition
