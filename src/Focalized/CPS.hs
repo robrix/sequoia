@@ -1,7 +1,6 @@
 module Focalized.CPS
 ( -- * Continuations
-  liftK2
-, (<••>)
+  (<••>)
 , type (••)
   -- * Double negation
 , dnI
@@ -43,10 +42,6 @@ import           Focalized.Continuation
 import           Focalized.Disjunction
 
 -- Continuations
-
-liftK2 :: ((a -> r) -> (b -> r) -> (c -> r)) -> (r •a -> r •b -> r •c)
-liftK2 f (K a) (K b) = K (f a b)
-
 
 (<••>) :: Disj d => c •a -> c •b -> c •(a `d` b)
 (<••>) = liftK2 (<-->)
