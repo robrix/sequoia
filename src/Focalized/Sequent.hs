@@ -55,8 +55,8 @@ instance Continuation k => CPS' k (Seq k) where
   exC = runSeq
 
 
-liftLR :: Continuation k => CPS k a b -> Seq k (a < _Γ) (_Δ > b)
-liftLR = Seq . runCPS . dimap exl inr
+liftLR :: Continuation k => (k b -> k a) -> Seq k (a < _Γ) (_Δ > b)
+liftLR = dimap exl inr . Seq
 
 
 lowerLR :: Continuation k => ((k b -> k a) -> _Γ -|Seq k|- _Δ) -> a < _Γ -|Seq k|- _Δ > b -> _Γ -|Seq k|- _Δ
@@ -174,7 +174,7 @@ instance Continuation k => XOrIntro (Seq k) where
 -- Implication
 
 instance Continuation k => FunctionIntro (Seq k) where
-  funL a b = popL (\ f -> a >>> liftLR (CPS (getFun f)) >>> wkL' b)
+  funL a b = popL (\ f -> a >>> liftLR (getFun f) >>> wkL' b)
   funR = lowerLR (liftR . Fun) . wkR'
 
 instance Continuation k => SubtractionIntro (Seq k) where
