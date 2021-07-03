@@ -22,14 +22,14 @@ import Prelude hiding (init)
 class Core s => UniversalIntro s where
   forAllL
     :: (Polarized n x, Neg (f x))
-    =>         R (K s)  ¬-f x < _Γ -|s|- _Δ
+    =>              K s ¬-f x < _Γ -|s|- _Δ
     -- ------------------------------------
     -> ForAll (R (K s)) n f   < _Γ -|s|- _Δ
 
   forAllR
     :: (Polarized n ==> Neg) f
-    => (forall x . Polarized n x => _Γ -|s|- _Δ >            f x)
-    -- ---------------------------------------------------------------
+    => (forall x . Polarized n x => _Γ -|s|- _Δ >                    f x)
+    -- ------------------------------------------------------------------
     ->                              _Γ -|s|- _Δ > ForAll (R (K s)) n f
 
 

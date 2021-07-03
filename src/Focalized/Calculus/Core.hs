@@ -5,6 +5,7 @@
 module Focalized.Calculus.Core
 ( -- * Core
   Core(..)
+, KK
   -- * Structural
 , Structural
 , Weaken(..)
@@ -81,6 +82,8 @@ class Contrapplicative (K s) => Core s where
   init
     -- -------------------
     :: a < _Γ -|s|- _Δ > a
+
+type KK s a = K s (K s a)
 
 
 -- Structural

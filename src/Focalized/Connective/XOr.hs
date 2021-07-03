@@ -12,12 +12,12 @@ import Focalized.Polarity
 
 -- Exclusive disjunction
 
-newtype XOr r a b = XOr { getXOr :: (a ~-r-< Up b) ⊕ (b ~-r-< Up a) }
+newtype XOr k a b = XOr { getXOr :: (a ~-k-< Up b) ⊕ (b ~-k-< Up a) }
 
-instance (Pos a, Pos b) => Polarized P (XOr r a b)
+instance (Pos a, Pos b) => Polarized P (XOr k a b)
 
-type a </r = XOr r a
-type r/> b = r b
+type a </k = XOr k a
+type x/> b = x b
 
 infixr 6 </
 infixr 5 />

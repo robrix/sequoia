@@ -1,21 +1,12 @@
 module Focalized.Connective.Negate
 ( -- * Negate
-  runNegate
-, appNegate
-, type (-)(..)
+  type (-)(..)
 ) where
 
-import Focalized.Continuation
 import Focalized.Polarity
 
-runNegate :: r -a -> (a -> r)
-runNegate = (•) . getNegate
+newtype k -a = Negate { getNegate :: k a }
 
-appNegate :: a -> r -a -> r
-appNegate = flip runNegate
-
-newtype r -a = Negate { getNegate :: r •a }
-
-instance Neg a => Polarized P (r -a) where
+instance Neg a => Polarized P (k -a) where
 
 infixr 9 -

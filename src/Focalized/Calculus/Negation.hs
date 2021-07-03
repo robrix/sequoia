@@ -19,7 +19,6 @@ import Focalized.Calculus.Core
 import Focalized.Calculus.Negate
 import Focalized.Calculus.Not
 import Focalized.Connective.Negation
-import Focalized.Continuation
 import Focalized.Polarity
 import Prelude hiding (init)
 
@@ -32,16 +31,16 @@ type NegationIntro s = (NotIntro s, NegateIntro s)
 
 dneN
   :: (NotIntro s, NegateIntro s, Neg a)
-  =>           a < _Γ -|s|- _Δ
-  -- -------------------------
-  -> R (K s) ¬-a < _Γ -|s|- _Δ
+  =>       a < _Γ -|s|- _Δ
+  -- ---------------------
+  -> K s ¬-a < _Γ -|s|- _Δ
 dneN = notL . negateR
 
 dniN
   :: (NotIntro s, NegateIntro s, Neg a)
   => _Γ -|s|- _Δ > a
-  -- -------------------------
-  -> _Γ -|s|- _Δ > R (K s) ¬-a
+  -- ---------------------
+  -> _Γ -|s|- _Δ > K s ¬-a
 dniN = notR . negateL
 
 
@@ -49,14 +48,14 @@ dniN = notR . negateL
 
 dneP
   :: (NotIntro s, NegateIntro s, Pos a)
-  =>           a < _Γ -|s|- _Δ
-  -- -------------------------
-  -> R (K s) -¬a < _Γ -|s|- _Δ
+  =>       a < _Γ -|s|- _Δ
+  -- ---------------------
+  -> K s -¬a < _Γ -|s|- _Δ
 dneP = negateL . notR
 
 dniP
   :: (NotIntro s, NegateIntro s, Pos a)
   => _Γ -|s|- _Δ > a
-  -- -------------------------
-  -> _Γ -|s|- _Δ > R (K s) -¬a
+  -- ---------------------
+  -> _Γ -|s|- _Δ > K s -¬a
 dniP = negateR . notL

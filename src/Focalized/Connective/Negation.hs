@@ -16,28 +16,27 @@ module Focalized.Connective.Negation
 import Data.Functor.Contravariant
 import Focalized.Connective.Negate
 import Focalized.Connective.Not
-import Focalized.Continuation
 
 -- Negative double negation
 
-notNegate :: r ••a -> r ¬-a
+notNegate :: Contravariant k => k (k a) -> k ¬-a
 notNegate = Not . contramap getNegate
 
-getNotNegate :: r ¬-a -> r ••a
+getNotNegate :: Contravariant k => k ¬-a -> k (k a)
 getNotNegate = contramap Negate . getNot
 
 
-type r ¬-a = r ¬r -a
+type k ¬-a = k ¬k -a
 
 infixr 9 ¬-
 
 
 -- Positive double negation
 
-negateNot :: r ••a -> r -¬a
+negateNot :: Contravariant k => k (k a) -> k -¬a
 negateNot = Negate . contramap getNot
 
-getNegateNot :: r -¬a -> r ••a
+getNegateNot :: Contravariant k => k -¬a -> k (k a)
 getNegateNot = contramap Not . getNegate
 
 
