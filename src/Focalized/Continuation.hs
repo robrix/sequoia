@@ -45,7 +45,7 @@ liftK2 f (K a) (K b) = K (f a b)
 
 -- Elimination
 
-runK :: r •a -> a -> r
+runK :: r •a -> (a -> r)
 runK = (•)
 
 lowerK1 :: (r •a -> r •b) -> ((a -> r) -> (b -> r))
