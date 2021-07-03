@@ -10,7 +10,6 @@ module Focalized.Sequent
 , SeqT(..)
 ) where
 
-import           Control.Applicative (liftA2)
 import qualified Control.Category as Cat
 import           Control.Monad.Trans.Class
 import           Data.Profunctor
@@ -117,7 +116,7 @@ instance Continuation k => ZeroIntro k (Seq k) where
 instance Continuation k => WithIntro k (Seq k) where
   withL1 p = popL (pushL p . exl)
   withL2 p = popL (pushL p . exr)
-  withR = liftA2 (liftA2 (-><-))
+  withR = mapR2 (-><-)
 
 instance Continuation k => SumIntro k (Seq k) where
   sumL a b = popL (pushL a <--> pushL b)
@@ -141,7 +140,7 @@ instance Continuation k => ParIntro k (Seq k) where
 
 instance Continuation k => TensorIntro k (Seq k) where
   tensorL p = popL (pushL2 p . exl <*> exr)
-  tensorR = liftA2 (liftA2 (-><-))
+  tensorR = mapR2 (-><-)
 
 
 -- Logical biconditional/exclusive disjunction
