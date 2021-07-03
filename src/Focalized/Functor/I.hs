@@ -1,2 +1,6 @@
 module Focalized.Functor.I
-() where
+( -- Identity functor
+  I(..)
+) where
+
+newtype I a = I { getI :: a }
