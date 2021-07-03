@@ -186,7 +186,7 @@ instance UniversalIntro Seq where
 
 instance ExistentialIntro Seq where
   existsL p = popL (dnESeq . runExists (pushL p))
-  existsR p = mapR (Exists . liftDN0) p
+  existsR p = mapR (Exists . liftDN) p
 
 
 -- Recursion
