@@ -48,7 +48,7 @@ sequent :: (r •_Δ -> r •_Γ) -> _Γ -|Seq r|- _Δ
 sequent = Seq . CPS
 
 dnESeq :: r ••(_Γ -|Seq r|- _Δ) -> _Γ -|Seq r|- _Δ
-dnESeq = Seq . dnE . contramap (contramap getSeq)
+dnESeq = Seq . CPS . dnE . contramap (contramap (runCPS . getSeq))
 
 newtype Seq r _Γ _Δ = Seq { getSeq :: _Γ -|CPS r|- _Δ }
   deriving (Applicative, Cat.Category, Functor, Monad, Profunctor)

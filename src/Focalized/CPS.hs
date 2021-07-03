@@ -33,8 +33,8 @@ import           Data.Profunctor.Traversing
 import           Focalized.Continuation
 import           Focalized.Disjunction
 
-dnE :: r ••CPS r a b -> CPS r a b
-dnE f = CPS (\ k -> K (\ a -> f • K (\ f -> runCPS f k • a)))
+dnE :: r ••(r •b -> r •a) -> (r •b -> r •a)
+dnE f k = f •<< K . \ a f -> f k • a
 
 
 -- CPS

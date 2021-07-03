@@ -30,7 +30,7 @@ liftFun' :: (a -> (b -> r) -> r) -> (a ~~r~> b)
 liftFun' = liftFun . flip
 
 dnEFun :: r ••(a ~~r~> b) -> (a ~~r~> b)
-dnEFun = Fun . dnE . contramap (contramap getFun)
+dnEFun = Fun . CPS . dnE . contramap (contramap (runCPS . getFun))
 
 newtype Fun r a b = Fun { getFun :: CPS r a b }
 
