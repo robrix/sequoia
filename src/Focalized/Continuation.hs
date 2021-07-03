@@ -84,14 +84,18 @@ inK1 :: Continuation k => ((a -> R k) -> (b -> R k)) -> (k a -> k b)
 inK1 = dimap exK inK
 
 inK2 :: Continuation k => ((a -> R k) -> (b -> R k) -> (c -> R k)) -> (k a -> k b -> k c)
-inK2 f a b = inK (f (exK a) (exK b))
+inK2 = dimap2 exK exK inK
 
 
 exK1 :: Continuation k => (k a -> k b) -> ((a -> R k) -> (b -> R k))
 exK1 = dimap inK exK
 
 exK2 :: Continuation k => (k a -> k b -> k c) -> ((a -> R k) -> (b -> R k) -> (c -> R k))
-exK2 f a b = exK (f (inK a) (inK b))
+exK2 = dimap2 inK inK exK
+
+
+dimap2 :: (a' -> a) -> (b' -> b) -> (c -> c') -> (a -> b -> c) -> (a' -> b' -> c')
+dimap2 l1 l2 r f a1 a2 = r (f (l1 a1) (l2 a2))
 
 
 coerceK :: (Continuation k1, Continuation k2, R k1 ~ R k2) => k1 a -> k2 a
