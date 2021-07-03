@@ -129,13 +129,13 @@ infixr 1 <<•, •>>
 infix 3 <••>
 
 
-(>>-) :: a -> (b -> r •a) -> r •b
-a >>- f = K ((• a) . f)
+(>>-) :: Continuation k => a -> (b -> k a) -> k b
+a >>- f = inK ((`exK` a) . f)
 
 infixl 1 >>-
 
-(-<<) :: (b -> r •a) -> (a -> r •b)
-f -<< a = K ((• a) . f)
+(-<<) :: Continuation k => (b -> k a) -> (a -> k b)
+f -<< a = inK ((`exK` a) . f)
 
 infixr 1 -<<
 
