@@ -10,9 +10,12 @@ module Focalized.Connective.Function
 , type (~>)
 ) where
 
-import Data.Functor.Contravariant
-import Focalized.Continuation
-import Focalized.Polarity
+import qualified Control.Category as Cat
+import           Data.Functor.Contravariant
+import           Data.Profunctor
+import           Focalized.CPS
+import           Focalized.Continuation
+import           Focalized.Polarity
 
 -- Implication
 
@@ -35,6 +38,11 @@ dnE' :: Continuation k => k **(k b -> k a) -> (k b -> k a)
 dnE' f = inK1 (\ k a -> exK f (inK (\ f -> exK1 f k a)))
 
 newtype Fun k a b = Fun { getFun :: k b -> k a }
+  deriving (Cat.Category, Profunctor) via ViaCPS (Fun k)
+
+instance Continuation k => CPS' k (Fun k) where
+  inC = Fun
+  exC = getFun
 
 instance Contravariant k => Functor (Fun k a) where
   fmap f (Fun r) = Fun (r . contramap f)
