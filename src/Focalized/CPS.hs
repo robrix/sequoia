@@ -5,10 +5,6 @@ module Focalized.CPS
 , lowerK
 , liftK2
 , runK
-, (•<<)
-, (>>•)
-, (<<•)
-, (•>>)
 , (<••>)
 , type (••)
   -- * Double negation
@@ -67,21 +63,6 @@ liftK2 f (K a) (K b) = K (f a b)
 runK :: r •a -> a -> r
 runK = (•)
 
-(•<<) :: r •a -> (b -> a) -> r •b
-(•<<) = flip contramap
-
-(>>•) :: (b -> a) -> r •a -> r •b
-(>>•) = contramap
-
-infixr 1 •<<, >>•
-
-(<<•) :: (r -> s) -> r •a -> s •a
-f <<• k = K (f . runK k)
-
-(•>>) :: r •a -> (r -> s) -> s •a
-k •>> f = K (f . runK k)
-
-infixr 1 <<•, •>>
 
 (<••>) :: Disj d => c •a -> c •b -> c •(a `d` b)
 (<••>) = liftK2 (<-->)

@@ -1,6 +1,11 @@
 module Focalized.Continuation
 ( -- * Continuations
   type (•)(..)
+  -- ** Composition
+, (•<<)
+, (>>•)
+, (<<•)
+, (•>>)
 ) where
 
 import qualified Control.Category as Cat
@@ -18,3 +23,22 @@ instance Cat.Category (•) where
 
 instance Contravariant ((•) r) where
   contramap f = K . (. f) . (•)
+
+
+-- Composition
+
+(•<<) :: r •a -> (b -> a) -> r •b
+(•<<) = flip contramap
+
+(>>•) :: (b -> a) -> r •a -> r •b
+(>>•) = contramap
+
+infixr 1 •<<, >>•
+
+(<<•) :: (r -> s) -> r •a -> s •a
+f <<• k = K (f . (k •))
+
+(•>>) :: r •a -> (r -> s) -> s •a
+k •>> f = K (f . (k •))
+
+infixr 1 <<•, •>>
