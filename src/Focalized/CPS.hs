@@ -56,7 +56,6 @@ module Focalized.CPS
 import           Control.Applicative (liftA2)
 import           Control.Arrow
 import qualified Control.Category as Cat
-import           Control.Monad (ap)
 import           Data.Functor.Contravariant
 import           Data.Kind (Type)
 import           Data.Profunctor
@@ -109,51 +108,11 @@ uncurryCPS :: (Continuation k, CPS' c) => c k a (c k b d) -> c k (a, b) d
 uncurryCPS c = inC (\ k -> inK ((`exK` k) . uncurry (appCPS2 c)))
 
 newtype CPS k a b = CPS { runCPS :: k b -> k a }
-
-instance Cat.Category (CPS k) where
-  id = inC id
-  f . g = inC (exC g . exC f)
-
-instance Contravariant k => Functor (CPS k a) where
-  fmap f r = inC (exC r . contramap f)
-
-instance Continuation k => Applicative (CPS k a) where
-  pure a = inC (•<< const a)
-  (<*>) = ap
-
-instance Continuation k => Monad (CPS k a) where
-  r >>= f = inC (inK . \ k a -> exK (exC r (inK (\ a' -> exK (exC (f a') k) a))) a)
-
-instance Continuation k => Arrow (CPS k) where
-  arr = cps
-  first  f = inC (inK . (\ k (l, r) -> exK (appCPS f l) (k •<< (,r))))
-  second g = inC (inK . (\ k (l, r) -> exK (appCPS g r) (k •<< (l,))))
-  f *** g  = inC (inK . (\ k (l, r) -> exK (appCPS f l) (appCPS g r •<< (k •<<) . (,))))
-  (&&&) = liftA2 (,)
-
-instance Continuation k => ArrowChoice (CPS k) where
-  left  f = inC (\ k -> exC f (k •<< inl) <••> (k •<< inr))
-  right g = inC (\ k -> (k •<< inl) <••> exC g (k •<< inr))
-  f +++ g = inC (\ k -> exC f (k •<< inl) <••> exC g (k •<< inr))
-  f ||| g = inC ((<••>) <$> exC f <*> exC g)
+  deriving (Arrow, ArrowChoice, Cat.Category, Choice, Profunctor, Strong, Traversing) via (ViaCPS CPS k)
+  deriving (Applicative, Functor, Monad) via (ViaCPS CPS k a)
 
 instance Continuation k => ArrowApply (CPS k) where
-  app = inC (>>- uncurry appCPS)
-
-instance Contravariant k => Profunctor (CPS k) where
-  dimap f g = inC . dimap (contramap g) (contramap f) . exC
-
-instance Continuation k => Strong (CPS k) where
-  first' = first
-  second' = second
-
-instance Continuation k => Choice (CPS k) where
-  left' = left
-  right' = right
-
-instance Continuation k => Traversing (CPS k) where
-  traverse' c = liftCPS (exK . execCPS . traverse (pappCPS c))
-  wander traverse c = liftCPS (exK . execCPS . traverse (pappCPS c))
+  app = applyCPS
 
 
 dnE :: Continuation k => k (k (CPS k a b)) -> CPS k a b
