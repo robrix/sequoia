@@ -13,8 +13,9 @@ import           Data.Functor.Contravariant
 import           Focalized.CPS
 import           Focalized.Connective.Down
 import           Focalized.Connective.Function
-import           Focalized.Polarity
 import           Focalized.Connective.Quantification
+import           Focalized.Continuation
+import           Focalized.Polarity
 
 -- Recursion
 

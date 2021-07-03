@@ -5,7 +5,7 @@ module Focalized.Connective.Negate
 , type (-)(..)
 ) where
 
-import Focalized.CPS
+import Focalized.Continuation
 import Focalized.Polarity
 
 runNegate :: r -a -> (a -> r)

@@ -32,6 +32,7 @@ import           Focalized.Calculus.Quantification
 import           Focalized.Calculus.Shift
 import           Focalized.Calculus.XOr
 import           Focalized.Conjunction
+import           Focalized.Continuation
 import           Focalized.Disjunction
 import           Prelude hiding (init)
 

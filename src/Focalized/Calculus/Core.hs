@@ -59,6 +59,7 @@ import Data.Profunctor
 import Focalized.CPS
 import Focalized.Calculus.Context
 import Focalized.Conjunction
+import Focalized.Continuation
 import Focalized.Disjunction
 import Prelude hiding (init)
 

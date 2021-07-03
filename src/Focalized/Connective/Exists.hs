@@ -6,6 +6,7 @@ module Focalized.Connective.Exists
 ) where
 
 import Focalized.CPS
+import Focalized.Continuation
 import Focalized.Polarity
 
 -- Universal quantification

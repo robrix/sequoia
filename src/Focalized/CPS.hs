@@ -10,7 +10,6 @@ module Focalized.CPS
 , (<<•)
 , (•>>)
 , (<••>)
-, type (•)(..)
 , type (••)
   -- * Double negation
 , dnI
@@ -48,6 +47,7 @@ import           Control.Monad.Trans.Class
 import           Data.Functor.Contravariant
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
+import           Focalized.Continuation
 import           Focalized.Disjunction
 
 -- Continuations
@@ -88,21 +88,12 @@ infixr 1 <<•, •>>
 
 infix 3 <••>
 
-newtype r •a = K { (•) :: a -> r }
-
-instance Cat.Category (•) where
-  id = K id
-  K f . K g = K (g . f)
-
-instance Contravariant ((•) r) where
-  contramap f = K . (. f) . (•)
-
 
 -- Double negation
 
 type r ••a = r •(r •a)
 
-infixl 9 •, ••
+infixl 9 ••
 
 
 dnI :: a -> r ••a

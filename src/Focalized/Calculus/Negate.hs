@@ -20,6 +20,7 @@ import Focalized.Calculus.Control
 import Focalized.Calculus.Core
 import Focalized.Connective.Negate
 import Focalized.Connective.Negation
+import Focalized.Continuation
 import Focalized.Polarity
 import Prelude hiding (init)
 

@@ -8,9 +8,9 @@ module Focalized.Calculus.Control
 , kR'
 ) where
 
-import Focalized.CPS
 import Focalized.Calculus.Context
 import Focalized.Calculus.Core
+import Focalized.Continuation
 import Prelude hiding (init)
 
 -- Delimited control

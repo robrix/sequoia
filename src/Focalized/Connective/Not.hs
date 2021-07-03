@@ -5,7 +5,7 @@ module Focalized.Connective.Not
 , type (¬)(..)
 ) where
 
-import Focalized.CPS
+import Focalized.Continuation
 import Focalized.Polarity
 
 runNot :: r ¬a -> (a -> r)
