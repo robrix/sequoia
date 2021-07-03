@@ -1,4 +1,5 @@
-{-# LANGUAGE QuantifiedConstraints #-}
+{-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Focalized.CPS
 ( -- * CPS
   cps
@@ -57,7 +58,6 @@ import           Control.Applicative (liftA2)
 import           Control.Arrow
 import qualified Control.Category as Cat
 import           Data.Functor.Contravariant
-import           Data.Kind (Type)
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
 import           Focalized.Continuation
@@ -65,51 +65,51 @@ import           Focalized.Disjunction
 
 -- CPS
 
-cps :: (Continuation k, CPS' c) => (a -> b) -> c k a b
+cps :: CPS' k c => (a -> b) -> c a b
 cps = inC . inK1 . flip (.)
 
-liftCPS :: (Continuation k, CPS' c) => (a -> k b -> R k) -> c k a b
+liftCPS :: CPS' k c => (a -> k b -> R k) -> c a b
 liftCPS = inC . fmap inK . flip
 
-contToCPS :: (Continuation k, CPS' c) => (a -> Cont k b) -> c k a b
+contToCPS :: CPS' k c => (a -> Cont k b) -> c a b
 contToCPS f = liftCPS (exK . runCont . f)
 
-cpsToCont :: (Continuation k, CPS' c) => c k a b -> (a -> Cont k b)
+cpsToCont :: CPS' k c => c a b -> (a -> Cont k b)
 cpsToCont c a = Cont (appCPS c a)
 
-appCPS :: (Continuation k, CPS' c) => c k a b -> a -> k (k b)
+appCPS :: CPS' k c => c a b -> a -> k (k b)
 appCPS c a = inK $ \ k -> exK (exC c k) a
 
-appCPS2 :: (Continuation k, CPS' c) => c k a (c k b d) -> a -> b -> k (k d)
+appCPS2 :: CPS' k c => c a (c b d) -> a -> b -> k (k d)
 appCPS2 c = appK2 (exC (rmap exC c))
 
-pappCPS :: (Continuation k, CPS' c) => c k a b -> a -> c k () b
+pappCPS :: CPS' k c => c a b -> a -> c () b
 pappCPS c a = c Cat.<<< inC (•<< const a)
 
-execCPS :: (Continuation k, CPS' c) => c k () a -> k (k a)
+execCPS :: CPS' k c => c () a -> k (k a)
 execCPS c = appCPS c ()
 
-evalCPS :: (Continuation k, CPS' c) => c k i (R k) -> k i
+evalCPS :: CPS' k c => c i (R k) -> k i
 evalCPS c = exC c idK
 
 refoldCPS :: (Cat.Category c, Traversing c, Traversable f) => f b `c` b -> a `c` f a -> a `c` b
 refoldCPS f g = go where go = f Cat.<<< traverse' go Cat.<<< g
 
-resetCPS :: (CPS' c, Continuation j, Continuation k) => c k i (R k) -> c j i (R k)
+resetCPS :: (CPS' j cj, CPS' k ck) => ck i (R k) -> cj i (R k)
 resetCPS c = inC (inK . \ k -> exK k . exK (evalCPS c))
 
-shiftCPS :: (Continuation k, CPS' c) => (k o -> c k i (R k)) -> c k i o
+shiftCPS :: CPS' k c => (k o -> c i (R k)) -> c i o
 shiftCPS f = inC (evalCPS . f)
 
-curryCPS :: (Continuation k, CPS' c) => c k (a, b) d -> c k a (c k b d)
+curryCPS :: CPS' k c => c (a, b) d -> c a (c b d)
 curryCPS c = inC (•<< (`lmap` c) . (,))
 
-uncurryCPS :: (Continuation k, CPS' c) => c k a (c k b d) -> c k (a, b) d
+uncurryCPS :: CPS' k c => c a (c b d) -> c (a, b) d
 uncurryCPS c = inC (\ k -> inK ((`exK` k) . uncurry (appCPS2 c)))
 
 newtype CPS k a b = CPS { runCPS :: k b -> k a }
-  deriving (Arrow, ArrowChoice, Cat.Category, Choice, Profunctor, Strong, Traversing) via (ViaCPS CPS k)
-  deriving (Applicative, Functor, Monad) via (ViaCPS CPS k a)
+  deriving (Arrow, ArrowChoice, Cat.Category, Choice, Profunctor, Strong, Traversing) via (ViaCPS (CPS k))
+  deriving (Applicative, Functor, Monad) via (ViaCPS (CPS k) a)
 
 instance Continuation k => ArrowApply (CPS k) where
   app = applyCPS
@@ -121,156 +121,156 @@ dnE f = CPS (inK . \ k a -> exK f (inK (\ f -> exK (runCPS f k) a)))
 
 -- CPS abstraction
 
-class (forall k . Cat.Category (c k), forall k . Contravariant k => Profunctor (c k)) => CPS' c where
-  inC :: (k b -> k a) -> c k a b
-  exC :: c k a b      -> (k b -> k a)
+class (Cat.Category c, Continuation k, Profunctor c) => CPS' k c | c -> k where
+  inC :: (k b -> k a) -> c a b
+  exC :: c a b        -> (k b -> k a)
 
-instance CPS' CPS where
+instance Continuation k => CPS' k (CPS k) where
   inC = CPS
   exC = runCPS
 
 
 -- Category
 
-idCPS :: CPS' c => c k a a
+idCPS :: CPS' k c => c a a
 idCPS = inC id
 
-composeCPS :: CPS' c => c k b d -> c k a b -> c k a d
+composeCPS :: CPS' k c => c b d -> c a b -> c a d
 composeCPS f g = inC (exC g . exC f)
 
 
 -- Functor
 
-fmapCPS :: (Contravariant k, CPS' c) => (b -> b') -> (c k a b -> c k a b')
+fmapCPS :: CPS' k c => (b -> b') -> (c a b -> c a b')
 fmapCPS = rmapCPS
 
 
 -- Applicative
 
-pureCPS :: (Continuation k, CPS' c) => b -> c k a b
+pureCPS :: CPS' k c => b -> c a b
 pureCPS a = inC (•<< const a)
 
-apCPS :: (Continuation k, CPS' c) => c k a (b -> b') -> (c k a b -> c k a b')
+apCPS :: CPS' k c => c a (b -> b') -> (c a b -> c a b')
 apCPS f a = inC (inK1 (\ k a' -> exK (exC f (inK (\ f -> exK (exC a (inK (k . f))) a'))) a'))
 
-liftA2CPS :: (Continuation k, CPS' c) => (x -> y -> z) -> c k a x -> c k a y -> c k a z
+liftA2CPS :: CPS' k c => (x -> y -> z) -> c a x -> c a y -> c a z
 liftA2CPS f a b = inC (\ k -> inK (\ a' -> exK (exC a (inK ((`exK` a') . exC b . (k •<<) . f))) a'))
 
 
 -- Monad
 
-bindCPS :: (Continuation k, CPS' c) => c k a b -> (b -> c k a b') -> c k a b'
+bindCPS :: CPS' k c => c a b -> (b -> c a b') -> c a b'
 bindCPS m f = inC (inK1 (\ k a -> exK (exC m (inK ((`exK` a) . (`exC` inK k) . f))) a))
 
 
 -- Arrow
 
-arrCPS :: (Continuation k, CPS' c) => (a -> b) -> c k a b
+arrCPS :: CPS' k c => (a -> b) -> c a b
 arrCPS = cps
 
-firstCPS :: (Continuation k, CPS' c) => c k a b -> c k (a, d) (b, d)
+firstCPS :: CPS' k c => c a b -> c (a, d) (b, d)
 firstCPS  f = inC (inK . (\ k (l, r) -> exK (appCPS f l) (k •<< (,r))))
 
-secondCPS :: (Continuation k, CPS' c) => c k a b -> c k (d, a) (d, b)
+secondCPS :: CPS' k c => c a b -> c (d, a) (d, b)
 secondCPS g = inC (inK . (\ k (l, r) -> exK (appCPS g r) (k •<< (l,))))
 
-splitPrdCPS :: (Continuation k, CPS' c) => c k a b -> c k a' b' -> c k (a, a') (b, b')
+splitPrdCPS :: CPS' k c => c a b -> c a' b' -> c (a, a') (b, b')
 splitPrdCPS f g = inC (inK . (\ k (l, r) -> exK (appCPS f l) (appCPS g r •<< (k •<<) . (,))))
 
-fanoutCPS :: (Continuation k, CPS' c) => c k a b -> c k a b' -> c k a (b, b')
+fanoutCPS :: CPS' k c => c a b -> c a b' -> c a (b, b')
 fanoutCPS = liftA2CPS (,)
 
 
 -- ArrowChoice
 
-leftCPS :: (Continuation k, CPS' c) => c k a b -> c k (Either a d) (Either b d)
+leftCPS :: CPS' k c => c a b -> c (Either a d) (Either b d)
 leftCPS  f = inC (\ k -> exC f (k •<< inl) <••> (k •<< inr))
 
-rightCPS :: (Continuation k, CPS' c) => c k a b -> c k (Either d a) (Either d b)
+rightCPS :: CPS' k c => c a b -> c (Either d a) (Either d b)
 rightCPS g = inC (\ k -> (k •<< inl) <••> exC g (k •<< inr))
 
-splitSumCPS :: (Continuation k, CPS' c) => c k a1 b1 -> c k a2 b2 -> c k (Either a1 a2) (Either b1 b2)
+splitSumCPS :: CPS' k c => c a1 b1 -> c a2 b2 -> c (Either a1 a2) (Either b1 b2)
 splitSumCPS f g = inC (\ k -> exC f (k •<< inl) <••> exC g (k •<< inr))
 
-faninCPS :: (Continuation k, CPS' c) => c k a1 b -> c k a2 b -> c k (Either a1 a2) b
+faninCPS :: CPS' k c => c a1 b -> c a2 b -> c (Either a1 a2) b
 faninCPS f g = inC ((<••>) <$> exC f <*> exC g)
 
 
 -- ArrowApply
 
-applyCPS :: (Continuation k, CPS' c) => c k (c k a b, a) b
+applyCPS :: CPS' k c => c (c a b, a) b
 applyCPS = inC (>>- uncurry appCPS)
 
 
 -- Traversing
 
-wanderCPS :: (Continuation k, CPS' c, Applicative (c k ())) => (forall f . Applicative f => (a -> f b) -> (s -> f t)) -> c k a b -> c k s t
+wanderCPS :: (CPS' k c, Applicative (c ())) => (forall f . Applicative f => (a -> f b) -> (s -> f t)) -> c a b -> c s t
 wanderCPS traverse c = liftCPS (exK . execCPS . traverse (pappCPS c))
 
 
 -- Profunctor
 
-dimapCPS :: (Contravariant k, CPS' c) => (a' -> a) -> (b -> b') -> (c k a b -> c k a' b')
+dimapCPS :: CPS' k c => (a' -> a) -> (b -> b') -> (c a b -> c a' b')
 dimapCPS f g = inC . dimap (contramap g) (contramap f) . exC
 
-lmapCPS :: (Contravariant k, CPS' c) => (a' -> a) -> (c k a b -> c k a' b)
+lmapCPS :: CPS' k c => (a' -> a) -> (c a b -> c a' b)
 lmapCPS = (`dimapCPS` id)
 
-rmapCPS :: (Contravariant k, CPS' c) => (b -> b') -> (c k a b -> c k a b')
+rmapCPS :: CPS' k c => (b -> b') -> (c a b -> c a b')
 rmapCPS = (id `dimapCPS`)
 
 
 -- Deriving
 
-newtype ViaCPS c (k :: Type -> Type) a b = ViaCPS { runViaCPS :: c k a b }
-  deriving (CPS')
+newtype ViaCPS c a b = ViaCPS { runViaCPS :: c a b }
+  deriving (CPS' k)
 
-instance CPS' c => Cat.Category (ViaCPS c k) where
+instance CPS' k c => Cat.Category (ViaCPS c) where
   id = idCPS
   (.) = composeCPS
 
-instance (Contravariant k, CPS' c) => Functor (ViaCPS c k a) where
+instance CPS' k c => Functor (ViaCPS c a) where
   fmap = fmapCPS
 
-instance (Continuation k, CPS' c) => Applicative (ViaCPS c k a) where
+instance CPS' k c => Applicative (ViaCPS c a) where
   pure = pureCPS
 
   liftA2 = liftA2CPS
 
   (<*>) = apCPS
 
-instance (Continuation k, CPS' c) => Monad (ViaCPS c k a) where
+instance CPS' k c => Monad (ViaCPS c a) where
   (>>=) = bindCPS
 
-instance (Continuation k, CPS' c) => Arrow (ViaCPS c k) where
+instance CPS' k c => Arrow (ViaCPS c) where
   arr = arrCPS
   first = firstCPS
   second = secondCPS
   (***) = splitPrdCPS
   (&&&) = fanoutCPS
 
-instance (Continuation k, CPS' c) => ArrowChoice (ViaCPS c k) where
+instance CPS' k c => ArrowChoice (ViaCPS c) where
   left = leftCPS
   right = rightCPS
   (+++) = splitSumCPS
   (|||) = faninCPS
 
-instance (Continuation k, CPS' c) => ArrowApply (ViaCPS c k) where
+instance CPS' k c => ArrowApply (ViaCPS c) where
   app = applyCPS
 
-instance (Continuation k, CPS' c) => Strong (ViaCPS c k) where
+instance CPS' k c => Strong (ViaCPS c) where
   first' = first
   second' = second
 
-instance (Continuation k, CPS' c) => Choice (ViaCPS c k) where
+instance CPS' k c => Choice (ViaCPS c) where
   left' = left
   right' = right
 
-instance (Continuation k, CPS' c) => Traversing (ViaCPS c k) where
+instance CPS' k c => Traversing (ViaCPS c) where
   traverse' = wanderCPS traverse
   wander = wanderCPS
 
-instance (Contravariant k, CPS' c) => Profunctor (ViaCPS c k) where
+instance CPS' k c => Profunctor (ViaCPS c) where
   dimap = dimapCPS
 
   lmap = lmapCPS
