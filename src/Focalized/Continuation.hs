@@ -47,6 +47,7 @@ module Focalized.Continuation
 import qualified Control.Category as Cat
 import           Control.Monad (ap, (<=<))
 import           Data.Functor.Contravariant
+import           Data.Functor.Contravariant.Rep
 import           Data.Profunctor
 import           Focalized.Disjunction
 
@@ -60,6 +61,12 @@ instance Monad m => Cat.Category (K m) where
 
 instance Contravariant (K m r) where
   contramap = contramapK
+
+instance Representable (K m r) where
+  type Rep (K m r) = m r
+
+  tabulate = K
+  index = runK
 
 
 -- Application
