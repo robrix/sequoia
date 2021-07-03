@@ -6,6 +6,9 @@ module Focalized.Continuation
 , appK1
 , appK2
 , Contrapplicative(..)
+, coerceK
+, coerceK1
+, coerceK2
   -- ** Composition
 , idK
 , (•<<)
@@ -84,6 +87,16 @@ instance Contrapplicative ((•) r) where
   exK1 = dimap K (•)
 
   exK2 f a b = exK (f (K a) (K b))
+
+
+coerceK :: (Contrapplicative k1, Contrapplicative k2, R k1 ~ R k2) => k1 a -> k2 a
+coerceK = inK . exK
+
+coerceK1 :: (Contrapplicative k1, Contrapplicative k2, R k1 ~ R k2) => (k1 a -> k1 b) -> (k2 a -> k2 b)
+coerceK1 = inK1 . exK1
+
+coerceK2 :: (Contrapplicative k1, Contrapplicative k2, R k1 ~ R k2) => (k1 a -> k1 b -> k1 c) -> (k2 a -> k2 b -> k2 c)
+coerceK2 = inK2 . exK2
 
 
 -- Composition
