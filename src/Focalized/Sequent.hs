@@ -59,8 +59,8 @@ liftLR :: Continuation k => CPS k a b -> Seq k (a < _Γ) (_Δ > b)
 liftLR = Seq . runCPS . dimap exl inr
 
 
-lowerLR :: Continuation k => (a -|CPS k|- b -> _Γ -|Seq k|- _Δ) -> a < _Γ -|Seq k|- _Δ > b -> _Γ -|Seq k|- _Δ
-lowerLR f p = sequent $ inK . \ k i -> exK (runSeq (f (CPS (\ kb -> runSeq p (k |> kb) •<< (<| i)))) k) i
+lowerLR :: Continuation k => ((k b -> k a) -> _Γ -|Seq k|- _Δ) -> a < _Γ -|Seq k|- _Δ > b -> _Γ -|Seq k|- _Δ
+lowerLR f p = sequent $ inK . \ k i -> exK (runSeq (f (\ kb -> runSeq p (k |> kb) •<< (<| i))) k) i
 
 
 -- Effectful sequents
@@ -175,7 +175,7 @@ instance Continuation k => XOrIntro (Seq k) where
 
 instance Continuation k => FunctionIntro (Seq k) where
   funL a b = popL (\ f -> a >>> liftLR (CPS (getFun f)) >>> wkL' b)
-  funR = lowerLR (liftR . Fun . runCPS) . wkR'
+  funR = lowerLR (liftR . Fun) . wkR'
 
 instance Continuation k => SubtractionIntro (Seq k) where
   subL f = mapL getSub (tensorL (wkL' f >>> poppedL2 negateL init))
