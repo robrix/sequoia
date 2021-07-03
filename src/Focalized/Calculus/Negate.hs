@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeFamilies #-}
 module Focalized.Calculus.Negate
 ( -- * Negate
   NegateIntro(..)
@@ -19,6 +20,7 @@ import Focalized.Calculus.Control
 import Focalized.Calculus.Core
 import Focalized.Connective.Negate
 import Focalized.Connective.Negation
+import Focalized.Continuation
 import Focalized.Polarity
 import Prelude hiding (init)
 
@@ -53,10 +55,10 @@ negateR' p = wkL p >>> negateL init
 
 
 shiftN
-  :: (Control s, Contextual (s r))
-  => K (s r) -a < _Γ -|s r|- _Δ > r
-  -- ------------------------------
-  ->              _Γ -|s r|- _Δ > a
+  :: (Control s, Contextual (s k), k ~ K (s k))
+  => k -a < _Γ -|s k|- _Δ > R k
+  -- --------------------------
+  ->        _Γ -|s k|- _Δ > a
 shiftN = shift . negateLK'
 
 

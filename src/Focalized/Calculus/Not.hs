@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeFamilies #-}
 module Focalized.Calculus.Not
 ( -- * Not
   NotIntro(..)
@@ -19,6 +20,7 @@ import Focalized.Calculus.Control
 import Focalized.Calculus.Core
 import Focalized.Connective.Negation
 import Focalized.Connective.Not
+import Focalized.Continuation
 import Focalized.Polarity
 import Prelude hiding (init)
 
@@ -54,10 +56,10 @@ notR' p = wkL p >>> notL init
 
 
 shiftP
-  :: (Control s, Contextual (s r))
-  =>  K (s r) ¬a < _Γ -|s r|- _Δ > r
-  -- -------------------------------
-  ->               _Γ -|s r|- _Δ > a
+  :: (Control s, Contextual (s k), k ~ K (s k))
+  =>  k ¬a < _Γ -|s k|- _Δ > R k
+  -- ---------------------------
+  ->         _Γ -|s k|- _Δ > a
 shiftP = shift . notLK'
 
 

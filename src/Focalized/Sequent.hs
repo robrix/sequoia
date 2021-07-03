@@ -39,27 +39,27 @@ import           Prelude hiding (init)
 
 -- Sequents
 
-runSeq :: _Γ -|Seq r|- _Δ -> (r •_Δ -> r •_Γ)
+runSeq :: _Γ -|Seq k|- _Δ -> (k _Δ -> k _Γ)
 runSeq = runCPS . getSeq
 
-evalSeq :: _Γ -|Seq _Δ|- _Δ -> _Δ •_Γ
+evalSeq :: Continuation k => _Δ ~ R k => _Γ -|Seq k|- _Δ -> k _Γ
 evalSeq = (`runSeq` idK)
 
-sequent :: (r •_Δ -> r •_Γ) -> _Γ -|Seq r|- _Δ
+sequent :: (k _Δ -> k _Γ) -> _Γ -|Seq k|- _Δ
 sequent = Seq . CPS
 
-dnESeq :: r ••(_Γ -|Seq r|- _Δ) -> _Γ -|Seq r|- _Δ
+dnESeq :: Continuation k => k (k (_Γ -|Seq k|- _Δ)) -> _Γ -|Seq k|- _Δ
 dnESeq = Seq . dnE . contramap (contramap getSeq)
 
-newtype Seq r _Γ _Δ = Seq { getSeq :: _Γ -|CPS ((•) r)|- _Δ }
+newtype Seq k _Γ _Δ = Seq { getSeq :: _Γ -|CPS k|- _Δ }
   deriving (Applicative, Cat.Category, Functor, Monad, Profunctor)
 
-liftLR :: CPS ((•) r) a b -> Seq r (a < _Γ) (_Δ > b)
+liftLR :: Continuation k => CPS k a b -> Seq k (a < _Γ) (_Δ > b)
 liftLR = Seq . dimap exl inr
 
 
-lowerLR :: (a -|CPS ((•) r)|- b -> _Γ -|Seq r|- _Δ) -> a < _Γ -|Seq r|- _Δ > b -> _Γ -|Seq r|- _Δ
-lowerLR f p = sequent $ K . \ k i -> runSeq (f (CPS (\ kb -> runSeq p (k |> kb) •<< (<| i)))) k • i
+lowerLR :: Continuation k => (a -|CPS k|- b -> _Γ -|Seq k|- _Δ) -> a < _Γ -|Seq k|- _Δ > b -> _Γ -|Seq k|- _Δ
+lowerLR f p = sequent $ inK . \ k i -> exK (runSeq (f (CPS (\ kb -> runSeq p (k |> kb) •<< (<| i)))) k) i
 
 
 -- Effectful sequents
@@ -67,7 +67,7 @@ lowerLR f p = sequent $ K . \ k i -> runSeq (f (CPS (\ kb -> runSeq p (k |> kb) 
 runSeqT :: SeqT r _Γ m _Δ -> (m r •_Δ -> m r •_Γ)
 runSeqT = runSeq . getSeqT
 
-newtype SeqT r _Γ m _Δ = SeqT { getSeqT :: Seq (m r) _Γ _Δ }
+newtype SeqT r _Γ m _Δ = SeqT { getSeqT :: Seq ((•) (m r)) _Γ _Δ }
   deriving (Applicative, Functor, Monad)
 
 instance MonadTrans (SeqT r _Γ) where
@@ -76,8 +76,8 @@ instance MonadTrans (SeqT r _Γ) where
 
 -- Core rules
 
-instance Core (Seq r) where
-  type K (Seq r) = (•) r
+instance Continuation k => Core (Seq k) where
+  type K (Seq k) = k
 
   f >>> g = f >>= pure <--> pushL g
 
@@ -86,49 +86,49 @@ instance Core (Seq r) where
 
 -- Structural rules
 
-deriving via Contextually (Seq r) instance Weaken   (Seq r)
-deriving via Contextually (Seq r) instance Contract (Seq r)
-deriving via Contextually (Seq r) instance Exchange (Seq r)
+deriving via Contextually (Seq k) instance Continuation k => Weaken   (Seq k)
+deriving via Contextually (Seq k) instance Continuation k => Contract (Seq k)
+deriving via Contextually (Seq k) instance Continuation k => Exchange (Seq k)
 
 
 -- Contextual rules
 
-instance Contextual (Seq r) where
-  swapΓΔ f _Δ' _Γ' = sequent $ K . \ _Δ _Γ -> runSeq (f _Δ _Γ) _Δ' • _Γ'
+instance Continuation k => Contextual (Seq k) where
+  swapΓΔ f _Δ' _Γ' = sequent (inK . \ _Δ _Γ -> exK (runSeq (f _Δ _Γ) _Δ') _Γ')
 
 
 -- Control
 
 instance Control Seq where
-  reset s = sequent (•<< (evalSeq s •))
+  reset s = sequent (•<< exK (evalSeq s))
   shift p = sequent (\ k -> runSeq p (inlC k |> idK) •<< (inrC k <|))
 
 
 -- Negation
 
-instance NotIntro (Seq r) where
+instance Continuation k => NotIntro (Seq k) where
   notL = notLK . kL
   notR = notRK . kR
 
-instance NegateIntro (Seq r) where
+instance Continuation k => NegateIntro (Seq k) where
   negateL = negateLK . kL
   negateR = negateRK . kR
 
 
 -- Additive
 
-instance TopIntro (Seq r) where
+instance Continuation k => TopIntro (Seq k) where
   topR = pure (inr Top)
 
-instance ZeroIntro (Seq r) where
-  zeroL = liftL (K absurdP)
+instance Continuation k => ZeroIntro (Seq k) where
+  zeroL = liftL (inK absurdP)
 
-instance WithIntro (Seq r) where
+instance Continuation k => WithIntro (Seq k) where
   withL1 p = popL (pushL p . exl)
   withL2 p = popL (pushL p . exr)
   withR = liftA2 (liftA2 (-><-))
 
-instance SumIntro (Seq r) where
+instance Continuation k => SumIntro (Seq k) where
   sumL a b = popL (pushL a <--> pushL b)
   sumR1 = mapR inl
   sumR2 = mapR inr
@@ -136,33 +136,33 @@ instance SumIntro (Seq r) where
 
 -- Multiplicative
 
-instance BottomIntro (Seq r) where
-  botL = liftL (K absurdN)
+instance Continuation k => BottomIntro (Seq k) where
+  botL = liftL (inK absurdN)
   botR = wkR
 
-instance OneIntro (Seq r) where
+instance Continuation k => OneIntro (Seq k) where
   oneL = wkL
   oneR = liftR One
 
-instance ParIntro (Seq r) where
+instance Continuation k => ParIntro (Seq k) where
   parL a b = popL (pushL a <--> pushL b)
   parR = fmap ((>>= inr . inl) <--> inr . inr)
 
-instance TensorIntro (Seq r) where
+instance Continuation k => TensorIntro (Seq k) where
   tensorL p = popL (pushL2 p . exl <*> exr)
   tensorR = liftA2 (liftA2 (-><-))
 
 
 -- Logical biconditional/exclusive disjunction
 
-instance IffIntro (Seq r) where
+instance Continuation k => IffIntro (Seq k) where
   iffL1 s1 s2 = mapL getIff (withL1 (downR s1 ->⊢ s2))
 
   iffL2 s1 s2 = mapL getIff (withL2 (downR s1 ->⊢ s2))
 
   iffR s1 s2 = mapR Iff (funR (downL s1) ⊢& funR (downL s2))
 
-instance XOrIntro (Seq r) where
+instance Continuation k => XOrIntro (Seq k) where
   xorL s1 s2 = mapL getXOr (subL (upR s1) ⊕⊢ subL (upR s2))
 
   xorR1 s1 s2 = mapR XOr (sumR1 (s1 ⊢-< upL s2))
@@ -172,43 +172,43 @@ instance XOrIntro (Seq r) where
 
 -- Implication
 
-instance FunctionIntro (Seq r) where
+instance Continuation k => FunctionIntro (Seq k) where
   funL a b = popL (\ f -> a >>> liftLR (CPS (getFun f)) >>> wkL' b)
   funR = lowerLR (liftR . Fun . runCPS) . wkR'
 
-instance SubtractionIntro (Seq r) where
+instance Continuation k => SubtractionIntro (Seq k) where
   subL f = mapL getSub (tensorL (wkL' f >>> poppedL2 negateL init))
   subR a b = mapR Sub (a ⊢⊗ negateR b)
 
 
 -- Quantification
 
-instance UniversalIntro (Seq r) where
+instance Continuation k => UniversalIntro (Seq k) where
   forAllL p = mapL (notNegate . runForAll) p
-  forAllR p = sequent $ K . \ k a -> inrC k • ForAll (K ((• a) . runSeq p . (inlC k |>)))
+  forAllR p = sequent (inK . \ k a -> exK (inrC k) (ForAll (inK ((`exK` a) . runSeq p . (inlC k |>)))))
 
-instance ExistentialIntro (Seq r) where
+instance Continuation k => ExistentialIntro (Seq k) where
   existsL p = popL (dnESeq . runExists (pushL p))
   existsR p = mapR (Exists . liftDN) p
 
 
 -- Recursion
 
-instance NuIntro (Seq r) where
+instance Continuation k => NuIntro (Seq k) where
   nuL = mapL runNu
   nuR s = wkR' s >>> existsL (mapL nu init)
 
-instance MuIntro (Seq r) where
+instance Continuation k => MuIntro (Seq k) where
   muL f k = wkL (downR f) >>> exL (mapL getMu (funL init (wkL' k)))
   muR = mapR mu
 
 
 -- Polarity shifts
 
-instance UpIntro (Seq r) where
+instance Continuation k => UpIntro (Seq k) where
   upL   = mapL getUp
   upR   = mapR Up
 
-instance DownIntro (Seq r) where
+instance Continuation k => DownIntro (Seq k) where
   downL = mapL getDown
   downR = mapR Down

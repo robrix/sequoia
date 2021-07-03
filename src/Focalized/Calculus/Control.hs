@@ -1,4 +1,4 @@
-{-# LANGUAGE QuantifiedConstraints #-}
+{-# LANGUAGE TypeFamilies #-}
 module Focalized.Calculus.Control
 ( -- * Delimited control
   Control(..)
@@ -11,20 +11,23 @@ module Focalized.Calculus.Control
 
 import Focalized.Calculus.Context
 import Focalized.Calculus.Core
+import Focalized.Continuation
 import Prelude hiding (init)
 
 -- Delimited control
 
-class (forall r . Core (s r)) => Control s where
+class Control s where
   reset
-    :: _Γ -|s _Δ|- _Δ
-    -- --------------
-    -> _Γ -|s r |- _Δ
+    :: (Continuation j, Continuation k, R j ~ _Δ)
+    => _Γ -|s j|- _Δ
+    -- -------------
+    -> _Γ -|s k|- _Δ
 
   shift
-    :: K (s r) a < _Γ -|s r|- _Δ > r
-    -- ------------------------------
-    ->             _Γ -|s r|- _Δ > a
+    :: Continuation k
+    => k a < _Γ -|s k|- _Δ > R k
+    -- -------------------------
+    ->       _Γ -|s k|- _Δ > a
 
 
 -- Continuations
