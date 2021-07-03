@@ -129,7 +129,7 @@ dnE f = CPS (inK . \ k a -> exK f (inK (\ f -> exK (runCPS f k) a)))
 
 -- CPS abstraction
 
-class (forall k . Cat.Category (c k)) => CPS' c where
+class (forall k . Cat.Category (c k), forall k . Contravariant k => Profunctor (c k)) => CPS' c where
   inC :: (k b -> k a) -> c k a b
   exC :: c k a b      -> (k b -> k a)
 
