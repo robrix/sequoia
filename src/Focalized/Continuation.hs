@@ -6,6 +6,7 @@ module Focalized.Continuation
 , liftK2
   -- ** Elimination
 , lowerK1
+, lowerK2
 , runK
   -- ** Composition
 , idK
@@ -46,6 +47,9 @@ liftK2 f (K a) (K b) = K (f a b)
 
 lowerK1 :: (r •a -> r •b) -> ((a -> r) -> (b -> r))
 lowerK1 = dimap K (•)
+
+lowerK2 :: (r •a -> r •b -> r •c) -> ((a -> r) -> (b -> r) -> (c -> r))
+lowerK2 f a b = runK (f (K a) (K b))
 
 runK :: r •a -> a -> r
 runK = (•)
