@@ -36,8 +36,8 @@ import           Focalized.Disjunction
 cps :: (Continuation k, CPS' c) => (a -> b) -> c k a b
 cps = inC . inK1 . flip (.)
 
-liftCPS :: Continuation k => (a -> k b -> R k) -> CPS k a b
-liftCPS = CPS . fmap inK . flip
+liftCPS :: (Continuation k, CPS' c) => (a -> k b -> R k) -> c k a b
+liftCPS = inC . fmap inK . flip
 
 contToCPS :: Continuation  k => (a -> Cont k b) -> CPS k a b
 contToCPS f = liftCPS (exK . runCont . f)
