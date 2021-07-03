@@ -16,8 +16,6 @@ module Focalized.CPS
 , uncurryCPS
 , CPS(..)
 , dnE
-  -- * Cont
-, Cont(..)
 ) where
 
 import           Control.Applicative (liftA2)
