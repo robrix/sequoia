@@ -21,19 +21,19 @@ import Focalized.Calculus.Tensor
 import Focalized.Polarity
 import Prelude hiding (init)
 
-type MultiplicativeIntro s = (BottomIntro s, OneIntro s, ParIntro s, TensorIntro s)
+type MultiplicativeIntro k s = (BottomIntro k s, OneIntro k s, ParIntro k s, TensorIntro k s)
 
 
 parLTensor
-  :: (Weaken s, ParIntro s, TensorIntro s, NegateIntro s, Neg a, Neg b)
-  =>         _Γ -|s|- _Δ > K s -a ⊗ K s -b
-  -- -------------------------------------
+  :: (Weaken k s, ParIntro k s, TensorIntro k s, NegateIntro k s, Neg a, Neg b)
+  =>         _Γ -|s|- _Δ > k -a ⊗ k -b
+  -- ---------------------------------
   -> a ⅋ b < _Γ -|s|- _Δ
 parLTensor s = wkL s >>> tensorL (negateL (negateL (parL (wkR init) init)))
 
 tensorLPar
-  :: (Weaken s, ParIntro s, TensorIntro s, NotIntro s, Pos a, Pos b)
-  =>         _Γ -|s|- _Δ > K s ¬a ⅋ K s ¬b
-  -- -------------------------------------
+  :: (Weaken k s, ParIntro k s, TensorIntro k s, NotIntro k s, Pos a, Pos b)
+  =>         _Γ -|s|- _Δ > k ¬a ⅋ k ¬b
+  -- ---------------------------------
   -> a ⊗ b < _Γ -|s|- _Δ
 tensorLPar s = wkL s >>> parL (notL (tensorL init)) (notL (tensorL (wkL init)))

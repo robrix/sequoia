@@ -33,29 +33,29 @@ class Control s where
 -- Continuations
 
 kL
-  :: Contextual s
-  =>         _Γ -|s|- _Δ > a
-  -- -----------------------
-  -> K s a < _Γ -|s|- _Δ
+  :: Contextual k s
+  =>       _Γ -|s|- _Δ > a
+  -- ---------------------
+  -> k a < _Γ -|s|- _Δ
 kL = popL . pushR
 
 kR
-  :: (Contextual s, Weaken s)
+  :: (Contextual k s, Weaken k s)
   => a < _Γ -|s|- _Δ
-  -- -----------------------
-  ->     _Γ -|s|- _Δ > K s a
+  -- ---------------------
+  ->     _Γ -|s|- _Δ > k a
 kR s = lowerL (pushL init) (wkR s)
 
 kL'
-  :: (Contextual s, Weaken s)
-  => K s a < _Γ -|s|- _Δ
-  -- -----------------------
-  ->         _Γ -|s|- _Δ > a
+  :: (Contextual k s, Weaken k s)
+  => k a < _Γ -|s|- _Δ
+  -- ---------------------
+  ->       _Γ -|s|- _Δ > a
 kL' s = kR init >>> wkR s
 
 kR'
-  :: (Contextual s, Weaken s)
-  =>     _Γ -|s|- _Δ > K s a
-  -- -----------------------
+  :: (Contextual k s, Weaken k s)
+  =>     _Γ -|s|- _Δ > k a
+  -- ---------------------
   -> a < _Γ -|s|- _Δ
 kR' s = wkL s >>> kL init

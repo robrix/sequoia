@@ -16,23 +16,23 @@ import Prelude hiding (init)
 
 -- Corecursion
 
-class Core s => NuIntro s where
+class Core k s => NuIntro k s where
   nuL
     :: (Pos ==> Neg) f
-    => Exists (K s) P (NuF (K s) f) < _Γ -|s|- _Δ
-    -- ------------------------------------------
-    ->                 Nu  (K s) f  < _Γ -|s|- _Δ
+    => Exists k P (NuF k f) < _Γ -|s|- _Δ
+    -- ----------------------------------
+    ->             Nu  k f  < _Γ -|s|- _Δ
 
   nuR
     :: (Pos ==> Neg) f
-    => _Γ -|s|- _Δ > Exists (K s) P (NuF (K s) f)
-    -- ------------------------------------------
-    -> _Γ -|s|- _Δ >                 Nu  (K s) f
+    => _Γ -|s|- _Δ > Exists k P (NuF k f)
+    -- ----------------------------------
+    -> _Γ -|s|- _Δ >             Nu  k f
 
 
 nuR'
-  :: (Weaken s, Exchange s, NuIntro s, (Pos ==> Neg) f)
-  => _Γ -|s|- _Δ >                 Nu  (K s) f
-  -- ------------------------------------------
-  -> _Γ -|s|- _Δ > Exists (K s) P (NuF (K s) f)
+  :: (Weaken k s, Exchange k s, NuIntro k s, (Pos ==> Neg) f)
+  => _Γ -|s|- _Δ >             Nu  k f
+  -- ----------------------------------
+  -> _Γ -|s|- _Δ > Exists k P (NuF k f)
 nuR' p = wkR' p >>> nuL init

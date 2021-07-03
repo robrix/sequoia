@@ -12,4 +12,4 @@ import Focalized.Calculus.ForAll
 
 -- Quantification rules
 
-type QuantificationIntro s = (UniversalIntro s, ExistentialIntro s)
+type QuantificationIntro k s = (UniversalIntro k s, ExistentialIntro k s)

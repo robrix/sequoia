@@ -12,7 +12,7 @@ import Focalized.Connective.Bottom
 
 -- Bottom
 
-class Core s => BottomIntro s where
+class Core k s => BottomIntro k s where
   botL
     -- --------------------
     :: Bottom < _Γ -|s|- _Δ
@@ -24,7 +24,7 @@ class Core s => BottomIntro s where
 
 
 botR'
-  :: BottomIntro s
+  :: BottomIntro k s
   => _Γ -|s|- _Δ > Bottom
   -- --------------------
   -> _Γ -|s|- _Δ

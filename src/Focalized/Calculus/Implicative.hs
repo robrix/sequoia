@@ -16,18 +16,18 @@ import Focalized.Calculus.Subtraction
 import Focalized.Polarity
 import Prelude hiding (init)
 
-type ImplicativeIntro s = (FunctionIntro s, SubtractionIntro s)
+type ImplicativeIntro k s = (FunctionIntro k s, SubtractionIntro k s)
 
 funLSub
-  :: (Weaken s, Exchange s, FunctionIntro s, SubtractionIntro s, Pos a, Neg b)
-  =>               _Γ -|s|- _Δ > a ~-K s-< b
-  -- ---------------------------------------
-  -> a ~~K s~> b < _Γ -|s|- _Δ
+  :: (Weaken k s, Exchange k s, FunctionIntro k s, SubtractionIntro k s, Pos a, Neg b)
+  =>             _Γ -|s|- _Δ > a ~-k-< b
+  -- -----------------------------------
+  -> a ~~k~> b < _Γ -|s|- _Δ
 funLSub s = wkL s >>> subL (exL (funL init init))
 
 subLFun
-  :: (Weaken s, Exchange s, FunctionIntro s, SubtractionIntro s, Pos a, Neg b)
-  =>               _Γ -|s|- _Δ > a ~~K s~> b
-  -- ---------------------------------------
-  -> a ~-K s-< b < _Γ -|s|- _Δ
+  :: (Weaken k s, Exchange k s, FunctionIntro k s, SubtractionIntro k s, Pos a, Neg b)
+  =>             _Γ -|s|- _Δ > a ~~k~> b
+  -- -----------------------------------
+  -> a ~-k-< b < _Γ -|s|- _Δ
 subLFun s = wkL s >>> funL (subL (wkR init)) (exL (subL (wkL init)))

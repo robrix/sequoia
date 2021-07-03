@@ -15,7 +15,7 @@ import Prelude hiding (init)
 
 -- Up
 
-class Core s => UpIntro s where
+class Core k s => UpIntro k s where
   upL
     :: Pos a
     =>    a < _Γ -|s|- _Δ
@@ -30,14 +30,14 @@ class Core s => UpIntro s where
 
 
 upL'
-  :: (Weaken s, Exchange s, UpIntro s, Pos a)
+  :: (Weaken k s, Exchange k s, UpIntro k s, Pos a)
   => Up a < _Γ -|s|- _Δ
   -- ------------------
   ->    a < _Γ -|s|- _Δ
 upL' p = upR init >>> wkL' p
 
 upR'
-  :: (Weaken s, Exchange s, UpIntro s, Pos a)
+  :: (Weaken k s, Exchange k s, UpIntro k s, Pos a)
   => _Γ -|s|- _Δ > Up a
   -- ------------------
   -> _Γ -|s|- _Δ >    a

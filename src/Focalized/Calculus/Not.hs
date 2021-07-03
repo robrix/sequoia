@@ -1,4 +1,3 @@
-{-# LANGUAGE TypeFamilies #-}
 module Focalized.Calculus.Not
 ( -- * Not
   NotIntro(..)
@@ -26,37 +25,37 @@ import Prelude hiding (init)
 
 -- Not
 
-class Core s => NotIntro s where
+class Core k s => NotIntro k s where
   notL
     :: Pos a
-    =>          _Γ -|s|- _Δ > a
-    -- ------------------------
-    -> K s ¬a < _Γ -|s|- _Δ
+    =>        _Γ -|s|- _Δ > a
+    -- ----------------------
+    -> k ¬a < _Γ -|s|- _Δ
 
   notR
     :: Pos a
     => a < _Γ -|s|- _Δ
-    -- ------------------------
-    ->     _Γ -|s|- _Δ > K s ¬a
+    -- ----------------------
+    ->     _Γ -|s|- _Δ > k ¬a
 
 
 notL'
-  :: (NotIntro s, Weaken s, Pos a)
-  =>  K s ¬a < _Γ -|s|- _Δ
-  -- -------------------------
-  ->           _Γ -|s|- _Δ > a
+  :: (NotIntro k s, Weaken k s, Pos a)
+  =>  k ¬a < _Γ -|s|- _Δ
+  -- -----------------------
+  ->         _Γ -|s|- _Δ > a
 notL' p = notR init >>> wkR p
 
 notR'
-  :: (NotIntro s, Weaken s, Pos a)
-  =>     _Γ -|s|- _Δ > K s ¬a
-  -- ------------------------
+  :: (NotIntro k s, Weaken k s, Pos a)
+  =>     _Γ -|s|- _Δ > k ¬a
+  -- ----------------------
   -> a < _Γ -|s|- _Δ
 notR' p = wkL p >>> notL init
 
 
 shiftP
-  :: (Control s, Contextual (s k), k ~ K (s k))
+  :: (Control s, Contextual k (s k))
   =>  k ¬a < _Γ -|s k|- _Δ > R k
   -- ---------------------------
   ->         _Γ -|s k|- _Δ > a
@@ -64,45 +63,45 @@ shiftP = shift . notLK'
 
 
 dneNK
-  :: Contextual s
-  => KK s   a < _Γ -|s|- _Δ
-  -- ----------------------
-  -> K  s ¬-a < _Γ -|s|- _Δ
+  :: Contextual k s
+  => k **a < _Γ -|s|- _Δ
+  -- -------------------
+  -> k ¬-a < _Γ -|s|- _Δ
 dneNK = mapL getNotNegate
 
 dniNK
-  :: Contextual s
-  => _Γ -|s|- _Δ > KK s   a
-  -- ----------------------
-  -> _Γ -|s|- _Δ > K  s ¬-a
+  :: Contextual k s
+  => _Γ -|s|- _Δ > k **a
+  -- -------------------
+  -> _Γ -|s|- _Δ > k ¬-a
 dniNK = mapR notNegate
 
 
 notLK
-  :: Contextual s
-  => K s  a < _Γ -|s|- _Δ
-  -- --------------------
-  -> K s ¬a < _Γ -|s|- _Δ
+  :: Contextual k s
+  => k  a < _Γ -|s|- _Δ
+  -- ------------------
+  -> k ¬a < _Γ -|s|- _Δ
 notLK = mapL getNot
 
 notRK
-  :: Contextual s
-  => _Γ -|s|- _Δ > K s  a
-  -- --------------------
-  -> _Γ -|s|- _Δ > K s ¬a
+  :: Contextual k s
+  => _Γ -|s|- _Δ > k  a
+  -- ------------------
+  -> _Γ -|s|- _Δ > k ¬a
 notRK = mapR Not
 
 
 notLK'
-  :: Contextual s
-  => K s ¬a < _Γ -|s|- _Δ
-  -- --------------------
-  -> K s  a < _Γ -|s|- _Δ
+  :: Contextual k s
+  => k ¬a < _Γ -|s|- _Δ
+  -- ------------------
+  -> k  a < _Γ -|s|- _Δ
 notLK' = mapL Not
 
 notRK'
-  :: Contextual s
-  => _Γ -|s|- _Δ > K s ¬a
-  -- --------------------
-  -> _Γ -|s|- _Δ > K s  a
+  :: Contextual k s
+  => _Γ -|s|- _Δ > k ¬a
+  -- ------------------
+  -> _Γ -|s|- _Δ > k  a
 notRK' = mapR getNot

@@ -10,4 +10,4 @@ module Focalized.Calculus.Recursive
 import Focalized.Calculus.Mu
 import Focalized.Calculus.Nu
 
-type RecursiveIntro s = (NuIntro s, MuIntro s)
+type RecursiveIntro k s = (NuIntro k s, MuIntro k s)

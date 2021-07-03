@@ -15,7 +15,6 @@ module Focalized.Calculus.Negation
 ) where
 
 import Focalized.Calculus.Context
-import Focalized.Calculus.Core
 import Focalized.Calculus.Negate
 import Focalized.Calculus.Not
 import Focalized.Connective.Negation
@@ -24,38 +23,38 @@ import Prelude hiding (init)
 
 -- Negation
 
-type NegationIntro s = (NotIntro s, NegateIntro s)
+type NegationIntro k s = (NotIntro k s, NegateIntro k s)
 
 
 -- Negative double negation
 
 dneN
-  :: (NotIntro s, NegateIntro s, Neg a)
-  =>       a < _Γ -|s|- _Δ
-  -- ---------------------
-  -> K s ¬-a < _Γ -|s|- _Δ
+  :: (NegationIntro k s, Neg a)
+  =>     a < _Γ -|s|- _Δ
+  -- -------------------
+  -> k ¬-a < _Γ -|s|- _Δ
 dneN = notL . negateR
 
 dniN
-  :: (NotIntro s, NegateIntro s, Neg a)
+  :: (NegationIntro k s, Neg a)
   => _Γ -|s|- _Δ > a
-  -- ---------------------
-  -> _Γ -|s|- _Δ > K s ¬-a
+  -- -------------------
+  -> _Γ -|s|- _Δ > k ¬-a
 dniN = notR . negateL
 
 
 -- Positive double negation
 
 dneP
-  :: (NotIntro s, NegateIntro s, Pos a)
-  =>       a < _Γ -|s|- _Δ
-  -- ---------------------
-  -> K s -¬a < _Γ -|s|- _Δ
+  :: (NegationIntro k s, Pos a)
+  =>     a < _Γ -|s|- _Δ
+  -- -------------------
+  -> k -¬a < _Γ -|s|- _Δ
 dneP = negateL . notR
 
 dniP
-  :: (NotIntro s, NegateIntro s, Pos a)
+  :: (NegationIntro k s, Pos a)
   => _Γ -|s|- _Δ > a
-  -- ---------------------
-  -> _Γ -|s|- _Δ > K s -¬a
+  -- -------------------
+  -> _Γ -|s|- _Δ > k -¬a
 dniP = negateR . notL

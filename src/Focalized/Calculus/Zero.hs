@@ -11,7 +11,7 @@ import Focalized.Connective.Zero
 
 -- Zero
 
-class Core s => ZeroIntro s where
+class Core k s => ZeroIntro k s where
   zeroL
     -- ------------------
     :: Zero < _Γ -|s|- _Δ

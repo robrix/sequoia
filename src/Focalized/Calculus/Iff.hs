@@ -15,36 +15,36 @@ import Prelude hiding (init)
 
 -- * Logical biconditional
 
-class IffIntro s where
+class Core k s => IffIntro k s where
   iffL1
     :: (Neg a, Neg b)
     => _Γ -|s|- _Δ > a   ->   b < _Γ -|s|- _Δ
     -- --------------------------------------
-    ->     a <~K s~> b < _Γ -|s|- _Δ
+    ->     a <~k~> b < _Γ -|s|- _Δ
 
   iffL2
     :: (Neg a, Neg b)
     => _Γ -|s|- _Δ > b   ->   a < _Γ -|s|- _Δ
     -- --------------------------------------
-    ->     a <~K s~> b < _Γ -|s|- _Δ
+    ->     a <~k~> b < _Γ -|s|- _Δ
 
   iffR
     :: (Neg a, Neg b)
     => a < _Γ -|s|- _Δ > b   ->   b < _Γ -|s|- _Δ > a
     -- ----------------------------------------------
-    ->         _Γ -|s|- _Δ > a <~K s~> b
+    ->           _Γ -|s|- _Δ > a <~k~> b
 
 
 iffR1'
-  :: (Weaken s, Exchange s, IffIntro s, Neg a, Neg b)
-  =>     _Γ -|s|- _Δ > a <~K s~> b
-  -- ---------------------------------
+  :: (Weaken k s, Exchange k s, IffIntro k s, Neg a, Neg b)
+  =>     _Γ -|s|- _Δ > a <~k~> b
+  -- ---------------------------
   -> a < _Γ -|s|- _Δ > b
 iffR1' s = wkL (wkR' s) >>> iffL1 init init
 
 iffR2'
-  :: (Weaken s, Exchange s, IffIntro s, Neg a, Neg b)
-  =>     _Γ -|s|- _Δ > a <~K s~> b
+  :: (Weaken k s, Exchange k s, IffIntro k s, Neg a, Neg b)
+  =>     _Γ -|s|- _Δ > a <~k~> b
   -- ---------------------------------
   -> b < _Γ -|s|- _Δ > a
 iffR2' s = wkL (wkR' s) >>> iffL2 init init

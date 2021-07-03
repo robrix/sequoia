@@ -10,4 +10,4 @@ module Focalized.Calculus.Shift
 import Focalized.Calculus.Down
 import Focalized.Calculus.Up
 
-type ShiftIntro s = (UpIntro s, DownIntro s)
+type ShiftIntro k s = (UpIntro k s, DownIntro k s)

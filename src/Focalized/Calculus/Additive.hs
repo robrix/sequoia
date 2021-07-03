@@ -21,18 +21,18 @@ import Focalized.Calculus.Zero
 import Focalized.Polarity
 import Prelude hiding (init)
 
-type AdditiveIntro s = (TopIntro s, ZeroIntro s, WithIntro s, SumIntro s)
+type AdditiveIntro k s = (TopIntro k s, ZeroIntro k s, WithIntro k s, SumIntro k s)
 
 withLSum
-  :: (Weaken s, SumIntro s, WithIntro s, NegateIntro s, Neg a, Neg b)
-  =>         _Γ -|s|- _Δ > K s -a ⊕ K s -b
-  -- -------------------------------------
+  :: (Weaken k s, SumIntro k s, WithIntro k s, NegateIntro k s, Neg a, Neg b)
+  =>         _Γ -|s|- _Δ > k -a ⊕ k -b
+  -- ---------------------------------
   -> a & b < _Γ -|s|- _Δ
 withLSum s = wkL s >>> sumL (negateL (withL1 init)) (negateL (withL2 init))
 
 sumLWith
-  :: (Weaken s, Exchange s, SumIntro s, WithIntro s, NotIntro s, Pos a, Pos b)
-  =>         _Γ -|s|- _Δ > K s ¬a & K s ¬b
-  -- -------------------------------------
+  :: (Weaken k s, Exchange k s, SumIntro k s, WithIntro k s, NotIntro k s, Pos a, Pos b)
+  =>         _Γ -|s|- _Δ > k ¬a & k ¬b
+  -- ---------------------------------
   -> a ⊕ b < _Γ -|s|- _Δ
 sumLWith s = wkL s >>> exL (sumL (exL (withL1 (notL init))) (exL (withL2 (notL init))))

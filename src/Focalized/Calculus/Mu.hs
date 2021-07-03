@@ -17,23 +17,23 @@ import Prelude hiding (init)
 
 -- Recursion
 
-class MuIntro s where
+class Core k s => MuIntro k s where
   muL
     :: ((Neg ==> Pos) f, Neg a)
-    => _Γ -|s|- _Δ > f a ~~K s~> a   ->   a < _Γ -|s|- _Δ
-    -- --------------------------------------------------
-    ->              Mu (K s) f < _Γ -|s|- _Δ
+    => _Γ -|s|- _Δ > f a ~~k~> a   ->   a < _Γ -|s|- _Δ
+    -- ------------------------------------------------
+    ->              Mu k f < _Γ -|s|- _Δ
 
   muR
     :: (Neg ==> Pos) f
-    => _Γ -|s|- _Δ > ForAll (K s) N (MuF (K s) f)
-    -- ------------------------------------------
-    -> _Γ -|s|- _Δ >                 Mu  (K s) f
+    => _Γ -|s|- _Δ > ForAll k N (MuF k f)
+    -- ----------------------------------
+    -> _Γ -|s|- _Δ >             Mu  k f
 
 
 muL'
-  :: (Weaken s, Exchange s, MuIntro s, (Neg ==> Pos) f)
-  =>                 Mu  (K s) f  < _Γ -|s|- _Δ
-  -- ------------------------------------------
-  -> ForAll (K s) N (MuF (K s) f) < _Γ -|s|- _Δ
+  :: (Weaken k s, Exchange k s, MuIntro k s, (Neg ==> Pos) f)
+  =>             Mu  k f  < _Γ -|s|- _Δ
+  -- ----------------------------------
+  -> ForAll k N (MuF k f) < _Γ -|s|- _Δ
 muL' p = muR init >>> wkL' p

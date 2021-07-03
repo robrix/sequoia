@@ -15,7 +15,7 @@ import Prelude hiding (init)
 
 -- Down
 
-class Core s => DownIntro s where
+class Core k s => DownIntro k s where
   downL
     :: Neg a
     =>      a < _Γ -|s|- _Δ
@@ -30,14 +30,14 @@ class Core s => DownIntro s where
 
 
 downL'
-  :: (Weaken s, Exchange s, DownIntro s, Neg a)
+  :: (Weaken k s, Exchange k s, DownIntro k s, Neg a)
   => Down a < _Γ -|s|- _Δ
   -- --------------------
   ->      a < _Γ -|s|- _Δ
 downL' p = downR init >>> wkL' p
 
 downR'
-  :: (Weaken s, Exchange s, DownIntro s, Neg a)
+  :: (Weaken k s, Exchange k s, DownIntro k s, Neg a)
   => _Γ -|s|- _Δ > Down a
   -- --------------------
   -> _Γ -|s|- _Δ >      a

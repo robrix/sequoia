@@ -11,7 +11,7 @@ import Focalized.Connective.Top
 
 -- Top
 
-class Core s => TopIntro s where
+class Core k s => TopIntro k s where
   topR
     -- -----------------
     :: _Γ -|s|- _Δ > Top
