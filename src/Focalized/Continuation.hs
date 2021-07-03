@@ -83,10 +83,10 @@ idK :: r •r
 idK = K id
 
 
-(•<<) :: r •a -> (b -> a) -> r •b
+(•<<) :: Contravariant k => k a -> (b -> a) -> k b
 (•<<) = flip contramap
 
-(>>•) :: (b -> a) -> r •a -> r •b
+(>>•) :: Contravariant k => (b -> a) -> k a -> k b
 (>>•) = contramap
 
 infixr 1 •<<, >>•
