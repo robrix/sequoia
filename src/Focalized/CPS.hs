@@ -60,7 +60,7 @@ execCPS c = appCPS c ()
 evalCPS :: (Continuation k, CPS' c) => c k i (R k) -> k i
 evalCPS c = exC c idK
 
-refoldCPS :: (Continuation k, Traversable f) => CPS k (f b) b -> CPS k a (f a) -> CPS k a b
+refoldCPS :: (Cat.Category c, Traversing c, Traversable f) => f b `c` b -> a `c` f a -> a `c` b
 refoldCPS f g = go where go = f Cat.<<< traverse' go Cat.<<< g
 
 resetCPS :: (Continuation j, Continuation k) => CPS k i (R k) -> CPS j i (R k)
