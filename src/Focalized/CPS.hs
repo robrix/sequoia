@@ -2,10 +2,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Focalized.CPS
 ( -- * CPS
-  CPS(..)
-, refoldCPS
-  -- * CPS abstraction
-, CPS'(..)
+  CPS'(..)
 , inC1
 , inC2
 , exC1
@@ -73,27 +70,10 @@ import           Focalized.Disjunction
 
 -- CPS
 
-newtype CPS k a b = CPS { runCPS :: k b -> k a }
-  deriving (Arrow, ArrowChoice, Cat.Category, Choice, Profunctor, Strong, Traversing) via (ViaCPS (CPS k))
-  deriving (Applicative, Functor, Monad) via (ViaCPS (CPS k) a)
-
-instance Continuation k => ArrowApply (CPS k) where
-  app = applyCPS
-
-
-refoldCPS :: (Cat.Category c, Traversing c, Traversable f) => f b `c` b -> a `c` f a -> a `c` b
-refoldCPS f g = go where go = f Cat.<<< traverse' go Cat.<<< g
-
-
--- CPS abstraction
-
 class (Cat.Category c, Continuation k, Profunctor c) => CPS' k c | c -> k where
   inC :: (k b -> k a) -> a `c` b
   exC :: a `c` b      -> (k b -> k a)
 
-instance Continuation k => CPS' k (CPS k) where
-  inC = CPS
-  exC = runCPS
 
 inC1 :: CPS' k c => ((k b1 -> k a1) -> (k b2 -> k a2)) -> (a1 `c` b1 -> a2 `c` b2)
 inC1 = dimap exC inC

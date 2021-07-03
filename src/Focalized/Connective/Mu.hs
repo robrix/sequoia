@@ -10,6 +10,7 @@ module Focalized.Connective.Mu
 
 import qualified Control.Category as Cat
 import           Data.Functor.Contravariant
+import           Data.Profunctor.Traversing
 import           Focalized.CPS
 import           Focalized.Connective.Down
 import           Focalized.Connective.Function
@@ -47,3 +48,7 @@ refoldMu f g = foldMu' f Cat.<<< unfoldMu g
 
 coerceC :: (CPS' k c, CPS' k d) => c a b -> d a b
 coerceC = inC . exC
+
+
+refoldCPS :: (Cat.Category c, Traversing c, Traversable f) => f b `c` b -> a `c` f a -> a `c` b
+refoldCPS f g = go where go = f Cat.<<< traverse' go Cat.<<< g
