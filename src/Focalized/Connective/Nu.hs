@@ -16,16 +16,16 @@ import Focalized.Polarity
 
 -- Corecursion
 
-data Nu r f = forall x . Pos x => Nu { getNu :: Down (x ~~r~> f x) ⊗ x }
+data Nu k f = forall x . Pos x => Nu { getNu :: Down (x ~~k~> f x) ⊗ x }
 
-instance Polarized N (Nu r f) where
+instance Polarized N (Nu k f) where
 
-newtype NuF r f a = NuF { getNuF :: Down (a ~~r~> f a) ⊗ a }
+newtype NuF k f a = NuF { getNuF :: Down (a ~~k~> f a) ⊗ a }
 
-instance (Neg (f a), Pos a) => Polarized P (NuF r f a)
+instance (Neg (f a), Pos a) => Polarized P (NuF k f a)
 
-nu :: Pos x => NuF r f x -> Nu r f
+nu :: Pos x => NuF k f x -> Nu k f
 nu r = Nu (getNuF r)
 
-runNu :: Nu k f -> Exists r P (NuF k f)
+runNu :: Contrapplicative k => Nu k f -> Exists k P (NuF k f)
 runNu (Nu r) = Exists (liftDN (NuF r))

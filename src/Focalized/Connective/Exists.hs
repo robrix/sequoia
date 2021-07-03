@@ -10,9 +10,9 @@ import Focalized.Polarity
 
 -- Universal quantification
 
-data Exists r p f = forall x . Polarized p x => Exists (r ••f x)
+data Exists k p f = forall x . Polarized p x => Exists (k (k (f x)))
 
 instance Polarized P (Exists r p f)
 
-runExists :: (forall x . Polarized p x => f x -> a) -> Exists r p f -> r ••a
-runExists f (Exists r) = K (\ k -> r • K ((k •) . f))
+runExists :: Contrapplicative k => (forall x . Polarized p x => f x -> a) -> Exists k p f -> k (k a)
+runExists f (Exists r) = inK (\ k -> exK r (inK (exK k . f)))
