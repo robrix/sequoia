@@ -10,6 +10,7 @@ module Focalized.Continuation
 , inK2
 , exK1
 , exK2
+, dimap2
   -- ** Coercion
 , coerceK
 , coerceK1
