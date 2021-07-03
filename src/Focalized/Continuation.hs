@@ -2,12 +2,8 @@
 module Focalized.Continuation
 ( -- * Continuations
   type (•)(..)
-  -- ** Construction
+  -- ** Application
 , Contrapplicative(..)
-  -- ** Elimination
-, runK0
-, runK1
-, runK2
   -- ** Composition
 , idK
 , (•<<)
@@ -52,13 +48,17 @@ instance Contravariant ((•) r) where
   contramap f = K . lmap f . (•)
 
 
--- Construction
+-- Application
 
 class Contravariant k => Contrapplicative k where
   type R k
   liftK0 :: (a -> R k) -> k a
   liftK1 :: ((a -> R k) -> (b -> R k)) -> (k a -> k b)
   liftK2 :: ((a -> R k) -> (b -> R k) -> (c -> R k)) -> (k a -> k b -> k c)
+
+  runK0 :: k a -> (a -> R k)
+  runK1 :: (k a -> k b) -> ((a -> R k) -> (b -> R k))
+  runK2 :: (k a -> k b -> k c) -> ((a -> R k) -> (b -> R k) -> (c -> R k))
 
 instance Contrapplicative ((•) r) where
   type R ((•) r) = r
@@ -69,17 +69,11 @@ instance Contrapplicative ((•) r) where
 
   liftK2 f (K a) (K b) = K (f a b)
 
+  runK0 = (•)
 
--- Elimination
+  runK1 = dimap K (•)
 
-runK0 :: r •a -> (a -> r)
-runK0 = (•)
-
-runK1 :: (r •a -> r •b) -> ((a -> r) -> (b -> r))
-runK1 = dimap K (•)
-
-runK2 :: (r •a -> r •b -> r •c) -> ((a -> r) -> (b -> r) -> (c -> r))
-runK2 f a b = runK0 (f (K a) (K b))
+  runK2 f a b = runK0 (f (K a) (K b))
 
 
 -- Composition
