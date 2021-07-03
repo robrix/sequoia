@@ -23,6 +23,7 @@ module Focalized.Continuation
   -- ** Construction
 , liftDN
 , liftDN0
+, liftDN1
 , liftDN2
   -- ** Elimination
 , runDN0
@@ -125,6 +126,9 @@ liftDN = K . flip (•)
 
 liftDN0 :: ((a -> r) -> r) -> r ••a
 liftDN0 = K . lmap (•)
+
+liftDN1 :: (((a -> r) -> r) -> ((b -> r) -> r)) -> (r ••a -> r ••b)
+liftDN1 = dimap runDN0 liftDN0
 
 liftDN2 :: (((a -> r) -> r) -> ((b -> r) -> r) -> ((c -> r) -> r)) -> (r ••a -> r ••b -> r ••c)
 liftDN2 f a b = liftDN0 (f (runDN0 a) (runDN0 b))
