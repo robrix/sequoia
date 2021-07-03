@@ -69,8 +69,8 @@ resetCPS c = inC (inK . \ k -> exK k . exK (evalCPS c))
 shiftCPS :: (Continuation k, CPS' c) => (k o -> c k i (R k)) -> c k i o
 shiftCPS f = inC (evalCPS . f)
 
-curryCPS :: Continuation k => CPS k (a, b) c -> CPS k a (CPS k b c)
-curryCPS c = CPS (•<< (`lmap` c) . (,))
+curryCPS :: (Continuation k, CPS' c) => c k (a, b) d -> c k a (c k b d)
+curryCPS c = inC (•<< (`lmap` c) . (,))
 
 uncurryCPS :: Continuation k => CPS k a (CPS k b c) -> CPS k (a, b) c
 uncurryCPS c = CPS (\ k -> inK ((`exK` k) . uncurry (appCPS2 c)))
