@@ -3,7 +3,6 @@
 module Focalized.CPS
 ( -- * CPS
   CPS(..)
-, dnE
 , refoldCPS
   -- * CPS abstraction
 , CPS'(..)
@@ -18,6 +17,7 @@ module Focalized.CPS
 , pappCPS
 , execCPS
 , evalCPS
+, dnE
   -- ** Currying
 , curryCPS
 , uncurryCPS
@@ -77,9 +77,6 @@ instance Continuation k => ArrowApply (CPS k) where
   app = applyCPS
 
 
-dnE :: CPS' k c => k (k (c a b)) -> c a b
-dnE f = inC (inK . \ k a -> exK f (inK (\ f -> exK (exC f k) a)))
-
 refoldCPS :: (Cat.Category c, Traversing c, Traversable f) => f b `c` b -> a `c` f a -> a `c` b
 refoldCPS f g = go where go = f Cat.<<< traverse' go Cat.<<< g
 
@@ -126,6 +123,9 @@ execCPS c = appCPS c ()
 
 evalCPS :: CPS' k c => c i (R k) -> k i
 evalCPS c = exC c idK
+
+dnE :: CPS' k c => k (k (c a b)) -> c a b
+dnE f = inC (inK . \ k a -> exK f (inK (\ f -> exK (exC f k) a)))
 
 
 -- Currying
