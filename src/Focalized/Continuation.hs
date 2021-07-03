@@ -1,4 +1,4 @@
-{-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE TypeFamilies #-}
 module Focalized.Continuation
 ( -- * Continuations
   type (•)(..)
@@ -54,12 +54,15 @@ instance Contravariant ((•) r) where
 
 -- Construction
 
-class Contravariant k => Contrapplicative r k | k -> r where
-  liftK0 :: (a -> r) -> k a
-  liftK1 :: ((a -> r) -> (b -> r)) -> (k a -> k b)
-  liftK2 :: ((a -> r) -> (b -> r) -> (c -> r)) -> (k a -> k b -> k c)
+class Contravariant k => Contrapplicative k where
+  type R k
+  liftK0 :: (a -> R k) -> k a
+  liftK1 :: ((a -> R k) -> (b -> R k)) -> (k a -> k b)
+  liftK2 :: ((a -> R k) -> (b -> R k) -> (c -> R k)) -> (k a -> k b -> k c)
 
-instance Contrapplicative r ((•) r) where
+instance Contrapplicative ((•) r) where
+  type R ((•) r) = r
+
   liftK0 = K
 
   liftK1 = dimap (•) K
@@ -102,7 +105,7 @@ k •>> f = K (f . runK0 k)
 infixr 1 <<•, •>>
 
 
-(<••>) :: (Disj d, Contrapplicative c k) => k a -> k b -> k (a `d` b)
+(<••>) :: (Disj d, Contrapplicative k) => k a -> k b -> k (a `d` b)
 (<••>) = liftK2 (<-->)
 
 infix 3 <••>
