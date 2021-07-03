@@ -48,7 +48,7 @@ cpsToCont c a = Cont (appCPS c a)
 appCPS :: (Continuation k, CPS' c) => c k a b -> a -> k (k b)
 appCPS c a = inK $ \ k -> exK (exC c k) a
 
-appCPS2 :: (Continuation k, CPS' s) => s k a (CPS k b c) -> a -> b -> k (k c)
+appCPS2 :: (Continuation k, CPS' c) => c k a (c k b d) -> a -> b -> k (k d)
 appCPS2 c = appK2 (exC (rmap exC c))
 
 pappCPS :: (Continuation k, CPS' c) => c k a b -> a -> c k () b
