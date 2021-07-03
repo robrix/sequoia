@@ -54,7 +54,7 @@ appCPS2 c = appK2 (exC (rmap exC c))
 pappCPS :: (Continuation k, CPS' c) => c k a b -> a -> c k () b
 pappCPS c a = c Cat.<<< inC (•<< const a)
 
-execCPS :: Continuation k => CPS k () a -> k (k a)
+execCPS :: (Continuation k, CPS' c) => c k () a -> k (k a)
 execCPS c = appCPS c ()
 
 evalCPS :: Continuation k => CPS k i (R k) -> k i
