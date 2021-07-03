@@ -163,4 +163,4 @@ instance Applicative (Cont r) where
   (<*>) = ap
 
 instance Monad (Cont r) where
-  Cont m >>= f = Cont (K (\ k -> m • K (\ a -> runCont (f a) • k)))
+  Cont m >>= f = Cont (m •<< K . \ k a -> runCont (f a) • k)
