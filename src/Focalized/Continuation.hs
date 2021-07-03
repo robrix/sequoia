@@ -22,7 +22,7 @@ module Focalized.Continuation
 , type (••)
   -- ** Construction
 , liftDN0
-, liftDN
+, liftDN1
   -- ** Elimination
 , runDN
 ) where
@@ -122,8 +122,8 @@ infixl 9 ••
 liftDN0 :: a -> r ••a
 liftDN0 = K . flip (•)
 
-liftDN :: ((a -> r) -> r) -> r ••a
-liftDN = K . lmap (•)
+liftDN1 :: ((a -> r) -> r) -> r ••a
+liftDN1 = K . lmap (•)
 
 
 -- Elimination
