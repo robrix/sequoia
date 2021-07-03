@@ -6,6 +6,10 @@ module Focalized.CPS
 , refoldCPS
   -- * CPS abstraction
 , CPS'(..)
+, inC1
+, inC2
+, exC1
+, exC2
   -- ** Construction
 , cps
 , liftCPS
@@ -91,6 +95,19 @@ instance Continuation k => CPS' k (CPS k) where
   inC = CPS
   exC = runCPS
 
+inC1 :: CPS' k c => ((k b1 -> k a1) -> (k b2 -> k a2)) -> (c a1 b1 -> c a2 b2)
+inC1 = dimap exC inC
+
+inC2 :: CPS' k c => ((k b1 -> k a1) -> (k b2 -> k a2) -> (k b3 -> k a3)) -> (c a1 b1 -> c a2 b2 -> c a3 b3)
+inC2 = dimap2 exC exC inC
+
+
+exC1 :: CPS' k c => (c a1 b1 -> c a2 b2) -> ((k b1 -> k a1) -> (k b2 -> k a2))
+exC1 = dimap inC exC
+
+exC2 :: CPS' k c => (c a1 b1 -> c a2 b2 -> c a3 b3) -> ((k b1 -> k a1) -> (k b2 -> k a2) -> (k b3 -> k a3))
+exC2 = dimap2 inC inC exC
+
 
 -- Construction
 
@@ -124,16 +141,16 @@ execCPS c = appCPS c ()
 evalCPS :: CPS' k c => c i (R k) -> k i
 evalCPS c = exC c idK
 
-dnE :: CPS' k c => k (k (c a b)) -> c a b
+dnE :: CPS' k c => k **c a b -> c a b
 dnE f = inC (inK . \ k a -> exK f (inK (\ f -> exK (exC f k) a)))
 
 
 -- Currying
 
-curryCPS :: CPS' k c => c (a, b) d -> c a (c b d)
+curryCPS :: CPS' k c => (a, b) `c` d -> a `c` (b `c` d)
 curryCPS c = inC (•<< (`lmap` c) . (,))
 
-uncurryCPS :: CPS' k c => c a (c b d) -> c (a, b) d
+uncurryCPS :: CPS' k c => a `c` (b `c` d) -> (a, b) `c` d
 uncurryCPS c = inC (\ k -> inK ((`exK` k) . uncurry (appCPS2 c)))
 
 
