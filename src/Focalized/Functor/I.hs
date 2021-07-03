@@ -4,3 +4,4 @@ module Focalized.Functor.I
 ) where
 
 newtype I a = I { getI :: a }
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
