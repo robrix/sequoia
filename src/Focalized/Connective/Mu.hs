@@ -36,7 +36,7 @@ foldMu :: Neg a => CPS r (f a) a -> CPS r (Mu r f) a
 foldMu alg = liftCPS $ \ (Mu f) -> (appFun f (Down (Fun alg)) •)
 
 unfoldMu :: Traversable f => CPS r a (f a) -> CPS r a (Mu r f)
-unfoldMu coalg = cps $ \ a -> Mu $ liftFun' $ \ (Down (Fun alg)) -> runDN1 (appCPS (refoldCPS alg coalg) a)
+unfoldMu coalg = cps $ \ a -> Mu $ liftFun' $ \ (Down (Fun alg)) -> runDN0 (appCPS (refoldCPS alg coalg) a)
 
 refoldMu :: (Traversable f, Neg b) => CPS r (f b) b -> CPS r a (f a) -> CPS r a b
 refoldMu f g = foldMu f Cat.<<< unfoldMu g
