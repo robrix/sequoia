@@ -179,43 +179,43 @@ composeCPS f g = inC (exC g . exC f)
 
 -- Functor
 
-fmapCPS :: (CPS' c, Contravariant k) => (b -> b') -> (c k a b -> c k a b')
+fmapCPS :: (Continuation k, CPS' c) => (b -> b') -> (c k a b -> c k a b')
 fmapCPS = dimapCPS id
 
 
 -- Applicative
 
-pureCPS :: (CPS' c, Contravariant k) => b -> c k a b
+pureCPS :: (Continuation k, CPS' c) => b -> c k a b
 pureCPS a = inC (•<< const a)
 
-apCPS :: (CPS' c, Continuation k) => c k a (b -> b') -> (c k a b -> c k a b')
+apCPS :: (Continuation k, CPS' c) => c k a (b -> b') -> (c k a b -> c k a b')
 apCPS f a = inC (inK1 (\ k a' -> exK (exC f (inK (\ f -> exK (exC a (inK (k . f))) a'))) a'))
 
-liftA2CPS :: (CPS' c, Continuation k) => (x -> y -> z) -> c k a x -> c k a y -> c k a z
+liftA2CPS :: (Continuation k, CPS' c) => (x -> y -> z) -> c k a x -> c k a y -> c k a z
 liftA2CPS f a b = inC (\ k -> inK (\ a' -> exK (exC a (inK ((`exK` a') . exC b . (k •<<) . f))) a'))
 
 
 -- Monad
 
-bindCPS :: (CPS' c, Continuation k) => c k a b -> (b -> c k a b') -> c k a b'
+bindCPS :: (Continuation k, CPS' c) => c k a b -> (b -> c k a b') -> c k a b'
 bindCPS m f = inC (inK1 (\ k a -> exK (exC m (inK ((`exK` a) . (`exC` inK k) . f))) a))
 
 
 -- Arrow
 
-arrCPS :: (CPS' c, Continuation k) => (a -> b) -> c k a b
+arrCPS :: (Continuation k, CPS' c) => (a -> b) -> c k a b
 arrCPS = cps
 
-firstCPS :: (CPS' c, Continuation k) => c k a b -> c k (a, d) (b, d)
+firstCPS :: (Continuation k, CPS' c) => c k a b -> c k (a, d) (b, d)
 firstCPS  f = inC (inK . (\ k (l, r) -> exK (appCPS f l) (k •<< (,r))))
 
-secondCPS :: (CPS' c, Continuation k) => c k a b -> c k (d, a) (d, b)
+secondCPS :: (Continuation k, CPS' c) => c k a b -> c k (d, a) (d, b)
 secondCPS g = inC (inK . (\ k (l, r) -> exK (appCPS g r) (k •<< (l,))))
 
-splitPrdCPS :: (CPS' c, Continuation k) => c k a b -> c k a' b' -> c k (a, a') (b, b')
+splitPrdCPS :: (Continuation k, CPS' c) => c k a b -> c k a' b' -> c k (a, a') (b, b')
 splitPrdCPS f g = inC (inK . (\ k (l, r) -> exK (appCPS f l) (appCPS g r •<< (k •<<) . (,))))
 
-fanoutCPS :: (CPS' c, Continuation k) => c k a b -> c k a b' -> c k a (b, b')
+fanoutCPS :: (Continuation k, CPS' c) => c k a b -> c k a b' -> c k a (b, b')
 fanoutCPS = liftA2CPS (,)
 
 
@@ -248,11 +248,11 @@ wanderCPS traverse c = liftCPS (exK . execCPS . traverse (pappCPS c))
 
 -- Profunctor
 
-dimapCPS :: (CPS' c, Contravariant k) => (a' -> a) -> (b -> b') -> (c k a b -> c k a' b')
+dimapCPS :: (Continuation k, CPS' c) => (a' -> a) -> (b -> b') -> (c k a b -> c k a' b')
 dimapCPS f g = inC . dimap (contramap g) (contramap f) . exC
 
-lmapCPS :: (CPS' c, Contravariant k) => (a' -> a) -> (c k a b -> c k a' b)
+lmapCPS :: (Continuation k, CPS' c) => (a' -> a) -> (c k a b -> c k a' b)
 lmapCPS = (`dimapCPS` id)
 
-rmapCPS :: (CPS' c, Contravariant k) => (b -> b') -> (c k a b -> c k a b')
+rmapCPS :: (Continuation k, CPS' c) => (b -> b') -> (c k a b -> c k a b')
 rmapCPS = (id `dimapCPS`)
