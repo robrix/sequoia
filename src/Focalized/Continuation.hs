@@ -20,6 +20,10 @@ module Focalized.Continuation
 , (-<<)
   -- * Double negation
 , type (••)
+  -- ** Construction
+, liftDN
+  -- ** Elimination
+, lowerDN
 ) where
 
 import qualified Control.Category as Cat
@@ -110,3 +114,15 @@ infixr 1 -<<
 type r ••a = r •(r •a)
 
 infixl 9 ••
+
+
+-- Construction
+
+liftDN :: ((a -> r) -> r) -> r ••a
+liftDN = K . lmap (•)
+
+
+-- Elimination
+
+lowerDN :: r ••a -> (a -> r) -> r
+lowerDN = lmap K . (•)

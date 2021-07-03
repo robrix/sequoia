@@ -2,8 +2,6 @@ module Focalized.CPS
 ( -- * Double negation
   dnI
 , dnE
-, liftDN
-, lowerDN
   -- * CPS
 , cps
 , liftCPS
@@ -41,12 +39,6 @@ dnI = K . flip (•)
 
 dnE :: r ••CPS r a b -> CPS r a b
 dnE f = CPS (\ k -> K (\ a -> f • K (\ f -> runCPS f k • a)))
-
-liftDN :: ((a -> r) -> r) -> r ••a
-liftDN = K . lmap (•)
-
-lowerDN :: r ••a -> (a -> r) -> r
-lowerDN = lmap K . (•)
 
 
 -- CPS
