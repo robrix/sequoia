@@ -25,6 +25,7 @@ module Focalized.Continuation
 , (-<<)
   -- * Double negation
 , type (••)
+, type (**)
   -- ** Construction
 , liftDN
 , liftDN0
@@ -152,39 +153,41 @@ infixr 1 -<<
 
 type r ••a = r •(r •a)
 
-infixl 9 ••
+type k **a = k (k a)
+
+infixl 9 ••, **
 
 
 -- Construction
 
-liftDN :: Continuation k => a -> k (k a)
+liftDN :: Continuation k => a -> k **a
 liftDN = inK . flip exK
 
-liftDN0 :: ((a -> r) -> r) -> r ••a
+liftDN0 :: Continuation k => ((a -> R k) -> R k) -> k **a
 liftDN0 = inK . lmap exK
 
-liftDN1 :: (((a -> r) -> r) -> ((b -> r) -> r)) -> (r ••a -> r ••b)
+liftDN1 :: Continuation k => (((a -> R k) -> R k) -> ((b -> R k) -> R k)) -> (k **a -> k **b)
 liftDN1 = dimap runDN0 liftDN0
 
-liftDN2 :: (((a -> r) -> r) -> ((b -> r) -> r) -> ((c -> r) -> r)) -> (r ••a -> r ••b -> r ••c)
+liftDN2 :: Continuation k => (((a -> R k) -> R k) -> ((b -> R k) -> R k) -> ((c -> R k) -> R k)) -> (k **a -> k **b -> k **c)
 liftDN2 = dimap2 runDN0 runDN0 liftDN0
 
 
 -- Elimination
 
-runDN0 :: Continuation k => k (k a) -> ((a -> R k) -> R k)
+runDN0 :: Continuation k => k **a -> ((a -> R k) -> R k)
 runDN0 = lmap inK . exK
 
-runDN1 :: (r ••a -> r ••b) -> (((a -> r) -> r) -> ((b -> r) -> r))
+runDN1 :: Continuation k => (k **a -> k **b) -> (((a -> R k) -> R k) -> ((b -> R k) -> R k))
 runDN1 = dimap liftDN0 runDN0
 
-runDN2 :: (r ••a -> r ••b -> r ••c) -> (((a -> r) -> r) -> ((b -> r) -> r) -> ((c -> r) -> r))
+runDN2 :: Continuation k => (k **a -> k **b -> k **c) -> (((a -> R k) -> R k) -> ((b -> R k) -> R k) -> ((c -> R k) -> R k))
 runDN2 = dimap2 liftDN0 liftDN0 runDN0
 
 
 -- Cont monad
 
-newtype Cont k a = Cont { runCont :: k (k a) }
+newtype Cont k a = Cont { runCont :: k **a }
 
 instance Contravariant k => Functor (Cont k) where
   fmap f = Cont . (•<< (•<< f)) . runCont
