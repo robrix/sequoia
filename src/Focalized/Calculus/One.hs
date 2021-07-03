@@ -12,20 +12,20 @@ import Focalized.Connective.One
 
 -- One
 
-class OneIntro s where
+class Core s => OneIntro s where
   oneL
-    ::       _Γ -|s r|- _Δ
-    -- -------------------
-    -> One < _Γ -|s r|- _Δ
+    ::       _Γ -|s|- _Δ
+    -- -----------------
+    -> One < _Γ -|s|- _Δ
 
   oneR
-    -- -------------------
-    :: _Γ -|s r|- _Δ > One
+    -- -----------------
+    :: _Γ -|s|- _Δ > One
 
 
 oneL'
-  :: (Core s, OneIntro s)
-  => One < _Γ -|s r|- _Δ
-  -- -------------------
-  ->       _Γ -|s r|- _Δ
+  :: OneIntro s
+  => One < _Γ -|s|- _Δ
+  -- -----------------
+  ->       _Γ -|s|- _Δ
 oneL' = (oneR >>>)

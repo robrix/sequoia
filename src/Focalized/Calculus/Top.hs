@@ -6,11 +6,12 @@ module Focalized.Calculus.Top
 ) where
 
 import Focalized.Calculus.Context
+import Focalized.Calculus.Core
 import Focalized.Connective.Top
 
 -- Top
 
-class TopIntro s where
+class Core s => TopIntro s where
   topR
-    -- -------------------
-    :: _Γ -|s r|- _Δ > Top
+    -- -----------------
+    :: _Γ -|s|- _Δ > Top

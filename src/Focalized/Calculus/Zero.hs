@@ -6,11 +6,12 @@ module Focalized.Calculus.Zero
 ) where
 
 import Focalized.Calculus.Context
+import Focalized.Calculus.Core
 import Focalized.Connective.Zero
 
 -- Zero
 
-class ZeroIntro s where
+class Core s => ZeroIntro s where
   zeroL
-    -- --------------------
-    :: Zero < _Γ -|s r|- _Δ
+    -- ------------------
+    :: Zero < _Γ -|s|- _Δ

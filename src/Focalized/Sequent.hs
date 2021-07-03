@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeFamilies #-}
 module Focalized.Sequent
 ( -- * Sequents
   runSeq
@@ -75,7 +76,9 @@ instance MonadTrans (SeqT r _Γ) where
 
 -- Core rules
 
-instance Core Seq where
+instance Core (Seq r) where
+  type K (Seq r) = (•) r
+
   f >>> g = f >>= pure <--> pushL g
 
   init = popL liftR
@@ -83,14 +86,14 @@ instance Core Seq where
 
 -- Structural rules
 
-deriving via Contextually Seq instance Weaken   Seq
-deriving via Contextually Seq instance Contract Seq
-deriving via Contextually Seq instance Exchange Seq
+deriving via Contextually (Seq r) instance Weaken   (Seq r)
+deriving via Contextually (Seq r) instance Contract (Seq r)
+deriving via Contextually (Seq r) instance Exchange (Seq r)
 
 
 -- Contextual rules
 
-instance Contextual Seq where
+instance Contextual (Seq r) where
   swapΓΔ f _Δ' _Γ' = sequent $ K . \ _Δ _Γ -> runSeq (f _Δ _Γ) _Δ' • _Γ'
 
 
@@ -103,29 +106,29 @@ instance Control Seq where
 
 -- Negation
 
-instance NotIntro Seq where
+instance NotIntro (Seq r) where
   notL = notLK . kL
   notR = notRK . kR
 
-instance NegateIntro Seq where
+instance NegateIntro (Seq r) where
   negateL = negateLK . kL
   negateR = negateRK . kR
 
 
 -- Additive
 
-instance TopIntro Seq where
+instance TopIntro (Seq r) where
   topR = pure (inr Top)
 
-instance ZeroIntro Seq where
+instance ZeroIntro (Seq r) where
   zeroL = liftL (K absurdP)
 
-instance WithIntro Seq where
+instance WithIntro (Seq r) where
   withL1 p = popL (pushL p . exl)
   withL2 p = popL (pushL p . exr)
   withR = liftA2 (liftA2 (-><-))
 
-instance SumIntro Seq where
+instance SumIntro (Seq r) where
   sumL a b = popL (pushL a <--> pushL b)
   sumR1 = mapR inl
   sumR2 = mapR inr
@@ -133,33 +136,33 @@ instance SumIntro Seq where
 
 -- Multiplicative
 
-instance BottomIntro Seq where
+instance BottomIntro (Seq r) where
   botL = liftL (K absurdN)
   botR = wkR
 
-instance OneIntro Seq where
+instance OneIntro (Seq r) where
   oneL = wkL
   oneR = liftR One
 
-instance ParIntro Seq where
+instance ParIntro (Seq r) where
   parL a b = popL (pushL a <--> pushL b)
   parR = fmap ((>>= inr . inl) <--> inr . inr)
 
-instance TensorIntro Seq where
+instance TensorIntro (Seq r) where
   tensorL p = popL (pushL2 p . exl <*> exr)
   tensorR = liftA2 (liftA2 (-><-))
 
 
 -- Logical biconditional/exclusive disjunction
 
-instance IffIntro Seq where
+instance IffIntro (Seq r) where
   iffL1 s1 s2 = mapL getIff (withL1 (downR s1 ->⊢ s2))
 
   iffL2 s1 s2 = mapL getIff (withL2 (downR s1 ->⊢ s2))
 
   iffR s1 s2 = mapR Iff (funR (downL s1) ⊢& funR (downL s2))
 
-instance XOrIntro Seq where
+instance XOrIntro (Seq r) where
   xorL s1 s2 = mapL getXOr (subL (upR s1) ⊕⊢ subL (upR s2))
 
   xorR1 s1 s2 = mapR XOr (sumR1 (s1 ⊢-< upL s2))
@@ -169,43 +172,43 @@ instance XOrIntro Seq where
 
 -- Implication
 
-instance FunctionIntro Seq where
+instance FunctionIntro (Seq r) where
   funL a b = popL (\ f -> a >>> liftLR (getFun f) >>> wkL' b)
   funR = lowerLR (liftR . Fun) . wkR'
 
-instance SubtractionIntro Seq where
+instance SubtractionIntro (Seq r) where
   subL f = mapL getSub (tensorL (wkL' f >>> poppedL2 negateL init))
   subR a b = mapR Sub (a ⊢⊗ negateR b)
 
 
 -- Quantification
 
-instance UniversalIntro Seq where
+instance UniversalIntro (Seq r) where
   forAllL p = mapL (notNegate . runForAll) p
   forAllR p = sequent $ K . \ k a -> inrC k • ForAll (K ((• a) . runSeq p . (inlC k |>)))
 
-instance ExistentialIntro Seq where
+instance ExistentialIntro (Seq r) where
   existsL p = popL (dnESeq . runExists (pushL p))
   existsR p = mapR (Exists . liftDN) p
 
 
 -- Recursion
 
-instance NuIntro Seq where
+instance NuIntro (Seq r) where
   nuL = mapL runNu
   nuR s = wkR' s >>> existsL (mapL nu init)
 
-instance MuIntro Seq where
+instance MuIntro (Seq r) where
   muL f k = wkL (downR f) >>> exL (mapL getMu (funL init (wkL' k)))
   muR = mapR mu
 
 
 -- Polarity shifts
 
-instance UpIntro Seq where
+instance UpIntro (Seq r) where
   upL   = mapL getUp
   upR   = mapR Up
 
-instance DownIntro Seq where
+instance DownIntro (Seq r) where
   downL = mapL getDown
   downR = mapR Down

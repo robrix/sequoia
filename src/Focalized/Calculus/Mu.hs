@@ -12,6 +12,7 @@ import Focalized.Calculus.Core
 import Focalized.Connective.Function
 import Focalized.Connective.Mu
 import Focalized.Connective.Quantification
+import Focalized.Continuation
 import Focalized.Polarity
 import Prelude hiding (init)
 
@@ -20,20 +21,20 @@ import Prelude hiding (init)
 class MuIntro s where
   muL
     :: ((Neg ==> Pos) f, Neg a)
-    => _Γ -|s r|- _Δ > f a ~~r~> a   ->   a < _Γ -|s r|- _Δ
-    -- ----------------------------------------------------
-    ->              Mu r f < _Γ -|s r|- _Δ
+    => _Γ -|s|- _Δ > f a ~~R (K s)~> a   ->   a < _Γ -|s|- _Δ
+    -- ------------------------------------------------------
+    ->              Mu (R (K s)) f < _Γ -|s|- _Δ
 
   muR
     :: (Neg ==> Pos) f
-    => _Γ -|s r|- _Δ > ForAll r N (MuF r f)
-    -- ------------------------------------
-    -> _Γ -|s r|- _Δ >             Mu  r f
+    => _Γ -|s|- _Δ > ForAll (R (K s)) N (MuF (R (K s)) f)
+    -- --------------------------------------------------
+    -> _Γ -|s|- _Δ >                     Mu  (R (K s)) f
 
 
 muL'
   :: (Weaken s, Exchange s, MuIntro s, (Neg ==> Pos) f)
-  =>             Mu  r f  < _Γ -|s r|- _Δ
-  -- ------------------------------------
-  -> ForAll r N (MuF r f) < _Γ -|s r|- _Δ
+  =>                     Mu  (R (K s)) f  < _Γ -|s|- _Δ
+  -- --------------------------------------------------
+  -> ForAll (R (K s)) N (MuF (R (K s)) f) < _Γ -|s|- _Δ
 muL' p = muR init >>> wkL' p
