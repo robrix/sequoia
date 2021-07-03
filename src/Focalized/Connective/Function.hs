@@ -32,10 +32,7 @@ liftFun' :: Continuation k => (a -> (b -> R k) -> R k) -> (a ~~k~> b)
 liftFun' = liftFun . flip
 
 dnEFun :: Continuation k => k **(a ~~k~> b) -> (a ~~k~> b)
-dnEFun = Fun . dnE' . contramap (contramap getFun)
-
-dnE' :: Continuation k => k **(k b -> k a) -> (k b -> k a)
-dnE' f = inK1 (\ k a -> exK f (inK (\ f -> exK1 f k a)))
+dnEFun = dnE
 
 newtype Fun k a b = Fun { getFun :: k b -> k a }
   deriving (Cat.Category, Profunctor) via ViaCPS (Fun k)
