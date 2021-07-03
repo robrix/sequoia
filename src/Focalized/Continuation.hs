@@ -43,7 +43,7 @@ module Focalized.Continuation
 , runDN1
 , runDN2
   -- * Cont monad
-, Cont(..)
+, type (••)(..)
 ) where
 
 import qualified Control.Category as Cat
@@ -204,14 +204,16 @@ runDN2 = dimap2 liftDN0 liftDN0 runDN0
 
 -- Cont monad
 
-newtype Cont k a = Cont { runCont :: k **a }
+newtype k ••a = Cont { runCont :: k **a }
 
-instance Contravariant k => Functor (Cont k) where
+infixr 9 ••
+
+instance Contravariant k => Functor ((••) k) where
   fmap f = Cont . (•<< (•<< f)) . runCont
 
-instance Representable k => Applicative (Cont k) where
+instance Representable k => Applicative ((••) k) where
   pure = Cont . liftDN
   (<*>) = ap
 
-instance Representable k => Monad (Cont k) where
+instance Representable k => Monad ((••) k) where
   Cont m >>= f = Cont (m •<< inK . \ k a -> exK (runCont (f a)) k)

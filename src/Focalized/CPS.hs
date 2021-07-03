@@ -97,13 +97,13 @@ cps = inC . inK1 . flip (.)
 liftCPS :: CPS k c => (a -> k b -> Rep k) -> a `c` b
 liftCPS = inC . fmap inK . flip
 
-contToCPS :: CPS k c => (a -> Cont k b) -> a `c` b
+contToCPS :: CPS k c => (a -> k ••b) -> a `c` b
 contToCPS f = liftCPS (exK . runCont . f)
 
 
 -- Elimination
 
-cpsToCont :: CPS k c => a `c` b -> (a -> Cont k b)
+cpsToCont :: CPS k c => a `c` b -> (a -> k ••b)
 cpsToCont c a = Cont (appCPS c a)
 
 appCPS :: CPS k c => a `c` b -> a -> k **b
