@@ -3,6 +3,8 @@ module Focalized.Continuation
 ( -- * Continuations
   type (•)(..)
   -- ** Application
+, appK1
+, appK2
 , Contrapplicative(..)
   -- ** Composition
 , idK
@@ -49,6 +51,13 @@ instance Contravariant ((•) r) where
 
 
 -- Application
+
+appK1 :: Contrapplicative k => (k b -> k a) -> (a -> k (k b))
+appK1 f a = inK (\ k -> exK (f k) a)
+
+appK2 :: Contrapplicative k => (k (k c -> k b) -> k a) -> (a -> b -> k (k c))
+appK2 f a b = inK (\ k -> exK1 f (\ f -> exK (f k) b) a)
+
 
 class Contravariant k => Contrapplicative k where
   type R k
