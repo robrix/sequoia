@@ -5,7 +5,7 @@ module Focalized.Continuation
   -- ** Application
 , appK1
 , appK2
-, Contrapplicative(..)
+, Continuation(..)
 , Contravariant(..)
 , coerceK
 , coerceK1
@@ -56,14 +56,14 @@ instance Contravariant ((•) r) where
 
 -- Application
 
-appK1 :: Contrapplicative k => (k b -> k a) -> (a -> k (k b))
+appK1 :: Continuation k => (k b -> k a) -> (a -> k (k b))
 appK1 f a = inK (\ k -> exK (f k) a)
 
-appK2 :: Contrapplicative k => (k (k c -> k b) -> k a) -> (a -> b -> k (k c))
+appK2 :: Continuation k => (k (k c -> k b) -> k a) -> (a -> b -> k (k c))
 appK2 f a b = inK (\ k -> exK1 f (\ f -> exK (f k) b) a)
 
 
-class Contravariant k => Contrapplicative k where
+class Contravariant k => Continuation k where
   type R k
 
   inK :: (a -> R k) -> k a
@@ -74,7 +74,7 @@ class Contravariant k => Contrapplicative k where
   exK1 :: (k a -> k b) -> ((a -> R k) -> (b -> R k))
   exK2 :: (k a -> k b -> k c) -> ((a -> R k) -> (b -> R k) -> (c -> R k))
 
-instance Contrapplicative ((•) r) where
+instance Continuation ((•) r) where
   type R ((•) r) = r
 
   inK = K
@@ -90,13 +90,13 @@ instance Contrapplicative ((•) r) where
   exK2 f a b = exK (f (K a) (K b))
 
 
-coerceK :: (Contrapplicative k1, Contrapplicative k2, R k1 ~ R k2) => k1 a -> k2 a
+coerceK :: (Continuation k1, Continuation k2, R k1 ~ R k2) => k1 a -> k2 a
 coerceK = inK . exK
 
-coerceK1 :: (Contrapplicative k1, Contrapplicative k2, R k1 ~ R k2) => (k1 a -> k1 b) -> (k2 a -> k2 b)
+coerceK1 :: (Continuation k1, Continuation k2, R k1 ~ R k2) => (k1 a -> k1 b) -> (k2 a -> k2 b)
 coerceK1 = inK1 . exK1
 
-coerceK2 :: (Contrapplicative k1, Contrapplicative k2, R k1 ~ R k2) => (k1 a -> k1 b -> k1 c) -> (k2 a -> k2 b -> k2 c)
+coerceK2 :: (Continuation k1, Continuation k2, R k1 ~ R k2) => (k1 a -> k1 b -> k1 c) -> (k2 a -> k2 b -> k2 c)
 coerceK2 = inK2 . exK2
 
 
@@ -123,7 +123,7 @@ k •>> f = K (f . exK k)
 infixr 1 <<•, •>>
 
 
-(<••>) :: (Disj d, Contrapplicative k) => k a -> k b -> k (a `d` b)
+(<••>) :: (Disj d, Continuation k) => k a -> k b -> k (a `d` b)
 (<••>) = inK2 (<-->)
 
 infix 3 <••>
@@ -149,7 +149,7 @@ infixl 9 ••
 
 -- Construction
 
-liftDN :: Contrapplicative k => a -> k (k a)
+liftDN :: Continuation k => a -> k (k a)
 liftDN = inK . flip exK
 
 liftDN0 :: ((a -> r) -> r) -> r ••a
@@ -181,9 +181,9 @@ newtype Cont k a = Cont { runCont :: k (k a) }
 instance Contravariant k => Functor (Cont k) where
   fmap f = Cont . (•<< (•<< f)) . runCont
 
-instance Contrapplicative k => Applicative (Cont k) where
+instance Continuation k => Applicative (Cont k) where
   pure = Cont . liftDN
   (<*>) = ap
 
-instance Contrapplicative k => Monad (Cont k) where
+instance Continuation k => Monad (Cont k) where
   Cont m >>= f = Cont (m •<< inK . \ k a -> exK (runCont (f a)) k)

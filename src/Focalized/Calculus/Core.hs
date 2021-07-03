@@ -60,7 +60,7 @@ import Focalized.Continuation
 import Focalized.Disjunction
 import Prelude hiding (init)
 
-class Contrapplicative (K s) => Core s where
+class Continuation (K s) => Core s where
   {-# MINIMAL ((>>>) | (<<<)), init #-}
 
   type K s :: Type -> Type

@@ -27,5 +27,5 @@ instance (Neg (f a), Pos a) => Polarized P (NuF k f a)
 nu :: Pos x => NuF k f x -> Nu k f
 nu r = Nu (getNuF r)
 
-runNu :: Contrapplicative k => Nu k f -> Exists k P (NuF k f)
+runNu :: Continuation k => Nu k f -> Exists k P (NuF k f)
 runNu (Nu r) = Exists (liftDN (NuF r))
