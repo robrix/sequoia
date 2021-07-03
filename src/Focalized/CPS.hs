@@ -88,60 +88,60 @@ refoldCPS f g = go where go = f Cat.<<< traverse' go Cat.<<< g
 -- CPS abstraction
 
 class (Cat.Category c, Continuation k, Profunctor c) => CPS' k c | c -> k where
-  inC :: (k b -> k a) -> c a b
-  exC :: c a b        -> (k b -> k a)
+  inC :: (k b -> k a) -> a `c` b
+  exC :: a `c` b      -> (k b -> k a)
 
 instance Continuation k => CPS' k (CPS k) where
   inC = CPS
   exC = runCPS
 
-inC1 :: CPS' k c => ((k b1 -> k a1) -> (k b2 -> k a2)) -> (c a1 b1 -> c a2 b2)
+inC1 :: CPS' k c => ((k b1 -> k a1) -> (k b2 -> k a2)) -> (a1 `c` b1 -> a2 `c` b2)
 inC1 = dimap exC inC
 
-inC2 :: CPS' k c => ((k b1 -> k a1) -> (k b2 -> k a2) -> (k b3 -> k a3)) -> (c a1 b1 -> c a2 b2 -> c a3 b3)
+inC2 :: CPS' k c => ((k b1 -> k a1) -> (k b2 -> k a2) -> (k b3 -> k a3)) -> (a1 `c` b1 -> a2 `c` b2 -> a3 `c` b3)
 inC2 = dimap2 exC exC inC
 
 
-exC1 :: CPS' k c => (c a1 b1 -> c a2 b2) -> ((k b1 -> k a1) -> (k b2 -> k a2))
+exC1 :: CPS' k c => (a1 `c` b1 -> a2 `c` b2) -> ((k b1 -> k a1) -> (k b2 -> k a2))
 exC1 = dimap inC exC
 
-exC2 :: CPS' k c => (c a1 b1 -> c a2 b2 -> c a3 b3) -> ((k b1 -> k a1) -> (k b2 -> k a2) -> (k b3 -> k a3))
+exC2 :: CPS' k c => (a1 `c` b1 -> a2 `c` b2 -> a3 `c` b3) -> ((k b1 -> k a1) -> (k b2 -> k a2) -> (k b3 -> k a3))
 exC2 = dimap2 inC inC exC
 
 
 -- Construction
 
-cps :: CPS' k c => (a -> b) -> c a b
+cps :: CPS' k c => (a -> b) -> a `c` b
 cps = inC . inK1 . flip (.)
 
-liftCPS :: CPS' k c => (a -> k b -> R k) -> c a b
+liftCPS :: CPS' k c => (a -> k b -> R k) -> a `c` b
 liftCPS = inC . fmap inK . flip
 
-contToCPS :: CPS' k c => (a -> Cont k b) -> c a b
+contToCPS :: CPS' k c => (a -> Cont k b) -> a `c` b
 contToCPS f = liftCPS (exK . runCont . f)
 
 
 -- Elimination
 
-cpsToCont :: CPS' k c => c a b -> (a -> Cont k b)
+cpsToCont :: CPS' k c => a `c` b -> (a -> Cont k b)
 cpsToCont c a = Cont (appCPS c a)
 
-appCPS :: CPS' k c => c a b -> a -> k (k b)
+appCPS :: CPS' k c => a `c` b -> a -> k **b
 appCPS c a = inK $ \ k -> exK (exC c k) a
 
-appCPS2 :: CPS' k c => c a (c b d) -> a -> b -> k (k d)
+appCPS2 :: CPS' k c => a `c` (b `c` d) -> a -> b -> k **d
 appCPS2 c = appK2 (exC (rmap exC c))
 
-pappCPS :: CPS' k c => c a b -> a -> c () b
+pappCPS :: CPS' k c => a `c` b -> a -> c () b
 pappCPS c a = c Cat.<<< inC (•<< const a)
 
-execCPS :: CPS' k c => c () a -> k (k a)
+execCPS :: CPS' k c => () `c` a -> k **a
 execCPS c = appCPS c ()
 
-evalCPS :: CPS' k c => c i (R k) -> k i
+evalCPS :: CPS' k c => i `c` R k -> k i
 evalCPS c = exC c idK
 
-dnE :: CPS' k c => k **c a b -> c a b
+dnE :: CPS' k c => k **c a b -> a `c` b
 dnE f = inC (inK . \ k a -> exK f (inK (\ f -> exK (exC f k) a)))
 
 
