@@ -53,28 +53,28 @@ instance Contravariant ((•) r) where
 class Contravariant k => Contrapplicative k where
   type R k
 
-  inK0 :: (a -> R k) -> k a
+  inK :: (a -> R k) -> k a
   inK1 :: ((a -> R k) -> (b -> R k)) -> (k a -> k b)
   inK2 :: ((a -> R k) -> (b -> R k) -> (c -> R k)) -> (k a -> k b -> k c)
 
-  exK0 :: k a -> (a -> R k)
+  exK :: k a -> (a -> R k)
   exK1 :: (k a -> k b) -> ((a -> R k) -> (b -> R k))
   exK2 :: (k a -> k b -> k c) -> ((a -> R k) -> (b -> R k) -> (c -> R k))
 
 instance Contrapplicative ((•) r) where
   type R ((•) r) = r
 
-  inK0 = K
+  inK = K
 
   inK1 = dimap (•) K
 
   inK2 f (K a) (K b) = K (f a b)
 
-  exK0 = (•)
+  exK = (•)
 
   exK1 = dimap K (•)
 
-  exK2 f a b = exK0 (f (K a) (K b))
+  exK2 f a b = exK (f (K a) (K b))
 
 
 -- Composition
@@ -92,10 +92,10 @@ idK = K id
 infixr 1 •<<, >>•
 
 (<<•) :: (r -> s) -> r •a -> s •a
-f <<• k = K (f . exK0 k)
+f <<• k = K (f . exK k)
 
 (•>>) :: r •a -> (r -> s) -> s •a
-k •>> f = K (f . exK0 k)
+k •>> f = K (f . exK k)
 
 infixr 1 <<•, •>>
 

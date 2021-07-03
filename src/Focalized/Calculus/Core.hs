@@ -166,7 +166,7 @@ popΓΔ
   => (K s _Δ -> _Γ -> Γ -|s|-  R (K s))
   -- ----------------------------------
   ->                 _Γ -|s|- _Δ
-popΓΔ f = swapΓΔ f (inK0 id) Γ
+popΓΔ f = swapΓΔ f (inK id) Γ
 
 -- | Pop something off the input context which can later be pushed. Used with 'pushΓ', this provides a generalized context restructuring facility.
 --
@@ -196,7 +196,7 @@ popΔ
   => (K s _Δ -> _Γ -|s|-  R (K s))
   -- -----------------------------
   ->            _Γ -|s|- _Δ
-popΔ f = swapΔ f (inK0 id)
+popΔ f = swapΔ f (inK id)
 
 
 -- | Pop something off the input context which can later be pushed. Used with 'pushL', this provides a generalized context restructuring facility.
