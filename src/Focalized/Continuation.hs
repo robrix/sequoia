@@ -42,7 +42,7 @@ instance Cat.Category (•) where
   K f . K g = K (g . f)
 
 instance Contravariant ((•) r) where
-  contramap f = K . (. f) . (•)
+  contramap f = K . lmap f . (•)
 
 
 -- Construction
