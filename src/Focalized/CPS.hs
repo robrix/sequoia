@@ -42,7 +42,7 @@ liftCPS = inC . fmap inK . flip
 contToCPS :: (Continuation k, CPS' c) => (a -> Cont k b) -> c k a b
 contToCPS f = liftCPS (exK . runCont . f)
 
-cpsToCont :: Continuation k => CPS k a b -> (a -> Cont k b)
+cpsToCont :: (Continuation k, CPS' c) => c k a b -> (a -> Cont k b)
 cpsToCont c a = Cont (appCPS c a)
 
 appCPS :: (Continuation k, CPS' c) => c k a b -> a -> k (k b)
