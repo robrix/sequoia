@@ -82,7 +82,7 @@ infixr 1 -<<
 -- CPS
 
 cps :: (a -> b) -> CPS r a b
-cps = CPS . liftK . flip (.)
+cps = CPS . liftK1 . flip (.)
 
 liftCPS :: (a -> r •b -> r) -> CPS r a b
 liftCPS = CPS . fmap K . flip
@@ -175,7 +175,7 @@ newtype CPST r a m b = CPST { runCPST :: CPS (m r) a b }
   deriving (Applicative, Functor, Monad)
 
 instance MonadTrans (CPST r i) where
-  lift m = CPST (CPS (liftK (const . (m >>=))))
+  lift m = CPST (CPS (liftK1 (const . (m >>=))))
 
 
 newtype Cont r a = Cont { runCont :: r ••a }

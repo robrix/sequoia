@@ -2,7 +2,7 @@ module Focalized.Continuation
 ( -- * Continuations
   type (•)(..)
   -- ** Construction
-, liftK
+, liftK1
 , liftK2
   -- ** Elimination
 , lowerK
@@ -35,8 +35,8 @@ instance Contravariant ((•) r) where
 
 -- Construction
 
-liftK :: ((a -> r) -> (b -> r)) -> (r •a -> r •b)
-liftK = dimap (•) K
+liftK1 :: ((a -> r) -> (b -> r)) -> (r •a -> r •b)
+liftK1 = dimap (•) K
 
 liftK2 :: ((a -> r) -> (b -> r) -> (c -> r)) -> (r •a -> r •b -> r •c)
 liftK2 f (K a) (K b) = K (f a b)
