@@ -161,13 +161,13 @@ liftDN :: Continuation k => a -> k (k a)
 liftDN = inK . flip exK
 
 liftDN0 :: ((a -> r) -> r) -> r ••a
-liftDN0 = K . lmap (•)
+liftDN0 = inK . lmap exK
 
 liftDN1 :: (((a -> r) -> r) -> ((b -> r) -> r)) -> (r ••a -> r ••b)
 liftDN1 = dimap runDN0 liftDN0
 
 liftDN2 :: (((a -> r) -> r) -> ((b -> r) -> r) -> ((c -> r) -> r)) -> (r ••a -> r ••b -> r ••c)
-liftDN2 f a b = liftDN0 (f (runDN0 a) (runDN0 b))
+liftDN2 = dimap2 runDN0 runDN0 liftDN0
 
 
 -- Elimination
@@ -179,7 +179,7 @@ runDN1 :: (r ••a -> r ••b) -> (((a -> r) -> r) -> ((b -> r) -> r))
 runDN1 = dimap liftDN0 runDN0
 
 runDN2 :: (r ••a -> r ••b -> r ••c) -> (((a -> r) -> r) -> ((b -> r) -> r) -> ((c -> r) -> r))
-runDN2 f a b = runDN0 (f (liftDN0 a) (liftDN0 b))
+runDN2 = dimap2 liftDN0 liftDN0 runDN0
 
 
 -- Cont monad
