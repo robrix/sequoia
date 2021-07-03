@@ -35,11 +35,15 @@ mu r = Mu (dnE (contramap (contramap getMuF) (runForAll r)))
 foldMu :: CPS' k c => Neg a => f a `c` a -> Mu k f `c` a
 foldMu alg = inC $ inK . \ k (Mu f) -> exK (appFun f (Down (Fun (coerceK1 (exC alg))))) (coerceK k)
 
-unfoldMu :: (Traversable f, Continuation k) => CPS k a (f a) -> CPS k a (Mu k f)
-unfoldMu coalg = cps $ \ a -> Mu $ liftFun' $ \ (Down (Fun alg)) -> runDN0 (appCPS (refoldCPS (CPS alg) coalg) a)
+unfoldMu :: (Traversable f, CPS' k c) => a `c` f a -> a `c` Mu k f
+unfoldMu coalg = cps $ \ a -> Mu $ Fun $ inK . \ k (Down alg) -> exK (exC (refoldCPS alg (coerceC coalg)) k) a
 
-refoldMu :: (Traversable f, Continuation k, Neg b) => CPS k (f b) b -> CPS k a (f a) -> CPS k a b
+refoldMu :: (Traversable f, CPS' k c, Neg b) => f b `c` b -> a `c` f a -> a `c` b
 refoldMu f g = foldMu' f Cat.<<< unfoldMu g
   where
-  foldMu' :: (CPS' k c, Neg a) => c (f a) a -> c (Mu k f) a
+  foldMu' :: (CPS' k c, Neg a) => f a `c` a -> Mu k f `c` a
   foldMu' = foldMu
+
+
+coerceC :: (CPS' k c, CPS' k d) => c a b -> d a b
+coerceC = inC . exC

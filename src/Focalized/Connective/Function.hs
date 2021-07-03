@@ -12,6 +12,7 @@ module Focalized.Connective.Function
 import qualified Control.Category as Cat
 import           Data.Functor.Contravariant
 import           Data.Profunctor
+import           Data.Profunctor.Traversing
 import           Focalized.CPS
 import           Focalized.Continuation
 import           Focalized.Polarity
@@ -31,7 +32,7 @@ liftFun' :: Continuation k => (a -> (b -> R k) -> R k) -> (a ~~k~> b)
 liftFun' = liftFun . flip
 
 newtype Fun k a b = Fun { getFun :: k b -> k a }
-  deriving (Cat.Category, Profunctor) via ViaCPS (Fun k)
+  deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via ViaCPS (Fun k)
 
 instance Continuation k => CPS' k (Fun k) where
   inC = Fun
