@@ -38,7 +38,7 @@ newtype r •a = K { (•) :: a -> r }
 infixl 9 •
 
 instance Cat.Category (•) where
-  id = K id
+  id = idK
   K f . K g = K (g . f)
 
 instance Contravariant ((•) r) where
@@ -72,7 +72,7 @@ lowerK2 f a b = lowerK0 (f (K a) (K b))
 -- Composition
 
 idK :: r •r
-idK = Cat.id
+idK = K id
 
 
 (•<<) :: r •a -> (b -> a) -> r •b
