@@ -16,6 +16,8 @@ module Focalized.Continuation
 , (<<•)
 , (•>>)
 , (<••>)
+  -- * Double negation
+, type (••)
 ) where
 
 import qualified Control.Category as Cat
@@ -88,3 +90,10 @@ infixr 1 <<•, •>>
 (<••>) = liftK2 (<-->)
 
 infix 3 <••>
+
+
+-- Double negation
+
+type r ••a = r •(r •a)
+
+infixl 9 ••

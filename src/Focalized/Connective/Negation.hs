@@ -14,9 +14,9 @@ module Focalized.Connective.Negation
 ) where
 
 import Data.Functor.Contravariant
-import Focalized.CPS
 import Focalized.Connective.Negate
 import Focalized.Connective.Not
+import Focalized.Continuation
 
 -- Negative double negation
 

@@ -5,7 +5,6 @@ module Focalized.Connective.Exists
 , runExists
 ) where
 
-import Focalized.CPS
 import Focalized.Continuation
 import Focalized.Polarity
 

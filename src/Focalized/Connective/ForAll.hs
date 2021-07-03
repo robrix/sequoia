@@ -3,7 +3,7 @@ module Focalized.Connective.ForAll
   ForAll(..)
 ) where
 
-import Focalized.CPS
+import Focalized.Continuation
 import Focalized.Polarity
 
 -- Universal quantification

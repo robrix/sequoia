@@ -1,8 +1,6 @@
 module Focalized.CPS
-( -- * Continuations
-  type (••)
-  -- * Double negation
-, dnI
+( -- * Double negation
+  dnI
 , dnE
 , liftDN
 , lowerDN
@@ -39,13 +37,6 @@ import           Data.Profunctor
 import           Data.Profunctor.Traversing
 import           Focalized.Continuation
 import           Focalized.Disjunction
-
--- Double negation
-
-type r ••a = r •(r •a)
-
-infixl 9 ••
-
 
 dnI :: a -> r ••a
 dnI = K . flip (•)

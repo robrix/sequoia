@@ -14,7 +14,6 @@ module Focalized.Calculus.Negate
 , module Focalized.Connective.Negate
 ) where
 
-import Focalized.CPS
 import Focalized.Calculus.Context
 import Focalized.Calculus.Control
 import Focalized.Calculus.Core
