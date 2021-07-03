@@ -19,6 +19,36 @@ module Focalized.CPS
 , dnE
   -- * CPS abstraction
 , CPS'(..)
+  -- ** Category
+, idCPS
+, composeCPS
+  -- ** Functor
+, fmapCPS
+  -- ** Applicative
+, pureCPS
+, apCPS
+, liftA2CPS
+  -- ** Monad
+, bindCPS
+  -- ** Arrow
+, arrCPS
+, firstCPS
+, secondCPS
+, splitPrdCPS
+, fanoutCPS
+  -- ** ArrowChoice
+, leftCPS
+, rightCPS
+, splitSumCPS
+, faninCPS
+  -- ** ArrowApply
+, applyCPS
+  -- ** Traversing
+, wanderCPS
+  -- ** Profunctor
+, dimapCPS
+, lmapCPS
+, rmapCPS
 ) where
 
 import           Control.Applicative (liftA2)
@@ -136,3 +166,93 @@ class (forall k . Cat.Category (c k), forall k . Contravariant k => Profunctor (
 instance CPS' CPS where
   inC = CPS
   exC = runCPS
+
+
+-- Category
+
+idCPS :: CPS' c => c k a a
+idCPS = inC id
+
+composeCPS :: CPS' c => c k b d -> c k a b -> c k a d
+composeCPS f g = inC (exC g . exC f)
+
+
+-- Functor
+
+fmapCPS :: (CPS' c, Contravariant k) => (b -> b') -> (c k a b -> c k a b')
+fmapCPS = dimapCPS id
+
+
+-- Applicative
+
+pureCPS :: (CPS' c, Contravariant k) => b -> c k a b
+pureCPS a = inC (•<< const a)
+
+apCPS :: (CPS' c, Continuation k) => c k a (b -> b') -> (c k a b -> c k a b')
+apCPS f a = inC (inK1 (\ k a' -> exK (exC f (inK (\ f -> exK (exC a (inK (k . f))) a'))) a'))
+
+liftA2CPS :: (CPS' c, Continuation k) => (x -> y -> z) -> c k a x -> c k a y -> c k a z
+liftA2CPS f a b = inC (\ k -> inK (\ a' -> exK (exC a (inK ((`exK` a') . exC b . (k •<<) . f))) a'))
+
+
+-- Monad
+
+bindCPS :: (CPS' c, Continuation k) => c k a b -> (b -> c k a b') -> c k a b'
+bindCPS m f = inC (inK1 (\ k a -> exK (exC m (inK ((`exK` a) . (`exC` inK k) . f))) a))
+
+
+-- Arrow
+
+arrCPS :: (CPS' c, Continuation k) => (a -> b) -> c k a b
+arrCPS = cps
+
+firstCPS :: (CPS' c, Continuation k) => c k a b -> c k (a, d) (b, d)
+firstCPS  f = inC (inK . (\ k (l, r) -> exK (appCPS f l) (k •<< (,r))))
+
+secondCPS :: (CPS' c, Continuation k) => c k a b -> c k (d, a) (d, b)
+secondCPS g = inC (inK . (\ k (l, r) -> exK (appCPS g r) (k •<< (l,))))
+
+splitPrdCPS :: (CPS' c, Continuation k) => c k a b -> c k a' b' -> c k (a, a') (b, b')
+splitPrdCPS f g = inC (inK . (\ k (l, r) -> exK (appCPS f l) (appCPS g r •<< (k •<<) . (,))))
+
+fanoutCPS :: (CPS' c, Continuation k) => c k a b -> c k a b' -> c k a (b, b')
+fanoutCPS = liftA2CPS (,)
+
+
+-- ArrowChoice
+
+leftCPS :: (Continuation k, CPS' c) => c k a b -> c k (Either a d) (Either b d)
+leftCPS  f = inC (\ k -> exC f (k •<< inl) <••> (k •<< inr))
+
+rightCPS :: (Continuation k, CPS' c) => c k a b -> c k (Either d a) (Either d b)
+rightCPS g = inC (\ k -> (k •<< inl) <••> exC g (k •<< inr))
+
+splitSumCPS :: (Continuation k, CPS' c) => c k a1 b1 -> c k a2 b2 -> c k (Either a1 a2) (Either b1 b2)
+splitSumCPS f g = inC (\ k -> exC f (k •<< inl) <••> exC g (k •<< inr))
+
+faninCPS :: (Continuation k, CPS' c) => c k a1 b -> c k a2 b -> c k (Either a1 a2) b
+faninCPS f g = inC ((<••>) <$> exC f <*> exC g)
+
+
+-- ArrowApply
+
+applyCPS :: (Continuation k, CPS' c) => c k (c k a b, a) b
+applyCPS = inC (>>- uncurry appCPS)
+
+
+-- Traversing
+
+wanderCPS :: (Continuation k, CPS' c, Applicative (c k ())) => (forall f . Applicative f => (a -> f b) -> (s -> f t)) -> c k a b -> c k s t
+wanderCPS traverse c = liftCPS (exK . execCPS . traverse (pappCPS c))
+
+
+-- Profunctor
+
+dimapCPS :: (CPS' c, Contravariant k) => (a' -> a) -> (b -> b') -> (c k a b -> c k a' b')
+dimapCPS f g = inC . dimap (contramap g) (contramap f) . exC
+
+lmapCPS :: (CPS' c, Contravariant k) => (a' -> a) -> (c k a b -> c k a' b)
+lmapCPS = (`dimapCPS` id)
+
+rmapCPS :: (CPS' c, Contravariant k) => (b -> b') -> (c k a b -> c k a b')
+rmapCPS = (id `dimapCPS`)
