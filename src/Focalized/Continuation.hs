@@ -26,7 +26,6 @@ module Focalized.Continuation
 , liftDN1
 , liftDN2
   -- ** Elimination
-, dnE
 , runDN0
 , runDN1
 , runDN2
@@ -138,9 +137,6 @@ liftDN2 f a b = liftDN0 (f (runDN0 a) (runDN0 b))
 
 
 -- Elimination
-
-dnE :: r ••(r •b -> r •a) -> (r •b -> r •a)
-dnE f k = f •<< K . \ a f -> f k • a
 
 runDN0 :: r ••a -> ((a -> r) -> r)
 runDN0 = lmap K . (•)

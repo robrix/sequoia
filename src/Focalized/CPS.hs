@@ -1,6 +1,8 @@
 module Focalized.CPS
-( -- * CPS
-  cps
+( -- * Double negation
+  dnE
+  -- * CPS
+, cps
 , liftCPS
 , contToCPS
 , cpsToCont
@@ -30,6 +32,10 @@ import           Data.Profunctor
 import           Data.Profunctor.Traversing
 import           Focalized.Continuation
 import           Focalized.Disjunction
+
+dnE :: r ••(r •b -> r •a) -> (r •b -> r •a)
+dnE f k = f •<< K . \ a f -> f k • a
+
 
 -- CPS
 
