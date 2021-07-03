@@ -102,8 +102,8 @@ coerceK2 = inK2 . exK2
 
 -- Composition
 
-idK :: r •r
-idK = K id
+idK :: Continuation k => k (R k)
+idK = inK id
 
 
 (•<<) :: Contravariant k => k a -> (b -> a) -> k b
