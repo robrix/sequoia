@@ -27,5 +27,5 @@ instance (Neg (f a), Pos a) => Polarized P (NuF r f a)
 nu :: Pos x => NuF r f x -> Nu r f
 nu r = Nu (getNuF r)
 
-runNu :: Nu r f -> Exists r P (NuF r f)
+runNu :: Nu k f -> Exists r P (NuF k f)
 runNu (Nu r) = Exists (liftDN (NuF r))

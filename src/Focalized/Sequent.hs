@@ -173,8 +173,8 @@ instance XOrIntro (Seq r) where
 -- Implication
 
 instance FunctionIntro (Seq r) where
-  funL a b = popL (\ f -> a >>> liftLR (getFun f) >>> wkL' b)
-  funR = lowerLR (liftR . Fun) . wkR'
+  funL a b = popL (\ f -> a >>> liftLR (CPS (getFun f)) >>> wkL' b)
+  funR = lowerLR (liftR . Fun . runCPS) . wkR'
 
 instance SubtractionIntro (Seq r) where
   subL f = mapL getSub (tensorL (wkL' f >>> poppedL2 negateL init))

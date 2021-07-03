@@ -3,11 +3,10 @@ module Focalized.Connective.ForAll
   ForAll(..)
 ) where
 
-import Focalized.Continuation
 import Focalized.Polarity
 
 -- Universal quantification
 
-newtype ForAll r p f = ForAll { runForAll :: forall x . Polarized p x => r ••f x }
+newtype ForAll k p f = ForAll { runForAll :: forall x . Polarized p x => k (k (f x)) }
 
-instance Polarized N (ForAll r p f)
+instance Polarized N (ForAll k p f)

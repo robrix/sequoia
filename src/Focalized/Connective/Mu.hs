@@ -29,14 +29,17 @@ newtype MuF r f a = MuF { getMuF :: Down (FAlg r f a) ~~r~> a }
 
 instance (Pos (f a), Neg a) => Polarized N (MuF r f a) where
 
-mu :: ForAll r N (MuF r f) -> Mu r f
+mu :: Contrapplicative k => ForAll k N (MuF k f) -> Mu k f
 mu r = Mu (dnEFun (contramap (contramap getMuF) (runForAll r)))
 
-foldMu :: Neg a => CPS r (f a) a -> CPS r (Mu r f) a
-foldMu alg = liftCPS $ \ (Mu f) -> (appFun f (Down (Fun alg)) •)
+foldMu :: Contrapplicative k => Neg a => CPS (R k) (f a) a -> CPS (R k) (Mu k f) a
+foldMu (CPS alg) = CPS $ K . \ k (Mu f) -> exK (appFun f (Down (Fun (coerceK1 alg)))) (coerceK k)
 
-unfoldMu :: Traversable f => CPS r a (f a) -> CPS r a (Mu r f)
-unfoldMu coalg = cps $ \ a -> Mu $ liftFun' $ \ (Down (Fun alg)) -> runDN0 (appCPS (refoldCPS alg coalg) a)
+unfoldMu :: (Traversable f, Contrapplicative k) => CPS (R k) a (f a) -> CPS (R k) a (Mu k f)
+unfoldMu coalg = cps $ \ a -> Mu $ liftFun' $ \ (Down (Fun alg)) -> runDN0 (appCPS (refoldCPS (CPS (coerceK1 alg)) coalg) a)
 
 refoldMu :: (Traversable f, Neg b) => CPS r (f b) b -> CPS r a (f a) -> CPS r a b
-refoldMu f g = foldMu f Cat.<<< unfoldMu g
+refoldMu f g = foldMu' f Cat.<<< unfoldMu g
+  where
+  foldMu' :: Neg a => CPS r (f a) a -> CPS r (Mu ((•) r) f) a
+  foldMu' = foldMu
