@@ -21,6 +21,7 @@ module Focalized.Continuation
   -- * Double negation
 , type (••)
   -- ** Construction
+, dnI
 , liftDN
   -- ** Elimination
 , runDN
@@ -117,6 +118,9 @@ infixl 9 ••
 
 
 -- Construction
+
+dnI :: a -> r ••a
+dnI = K . flip (•)
 
 liftDN :: ((a -> r) -> r) -> r ••a
 liftDN = K . lmap (•)

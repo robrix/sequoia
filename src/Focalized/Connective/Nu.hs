@@ -7,12 +7,12 @@ module Focalized.Connective.Nu
 , runNu
 ) where
 
-import Focalized.CPS
 import Focalized.Connective.Down
 import Focalized.Connective.Function
-import Focalized.Polarity
 import Focalized.Connective.Quantification
 import Focalized.Connective.Tensor
+import Focalized.Continuation
+import Focalized.Polarity
 
 -- Corecursion
 
