@@ -41,16 +41,16 @@ newtype Seq k _Γ _Δ = Seq { runSeq :: k _Δ -> k _Γ }
   deriving (Cat.Category, Profunctor) via ViaCPS (Seq k)
   deriving (Applicative, Functor, Monad) via ViaCPS (Seq k) _Γ
 
-instance Continuation k => CPS' k (Seq k) where
+instance Continuation k => CPS k (Seq k) where
   inC = Seq
   exC = runSeq
 
 
-liftLR :: CPS' k c => c a b -> Seq k (a < _Γ) (_Δ > b)
+liftLR :: CPS k c => c a b -> Seq k (a < _Γ) (_Δ > b)
 liftLR = dimap exl inr . Seq . exC
 
 
-lowerLR :: CPS' k c => (c a b -> _Γ -|Seq k|- _Δ) -> a < _Γ -|Seq k|- _Δ > b -> _Γ -|Seq k|- _Δ
+lowerLR :: CPS k c => (c a b -> _Γ -|Seq k|- _Δ) -> a < _Γ -|Seq k|- _Δ > b -> _Γ -|Seq k|- _Δ
 lowerLR f p = Seq $ inK . \ k i -> exK (runSeq (f (inC (\ kb -> runSeq p (k |> kb) •<< (<| i)))) k) i
 
 

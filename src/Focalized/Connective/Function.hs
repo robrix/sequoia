@@ -34,7 +34,7 @@ liftFun' = liftFun . flip
 newtype Fun k a b = Fun { getFun :: k b -> k a }
   deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via ViaCPS (Fun k)
 
-instance Continuation k => CPS' k (Fun k) where
+instance Continuation k => CPS k (Fun k) where
   inC = Fun
   exC = getFun
 
