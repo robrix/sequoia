@@ -30,7 +30,7 @@ newtype MuF r f a = MuF { getMuF :: Down (FAlg r f a) ~~r~> a }
 instance (Pos (f a), Neg a) => Polarized N (MuF r f a) where
 
 mu :: Continuation k => ForAll k N (MuF k f) -> Mu k f
-mu r = Mu (dnEFun (contramap (contramap getMuF) (runForAll r)))
+mu r = Mu (dnE (contramap (contramap getMuF) (runForAll r)))
 
 foldMu :: CPS' k c => Neg a => f a `c` a -> Mu k f `c` a
 foldMu alg = inC $ inK . \ k (Mu f) -> exK (appFun f (Down (Fun (coerceK1 (exC alg))))) (coerceK k)

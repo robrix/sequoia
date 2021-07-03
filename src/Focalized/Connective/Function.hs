@@ -4,7 +4,6 @@ module Focalized.Connective.Function
 , appFun2
 , liftFun
 , liftFun'
-, dnEFun
 , Fun(..)
 , type (~~)
 , type (~>)
@@ -30,9 +29,6 @@ liftFun = Fun . inK1
 
 liftFun' :: Continuation k => (a -> (b -> R k) -> R k) -> (a ~~k~> b)
 liftFun' = liftFun . flip
-
-dnEFun :: Continuation k => k **(a ~~k~> b) -> (a ~~k~> b)
-dnEFun = dnE
 
 newtype Fun k a b = Fun { getFun :: k b -> k a }
   deriving (Cat.Category, Profunctor) via ViaCPS (Fun k)
