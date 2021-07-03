@@ -125,7 +125,7 @@ instance Traversing (CPS r) where
 
 
 dnE :: r ••CPS r a b -> CPS r a b
-dnE f = CPS (\ k -> K (\ a -> f • K (\ f -> runCPS f k • a)))
+dnE f = CPS (K . \ k a -> f • K (\ f -> runCPS f k • a))
 
 
 newtype CPST r a m b = CPST { runCPST :: CPS (m r) a b }
