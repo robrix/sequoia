@@ -45,20 +45,20 @@ module Focalized.Continuation
 ) where
 
 import qualified Control.Category as Cat
-import           Control.Monad (ap)
+import           Control.Monad (ap, (<=<))
 import           Data.Functor.Contravariant
 import           Data.Profunctor
 import           Focalized.Disjunction
 
 -- Continuations
 
-newtype K r a = K { runK :: a -> r }
+newtype K m r a = K { runK :: a -> m r }
 
-instance Cat.Category K where
-  id = idK
-  (.) = composeK
+instance Monad m => Cat.Category (K m) where
+  id = K pure
+  K f . K g = K (g <=< f)
 
-instance Contravariant (K r) where
+instance Contravariant (K m r) where
   contramap = contramapK
 
 
@@ -77,8 +77,8 @@ class Contravariant k => Continuation k where
   inK :: (a -> R k) -> k a
   exK :: k a        -> (a -> R k)
 
-instance Continuation (K r) where
-  type R (K r) = r
+instance Continuation (K m r) where
+  type R (K m r) = m r
 
   inK = K
   exK = runK
