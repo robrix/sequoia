@@ -177,8 +177,8 @@ instance FunctionIntro (Seq r) where
   funR = lowerLR (liftR . Fun) . wkR'
 
 instance SubtractionIntro (Seq r) where
-  subL f = mapL (fmap Negate . getSub) (tensorL (wkL' f >>> poppedL2 negateL init))
-  subR a b = mapR (Sub . fmap getNegate) (a ⊢⊗ negateR b)
+  subL f = mapL getSub (tensorL (wkL' f >>> poppedL2 negateL init))
+  subR a b = mapR Sub (a ⊢⊗ negateR b)
 
 
 -- Quantification
