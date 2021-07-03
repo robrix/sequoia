@@ -15,11 +15,13 @@ module Focalized.Continuation
 , (>>•)
 , (<<•)
 , (•>>)
+, (<••>)
 ) where
 
 import qualified Control.Category as Cat
 import           Data.Functor.Contravariant
 import           Data.Profunctor
+import           Focalized.Disjunction
 
 -- Continuations
 
@@ -80,3 +82,9 @@ f <<• k = K (f . lowerK0 k)
 k •>> f = K (f . lowerK0 k)
 
 infixr 1 <<•, •>>
+
+
+(<••>) :: Disj d => c •a -> c •b -> c •(a `d` b)
+(<••>) = liftK2 (<-->)
+
+infix 3 <••>

@@ -38,7 +38,6 @@ import Data.Functor.Adjunction
 import Data.Functor.Contravariant
 import Data.Functor.Identity
 import Data.Functor.Rep
-import Focalized.CPS
 import Focalized.Conjunction
 import Focalized.Continuation
 import Focalized.Disjunction
