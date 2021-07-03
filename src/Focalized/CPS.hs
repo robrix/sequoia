@@ -72,8 +72,8 @@ shiftCPS f = inC (evalCPS . f)
 curryCPS :: (Continuation k, CPS' c) => c k (a, b) d -> c k a (c k b d)
 curryCPS c = inC (•<< (`lmap` c) . (,))
 
-uncurryCPS :: Continuation k => CPS k a (CPS k b c) -> CPS k (a, b) c
-uncurryCPS c = CPS (\ k -> inK ((`exK` k) . uncurry (appCPS2 c)))
+uncurryCPS :: (Continuation k, CPS' c) => c k a (c k b d) -> c k (a, b) d
+uncurryCPS c = inC (\ k -> inK ((`exK` k) . uncurry (appCPS2 c)))
 
 newtype CPS k a b = CPS { runCPS :: k b -> k a }
 
