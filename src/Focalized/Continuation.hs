@@ -124,5 +124,5 @@ liftDN = K . lmap (•)
 
 -- Elimination
 
-lowerDN :: r ••a -> (a -> r) -> r
+lowerDN :: r ••a -> ((a -> r) -> r)
 lowerDN = lmap K . (•)
