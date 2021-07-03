@@ -53,7 +53,7 @@ import           Focalized.Disjunction
 
 -- Continuations
 
-newtype r •a = K { (•) :: a -> r }
+newtype r •a = K { runK :: a -> r }
 
 infixl 9 •
 
@@ -84,7 +84,7 @@ instance Continuation ((•) r) where
   type R ((•) r) = r
 
   inK = K
-  exK = (•)
+  exK = runK
 
 
 inK1 :: Continuation k => ((a -> R k) -> (b -> R k)) -> (k a -> k b)
