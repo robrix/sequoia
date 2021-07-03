@@ -28,6 +28,7 @@ module Focalized.Continuation
   -- ** Elimination
 , runDN0
 , runDN1
+, runDN2
 ) where
 
 import qualified Control.Category as Cat
@@ -142,3 +143,6 @@ runDN0 = lmap K . (•)
 
 runDN1 :: (r ••a -> r ••b) -> (((a -> r) -> r) -> ((b -> r) -> r))
 runDN1 = dimap liftDN0 runDN0
+
+runDN2 :: (r ••a -> r ••b -> r ••c) -> (((a -> r) -> r) -> ((b -> r) -> r) -> ((c -> r) -> r))
+runDN2 f a b = runDN0 (f (liftDN0 a) (liftDN0 b))
