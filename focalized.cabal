@@ -121,6 +121,7 @@ library
     Focalized.CPS
     Focalized.Disjunction
     Focalized.Functor.C
+    Focalized.Functor.I
     Focalized.Polarity
     Focalized.Printer
     Focalized.Sequent
