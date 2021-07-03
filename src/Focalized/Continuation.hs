@@ -30,7 +30,6 @@ module Focalized.Continuation
 , (>>-)
 , (-<<)
   -- * Double negation
-, type (••)
 , type (**)
   -- ** Construction
 , liftDN
@@ -170,11 +169,9 @@ infixr 1 -<<
 
 -- Double negation
 
-type r ••a = r •(r •a)
-
 type k **a = k (k a)
 
-infixl 9 ••, **
+infixl 9 **
 
 
 -- Construction
