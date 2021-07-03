@@ -164,8 +164,8 @@ liftDN2 f a b = liftDN0 (f (runDN0 a) (runDN0 b))
 
 -- Elimination
 
-runDN0 :: r ••a -> ((a -> r) -> r)
-runDN0 = lmap K . (•)
+runDN0 :: Continuation k => k (k a) -> ((a -> R k) -> R k)
+runDN0 = lmap inK . exK
 
 runDN1 :: (r ••a -> r ••b) -> (((a -> r) -> r) -> ((b -> r) -> r))
 runDN1 = dimap liftDN0 runDN0
