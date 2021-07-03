@@ -51,12 +51,12 @@ lowerDN :: r ••a -> (a -> r) -> r
 lowerDN = lmap K . (•)
 
 (>>-) :: a -> (b -> r •a) -> r •b
-(>>-) f g = K ((• f) . g)
+a >>- f = K ((• a) . f)
 
 infixl 1 >>-
 
 (-<<) :: (b -> r •a) -> (a -> r •b)
-(-<<) g f = K ((• f) . g)
+f -<< a = K ((• a) . f)
 
 infixr 1 -<<
 
