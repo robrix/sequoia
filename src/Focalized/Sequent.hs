@@ -2,7 +2,6 @@
 module Focalized.Sequent
 ( -- * Sequents
   evalSeq
-, sequent
 , dnESeq
 , Seq(..)
 , liftLR
@@ -40,9 +39,6 @@ import           Prelude hiding (init)
 evalSeq :: Continuation k => _Δ ~ R k => _Γ -|Seq k|- _Δ -> k _Γ
 evalSeq = (`runSeq` idK)
 
-sequent :: (k _Δ -> k _Γ) -> _Γ -|Seq k|- _Δ
-sequent = Seq
-
 dnESeq :: Continuation k => k **(_Γ -|Seq k|- _Δ) -> _Γ -|Seq k|- _Δ
 dnESeq = dnE
 
@@ -60,7 +56,7 @@ liftLR = dimap exl inr . Seq
 
 
 lowerLR :: Continuation k => ((k b -> k a) -> _Γ -|Seq k|- _Δ) -> a < _Γ -|Seq k|- _Δ > b -> _Γ -|Seq k|- _Δ
-lowerLR f p = sequent $ inK . \ k i -> exK (runSeq (f (\ kb -> runSeq p (k |> kb) •<< (<| i))) k) i
+lowerLR f p = Seq $ inK . \ k i -> exK (runSeq (f (\ kb -> runSeq p (k |> kb) •<< (<| i))) k) i
 
 
 -- Effectful sequents
@@ -95,14 +91,14 @@ deriving via Contextually (Seq k) instance Continuation k => Exchange (Seq k)
 -- Contextual rules
 
 instance Continuation k => Contextual (Seq k) where
-  swapΓΔ f _Δ' _Γ' = sequent (inK . \ _Δ _Γ -> exK (runSeq (f _Δ _Γ) _Δ') _Γ')
+  swapΓΔ f _Δ' _Γ' = Seq (inK . \ _Δ _Γ -> exK (runSeq (f _Δ _Γ) _Δ') _Γ')
 
 
 -- Control
 
 instance Control Seq where
-  reset s = sequent (•<< exK (evalSeq s))
-  shift p = sequent (\ k -> runSeq p (inlC k |> idK) •<< (inrC k <|))
+  reset s = Seq (•<< exK (evalSeq s))
+  shift p = Seq (\ k -> runSeq p (inlC k |> idK) •<< (inrC k <|))
 
 
 -- Negation
@@ -186,7 +182,7 @@ instance Continuation k => SubtractionIntro (Seq k) where
 
 instance Continuation k => UniversalIntro (Seq k) where
   forAllL p = mapL (notNegate . runForAll) p
-  forAllR p = sequent (inK . \ k a -> exK (inrC k) (ForAll (inK ((`exK` a) . runSeq p . (inlC k |>)))))
+  forAllR p = Seq (inK . \ k a -> exK (inrC k) (ForAll (inK ((`exK` a) . runSeq p . (inlC k |>)))))
 
 instance Continuation k => ExistentialIntro (Seq k) where
   existsL p = popL (dnESeq . runExists (pushL p))
