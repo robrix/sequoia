@@ -32,8 +32,8 @@ instance (Pos (f a), Neg a) => Polarized N (MuF r f a) where
 mu :: Continuation k => ForAll k N (MuF k f) -> Mu k f
 mu r = Mu (dnEFun (contramap (contramap getMuF) (runForAll r)))
 
-foldMu :: Continuation k => Neg a => CPS k (f a) a -> CPS k (Mu k f) a
-foldMu (CPS alg) = CPS $ inK . \ k (Mu f) -> exK (appFun f (Down (Fun (coerceK1 alg)))) (coerceK k)
+foldMu :: CPS' k c => Neg a => f a `c` a -> Mu k f `c` a
+foldMu alg = inC $ inK . \ k (Mu f) -> exK (appFun f (Down (Fun (coerceK1 (exC alg))))) (coerceK k)
 
 unfoldMu :: (Traversable f, Continuation k) => CPS k a (f a) -> CPS k a (Mu k f)
 unfoldMu coalg = cps $ \ a -> Mu $ liftFun' $ \ (Down (Fun alg)) -> runDN0 (appCPS (refoldCPS (CPS alg) coalg) a)
