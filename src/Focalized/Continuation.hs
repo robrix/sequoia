@@ -6,6 +6,10 @@ module Focalized.Continuation
 , appK1
 , appK2
 , Continuation(..)
+, inK1
+, inK2
+, exK1
+, exK2
 , Contravariant(..)
 , coerceK
 , coerceK1
@@ -67,27 +71,27 @@ class Contravariant k => Continuation k where
   type R k
 
   inK :: (a -> R k) -> k a
-  inK1 :: ((a -> R k) -> (b -> R k)) -> (k a -> k b)
-  inK2 :: ((a -> R k) -> (b -> R k) -> (c -> R k)) -> (k a -> k b -> k c)
-
-  exK :: k a -> (a -> R k)
-  exK1 :: (k a -> k b) -> ((a -> R k) -> (b -> R k))
-  exK2 :: (k a -> k b -> k c) -> ((a -> R k) -> (b -> R k) -> (c -> R k))
+  exK :: k a        -> (a -> R k)
 
 instance Continuation ((•) r) where
   type R ((•) r) = r
 
   inK = K
-
-  inK1 = dimap (•) K
-
-  inK2 f (K a) (K b) = K (f a b)
-
   exK = (•)
 
-  exK1 = dimap K (•)
 
-  exK2 f a b = exK (f (K a) (K b))
+inK1 :: Continuation k => ((a -> R k) -> (b -> R k)) -> (k a -> k b)
+inK1 = dimap exK inK
+
+inK2 :: Continuation k => ((a -> R k) -> (b -> R k) -> (c -> R k)) -> (k a -> k b -> k c)
+inK2 f a b = inK (f (exK a) (exK b))
+
+
+exK1 :: Continuation k => (k a -> k b) -> ((a -> R k) -> (b -> R k))
+exK1 = dimap inK exK
+
+exK2 :: Continuation k => (k a -> k b -> k c) -> ((a -> R k) -> (b -> R k) -> (c -> R k))
+exK2 f a b = exK (f (inK a) (inK b))
 
 
 coerceK :: (Continuation k1, Continuation k2, R k1 ~ R k2) => k1 a -> k2 a
