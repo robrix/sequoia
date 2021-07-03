@@ -122,11 +122,11 @@ idK = inK id
 
 infixr 1 •<<, >>•
 
-(<<•) :: (r -> s) -> r •a -> s •a
-f <<• k = K (f . exK k)
+(<<•) :: (Continuation j, Continuation k) => (R j -> R k) -> (j a -> k a)
+f <<• k = inK (f . exK k)
 
-(•>>) :: r •a -> (r -> s) -> s •a
-k •>> f = K (f . exK k)
+(•>>) :: (Continuation j, Continuation k) => j a -> (R j -> R k) -> k a
+k •>> f = inK (f . exK k)
 
 infixr 1 <<•, •>>
 
