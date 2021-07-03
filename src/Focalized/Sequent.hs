@@ -51,14 +51,14 @@ sequent = Seq . CPS
 dnESeq :: r ••(_Γ -|Seq r|- _Δ) -> _Γ -|Seq r|- _Δ
 dnESeq = Seq . dnE . contramap (contramap getSeq)
 
-newtype Seq r _Γ _Δ = Seq { getSeq :: _Γ -|CPS r|- _Δ }
+newtype Seq r _Γ _Δ = Seq { getSeq :: _Γ -|CPS ((•) r)|- _Δ }
   deriving (Applicative, Cat.Category, Functor, Monad, Profunctor)
 
-liftLR :: CPS r a b -> Seq r (a < _Γ) (_Δ > b)
+liftLR :: CPS ((•) r) a b -> Seq r (a < _Γ) (_Δ > b)
 liftLR = Seq . dimap exl inr
 
 
-lowerLR :: (a -|CPS r|- b -> _Γ -|Seq r|- _Δ) -> a < _Γ -|Seq r|- _Δ > b -> _Γ -|Seq r|- _Δ
+lowerLR :: (a -|CPS ((•) r)|- b -> _Γ -|Seq r|- _Δ) -> a < _Γ -|Seq r|- _Δ > b -> _Γ -|Seq r|- _Δ
 lowerLR f p = sequent $ K . \ k i -> runSeq (f (CPS (\ kb -> runSeq p (k |> kb) •<< (<| i)))) k • i
 
 
