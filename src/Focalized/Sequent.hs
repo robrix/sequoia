@@ -1,8 +1,7 @@
 {-# LANGUAGE TypeFamilies #-}
 module Focalized.Sequent
 ( -- * Sequents
-  runSeq
-, evalSeq
+  evalSeq
 , sequent
 , dnESeq
 , Seq(..)
@@ -16,7 +15,6 @@ module Focalized.Sequent
 import           Control.Applicative (liftA2)
 import qualified Control.Category as Cat
 import           Control.Monad.Trans.Class
-import           Data.Functor.Contravariant
 import           Data.Profunctor
 import           Focalized.CPS
 import           Focalized.Calculus.Additive
@@ -39,23 +37,26 @@ import           Prelude hiding (init)
 
 -- Sequents
 
-runSeq :: _Γ -|Seq k|- _Δ -> (k _Δ -> k _Γ)
-runSeq = runCPS . getSeq
-
 evalSeq :: Continuation k => _Δ ~ R k => _Γ -|Seq k|- _Δ -> k _Γ
 evalSeq = (`runSeq` idK)
 
 sequent :: (k _Δ -> k _Γ) -> _Γ -|Seq k|- _Δ
-sequent = Seq . CPS
+sequent = Seq
 
 dnESeq :: Continuation k => k (k (_Γ -|Seq k|- _Δ)) -> _Γ -|Seq k|- _Δ
-dnESeq = Seq . dnE . contramap (contramap getSeq)
+dnESeq = dnE
 
-newtype Seq k _Γ _Δ = Seq { getSeq :: _Γ -|CPS k|- _Δ }
-  deriving (Applicative, Cat.Category, Functor, Monad, Profunctor)
+newtype Seq k _Γ _Δ = Seq { runSeq :: k _Δ -> k _Γ }
+  deriving (Cat.Category, Profunctor) via ViaCPS (Seq k)
+  deriving (Applicative, Functor, Monad) via ViaCPS (Seq k) _Γ
+
+instance Continuation k => CPS' k (Seq k) where
+  inC = Seq
+  exC = runSeq
+
 
 liftLR :: Continuation k => CPS k a b -> Seq k (a < _Γ) (_Δ > b)
-liftLR = Seq . dimap exl inr
+liftLR = Seq . runCPS . dimap exl inr
 
 
 lowerLR :: Continuation k => (a -|CPS k|- b -> _Γ -|Seq k|- _Δ) -> a < _Γ -|Seq k|- _Δ > b -> _Γ -|Seq k|- _Δ
@@ -71,7 +72,7 @@ newtype SeqT r _Γ m _Δ = SeqT { getSeqT :: Seq ((•) (m r)) _Γ _Δ }
   deriving (Applicative, Functor, Monad)
 
 instance MonadTrans (SeqT r _Γ) where
-  lift m = SeqT (Seq (CPS (inK1 (const . (m >>=)))))
+  lift m = SeqT (Seq (inK1 (const . (m >>=))))
 
 
 -- Core rules
