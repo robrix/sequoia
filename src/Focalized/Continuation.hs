@@ -102,7 +102,7 @@ k •>> f = K (f . runK0 k)
 infixr 1 <<•, •>>
 
 
-(<••>) :: Disj d => c •a -> c •b -> c •(a `d` b)
+(<••>) :: (Disj d, Contrapplicative c k) => k a -> k b -> k (a `d` b)
 (<••>) = liftK2 (<-->)
 
 infix 3 <••>
