@@ -1,8 +1,6 @@
 module Focalized.CPS
 ( -- * Continuations
-  liftK
-, lowerK
-, liftK2
+  liftK2
 , runK
 , (<••>)
 , type (••)
@@ -46,12 +44,6 @@ import           Focalized.Continuation
 import           Focalized.Disjunction
 
 -- Continuations
-
-liftK :: ((a -> r) -> (b -> r)) -> (r •a -> r •b)
-liftK = dimap (•) K
-
-lowerK :: (r •a -> r •b) -> ((a -> r) -> (b -> r))
-lowerK = dimap K (•)
 
 liftK2 :: ((a -> r) -> (b -> r) -> (c -> r)) -> (r •a -> r •b -> r •c)
 liftK2 f (K a) (K b) = K (f a b)

@@ -12,6 +12,7 @@ module Focalized.Connective.Function
 
 import Data.Functor.Contravariant
 import Focalized.CPS
+import Focalized.Continuation
 import Focalized.Polarity
 
 -- Implication

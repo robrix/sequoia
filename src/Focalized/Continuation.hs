@@ -1,6 +1,10 @@
 module Focalized.Continuation
 ( -- * Continuations
   type (•)(..)
+  -- ** Construction
+, liftK
+  -- ** Elimination
+, lowerK
   -- ** Composition
 , idK
 , (•<<)
@@ -11,6 +15,7 @@ module Focalized.Continuation
 
 import qualified Control.Category as Cat
 import           Data.Functor.Contravariant
+import           Data.Profunctor
 
 -- Continuations
 
@@ -24,6 +29,18 @@ instance Cat.Category (•) where
 
 instance Contravariant ((•) r) where
   contramap f = K . (. f) . (•)
+
+
+-- Construction
+
+liftK :: ((a -> r) -> (b -> r)) -> (r •a -> r •b)
+liftK = dimap (•) K
+
+
+-- Elimination
+
+lowerK :: (r •a -> r •b) -> ((a -> r) -> (b -> r))
+lowerK = dimap K (•)
 
 
 -- Composition
