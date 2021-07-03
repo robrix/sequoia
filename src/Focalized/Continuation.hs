@@ -148,8 +148,8 @@ infixl 9 ••
 
 -- Construction
 
-liftDN :: a -> r ••a
-liftDN = K . flip (•)
+liftDN :: Contrapplicative k => a -> k (k a)
+liftDN = inK . flip exK
 
 liftDN0 :: ((a -> r) -> r) -> r ••a
 liftDN0 = K . lmap (•)
