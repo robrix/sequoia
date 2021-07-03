@@ -1,9 +1,12 @@
 module Focalized.Continuation
-( type (•)(..)
+( -- * Continuations
+  type (•)(..)
 ) where
 
 import qualified Control.Category as Cat
 import           Data.Functor.Contravariant
+
+-- Continuations
 
 newtype r •a = K { (•) :: a -> r }
 
