@@ -43,7 +43,7 @@ evalSeq = (`runSeq` idK)
 sequent :: (k _Δ -> k _Γ) -> _Γ -|Seq k|- _Δ
 sequent = Seq
 
-dnESeq :: Continuation k => k (k (_Γ -|Seq k|- _Δ)) -> _Γ -|Seq k|- _Δ
+dnESeq :: Continuation k => k **(_Γ -|Seq k|- _Δ) -> _Γ -|Seq k|- _Δ
 dnESeq = dnE
 
 newtype Seq k _Γ _Δ = Seq { runSeq :: k _Δ -> k _Γ }
