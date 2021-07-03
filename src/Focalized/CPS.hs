@@ -66,8 +66,8 @@ refoldCPS f g = go where go = f Cat.<<< traverse' go Cat.<<< g
 resetCPS :: (CPS' c, Continuation j, Continuation k) => c k i (R k) -> c j i (R k)
 resetCPS c = inC (inK . \ k -> exK k . exK (evalCPS c))
 
-shiftCPS :: Continuation k => (k o -> CPS k i (R k)) -> CPS k i o
-shiftCPS f = CPS (evalCPS . f)
+shiftCPS :: (Continuation k, CPS' c) => (k o -> c k i (R k)) -> c k i o
+shiftCPS f = inC (evalCPS . f)
 
 curryCPS :: Continuation k => CPS k (a, b) c -> CPS k a (CPS k b c)
 curryCPS c = CPS (•<< (`lmap` c) . (,))
