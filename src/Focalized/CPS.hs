@@ -85,7 +85,7 @@ instance Contravariant k => Functor (CPS k a) where
   fmap f r = inC (exC r . contramap f)
 
 instance Continuation k => Applicative (CPS k a) where
-  pure a = inC (inK . const . (`exK` a))
+  pure a = inC (•<< const a)
   (<*>) = ap
 
 instance Continuation k => Monad (CPS k a) where
