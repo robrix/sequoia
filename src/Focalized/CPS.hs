@@ -45,8 +45,8 @@ contToCPS f = liftCPS (exK . runCont . f)
 cpsToCont :: Continuation k => CPS k a b -> (a -> Cont k b)
 cpsToCont c a = Cont (appCPS c a)
 
-appCPS :: Continuation k => CPS k a b -> a -> k (k b)
-appCPS c a = inK $ \ k -> exK (runCPS c k) a
+appCPS :: (Continuation k, CPS' c) => c k a b -> a -> k (k b)
+appCPS c a = inK $ \ k -> exK (exC c k) a
 
 appCPS2 :: Continuation k => CPS k a (CPS k b c) -> a -> b -> k (k c)
 appCPS2 c = appK2 (runCPS (runCPS <$> c))
