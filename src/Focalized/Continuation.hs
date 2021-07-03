@@ -1,7 +1,7 @@
 {-# LANGUAGE TypeFamilies #-}
 module Focalized.Continuation
 ( -- * Continuations
-  type (•)(..)
+  K(..)
   -- ** Application
 , appK1
 , appK2
@@ -52,15 +52,13 @@ import           Focalized.Disjunction
 
 -- Continuations
 
-newtype r •a = K { runK :: a -> r }
+newtype K r a = K { runK :: a -> r }
 
-infixl 9 •
-
-instance Cat.Category (•) where
+instance Cat.Category K where
   id = idK
   (.) = composeK
 
-instance Contravariant ((•) r) where
+instance Contravariant (K r) where
   contramap = contramapK
 
 
@@ -79,8 +77,8 @@ class Contravariant k => Continuation k where
   inK :: (a -> R k) -> k a
   exK :: k a        -> (a -> R k)
 
-instance Continuation ((•) r) where
-  type R ((•) r) = r
+instance Continuation (K r) where
+  type R (K r) = r
 
   inK = K
   exK = runK
