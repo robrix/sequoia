@@ -77,8 +77,8 @@ instance Continuation k => ArrowApply (CPS k) where
   app = applyCPS
 
 
-dnE :: Continuation k => k (k (CPS k a b)) -> CPS k a b
-dnE f = CPS (inK . \ k a -> exK f (inK (\ f -> exK (runCPS f k) a)))
+dnE :: CPS' k c => k (k (c a b)) -> c a b
+dnE f = inC (inK . \ k a -> exK f (inK (\ f -> exK (exC f k) a)))
 
 refoldCPS :: (Cat.Category c, Traversing c, Traversable f) => f b `c` b -> a `c` f a -> a `c` b
 refoldCPS f g = go where go = f Cat.<<< traverse' go Cat.<<< g
