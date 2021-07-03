@@ -29,9 +29,12 @@ module Focalized.Continuation
 , runDN0
 , runDN1
 , runDN2
+  -- * Cont monad
+, Cont(..)
 ) where
 
 import qualified Control.Category as Cat
+import           Control.Monad (ap)
 import           Data.Functor.Contravariant
 import           Data.Profunctor
 import           Focalized.Disjunction
@@ -146,3 +149,18 @@ runDN1 = dimap liftDN0 runDN0
 
 runDN2 :: (r ••a -> r ••b -> r ••c) -> (((a -> r) -> r) -> ((b -> r) -> r) -> ((c -> r) -> r))
 runDN2 f a b = runDN0 (f (liftDN0 a) (liftDN0 b))
+
+
+-- Cont monad
+
+newtype Cont r a = Cont { runCont :: r ••a }
+
+instance Functor (Cont r) where
+  fmap f = Cont . contramap (contramap f) . runCont
+
+instance Applicative (Cont r) where
+  pure = Cont . K . flip (•)
+  (<*>) = ap
+
+instance Monad (Cont r) where
+  Cont m >>= f = Cont (K (\ k -> m • K (\ a -> runCont (f a) • k)))

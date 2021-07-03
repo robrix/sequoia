@@ -133,16 +133,3 @@ newtype CPST r a m b = CPST { runCPST :: CPS (m r) a b }
 
 instance MonadTrans (CPST r i) where
   lift m = CPST (CPS (liftK1 (const . (m >>=))))
-
-
-newtype Cont r a = Cont { runCont :: r ••a }
-
-instance Functor (Cont r) where
-  fmap f = Cont . contramap (contramap f) . runCont
-
-instance Applicative (Cont r) where
-  pure = Cont . K . flip (•)
-  (<*>) = ap
-
-instance Monad (Cont r) where
-  Cont m >>= f = Cont (K (\ k -> m • K (\ a -> runCont (f a) • k)))
