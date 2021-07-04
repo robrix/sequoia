@@ -247,7 +247,7 @@ instance Representable k => Applicative ((••) k) where
   (<*>) = ap
 
 instance Representable k => Monad ((••) k) where
-  Cont m >>= f = Cont (m •<< inK . \ k a -> exK (runCont (f a)) k)
+  Cont m >>= f = Cont (m •<< inK . \ k a -> runCont (f a) • k)
 
 
 inCont :: Representable k => ContFn k a -> k ••a
