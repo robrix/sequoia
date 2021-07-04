@@ -19,10 +19,16 @@ module Sequoia.Signal
 , dnKm
   -- Self-adjunction
 , Self(..)
+  -- Maps
+, mapKSol
+, mapKSrc
+, mapKSnk
+, mapKSig
 ) where
 
 import Data.Distributive
 import Data.Functor.Contravariant.Adjunction
+import Data.Profunctor
 import Sequoia.Calculus.Context
 import Sequoia.Continuation
 
@@ -147,3 +153,18 @@ instance Distributive k => Distributive (Self k) where
 instance Representable k => Adjunction (Self k) (Self k) where
   leftAdjunct  = fmap inK . (. flip exK) . flip (.)
   rightAdjunct = fmap inK . (. flip exK) . flip (.)
+
+
+-- Maps
+
+mapKSol :: (forall x . k' x -> k x) -> (forall x . k x -> k' x) -> (Sol k -> Sol k')
+mapKSol f g (Sol r) = Sol (dimap f g r)
+
+mapKSrc :: Contravariant k => (forall x . k' x -> k x) -> (forall x . k x -> k' x) -> (Src k b -> Src k' b)
+mapKSrc f g (Src r) = Src (g (contramap f r))
+
+mapKSnk :: Contravariant k => (forall x . k' x -> k x) -> (forall x . k x -> k' x) -> (Snk k a -> Snk k' a)
+mapKSnk f g (Snk r) = Snk (g . contramap f . r)
+
+mapKSig :: (forall x . k' x -> k x) -> (forall x . k x -> k' x) -> (Sig k a b -> Sig k' a b)
+mapKSig f g (Sig r) = Sig (dimap f g r)
