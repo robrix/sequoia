@@ -16,13 +16,14 @@ module Sequoia.Connective.Negation
 import Data.Functor.Contravariant
 import Sequoia.Connective.Negate
 import Sequoia.Connective.Not
+import Sequoia.Continuation
 
 -- Negative double negation
 
-notNegate :: Contravariant k => k (k a) -> k ¬-a
+notNegate :: Contravariant k => k **a -> k ¬-a
 notNegate = Not . contramap getNegate
 
-getNotNegate :: Contravariant k => k ¬-a -> k (k a)
+getNotNegate :: Contravariant k => k ¬-a -> k **a
 getNotNegate = contramap Negate . getNot
 
 
@@ -33,10 +34,10 @@ infixr 9 ¬-
 
 -- Positive double negation
 
-negateNot :: Contravariant k => k (k a) -> k -¬a
+negateNot :: Contravariant k => k **a -> k -¬a
 negateNot = Negate . contramap getNot
 
-getNegateNot :: Contravariant k => k -¬a -> k (k a)
+getNegateNot :: Contravariant k => k -¬a -> k **a
 getNegateNot = contramap Not . getNegate
 
 
