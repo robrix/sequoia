@@ -12,7 +12,6 @@ module Sequoia.CPS
 , liftCPS
 , contToCPS
   -- ** Elimination
-, cpsToCont
 , appCPS
 , appCPS2
 , pappCPS
@@ -55,6 +54,8 @@ module Sequoia.CPS
 , dimapCPS
 , lmapCPS
 , rmapCPS
+  -- ** Sieve
+, sieveCPS
   -- ** Deriving
 , ViaCPS(..)
 ) where
@@ -103,9 +104,6 @@ contToCPS f = liftCPS (exK . runCont . f)
 
 
 -- Elimination
-
-cpsToCont :: CPS k c => a `c` b -> (a -> k ••b)
-cpsToCont c a = Cont (appCPS c a)
 
 appCPS :: CPS k c => a `c` b -> a -> k **b
 appCPS c a = inK $ \ k -> exK (exC c k) a
@@ -234,6 +232,12 @@ rmapCPS :: CPS k c => (b -> b') -> (c a b -> c a b')
 rmapCPS = (id `dimapCPS`)
 
 
+-- Sieve
+
+sieveCPS :: CPS k c => a `c` b -> (a -> k ••b)
+sieveCPS = fmap Cont . appCPS
+
+
 -- Deriving
 
 newtype ViaCPS c (k :: Type -> Type) a b = ViaCPS { runViaCPS :: c a b }
@@ -290,3 +294,6 @@ instance CPS k c => Profunctor (ViaCPS c k) where
   lmap = lmapCPS
 
   rmap = rmapCPS
+
+instance CPS k c => Sieve (ViaCPS c k) ((••) k) where
+  sieve = sieveCPS
