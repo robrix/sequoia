@@ -10,18 +10,6 @@ module Sequoia.Signal
 , srcSig
 , snkSig
 , solSig
-, type (<->)(..)
-, (<->)
-, exBl
-, exBr
-, (~>)
-, (<~)
-, inv
-, coerced
-, coercedTo
-, coercedFrom
-, adjuncted
-, constant
 , dnKm
   -- Self-adjunction
 , self
@@ -33,14 +21,13 @@ module Sequoia.Signal
 , mapKSig
 ) where
 
-import           Control.Category ((<<<))
-import qualified Control.Category as Cat
-import           Data.Coerce
-import           Data.Distributive
-import           Data.Functor.Contravariant.Adjunction hiding (adjuncted)
-import           Data.Profunctor
-import           Sequoia.Calculus.Context
-import           Sequoia.Continuation
+import Control.Category ((<<<))
+import Data.Distributive
+import Data.Functor.Contravariant.Adjunction hiding (adjuncted)
+import Data.Profunctor
+import Sequoia.Bijection
+import Sequoia.Calculus.Context
+import Sequoia.Continuation
 
 -- Signals
 
@@ -71,7 +58,7 @@ solSrc
   =>      Sol k
            <->
           Src k |- Δ
-solSrc = coercedTo Src <<< constant Γ <<< adjuncted <<< coercedFrom Sol
+solSrc = coercedTo Src <<< constant Γ <<< contraadjuncted <<< coercedFrom Sol
 
 
 solSnk
@@ -79,7 +66,7 @@ solSnk
   =>      Sol k
            <->
      Γ -| Snk k
-solSnk = coercedTo Snk <<< adjuncted <<< coercedFrom Sol
+solSnk = coercedTo Snk <<< contraadjuncted <<< coercedFrom Sol
 
 
 srcSig
@@ -87,7 +74,7 @@ srcSig
   =>      Src k |- b
            <->
      Γ -| Sig k |- b
-srcSig = coercedTo Sig <<< adjuncted <<< inv (constant Γ) <<< coercedFrom Src
+srcSig = coercedTo Sig <<< contraadjuncted <<< inv (constant Γ) <<< coercedFrom Src
 
 
 snkSig
@@ -95,7 +82,7 @@ snkSig
   => a -| Snk k
            <->
      a -| Sig k |- Δ
-snkSig = coercedTo Sig <<< adjuncted <<< coercedFrom Snk
+snkSig = coercedTo Sig <<< contraadjuncted <<< coercedFrom Snk
 
 
 solSig
@@ -114,53 +101,6 @@ solSig = coerced
   Snk ---> Sig
        o
 -}
-
-
-newtype a <-> b = Bij { runBij :: forall r . ((a -> b) -> (b -> a) -> r) -> r }
-
-infix 1 <->
-
-instance Cat.Category (<->) where
-  id = id <-> id
-  f . g = (exBl f . exBl g) <-> (exBr g . exBr f)
-
-(<->) :: (a -> b) -> (b -> a) -> a <-> b
-l <-> r = Bij (\ f -> f l r)
-
-exBl :: a <-> b -> (a -> b)
-exBl b = runBij b const
-
-exBr :: a <-> b -> (b -> a)
-exBr b = runBij b (const id)
-
-(<~) :: a <-> b -> (a -> b)
-(<~) = exBl
-
-infixr 9 <~
-
-(~>) :: b -> a <-> b -> a
-b ~> x = exBr x b
-
-infixl 9 ~>
-
-inv :: a <-> b -> b <-> a
-inv b = (~> b) <-> (b <~)
-
-
-coerced :: Coercible a b => a <-> b
-coerced = coerce <-> coerce
-
-coercedTo   :: Coercible a b => (a -> b) -> a <-> b
-coercedTo   = (<-> coerce)
-
-coercedFrom :: Coercible a b => (b -> a) -> a <-> b
-coercedFrom = (coerce <->)
-
-adjuncted :: Adjunction f u => (a -> f b) <-> (b -> u a)
-adjuncted = leftAdjunct <-> rightAdjunct
-
-constant :: a -> (a -> b) <-> b
-constant a = ($ a) <-> const
 
 
 -- | Witness of the adjunction between the double negation and continuation morphism representations of functions in CPS.
