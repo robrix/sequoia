@@ -23,6 +23,8 @@ module Sequoia.Bijection
   -- ** Adjunction
 , adjuncted
 , contraadjuncted
+  -- ** Functor
+, fmapping
 ) where
 
 import           Control.Applicative (Alternative)
@@ -116,3 +118,9 @@ adjuncted = Co.leftAdjunct <-> Co.rightAdjunct
 
 contraadjuncted :: Contra.Adjunction f u => (a -> f b) <-> (b -> u a)
 contraadjuncted = Contra.leftAdjunct <-> Contra.rightAdjunct
+
+
+-- Functor
+
+fmapping :: Functor f => (a <-> a') -> f a <-> f a'
+fmapping a = fmap (exBl a) <-> fmap (exBr a)
