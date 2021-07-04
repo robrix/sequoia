@@ -68,6 +68,9 @@ instance Cat.Category (Sig k) where
   id = Sig id
   (.) = dimap2 runSig runSig Sig (flip (.))
 
+instance Contravariant k => Profunctor (Sig k) where
+  dimap f g = Sig . dimap (contramap g) (contramap f) . runSig
+
 instance Contravariant k => Functor (Sig k a) where
   fmap f = Sig . lmap (contramap f) . runSig
 
