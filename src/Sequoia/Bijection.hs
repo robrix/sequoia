@@ -15,6 +15,7 @@ module Sequoia.Bijection
 , curried
 , uncurried
 , swapped
+, non
   -- ** Coercion
 , coerced
 , coercedFrom
@@ -23,9 +24,12 @@ module Sequoia.Bijection
 , contraadjuncted
 ) where
 
+import           Control.Applicative (Alternative)
 import qualified Control.Category as Cat
+import           Control.Monad (guard)
 import           Data.Coerce
 import qualified Data.Functor.Contravariant.Adjunction as Contra
+import           Data.Maybe (fromMaybe)
 import           Data.Tuple (swap)
 
 -- Bijections
@@ -83,6 +87,12 @@ uncurried = uncurry <-> curry
 
 swapped :: (a, b) <-> (b, a)
 swapped = swap <-> swap
+
+non :: Eq a => a -> Maybe a <-> a
+non a = fromMaybe a <-> select (/= a)
+
+select :: Alternative f => (a -> Bool) -> (a -> f a)
+select p a = a <$ guard (p a)
 
 
 -- Coercion
