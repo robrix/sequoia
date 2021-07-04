@@ -34,10 +34,10 @@ import           Sequoia.Continuation
 
 -- Signals
 
-newtype Sol k     = Sol { runSol :: k Δ -> k Γ }
+newtype Sol k     = Sol { runSol :: Sig k Γ Δ }
 
 mapKSol :: (forall x . k x <-> k' x) -> (Sol k -> Sol k')
-mapKSol b = Sol . (~> dimapping b b) . runSol
+mapKSol b = Sol . mapKSig b . runSol
 
 
 newtype Src k   b = Src { runSrc :: Sig k Γ b }
@@ -82,21 +82,21 @@ solSrc
   ::      Sol k
            <->
           Src k |- Δ
-solSrc = coercedTo Src <<< solSig
+solSrc = coerced
 
 
 solSnk
   ::      Sol k
            <->
      Γ -| Snk k
-solSnk = coercedTo Snk <<< solSig
+solSnk = coerced
 
 
 srcSig
   ::      Src k |- b
            <->
      Γ -| Sig k |- b
-srcSig = coercedFrom Src
+srcSig = coerced
 
 composeSrcSig :: Src k a -> Sig k a b -> Src k b
 composeSrcSig src sig = srcSig <~ (sig <<< src ~> srcSig)
@@ -106,7 +106,7 @@ snkSig
   :: a -| Snk k
            <->
      a -| Sig k |- Δ
-snkSig = coercedFrom Snk
+snkSig = coerced
 
 composeSigSnk :: Sig k a b -> Snk k b -> Snk k a
 composeSigSnk sig snk = snkSig <~ (snk ~> snkSig <<< sig)
