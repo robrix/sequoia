@@ -26,11 +26,14 @@ module Sequoia.Bijection
   -- ** Functor
 , fmapping
 , contramapping
+  -- ** Bifunctor
+, bimapping
 ) where
 
 import           Control.Applicative (Alternative)
 import qualified Control.Category as Cat
 import           Control.Monad (guard)
+import           Data.Bifunctor
 import           Data.Coerce
 import qualified Data.Functor.Adjunction as Co
 import           Data.Functor.Contravariant
@@ -129,3 +132,9 @@ fmapping a = fmap (exBl a) <-> fmap (exBr a)
 
 contramapping :: Contravariant f => (a <-> a') -> f a <-> f a'
 contramapping a = contramap (exBr a) <-> contramap (exBl a)
+
+
+-- Bifunctor
+
+bimapping :: Bifunctor p => (a <-> a') -> (b <-> b') -> (a `p` b) <-> (a' `p` b')
+bimapping a b = bimap (exBl a) (exBl b) <-> bimap (exBr a) (exBr b)
