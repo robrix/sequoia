@@ -25,6 +25,7 @@ module Sequoia.Bijection
 , contraadjuncted
   -- ** Functor
 , fmapping
+, contramapping
 ) where
 
 import           Control.Applicative (Alternative)
@@ -32,6 +33,7 @@ import qualified Control.Category as Cat
 import           Control.Monad (guard)
 import           Data.Coerce
 import qualified Data.Functor.Adjunction as Co
+import           Data.Functor.Contravariant
 import qualified Data.Functor.Contravariant.Adjunction as Contra
 import           Data.Maybe (fromMaybe)
 import           Data.Tuple (swap)
@@ -124,3 +126,6 @@ contraadjuncted = Contra.leftAdjunct <-> Contra.rightAdjunct
 
 fmapping :: Functor f => (a <-> a') -> f a <-> f a'
 fmapping a = fmap (exBl a) <-> fmap (exBr a)
+
+contramapping :: Contravariant f => (a <-> a') -> f a <-> f a'
+contramapping a = contramap (exBr a) <-> contramap (exBl a)
