@@ -15,7 +15,6 @@ module Sequoia.Signal
 , srcSig
 , snkSig
 , solSig
-, dnKm
   -- Self-adjunction
 , self
 , Self(..)
@@ -114,11 +113,6 @@ solSig = coerced
   Snk ---> Sig
        o
 -}
-
-
--- | Witness of the adjunction between the double negation and continuation morphism representations of functions in CPS.
-dnKm :: Adjunction j k => (a -> j (k b)) <-> (k b -> k a)
-dnKm = leftAdjunct <-> rightAdjunct
 
 
 -- Self-adjunction
