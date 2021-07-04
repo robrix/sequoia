@@ -94,7 +94,7 @@ snkSig
   => a -| Snk k
            <->
      a -| Sig k |- Δ
-snkSig = (Sig . (dnKm <~) . runSnk) <-> (Snk . (~> dnKm) . runSig)
+snkSig = coercedTo Sig <<< adjuncted <<< coercedFrom Snk
 
 
 solSig
