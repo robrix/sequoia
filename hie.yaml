@@ -1,6 +1,6 @@
 cradle:
   cabal:
     - path: "./src"
-      component: "lib:focalized"
+      component: "lib:sequoia"
     - path: "./test"
       component: "test:test"
