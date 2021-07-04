@@ -16,6 +16,7 @@ module Sequoia.Signal
 , exBr
 , (~>)
 , (<~)
+, inv
 , dnKm
   -- Self-adjunction
 , self
@@ -125,6 +126,9 @@ infixl 9 ~>
 b <~ x = exBr x b
 
 infixr 9 <~
+
+inv :: a <-> b -> b <-> a
+inv b = (<~ b) <-> (b ~>)
 
 
 -- | Witness of the adjunction between the double negation and continuation morphism representations of functions in CPS.
