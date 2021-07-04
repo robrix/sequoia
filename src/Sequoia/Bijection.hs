@@ -14,6 +14,7 @@ module Sequoia.Bijection
 , flipped
 , curried
 , uncurried
+, swapped
   -- ** Coercion
 , coerced
 , coercedFrom
@@ -25,6 +26,7 @@ module Sequoia.Bijection
 import qualified Control.Category as Cat
 import           Data.Coerce
 import qualified Data.Functor.Contravariant.Adjunction as Contra
+import           Data.Tuple (swap)
 
 -- Bijections
 
@@ -78,6 +80,9 @@ curried = curry <-> uncurry
 
 uncurried :: (a -> b -> c) <-> ((a, b) -> c)
 uncurried = uncurry <-> curry
+
+swapped :: (a, b) <-> (b, a)
+swapped = swap <-> swap
 
 
 -- Coercion
