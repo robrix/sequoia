@@ -109,6 +109,7 @@ library
     Sequoia.Connective.One
     Sequoia.Connective.Par
     Sequoia.Connective.Quantification
+    Sequoia.Connective.Shift
     Sequoia.Connective.Subtraction
     Sequoia.Connective.Sum
     Sequoia.Connective.Tensor
