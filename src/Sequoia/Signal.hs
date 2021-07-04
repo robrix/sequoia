@@ -32,6 +32,7 @@ module Sequoia.Signal
 , mapKSig
 ) where
 
+import           Control.Category ((<<<))
 import qualified Control.Category as Cat
 import           Data.Coerce
 import           Data.Distributive
@@ -77,7 +78,7 @@ solSnk
   =>      Sol k
            <->
      Γ -| Snk k
-solSnk = (Snk . (~> dnKm) . runSol) <-> (Sol . (dnKm <~) . runSnk)
+solSnk = coercedTo Snk <<< adjuncted <<< coercedFrom Sol
 
 
 srcSig
