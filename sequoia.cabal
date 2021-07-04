@@ -17,7 +17,7 @@ maintainer:         rob.rix@me.com
 -- A copyright notice.
 -- copyright:
 category:           Language
--- extra-source-files: CHANGELOG.md
+extra-source-files: README.md
 
 common common
   default-language: Haskell2010
