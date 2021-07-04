@@ -95,7 +95,7 @@ solSig
   ::      Sol k
            <->
      Γ -| Sig k |- Δ
-solSig = (\ (Sol sol) -> Sig sol) <-> (\ (Sig sig) -> Sol sig)
+solSig = (Sig . runSol) <-> (Sol . runSig)
 
 
 {-
