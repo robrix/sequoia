@@ -1,4 +1,5 @@
 {-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Sequoia.CPS
 ( -- * CPS
@@ -10,7 +11,6 @@ module Sequoia.CPS
   -- ** Construction
 , cps
 , liftCPS
-, contToCPS
   -- ** Elimination
 , appCPS
 , appCPS2
@@ -56,6 +56,8 @@ module Sequoia.CPS
 , rmapCPS
   -- ** Sieve
 , sieveCPS
+  -- ** Representable
+, tabulateCPS
   -- ** Deriving
 , ViaCPS(..)
 ) where
@@ -66,6 +68,8 @@ import qualified Control.Category as Cat
 import           Data.Functor.Contravariant
 import           Data.Kind (Type)
 import           Data.Profunctor
+import qualified Data.Profunctor.Rep as Pro
+import           Data.Profunctor.Sieve
 import           Data.Profunctor.Traversing
 import           Sequoia.Continuation
 import           Sequoia.Disjunction
@@ -98,9 +102,6 @@ cps = inC . inK1 . flip (.)
 
 liftCPS :: CPS k c => (a -> k b -> Rep k) -> a `c` b
 liftCPS = inC . fmap inK . flip
-
-contToCPS :: CPS k c => (a -> k ••b) -> a `c` b
-contToCPS f = liftCPS (exK . runCont . f)
 
 
 -- Elimination
@@ -238,6 +239,12 @@ sieveCPS :: CPS k c => a `c` b -> (a -> k ••b)
 sieveCPS = fmap Cont . appCPS
 
 
+-- Representable
+
+tabulateCPS :: CPS k c => (a -> k ••b) -> a `c` b
+tabulateCPS f = liftCPS (exK . runCont . f)
+
+
 -- Deriving
 
 newtype ViaCPS c (k :: Type -> Type) a b = ViaCPS { runViaCPS :: c a b }
@@ -297,3 +304,7 @@ instance CPS k c => Profunctor (ViaCPS c k) where
 
 instance CPS k c => Sieve (ViaCPS c k) ((••) k) where
   sieve = sieveCPS
+
+instance CPS k c => Pro.Representable (ViaCPS c k) where
+  type Rep (ViaCPS c k) = (••) k
+  tabulate = tabulateCPS
