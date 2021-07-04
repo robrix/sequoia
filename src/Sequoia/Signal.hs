@@ -14,8 +14,12 @@ module Sequoia.Signal
 , inB
 , exBl
 , exBr
+  -- Self-adjunction
+, Self(..)
 ) where
 
+import Data.Distributive
+import Data.Functor.Contravariant.Adjunction
 import Sequoia.Calculus.Context
 import Sequoia.Continuation
 
@@ -112,3 +116,16 @@ instance Representable k => Applicative (Src k) where
 
 instance Representable k => Monad (Src k) where
   Src m >>= f = Src (m •<< inK . \ k -> (`exK` k) . runSrc . f)
+
+
+-- Self-adjunction
+
+newtype Self k a = Self { getSelf :: k a }
+  deriving (Contravariant, Functor, Representable)
+
+instance Distributive k => Distributive (Self k) where
+  distribute = Self . distribute . fmap getSelf
+
+instance Representable k => Adjunction (Self k) (Self k) where
+  leftAdjunct  = fmap inK . (. flip exK) . flip (.)
+  rightAdjunct = fmap inK . (. flip exK) . flip (.)
