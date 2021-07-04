@@ -37,7 +37,9 @@
 :seti -Wno-type-defaults
 :set -Wno-unused-packages
 
-:load Sequoia.Calculus test/Test.hs
+:load Sequoia.Calculus Sequoia.Sequent Sequoia.Signal test/Test.hs
 
 import Sequoia.Calculus
+import Sequoia.Sequent
+import Sequoia.Signal
 import Main
