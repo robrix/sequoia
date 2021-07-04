@@ -11,7 +11,7 @@ module Sequoia.Signal
 , snkSig
 , solSig
 , type (<->)
-, inB
+, (<->)
 , exBl
 , exBr
   -- Self-adjunction
@@ -36,7 +36,7 @@ solSrc
   =>      Sol k
            <->
           Src k |- Δ
-solSrc = inB solToSrc srcToSol
+solSrc = solToSrc <-> srcToSol
   where
   solToSrc (Sol sol) = Src (inK ((`exK` Γ) . sol))
   srcToSol (Src src) = Sol (inK1 (const . exK src . inK))
@@ -47,7 +47,7 @@ solSnk
   =>      Sol k
            <->
      Γ -| Snk k
-solSnk = inB solToSnk snkToSol
+solSnk = solToSnk <-> snkToSol
   where
   solToSnk (Sol sol) = Snk (inK . (. sol) . flip exK)
   snkToSol (Snk snk) = Sol (inK . (. snk) . flip exK)
@@ -58,7 +58,7 @@ srcSig
   =>      Src k |- b
            <->
      Γ -| Sig k |- b
-srcSig = inB srcToSig sigToSrc
+srcSig = srcToSig <-> sigToSrc
   where
   srcToSig (Src src) = Sig (inK1 (const . exK src . inK))
   sigToSrc (Sig sig) = Src (inK ((`exK` Γ) . sig))
@@ -69,7 +69,7 @@ snkSig
   => a -| Snk k
            <->
      a -| Sig k |- Δ
-snkSig = inB snkToSig sigToSnk
+snkSig = snkToSig <-> sigToSnk
   where
   snkToSig (Snk snk) = Sig (inK . (. snk) . flip exK)
   sigToSnk (Sig sig) = Snk (inK . (. sig) . flip exK)
@@ -79,7 +79,7 @@ solSig
   ::      Sol k
            <->
      Γ -| Sig k |- Δ
-solSig = inB (\ (Sol sol) -> Sig sol) (\ (Sig sig) -> Sol sig)
+solSig = (\ (Sol sol) -> Sig sol) <-> (\ (Sig sig) -> Sol sig)
 
 
 {-
@@ -97,8 +97,8 @@ type a <-> b = forall r . ((a -> b) -> (b -> a) -> r) -> r
 
 infix 1 <->
 
-inB :: (a -> b) -> (b -> a) -> a <-> b
-inB l r f = f l r
+(<->) :: (a -> b) -> (b -> a) -> a <-> b
+(l <-> r) f = f l r
 
 exBl :: a <-> b -> (a -> b)
 exBl f = f const
