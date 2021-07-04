@@ -195,7 +195,7 @@ type ContFn k a = RepFn k (RepFn k a)
 
 
 mapDN :: Contravariant j => (forall x . j x <-> k x) -> (j **a -> k **a)
-mapDN b = (b <~) . contramap (~> b)
+mapDN b = (~> b) . contramap (b <~)
 
 
 -- Construction

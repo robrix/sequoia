@@ -73,13 +73,13 @@ exBl b = runBij b const
 exBr :: a <-> b -> (b -> a)
 exBr b = runBij b (const id)
 
-(<~) :: a <-> b -> (a -> b)
-(<~) = exBl
+(<~) :: a <-> b -> (b -> a)
+(<~) = exBr
 
 infixr 9 <~
 
-(~>) :: b -> a <-> b -> a
-b ~> x = exBr x b
+(~>) :: a -> a <-> b -> b
+b ~> x = exBl x b
 
 infixl 9 ~>
 
@@ -90,7 +90,7 @@ infixl 9 ~>
 l <-> r = Bij (\ f -> f l r)
 
 inv :: a <-> b -> b <-> a
-inv b = (~> b) <-> (b <~)
+inv b = (b <~) <-> (~> b)
 
 constant :: a -> (a -> b) <-> b
 constant a = ($ a) <-> const

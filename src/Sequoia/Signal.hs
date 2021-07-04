@@ -33,7 +33,7 @@ import           Sequoia.Continuation
 newtype Sol k     = Sol { runSol :: k Δ -> k Γ }
 
 mapKSol :: (forall x . k x <-> k' x) -> (Sol k -> Sol k')
-mapKSol b = Sol . (dimapping b b <~) . runSol
+mapKSol b = Sol . (~> dimapping b b) . runSol
 
 
 newtype Src k   b = Src { runSrc :: k **b }
@@ -65,7 +65,7 @@ instance Cat.Category (Sig k) where
   (.) = dimap2 runSig runSig Sig (flip (.))
 
 mapKSig :: (forall x . k x <-> k' x) -> (Sig k a b -> Sig k' a b)
-mapKSig b = Sig . (dimapping b b <~) . runSig
+mapKSig b = Sig . (~> dimapping b b) . runSig
 
 
 -- Conversions
