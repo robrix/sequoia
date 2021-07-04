@@ -28,11 +28,12 @@ module Sequoia.Signal
 , mapKSig
 ) where
 
-import Data.Distributive
-import Data.Functor.Contravariant.Adjunction
-import Data.Profunctor
-import Sequoia.Calculus.Context
-import Sequoia.Continuation
+import qualified Control.Category as Cat
+import           Data.Distributive
+import           Data.Functor.Contravariant.Adjunction
+import           Data.Profunctor
+import           Sequoia.Calculus.Context
+import           Sequoia.Continuation
 
 -- Signals
 
@@ -95,6 +96,10 @@ solSig = (\ (Sol sol) -> Sig sol) <-> (\ (Sig sig) -> Sol sig)
 newtype a <-> b = Bij { runBij :: forall r . ((a -> b) -> (b -> a) -> r) -> r }
 
 infix 1 <->
+
+instance Cat.Category (<->) where
+  id = id <-> id
+  f . g = (exBl f . exBl g) <-> (exBr g . exBr f)
 
 (<->) :: (a -> b) -> (b -> a) -> a <-> b
 l <-> r = Bij (\ f -> f l r)
