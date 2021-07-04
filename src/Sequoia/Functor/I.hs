@@ -5,6 +5,7 @@ module Sequoia.Functor.I
 
 import Control.Applicative (liftA2)
 import Data.Coerce
+import Data.Distributive
 
 newtype I a = I { getI :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
@@ -16,3 +17,7 @@ instance Applicative I where
 
 instance Monad I where
   (>>=) = flip coerce
+
+instance Distributive I where
+  distribute = I . fmap  getI
+  collect f  = I . fmap (getI . f)
