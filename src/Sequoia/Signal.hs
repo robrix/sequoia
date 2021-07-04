@@ -18,7 +18,7 @@ import Sequoia.Continuation
 
 -- Signals
 
-newtype Sol k     = Sol { runSol :: k Δ }
+newtype Sol k     = Sol { runSol :: k Δ -> k Γ }
 newtype Src k   b = Src { runSrc :: k **b }
 newtype Snk k a   = Snk { runSnk ::        k a }
 newtype Sig k a b = Sig { runSig :: k b -> k a }
