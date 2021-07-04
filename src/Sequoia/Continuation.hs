@@ -35,6 +35,7 @@ module Sequoia.Continuation
   -- * Double negation
 , type (**)
 , ContFn
+, mapDN
   -- ** Construction
 , liftDN
 , liftDN0
@@ -56,6 +57,7 @@ import           Data.Functor.Contravariant
 import           Data.Functor.Contravariant.Adjunction
 import           Data.Functor.Contravariant.Rep
 import           Data.Profunctor
+import           Sequoia.Bijection
 import           Sequoia.Disjunction
 
 -- Continuations
@@ -190,6 +192,10 @@ infixl 9 **
 
 
 type ContFn k a = RepFn k (RepFn k a)
+
+
+mapDN :: Contravariant j => (forall x . j x <-> k x) -> (j **a -> k **a)
+mapDN b = (b <~) . contramap (~> b)
 
 
 -- Construction

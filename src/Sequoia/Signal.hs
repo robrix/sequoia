@@ -136,6 +136,3 @@ mapKSnk b = Snk . (mapDN b .) . runSnk
 
 mapKSig :: (forall x . k x <-> k' x) -> (Sig k a b -> Sig k' a b)
 mapKSig b = Sig . (dimapping b b <~) . runSig
-
-mapDN :: Contravariant j => (forall x . j x <-> k x) -> (j **a -> k **a)
-mapDN b = (b <~) . contramap (~> b)
