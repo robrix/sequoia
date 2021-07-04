@@ -71,7 +71,7 @@ solSrc
   =>      Sol k
            <->
           Src k |- Δ
-solSrc = (Src . ($ Γ) . (~> dnKm) . runSol) <-> (Sol . (dnKm <~) . const . runSrc)
+solSrc = coercedTo Src <<< constant Γ <<< adjuncted <<< coercedFrom Sol
 
 
 solSnk
