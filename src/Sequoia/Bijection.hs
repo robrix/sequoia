@@ -116,9 +116,27 @@ select p a = a <$ guard (p a)
 coerced :: Coercible a b => a <-> b
 coerced = coerce <-> coerce
 
+-- | Build a bidi coercion, taking a constructor for the type being built both to improve type inference and as documentation.
+--
+-- For example, given two newtypes @A@ and @B@ wrapping the same type, this expression:
+--
+-- @
+-- 'coercedTo' B <<< 'coercedFrom' A
+-- @
+--
+-- produces a bijection of type @A '<->' B@.
 coercedTo   :: Coercible a b => (a -> b) -> a <-> b
 coercedTo   = (<-> coerce)
 
+-- | Build a bidi coercion, taking a constructor for the type being eliminated both to improve type inference and as documentation.
+--
+-- For example, given two newtypes @A@ and @B@ wrapping the same type, this expression:
+--
+-- @
+-- 'coercedTo' B <<< 'coercedFrom' A
+-- @
+--
+-- produces a bijection of type @A '<->' B@.
 coercedFrom :: Coercible a b => (b -> a) -> a <-> b
 coercedFrom = (coerce <->)
 
