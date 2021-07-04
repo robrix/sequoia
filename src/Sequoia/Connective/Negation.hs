@@ -46,6 +46,13 @@ instance Neg a => Polarized P (k -a) where
 infixr 9 -
 
 
+instance Adjunction f u => Adjunction ((¬) f) ((-) u) where
+  unit   = Negate . leftAdjunct  getNot
+  counit = Not    . rightAdjunct getNegate
+  leftAdjunct  = (Negate .) . leftAdjunct  . (getNot    .)
+  rightAdjunct = (Not    .) . rightAdjunct . (getNegate .)
+
+
 -- Negative double negation
 
 notNegate :: Contravariant k => k **a -> k ¬-a
