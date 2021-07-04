@@ -23,8 +23,8 @@ instance (Applicative f, Applicative g) => Applicative (f · g) where
   f <*> a = C ((<*>) <$> getC f <*> getC a)
 
 instance (Distributive f, Distributive g) => Distributive (f · g) where
-  distribute r = C (distribute <$> distribute (getC     <$> r))
-  collect f  r = C (distribute <$> distribute (getC . f <$> r))
+  distribute = C . fmap distribute . distribute . fmap  getC
+  collect f  = C . fmap distribute . distribute . fmap (getC . f)
 
 instance (Representable f, Representable g) => Representable (f · g) where
   type Rep (f · g) = (Rep f, Rep g)
