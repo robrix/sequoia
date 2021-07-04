@@ -21,6 +21,7 @@ module Sequoia.Signal
 , coercedTo
 , coercedFrom
 , adjuncted
+, constant
 , dnKm
   -- Self-adjunction
 , self
@@ -157,6 +158,9 @@ coercedFrom = (coerce <->)
 
 adjuncted :: Adjunction f u => (a -> f b) <-> (b -> u a)
 adjuncted = leftAdjunct <-> rightAdjunct
+
+constant :: a -> (a -> b) <-> b
+constant a = ($ a) <-> const
 
 
 -- | Witness of the adjunction between the double negation and continuation morphism representations of functions in CPS.
