@@ -147,8 +147,8 @@ instance Distributive k => Distributive (Self k) where
   distribute = Self . distribute . fmap getSelf
 
 instance Representable k => Adjunction (Self k) (Self k) where
-  leftAdjunct  = fmap inK . (. flip exK) . flip (.)
-  rightAdjunct = fmap inK . (. flip exK) . flip (.)
+  leftAdjunct  = (-<<)
+  rightAdjunct = (-<<)
 
 
 -- Maps
