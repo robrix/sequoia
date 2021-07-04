@@ -10,7 +10,7 @@ module Sequoia.Signal
 , srcSig
 , snkSig
 , solSig
-, type (<->)
+, type (<->)(..)
 , (<->)
 , exBl
 , exBr
@@ -92,18 +92,18 @@ solSig = (\ (Sol sol) -> Sig sol) <-> (\ (Sig sig) -> Sol sig)
 -}
 
 
-type a <-> b = forall r . ((a -> b) -> (b -> a) -> r) -> r
+newtype a <-> b = Bij { runBij :: forall r . ((a -> b) -> (b -> a) -> r) -> r }
 
 infix 1 <->
 
 (<->) :: (a -> b) -> (b -> a) -> a <-> b
-(l <-> r) f = f l r
+l <-> r = Bij (\ f -> f l r)
 
 exBl :: a <-> b -> (a -> b)
-exBl f = f const
+exBl b = runBij b const
 
 exBr :: a <-> b -> (b -> a)
-exBr f = f (const id)
+exBr b = runBij b (const id)
 
 (<~) :: a <-> b -> (a -> b)
 (<~) = exBl
