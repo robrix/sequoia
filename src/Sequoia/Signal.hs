@@ -14,6 +14,8 @@ module Sequoia.Signal
 , (<->)
 , exBl
 , exBr
+, (~>)
+, (<~)
   -- Self-adjunction
 , Self(..)
 ) where
@@ -106,6 +108,15 @@ exBl f = f const
 exBr :: a <-> b -> (b -> a)
 exBr f = f (const id)
 
+(~>) :: a <-> b -> (a -> b)
+(~>) = exBl
+
+infixl 9 ~>
+
+(<~) :: b -> a <-> b -> a
+b <~ x = exBr x b
+
+infixr 9 <~
 
 instance Contravariant k => Functor (Src k) where
   fmap f = Src . contramap (contramap f) . runSrc
