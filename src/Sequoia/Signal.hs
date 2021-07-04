@@ -13,6 +13,7 @@ module Sequoia.Signal
 , solSrc
 , solSnk
 , srcSig
+, composeSrcSig
 , snkSig
 , solSig
   -- Self-adjunction
@@ -92,6 +93,9 @@ srcSig
            <->
      Γ -| Sig k |- b
 srcSig = coercedTo Sig <<< contraadjuncted <<< inv (constant Γ) <<< coercedFrom Src
+
+composeSrcSig :: Adjunction k k => Src k a -> Sig k a b -> Src k b
+composeSrcSig src sig = srcSig <~ (sig <<< src ~> srcSig)
 
 
 snkSig
