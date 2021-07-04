@@ -38,8 +38,24 @@ import           Sequoia.Continuation
 -- Signals
 
 newtype Sol k     = Sol { runSol :: k Δ -> k Γ }
+
+
 newtype Src k   b = Src { runSrc :: k **b }
+
+instance Contravariant k => Functor (Src k) where
+  fmap f = Src . contramap (contramap f) . runSrc
+
+instance Representable k => Applicative (Src k) where
+  pure a = Src (inK (`exK` a))
+  Src f <*> Src a = Src (inK (\ b -> exK f (inK (exK a . inK . (exK b .)))))
+
+instance Representable k => Monad (Src k) where
+  Src m >>= f = Src (m •<< inK . \ k -> (`exK` k) . runSrc . f)
+
+
 newtype Snk k a   = Snk { runSnk :: a -> k **Δ }
+
+
 newtype Sig k a b = Sig { runSig :: k b -> k a }
 
 
@@ -127,17 +143,6 @@ inv b = (~> b) <-> (b <~)
 -- | Witness of the adjunction between the double negation and continuation morphism representations of functions in CPS.
 dnKm :: Adjunction j k => (a -> j (k b)) <-> (k b -> k a)
 dnKm = leftAdjunct <-> rightAdjunct
-
-
-instance Contravariant k => Functor (Src k) where
-  fmap f = Src . contramap (contramap f) . runSrc
-
-instance Representable k => Applicative (Src k) where
-  pure a = Src (inK (`exK` a))
-  Src f <*> Src a = Src (inK (\ b -> exK f (inK (exK a . inK . (exK b .)))))
-
-instance Representable k => Monad (Src k) where
-  Src m >>= f = Src (m •<< inK . \ k -> (`exK` k) . runSrc . f)
 
 
 -- Self-adjunction
