@@ -68,6 +68,9 @@ instance Cat.Category (Sig k) where
   id = Sig id
   (.) = dimap2 runSig runSig Sig (flip (.))
 
+instance Contravariant k => Functor (Sig k a) where
+  fmap f = Sig . lmap (contramap f) . runSig
+
 mapKSig :: (forall x . k x <-> k' x) -> (Sig k a b -> Sig k' a b)
 mapKSig b = Sig . (~> dimapping b b) . runSig
 
