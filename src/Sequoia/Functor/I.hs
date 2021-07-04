@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeFamilies #-}
 module Sequoia.Functor.I
 ( -- Identity functor
   I(..)
@@ -6,6 +7,7 @@ module Sequoia.Functor.I
 import Control.Applicative (liftA2)
 import Data.Coerce
 import Data.Distributive
+import Data.Functor.Rep
 
 newtype I a = I { getI :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
@@ -21,3 +23,8 @@ instance Monad I where
 instance Distributive I where
   distribute = I . fmap  getI
   collect f  = I . fmap (getI . f)
+
+instance Representable I where
+  type Rep I = ()
+  tabulate = I . ($ ())
+  index = const . getI
