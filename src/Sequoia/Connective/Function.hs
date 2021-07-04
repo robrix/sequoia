@@ -32,7 +32,7 @@ liftFun' :: Representable k => (a -> (b -> Rep k) -> Rep k) -> (a ~~k~> b)
 liftFun' = liftFun . flip
 
 newtype Fun k a b = Fun { getFun :: k b -> k a }
-  deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via ViaCPS (Fun k)
+  deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via ViaCPS (Fun k) k
 
 instance Representable k => CPS k (Fun k) where
   inC = Fun

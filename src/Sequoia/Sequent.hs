@@ -38,8 +38,8 @@ evalSeq :: Representable k => _Δ ~ Rep k => _Γ -|Seq k|- _Δ -> k _Γ
 evalSeq = (`runSeq` idK)
 
 newtype Seq k _Γ _Δ = Seq { runSeq :: k _Δ -> k _Γ }
-  deriving (Cat.Category, Profunctor) via ViaCPS (Seq k)
-  deriving (Applicative, Functor, Monad) via ViaCPS (Seq k) _Γ
+  deriving (Cat.Category, Profunctor) via ViaCPS (Seq k) k
+  deriving (Applicative, Functor, Monad) via ViaCPS (Seq k) k _Γ
 
 instance Representable k => CPS k (Seq k) where
   inC = Seq

@@ -63,6 +63,7 @@ import           Control.Applicative (liftA2)
 import           Control.Arrow
 import qualified Control.Category as Cat
 import           Data.Functor.Contravariant
+import           Data.Kind (Type)
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
 import           Sequoia.Continuation
@@ -235,55 +236,55 @@ rmapCPS = (id `dimapCPS`)
 
 -- Deriving
 
-newtype ViaCPS c a b = ViaCPS { runViaCPS :: c a b }
+newtype ViaCPS c (k :: Type -> Type) a b = ViaCPS { runViaCPS :: c a b }
   deriving (CPS k)
 
-instance CPS k c => Cat.Category (ViaCPS c) where
+instance CPS k c => Cat.Category (ViaCPS c k) where
   id = idCPS
   (.) = composeCPS
 
-instance CPS k c => Functor (ViaCPS c a) where
+instance CPS k c => Functor (ViaCPS c k a) where
   fmap = fmapCPS
 
-instance CPS k c => Applicative (ViaCPS c a) where
+instance CPS k c => Applicative (ViaCPS c k a) where
   pure = pureCPS
 
   liftA2 = liftA2CPS
 
   (<*>) = apCPS
 
-instance CPS k c => Monad (ViaCPS c a) where
+instance CPS k c => Monad (ViaCPS c k a) where
   (>>=) = bindCPS
 
-instance CPS k c => Arrow (ViaCPS c) where
+instance CPS k c => Arrow (ViaCPS c k) where
   arr = arrCPS
   first = firstCPS
   second = secondCPS
   (***) = splitPrdCPS
   (&&&) = fanoutCPS
 
-instance CPS k c => ArrowChoice (ViaCPS c) where
+instance CPS k c => ArrowChoice (ViaCPS c k) where
   left = leftCPS
   right = rightCPS
   (+++) = splitSumCPS
   (|||) = faninCPS
 
-instance CPS k c => ArrowApply (ViaCPS c) where
+instance CPS k c => ArrowApply (ViaCPS c k) where
   app = applyCPS
 
-instance CPS k c => Strong (ViaCPS c) where
+instance CPS k c => Strong (ViaCPS c k) where
   first' = first
   second' = second
 
-instance CPS k c => Choice (ViaCPS c) where
+instance CPS k c => Choice (ViaCPS c k) where
   left' = left
   right' = right
 
-instance CPS k c => Traversing (ViaCPS c) where
+instance CPS k c => Traversing (ViaCPS c k) where
   traverse' = wanderCPS traverse
   wander = wanderCPS
 
-instance CPS k c => Profunctor (ViaCPS c) where
+instance CPS k c => Profunctor (ViaCPS c k) where
   dimap = dimapCPS
 
   lmap = lmapCPS
