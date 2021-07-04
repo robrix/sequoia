@@ -37,7 +37,7 @@
 :seti -Wno-type-defaults
 :set -Wno-unused-packages
 
-:load Focalized.Calculus test/Test.hs
+:load Sequoia.Calculus test/Test.hs
 
-import Focalized.Calculus
+import Sequoia.Calculus
 import Main
