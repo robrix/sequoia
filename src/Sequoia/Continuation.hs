@@ -144,7 +144,7 @@ coerceK2 = inK2 . exK2
 -- Contravariant
 
 contramapK :: Representable k => (a' -> a) -> (k a -> k a')
-contramapK = coerceKWith . lmap
+contramapK = inK1 . lmap
 
 
 -- Category
