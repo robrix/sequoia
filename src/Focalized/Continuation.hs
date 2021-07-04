@@ -52,6 +52,7 @@ module Focalized.Continuation
 import qualified Control.Category as Cat
 import           Control.Monad (ap, (<=<))
 import           Data.Functor.Contravariant
+import           Data.Functor.Contravariant.Adjunction
 import           Data.Functor.Contravariant.Rep
 import           Data.Profunctor
 import           Focalized.Disjunction
@@ -72,6 +73,12 @@ instance Representable (K m r) where
 
   tabulate = K
   index = runK
+
+instance Adjunction (K m r) (K m r) where
+  unit   = inK . flip exK
+  counit = inK . flip exK
+  leftAdjunct  = (-<<)
+  rightAdjunct = (-<<)
 
 
 -- Application
