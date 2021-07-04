@@ -18,6 +18,7 @@ module Sequoia.Signal
 , (<~)
 , inv
 , coerced
+, adjuncted
 , dnKm
   -- Self-adjunction
 , self
@@ -32,7 +33,7 @@ module Sequoia.Signal
 import qualified Control.Category as Cat
 import           Data.Coerce
 import           Data.Distributive
-import           Data.Functor.Contravariant.Adjunction
+import           Data.Functor.Contravariant.Adjunction hiding (adjuncted)
 import           Data.Profunctor
 import           Sequoia.Calculus.Context
 import           Sequoia.Continuation
@@ -144,6 +145,9 @@ inv b = (~> b) <-> (b <~)
 
 coerced :: Coercible a b => a <-> b
 coerced = coerce <-> coerce
+
+adjuncted :: Adjunction f u => (a -> f b) <-> (b -> u a)
+adjuncted = leftAdjunct <-> rightAdjunct
 
 
 -- | Witness of the adjunction between the double negation and continuation morphism representations of functions in CPS.
