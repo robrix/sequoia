@@ -13,6 +13,7 @@ module Sequoia.Continuation
 , exK
 , exK1
 , exK2
+, (•)
 , dimap2
   -- ** Coercion
 , coerceK
@@ -99,10 +100,6 @@ type RepFn k a = a -> Rep k
 inK :: Representable k => RepFn k a ->       k a
 inK = tabulate
 
-exK :: Representable k =>       k a -> RepFn k a
-exK = index
-
-
 inK1 :: Representable k => (RepFn k a -> RepFn k b) -> (k a -> k b)
 inK1 = dimap exK inK
 
@@ -110,11 +107,18 @@ inK2 :: Representable k => (RepFn k a -> RepFn k b -> RepFn k c) -> (k a -> k b 
 inK2 = dimap2 exK exK inK
 
 
+exK :: Representable k =>       k a -> RepFn k a
+exK = index
+
 exK1 :: Representable k => (k a -> k b) -> (RepFn k a -> RepFn k b)
 exK1 = dimap inK exK
 
 exK2 :: Representable k => (k a -> k b -> k c) -> (RepFn k a -> RepFn k b -> RepFn k c)
 exK2 = dimap2 inK inK exK
+
+
+(•) :: Representable k => k a -> RepFn k a
+(•) = index
 
 
 dimap2 :: (a' -> a) -> (b' -> b) -> (c -> c') -> (a -> b -> c) -> (a' -> b' -> c')
