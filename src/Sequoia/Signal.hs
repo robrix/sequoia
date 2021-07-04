@@ -43,14 +43,11 @@ newtype Sig k a b = Sig { runSig :: k b -> k a }
 
 
 solSrc
-  :: Representable k
+  :: Adjunction k k
   =>      Sol k
            <->
           Src k |- Δ
-solSrc = solToSrc <-> srcToSol
-  where
-  solToSrc (Sol sol) = Src (inK ((`exK` Γ) . sol))
-  srcToSol (Src src) = Sol (inK1 (const . exK src . inK))
+solSrc = (Src . ($ Γ) . (~> dnKm) . runSol) <-> (Sol . (dnKm <~) . const . runSrc)
 
 
 solSnk
