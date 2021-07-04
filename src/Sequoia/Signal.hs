@@ -18,6 +18,8 @@ module Sequoia.Signal
 , (<~)
 , inv
 , coerced
+, coercedTo
+, coercedFrom
 , adjuncted
 , dnKm
   -- Self-adjunction
@@ -145,6 +147,12 @@ inv b = (~> b) <-> (b <~)
 
 coerced :: Coercible a b => a <-> b
 coerced = coerce <-> coerce
+
+coercedTo   :: Coercible a b => (a -> b) -> a <-> b
+coercedTo   = (<-> coerce)
+
+coercedFrom :: Coercible a b => (b -> a) -> a <-> b
+coercedFrom = (coerce <->)
 
 adjuncted :: Adjunction f u => (a -> f b) <-> (b -> u a)
 adjuncted = leftAdjunct <-> rightAdjunct
