@@ -71,6 +71,10 @@ instance Cat.Category (Sig k) where
 instance Contravariant k => Functor (Sig k a) where
   fmap f = Sig . lmap (contramap f) . runSig
 
+instance Representable k => Applicative (Sig k a) where
+  pure a = Sig (•<< const a)
+  Sig f <*> Sig a = Sig (inK1 (\ k a' -> exK (f (inK (\ f -> exK (a (inK (k . f))) a'))) a'))
+
 mapKSig :: (forall x . k x <-> k' x) -> (Sig k a b -> Sig k' a b)
 mapKSig b = Sig . (~> dimapping b b) . runSig
 
