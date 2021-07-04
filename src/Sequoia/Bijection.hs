@@ -30,6 +30,8 @@ module Sequoia.Bijection
 , bimapping
 , firsting
 , seconding
+  -- ** Profunctor
+, dimapping
 ) where
 
 import           Control.Applicative (Alternative)
@@ -41,6 +43,7 @@ import qualified Data.Functor.Adjunction as Co
 import           Data.Functor.Contravariant
 import qualified Data.Functor.Contravariant.Adjunction as Contra
 import           Data.Maybe (fromMaybe)
+import           Data.Profunctor
 import           Data.Tuple (swap)
 
 -- Bijections
@@ -146,3 +149,9 @@ firsting a = first (exBl a) <-> first (exBr a)
 
 seconding :: Bifunctor p => (b <-> b') -> (a `p` b) <-> (a `p` b')
 seconding b = second (exBl b) <-> second (exBr b)
+
+
+-- Profunctor
+
+dimapping :: Profunctor p => (a <-> a') -> (b <-> b') -> (a `p` b) <-> (a' `p` b')
+dimapping a b = dimap (exBr a) (exBl b) <-> dimap (exBl a) (exBr b)
