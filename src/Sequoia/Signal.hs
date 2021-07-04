@@ -9,6 +9,7 @@ module Sequoia.Signal
 , solSnk
 , srcSig
 , snkSig
+, solSig
 , type (<->)
 , inB
 , exBl
@@ -68,6 +69,14 @@ snkSig = inB snkToSig sigToSnk
   where
   snkToSig (Snk snk) = Sig (inK1 (const (exK snk)))
   sigToSnk (Sig sig) = Snk (inK (exK (sig (inK absurdΔ))))
+
+
+solSig
+  ::      Sol k
+           <->
+     Γ -| Sig k |- Δ
+solSig = inB (\ (Sol sol) -> Sig sol) (\ (Sig sig) -> Sol sig)
+
 
 {-
        o
