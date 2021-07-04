@@ -3,6 +3,7 @@ module Focalized.Functor.C
 ( type(·)(..)
 ) where
 
+import Data.Distributive
 import Focalized.Polarity
 
 newtype (f · g) a = C { getC :: f (g a) }
@@ -17,3 +18,7 @@ instance Polarized p (f (g a)) => Polarized p ((f · g) a) where
 instance (Applicative f, Applicative g) => Applicative (f · g) where
   pure = C . pure . pure
   f <*> a = C ((<*>) <$> getC f <*> getC a)
+
+instance (Distributive f, Distributive g) => Distributive (f · g) where
+  distribute r = C (distribute <$> distribute (getC <$> r))
+  collect f r = C (distribute <$> distribute (getC . f <$> r))
