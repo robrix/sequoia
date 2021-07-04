@@ -28,6 +28,7 @@ module Sequoia.Bijection
 , contramapping
   -- ** Bifunctor
 , bimapping
+, firsting
 ) where
 
 import           Control.Applicative (Alternative)
@@ -138,3 +139,6 @@ contramapping a = contramap (exBr a) <-> contramap (exBl a)
 
 bimapping :: Bifunctor p => (a <-> a') -> (b <-> b') -> (a `p` b) <-> (a' `p` b')
 bimapping a b = bimap (exBl a) (exBl b) <-> bimap (exBr a) (exBr b)
+
+firsting :: Bifunctor p => (a <-> a') -> (a `p` b) <-> (a' `p` b)
+firsting a = first (exBl a) <-> first (exBr a)
