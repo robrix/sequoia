@@ -6,6 +6,7 @@ module Sequoia.Bijection
 , exBr
 , (<~)
 , (~>)
+, under
   -- ** Construction
 , (<->)
 , inv
@@ -82,6 +83,10 @@ infixr 9 <~
 b ~> x = exBl x b
 
 infixl 9 ~>
+
+
+under :: (a <-> b) -> (b -> b) -> (a -> a)
+under b = dimap (~> b) (b <~)
 
 
 -- Construction
