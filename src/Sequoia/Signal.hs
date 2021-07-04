@@ -5,6 +5,7 @@ module Sequoia.Signal
 , Src(..)
 , Snk(..)
 , Sig(..)
+, solSrc
 , srcSig
 , snkSig
 , type (<->)
@@ -22,6 +23,17 @@ newtype Sol k     = Sol { runSol :: k Δ -> k Γ }
 newtype Src k   b = Src { runSrc :: k **b }
 newtype Snk k a   = Snk { runSnk ::        k a }
 newtype Sig k a b = Sig { runSig :: k b -> k a }
+
+
+solSrc
+  :: Representable k
+  =>      Sol k
+           <->
+          Src k |- Δ
+solSrc = inB solToSrc srcToSol
+  where
+  solToSrc (Sol sol) = Src (inK ((`exK` Γ) . sol))
+  srcToSol (Src src) = Sol (inK1 (const . exK src . inK))
 
 
 srcSig
