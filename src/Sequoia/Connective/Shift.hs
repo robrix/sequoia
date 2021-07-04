@@ -6,7 +6,9 @@ module Sequoia.Connective.Shift
 , Down(..)
 ) where
 
+import Data.Coerce
 import Data.Distributive
+import Data.Functor.Adjunction
 import Data.Functor.Rep
 import Sequoia.Functor.I
 import Sequoia.Polarity
@@ -23,6 +25,12 @@ instance Distributive Up where
 
 instance Pos a => Polarized N (Up a) where
 
+instance Adjunction Down Up where
+  unit   = coerce
+  counit = coerce
+  leftAdjunct  = coerce
+  rightAdjunct = coerce
+
 
 -- Down
 
@@ -35,3 +43,9 @@ instance Distributive Down where
   collect f  = Down . fmap (getDown . f)
 
 instance Neg a => Polarized P (Down a) where
+
+instance Adjunction Up Down where
+  unit   = coerce
+  counit = coerce
+  leftAdjunct  = coerce
+  rightAdjunct = coerce
