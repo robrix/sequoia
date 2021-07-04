@@ -56,10 +56,10 @@ mapKSrc :: (forall x . k x <-> k' x) -> (Src k b -> Src k' b)
 mapKSrc b = Src . (~> dimapping b b) . runSrc
 
 
-newtype Snk k a   = Snk { runSnk :: k Δ -> k a }
+newtype Snk k a   = Snk { runSnk :: Sig k a Δ }
 
 mapKSnk :: (forall x . k x <-> k' x) -> (Snk k a -> Snk k' a)
-mapKSnk b = Snk . (~> dimapping b b) . runSnk
+mapKSnk b = Snk . mapKSig b . runSnk
 
 
 newtype Sig k a b = Sig { runSig :: k b -> k a }
@@ -98,7 +98,7 @@ solSnk
   ::      Sol k
            <->
      Γ -| Snk k
-solSnk = coercedTo Snk <<< coercedFrom Sol
+solSnk = coercedTo Snk <<< solSig
 
 
 srcSig
@@ -115,7 +115,7 @@ snkSig
   :: a -| Snk k
            <->
      a -| Sig k |- Δ
-snkSig = coercedTo Sig <<< coercedFrom Snk
+snkSig = coercedFrom Snk
 
 composeSigSnk :: Sig k a b -> Snk k b -> Snk k a
 composeSigSnk sig snk = snkSig <~ (snk ~> snkSig <<< sig)
