@@ -27,6 +27,7 @@ import           Control.Category ((<<<))
 import qualified Control.Category as Cat
 import           Data.Distributive
 import           Data.Functor.Contravariant.Adjunction hiding (adjuncted)
+import           Data.Profunctor
 import           Sequoia.Bijection
 import           Sequoia.Calculus.Context
 import           Sequoia.Continuation
@@ -39,20 +40,20 @@ mapKSol :: (forall x . k x <-> k' x) -> (Sol k -> Sol k')
 mapKSol b = Sol . (~> dimapping b b) . runSol
 
 
-newtype Src k   b = Src { runSrc :: k **b }
+newtype Src k   b = Src { runSrc :: k b -> k Γ }
 
 instance Contravariant k => Functor (Src k) where
-  fmap f = Src . contramap (contramap f) . runSrc
+  fmap f = Src . lmap (contramap f) . runSrc
 
 instance Representable k => Applicative (Src k) where
-  pure a = Src (inK (`exK` a))
-  Src f <*> Src a = Src (inK (\ b -> exK f (inK (exK a . inK . (exK b .)))))
+  pure a = Src (•<< const a)
+  Src f <*> Src a = Src (inK1 (\ k a' -> exK (f (inK (\ f -> exK (a (inK (k . f))) a'))) a'))
 
 instance Representable k => Monad (Src k) where
-  Src m >>= f = Src (m •<< inK . \ k -> (`exK` k) . runSrc . f)
+  Src m >>= f = Src (inK1 (\ k a -> exK (m (inK ((`exK` a) . (`runSrc` inK k) . f))) a))
 
-mapKSrc :: Contravariant k => (forall x . k x <-> k' x) -> (Src k b -> Src k' b)
-mapKSrc b = Src . mapDN b . runSrc
+mapKSrc :: (forall x . k x <-> k' x) -> (Src k b -> Src k' b)
+mapKSrc b = Src . (~> dimapping b b) . runSrc
 
 
 newtype Snk k a   = Snk { runSnk :: k Δ -> k a }
@@ -74,11 +75,10 @@ mapKSig b = Sig . (~> dimapping b b) . runSig
 -- Conversions
 
 solSrc
-  :: Adjunction k k
-  =>      Sol k
+  ::      Sol k
            <->
           Src k |- Δ
-solSrc = coercedTo Src <<< constant Γ <<< contraadjuncted <<< coercedFrom Sol
+solSrc = coercedTo Src <<< coercedFrom Sol
 
 
 solSnk
@@ -89,13 +89,12 @@ solSnk = coercedTo Snk <<< coercedFrom Sol
 
 
 srcSig
-  :: Adjunction k k
-  =>      Src k |- b
+  ::      Src k |- b
            <->
      Γ -| Sig k |- b
-srcSig = coercedTo Sig <<< contraadjuncted <<< inv (constant Γ) <<< coercedFrom Src
+srcSig = coercedTo Sig <<< coercedFrom Src
 
-composeSrcSig :: Adjunction k k => Src k a -> Sig k a b -> Src k b
+composeSrcSig :: Src k a -> Sig k a b -> Src k b
 composeSrcSig src sig = srcSig <~ (sig <<< src ~> srcSig)
 
 
@@ -116,7 +115,7 @@ solSig
 solSig = coerced
 
 
-composeSrcSnk :: Adjunction k k => Src k a -> Snk k a -> Sol k
+composeSrcSnk :: Src k a -> Snk k a -> Sol k
 composeSrcSnk src snk = solSig <~ (snk ~> snkSig <<< src ~> srcSig)
 
 
