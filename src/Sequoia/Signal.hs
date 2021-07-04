@@ -62,14 +62,11 @@ solSnk = (Snk . (~> dnKm) . runSol) <-> (Sol . (dnKm <~) . runSnk)
 
 
 srcSig
-  :: Representable k
+  :: Adjunction k k
   =>      Src k |- b
            <->
      Γ -| Sig k |- b
-srcSig = srcToSig <-> sigToSrc
-  where
-  srcToSig (Src src) = Sig (inK1 (const . exK src . inK))
-  sigToSrc (Sig sig) = Src (inK ((`exK` Γ) . sig))
+srcSig = (Sig . (dnKm <~) . const . runSrc) <-> (Src . ($ Γ) . (~> dnKm) . runSig)
 
 
 snkSig
