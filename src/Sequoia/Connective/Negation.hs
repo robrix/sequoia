@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Connective.Negation
 ( -- * Not
   type (¬)(..)
@@ -14,6 +15,7 @@ module Sequoia.Connective.Negation
 ) where
 
 import Data.Functor.Contravariant
+import Data.Functor.Contravariant.Adjunction
 import Sequoia.Continuation
 import Sequoia.Polarity
 
@@ -25,6 +27,13 @@ newtype k ¬a = Not { getNot :: k a }
 instance Pos a => Polarized N (k ¬a) where
 
 infixr 9 ¬
+
+
+instance Adjunction f u => Adjunction ((-) f) ((¬) u) where
+  unit   = Not    . leftAdjunct  getNegate
+  counit = Negate . rightAdjunct getNot
+  leftAdjunct  = (Not    .) . leftAdjunct  . (getNegate .)
+  rightAdjunct = (Negate .) . rightAdjunct . (getNot    .)
 
 
 -- Negate
