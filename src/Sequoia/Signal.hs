@@ -58,10 +58,7 @@ solSnk
   =>      Sol k
            <->
      Γ -| Snk k
-solSnk = solToSnk <-> snkToSol
-  where
-  solToSnk (Sol sol) = Snk (sol ~> dnKm)
-  snkToSol (Snk snk) = Sol (dnKm <~ snk)
+solSnk = (Snk . (~> dnKm) . runSol) <-> (Sol . (dnKm <~) . runSnk)
 
 
 srcSig
