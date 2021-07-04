@@ -20,12 +20,13 @@ module Sequoia.Signal
 , Self(..)
 ) where
 
-import Control.Category ((<<<))
-import Data.Distributive
-import Data.Functor.Contravariant.Adjunction hiding (adjuncted)
-import Sequoia.Bijection
-import Sequoia.Calculus.Context
-import Sequoia.Continuation
+import           Control.Category ((<<<))
+import qualified Control.Category as Cat
+import           Data.Distributive
+import           Data.Functor.Contravariant.Adjunction hiding (adjuncted)
+import           Sequoia.Bijection
+import           Sequoia.Calculus.Context
+import           Sequoia.Continuation
 
 -- Signals
 
@@ -58,6 +59,10 @@ mapKSnk b = Snk . (mapDN b .) . runSnk
 
 
 newtype Sig k a b = Sig { runSig :: k b -> k a }
+
+instance Cat.Category (Sig k) where
+  id = Sig id
+  (.) = dimap2 runSig runSig Sig (flip (.))
 
 mapKSig :: (forall x . k x <-> k' x) -> (Sig k a b -> Sig k' a b)
 mapKSig b = Sig . (dimapping b b <~) . runSig
