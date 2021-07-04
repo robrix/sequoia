@@ -2,9 +2,14 @@
 module Sequoia.Signal
 ( -- * Signals
   Sol(..)
+, mapKSol
 , Src(..)
+, mapKSrc
 , Snk(..)
+, mapKSnk
 , Sig(..)
+, mapKSig
+  -- * Conversions
 , solSrc
 , solSnk
 , srcSig
@@ -14,11 +19,6 @@ module Sequoia.Signal
   -- Self-adjunction
 , self
 , Self(..)
-  -- Maps
-, mapKSol
-, mapKSrc
-, mapKSnk
-, mapKSig
 ) where
 
 import Control.Category ((<<<))
@@ -31,6 +31,9 @@ import Sequoia.Continuation
 -- Signals
 
 newtype Sol k     = Sol { runSol :: k Δ -> k Γ }
+
+mapKSol :: (forall x . k x <-> k' x) -> (Sol k -> Sol k')
+mapKSol b = Sol . (dimapping b b <~) . runSol
 
 
 newtype Src k   b = Src { runSrc :: k **b }
@@ -45,12 +48,23 @@ instance Representable k => Applicative (Src k) where
 instance Representable k => Monad (Src k) where
   Src m >>= f = Src (m •<< inK . \ k -> (`exK` k) . runSrc . f)
 
+mapKSrc :: Contravariant k => (forall x . k x <-> k' x) -> (Src k b -> Src k' b)
+mapKSrc b = Src . mapDN b . runSrc
+
 
 newtype Snk k a   = Snk { runSnk :: a -> k **Δ }
+
+mapKSnk :: Contravariant k => (forall x . k x <-> k' x) -> (Snk k a -> Snk k' a)
+mapKSnk b = Snk . (mapDN b .) . runSnk
 
 
 newtype Sig k a b = Sig { runSig :: k b -> k a }
 
+mapKSig :: (forall x . k x <-> k' x) -> (Sig k a b -> Sig k' a b)
+mapKSig b = Sig . (dimapping b b <~) . runSig
+
+
+-- Conversions
 
 solSrc
   :: Adjunction k k
@@ -121,18 +135,3 @@ instance Distributive k => Distributive (Self k) where
 instance Representable k => Adjunction (Self k) (Self k) where
   leftAdjunct  = (-<<)
   rightAdjunct = (-<<)
-
-
--- Maps
-
-mapKSol :: (forall x . k x <-> k' x) -> (Sol k -> Sol k')
-mapKSol b = Sol . (dimapping b b <~) . runSol
-
-mapKSrc :: Contravariant k => (forall x . k x <-> k' x) -> (Src k b -> Src k' b)
-mapKSrc b = Src . mapDN b . runSrc
-
-mapKSnk :: Contravariant k => (forall x . k x <-> k' x) -> (Snk k a -> Snk k' a)
-mapKSnk b = Snk . (mapDN b .) . runSnk
-
-mapKSig :: (forall x . k x <-> k' x) -> (Sig k a b -> Sig k' a b)
-mapKSig b = Sig . (dimapping b b <~) . runSig
