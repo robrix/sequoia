@@ -40,20 +40,11 @@ mapKSol :: (forall x . k x <-> k' x) -> (Sol k -> Sol k')
 mapKSol b = Sol . (~> dimapping b b) . runSol
 
 
-newtype Src k   b = Src { runSrc :: k b -> k Γ }
-
-instance Contravariant k => Functor (Src k) where
-  fmap f = Src . lmap (contramap f) . runSrc
-
-instance Representable k => Applicative (Src k) where
-  pure a = Src (•<< const a)
-  Src f <*> Src a = Src (inK1 (\ k a' -> exK (f (inK (\ f -> exK (a (inK (k . f))) a'))) a'))
-
-instance Representable k => Monad (Src k) where
-  Src m >>= f = Src (inK1 (\ k a -> exK (m (inK ((`exK` a) . (`runSrc` inK k) . f))) a))
+newtype Src k   b = Src { runSrc :: Sig k Γ b }
+  deriving (Applicative, Functor, Monad)
 
 mapKSrc :: (forall x . k x <-> k' x) -> (Src k b -> Src k' b)
-mapKSrc b = Src . (~> dimapping b b) . runSrc
+mapKSrc b = Src . mapKSig b . runSrc
 
 
 newtype Snk k a   = Snk { runSnk :: Sig k a Δ }
@@ -91,7 +82,7 @@ solSrc
   ::      Sol k
            <->
           Src k |- Δ
-solSrc = coercedTo Src <<< coercedFrom Sol
+solSrc = coercedTo Src <<< solSig
 
 
 solSnk
@@ -105,7 +96,7 @@ srcSig
   ::      Src k |- b
            <->
      Γ -| Sig k |- b
-srcSig = coercedTo Sig <<< coercedFrom Src
+srcSig = coercedFrom Src
 
 composeSrcSig :: Src k a -> Sig k a b -> Src k b
 composeSrcSig src sig = srcSig <~ (sig <<< src ~> srcSig)
