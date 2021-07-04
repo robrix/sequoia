@@ -157,14 +157,14 @@ instance Representable k => Adjunction (Self k) (Self k) where
 
 -- Maps
 
-mapKSol :: (forall x . k' x -> k x) -> (forall x . k x -> k' x) -> (Sol k -> Sol k')
-mapKSol f g (Sol r) = Sol (dimap f g r)
+mapKSol :: (forall x . k x <-> k' x) -> (Sol k -> Sol k')
+mapKSol b (Sol r) = Sol (dimap (<~ b) (b ~>) r)
 
-mapKSrc :: Contravariant k => (forall x . k' x -> k x) -> (forall x . k x -> k' x) -> (Src k b -> Src k' b)
-mapKSrc f g (Src r) = Src (g (contramap f r))
+mapKSrc :: Contravariant k => (forall x . k x <-> k' x) -> (Src k b -> Src k' b)
+mapKSrc b (Src r) = Src (b ~> contramap (<~ b) r)
 
-mapKSnk :: Contravariant k => (forall x . k' x -> k x) -> (forall x . k x -> k' x) -> (Snk k a -> Snk k' a)
-mapKSnk f g (Snk r) = Snk (g . contramap f . r)
+mapKSnk :: Contravariant k => (forall x . k x <-> k' x) -> (Snk k a -> Snk k' a)
+mapKSnk b (Snk r) = Snk ((b ~>) . contramap (<~ b) . r)
 
-mapKSig :: (forall x . k' x -> k x) -> (forall x . k x -> k' x) -> (Sig k a b -> Sig k' a b)
-mapKSig f g (Sig r) = Sig (dimap f g r)
+mapKSig :: (forall x . k x <-> k' x) -> (Sig k a b -> Sig k' a b)
+mapKSig b (Sig r) = Sig (dimap (<~ b) (b ~>) r)
