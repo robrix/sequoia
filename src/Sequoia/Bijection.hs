@@ -21,6 +21,8 @@ module Sequoia.Bijection
 , coerced
 , coercedFrom
 , coercedTo
+  -- ** Representable
+, tabulated
   -- ** Adjunction
 , adjuncted
 , contraadjuncted
@@ -45,6 +47,7 @@ import           Data.Coerce
 import qualified Data.Functor.Adjunction as Co
 import           Data.Functor.Contravariant
 import qualified Data.Functor.Contravariant.Adjunction as Contra
+import qualified Data.Functor.Rep as Co
 import           Data.Maybe (fromMaybe)
 import           Data.Profunctor
 import           Data.Tuple (swap)
@@ -143,6 +146,12 @@ coercedTo   = (<-> coerce)
 -- produces a bijection of type @A '<->' B@.
 coercedFrom :: Coercible a b => (b -> a) -> a <-> b
 coercedFrom = (coerce <->)
+
+
+-- Representable
+
+tabulated :: Co.Representable f => (Co.Rep f -> a) <-> f a
+tabulated = Co.tabulate <-> Co.index
 
 
 -- Adjunction
