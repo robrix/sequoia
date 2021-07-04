@@ -13,6 +13,7 @@ module Sequoia.Bijection
 , involuted
 , flipped
 , curried
+, uncurried
   -- ** Coercion
 , coerced
 , coercedFrom
@@ -74,6 +75,9 @@ flipped = flip <-> flip
 
 curried :: ((a, b) -> c) <-> (a -> b -> c)
 curried = curry <-> uncurry
+
+uncurried :: (a -> b -> c) <-> ((a, b) -> c)
+uncurried = uncurry <-> curry
 
 
 -- Coercion
