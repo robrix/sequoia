@@ -87,7 +87,7 @@ srcSig
   =>      Src k |- b
            <->
      Γ -| Sig k |- b
-srcSig = (Sig . (dnKm <~) . const . runSrc) <-> (Src . ($ Γ) . (~> dnKm) . runSig)
+srcSig = coercedTo Sig <<< adjuncted <<< inv (constant Γ) <<< coercedFrom Src
 
 
 snkSig
