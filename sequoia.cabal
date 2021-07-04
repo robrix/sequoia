@@ -63,6 +63,7 @@ common common
 library
   import: common
   exposed-modules:
+    Sequoia.Bijection
     Sequoia.Calculus
     Sequoia.Calculus.Additive
     Sequoia.Calculus.Bottom
