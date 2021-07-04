@@ -5,6 +5,7 @@ module Sequoia.Connective.Shift
 , Down(..)
 ) where
 
+import Data.Distributive
 import Sequoia.Functor.I
 import Sequoia.Polarity
 
@@ -14,6 +15,10 @@ newtype Up a = Up { getUp :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
   deriving (Applicative, Monad) via I
 
+instance Distributive Up where
+  distribute = Up . fmap  getUp
+  collect f  = Up . fmap (getUp . f)
+
 instance Pos a => Polarized N (Up a) where
 
 
@@ -22,5 +27,9 @@ instance Pos a => Polarized N (Up a) where
 newtype Down a = Down { getDown :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
   deriving (Applicative, Monad) via I
+
+instance Distributive Down where
+  distribute = Down . fmap  getDown
+  collect f  = Down . fmap (getDown . f)
 
 instance Neg a => Polarized P (Down a) where
