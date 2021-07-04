@@ -3,12 +3,4 @@ module Sequoia.Connective.Not
   type (¬)(..)
 ) where
 
-import Sequoia.Continuation
-import Sequoia.Polarity
-
-newtype k ¬a = Not { getNot :: k a }
-  deriving (Applicative, Representable, Contravariant, Functor)
-
-instance Pos a => Polarized N (k ¬a) where
-
-infixr 9 ¬
+import Sequoia.Connective.Negation

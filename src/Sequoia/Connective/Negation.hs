@@ -1,22 +1,41 @@
 module Sequoia.Connective.Negation
-( -- * Negative double negation
-  notNegate
+( -- * Not
+  type (¬)(..)
+  -- * Negate
+, type (-)(..)
+  -- * Negative double negation
+, notNegate
 , getNotNegate
 , type (¬-)
   -- * Positive double negation
 , negateNot
 , getNegateNot
 , type (-¬)
-  -- * Not
-, module Sequoia.Connective.Not
-  -- * Negate
-, module Sequoia.Connective.Negate
 ) where
 
 import Data.Functor.Contravariant
-import Sequoia.Connective.Negate
-import Sequoia.Connective.Not
 import Sequoia.Continuation
+import Sequoia.Polarity
+
+-- Not
+
+newtype k ¬a = Not { getNot :: k a }
+  deriving (Applicative, Representable, Contravariant, Functor)
+
+instance Pos a => Polarized N (k ¬a) where
+
+infixr 9 ¬
+
+
+-- Negate
+
+newtype k -a = Negate { getNegate :: k a }
+  deriving (Applicative, Representable, Contravariant, Functor)
+
+instance Neg a => Polarized P (k -a) where
+
+infixr 9 -
+
 
 -- Negative double negation
 
