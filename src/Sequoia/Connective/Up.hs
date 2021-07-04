@@ -3,13 +3,4 @@ module Sequoia.Connective.Up
   Up(..)
 ) where
 
-import Data.Functor.Identity
-import Sequoia.Polarity
-
--- Positive-to-negative shift
-
-newtype Up a = Up { getUp :: a }
-  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-  deriving (Applicative, Monad) via Identity
-
-instance Pos a => Polarized N (Up a) where
+import Sequoia.Connective.Shift
