@@ -10,6 +10,7 @@ module Sequoia.Bijection
 , (<->)
 , inv
 , constant
+, involuted
   -- ** Coercion
 , coerced
 , coercedFrom
@@ -62,6 +63,9 @@ inv b = (~> b) <-> (b <~)
 
 constant :: a -> (a -> b) <-> b
 constant a = ($ a) <-> const
+
+involuted :: (a -> a) -> a <-> a
+involuted f = f <-> f
 
 
 -- Coercion
