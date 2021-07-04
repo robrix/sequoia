@@ -97,7 +97,7 @@ solSig
   ::      Sol k
            <->
      Γ -| Sig k |- Δ
-solSig = (Sig . runSol) <-> (Sol . runSig)
+solSig = coerced
 
 
 {-
