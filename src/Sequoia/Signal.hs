@@ -24,7 +24,6 @@ module Sequoia.Signal
 import Control.Category ((<<<))
 import Data.Distributive
 import Data.Functor.Contravariant.Adjunction hiding (adjuncted)
-import Data.Profunctor
 import Sequoia.Bijection
 import Sequoia.Calculus.Context
 import Sequoia.Continuation
@@ -127,13 +126,16 @@ instance Representable k => Adjunction (Self k) (Self k) where
 -- Maps
 
 mapKSol :: (forall x . k x <-> k' x) -> (Sol k -> Sol k')
-mapKSol b (Sol r) = Sol (dimap (~> b) (b <~) r)
+mapKSol b = Sol . (dimapping b b <~) . runSol
 
 mapKSrc :: Contravariant k => (forall x . k x <-> k' x) -> (Src k b -> Src k' b)
-mapKSrc b (Src r) = Src (b <~ contramap (~> b) r)
+mapKSrc b = Src . mapDN b . runSrc
 
 mapKSnk :: Contravariant k => (forall x . k x <-> k' x) -> (Snk k a -> Snk k' a)
-mapKSnk b (Snk r) = Snk ((b <~) . contramap (~> b) . r)
+mapKSnk b = Snk . (mapDN b .) . runSnk
 
 mapKSig :: (forall x . k x <-> k' x) -> (Sig k a b -> Sig k' a b)
-mapKSig b (Sig r) = Sig (dimap (~> b) (b <~) r)
+mapKSig b = Sig . (dimapping b b <~) . runSig
+
+mapDN :: Contravariant j => (forall x . j x <-> k x) -> (j **a -> k **a)
+mapDN b = (b <~) . contramap (~> b)
