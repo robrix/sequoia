@@ -11,6 +11,7 @@ module Sequoia.Bijection
 , inv
 , constant
 , involuted
+, flipped
   -- ** Coercion
 , coerced
 , coercedFrom
@@ -66,6 +67,9 @@ constant a = ($ a) <-> const
 
 involuted :: (a -> a) -> a <-> a
 involuted f = f <-> f
+
+flipped :: (a -> b -> c) <-> (b -> a -> c)
+flipped = flip <-> flip
 
 
 -- Coercion
