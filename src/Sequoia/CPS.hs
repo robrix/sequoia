@@ -114,7 +114,7 @@ liftCPS = inC . fmap inK . flip
 -- Elimination
 
 appCPS :: CPS k c => a `c` b -> a -> k **b
-appCPS c a = inK $ \ k -> c •• k • a
+appCPS = (-<<) . exC
 
 appCPS2 :: CPS k c => a `c` (b `c` d) -> a -> b -> k **d
 appCPS2 c = appK2 (exC (rmap exC c))
