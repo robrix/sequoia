@@ -75,6 +75,9 @@ instance Representable k => Applicative (Sig k a) where
   pure a = Sig (•<< const a)
   Sig f <*> Sig a = Sig (inK1 (\ k a' -> exK (f (inK (\ f -> exK (a (inK (k . f))) a'))) a'))
 
+instance Representable k => Monad (Sig k a) where
+  Sig m >>= f = Sig (inK1 (\ k a -> exK (m (inK ((`exK` a) . (`runSig` inK k) . f))) a))
+
 mapKSig :: (forall x . k x <-> k' x) -> (Sig k a b -> Sig k' a b)
 mapKSig b = Sig . (~> dimapping b b) . runSig
 
