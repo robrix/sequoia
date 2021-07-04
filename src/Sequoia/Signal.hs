@@ -6,6 +6,7 @@ module Sequoia.Signal
 , Snk(..)
 , Sig(..)
 , solSrc
+, solSnk
 , srcSig
 , snkSig
 , type (<->)
@@ -34,6 +35,17 @@ solSrc = inB solToSrc srcToSol
   where
   solToSrc (Sol sol) = Src (inK ((`exK` Γ) . sol))
   srcToSol (Src src) = Sol (inK1 (const . exK src . inK))
+
+
+solSnk
+  :: Representable k
+  =>      Sol k
+           <->
+     Γ -| Snk k
+solSnk = inB solToSnk snkToSol
+  where
+  solToSnk (Sol sol) = Snk (sol (inK absurdΔ))
+  snkToSol (Snk snk) = Sol (const snk) -- fixme: this feels wrong
 
 
 srcSig
