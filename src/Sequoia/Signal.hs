@@ -23,7 +23,7 @@ import Sequoia.Continuation
 
 newtype Sol k     = Sol { runSol :: k Δ -> k Γ }
 newtype Src k   b = Src { runSrc :: k **b }
-newtype Snk k a   = Snk { runSnk ::        k a }
+newtype Snk k a   = Snk { runSnk :: a -> k **Δ }
 newtype Sig k a b = Sig { runSig :: k b -> k a }
 
 
@@ -45,8 +45,8 @@ solSnk
      Γ -| Snk k
 solSnk = inB solToSnk snkToSol
   where
-  solToSnk (Sol sol) = Snk (sol (inK absurdΔ))
-  snkToSol (Snk snk) = Sol (const snk) -- fixme: this feels wrong
+  solToSnk (Sol sol) = Snk (inK . (. sol) . flip exK)
+  snkToSol (Snk snk) = Sol (inK . (. snk) . flip exK)
 
 
 srcSig
@@ -67,8 +67,8 @@ snkSig
      a -| Sig k |- Δ
 snkSig = inB snkToSig sigToSnk
   where
-  snkToSig (Snk snk) = Sig (inK1 (const (exK snk)))
-  sigToSnk (Sig sig) = Snk (inK (exK (sig (inK absurdΔ))))
+  snkToSig (Snk snk) = Sig (inK . (. snk) . flip exK)
+  sigToSnk (Sig sig) = Snk (inK . (. sig) . flip exK)
 
 
 solSig
