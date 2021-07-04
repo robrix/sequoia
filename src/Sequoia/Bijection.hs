@@ -33,6 +33,7 @@ module Sequoia.Bijection
   -- ** Profunctor
 , dimapping
 , lmapping
+, rmapping
 ) where
 
 import           Control.Applicative (Alternative)
@@ -159,3 +160,6 @@ dimapping a b = dimap (exBr a) (exBl b) <-> dimap (exBl a) (exBr b)
 
 lmapping :: Profunctor p => (a <-> a') -> (a `p` b) <-> (a' `p` b)
 lmapping a = lmap (exBr a) <-> lmap (exBl a)
+
+rmapping :: Profunctor p => (b <-> b') -> (a `p` b) <-> (a `p` b')
+rmapping b = rmap (exBl b) <-> rmap (exBr b)
