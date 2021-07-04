@@ -55,10 +55,10 @@ mapKSrc :: Contravariant k => (forall x . k x <-> k' x) -> (Src k b -> Src k' b)
 mapKSrc b = Src . mapDN b . runSrc
 
 
-newtype Snk k a   = Snk { runSnk :: a -> k **Δ }
+newtype Snk k a   = Snk { runSnk :: k Δ -> k a }
 
-mapKSnk :: Contravariant k => (forall x . k x <-> k' x) -> (Snk k a -> Snk k' a)
-mapKSnk b = Snk . (mapDN b .) . runSnk
+mapKSnk :: (forall x . k x <-> k' x) -> (Snk k a -> Snk k' a)
+mapKSnk b = Snk . (~> dimapping b b) . runSnk
 
 
 newtype Sig k a b = Sig { runSig :: k b -> k a }
@@ -82,11 +82,10 @@ solSrc = coercedTo Src <<< constant Γ <<< contraadjuncted <<< coercedFrom Sol
 
 
 solSnk
-  :: Adjunction k k
-  =>      Sol k
+  ::      Sol k
            <->
      Γ -| Snk k
-solSnk = coercedTo Snk <<< contraadjuncted <<< coercedFrom Sol
+solSnk = coercedTo Snk <<< coercedFrom Sol
 
 
 srcSig
@@ -101,13 +100,12 @@ composeSrcSig src sig = srcSig <~ (sig <<< src ~> srcSig)
 
 
 snkSig
-  :: Adjunction k k
-  => a -| Snk k
+  :: a -| Snk k
            <->
      a -| Sig k |- Δ
-snkSig = coercedTo Sig <<< contraadjuncted <<< coercedFrom Snk
+snkSig = coercedTo Sig <<< coercedFrom Snk
 
-composeSigSnk :: Adjunction k k => Sig k a b -> Snk k b -> Snk k a
+composeSigSnk :: Sig k a b -> Snk k b -> Snk k a
 composeSigSnk sig snk = snkSig <~ (snk ~> snkSig <<< sig)
 
 
