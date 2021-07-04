@@ -70,5 +70,5 @@ exBr :: a <-> b -> (b -> a)
 exBr f = f (const id)
 
 
-instance Representable k => Functor (Src k) where
+instance Contravariant k => Functor (Src k) where
   fmap f = Src . contramap (contramap f) . runSrc
