@@ -76,3 +76,6 @@ instance Contravariant k => Functor (Src k) where
 instance Representable k => Applicative (Src k) where
   pure a = Src (inK (`exK` a))
   Src f <*> Src a = Src (inK (\ b -> exK f (inK (exK a . inK . (exK b .)))))
+
+instance Representable k => Monad (Src k) where
+  Src m >>= f = Src (m •<< inK . \ k -> (`exK` k) . runSrc . f)
