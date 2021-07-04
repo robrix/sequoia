@@ -28,8 +28,8 @@ instance (Distributive f, Distributive g) => Distributive (f · g) where
 
 instance (Representable f, Representable g) => Representable (f · g) where
   type Rep (f · g) = (Rep f, Rep g)
-  tabulate = C . tabulate . fmap tabulate . curry
-  index    = uncurry . fmap index . index . getC
+  tabulate = C       . tabulate   . fmap tabulate . curry
+  index    = uncurry . fmap index . index         . getC
 
 instance (Adjunction f1 g1, Adjunction f2 g2) => Adjunction (f2 · f1) (g1 · g2) where
   unit   = C . leftAdjunct  (leftAdjunct  C)
