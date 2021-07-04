@@ -72,3 +72,7 @@ exBr f = f (const id)
 
 instance Contravariant k => Functor (Src k) where
   fmap f = Src . contramap (contramap f) . runSrc
+
+instance Representable k => Applicative (Src k) where
+  pure a = Src (inK (`exK` a))
+  Src f <*> Src a = Src (inK (\ b -> exK f (inK (exK a . inK . (exK b .)))))
