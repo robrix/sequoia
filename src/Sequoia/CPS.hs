@@ -121,7 +121,7 @@ execCPS c = appCPS c ()
 evalCPS :: CPS k c => i `c` Rep k -> k i
 evalCPS c = exC c idK
 
-dnE :: CPS k c => k **c a b -> a `c` b
+dnE :: CPS k c => k **(a `c` b) -> a `c` b
 dnE f = inC (inK . \ k a -> exK f (inK (\ f -> exK (exC f k) a)))
 
 
