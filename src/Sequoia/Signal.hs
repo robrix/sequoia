@@ -18,6 +18,7 @@ module Sequoia.Signal
 , (<~)
 , dnKm
   -- Self-adjunction
+, self
 , Self(..)
   -- Maps
 , mapKSol
@@ -143,6 +144,9 @@ instance Representable k => Monad (Src k) where
 
 
 -- Self-adjunction
+
+self :: k a <-> Self k a
+self = Self <-> getSelf
 
 newtype Self k a = Self { getSelf :: k a }
   deriving (Contravariant, Functor, Representable)
