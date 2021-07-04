@@ -117,18 +117,18 @@ exBl f = f const
 exBr :: a <-> b -> (b -> a)
 exBr f = f (const id)
 
-(~>) :: a <-> b -> (a -> b)
-(~>) = exBl
-
-infixl 9 ~>
-
-(<~) :: b -> a <-> b -> a
-b <~ x = exBr x b
+(<~) :: a <-> b -> (a -> b)
+(<~) = exBl
 
 infixr 9 <~
 
+(~>) :: b -> a <-> b -> a
+b ~> x = exBr x b
+
+infixl 9 ~>
+
 inv :: a <-> b -> b <-> a
-inv b = (<~ b) <-> (b ~>)
+inv b = (~> b) <-> (b <~)
 
 
 -- | Witness of the adjunction between the double negation and continuation morphism representations of functions in CPS.
@@ -166,13 +166,13 @@ instance Representable k => Adjunction (Self k) (Self k) where
 -- Maps
 
 mapKSol :: (forall x . k x <-> k' x) -> (Sol k -> Sol k')
-mapKSol b (Sol r) = Sol (dimap (<~ b) (b ~>) r)
+mapKSol b (Sol r) = Sol (dimap (~> b) (b <~) r)
 
 mapKSrc :: Contravariant k => (forall x . k x <-> k' x) -> (Src k b -> Src k' b)
-mapKSrc b (Src r) = Src (b ~> contramap (<~ b) r)
+mapKSrc b (Src r) = Src (b <~ contramap (~> b) r)
 
 mapKSnk :: Contravariant k => (forall x . k x <-> k' x) -> (Snk k a -> Snk k' a)
-mapKSnk b (Snk r) = Snk ((b ~>) . contramap (<~ b) . r)
+mapKSnk b (Snk r) = Snk ((b <~) . contramap (~> b) . r)
 
 mapKSig :: (forall x . k x <-> k' x) -> (Sig k a b -> Sig k' a b)
-mapKSig b (Sig r) = Sig (dimap (<~ b) (b ~>) r)
+mapKSig b (Sig r) = Sig (dimap (~> b) (b <~) r)
