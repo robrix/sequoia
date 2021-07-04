@@ -107,7 +107,7 @@ liftCPS = inC . fmap inK . flip
 -- Elimination
 
 appCPS :: CPS k c => a `c` b -> a -> k **b
-appCPS c a = inK $ \ k -> exK (exC c k) a
+appCPS c a = inK $ \ k -> exC c k • a
 
 appCPS2 :: CPS k c => a `c` (b `c` d) -> a -> b -> k **d
 appCPS2 c = appK2 (exC (rmap exC c))
@@ -122,7 +122,7 @@ evalCPS :: CPS k c => i `c` Rep k -> k i
 evalCPS c = exC c idK
 
 dnE :: CPS k c => k **(a `c` b) -> a `c` b
-dnE f = inC (inK . \ k a -> exK f (inK (\ f -> exK (exC f k) a)))
+dnE f = inC (inK . \ k a -> f • inK (\ f -> exC f k • a))
 
 
 -- Currying
@@ -131,7 +131,7 @@ curryCPS :: CPS k c => (a, b) `c` d -> a `c` (b `c` d)
 curryCPS c = inC (•<< (`lmap` c) . (,))
 
 uncurryCPS :: CPS k c => a `c` (b `c` d) -> (a, b) `c` d
-uncurryCPS c = inC (\ k -> inK ((`exK` k) . uncurry (appCPS2 c)))
+uncurryCPS c = inC (\ k -> inK ((• k) . uncurry (appCPS2 c)))
 
 
 -- Delimited continuations
@@ -164,16 +164,16 @@ pureCPS :: CPS k c => b -> c a b
 pureCPS a = inC (•<< const a)
 
 apCPS :: CPS k c => c a (b -> b') -> (c a b -> c a b')
-apCPS f a = inC (inK1 (\ k a' -> exK (exC f (inK (\ f -> exK (exC a (inK (k . f))) a'))) a'))
+apCPS f a = inC (inK1 (\ k a' -> exC f (inK (\ f -> exC a (inK (k . f)) • a')) • a'))
 
 liftA2CPS :: CPS k c => (x -> y -> z) -> c a x -> c a y -> c a z
-liftA2CPS f a b = inC (\ k -> inK (\ a' -> exK (exC a (inK ((`exK` a') . exC b . (k •<<) . f))) a'))
+liftA2CPS f a b = inC (\ k -> inK (\ a' -> exC a (inK ((• a') . exC b . (k •<<) . f)) • a'))
 
 
 -- Monad
 
 bindCPS :: CPS k c => c a b -> (b -> c a b') -> c a b'
-bindCPS m f = inC (inK1 (\ k a -> exK (exC m (inK ((`exK` a) . (`exC` inK k) . f))) a))
+bindCPS m f = inC (inK1 (\ k a -> exC m (inK ((• a) . (`exC` inK k) . f)) • a))
 
 
 -- Arrow
@@ -182,13 +182,13 @@ arrCPS :: CPS k c => (a -> b) -> c a b
 arrCPS = cps
 
 firstCPS :: CPS k c => c a b -> c (a, d) (b, d)
-firstCPS  f = inC (inK . (\ k (l, r) -> exK (appCPS f l) (k •<< (,r))))
+firstCPS  f = inC (inK . (\ k (l, r) -> appCPS f l • (k •<< (,r))))
 
 secondCPS :: CPS k c => c a b -> c (d, a) (d, b)
-secondCPS g = inC (inK . (\ k (l, r) -> exK (appCPS g r) (k •<< (l,))))
+secondCPS g = inC (inK . (\ k (l, r) -> appCPS g r • (k •<< (l,))))
 
 splitPrdCPS :: CPS k c => c a b -> c a' b' -> c (a, a') (b, b')
-splitPrdCPS f g = inC (inK . (\ k (l, r) -> exK (appCPS f l) (appCPS g r •<< (k •<<) . (,))))
+splitPrdCPS f g = inC (inK . (\ k (l, r) -> appCPS f l • (appCPS g r •<< (k •<<) . (,))))
 
 fanoutCPS :: CPS k c => c a b -> c a b' -> c a (b, b')
 fanoutCPS = liftA2CPS (,)

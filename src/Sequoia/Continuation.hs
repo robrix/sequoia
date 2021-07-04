@@ -91,7 +91,7 @@ appK1 :: Representable k => (k b -> k a) -> (a -> k **b)
 appK1 = (-<<)
 
 appK2 :: Representable k => (k (k c -> k b) -> k a) -> (a -> b -> k **c)
-appK2 f a b = inK (\ k -> exK1 f (\ f -> exK (f k) b) a)
+appK2 f a b = inK (\ k -> exK1 f (\ f -> f k • b) a)
 
 
 type RepFn k a = a -> Rep k
@@ -178,12 +178,12 @@ infix 3 <••>
 
 
 (>>-) :: Representable k => a -> (b -> k a) -> k b
-a >>- f = inK ((`exK` a) . f)
+a >>- f = inK ((• a) . f)
 
 infixl 1 >>-
 
 (-<<) :: Representable k => (b -> k a) -> (a -> k b)
-f -<< a = inK ((`exK` a) . f)
+f -<< a = inK ((• a) . f)
 
 infixr 1 -<<
 
