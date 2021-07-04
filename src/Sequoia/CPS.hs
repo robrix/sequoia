@@ -8,6 +8,7 @@ module Sequoia.CPS
 , inC2
 , exC1
 , exC2
+, (••)
   -- ** Construction
 , cps
 , liftCPS
@@ -95,6 +96,12 @@ exC2 :: CPS k c => (a1 `c` b1 -> a2 `c` b2 -> a3 `c` b3) -> ((k b1 -> k a1) -> (
 exC2 = dimap2 inC inC exC
 
 
+(••) :: CPS k c => a `c` b -> (k b -> k a)
+(••) = exC
+
+infixl 9 ••
+
+
 -- Construction
 
 cps :: CPS k c => (a -> b) -> a `c` b
@@ -107,7 +114,7 @@ liftCPS = inC . fmap inK . flip
 -- Elimination
 
 appCPS :: CPS k c => a `c` b -> a -> k **b
-appCPS c a = inK $ \ k -> exC c k • a
+appCPS c a = inK $ \ k -> c •• k • a
 
 appCPS2 :: CPS k c => a `c` (b `c` d) -> a -> b -> k **d
 appCPS2 c = appK2 (exC (rmap exC c))
@@ -119,10 +126,10 @@ execCPS :: CPS k c => () `c` a -> k **a
 execCPS c = appCPS c ()
 
 evalCPS :: CPS k c => i `c` Rep k -> k i
-evalCPS c = exC c idK
+evalCPS = (•• idK)
 
 dnE :: CPS k c => k **(a `c` b) -> a `c` b
-dnE f = inC (inK . \ k a -> f • inK (\ f -> exC f k • a))
+dnE f = inC (inK . \ k a -> f • inK (\ f -> f •• k • a))
 
 
 -- Currying
@@ -164,16 +171,16 @@ pureCPS :: CPS k c => b -> c a b
 pureCPS a = inC (•<< const a)
 
 apCPS :: CPS k c => c a (b -> b') -> (c a b -> c a b')
-apCPS f a = inC (inK1 (\ k a' -> exC f (inK (\ f -> exC a (inK (k . f)) • a')) • a'))
+apCPS f a = inC (inK1 (\ k a' -> f •• inK (\ f -> a •• inK (k . f) • a') • a'))
 
 liftA2CPS :: CPS k c => (x -> y -> z) -> c a x -> c a y -> c a z
-liftA2CPS f a b = inC (\ k -> inK (\ a' -> exC a (inK ((• a') . exC b . (k •<<) . f)) • a'))
+liftA2CPS f a b = inC (\ k -> inK (\ a' -> a •• inK ((• a') . exC b . (k •<<) . f) • a'))
 
 
 -- Monad
 
 bindCPS :: CPS k c => c a b -> (b -> c a b') -> c a b'
-bindCPS m f = inC (inK1 (\ k a -> exC m (inK ((• a) . (`exC` inK k) . f)) • a))
+bindCPS m f = inC (inK1 (\ k a -> m •• inK ((• a) . (•• inK k) . f) • a))
 
 
 -- Arrow
@@ -197,13 +204,13 @@ fanoutCPS = liftA2CPS (,)
 -- ArrowChoice
 
 leftCPS :: CPS k c => c a b -> c (Either a d) (Either b d)
-leftCPS  f = inC (\ k -> exC f (k •<< inl) <••> (k •<< inr))
+leftCPS  f = inC (\ k -> f •• (k •<< inl) <••> (k •<< inr))
 
 rightCPS :: CPS k c => c a b -> c (Either d a) (Either d b)
-rightCPS g = inC (\ k -> (k •<< inl) <••> exC g (k •<< inr))
+rightCPS g = inC (\ k -> (k •<< inl) <••> g •• (k •<< inr))
 
 splitSumCPS :: CPS k c => c a1 b1 -> c a2 b2 -> c (Either a1 a2) (Either b1 b2)
-splitSumCPS f g = inC (\ k -> exC f (k •<< inl) <••> exC g (k •<< inr))
+splitSumCPS f g = inC (\ k -> f •• (k •<< inl) <••> g •• (k •<< inr))
 
 faninCPS :: CPS k c => c a1 b -> c a2 b -> c (Either a1 a2) b
 faninCPS f g = inC ((<••>) <$> exC f <*> exC g)
