@@ -54,14 +54,14 @@ solSrc = solToSrc <-> srcToSol
 
 
 solSnk
-  :: Representable k
+  :: Adjunction k k
   =>      Sol k
            <->
      Γ -| Snk k
 solSnk = solToSnk <-> snkToSol
   where
-  solToSnk (Sol sol) = Snk (inK . (. sol) . flip exK)
-  snkToSol (Snk snk) = Sol (inK . (. snk) . flip exK)
+  solToSnk (Sol sol) = Snk (sol ~> dnKm)
+  snkToSol (Snk snk) = Sol (dnKm <~ snk)
 
 
 srcSig
