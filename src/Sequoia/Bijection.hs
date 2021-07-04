@@ -21,6 +21,7 @@ module Sequoia.Bijection
 , coercedFrom
 , coercedTo
   -- ** Adjunction
+, adjuncted
 , contraadjuncted
 ) where
 
@@ -28,6 +29,7 @@ import           Control.Applicative (Alternative)
 import qualified Control.Category as Cat
 import           Control.Monad (guard)
 import           Data.Coerce
+import qualified Data.Functor.Adjunction as Co
 import qualified Data.Functor.Contravariant.Adjunction as Contra
 import           Data.Maybe (fromMaybe)
 import           Data.Tuple (swap)
@@ -108,6 +110,9 @@ coercedFrom = (coerce <->)
 
 
 -- Adjunction
+
+adjuncted :: Co.Adjunction f u => (f a -> b) <-> (a -> u b)
+adjuncted = Co.leftAdjunct <-> Co.rightAdjunct
 
 contraadjuncted :: Contra.Adjunction f u => (a -> f b) <-> (b -> u a)
 contraadjuncted = Contra.leftAdjunct <-> Contra.rightAdjunct
