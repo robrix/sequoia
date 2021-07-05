@@ -16,7 +16,6 @@ module Sequoia.CPS
   -- ** Elimination
 , appC
 , appC2
-, appCPS2
 , pappCPS
 , execCPS
 , evalCPS
@@ -123,9 +122,6 @@ appC c a k = c •• inK k • a
 appC2 :: CPS k c => a `c` (b `c` d) -> a -> b -> ContFn k d
 appC2 f a b k = appC f a (\ f -> appC f b k)
 
-appCPS2 :: CPS k c => a `c` (b `c` d) -> a -> b -> k **d
-appCPS2 c a b = inK (\ k -> appC c a (\ f -> f •• k • b))
-
 pappCPS :: CPS k c => a `c` b -> a -> c () b
 pappCPS c a = c Cat.<<< inC (•<< const a)
 
@@ -145,7 +141,7 @@ curryCPS :: CPS k c => (a, b) `c` d -> a `c` (b `c` d)
 curryCPS c = inC (•<< (`lmap` c) . (,))
 
 uncurryCPS :: CPS k c => a `c` (b `c` d) -> (a, b) `c` d
-uncurryCPS c = inC (\ k -> inK ((• k) . uncurry (appCPS2 c)))
+uncurryCPS c = inC (\ k -> inK (($ exK k) . uncurry (appC2 c)))
 
 
 -- Delimited continuations
