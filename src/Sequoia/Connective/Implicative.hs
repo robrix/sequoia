@@ -5,10 +5,9 @@ module Sequoia.Connective.Implicative
 , module Sequoia.Connective.Subtraction
 ) where
 
-import Sequoia.Conjunction
 import Sequoia.Connective.Function
 import Sequoia.Connective.Subtraction
 import Sequoia.Continuation
 
 elimFun :: Representable k => a ~~k~> b -> a ~-k-< b -> Rep k
-elimFun f (Sub s) = appFun f (exl s) • coerceK (exr s)
+elimFun f s = appFun f (subA s) • subK s
