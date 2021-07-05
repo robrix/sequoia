@@ -1,6 +1,7 @@
 module Sequoia.Connective.Implicative
 ( elimFun
 , funPar1
+, funPar2
   -- * Connectives
 , module Sequoia.Connective.Function
 , module Sequoia.Connective.Subtraction
@@ -21,3 +22,8 @@ funPar1 :: Representable k => k (k ¬a ⅋ b) <-> k (a ~~k~> b)
 funPar1
   =   inK1 (\ k f -> k (inl (inK (\ a -> appFun f a • inK (k . inr)))))
   <-> inK1 (\ k p -> k (Fun (inK1 (\ b a -> ((• a) <--> b) p))))
+
+funPar2 :: Representable k => k **(k ¬a ⅋ b) <-> k **(a ~~k~> b)
+funPar2
+  =   inK1 (\ k f -> k (inK (\ p -> f • Fun (inK1 (\ b a -> ((• a) <--> b) p)))))
+  <-> inK1 (\ k p -> k (inK (\ f -> p • inl (inK (\ a -> appFun f a • inK ((p •) . inr))))))
