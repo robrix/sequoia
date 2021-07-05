@@ -3,6 +3,7 @@ module Sequoia.Connective.Subtraction
   Sub(..)
 , type (~-)
 , type (-<)
+, sub
 ) where
 
 import Sequoia.Connective.Negate
@@ -20,3 +21,7 @@ type s-< b = s b
 
 infixr 6 ~-
 infixr 5 -<
+
+
+sub :: a ⊗ k -b -> a ~-k-< b
+sub = Sub
