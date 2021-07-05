@@ -168,7 +168,7 @@ instance Representable k => FunctionIntro k (Seq k) where
 
 instance Representable k => SubtractionIntro k (Seq k) where
   subL f = mapL getSub (tensorL (wkL' f >>> poppedL2 negateL init))
-  subR a b = mapR Sub (a ⊢⊗ negateR b)
+  subR a b = mapR sub (a ⊢⊗ negateR b)
 
 
 -- Quantification
