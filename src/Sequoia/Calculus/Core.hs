@@ -51,7 +51,6 @@ module Sequoia.Calculus.Core
 
 import Control.Monad (join)
 import Data.Bifunctor
-import Data.Functor.Contravariant
 import Data.Profunctor
 import Prelude hiding (init)
 import Sequoia.Calculus.Context
@@ -161,7 +160,7 @@ popΓΔ
   => (k _Δ -> _Γ -> Γ -|s|- Rep k)
   -- -----------------------------
   ->               _Γ -|s|- _Δ
-popΓΔ f = swapΓΔ f (inK id) Γ
+popΓΔ f = swapΓΔ f idK Γ
 
 -- | Pop something off the input context which can later be pushed. Used with 'pushΓ', this provides a generalized context restructuring facility.
 --
@@ -191,7 +190,7 @@ popΔ
   => (k _Δ -> _Γ -|s|-  Rep k)
   -- -------------------------
   ->          _Γ -|s|- _Δ
-popΔ f = swapΔ f (inK id)
+popΔ f = swapΔ f idK
 
 
 -- | Pop something off the input context which can later be pushed. Used with 'pushL', this provides a generalized context restructuring facility.
@@ -222,7 +221,7 @@ popR
   => (k a -> _Γ -|s|- _Δ)
   -- -----------------------
   ->         _Γ -|s|- _Δ > a
-popR f = popΔ (\ c -> pushΔ (f (contramap inr c)) (contramap inl c))
+popR f = popΔ (\ c -> pushΔ (f (inrC c)) (inlC c))
 
 
 pushΓΔ
