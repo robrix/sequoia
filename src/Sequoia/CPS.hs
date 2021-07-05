@@ -3,7 +3,8 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Sequoia.CPS
 ( -- * CPS
-  CPS(..)
+  CPSFn
+, CPS(..)
 , inC1
 , inC2
 , exC1
@@ -76,6 +77,8 @@ import           Sequoia.Continuation
 import           Sequoia.Disjunction
 
 -- CPS
+
+type CPSFn k a b = k b -> k a
 
 class (Cat.Category c, Representable k, Profunctor c) => CPS k c | c -> k where
   inC :: (k b -> k a) -> a `c` b
