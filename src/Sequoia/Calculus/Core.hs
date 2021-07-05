@@ -53,11 +53,11 @@ import Control.Monad (join)
 import Data.Bifunctor
 import Data.Functor.Contravariant
 import Data.Profunctor
+import Prelude hiding (init)
 import Sequoia.Calculus.Context
 import Sequoia.Conjunction
 import Sequoia.Continuation
 import Sequoia.Disjunction
-import Prelude hiding (init)
 
 class Representable k => Core k s | s -> k where
   {-# MINIMAL ((>>>) | (<<<)), init #-}
