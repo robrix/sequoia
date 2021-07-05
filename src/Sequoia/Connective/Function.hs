@@ -23,7 +23,7 @@ appFun :: Representable k => (a ~~k~> b) -> (a -> k **b)
 appFun = (-<<) . getFun
 
 appFun2 :: Representable k => (a ~~k~> b ~~k~> c) -> (a -> b -> k **c)
-appFun2 f = appK2 (getFun (getFun <$> f))
+appFun2 = appCPS2
 
 liftFun :: Representable k => ((b -> Rep k) -> (a -> Rep k)) -> (a ~~k~> b)
 liftFun = Fun . inK1
