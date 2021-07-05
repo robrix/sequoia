@@ -122,7 +122,7 @@ appC2 :: CPS k c => a `c` (b `c` d) -> a -> b -> ContFn k d
 appC2 f a b k = appC f a (\ f -> appC f b k)
 
 execC :: CPS k c => () `c` a -> k **a
-execC c = liftDN0 (appC c ())
+execC c = exC c -<< ()
 
 evalC :: CPS k c => i `c` Rep k -> k i
 evalC = (•• idK)
