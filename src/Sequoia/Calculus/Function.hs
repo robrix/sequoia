@@ -62,7 +62,7 @@ funLPar
   =>  k ¬a ⅋ b < _Γ -|s|- _Δ
   -- -------------------------
   -> a ~~k~> b < _Γ -|s|- _Δ
-funLPar s = exR (parR (exR (notR (exR init)))) ->⊢ parR init >>> wkL' s
+funLPar s = parR (exR (notR (exL (init ->⊢ init)))) >>> wkL' s
 
 funRPar
   :: (Weaken k s, Exchange k s, FunctionIntro k s, ParIntro k s, NotIntro k s, Pos a, Neg b)
