@@ -124,7 +124,7 @@ appCPS :: CPS k c => a `c` b -> a -> k **b
 appCPS = (-<<) . exC
 
 appCPS2 :: CPS k c => a `c` (b `c` d) -> a -> b -> k **d
-appCPS2 c = appK2 (exC (rmap exC c))
+appCPS2 c a b = inK (\ k -> appC c a (\ f -> f •• k • b))
 
 pappCPS :: CPS k c => a `c` b -> a -> c () b
 pappCPS c a = c Cat.<<< inC (•<< const a)
