@@ -20,7 +20,7 @@ import           Sequoia.Polarity
 -- Implication
 
 appFun :: Representable k => (a ~~k~> b) -> (a -> k **b)
-appFun (Fun f) = appK1 f
+appFun = (-<<) . getFun
 
 appFun2 :: Representable k => (a ~~k~> b ~~k~> c) -> (a -> b -> k **c)
 appFun2 f = appK2 (getFun (getFun <$> f))

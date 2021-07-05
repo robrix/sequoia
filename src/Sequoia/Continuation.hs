@@ -3,7 +3,6 @@ module Sequoia.Continuation
 ( -- * Continuations
   K(..)
   -- ** Application
-, appK1
 , appK2
 , Representable(..)
 , RepFn
@@ -87,9 +86,6 @@ instance Adjunction (K m r) (K m r) where
 
 
 -- Application
-
-appK1 :: Representable k => (k b -> k a) -> (a -> k **b)
-appK1 = (-<<)
 
 appK2 :: Representable k => (k (k c -> k b) -> k a) -> (a -> b -> k **c)
 appK2 f a b = inK (\ k -> exK1 f (\ f -> f k • b) a)
