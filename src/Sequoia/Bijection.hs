@@ -1,6 +1,7 @@
 module Sequoia.Bijection
 ( -- * Bijections
-  type (<->)(..)
+  type (<->)
+, Biject
   -- ** Elimination
 , exBl
 , exBr
@@ -57,7 +58,7 @@ import           Data.Tuple (swap)
 
 -- Bijections
 
-newtype a <-> b = Bij { runBij :: forall r . ((a -> b) -> (b -> a) -> r) -> r }
+newtype a <-> b = Bij { runBij :: Biject a a b b }
 
 infix 1 <->
 
@@ -65,14 +66,19 @@ instance Cat.Category (<->) where
   id = id <-> id
   f . g = (exBl f . exBl g) <-> (exBr g . exBr f)
 
+type Biject s t a b = forall p . Profunctor p => (a `p` b) -> (s `p` t)
+
 
 -- Elimination
 
+exBs :: Biject s t a b -> ((a -> r) -> (s -> r), (t -> r) -> (b -> r))
+exBs b = (runForget . b . Forget, \ f -> f . getTagged . b . Tagged)
+
 exBl :: a <-> b -> (a -> b)
-exBl b = runBij b const
+exBl b = fst (exBs (runBij b)) id
 
 exBr :: a <-> b -> (b -> a)
-exBr b = runBij b (const id)
+exBr b = snd (exBs (runBij b)) id
 
 (<~) :: a <-> b -> (b -> a)
 (<~) = exBr
@@ -80,7 +86,7 @@ exBr b = runBij b (const id)
 infixr 9 <~
 
 (~>) :: a -> a <-> b -> b
-b ~> x = exBl x b
+(~>) = flip exBl
 
 infixl 9 ~>
 
@@ -92,7 +98,7 @@ under b = dimap (~> b) (b <~)
 -- Construction
 
 (<->) :: (a -> b) -> (b -> a) -> a <-> b
-l <-> r = Bij (\ f -> f l r)
+l <-> r = Bij (dimap l r)
 
 inv :: a <-> b -> b <-> a
 inv b = (b <~) <-> (~> b)
@@ -122,7 +128,7 @@ select :: Alternative f => (a -> Bool) -> (a -> f a)
 select p a = a <$ guard (p a)
 
 bij :: (a -> b, b -> a) <-> (a <-> b)
-bij = uncurry (<->) <-> flip runBij (,)
+bij = uncurry (<->) <-> ((,) <$> exBl <*> exBr)
 
 
 -- Coercion
@@ -204,3 +210,11 @@ lmapping a = lmap (exBr a) <-> lmap (exBl a)
 
 rmapping :: Profunctor p => (b <-> b') -> (a `p` b) <-> (a `p` b')
 rmapping b = rmap (exBl b) <-> rmap (exBr b)
+
+
+-- Tagged
+
+newtype Tagged a b = Tagged { getTagged :: b }
+
+instance Profunctor Tagged where
+  dimap _ g = Tagged . g . getTagged
