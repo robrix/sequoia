@@ -5,8 +5,10 @@ module Sequoia.Connective.Subtraction
 , type (-<)
 , sub
 , getSub
+, subK
 ) where
 
+import Sequoia.Conjunction
 import Sequoia.Connective.Negate
 import Sequoia.Connective.Tensor
 import Sequoia.Polarity
@@ -29,3 +31,6 @@ sub = Sub
 
 getSub :: a ~-k-< b -> a ⊗ k -b
 getSub (Sub s) = s
+
+subK :: a ~-k-< b -> k b
+subK = getNegate . exr . getSub
