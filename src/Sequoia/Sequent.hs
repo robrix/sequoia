@@ -52,7 +52,7 @@ liftLR = dimap exl inr . Seq . exC
 
 
 lowerLR :: CPS k c => (c a b -> _Γ -|Seq k|- _Δ) -> a < _Γ -|Seq k|- _Δ > b -> _Γ -|Seq k|- _Δ
-lowerLR f p = Seq $ inK . \ _Δ _Γ -> f (inC (inK . \ b a -> p •• (_Δ |> b) • (a <| _Γ))) •• _Δ • _Γ
+lowerLR f p = Seq $ inK1 (\ _Δ _Γ -> appC (f (inC (inK1 (\ b a -> appC p (a <| _Γ) (_Δ <--> b))))) _Γ _Δ)
 
 
 -- Effectful sequents
@@ -85,14 +85,14 @@ deriving via Contextually (Seq k) instance Representable k => Exchange k (Seq k)
 -- Contextual rules
 
 instance Representable k => Contextual k (Seq k) where
-  swapΓΔ f _Δ' _Γ' = Seq (inK . \ _Δ _Γ -> f _Δ _Γ •• _Δ' • _Γ')
+  swapΓΔ f _Δ' _Γ' = Seq (inK1 (\ _Δ _Γ -> appC (f (inK _Δ) _Γ) _Γ' (exK _Δ')))
 
 
 -- Control
 
 instance Control Seq where
-  reset s = Seq (inK . \ _Δ -> exK _Δ . exK (evalSeq s))
-  shift s = Seq (inK . \ _Δ _Γ -> s •• (inlC _Δ |> idK) • (inrC _Δ <| _Γ))
+  reset s = Seq (inK1 (\ _Δ -> _Δ . exK (evalSeq s)))
+  shift s = Seq (inK1 (\ _Δ _Γ -> appC s (inrC (inK _Δ) <| _Γ) (_Δ . inl <--> id)))
 
 
 -- Negation
@@ -176,7 +176,7 @@ instance Representable k => SubtractionIntro k (Seq k) where
 
 instance Representable k => UniversalIntro k (Seq k) where
   forAllL p = mapL (notNegate . runForAll) p
-  forAllR p = Seq (inK . \ _Δ _Γ -> inrC _Δ • ForAll (inK (\ k -> p •• (inlC _Δ |> k) • _Γ)))
+  forAllR p = Seq (inK1 (\ _Δ _Γ -> _Δ (inr (ForAll (inK (\ k -> appC p _Γ (_Δ . inl <--> exK k)))))))
 
 instance Representable k => ExistentialIntro k (Seq k) where
   existsL p = popL (dnE . runExists (pushL p))

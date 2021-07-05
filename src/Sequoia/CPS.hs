@@ -144,7 +144,7 @@ evalCM :: (CPS k c, MonadK k m) => i `c` Rep k -> (i -> m ())
 evalCM c i = jump (inK (const (evalC c • i)))
 
 dnE :: CPS k c => k **(a `c` b) -> a `c` b
-dnE f = inC (inK . \ k a -> f • inK (\ f -> f •• k • a))
+dnE f = inC (inK1 (\ k a -> f • inK (\ f -> appC f a k)))
 
 
 -- Currying
@@ -159,7 +159,7 @@ uncurryC c = inC (\ k -> inK (($ exK k) . uncurry (appC2 c)))
 -- Delimited continuations
 
 resetC :: (CPS j cj, CPS k ck) => ck i (Rep k) -> cj i (Rep k)
-resetC c = inC (inK . \ k -> exK k . exK (evalC c))
+resetC c = inC (inK1 (\ k -> k . exK (evalC c)))
 
 shiftC :: CPS k c => (k o -> c i (Rep k)) -> c i o
 shiftC f = inC (evalC . f)
@@ -204,13 +204,13 @@ arrCPS :: CPS k c => (a -> b) -> c a b
 arrCPS = cps
 
 firstCPS :: CPS k c => c a b -> c (a, d) (b, d)
-firstCPS  f = inC (inK . (\ k (l, r) -> appC f l ((k •) . (,r))))
+firstCPS  f = inC (inK1 (\ k (l, r) -> appC f l (k . (,r))))
 
 secondCPS :: CPS k c => c a b -> c (d, a) (d, b)
-secondCPS g = inC (inK . (\ k (l, r) -> appC g r ((k •) . (l,))))
+secondCPS g = inC (inK1 (\ k (l, r) -> appC g r (k . (l,))))
 
 splitPrdCPS :: CPS k c => c a b -> c a' b' -> c (a, a') (b, b')
-splitPrdCPS f g = inC (inK . (\ k (l, r) -> appC f l (appC g r . fmap (k •) . (,))))
+splitPrdCPS f g = inC (inK1 (\ k (l, r) -> appC f l (appC g r . fmap k . (,))))
 
 fanoutCPS :: CPS k c => c a b -> c a b' -> c a (b, b')
 fanoutCPS = liftA2CPS (,)
