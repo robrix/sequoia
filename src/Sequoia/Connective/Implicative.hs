@@ -1,2 +1,8 @@
 module Sequoia.Connective.Implicative
-() where
+( -- * Connectives
+  module Sequoia.Connective.Function
+, module Sequoia.Connective.Subtraction
+) where
+
+import Sequoia.Connective.Function
+import Sequoia.Connective.Subtraction
