@@ -115,6 +115,8 @@ exK2 = dimap2 inK inK exK
 (•) :: Representable k => k a -> RepFn k a
 (•) = index
 
+infixl 9 •
+
 
 dimap2 :: (a' -> a) -> (b' -> b) -> (c -> c') -> (a -> b -> c) -> (a' -> b' -> c')
 dimap2 l1 l2 r f a1 a2 = r (f (l1 a1) (l2 a2))
