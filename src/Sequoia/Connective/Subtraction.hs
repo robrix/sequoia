@@ -5,6 +5,7 @@ module Sequoia.Connective.Subtraction
 , type (-<)
 , sub
 , getSub
+, subA
 , subK
 ) where
 
@@ -31,6 +32,9 @@ sub = Sub
 
 getSub :: a ~-k-< b -> a ⊗ k -b
 getSub (Sub s) = s
+
+subA :: a ~-k-< b -> a
+subA = exl . getSub
 
 subK :: a ~-k-< b -> k b
 subK = getNegate . exr . getSub
