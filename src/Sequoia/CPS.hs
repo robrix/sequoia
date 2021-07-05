@@ -17,6 +17,7 @@ module Sequoia.CPS
 , appC
 , appC2
 , appCM
+, appCM2
 , execC
 , evalC
 , dnE
@@ -124,6 +125,9 @@ appC2 f a b k = appC f a (\ f -> appC f b k)
 
 appCM :: (CPS k c, MonadK k m) => a `c` b -> (a -> m b)
 appCM c a = jump (inK (\ k -> c •• k • a))
+
+appCM2 :: (CPS k c, MonadK k m) => a `c` (b `c` d) -> (a -> b -> m d)
+appCM2 c a b = jump (inK (\ k -> c •• inK (\ c -> c •• k • b) • a))
 
 execC :: CPS k c => () `c` a -> k **a
 execC c = exC c -<< ()
