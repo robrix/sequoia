@@ -15,7 +15,6 @@ module Sequoia.CPS
 , liftCPS
   -- ** Elimination
 , appC
-, appCPS
 , appCPS2
 , pappCPS
 , execCPS
@@ -120,9 +119,6 @@ liftCPS = inC . fmap inK . flip
 appC :: CPS k c => a `c` b -> a -> RepFn k b -> Rep k
 appC c a k = c •• inK k • a
 
-appCPS :: CPS k c => a `c` b -> a -> k **b
-appCPS = (-<<) . exC
-
 appCPS2 :: CPS k c => a `c` (b `c` d) -> a -> b -> k **d
 appCPS2 c a b = inK (\ k -> appC c a (\ f -> f •• k • b))
 
@@ -130,7 +126,7 @@ pappCPS :: CPS k c => a `c` b -> a -> c () b
 pappCPS c a = c Cat.<<< inC (•<< const a)
 
 execCPS :: CPS k c => () `c` a -> k **a
-execCPS c = appCPS c ()
+execCPS c = liftDN0 (appC c ())
 
 evalCPS :: CPS k c => i `c` Rep k -> k i
 evalCPS = (•• idK)
@@ -196,13 +192,13 @@ arrCPS :: CPS k c => (a -> b) -> c a b
 arrCPS = cps
 
 firstCPS :: CPS k c => c a b -> c (a, d) (b, d)
-firstCPS  f = inC (inK . (\ k (l, r) -> appCPS f l • (k •<< (,r))))
+firstCPS  f = inC (inK . (\ k (l, r) -> appC f l ((k •) . (,r))))
 
 secondCPS :: CPS k c => c a b -> c (d, a) (d, b)
-secondCPS g = inC (inK . (\ k (l, r) -> appCPS g r • (k •<< (l,))))
+secondCPS g = inC (inK . (\ k (l, r) -> appC g r ((k •) . (l,))))
 
 splitPrdCPS :: CPS k c => c a b -> c a' b' -> c (a, a') (b, b')
-splitPrdCPS f g = inC (inK . (\ k (l, r) -> appCPS f l • (appCPS g r •<< (k •<<) . (,))))
+splitPrdCPS f g = inC (inK . (\ k (l, r) -> appC f l (appC g r . fmap (k •) . (,))))
 
 fanoutCPS :: CPS k c => c a b -> c a b' -> c a (b, b')
 fanoutCPS = liftA2CPS (,)
@@ -226,7 +222,7 @@ faninCPS f g = inC ((<••>) <$> exC f <*> exC g)
 -- ArrowApply
 
 applyCPS :: CPS k c => c (c a b, a) b
-applyCPS = inC (>>- uncurry appCPS)
+applyCPS = inC (>>- uncurry (fmap liftDN0 . appC))
 
 
 -- Traversing
@@ -250,7 +246,7 @@ rmapCPS = (id `dimapCPS`)
 -- Sieve
 
 sieveCPS :: CPS k c => a `c` b -> (a -> k ••b)
-sieveCPS = fmap Cont . appCPS
+sieveCPS = fmap (Cont . liftDN0) . appC
 
 
 -- Representable
