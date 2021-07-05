@@ -96,6 +96,7 @@ library
     Sequoia.Calculus.XOr
     Sequoia.Calculus.Zero
     Sequoia.Conjunction
+    Sequoia.Connective.Additive
     Sequoia.Connective.Bottom
     Sequoia.Connective.Down
     Sequoia.Connective.Exists
