@@ -47,3 +47,8 @@
 
 # Define some custom infix operators
 - fixity: infix 1 <->
+- fixity: infixl 9 **
+- fixity: infixl 9 •
+- fixity: infixl 9 ••
+- fixity: infix 3 <-->
+- fixity: infix 4 -><-
