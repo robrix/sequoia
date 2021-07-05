@@ -104,6 +104,7 @@ library
     Sequoia.Connective.Function
     Sequoia.Connective.Iff
     Sequoia.Connective.Mu
+    Sequoia.Connective.Multiplicative
     Sequoia.Connective.Negate
     Sequoia.Connective.Negation
     Sequoia.Connective.Not
