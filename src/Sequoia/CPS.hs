@@ -21,6 +21,7 @@ module Sequoia.CPS
 , execC
 , execCM
 , evalC
+, evalCM
 , dnE
   -- ** Currying
 , curryC
@@ -138,6 +139,9 @@ execCM = jump . execC
 
 evalC :: CPS k c => i `c` Rep k -> k i
 evalC = (•• idK)
+
+evalCM :: (CPS k c, MonadK k m) => i `c` Rep k -> (i -> m ())
+evalCM c i = jump (inK (const (evalC c • i)))
 
 dnE :: CPS k c => k **(a `c` b) -> a `c` b
 dnE f = inC (inK . \ k a -> f • inK (\ f -> f •• k • a))
