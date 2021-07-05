@@ -123,7 +123,7 @@ appC2 :: CPS k c => a `c` (b `c` d) -> a -> b -> ContFn k d
 appC2 f a b k = appC f a (\ f -> appC f b k)
 
 pappCPS :: CPS k c => a `c` b -> a -> c () b
-pappCPS c a = c Cat.<<< inC (•<< const a)
+pappCPS c a = inC ((a >$) . (c ••))
 
 execCPS :: CPS k c => () `c` a -> k **a
 execCPS c = liftDN0 (appC c ())
