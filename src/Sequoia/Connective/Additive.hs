@@ -1,6 +1,7 @@
 module Sequoia.Connective.Additive
 ( -- * Duals
   elimWith
+, elimSum
   -- * Connectives
 , module Sequoia.Connective.Sum
 , module Sequoia.Connective.Top
@@ -19,3 +20,6 @@ import Sequoia.Disjunction
 
 elimWith :: Representable k => a & b -> k -a ⊕ k -b -> Rep k
 elimWith = flip ((. exl) . (•) <--> (. exr) . (•))
+
+elimSum :: Representable k => a ⊕ b -> k ¬a & k ¬b -> Rep k
+elimSum = (. exl) . flip (•) <--> (. exr) . flip (•)
