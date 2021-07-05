@@ -17,7 +17,7 @@ module Sequoia.CPS
 , appC
 , appC2
 , execC
-, evalCPS
+, evalC
 , dnE
   -- ** Currying
 , curryCPS
@@ -124,8 +124,8 @@ appC2 f a b k = appC f a (\ f -> appC f b k)
 execC :: CPS k c => () `c` a -> k **a
 execC c = liftDN0 (appC c ())
 
-evalCPS :: CPS k c => i `c` Rep k -> k i
-evalCPS = (•• idK)
+evalC :: CPS k c => i `c` Rep k -> k i
+evalC = (•• idK)
 
 dnE :: CPS k c => k **(a `c` b) -> a `c` b
 dnE f = inC (inK . \ k a -> f • inK (\ f -> f •• k • a))
@@ -143,10 +143,10 @@ uncurryCPS c = inC (\ k -> inK (($ exK k) . uncurry (appC2 c)))
 -- Delimited continuations
 
 resetCPS :: (CPS j cj, CPS k ck) => ck i (Rep k) -> cj i (Rep k)
-resetCPS c = inC (inK . \ k -> exK k . exK (evalCPS c))
+resetCPS c = inC (inK . \ k -> exK k . exK (evalC c))
 
 shiftCPS :: CPS k c => (k o -> c i (Rep k)) -> c i o
-shiftCPS f = inC (evalCPS . f)
+shiftCPS f = inC (evalC . f)
 
 
 -- Category
