@@ -4,6 +4,7 @@ module Sequoia.Connective.Subtraction
 , type (~-)
 , type (-<)
 , sub
+, getSub
 ) where
 
 import Sequoia.Connective.Negate
@@ -12,7 +13,7 @@ import Sequoia.Polarity
 
 -- Subtraction
 
-newtype Sub k a b = Sub { getSub :: a ⊗ k -b }
+newtype Sub k a b = Sub (a ⊗ k -b)
 
 instance (Pos a, Neg b) => Polarized P (Sub k a b) where
 
@@ -25,3 +26,6 @@ infixr 5 -<
 
 sub :: a ⊗ k -b -> a ~-k-< b
 sub = Sub
+
+getSub :: a ~-k-< b -> a ⊗ k -b
+getSub (Sub s) = s
