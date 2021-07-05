@@ -16,7 +16,7 @@ module Sequoia.CPS
   -- ** Elimination
 , appC
 , appC2
-, execCPS
+, execC
 , evalCPS
 , dnE
   -- ** Currying
@@ -121,8 +121,8 @@ appC c a k = c •• inK k • a
 appC2 :: CPS k c => a `c` (b `c` d) -> a -> b -> ContFn k d
 appC2 f a b k = appC f a (\ f -> appC f b k)
 
-execCPS :: CPS k c => () `c` a -> k **a
-execCPS c = liftDN0 (appC c ())
+execC :: CPS k c => () `c` a -> k **a
+execC c = liftDN0 (appC c ())
 
 evalCPS :: CPS k c => i `c` Rep k -> k i
 evalCPS = (•• idK)
@@ -224,7 +224,7 @@ applyCPS = inC (>>- uncurry (fmap liftDN0 . appC))
 -- Traversing
 
 wanderCPS :: (CPS k c, Applicative (c ())) => (forall f . Applicative f => (a -> f b) -> (s -> f t)) -> (c a b -> c s t)
-wanderCPS traverse c = liftCPS (exK . execCPS . traverse (pappC c))
+wanderCPS traverse c = liftCPS (exK . execC . traverse (pappC c))
   where
   pappC :: CPS k c => c a b -> a -> c () b
   pappC c a = inC ((a >$) . (c ••))
