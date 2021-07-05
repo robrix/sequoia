@@ -35,7 +35,7 @@ import           Sequoia.Disjunction
 -- Sequents
 
 evalSeq :: Representable k => _Δ ~ Rep k => _Γ -|Seq k|- _Δ -> k _Γ
-evalSeq = (`runSeq` idK)
+evalSeq = evalC
 
 newtype Seq k _Γ _Δ = Seq { runSeq :: k _Δ -> k _Γ }
   deriving (Cat.Category, Profunctor) via ViaCPS (Seq k) k
@@ -51,7 +51,7 @@ liftLR = dimap exl inr . Seq . exC
 
 
 lowerLR :: CPS k c => (c a b -> _Γ -|Seq k|- _Δ) -> a < _Γ -|Seq k|- _Δ > b -> _Γ -|Seq k|- _Δ
-lowerLR f p = Seq $ inK . \ k i -> exK (runSeq (f (inC (\ kb -> runSeq p (k |> kb) •<< (<| i)))) k) i
+lowerLR f p = Seq $ inK . \ _Δ _Γ -> f (inC (inK . \ b a -> p •• (_Δ |> b) • (a <| _Γ))) •• _Δ • _Γ
 
 
 -- Effectful sequents
@@ -84,14 +84,14 @@ deriving via Contextually (Seq k) instance Representable k => Exchange k (Seq k)
 -- Contextual rules
 
 instance Representable k => Contextual k (Seq k) where
-  swapΓΔ f _Δ' _Γ' = Seq (inK . \ _Δ _Γ -> exK (runSeq (f _Δ _Γ) _Δ') _Γ')
+  swapΓΔ f _Δ' _Γ' = Seq (inK . \ _Δ _Γ -> f _Δ _Γ •• _Δ' • _Γ')
 
 
 -- Control
 
 instance Control Seq where
-  reset s = Seq (•<< exK (evalSeq s))
-  shift p = Seq (\ k -> runSeq p (inlC k |> idK) •<< (inrC k <|))
+  reset s = Seq (inK . \ _Δ -> exK _Δ . exK (evalSeq s))
+  shift s = Seq (inK . \ _Δ _Γ -> s •• (inlC _Δ |> idK) • (inrC _Δ <| _Γ))
 
 
 -- Negation
@@ -175,7 +175,7 @@ instance Representable k => SubtractionIntro k (Seq k) where
 
 instance Representable k => UniversalIntro k (Seq k) where
   forAllL p = mapL (notNegate . runForAll) p
-  forAllR p = Seq (inK . \ k a -> exK (inrC k) (ForAll (inK ((`exK` a) . runSeq p . (inlC k |>)))))
+  forAllR p = Seq (inK . \ _Δ _Γ -> inrC _Δ • ForAll (inK (\ k -> p •• (inlC _Δ |> k) • _Γ)))
 
 instance Representable k => ExistentialIntro k (Seq k) where
   existsL p = popL (dnE . runExists (pushL p))
