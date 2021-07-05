@@ -103,6 +103,7 @@ library
     Sequoia.Connective.ForAll
     Sequoia.Connective.Function
     Sequoia.Connective.Iff
+    Sequoia.Connective.Implicative
     Sequoia.Connective.Mu
     Sequoia.Connective.Multiplicative
     Sequoia.Connective.Negate
