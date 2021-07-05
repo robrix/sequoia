@@ -20,11 +20,11 @@ module Sequoia.CPS
 , evalC
 , dnE
   -- ** Currying
-, curryCPS
-, uncurryCPS
+, curryC
+, uncurryC
   -- * Delimited continuations
-, resetCPS
-, shiftCPS
+, resetC
+, shiftC
   -- ** Category
 , idCPS
 , composeCPS
@@ -133,20 +133,20 @@ dnE f = inC (inK . \ k a -> f • inK (\ f -> f •• k • a))
 
 -- Currying
 
-curryCPS :: CPS k c => (a, b) `c` d -> a `c` (b `c` d)
-curryCPS c = inC (•<< (`lmap` c) . (,))
+curryC :: CPS k c => (a, b) `c` d -> a `c` (b `c` d)
+curryC c = inC (•<< (`lmap` c) . (,))
 
-uncurryCPS :: CPS k c => a `c` (b `c` d) -> (a, b) `c` d
-uncurryCPS c = inC (\ k -> inK (($ exK k) . uncurry (appC2 c)))
+uncurryC :: CPS k c => a `c` (b `c` d) -> (a, b) `c` d
+uncurryC c = inC (\ k -> inK (($ exK k) . uncurry (appC2 c)))
 
 
 -- Delimited continuations
 
-resetCPS :: (CPS j cj, CPS k ck) => ck i (Rep k) -> cj i (Rep k)
-resetCPS c = inC (inK . \ k -> exK k . exK (evalC c))
+resetC :: (CPS j cj, CPS k ck) => ck i (Rep k) -> cj i (Rep k)
+resetC c = inC (inK . \ k -> exK k . exK (evalC c))
 
-shiftCPS :: CPS k c => (k o -> c i (Rep k)) -> c i o
-shiftCPS f = inC (evalC . f)
+shiftC :: CPS k c => (k o -> c i (Rep k)) -> c i o
+shiftC f = inC (evalC . f)
 
 
 -- Category
