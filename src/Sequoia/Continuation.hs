@@ -1,3 +1,4 @@
+{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE TypeFamilies #-}
 module Sequoia.Continuation
 ( -- * Continuations
@@ -49,6 +50,8 @@ module Sequoia.Continuation
 , type (••)(..)
 , inCont
 , exCont
+  -- * Monadic abstraction
+, MonadK(..)
 ) where
 
 import qualified Control.Category as Cat
@@ -246,3 +249,12 @@ inCont = Cont . inK . lmap exK
 
 exCont :: Representable k => k ••a -> ContFn k a
 exCont = lmap inK . exK . runCont
+
+
+-- Monadic abstraction
+
+class (Representable k, Monad m) => MonadK k m | m -> k where
+  jump :: k **a -> m a
+
+instance Representable k => MonadK k ((••) k) where
+  jump = Cont
