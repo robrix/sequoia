@@ -4,9 +4,9 @@ module Sequoia.Connective.Subtraction
 , type (~-)
 , type (-<)
 , sub
-, getSub
 ) where
 
+import Sequoia.Bijection
 import Sequoia.Connective.Negate
 import Sequoia.Connective.Tensor
 import Sequoia.Polarity
@@ -24,8 +24,5 @@ infixr 6 ~-
 infixr 5 -<
 
 
-sub :: a ⊗ k -b -> a ~-k-< b
-sub (a :⊗ k) = Sub a (getNegate k)
-
-getSub :: a ~-k-< b -> a ⊗ k -b
-getSub (Sub a k) = a :⊗ Negate k
+sub :: a ⊗ k -b <-> a ~-k-< b
+sub = (\ (a :⊗ k) -> Sub a (getNegate k)) <-> (\ (Sub a k) -> a :⊗ Negate k)

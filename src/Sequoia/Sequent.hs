@@ -14,6 +14,7 @@ import qualified Control.Category as Cat
 import           Control.Monad.Trans.Class
 import           Data.Profunctor
 import           Prelude hiding (init)
+import           Sequoia.Bijection
 import           Sequoia.CPS
 import           Sequoia.Calculus.Additive
 import           Sequoia.Calculus.Context
@@ -167,8 +168,8 @@ instance Representable k => FunctionIntro k (Seq k) where
   funR = lowerLR liftR . wkR'
 
 instance Representable k => SubtractionIntro k (Seq k) where
-  subL f = mapL getSub (tensorL (wkL' f >>> poppedL2 negateL init))
-  subR a b = mapR sub (a ⊢⊗ negateR b)
+  subL f = mapL (sub <~) (tensorL (wkL' f >>> poppedL2 negateL init))
+  subR a b = mapR (~> sub) (a ⊢⊗ negateR b)
 
 
 -- Quantification
