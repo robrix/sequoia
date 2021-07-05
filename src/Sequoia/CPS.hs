@@ -14,6 +14,7 @@ module Sequoia.CPS
 , cps
 , liftCPS
   -- ** Elimination
+, appC
 , appCPS
 , appCPS2
 , pappCPS
@@ -115,6 +116,9 @@ liftCPS = inC . fmap inK . flip
 
 
 -- Elimination
+
+appC :: CPS k c => a `c` b -> a -> RepFn k b -> Rep k
+appC c a k = c •• inK k • a
 
 appCPS :: CPS k c => a `c` b -> a -> k **b
 appCPS = (-<<) . exC
