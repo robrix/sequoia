@@ -1,5 +1,6 @@
 module Sequoia.Connective.Multiplicative
 ( elimPar
+, elimTensor
   -- * Connectives
 , module Sequoia.Connective.Bottom
 , module Sequoia.Connective.One
@@ -18,3 +19,6 @@ import Sequoia.Disjunction
 
 elimPar :: Representable k => a ⅋ b -> k -a ⊗ k -b -> Rep k
 elimPar = (. exl) . flip (•) <--> (. exr) . flip (•)
+
+elimTensor :: Representable k => a ⊗ b -> k ¬a ⅋ k ¬b -> Rep k
+elimTensor = flip ((. exl) . (•) <--> (. exr) . (•))
