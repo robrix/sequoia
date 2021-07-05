@@ -19,6 +19,7 @@ module Sequoia.CPS
 , appCM
 , appCM2
 , execC
+, execCM
 , evalC
 , dnE
   -- ** Currying
@@ -131,6 +132,9 @@ appCM2 c a b = jump (inK (\ k -> c •• inK (\ c -> c •• k • b) • a))
 
 execC :: CPS k c => () `c` a -> k **a
 execC c = exC c -<< ()
+
+execCM :: (CPS k c, MonadK k m) => () `c` a -> m a
+execCM = jump . execC
 
 evalC :: CPS k c => i `c` Rep k -> k i
 evalC = (•• idK)
