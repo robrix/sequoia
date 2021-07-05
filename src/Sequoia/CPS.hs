@@ -81,25 +81,25 @@ import           Sequoia.Disjunction
 type CPSFn k a b = k b -> k a
 
 class (Cat.Category c, Representable k, Profunctor c) => CPS k c | c -> k where
-  inC :: (k b -> k a) -> a `c` b
-  exC :: a `c` b      -> (k b -> k a)
+  inC :: CPSFn k a b -> a `c` b
+  exC :: a `c` b     -> CPSFn k a b
 
 
-inC1 :: CPS k c => ((k b1 -> k a1) -> (k b2 -> k a2)) -> (a1 `c` b1 -> a2 `c` b2)
+inC1 :: CPS k c => (CPSFn k a1 b1 -> CPSFn k a2 b2) -> (a1 `c` b1 -> a2 `c` b2)
 inC1 = dimap exC inC
 
-inC2 :: CPS k c => ((k b1 -> k a1) -> (k b2 -> k a2) -> (k b3 -> k a3)) -> (a1 `c` b1 -> a2 `c` b2 -> a3 `c` b3)
+inC2 :: CPS k c => (CPSFn k a1 b1 -> CPSFn k a2 b2 -> CPSFn k a3 b3) -> (a1 `c` b1 -> a2 `c` b2 -> a3 `c` b3)
 inC2 = dimap2 exC exC inC
 
 
-exC1 :: CPS k c => (a1 `c` b1 -> a2 `c` b2) -> ((k b1 -> k a1) -> (k b2 -> k a2))
+exC1 :: CPS k c => (a1 `c` b1 -> a2 `c` b2) -> (CPSFn k a1 b1 -> CPSFn k a2 b2)
 exC1 = dimap inC exC
 
-exC2 :: CPS k c => (a1 `c` b1 -> a2 `c` b2 -> a3 `c` b3) -> ((k b1 -> k a1) -> (k b2 -> k a2) -> (k b3 -> k a3))
+exC2 :: CPS k c => (a1 `c` b1 -> a2 `c` b2 -> a3 `c` b3) -> (CPSFn k a1 b1 -> CPSFn k a2 b2 -> CPSFn k a3 b3)
 exC2 = dimap2 inC inC exC
 
 
-(••) :: CPS k c => a `c` b -> (k b -> k a)
+(••) :: CPS k c => a `c` b -> CPSFn k a b
 (••) = exC
 
 infixl 9 ••
