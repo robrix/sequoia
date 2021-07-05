@@ -116,7 +116,7 @@ liftCPS = inC . fmap inK . flip
 
 -- Elimination
 
-appC :: CPS k c => a `c` b -> a -> RepFn k b -> Rep k
+appC :: CPS k c => a `c` b -> a -> ContFn k b
 appC c a k = c •• inK k • a
 
 appCPS2 :: CPS k c => a `c` (b `c` d) -> a -> b -> k **d
