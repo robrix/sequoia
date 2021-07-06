@@ -8,6 +8,8 @@ module Sequoia.Bijection
 , Optic(..)
 , Iso
   -- ** Elimination
+, views
+, reviews
 , (<~)
 , (~>)
 , over
