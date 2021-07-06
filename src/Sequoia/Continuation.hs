@@ -100,7 +100,7 @@ inK :: Representable k => RepFn k a ->       k a
 inK = tabulate
 
 inK1 :: Representable k => (RepFn k a -> RepFn k b) -> (k a -> k b)
-inK1 = under (inv _K)
+inK1 = under (from _K)
 
 inK2 :: Representable k => (RepFn k a -> RepFn k b -> RepFn k c) -> (k a -> k b -> k c)
 inK2 = dimap2 exK exK inK
@@ -129,7 +129,7 @@ dimap2 l1 l2 r f a1 a2 = r (f (l1 a1) (l2 a2))
 -- Coercion
 
 coerceKWith :: (Representable k1, Representable k2) => (RepFn k1 a -> RepFn k2 b) -> (k1 a -> k2 b)
-coerceKWith = under (inv _K)
+coerceKWith = under (from _K)
 
 coerceK :: (Representable k1, Representable k2, Rep k1 ~ Rep k2) => (k1 a -> k2 a)
 coerceK = inK . exK

@@ -14,7 +14,7 @@ module Sequoia.Bijection
 , under
   -- ** Construction
 , (<->)
-, inv
+, from
 , constant
 , involuted
 , flipped
@@ -127,8 +127,8 @@ under b = dimap (~> b) (b <~)
 (<->) :: Bijection r s t a b => (s -> a) -> (b -> t) -> r
 l <-> r = inB (dimap l r)
 
-inv :: (Bijection r s t a b) => r -> Inv r
-inv b = (b <~) <-> (~> b)
+from :: (Bijection r s t a b) => r -> Inv r
+from b = (b <~) <-> (~> b)
 
 newtype Inv r = Inv { runInv :: r }
 
