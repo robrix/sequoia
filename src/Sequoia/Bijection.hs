@@ -278,6 +278,18 @@ rmapping b = rmap (exBl b) <-> rmap (exBr b)
 -- Tagged
 
 newtype Tagged a b = Tagged { getTagged :: b }
+  deriving (Functor)
+
+instance Applicative (Tagged a) where
+  pure = Tagged
+  (<*>) = coerce
 
 instance Profunctor Tagged where
   dimap _ g = Tagged . g . getTagged
+
+instance Choice Tagged where
+  left'  = Tagged . Left  . getTagged
+  right' = Tagged . Right . getTagged
+
+instance Closed Tagged where
+  closed (Tagged b) = Tagged (const b)
