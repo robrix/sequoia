@@ -92,7 +92,7 @@ instance Adjunction (K m r) (K m r) where
 
 type RepFn k a = a -> Rep k
 
-_K :: Representable k => RepFn k a <-> k a
+_K :: (Representable k, Representable k') => Poly (RepFn k a) (RepFn k' a') (k a) (k' a')
 _K = inK <-> exK
 
 
