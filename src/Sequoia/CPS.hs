@@ -171,7 +171,7 @@ apCPS :: CPS k c => c a (b -> b') -> (c a b -> c a b')
 apCPS f a = inC (inK1 (\ k a' -> f •• inK (\ f -> a •• inK (k . f) • a') • a'))
 
 liftA2CPS :: CPS k c => (x -> y -> z) -> c a x -> c a y -> c a z
-liftA2CPS f a b = inC (\ k -> inK (\ a' -> a •• inK ((• a') . exC b . (k •<<) . f) • a'))
+liftA2CPS f a b = inC (inK1 (\ k a' -> appC a a' (appC b a' . (k .) . f)))
 
 
 -- Monad
