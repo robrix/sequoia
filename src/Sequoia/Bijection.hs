@@ -25,6 +25,7 @@ module Sequoia.Bijection
 , swapped
 , non
 , bij
+, dimap2
   -- ** Composition
 , type (∨)
 , idB
@@ -154,6 +155,9 @@ select p a = a <$ guard (p a)
 
 bij :: (a <-> b) <-> (a -> b, b -> a)
 bij = ((,) <$> flip (~>) <*> (<~)) <-> uncurry (<->)
+
+dimap2 :: (a' -> a) -> (b' -> b) -> (c -> c') -> (a -> b -> c) -> (a' -> b' -> c')
+dimap2 l1 l2 r f a1 a2 = r (f (l1 a1) (l2 a2))
 
 
 -- Composition

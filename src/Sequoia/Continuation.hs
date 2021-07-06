@@ -16,7 +16,6 @@ module Sequoia.Continuation
 , exK1
 , exK2
 , (•)
-, dimap2
   -- ** Coercion
 , coerceKWith
 , coerceK
@@ -129,10 +128,6 @@ exK2 = dimap2 inK inK exK
 (•) = index
 
 infixl 9 •
-
-
-dimap2 :: (a' -> a) -> (b' -> b) -> (c -> c') -> (a -> b -> c) -> (a' -> b' -> c')
-dimap2 l1 l2 r f a1 a2 = r (f (l1 a1) (l2 a2))
 
 
 -- Coercion
