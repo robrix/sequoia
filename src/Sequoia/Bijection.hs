@@ -61,7 +61,7 @@ module Sequoia.Bijection
 , _Left
 , _Right
   -- * Tagged
-, Tagged
+, Tagged(..)
 ) where
 
 import           Control.Applicative (Alternative)
