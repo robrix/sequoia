@@ -5,6 +5,7 @@ module Sequoia.CPS
 ( -- * CPS
   CPSFn
 , CPS(..)
+, _CPS
 , inC1
 , (••)
   -- ** Construction
@@ -73,6 +74,7 @@ import           Data.Profunctor
 import qualified Data.Profunctor.Rep as Pro
 import           Data.Profunctor.Sieve
 import           Data.Profunctor.Traversing
+import           Sequoia.Bijection
 import           Sequoia.Continuation
 import           Sequoia.Disjunction
 
@@ -83,6 +85,10 @@ type CPSFn k a b = k b -> k a
 class (Cat.Category c, Representable k, Profunctor c) => CPS k c | c -> k where
   inC :: CPSFn k a b -> a `c` b
   exC :: a `c` b     -> CPSFn k a b
+
+
+_CPS :: (CPS k c, CPS k' c') => Poly (CPSFn k a b) (CPSFn k' a' b') (c a b) (c' a' b')
+_CPS = inC <-> exC
 
 
 inC1 :: CPS k c => (RepFn k b -> RepFn k a) -> a `c` b
