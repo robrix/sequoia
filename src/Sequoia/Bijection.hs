@@ -85,11 +85,11 @@ instance Bijection (a <-> b) a a b b where
 exBs :: Biject s t a b -> ((a -> r) -> (s -> r), (t -> r) -> (b -> r))
 exBs b = (runForget . b . Forget, \ f -> f . getTagged . b . Tagged)
 
-exBl :: a <-> b -> (a -> b)
-exBl b = fst (exBs (runBij b)) id
+exBl :: Bijection r s t a b => r -> (s -> a)
+exBl b = fst (exBs (exB b)) id
 
-exBr :: a <-> b -> (b -> a)
-exBr b = snd (exBs (runBij b)) id
+exBr :: Bijection r s t a b => r -> (b -> t)
+exBr b = snd (exBs (exB b)) id
 
 (<~) :: a <-> b -> (b -> a)
 (<~) = exBr
