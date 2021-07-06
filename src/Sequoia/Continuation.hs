@@ -110,7 +110,7 @@ exK :: Representable k =>       k a -> RepFn k a
 exK = index
 
 exK1 :: Representable k => (k a -> k b) -> (RepFn k a -> RepFn k b)
-exK1 = dimap inK exK
+exK1 = under _K
 
 exK2 :: Representable k => (k a -> k b -> k c) -> (RepFn k a -> RepFn k b -> RepFn k c)
 exK2 = dimap2 inK inK exK
