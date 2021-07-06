@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Value
 ( -- * Values
   Value
@@ -14,6 +15,7 @@ module Sequoia.Value
 , V(..)
 ) where
 
+import Data.Distributive
 import Data.Functor.Rep
 import Sequoia.Bijection
 
@@ -46,3 +48,8 @@ exV2 = dimap2 inV inV exV
 
 
 newtype V f s a = V { runV :: f s -> a }
+  deriving (Applicative, Functor, Monad, Representable)
+
+instance Distributive (V f s) where
+  distribute = distributeRep
+  collect = collectRep
