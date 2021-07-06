@@ -27,6 +27,7 @@ module Sequoia.Bijection
 , bij
   -- ** Composition
 , type (∨)
+, idB
 , (%)
   -- ** Coercion
 , coerced
@@ -163,6 +164,9 @@ bij = uncurry (<->) <-> ((,) <$> exBl <*> exBr)
 -- Composition
 
 class (c1 p, c2 p) => (c1 ∨ c2) p
+
+idB :: Optic c s s s s
+idB = Optic id
 
 (%) :: Optic c1 s t u v -> Optic c2 u v a b -> Optic (c1 ∨ c2) s t a b
 f % g = Optic (runOptic f . runOptic g)
