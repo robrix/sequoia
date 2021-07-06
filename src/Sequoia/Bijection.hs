@@ -69,6 +69,7 @@ instance Cat.Category (<->) where
   id = id <-> id
   f . g = (exBl f . exBl g) <-> (exBr g . exBr f)
 
+
 type Biject s t a b = forall p . Profunctor p => (a `p` b) -> (s `p` t)
 
 
