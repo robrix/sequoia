@@ -10,6 +10,8 @@ module Sequoia.Value
 , exV
 , exV1
 , exV2
+  -- * Concrete values
+, V(..)
 ) where
 
 import Data.Functor.Rep
@@ -41,3 +43,6 @@ exV1 = over _V
 
 exV2 :: Value v => (v a -> v b -> v c) -> (VFn v a -> VFn v b -> VFn v c)
 exV2 = dimap2 inV inV exV
+
+
+newtype V f s a = V { runV :: f s -> a }
