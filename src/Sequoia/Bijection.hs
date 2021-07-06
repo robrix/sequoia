@@ -3,6 +3,7 @@ module Sequoia.Bijection
 ( -- * Bijections
   type (<->)
 , Biject
+, Poly(..)
 , Bijection(..)
   -- ** Elimination
 , exBl
@@ -71,6 +72,9 @@ instance Cat.Category (<->) where
 type Biject s t a b = forall p . Profunctor p => (a `p` b) -> (s `p` t)
 
 
+newtype Poly s t a b = Poly { runPoly :: Biject s t a b }
+
+
 class Bijection r s t a b | r -> s t a b where
   inB :: Biject s t a b -> r
   exB :: r -> Biject s t a b
@@ -78,6 +82,10 @@ class Bijection r s t a b | r -> s t a b where
 instance Bijection (a <-> b) a a b b where
   inB = Bij
   exB = runBij
+
+instance Bijection (Poly s t a b) s t a b where
+  inB = Poly
+  exB = runPoly
 
 
 -- Elimination
