@@ -11,6 +11,7 @@ module Sequoia.Bijection
 , exBr
 , (<~)
 , (~>)
+, over
 , under
   -- ** Construction
 , (<->)
@@ -117,6 +118,9 @@ infixr 9 <~
 
 infixl 9 ~>
 
+
+over :: Bijection r s t a b => r -> (t -> s) -> (b -> a)
+over b = dimap (b <~) (~> b)
 
 under :: Bijection r s t a b => r -> (a -> b) -> (s -> t)
 under b = dimap (~> b) (b <~)
