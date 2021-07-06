@@ -108,8 +108,8 @@ under b = dimap (~> b) (b <~)
 
 -- Construction
 
-(<->) :: (a -> b) -> (b -> a) -> a <-> b
-l <-> r = Bij (dimap l r)
+(<->) :: Bijection r s t a b => (s -> a) -> (b -> t) -> r
+l <-> r = inB (dimap l r)
 
 inv :: a <-> b -> b <-> a
 inv b = (b <~) <-> (~> b)
