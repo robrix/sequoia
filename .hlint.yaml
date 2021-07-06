@@ -19,6 +19,10 @@
 #   - {name: unsafePerformIO, within: []} # unsafePerformIO can only appear in no modules
 
 - error: {name: Use infix synonym, lhs: "exK f a", rhs: "f • a"}
+- error: {name: Use synonym, lhs: "inC (inK1 f)", rhs: "inC1 f"}
+- error: {name: Use synonym, lhs: "inC (\ k -> inK f)", rhs: "inC1 (\ k -> f)"}
+- error: {name: Use synonym, lhs: "k •<< inl", rhs: "inlC k"}
+- error: {name: Use synonym, lhs: "k •<< inr", rhs: "inrC k"}
 # - error: {name: Use higher-order synonym, lhs: "inK . \ k f -> b", rhs: "inK1 (\ k f -> b)"}
 
 # The hints are named by the string they display in warning messages.
