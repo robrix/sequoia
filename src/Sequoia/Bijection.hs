@@ -1,4 +1,5 @@
 {-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Bijection
 ( -- * Bijections
   type (<->)
@@ -72,6 +73,9 @@ instance Cat.Category (<->) where
 
 type Biject s t a b = forall p . Profunctor p => (a `p` b) -> (s `p` t)
 
+invBiject :: Biject b a t s -> Biject s t a b
+invBiject b = dimap (snd (exBs' b)) (fst (exBs' b))
+
 
 newtype Poly s t a b = Poly { runPoly :: Biject s t a b }
 
@@ -125,6 +129,12 @@ l <-> r = inB (dimap l r)
 
 inv :: (Bijection r s t a b, Bijection r' b a t s) => r -> r'
 inv b = (b <~) <-> (~> b)
+
+newtype Inv r = Inv { runInv :: r }
+
+instance Bijection r s t a b => Bijection (Inv r) b a t s where
+  inB f = Inv (inB (invBiject f))
+  exB r = invBiject (exB (runInv r))
 
 constant :: a -> (a -> b) <-> b
 constant a = ($ a) <-> const
