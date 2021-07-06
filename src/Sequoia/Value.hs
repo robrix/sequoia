@@ -55,6 +55,8 @@ newtype V f s a = V { runV :: f s -> a }
   deriving (Applicative, Functor, Monad, Representable)
   deriving (Closed, Cochoice, Costrong, Profunctor) via Costar f
 
+instance Value (V f s)
+
 instance Distributive (V f s) where
   distribute = distributeRep
   collect = collectRep
