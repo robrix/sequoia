@@ -6,6 +6,7 @@ module Sequoia.Value
 , VRep
 , VFn
 , _V
+, inV0
 , inV
 , inV1
 , inV2
@@ -31,6 +32,9 @@ type VFn v a = VRep v -> a
 
 _V :: (Value v, Value v') => Optic Iso (v a) (v' a') (VFn v a) (VFn v' a')
 _V = exV <-> inV
+
+inV0 :: Value v => a -> v a
+inV0 = inV . const
 
 inV :: Value v => VFn v a -> v a
 inV = tabulate
