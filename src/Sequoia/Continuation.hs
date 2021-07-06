@@ -6,6 +6,7 @@ module Sequoia.Continuation
   -- ** Application
 , Representable(..)
 , RepFn
+, _K
 , inK
 , inK1
 , inK2
@@ -90,6 +91,9 @@ instance Adjunction (K m r) (K m r) where
 -- Application
 
 type RepFn k a = a -> Rep k
+
+_K :: Representable k => RepFn k a <-> k a
+_K = inK <-> exK
 
 
 inK :: Representable k => RepFn k a ->       k a
