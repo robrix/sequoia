@@ -6,6 +6,7 @@ module Sequoia.CPS
   CPSFn
 , CPS(..)
 , (••)
+, ($$)
   -- ** Construction
 , cps
 , liftCPS
@@ -88,6 +89,11 @@ class (Cat.Category c, Representable k, Profunctor c) => CPS k c | c -> k where
 (••) = exC
 
 infixl 9 ••
+
+($$) :: CPS k c => a `c` b -> a -> ContFn k b
+($$) = appC
+
+infixl 9 $$
 
 
 -- Construction
