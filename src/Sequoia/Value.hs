@@ -6,8 +6,10 @@ module Sequoia.Value
 , _V
 , inV
 , inV1
+, inV2
 , exV
 , exV1
+, exV2
 ) where
 
 import Data.Functor.Rep
@@ -28,8 +30,14 @@ inV = tabulate
 inV1 :: Value v => (VFn v a -> VFn v b) -> (v a -> v b)
 inV1 = under _V
 
+inV2 :: Value v => (VFn v a -> VFn v b -> VFn v c) -> (v a -> v b -> v c)
+inV2 = dimap2 exV exV inV
+
 exV :: Value v => v a -> VFn v a
 exV = index
 
 exV1 :: Value v => (v a -> v b) -> (VFn v a -> VFn v b)
 exV1 = over _V
+
+exV2 :: Value v => (v a -> v b -> v c) -> (VFn v a -> VFn v b -> VFn v c)
+exV2 = dimap2 inV inV exV
