@@ -17,8 +17,8 @@ type VRep v = Rep v
 type VFn v a = VRep v -> a
 
 
-_V :: (Value v, Value v') => Optic Iso (VFn v a) (VFn v' a') (v a) (v' a')
-_V = inV <-> exV
+_V :: (Value v, Value v') => Optic Iso (v a) (v' a') (VFn v a) (VFn v' a')
+_V = exV <-> inV
 
 inV :: Value v => VFn v a -> v a
 inV = tabulate

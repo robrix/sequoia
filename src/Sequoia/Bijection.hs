@@ -152,8 +152,8 @@ non a = fromMaybe a <-> select (/= a)
 select :: Alternative f => (a -> Bool) -> (a -> f a)
 select p a = a <$ guard (p a)
 
-bij :: (a -> b, b -> a) <-> (a <-> b)
-bij = uncurry (<->) <-> ((,) <$> flip (~>) <*> (<~))
+bij :: (a <-> b) <-> (a -> b, b -> a)
+bij = ((,) <$> flip (~>) <*> (<~)) <-> uncurry (<->)
 
 
 -- Composition

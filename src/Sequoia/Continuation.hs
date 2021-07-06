@@ -101,15 +101,15 @@ instance Adjunction (K m r) (K m r) where
 
 type KFn k a = a -> Rep k
 
-_K :: (Representable k, Representable k') => Optic Iso (KFn k a) (KFn k' a') (k a) (k' a')
-_K = inK <-> exK
+_K :: (Representable k, Representable k') => Optic Iso (k a) (k' a') (KFn k a) (KFn k' a')
+_K = exK <-> inK
 
 
 inK :: Representable k => KFn k a ->       k a
 inK = tabulate
 
 inK1 :: Representable k => (KFn k a -> KFn k b) -> (k a -> k b)
-inK1 = over _K
+inK1 = under _K
 
 inK2 :: Representable k => (KFn k a -> KFn k b -> KFn k c) -> (k a -> k b -> k c)
 inK2 = dimap2 exK exK inK
@@ -119,7 +119,7 @@ exK :: Representable k =>       k a -> KFn k a
 exK = index
 
 exK1 :: Representable k => (k a -> k b) -> (KFn k a -> KFn k b)
-exK1 = under _K
+exK1 = over _K
 
 exK2 :: Representable k => (k a -> k b -> k c) -> (KFn k a -> KFn k b -> KFn k c)
 exK2 = dimap2 inK inK exK
@@ -138,7 +138,7 @@ dimap2 l1 l2 r f a1 a2 = r (f (l1 a1) (l2 a2))
 -- Coercion
 
 coerceKWith :: (Representable k1, Representable k2) => (KFn k1 a -> KFn k2 b) -> (k1 a -> k2 b)
-coerceKWith = over _K
+coerceKWith = under _K
 
 coerceK :: (Representable k1, Representable k2, Rep k1 ~ Rep k2) => (k1 a -> k2 a)
 coerceK = inK . exK

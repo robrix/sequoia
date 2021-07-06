@@ -87,8 +87,8 @@ class (Cat.Category c, Continuation k, Profunctor c) => CPS k c | c -> k where
   exC :: a `c` b     -> CPSFn k a b
 
 
-_CPS :: (CPS k c, CPS k' c') => Optic Iso (CPSFn k a b) (CPSFn k' a' b') (c a b) (c' a' b')
-_CPS = inC <-> exC
+_CPS :: (CPS k c, CPS k' c') => Optic Iso (c a b) (c' a' b') (CPSFn k a b) (CPSFn k' a' b')
+_CPS = exC <-> inC
 
 
 inC1 :: CPS k c => (KFn k b -> KFn k a) -> a `c` b
@@ -242,7 +242,7 @@ wanderCPS traverse c = liftCPS (exK . execC . traverse (pappC c))
 -- Profunctor
 
 dimapCPS :: CPS k c => (a' -> a) -> (b -> b') -> (c a b -> c a' b')
-dimapCPS f g = over _CPS (dimap (contramap g) (contramap f))
+dimapCPS f g = under _CPS (dimap (contramap g) (contramap f))
 
 lmapCPS :: CPS k c => (a' -> a) -> (c a b -> c a' b)
 lmapCPS = (`dimapCPS` id)
