@@ -5,7 +5,6 @@ module Sequoia.Bijection
   type (<->)
 , Optic(..)
 , Iso
-, Prism
   -- ** Elimination
 , exBl
 , exBr
@@ -45,11 +44,16 @@ module Sequoia.Bijection
 , dimapping
 , lmapping
 , rmapping
-  -- * Lens
+  -- * Lenses
 , Lens
 , lens
 , _fst
 , _snd
+  -- * Prisms
+, Prism
+, prism
+, _Left
+, _Right
   -- * Tagged
 , Tagged
 ) where
@@ -81,10 +85,6 @@ newtype Optic c s t a b = Optic { runOptic :: OpticF c s t a b }
 
 class Profunctor p => Iso p
 instance Profunctor p => Iso p
-
-
-class Choice p => Prism p
-instance Choice p => Prism p
 
 
 -- Elimination
@@ -250,6 +250,22 @@ _fst = lens fst (\ ~(_, b) a' -> (a', b))
 
 _snd :: Optic Lens (a, b) (a, b') b b'
 _snd = lens snd (\ ~(a, _) b' -> (a, b'))
+
+
+-- Prisms
+
+class Choice p => Prism p
+instance Choice p => Prism p
+
+prism :: (b -> t) -> (s -> Either t a) -> Optic Prism s t a b
+prism inj prj = Optic (dimap prj (either id inj) . right')
+
+
+_Left :: Optic Prism (Either a b) (Either a' b) a a'
+_Left = prism Left (either Right (Left . Right))
+
+_Right :: Optic Prism (Either a b) (Either a b') b b'
+_Right = prism Right (either (Left . Left) Right)
 
 
 -- Tagged
