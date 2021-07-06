@@ -131,6 +131,7 @@ library
     Sequoia.Printer
     Sequoia.Sequent
     Sequoia.Signal
+    Sequoia.Value
 
   -- Modules included in this library but not exported.
   -- other-modules:
