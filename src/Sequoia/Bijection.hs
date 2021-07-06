@@ -1,7 +1,9 @@
+{-# LANGUAGE FunctionalDependencies #-}
 module Sequoia.Bijection
 ( -- * Bijections
   type (<->)
 , Biject
+, Bijection(..)
   -- ** Elimination
 , exBl
 , exBr
@@ -67,6 +69,15 @@ instance Cat.Category (<->) where
   f . g = (exBl f . exBl g) <-> (exBr g . exBr f)
 
 type Biject s t a b = forall p . Profunctor p => (a `p` b) -> (s `p` t)
+
+
+class Bijection r s t a b | r -> s t a b where
+  inB :: Biject s t a b -> r
+  exB :: r -> Biject s t a b
+
+instance Bijection (a <-> b) a a b b where
+  inB = Bij
+  exB = runBij
 
 
 -- Elimination
