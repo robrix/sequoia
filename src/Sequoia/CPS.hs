@@ -5,10 +5,6 @@ module Sequoia.CPS
 ( -- * CPS
   CPSFn
 , CPS(..)
-, inC1
-, inC2
-, exC1
-, exC2
 , (••)
   -- ** Construction
 , cps
@@ -86,20 +82,6 @@ type CPSFn k a b = k b -> k a
 class (Cat.Category c, Representable k, Profunctor c) => CPS k c | c -> k where
   inC :: CPSFn k a b -> a `c` b
   exC :: a `c` b     -> CPSFn k a b
-
-
-inC1 :: CPS k c => (CPSFn k a1 b1 -> CPSFn k a2 b2) -> (a1 `c` b1 -> a2 `c` b2)
-inC1 = dimap exC inC
-
-inC2 :: CPS k c => (CPSFn k a1 b1 -> CPSFn k a2 b2 -> CPSFn k a3 b3) -> (a1 `c` b1 -> a2 `c` b2 -> a3 `c` b3)
-inC2 = dimap2 exC exC inC
-
-
-exC1 :: CPS k c => (a1 `c` b1 -> a2 `c` b2) -> (CPSFn k a1 b1 -> CPSFn k a2 b2)
-exC1 = dimap inC exC
-
-exC2 :: CPS k c => (a1 `c` b1 -> a2 `c` b2 -> a3 `c` b3) -> (CPSFn k a1 b1 -> CPSFn k a2 b2 -> CPSFn k a3 b3)
-exC2 = dimap2 inC inC exC
 
 
 (••) :: CPS k c => a `c` b -> CPSFn k a b
