@@ -1,9 +1,11 @@
+{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Bijection
 ( -- * Bijections
   type (<->)
 , Biject
+, Optic(..)
 , Poly(..)
 , Bijection(..)
   -- ** Elimination
@@ -77,6 +79,8 @@ type Biject s t a b = forall p . Profunctor p => (a `p` b) -> (s `p` t)
 invBiject :: Biject b a t s -> Biject s t a b
 invBiject b = dimap (snd (exBs' b)) (fst (exBs' b))
 
+
+newtype Optic c s t a b = Optic { runOptic :: forall p . c p => (a `p` b) -> (s `p` t) }
 
 newtype Poly s t a b = Poly { runPoly :: Biject s t a b }
 
