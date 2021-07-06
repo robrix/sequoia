@@ -1,2 +1,7 @@
 module Sequoia.Value
-() where
+( Value
+) where
+
+import Data.Functor.Rep
+
+class Representable v => Value v
