@@ -227,7 +227,7 @@ faninCPS f g = inC ((<••>) <$> exC f <*> exC g)
 -- ArrowApply
 
 applyCPS :: CPS k c => c (c a b, a) b
-applyCPS = inC (>>- uncurry (fmap liftDN0 . appC))
+applyCPS = inC (>>- uncurry (fmap inDN . appC))
 
 
 -- Traversing
@@ -254,7 +254,7 @@ rmapCPS = (id `dimapCPS`)
 -- Sieve
 
 sieveCPS :: CPS k c => a `c` b -> (a -> k ••b)
-sieveCPS = fmap (Cont . liftDN0) . appC
+sieveCPS = fmap (Cont . inDN) . appC
 
 
 -- Representable

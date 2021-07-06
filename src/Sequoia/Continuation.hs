@@ -40,13 +40,13 @@ module Sequoia.Continuation
 , mapDN
   -- ** Construction
 , liftDN
-, liftDN0
-, liftDN1
-, liftDN2
+, inDN
+, inDN1
+, inDN2
   -- ** Elimination
-, runDN0
-, runDN1
-, runDN2
+, exDN
+, exDN1
+, exDN2
   -- * Cont monad
 , type (••)(..)
 , inCont
@@ -211,26 +211,26 @@ mapDN b = (~> b) . contramap (b <~)
 liftDN :: Representable k => a -> k **a
 liftDN = inK . flip exK
 
-liftDN0 :: Representable k => ContFn k a -> k **a
-liftDN0 = inK . lmap exK
+inDN :: Representable k => ContFn k a -> k **a
+inDN = inK . lmap exK
 
-liftDN1 :: Representable k => (ContFn k a -> ContFn k b) -> (k **a -> k **b)
-liftDN1 = dimap runDN0 liftDN0
+inDN1 :: Representable k => (ContFn k a -> ContFn k b) -> (k **a -> k **b)
+inDN1 = dimap exDN inDN
 
-liftDN2 :: Representable k => (ContFn k a -> ContFn k b -> ContFn k c) -> (k **a -> k **b -> k **c)
-liftDN2 = dimap2 runDN0 runDN0 liftDN0
+inDN2 :: Representable k => (ContFn k a -> ContFn k b -> ContFn k c) -> (k **a -> k **b -> k **c)
+inDN2 = dimap2 exDN exDN inDN
 
 
 -- Elimination
 
-runDN0 :: Representable k => k **a -> ContFn k a
-runDN0 = lmap inK . exK
+exDN :: Representable k => k **a -> ContFn k a
+exDN = lmap inK . exK
 
-runDN1 :: Representable k => (k **a -> k **b) -> (ContFn k a -> ContFn k b)
-runDN1 = dimap liftDN0 runDN0
+exDN1 :: Representable k => (k **a -> k **b) -> (ContFn k a -> ContFn k b)
+exDN1 = dimap inDN exDN
 
-runDN2 :: Representable k => (k **a -> k **b -> k **c) -> (ContFn k a -> ContFn k b -> ContFn k c)
-runDN2 = dimap2 liftDN0 liftDN0 runDN0
+exDN2 :: Representable k => (k **a -> k **b -> k **c) -> (ContFn k a -> ContFn k b -> ContFn k c)
+exDN2 = dimap2 inDN inDN exDN
 
 
 -- Cont monad
