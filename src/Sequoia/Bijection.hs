@@ -77,7 +77,7 @@ instance Cat.Category (<->) where
 type Biject s t a b = forall p . Profunctor p => (a `p` b) -> (s `p` t)
 
 invBiject :: Biject b a t s -> Biject s t a b
-invBiject b = dimap (snd (exBs' b)) (fst (exBs' b))
+invBiject b = uncurry (flip dimap) (exBs' b)
 
 
 newtype Optic c s t a b = Optic { runOptic :: forall p . c p => (a `p` b) -> (s `p` t) }
