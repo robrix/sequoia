@@ -7,6 +7,9 @@ module Sequoia.Bijection
 , Biject
 , Optic(..)
 , Poly(..)
+, Iso
+, Lens
+, Prism
 , Bijection(..)
   -- ** Elimination
 , exBl
@@ -83,6 +86,18 @@ invBiject b = uncurry (flip dimap) (exBs' b)
 newtype Optic c s t a b = Optic { runOptic :: forall p . c p => (a `p` b) -> (s `p` t) }
 
 newtype Poly s t a b = Poly { runPoly :: Optic Profunctor s t a b }
+
+
+class Profunctor p => Iso p
+instance Profunctor p => Iso p
+
+
+class Strong p => Lens  p
+instance Strong p => Lens p
+
+
+class Choice p => Prism p
+instance Choice p => Prism p
 
 
 class Bijection r s t a b | r -> s t a b where
