@@ -18,15 +18,10 @@ module Sequoia.Signal
 , composeSigSnk
 , solSig
 , composeSrcSnk
-  -- Self-adjunction
-, self
-, Self(..)
 ) where
 
 import           Control.Category ((<<<))
 import qualified Control.Category as Cat
-import           Data.Distributive
-import           Data.Functor.Contravariant.Adjunction hiding (adjuncted)
 import           Data.Profunctor
 import           Sequoia.Bijection
 import           Sequoia.Calculus.Context
@@ -132,19 +127,3 @@ composeSrcSnk src snk = solSig <~ (snk ~> snkSig <<< src ~> srcSig)
   Snk ---> Sig
        o
 -}
-
-
--- Self-adjunction
-
-self :: k a <-> Self k a
-self = Self <-> getSelf
-
-newtype Self k a = Self { getSelf :: k a }
-  deriving (Contravariant, Functor, Representable)
-
-instance Distributive k => Distributive (Self k) where
-  distribute = Self . distribute . fmap getSelf
-
-instance Representable k => Adjunction (Self k) (Self k) where
-  leftAdjunct  = (-<<)
-  rightAdjunct = (-<<)
