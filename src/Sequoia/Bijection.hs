@@ -84,7 +84,9 @@ invBiject :: Biject b a t s -> Biject s t a b
 invBiject b = uncurry (flip dimap) (exBs' b)
 
 
-newtype Optic c s t a b = Optic { runOptic :: forall p . c p => (a `p` b) -> (s `p` t) }
+type OpticF c s t a b = forall p . c p => (a `p` b) -> (s `p` t)
+
+newtype Optic c s t a b = Optic { runOptic :: OpticF c s t a b }
 
 newtype Poly s t a b = Poly { runPoly :: Optic Profunctor s t a b }
 
