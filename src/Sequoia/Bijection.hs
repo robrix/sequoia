@@ -98,8 +98,8 @@ instance Bijection (Optic Profunctor s t a b) s t a b where
   exB = runOptic
 
 instance Bijection (Poly s t a b) s t a b where
-  inB f = Poly $ Optic f
-  exB = runOptic . runPoly
+  inB f = Poly $ inB f
+  exB = exB . runPoly
 
 
 -- Elimination
