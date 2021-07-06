@@ -91,7 +91,7 @@ _CPS :: (CPS k c, CPS k' c') => Optic Iso (CPSFn k a b) (CPSFn k' a' b') (c a b)
 _CPS = inC <-> exC
 
 
-inC1 :: CPS k c => (RepFn k b -> RepFn k a) -> a `c` b
+inC1 :: CPS k c => (KFn k b -> KFn k a) -> a `c` b
 inC1 = inC . inK1
 
 

@@ -7,7 +7,7 @@ module Sequoia.Continuation
 , KRep
 , K(..)
   -- ** Application
-, RepFn
+, KFn
 , _K
 , inK
 , inK1
@@ -99,33 +99,33 @@ instance Adjunction (K m r) (K m r) where
 
 -- Application
 
-type RepFn k a = a -> Rep k
+type KFn k a = a -> Rep k
 
-_K :: (Representable k, Representable k') => Optic Iso (RepFn k a) (RepFn k' a') (k a) (k' a')
+_K :: (Representable k, Representable k') => Optic Iso (KFn k a) (KFn k' a') (k a) (k' a')
 _K = inK <-> exK
 
 
-inK :: Representable k => RepFn k a ->       k a
+inK :: Representable k => KFn k a ->       k a
 inK = tabulate
 
-inK1 :: Representable k => (RepFn k a -> RepFn k b) -> (k a -> k b)
+inK1 :: Representable k => (KFn k a -> KFn k b) -> (k a -> k b)
 inK1 = over _K
 
-inK2 :: Representable k => (RepFn k a -> RepFn k b -> RepFn k c) -> (k a -> k b -> k c)
+inK2 :: Representable k => (KFn k a -> KFn k b -> KFn k c) -> (k a -> k b -> k c)
 inK2 = dimap2 exK exK inK
 
 
-exK :: Representable k =>       k a -> RepFn k a
+exK :: Representable k =>       k a -> KFn k a
 exK = index
 
-exK1 :: Representable k => (k a -> k b) -> (RepFn k a -> RepFn k b)
+exK1 :: Representable k => (k a -> k b) -> (KFn k a -> KFn k b)
 exK1 = under _K
 
-exK2 :: Representable k => (k a -> k b -> k c) -> (RepFn k a -> RepFn k b -> RepFn k c)
+exK2 :: Representable k => (k a -> k b -> k c) -> (KFn k a -> KFn k b -> KFn k c)
 exK2 = dimap2 inK inK exK
 
 
-(•) :: Representable k => k a -> RepFn k a
+(•) :: Representable k => k a -> KFn k a
 (•) = index
 
 infixl 9 •
@@ -137,7 +137,7 @@ dimap2 l1 l2 r f a1 a2 = r (f (l1 a1) (l2 a2))
 
 -- Coercion
 
-coerceKWith :: (Representable k1, Representable k2) => (RepFn k1 a -> RepFn k2 b) -> (k1 a -> k2 b)
+coerceKWith :: (Representable k1, Representable k2) => (KFn k1 a -> KFn k2 b) -> (k1 a -> k2 b)
 coerceKWith = over _K
 
 coerceK :: (Representable k1, Representable k2, Rep k1 ~ Rep k2) => (k1 a -> k2 a)
@@ -202,7 +202,7 @@ type k **a = k (k a)
 infixl 9 **
 
 
-type ContFn k a = RepFn k (RepFn k a)
+type ContFn k a = KFn k (KFn k a)
 
 
 _DN :: (Representable k, Representable k') => Optic Iso (ContFn k a) (ContFn k' a') (k **a) (k' **a')
