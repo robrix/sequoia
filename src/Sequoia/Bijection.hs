@@ -95,17 +95,17 @@ instance Profunctor p => Iso p
 
 -- Elimination
 
-exBls :: c (Forget r) => Optic c s t a b -> (a -> r) -> (s -> r)
-exBls b = runForget . runOptic b . Forget
+views :: c (Forget r) => Optic c s t a b -> (a -> r) -> (s -> r)
+views b = runForget . runOptic b . Forget
 
 exBl :: c (Forget a) => Optic c s t a b -> (s -> a)
-exBl b = exBls b id
+exBl b = views b id
 
-exBrs :: c Tagged => Optic c s t a b -> (t -> r) -> (b -> r)
-exBrs b f = f . getTagged . runOptic b . Tagged
+reviews :: c Tagged => Optic c s t a b -> (t -> r) -> (b -> r)
+reviews b f = f . getTagged . runOptic b . Tagged
 
 exBr :: c Tagged => Optic c s t a b -> (b -> t)
-exBr b = exBrs b id
+exBr b = reviews b id
 
 (<~) :: c Tagged => Optic c s t a b -> (b -> t)
 (<~) = exBr
