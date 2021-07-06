@@ -158,7 +158,8 @@ bij = ((,) <$> flip (~>) <*> (<~)) <-> uncurry (<->)
 
 -- Composition
 
-class (c1 p, c2 p) => (c1 ∨ c2) p
+class    (c1 p, c2 p) => (c1 ∨ c2) p
+instance (c1 p, c2 p) => (c1 ∨ c2) p
 
 idB :: Optic c s s s s
 idB = Optic id
