@@ -82,7 +82,7 @@ invBiject b = dimap (snd (exBs' b)) (fst (exBs' b))
 
 newtype Optic c s t a b = Optic { runOptic :: forall p . c p => (a `p` b) -> (s `p` t) }
 
-newtype Poly s t a b = Poly { runPoly :: Biject s t a b }
+newtype Poly s t a b = Poly { runPoly :: Optic Profunctor s t a b }
 
 
 class Bijection r s t a b | r -> s t a b where
@@ -94,8 +94,8 @@ instance Bijection (a <-> b) a a b b where
   exB = runBij
 
 instance Bijection (Poly s t a b) s t a b where
-  inB = Poly
-  exB = runPoly
+  inB f = Poly $ Optic f
+  exB = runOptic . runPoly
 
 
 -- Elimination
