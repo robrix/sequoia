@@ -22,7 +22,6 @@ module Sequoia.Continuation
 , coerceK2
   -- ** Contravariant
 , Contravariant(..)
-, contramapK
   -- ** Category
 , idK
 , composeK
@@ -74,7 +73,7 @@ instance Monad m => Cat.Category (K m) where
   K f . K g = K (g <=< f)
 
 instance Contravariant (K m r) where
-  contramap = contramapK
+  contramap = contramapRep
 
 instance Representable (K m r) where
   type Rep (K m r) = m r
@@ -140,12 +139,6 @@ coerceK1 = inK1 . exK1
 
 coerceK2 :: (Representable k1, Representable k2, Rep k1 ~ Rep k2) => (k1 a -> k1 b -> k1 c) -> (k2 a -> k2 b -> k2 c)
 coerceK2 = inK2 . exK2
-
-
--- Contravariant
-
-contramapK :: Representable k => (a' -> a) -> (k a -> k a')
-contramapK = inK1 . lmap
 
 
 -- Category
