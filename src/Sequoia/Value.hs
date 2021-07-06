@@ -15,8 +15,8 @@ type VRep v = Rep v
 type VFn v a = VRep v -> a
 
 
-inV :: Value v => (VRep v -> a) -> v a
+inV :: Value v => VFn v a -> v a
 inV = tabulate
 
-exV :: Value v => v a -> (VRep v -> a)
+exV :: Value v => v a -> VFn v a
 exV = index
