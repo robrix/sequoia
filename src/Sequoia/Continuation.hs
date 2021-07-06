@@ -100,7 +100,7 @@ inK :: Representable k => RepFn k a ->       k a
 inK = tabulate
 
 inK1 :: Representable k => (RepFn k a -> RepFn k b) -> (k a -> k b)
-inK1 = dimap exK inK
+inK1 = under (inv _K)
 
 inK2 :: Representable k => (RepFn k a -> RepFn k b -> RepFn k c) -> (k a -> k b -> k c)
 inK2 = dimap2 exK exK inK
