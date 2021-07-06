@@ -46,6 +46,8 @@ module Sequoia.Bijection
 , dimapping
 , lmapping
 , rmapping
+  -- * Tagged
+, Tagged
 ) where
 
 import           Control.Applicative (Alternative)
