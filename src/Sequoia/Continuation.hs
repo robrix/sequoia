@@ -4,6 +4,7 @@
 module Sequoia.Continuation
 ( -- * Continuations
   Continuation
+, KRep
 , K(..)
   -- ** Application
 , Representable(..)
@@ -70,6 +71,8 @@ import           Sequoia.Disjunction
 
 class    Representable k => Continuation k
 instance Representable k => Continuation k
+
+type KRep k = Rep k
 
 
 newtype K m r a = K { runK :: a -> m r }
