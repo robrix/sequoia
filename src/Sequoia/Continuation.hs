@@ -37,6 +37,7 @@ module Sequoia.Continuation
   -- * Double negation
 , type (**)
 , ContFn
+, _DN
 , mapDN
   -- ** Construction
 , liftDN
@@ -200,6 +201,10 @@ infixl 9 **
 
 
 type ContFn k a = RepFn k (RepFn k a)
+
+
+_DN :: (Representable k, Representable k') => Poly (ContFn k a) (ContFn k' a') (k **a) (k' **a')
+_DN = inDN <-> exDN
 
 
 mapDN :: Contravariant j => (forall x . j x <-> k x) -> (j **a -> k **a)
