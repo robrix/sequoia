@@ -93,7 +93,7 @@ class Profunctor p => Iso p
 instance Profunctor p => Iso p
 
 
-class Strong p => Lens  p
+class Strong p => Lens p
 instance Strong p => Lens p
 
 
