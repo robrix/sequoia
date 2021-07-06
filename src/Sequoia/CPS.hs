@@ -5,6 +5,7 @@ module Sequoia.CPS
 ( -- * CPS
   CPSFn
 , CPS(..)
+, inC1
 , (••)
   -- ** Construction
 , cps
@@ -82,6 +83,10 @@ type CPSFn k a b = k b -> k a
 class (Cat.Category c, Representable k, Profunctor c) => CPS k c | c -> k where
   inC :: CPSFn k a b -> a `c` b
   exC :: a `c` b     -> CPSFn k a b
+
+
+inC1 :: CPS k c => (RepFn k b -> RepFn k a) -> a `c` b
+inC1 = inC . inK1
 
 
 (••) :: CPS k c => a `c` b -> CPSFn k a b
