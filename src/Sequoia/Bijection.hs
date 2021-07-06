@@ -93,11 +93,14 @@ instance Bijection (Poly s t a b) s t a b where
 exBs :: Biject s t a b -> ((a -> r) -> (s -> r), (t -> r) -> (b -> r))
 exBs b = (runForget . b . Forget, \ f -> f . getTagged . b . Tagged)
 
+exBs' :: Biject s t a b -> (s -> a, b -> t)
+exBs' b = let (l, r) = exBs b in (l id, r id)
+
 exBl :: Bijection r s t a b => r -> (s -> a)
-exBl b = fst (exBs (exB b)) id
+exBl b = fst (exBs' (exB b))
 
 exBr :: Bijection r s t a b => r -> (b -> t)
-exBr b = snd (exBs (exB b)) id
+exBr b = snd (exBs' (exB b))
 
 (<~) :: Bijection r s t a b => r -> (b -> t)
 (<~) = exBr
