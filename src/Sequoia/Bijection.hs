@@ -108,12 +108,12 @@ exBr :: c Tagged => Optic c s t a b -> (b -> t)
 exBr b = reviews b id
 
 (<~) :: c Tagged => Optic c s t a b -> (b -> t)
-(<~) = exBr
+o <~ b = reviews o id b
 
 infixr 9 <~
 
 (~>) :: c (Forget a) => s -> Optic c s t a b -> a
-(~>) = flip exBl
+s ~> o = views o id s
 
 infixl 9 ~>
 
