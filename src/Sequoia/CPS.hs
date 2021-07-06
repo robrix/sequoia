@@ -242,7 +242,7 @@ wanderCPS traverse c = liftCPS (exK . execC . traverse (pappC c))
 -- Profunctor
 
 dimapCPS :: CPS k c => (a' -> a) -> (b -> b') -> (c a b -> c a' b')
-dimapCPS f g = inC . dimap (contramap g) (contramap f) . exC
+dimapCPS f g = under (inv _CPS) (dimap (contramap g) (contramap f))
 
 lmapCPS :: CPS k c => (a' -> a) -> (c a b -> c a' b)
 lmapCPS = (`dimapCPS` id)
