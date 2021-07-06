@@ -25,11 +25,11 @@ _V = exV <-> inV
 inV :: Value v => VFn v a -> v a
 inV = tabulate
 
-inV1 :: (Value v, Value v') => (VFn v a -> VFn v' a') -> (v a -> v' a')
+inV1 :: Value v => (VFn v a -> VFn v b) -> (v a -> v b)
 inV1 = under _V
 
 exV :: Value v => v a -> VFn v a
 exV = index
 
-exV1 :: (Value v, Value v') => (v a -> v' a') -> (VFn v a -> VFn v' a')
+exV1 :: Value v => (v a -> v b) -> (VFn v a -> VFn v b)
 exV1 = over _V
