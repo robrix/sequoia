@@ -92,7 +92,7 @@ instance Adjunction (K m r) (K m r) where
 
 type RepFn k a = a -> Rep k
 
-_K :: (Representable k, Representable k') => Poly (RepFn k a) (RepFn k' a') (k a) (k' a')
+_K :: (Representable k, Representable k') => Optic Iso (RepFn k a) (RepFn k' a') (k a) (k' a')
 _K = inK <-> exK
 
 
@@ -196,7 +196,7 @@ infixl 9 **
 type ContFn k a = RepFn k (RepFn k a)
 
 
-_DN :: (Representable k, Representable k') => Poly (ContFn k a) (ContFn k' a') (k **a) (k' **a')
+_DN :: (Representable k, Representable k') => Optic Iso (ContFn k a) (ContFn k' a') (k **a) (k' **a')
 _DN = inDN <-> exDN
 
 

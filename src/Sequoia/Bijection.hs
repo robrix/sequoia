@@ -1,17 +1,12 @@
 {-# LANGUAGE ConstraintKinds #-}
-{-# LANGUAGE FunctionalDependencies #-}
-{-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Bijection
 ( -- * Bijections
   type (<->)
-, Biject
 , Optic(..)
-, Poly(..)
 , Iso
 , Lens
 , Prism
-, Bijection(..)
   -- ** Elimination
 , exBl
 , exBr
@@ -54,7 +49,6 @@ module Sequoia.Bijection
 ) where
 
 import           Control.Applicative (Alternative)
-import qualified Control.Category as Cat
 import           Control.Monad (guard)
 import           Data.Bifunctor
 import           Data.Coerce
@@ -69,26 +63,14 @@ import           Data.Tuple (swap)
 
 -- Bijections
 
-newtype a <-> b = Bij { runBij :: Optic Iso a a b b }
+type a <-> b = Optic Iso a a b b
 
 infix 1 <->
-
-instance Cat.Category (<->) where
-  id = id <-> id
-  f . g = (exBl f . exBl g) <-> (exBr g . exBr f)
-
-
-type Biject s t a b = forall p . Profunctor p => (a `p` b) -> (s `p` t)
-
-invBiject :: Biject b a t s -> Biject s t a b
-invBiject b = uncurry (flip dimap) (exBs' b)
 
 
 type OpticF c s t a b = forall p . c p => (a `p` b) -> (s `p` t)
 
 newtype Optic c s t a b = Optic { runOptic :: OpticF c s t a b }
-
-newtype Poly s t a b = Poly { runPoly :: Optic Profunctor s t a b }
 
 
 class Profunctor p => Iso p
@@ -103,68 +85,45 @@ class Choice p => Prism p
 instance Choice p => Prism p
 
 
-class Bijection r s t a b | r -> s t a b where
-  inB :: Biject s t a b -> r
-  exB :: r -> Biject s t a b
-
-instance Bijection (a <-> b) a a b b where
-  inB f = Bij $ inB f
-  exB = runOptic . runBij
-
-instance (forall p . Profunctor p => c p, forall p . c p => Profunctor p) => Bijection (Optic c s t a b) s t a b where
-  inB = Optic
-  exB = runOptic
-
-instance Bijection (Poly s t a b) s t a b where
-  inB f = Poly $ inB f
-  exB = exB . runPoly
-
-
 -- Elimination
 
-exBs :: Biject s t a b -> ((a -> r) -> (s -> r), (t -> r) -> (b -> r))
-exBs b = (runForget . b . Forget, \ f -> f . getTagged . b . Tagged)
+exBls :: c (Forget r) => Optic c s t a b -> (a -> r) -> (s -> r)
+exBls b = runForget . runOptic b . Forget
 
-exBs' :: Biject s t a b -> (s -> a, b -> t)
-exBs' b = let (l, r) = exBs b in (l id, r id)
+exBl :: c (Forget a) => Optic c s t a b -> (s -> a)
+exBl b = exBls b id
 
-exBl :: Bijection r s t a b => r -> (s -> a)
-exBl b = fst (exBs' (exB b))
+exBrs :: c Tagged => Optic c s t a b -> (t -> r) -> (b -> r)
+exBrs b f = f . getTagged . runOptic b . Tagged
 
-exBr :: Bijection r s t a b => r -> (b -> t)
-exBr b = snd (exBs' (exB b))
+exBr :: c Tagged => Optic c s t a b -> (b -> t)
+exBr b = exBrs b id
 
-(<~) :: Bijection r s t a b => r -> (b -> t)
+(<~) :: c Tagged => Optic c s t a b -> (b -> t)
 (<~) = exBr
 
 infixr 9 <~
 
-(~>) :: Bijection r s t a b => s -> r -> a
+(~>) :: c (Forget a) => s -> Optic c s t a b -> a
 (~>) = flip exBl
 
 infixl 9 ~>
 
 
-over :: Bijection r s t a b => r -> (t -> s) -> (b -> a)
+over :: (c Tagged, c (Forget a)) => Optic c s t a b -> (t -> s) -> (b -> a)
 over b = dimap (b <~) (~> b)
 
-under :: Bijection r s t a b => r -> (a -> b) -> (s -> t)
+under :: (c Tagged, c (Forget a)) => Optic c s t a b -> (a -> b) -> (s -> t)
 under b = dimap (~> b) (b <~)
 
 
 -- Construction
 
-(<->) :: Bijection r s t a b => (s -> a) -> (b -> t) -> r
-l <-> r = inB (dimap l r)
+(<->) :: (s -> a) -> (b -> t) -> Optic Iso s t a b
+l <-> r = Optic (dimap l r)
 
-from :: Bijection r s t a b => r -> Inv r
+from :: Optic Iso s t a b -> Optic Iso b a t s
 from b = (b <~) <-> (~> b)
-
-newtype Inv r = Inv { runInv :: r }
-
-instance Bijection r s t a b => Bijection (Inv r) b a t s where
-  inB f = Inv (inB (invBiject f))
-  exB r = invBiject (exB (runInv r))
 
 constant :: a -> (a -> b) <-> b
 constant a = ($ a) <-> const

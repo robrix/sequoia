@@ -87,7 +87,7 @@ class (Cat.Category c, Representable k, Profunctor c) => CPS k c | c -> k where
   exC :: a `c` b     -> CPSFn k a b
 
 
-_CPS :: (CPS k c, CPS k' c') => Poly (CPSFn k a b) (CPSFn k' a' b') (c a b) (c' a' b')
+_CPS :: (CPS k c, CPS k' c') => Optic Iso (CPSFn k a b) (CPSFn k' a' b') (c a b) (c' a' b')
 _CPS = inC <-> exC
 
 
