@@ -119,7 +119,7 @@ under b = dimap (~> b) (b <~)
 (<->) :: Bijection r s t a b => (s -> a) -> (b -> t) -> r
 l <-> r = inB (dimap l r)
 
-inv :: a <-> b -> b <-> a
+inv :: (Bijection r s t a b, Bijection r' b a t s) => r -> r'
 inv b = (b <~) <-> (~> b)
 
 constant :: a -> (a -> b) <-> b
