@@ -57,7 +57,7 @@ import Sequoia.Conjunction
 import Sequoia.Continuation
 import Sequoia.Disjunction
 
-class Representable k => Core k s | s -> k where
+class Continuation k => Core k s | s -> k where
   {-# MINIMAL ((>>>) | (<<<)), init #-}
 
   (>>>)
@@ -156,8 +156,8 @@ swapΔ f _Δ' = popΓΔ (\ _Δ -> pushΓΔ (f _Δ) _Δ')
 
 popΓΔ
   :: Contextual k s
-  => (k _Δ -> _Γ -> Γ -|s|- Rep k)
-  -- -----------------------------
+  => (k _Δ -> _Γ -> Γ -|s|- KRep k)
+  -- ------------------------------
   ->               _Γ -|s|- _Δ
 popΓΔ f = swapΓΔ f idK Γ
 
@@ -186,8 +186,8 @@ popΓ f = swapΓ f Γ
 -- @
 popΔ
   :: Contextual k s
-  => (k _Δ -> _Γ -|s|-  Rep k)
-  -- -------------------------
+  => (k _Δ -> _Γ -|s|-  KRep k)
+  -- --------------------------
   ->          _Γ -|s|- _Δ
 popΔ f = swapΔ f idK
 

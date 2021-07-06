@@ -15,21 +15,21 @@ import Sequoia.Connective.Subtraction
 import Sequoia.Continuation
 import Sequoia.Disjunction
 
-elimFun :: Representable k => a ~~k~> b -> a ~-k-< b -> Rep k
+elimFun :: Continuation k => a ~~k~> b -> a ~-k-< b -> KRep k
 elimFun f = (•) <$> appFun f . subA <*> subK
 
-funPar1 :: Representable k => k (k ¬a ⅋ b) <-> k (a ~~k~> b)
+funPar1 :: Continuation k => k (k ¬a ⅋ b) <-> k (a ~~k~> b)
 funPar1
   =   inK1 (\ k -> k . mkPar (inK k))
   <-> inK1 (. mkFun)
 
-funPar2 :: Representable k => k **(k ¬a ⅋ b) <-> k **(a ~~k~> b)
+funPar2 :: Continuation k => k **(k ¬a ⅋ b) <-> k **(a ~~k~> b)
 funPar2
   =   inK1 (\ k f -> k (inK ((f •) . mkFun)))
   <-> inK1 (\ k p -> k (inK ((p •) . mkPar p)))
 
-mkPar :: Representable k => k (k ¬a ⅋ b) -> a ~~k~> b -> k ¬a ⅋ b
+mkPar :: Continuation k => k (k ¬a ⅋ b) -> a ~~k~> b -> k ¬a ⅋ b
 mkPar p f = inl (inK (\ a -> appFun f a • inK ((p •) . inr)))
 
-mkFun :: Representable k => k ¬a ⅋ b -> a ~~k~> b
+mkFun :: Continuation k => k ¬a ⅋ b -> a ~~k~> b
 mkFun p = Fun (inK1 (\ b a -> ((• a) <--> b) p))

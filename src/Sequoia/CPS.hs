@@ -82,7 +82,7 @@ import           Sequoia.Disjunction
 
 type CPSFn k a b = k b -> k a
 
-class (Cat.Category c, Representable k, Profunctor c) => CPS k c | c -> k where
+class (Cat.Category c, Continuation k, Profunctor c) => CPS k c | c -> k where
   inC :: CPSFn k a b -> a `c` b
   exC :: a `c` b     -> CPSFn k a b
 
@@ -106,7 +106,7 @@ infixl 9 ••
 cps :: CPS k c => (a -> b) -> a `c` b
 cps = inC1 . flip (.)
 
-liftCPS :: CPS k c => (a -> k b -> Rep k) -> a `c` b
+liftCPS :: CPS k c => (a -> k b -> KRep k) -> a `c` b
 liftCPS = inC . fmap inK . flip
 
 
@@ -130,10 +130,10 @@ execC c = exC c -<< ()
 execCM :: (CPS k c, MonadK k m) => () `c` a -> m a
 execCM = jump . execC
 
-evalC :: CPS k c => i `c` Rep k -> k i
+evalC :: CPS k c => i `c` KRep k -> k i
 evalC = (•• idK)
 
-evalCM :: (CPS k c, MonadK k m) => i `c` Rep k -> (i -> m ())
+evalCM :: (CPS k c, MonadK k m) => i `c` KRep k -> (i -> m ())
 evalCM c i = jump (inK (const (evalC c • i)))
 
 dnE :: CPS k c => k **(a `c` b) -> a `c` b
@@ -151,10 +151,10 @@ uncurryC c = inC1 (\ k -> ($ k) . uncurry (appC2 c))
 
 -- Delimited continuations
 
-resetC :: (CPS j cj, CPS k ck) => ck i (Rep k) -> cj i (Rep k)
+resetC :: (CPS j cj, CPS k ck) => ck i (KRep k) -> cj i (KRep k)
 resetC c = inC1 (\ k -> k . (evalC c •))
 
-shiftC :: CPS k c => (k o -> c i (Rep k)) -> c i o
+shiftC :: CPS k c => (k o -> c i (KRep k)) -> c i o
 shiftC f = inC (evalC . f)
 
 

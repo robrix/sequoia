@@ -60,11 +60,11 @@ instance Contravariant k => Profunctor (Sig k) where
 instance Contravariant k => Functor (Sig k a) where
   fmap f = Sig . lmap (contramap f) . runSig
 
-instance Representable k => Applicative (Sig k a) where
+instance Continuation k => Applicative (Sig k a) where
   pure a = Sig (•<< const a)
   Sig f <*> Sig a = Sig (inK1 (\ k a' -> f (inK (\ f -> a (inK (k . f)) • a')) • a'))
 
-instance Representable k => Monad (Sig k a) where
+instance Continuation k => Monad (Sig k a) where
   Sig m >>= f = Sig (inK1 (\ k a -> m (inK ((• a) . (`runSig` inK k) . f)) • a))
 
 mapKSig :: (forall x . k x <-> k' x) -> (Sig k a b -> Sig k' a b)

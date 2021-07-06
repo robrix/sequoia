@@ -14,6 +14,7 @@ module Sequoia.Calculus.Negate
 , module Sequoia.Connective.Negate
 ) where
 
+import Prelude hiding (init)
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Control
 import Sequoia.Calculus.Core
@@ -21,7 +22,6 @@ import Sequoia.Connective.Negate
 import Sequoia.Connective.Negation
 import Sequoia.Continuation
 import Sequoia.Polarity
-import Prelude hiding (init)
 
 -- Negate
 
@@ -55,8 +55,8 @@ negateR' p = wkL p >>> negateL init
 
 shiftN
   :: (Control s, Contextual k (s k))
-  => k -a < _Γ -|s k|- _Δ > Rep k
-  -- ----------------------------
+  => k -a < _Γ -|s k|- _Δ > KRep k
+  -- -----------------------------
   ->        _Γ -|s k|- _Δ > a
 shiftN = shift . negateLK'
 

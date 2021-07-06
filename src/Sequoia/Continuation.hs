@@ -7,7 +7,6 @@ module Sequoia.Continuation
 , KRep
 , K(..)
   -- ** Application
-, Representable(..)
 , RepFn
 , _K
 , inK
@@ -69,8 +68,7 @@ import           Sequoia.Disjunction
 
 -- Continuations
 
-class    Representable k => Continuation k
-instance Representable k => Continuation k
+class Representable k => Continuation k
 
 type KRep k = Rep k
 
@@ -89,6 +87,8 @@ instance Representable (K m r) where
 
   tabulate = K
   index = runK
+
+instance Continuation (K m r)
 
 instance Adjunction (K m r) (K m r) where
   unit   = inK . flip exK

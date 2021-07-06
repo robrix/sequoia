@@ -14,6 +14,7 @@ module Sequoia.Calculus.Not
 , module Sequoia.Connective.Not
 ) where
 
+import Prelude hiding (init)
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Control
 import Sequoia.Calculus.Core
@@ -21,7 +22,6 @@ import Sequoia.Connective.Negation
 import Sequoia.Connective.Not
 import Sequoia.Continuation
 import Sequoia.Polarity
-import Prelude hiding (init)
 
 -- Not
 
@@ -56,8 +56,8 @@ notR' p = wkL p >>> notL init
 
 shiftP
   :: (Control s, Contextual k (s k))
-  =>  k ¬a < _Γ -|s k|- _Δ > Rep k
-  -- -----------------------------
+  =>  k ¬a < _Γ -|s k|- _Δ > KRep k
+  -- ------------------------------
   ->         _Γ -|s k|- _Δ > a
 shiftP = shift . notLK'
 

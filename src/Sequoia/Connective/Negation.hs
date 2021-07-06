@@ -16,13 +16,14 @@ module Sequoia.Connective.Negation
 
 import Data.Functor.Contravariant
 import Data.Functor.Contravariant.Adjunction
+import Data.Functor.Contravariant.Rep
 import Sequoia.Continuation
 import Sequoia.Polarity
 
 -- Not
 
 newtype k ¬a = Not { getNot :: k a }
-  deriving (Applicative, Representable, Contravariant, Functor)
+  deriving (Applicative, Continuation, Contravariant, Representable, Functor)
 
 instance Pos a => Polarized N (k ¬a) where
 
@@ -39,7 +40,7 @@ instance Adjunction f u => Adjunction ((-) f) ((¬) u) where
 -- Negate
 
 newtype k -a = Negate { getNegate :: k a }
-  deriving (Applicative, Representable, Contravariant, Functor)
+  deriving (Applicative, Continuation, Contravariant, Representable, Functor)
 
 instance Neg a => Polarized P (k -a) where
 

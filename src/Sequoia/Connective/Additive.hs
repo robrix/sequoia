@@ -18,8 +18,8 @@ import Sequoia.Connective.Zero
 import Sequoia.Continuation
 import Sequoia.Disjunction
 
-elimWith :: Representable k => a & b -> k -a ⊕ k -b -> Rep k
+elimWith :: Continuation k => a & b -> k -a ⊕ k -b -> KRep k
 elimWith = flip ((. exl) . (•) <--> (. exr) . (•))
 
-elimSum :: Representable k => a ⊕ b -> k ¬a & k ¬b -> Rep k
+elimSum :: Continuation k => a ⊕ b -> k ¬a & k ¬b -> KRep k
 elimSum = (. exl) . flip (•) <--> (. exr) . flip (•)
