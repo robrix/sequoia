@@ -8,8 +8,6 @@ module Sequoia.Bijection
 , Optic(..)
 , Iso
   -- ** Elimination
-, exBl
-, exBr
 , (<~)
 , (~>)
 , over
@@ -98,24 +96,19 @@ instance Profunctor p => Iso p
 views :: c (Forget r) => Optic c s t a b -> (a -> r) -> (s -> r)
 views b = runForget . runOptic b . Forget
 
-exBl :: c (Forget a) => Optic c s t a b -> (s -> a)
-exBl b = views b id
-
 reviews :: c Tagged => Optic c s t a b -> (t -> r) -> (b -> r)
 reviews b f = f . getTagged . runOptic b . Tagged
 
-exBr :: c Tagged => Optic c s t a b -> (b -> t)
-exBr b = reviews b id
-
-(<~) :: c Tagged => Optic c s t a b -> (b -> t)
-o <~ b = reviews o id b
-
-infixr 9 <~
 
 (~>) :: c (Forget a) => s -> Optic c s t a b -> a
 s ~> o = views o id s
 
 infixl 9 ~>
+
+(<~) :: c Tagged => Optic c s t a b -> (b -> t)
+o <~ b = reviews o id b
+
+infixr 9 <~
 
 
 over :: (c Tagged, c (Forget a)) => Optic c s t a b -> (t -> s) -> (b -> a)
@@ -158,7 +151,7 @@ select :: Alternative f => (a -> Bool) -> (a -> f a)
 select p a = a <$ guard (p a)
 
 bij :: (a -> b, b -> a) <-> (a <-> b)
-bij = uncurry (<->) <-> ((,) <$> exBl <*> exBr)
+bij = uncurry (<->) <-> ((,) <$> flip (~>) <*> (<~))
 
 
 -- Composition
@@ -223,34 +216,34 @@ contraadjuncted = Contra.leftAdjunct <-> Contra.rightAdjunct
 -- Functor
 
 fmapping :: Functor f => (a <-> a') -> f a <-> f a'
-fmapping a = fmap (exBl a) <-> fmap (exBr a)
+fmapping a = fmap (~> a) <-> fmap (a <~)
 
 contramapping :: Contravariant f => (a <-> a') -> f a <-> f a'
-contramapping a = contramap (exBr a) <-> contramap (exBl a)
+contramapping a = contramap (a <~) <-> contramap (~> a)
 
 
 -- Bifunctor
 
 bimapping :: Bifunctor p => (a <-> a') -> (b <-> b') -> (a `p` b) <-> (a' `p` b')
-bimapping a b = bimap (exBl a) (exBl b) <-> bimap (exBr a) (exBr b)
+bimapping a b = bimap (~> a) (~> b) <-> bimap (a <~) (b <~)
 
 firsting :: Bifunctor p => (a <-> a') -> (a `p` b) <-> (a' `p` b)
-firsting a = first (exBl a) <-> first (exBr a)
+firsting a = first (~> a) <-> first (a <~)
 
 seconding :: Bifunctor p => (b <-> b') -> (a `p` b) <-> (a `p` b')
-seconding b = second (exBl b) <-> second (exBr b)
+seconding b = second (~> b) <-> second (b <~)
 
 
 -- Profunctor
 
 dimapping :: Profunctor p => (a <-> a') -> (b <-> b') -> (a `p` b) <-> (a' `p` b')
-dimapping a b = dimap (exBr a) (exBl b) <-> dimap (exBl a) (exBr b)
+dimapping a b = dimap (a <~) (~> b) <-> dimap (~> a) (b <~)
 
 lmapping :: Profunctor p => (a <-> a') -> (a `p` b) <-> (a' `p` b)
-lmapping a = lmap (exBr a) <-> lmap (exBl a)
+lmapping a = lmap (a <~) <-> lmap (~> a)
 
 rmapping :: Profunctor p => (b <-> b') -> (a `p` b) <-> (a `p` b')
-rmapping b = rmap (exBl b) <-> rmap (exBr b)
+rmapping b = rmap (~> b) <-> rmap (b <~)
 
 
 -- Lenses
