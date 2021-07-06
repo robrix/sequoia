@@ -91,12 +91,12 @@ exBl b = fst (exBs (exB b)) id
 exBr :: Bijection r s t a b => r -> (b -> t)
 exBr b = snd (exBs (exB b)) id
 
-(<~) :: a <-> b -> (b -> a)
+(<~) :: Bijection r s t a b => r -> (b -> t)
 (<~) = exBr
 
 infixr 9 <~
 
-(~>) :: a -> a <-> b -> b
+(~>) :: Bijection r s t a b => s -> r -> a
 (~>) = flip exBl
 
 infixl 9 ~>
