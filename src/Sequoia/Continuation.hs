@@ -1,8 +1,10 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Continuation
 ( -- * Continuations
-  K(..)
+  Continuation
+, K(..)
   -- ** Application
 , Representable(..)
 , RepFn
@@ -65,6 +67,10 @@ import           Sequoia.Bijection
 import           Sequoia.Disjunction
 
 -- Continuations
+
+class    Representable k => Continuation k
+instance Representable k => Continuation k
+
 
 newtype K m r a = K { runK :: a -> m r }
 
