@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Value
 ( -- * Values
@@ -15,9 +16,12 @@ module Sequoia.Value
 , V(..)
 ) where
 
-import Data.Distributive
-import Data.Functor.Rep
-import Sequoia.Bijection
+import           Data.Distributive
+import           Data.Functor.Rep
+import           Data.Profunctor
+import qualified Data.Profunctor.Rep as Pro
+import           Data.Profunctor.Sieve
+import           Sequoia.Bijection
 
 class Representable v => Value v
 
@@ -49,7 +53,15 @@ exV2 = dimap2 inV inV exV
 
 newtype V f s a = V { runV :: f s -> a }
   deriving (Applicative, Functor, Monad, Representable)
+  deriving (Closed, Cochoice, Costrong, Profunctor) via Costar f
 
 instance Distributive (V f s) where
   distribute = distributeRep
   collect = collectRep
+
+instance Functor f => Cosieve (V f) f where
+  cosieve = runV
+
+instance Functor f => Pro.Corepresentable (V f) where
+  type Corep (V f) = f
+  cotabulate = V
