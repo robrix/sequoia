@@ -102,7 +102,7 @@ infixr 9 <~
 infixl 9 ~>
 
 
-under :: (a <-> b) -> (b -> b) -> (a -> a)
+under :: Bijection r s t a b => r -> (a -> b) -> (s -> t)
 under b = dimap (~> b) (b <~)
 
 
