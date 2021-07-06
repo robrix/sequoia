@@ -129,7 +129,7 @@ dimap2 l1 l2 r f a1 a2 = r (f (l1 a1) (l2 a2))
 -- Coercion
 
 coerceKWith :: (Representable k1, Representable k2) => (RepFn k1 a -> RepFn k2 b) -> (k1 a -> k2 b)
-coerceKWith f = inK . f . exK
+coerceKWith = under (inv _K)
 
 coerceK :: (Representable k1, Representable k2, Rep k1 ~ Rep k2) => (k1 a -> k2 a)
 coerceK = inK . exK
