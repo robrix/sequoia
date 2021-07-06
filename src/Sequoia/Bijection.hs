@@ -1,5 +1,6 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Bijection
 ( -- * Bijections
@@ -68,7 +69,7 @@ import           Data.Tuple (swap)
 
 -- Bijections
 
-newtype a <-> b = Bij { runBij :: Biject a a b b }
+newtype a <-> b = Bij { runBij :: Optic Iso a a b b }
 
 infix 1 <->
 
@@ -105,10 +106,10 @@ class Bijection r s t a b | r -> s t a b where
   exB :: r -> Biject s t a b
 
 instance Bijection (a <-> b) a a b b where
-  inB = Bij
-  exB = runBij
+  inB f = Bij $ inB f
+  exB = runOptic . runBij
 
-instance Bijection (Optic Profunctor s t a b) s t a b where
+instance (forall p . Profunctor p => c p, forall p . c p => Profunctor p) => Bijection (Optic c s t a b) s t a b where
   inB = Optic
   exB = runOptic
 
