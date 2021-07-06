@@ -98,7 +98,7 @@ infixl 9 ••
 -- Construction
 
 cps :: CPS k c => (a -> b) -> a `c` b
-cps = inC . inK1 . flip (.)
+cps = inC1 . flip (.)
 
 liftCPS :: CPS k c => (a -> k b -> Rep k) -> a `c` b
 liftCPS = inC . fmap inK . flip
@@ -131,7 +131,7 @@ evalCM :: (CPS k c, MonadK k m) => i `c` Rep k -> (i -> m ())
 evalCM c i = jump (inK (const (evalC c • i)))
 
 dnE :: CPS k c => k **(a `c` b) -> a `c` b
-dnE f = inC (inK1 (\ k a -> f • inK (\ f -> appC f a k)))
+dnE f = inC1 (\ k a -> f • inK (\ f -> appC f a k))
 
 
 -- Currying
@@ -140,13 +140,13 @@ curryC :: CPS k c => (a, b) `c` d -> a `c` (b `c` d)
 curryC c = inC (•<< (`lmap` c) . (,))
 
 uncurryC :: CPS k c => a `c` (b `c` d) -> (a, b) `c` d
-uncurryC c = inC (\ k -> inK (($ exK k) . uncurry (appC2 c)))
+uncurryC c = inC1 (\ k -> ($ k) . uncurry (appC2 c))
 
 
 -- Delimited continuations
 
 resetC :: (CPS j cj, CPS k ck) => ck i (Rep k) -> cj i (Rep k)
-resetC c = inC (inK1 (\ k -> k . exK (evalC c)))
+resetC c = inC1 (\ k -> k . (evalC c •))
 
 shiftC :: CPS k c => (k o -> c i (Rep k)) -> c i o
 shiftC f = inC (evalC . f)
@@ -173,16 +173,16 @@ pureCPS :: CPS k c => b -> c a b
 pureCPS a = inC (•<< const a)
 
 apCPS :: CPS k c => c a (b -> b') -> (c a b -> c a b')
-apCPS f a = inC (inK1 (\ k a' -> f •• inK (\ f -> a •• inK (k . f) • a') • a'))
+apCPS f a = inC1 (\ k a' -> f •• inK (\ f -> a •• inK (k . f) • a') • a')
 
 liftA2CPS :: CPS k c => (x -> y -> z) -> c a x -> c a y -> c a z
-liftA2CPS f a b = inC (inK1 (\ k a' -> appC a a' (appC b a' . (k .) . f)))
+liftA2CPS f a b = inC1 (\ k a' -> appC a a' (appC b a' . (k .) . f))
 
 
 -- Monad
 
 bindCPS :: CPS k c => c a b -> (b -> c a b') -> c a b'
-bindCPS m f = inC (inK1 (\ k a -> m •• inK ((• a) . (•• inK k) . f) • a))
+bindCPS m f = inC1 (\ k a -> m •• inK ((• a) . (•• inK k) . f) • a)
 
 
 -- Arrow
@@ -191,13 +191,13 @@ arrCPS :: CPS k c => (a -> b) -> c a b
 arrCPS = cps
 
 firstCPS :: CPS k c => c a b -> c (a, d) (b, d)
-firstCPS  f = inC (inK1 (\ k (l, r) -> appC f l (k . (,r))))
+firstCPS  f = inC1 (\ k (l, r) -> appC f l (k . (,r)))
 
 secondCPS :: CPS k c => c a b -> c (d, a) (d, b)
-secondCPS g = inC (inK1 (\ k (l, r) -> appC g r (k . (l,))))
+secondCPS g = inC1 (\ k (l, r) -> appC g r (k . (l,)))
 
 splitPrdCPS :: CPS k c => c a b -> c a' b' -> c (a, a') (b, b')
-splitPrdCPS f g = inC (inK1 (\ k (l, r) -> appC f l (appC g r . fmap k . (,))))
+splitPrdCPS f g = inC1 (\ k (l, r) -> appC f l (appC g r . fmap k . (,)))
 
 fanoutCPS :: CPS k c => c a b -> c a b' -> c a (b, b')
 fanoutCPS = liftA2CPS (,)
@@ -206,13 +206,13 @@ fanoutCPS = liftA2CPS (,)
 -- ArrowChoice
 
 leftCPS :: CPS k c => c a b -> c (Either a d) (Either b d)
-leftCPS  f = inC (\ k -> f •• (k •<< inl) <••> (k •<< inr))
+leftCPS  f = inC (\ k -> f •• inlC k <••> inrC k)
 
 rightCPS :: CPS k c => c a b -> c (Either d a) (Either d b)
-rightCPS g = inC (\ k -> (k •<< inl) <••> g •• (k •<< inr))
+rightCPS g = inC (\ k -> inlC k <••> g •• inrC k)
 
 splitSumCPS :: CPS k c => c a1 b1 -> c a2 b2 -> c (Either a1 a2) (Either b1 b2)
-splitSumCPS f g = inC (\ k -> f •• (k •<< inl) <••> g •• (k •<< inr))
+splitSumCPS f g = inC (\ k -> f •• inlC k <••> g •• inrC k)
 
 faninCPS :: CPS k c => c a1 b -> c a2 b -> c (Either a1 a2) b
 faninCPS f g = inC ((<••>) <$> exC f <*> exC g)
