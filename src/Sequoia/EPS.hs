@@ -174,5 +174,9 @@ instance Value v => Profunctor (E v) where
   lmap = lmapE
   rmap = rmapE
 
+instance Value v => Costrong (E v) where
+  unfirst  = unfirstE
+  unsecond = unsecondE
+
 instance (Value v, Monoid (VRep v)) => Cosieve (E v) (Env v) where
   cosieve = cosieveE
