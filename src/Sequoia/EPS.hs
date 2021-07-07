@@ -52,6 +52,7 @@ module Sequoia.EPS
 import           Control.Applicative (liftA2)
 import qualified Control.Category as Cat
 import           Control.Comonad
+import           Data.Distributive
 import           Data.Profunctor
 import           Data.Profunctor.Rep
 import           Data.Profunctor.Sieve
@@ -202,6 +203,10 @@ instance Value v => EnvPassing v (E v) where
 
 instance Value v => Functor (E v a) where
   fmap = fmapE
+
+instance Value v => Distributive (E v a) where
+  distribute = distributeE
+  collect = collectE
 
 instance Value v => Applicative (E v a) where
   pure = pureE
