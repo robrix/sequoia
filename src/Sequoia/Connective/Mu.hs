@@ -34,7 +34,7 @@ mu :: Continuation k => ForAll k N (MuF k f) -> Mu k f
 mu r = Mu (dnE (contramap (contramap getMuF) (runForAll r)))
 
 foldMu :: ContPassing k c => Neg a => f a `c` a -> Mu k f `c` a
-foldMu alg = inC (inK1 (\ k (Mu f) -> appC f (Down (coerceC alg)) k))
+foldMu alg = inC1 (\ k (Mu f) -> appC f (Down (coerceC alg)) k)
 
 unfoldMu :: (Traversable f, ContPassing k c) => a `c` f a -> a `c` Mu k f
 unfoldMu coalg = cps (\ a -> Mu (Fun (inK1 (\ k (Down alg) -> appC (refoldCPS alg (coerceC coalg)) a k))))
