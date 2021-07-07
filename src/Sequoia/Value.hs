@@ -15,6 +15,8 @@ module Sequoia.Value
 , exV2
   -- * Concrete values
 , V(..)
+  -- * Env monad
+, Env(..)
 ) where
 
 import           Data.Distributive
@@ -71,3 +73,9 @@ instance Functor f => Cosieve (V f) f where
 instance Functor f => Pro.Corepresentable (V f) where
   type Corep (V f) = f
   cotabulate = V
+
+
+-- Env monad
+
+newtype Env v a b = Env { runEnv :: v (v a -> b) }
+  deriving (Functor)
