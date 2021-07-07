@@ -83,3 +83,6 @@ newtype Env v a b = Env { runEnv :: v (v a -> b) }
 instance Value v => Applicative (Env v a) where
   pure a = Env (inV (\ _ _ -> a))
   f <*> a = Env (inV (\ s va -> exV (runEnv f) s va (exV (runEnv a) s va)))
+
+instance Value v => Monad (Env v a) where
+  m >>= f = Env (inV (\ s va -> exV (runEnv (f (exV (runEnv m) s va))) s va))
