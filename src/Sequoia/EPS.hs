@@ -147,3 +147,6 @@ instance Value v => Profunctor (E v) where
   dimap = dimapE
   lmap = lmapE
   rmap = rmapE
+
+instance Value v => Functor (E v a) where
+  fmap = fmapE
