@@ -156,3 +156,6 @@ instance Value v => Applicative (E v a) where
   pure = pureE
   (<*>) = apE
   liftA2 = liftA2E
+
+instance Value v => Monad (E v a) where
+  (>>=) = bindE
