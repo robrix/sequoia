@@ -122,14 +122,14 @@ rmapE = (id `dimapE`)
 
 -- Cosieve
 
-cosieveE :: EnvPassing v e => a `e` b -> Env v a b
-cosieveE = Env . inV . flip . lmap exV . exE1
+cosieveE :: (EnvPassing v e, Monoid (VRep v)) => a `e` b -> (Env v a -> b)
+cosieveE e n = let s = mempty in appE e s (appEnv n s)
 
 
 -- Corepresentable
 
-cotabulateE :: EnvPassing v e => Env v a b -> a `e` b
-cotabulateE b = inE1 (\ k s -> appEnv b s (inV k))
+cotabulateE :: EnvPassing v e => (Env v a -> b) -> a `e` b
+cotabulateE f = liftE (\ s a -> f (pure (a s)))
 
 
 -- Concrete
