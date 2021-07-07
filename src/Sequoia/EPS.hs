@@ -24,6 +24,10 @@ module Sequoia.EPS
 , liftA2E
   -- ** Monad
 , bindE
+  -- ** Comonad
+, extractE
+, extendE
+, duplicateE
   -- ** Profunctor
 , dimapE
 , lmapE
@@ -44,6 +48,7 @@ module Sequoia.EPS
 
 import           Control.Applicative (liftA2)
 import qualified Control.Category as Cat
+import           Control.Comonad
 import           Data.Profunctor
 import           Data.Profunctor.Rep
 import           Data.Profunctor.Sieve
@@ -117,6 +122,18 @@ liftA2E f a b = inE1 (\ k -> f <$> exE1 a k <*> exE1 b k)
 
 bindE :: EnvPassing v e => e a b -> (b -> e a b') -> e a b'
 bindE m f = inE1 (\ k -> (`exE1` k) =<< f . exE1 m k)
+
+
+-- Comonad
+
+extractE :: (EnvPassing v e, Monoid (VRep v), Monoid a) => a `e` b -> b
+extractE e = appE e mempty mempty
+
+extendE :: EnvPassing v e => (s `e` a -> b) -> (s `e` a -> s `e` b)
+extendE f e = inE1 (\ _ _ -> f e)
+
+duplicateE :: EnvPassing v e => a `e` b -> a `e` (a `e` b)
+duplicateE e = inE1 (\ _ _ -> e)
 
 
 -- Profunctor
