@@ -8,6 +8,7 @@ module Sequoia.EPS
 , exE1
   -- ** Construction
 , eps
+, liftE
   -- ** Elimination
 , appE
 ) where
@@ -41,6 +42,9 @@ exE1 = exV1 . exE
 
 eps :: EnvPassing v e => (a -> b) -> a `e` b
 eps = inE1 . (.)
+
+liftE :: EnvPassing v e => (v a -> VRep v -> b) -> a `e` b
+liftE = inE . fmap inV
 
 
 -- Elimination
