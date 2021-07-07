@@ -26,6 +26,8 @@ module Sequoia.EPS
 , dimapE
 , lmapE
 , rmapE
+  -- ** Cosieve
+, cosieveE
   -- * Concrete
 , E(..)
 ) where
@@ -113,6 +115,12 @@ lmapE = (`dimapE` id)
 
 rmapE :: EnvPassing v e => (b -> b') -> (e a b -> e a b')
 rmapE = (id `dimapE`)
+
+
+-- Cosieve
+
+cosieveE :: EnvPassing v e => a `e` b -> Env v a b
+cosieveE = Env . inV . flip . lmap exV . exE1
 
 
 -- Concrete
