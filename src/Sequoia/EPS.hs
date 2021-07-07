@@ -28,6 +28,9 @@ module Sequoia.EPS
 , dimapE
 , lmapE
 , rmapE
+  -- ** Cochoice
+, unleftE
+, unrightE
   -- ** Costrong
 , unfirstE
 , unsecondE
@@ -45,6 +48,7 @@ import           Data.Profunctor
 import           Data.Profunctor.Rep
 import           Data.Profunctor.Sieve
 import           Sequoia.Bijection
+import           Sequoia.Disjunction
 import           Sequoia.Value
 
 -- EPS
@@ -125,6 +129,17 @@ lmapE = (`dimapE` id)
 
 rmapE :: EnvPassing v e => (b -> b') -> (e a b -> e a b')
 rmapE = (id `dimapE`)
+
+
+-- Cochoice
+
+unleftE  :: EnvPassing v e => Either a d `e` Either b d -> a `e` b
+unleftE  e = inE1 (flip go . (Left .))
+  where go s = (id <--> go s . pure . Right) . appE e s
+
+unrightE :: EnvPassing v e => Either d a `e` Either d b -> a `e` b
+unrightE e = inE1 (flip go . (Right .))
+  where go s = (go s . pure . Left <--> id) . appE e s
 
 
 -- Costrong
