@@ -135,6 +135,10 @@ cotabulateE b = inE1 (\ k s -> appEnv b s (inV k))
 
 newtype E v a b = E { runE :: v a -> v b }
 
+instance Value v => EnvPassing v (E v) where
+  inE = E
+  exE = runE
+
 instance Value v => Cat.Category (E v) where
   id = idE
   (.) = composeE
@@ -143,7 +147,3 @@ instance Value v => Profunctor (E v) where
   dimap = dimapE
   lmap = lmapE
   rmap = rmapE
-
-instance Value v => EnvPassing v (E v) where
-  inE = E
-  exE = runE
