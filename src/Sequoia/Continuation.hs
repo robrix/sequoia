@@ -38,7 +38,7 @@ module Sequoia.Continuation
 , type (**)
 , ContFn
 , _DN
-, mapDN
+, hoistDN
   -- ** Construction
 , liftDN
 , inDN
@@ -204,8 +204,8 @@ _DN :: (Representable k, Representable k') => Optic Iso (ContFn k a) (ContFn k' 
 _DN = inDN <-> exDN
 
 
-mapDN :: Contravariant j => (forall x . j x <-> k x) -> (j **a -> k **a)
-mapDN b = (~> b) . contramap (b <~)
+hoistDN :: Contravariant j => (forall x . j x <-> k x) -> (j **a -> k **a)
+hoistDN b = (~> b) . contramap (b <~)
 
 
 -- Construction
