@@ -79,3 +79,7 @@ instance Functor f => Pro.Corepresentable (V f) where
 
 newtype Env v a b = Env { runEnv :: v (v a -> b) }
   deriving (Functor)
+
+instance Value v => Applicative (Env v a) where
+  pure a = Env (inV (\ _ _ -> a))
+  f <*> a = Env (inV (\ s va -> exV (runEnv f) s va (exV (runEnv a) s va)))
