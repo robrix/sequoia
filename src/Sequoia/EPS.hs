@@ -125,3 +125,7 @@ instance Cat.Category (E v) where
 
 instance Value v => Profunctor (E v) where
   dimap f g = E . dimap (fmap f) (fmap g) . runE
+
+instance Value v => EnvPassing v (E v) where
+  inE = E
+  exE = runE
