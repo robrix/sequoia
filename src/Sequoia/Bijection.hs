@@ -85,9 +85,7 @@ type a <-> b = Optic Iso a a b b
 infix 1 <->
 
 
-type OpticF c s t a b = forall p . c p => (a `p` b) -> (s `p` t)
-
-newtype Optic c s t a b = Optic { runOptic :: OpticF c s t a b }
+newtype Optic c s t a b = Optic { runOptic :: forall p . c p => (a `p` b) -> (s `p` t) }
 
 
 class Profunctor p => Iso p
