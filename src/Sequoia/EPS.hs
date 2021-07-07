@@ -18,6 +18,9 @@ module Sequoia.EPS
 , composeE
   -- ** Functor
 , fmapE
+  -- ** Distributive
+, distributeE
+, collectE
   -- ** Applicative
 , pureE
 , apE
@@ -104,6 +107,15 @@ composeE f g = inE (exE f . exE g)
 
 fmapE :: EnvPassing v e => (b -> b') -> (e a b -> e a b')
 fmapE = rmapE
+
+
+-- Distributive
+
+distributeE :: (EnvPassing v e, Functor f) => f (a `e` b) -> a `e` f b
+distributeE r = inE1 (\ a s -> (\ e -> exE1 e a s) <$> r)
+
+collectE :: (EnvPassing v e, Functor f) => (c -> a `e` b) -> f c -> a `e` f b
+collectE f r = inE1 (\ a s -> (\ c -> exE1 (f c) a s) <$> r)
 
 
 -- Applicative
