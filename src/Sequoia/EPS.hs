@@ -140,7 +140,9 @@ instance Cat.Category (E v) where
   E f . E g = E (f . g)
 
 instance Value v => Profunctor (E v) where
-  dimap f g = E . dimap (fmap f) (fmap g) . runE
+  dimap = dimapE
+  lmap = lmapE
+  rmap = rmapE
 
 instance Value v => EnvPassing v (E v) where
   inE = E
