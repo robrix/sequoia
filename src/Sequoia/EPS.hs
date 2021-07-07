@@ -28,6 +28,8 @@ module Sequoia.EPS
 , rmapE
   -- ** Cosieve
 , cosieveE
+  -- ** Corepresentable
+, cotabulateE
   -- * Concrete
 , E(..)
 ) where
@@ -121,6 +123,12 @@ rmapE = (id `dimapE`)
 
 cosieveE :: EnvPassing v e => a `e` b -> Env v a b
 cosieveE = Env . inV . flip . lmap exV . exE1
+
+
+-- Corepresentable
+
+cotabulateE :: EnvPassing v e => Env v a b -> a `e` b
+cotabulateE b = inE1 (\ k s -> exV (runEnv b) s (inV k))
 
 
 -- Concrete
