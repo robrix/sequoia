@@ -62,7 +62,7 @@ module Sequoia.CPS
   -- ** Representable
 , tabulateC
   -- ** Deriving
-, ViaCPS(..)
+, C(..)
 ) where
 
 import           Control.Applicative (liftA2)
@@ -265,64 +265,64 @@ tabulateC f = liftC (exK . runCont . f)
 
 -- Deriving
 
-newtype ViaCPS c (k :: Type -> Type) a b = ViaCPS { runViaCPS :: c a b }
+newtype C c (k :: Type -> Type) a b = C { runC :: c a b }
   deriving (ContPassing k)
 
-instance ContPassing k c => Cat.Category (ViaCPS c k) where
+instance ContPassing k c => Cat.Category (C c k) where
   id = idC
   (.) = composeC
 
-instance ContPassing k c => Functor (ViaCPS c k a) where
+instance ContPassing k c => Functor (C c k a) where
   fmap = fmapC
 
-instance ContPassing k c => Applicative (ViaCPS c k a) where
+instance ContPassing k c => Applicative (C c k a) where
   pure = pureC
 
   liftA2 = liftA2C
 
   (<*>) = apC
 
-instance ContPassing k c => Monad (ViaCPS c k a) where
+instance ContPassing k c => Monad (C c k a) where
   (>>=) = bindC
 
-instance ContPassing k c => Arrow (ViaCPS c k) where
+instance ContPassing k c => Arrow (C c k) where
   arr = arrC
   first = firstC
   second = secondC
   (***) = splitPrdC
   (&&&) = fanoutC
 
-instance ContPassing k c => ArrowChoice (ViaCPS c k) where
+instance ContPassing k c => ArrowChoice (C c k) where
   left = leftC
   right = rightC
   (+++) = splitSumC
   (|||) = faninC
 
-instance ContPassing k c => ArrowApply (ViaCPS c k) where
+instance ContPassing k c => ArrowApply (C c k) where
   app = applyC
 
-instance ContPassing k c => Strong (ViaCPS c k) where
+instance ContPassing k c => Strong (C c k) where
   first' = first
   second' = second
 
-instance ContPassing k c => Choice (ViaCPS c k) where
+instance ContPassing k c => Choice (C c k) where
   left' = left
   right' = right
 
-instance ContPassing k c => Traversing (ViaCPS c k) where
+instance ContPassing k c => Traversing (C c k) where
   traverse' = wanderC traverse
   wander = wanderC
 
-instance ContPassing k c => Profunctor (ViaCPS c k) where
+instance ContPassing k c => Profunctor (C c k) where
   dimap = dimapC
 
   lmap = lmapC
 
   rmap = rmapC
 
-instance ContPassing k c => Sieve (ViaCPS c k) ((••) k) where
+instance ContPassing k c => Sieve (C c k) ((••) k) where
   sieve = sieveC
 
-instance ContPassing k c => Pro.Representable (ViaCPS c k) where
-  type Rep (ViaCPS c k) = (••) k
+instance ContPassing k c => Pro.Representable (C c k) where
+  type Rep (C c k) = (••) k
   tabulate = tabulateC

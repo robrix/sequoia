@@ -32,7 +32,7 @@ liftFun' :: Continuation k => (a -> (b -> KRep k) -> KRep k) -> (a ~~k~> b)
 liftFun' = liftFun . flip
 
 newtype Fun k a b = Fun { getFun :: k b -> k a }
-  deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via ViaCPS (Fun k) k
+  deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via C (Fun k) k
 
 instance Continuation k => ContPassing k (Fun k) where
   inC = Fun
