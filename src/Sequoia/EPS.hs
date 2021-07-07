@@ -26,6 +26,8 @@ module Sequoia.EPS
 , dimapE
 , lmapE
 , rmapE
+  -- * Concrete
+, E(..)
 ) where
 
 import qualified Control.Category as Cat
@@ -111,3 +113,8 @@ lmapE = (`dimapE` id)
 
 rmapE :: EnvPassing v e => (b -> b') -> (e a b -> e a b')
 rmapE = (id `dimapE`)
+
+
+-- Concrete
+
+newtype E v a b = E { runE :: v a -> v b }
