@@ -16,6 +16,10 @@ module Sequoia.EPS
 , composeE
   -- ** Functor
 , fmapE
+  -- ** Applicative
+, pureE
+, apE
+, liftA2E
 ) where
 
 import qualified Control.Category as Cat
@@ -71,3 +75,15 @@ composeE f g = inE (exE f . exE g)
 
 fmapE :: EnvPassing v e => (b -> b') -> (e a b -> e a b')
 fmapE = rmapE
+
+
+-- Applicative
+
+pureE :: EnvPassing v e => b -> e a b
+pureE = inE1 . const . const
+
+apE :: EnvPassing v e => e a (b -> b') -> (e a b -> e a b')
+apE f a = inE1 (\ k -> exE1 f k <*> exE1 a k)
+
+liftA2E :: EnvPassing v e => (x -> y -> z) -> e a x -> e a y -> e a z
+liftA2E f a b = inE1 (\ k -> f <$> exE1 a k <*> exE1 b k)
