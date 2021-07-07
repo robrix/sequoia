@@ -19,6 +19,8 @@ module Sequoia.Value
 , Env(..)
 ) where
 
+import qualified Control.Category as Cat
+import           Control.Comonad
 import           Data.Distributive
 import           Data.Functor.Rep
 import           Data.Profunctor
@@ -62,6 +64,10 @@ newtype V f s a = V { runV :: f s -> a }
   deriving (Closed, Cochoice, Costrong, Profunctor) via Costar f
 
 instance Value (V f s)
+
+instance Comonad f => Cat.Category (V f) where
+  id = V extract
+  V f . V g = V (f =<= g)
 
 instance Distributive (V f s) where
   distribute = distributeRep
