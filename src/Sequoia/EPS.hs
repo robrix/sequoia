@@ -118,3 +118,7 @@ rmapE = (id `dimapE`)
 -- Concrete
 
 newtype E v a b = E { runE :: v a -> v b }
+
+instance Cat.Category (E v) where
+  id = E id
+  E f . E g = E (f . g)
