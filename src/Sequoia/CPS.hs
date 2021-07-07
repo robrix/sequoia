@@ -5,12 +5,12 @@ module Sequoia.CPS
 ( -- * ContPassing
   CFn
 , ContPassing(..)
-, _CPS
+, _C
 , inC1
 , (••)
   -- ** Construction
 , cps
-, liftCPS
+, liftC
   -- ** Elimination
 , appC
 , appC2
@@ -28,39 +28,39 @@ module Sequoia.CPS
 , resetC
 , shiftC
   -- ** Category
-, idCPS
-, composeCPS
+, idC
+, composeC
   -- ** Functor
-, fmapCPS
+, fmapC
   -- ** Applicative
-, pureCPS
-, apCPS
-, liftA2CPS
+, pureC
+, apC
+, liftA2C
   -- ** Monad
-, bindCPS
+, bindC
   -- ** Arrow
-, arrCPS
-, firstCPS
-, secondCPS
-, splitPrdCPS
-, fanoutCPS
+, arrC
+, firstC
+, secondC
+, splitPrdC
+, fanoutC
   -- ** ArrowChoice
-, leftCPS
-, rightCPS
-, splitSumCPS
-, faninCPS
+, leftC
+, rightC
+, splitSumC
+, faninC
   -- ** ArrowApply
-, applyCPS
+, applyC
   -- ** Traversing
-, wanderCPS
+, wanderC
   -- ** Profunctor
-, dimapCPS
-, lmapCPS
-, rmapCPS
+, dimapC
+, lmapC
+, rmapC
   -- ** Sieve
-, sieveCPS
+, sieveC
   -- ** Representable
-, tabulateCPS
+, tabulateC
   -- ** Deriving
 , ViaCPS(..)
 ) where
@@ -87,8 +87,8 @@ class (Cat.Category c, Continuation k, Profunctor c) => ContPassing k c | c -> k
   exC :: a `c` b     -> CFn k a b
 
 
-_CPS :: (ContPassing k c, ContPassing k' c') => Optic Iso (c a b) (c' a' b') (CFn k a b) (CFn k' a' b')
-_CPS = exC <-> inC
+_C :: (ContPassing k c, ContPassing k' c') => Optic Iso (c a b) (c' a' b') (CFn k a b) (CFn k' a' b')
+_C = exC <-> inC
 
 
 inC1 :: ContPassing k c => (KFn k b -> KFn k a) -> a `c` b
@@ -106,8 +106,8 @@ infixl 9 ••
 cps :: ContPassing k c => (a -> b) -> a `c` b
 cps = inC1 . flip (.)
 
-liftCPS :: ContPassing k c => (a -> k b -> KRep k) -> a `c` b
-liftCPS = inC . fmap inK . flip
+liftC :: ContPassing k c => (a -> k b -> KRep k) -> a `c` b
+liftC = inC . fmap inK . flip
 
 
 -- Elimination
@@ -160,80 +160,80 @@ shiftC f = inC (evalC . f)
 
 -- Category
 
-idCPS :: ContPassing k c => c a a
-idCPS = inC id
+idC :: ContPassing k c => c a a
+idC = inC id
 
-composeCPS :: ContPassing k c => c b d -> c a b -> c a d
-composeCPS f g = inC (exC g . exC f)
+composeC :: ContPassing k c => c b d -> c a b -> c a d
+composeC f g = inC (exC g . exC f)
 
 
 -- Functor
 
-fmapCPS :: ContPassing k c => (b -> b') -> (c a b -> c a b')
-fmapCPS = rmapCPS
+fmapC :: ContPassing k c => (b -> b') -> (c a b -> c a b')
+fmapC = rmapC
 
 
 -- Applicative
 
-pureCPS :: ContPassing k c => b -> c a b
-pureCPS a = inC (•<< const a)
+pureC :: ContPassing k c => b -> c a b
+pureC a = inC (•<< const a)
 
-apCPS :: ContPassing k c => c a (b -> b') -> (c a b -> c a b')
-apCPS f a = inC1 (\ k a' -> f •• inK (\ f -> a •• inK (k . f) • a') • a')
+apC :: ContPassing k c => c a (b -> b') -> (c a b -> c a b')
+apC f a = inC1 (\ k a' -> f •• inK (\ f -> a •• inK (k . f) • a') • a')
 
-liftA2CPS :: ContPassing k c => (x -> y -> z) -> c a x -> c a y -> c a z
-liftA2CPS f a b = inC1 (\ k a' -> appC a a' (appC b a' . (k .) . f))
+liftA2C :: ContPassing k c => (x -> y -> z) -> c a x -> c a y -> c a z
+liftA2C f a b = inC1 (\ k a' -> appC a a' (appC b a' . (k .) . f))
 
 
 -- Monad
 
-bindCPS :: ContPassing k c => c a b -> (b -> c a b') -> c a b'
-bindCPS m f = inC1 (\ k a -> m •• inK ((• a) . (•• inK k) . f) • a)
+bindC :: ContPassing k c => c a b -> (b -> c a b') -> c a b'
+bindC m f = inC1 (\ k a -> m •• inK ((• a) . (•• inK k) . f) • a)
 
 
 -- Arrow
 
-arrCPS :: ContPassing k c => (a -> b) -> c a b
-arrCPS = cps
+arrC :: ContPassing k c => (a -> b) -> c a b
+arrC = cps
 
-firstCPS :: ContPassing k c => c a b -> c (a, d) (b, d)
-firstCPS  f = inC1 (\ k (l, r) -> appC f l (k . (,r)))
+firstC :: ContPassing k c => c a b -> c (a, d) (b, d)
+firstC  f = inC1 (\ k (l, r) -> appC f l (k . (,r)))
 
-secondCPS :: ContPassing k c => c a b -> c (d, a) (d, b)
-secondCPS g = inC1 (\ k (l, r) -> appC g r (k . (l,)))
+secondC :: ContPassing k c => c a b -> c (d, a) (d, b)
+secondC g = inC1 (\ k (l, r) -> appC g r (k . (l,)))
 
-splitPrdCPS :: ContPassing k c => c a b -> c a' b' -> c (a, a') (b, b')
-splitPrdCPS f g = inC1 (\ k (l, r) -> appC f l (appC g r . fmap k . (,)))
+splitPrdC :: ContPassing k c => c a b -> c a' b' -> c (a, a') (b, b')
+splitPrdC f g = inC1 (\ k (l, r) -> appC f l (appC g r . fmap k . (,)))
 
-fanoutCPS :: ContPassing k c => c a b -> c a b' -> c a (b, b')
-fanoutCPS = liftA2CPS (,)
+fanoutC :: ContPassing k c => c a b -> c a b' -> c a (b, b')
+fanoutC = liftA2C (,)
 
 
 -- ArrowChoice
 
-leftCPS :: ContPassing k c => c a b -> c (Either a d) (Either b d)
-leftCPS  f = inC (\ k -> f •• inlC k <••> inrC k)
+leftC :: ContPassing k c => c a b -> c (Either a d) (Either b d)
+leftC  f = inC (\ k -> f •• inlC k <••> inrC k)
 
-rightCPS :: ContPassing k c => c a b -> c (Either d a) (Either d b)
-rightCPS g = inC (\ k -> inlC k <••> g •• inrC k)
+rightC :: ContPassing k c => c a b -> c (Either d a) (Either d b)
+rightC g = inC (\ k -> inlC k <••> g •• inrC k)
 
-splitSumCPS :: ContPassing k c => c a1 b1 -> c a2 b2 -> c (Either a1 a2) (Either b1 b2)
-splitSumCPS f g = inC (\ k -> f •• inlC k <••> g •• inrC k)
+splitSumC :: ContPassing k c => c a1 b1 -> c a2 b2 -> c (Either a1 a2) (Either b1 b2)
+splitSumC f g = inC (\ k -> f •• inlC k <••> g •• inrC k)
 
-faninCPS :: ContPassing k c => c a1 b -> c a2 b -> c (Either a1 a2) b
-faninCPS f g = inC ((<••>) <$> exC f <*> exC g)
+faninC :: ContPassing k c => c a1 b -> c a2 b -> c (Either a1 a2) b
+faninC f g = inC ((<••>) <$> exC f <*> exC g)
 
 
 -- ArrowApply
 
-applyCPS :: ContPassing k c => c (c a b, a) b
-applyCPS = inC (>>- uncurry (fmap inDN . appC))
+applyC :: ContPassing k c => c (c a b, a) b
+applyC = inC (>>- uncurry (fmap inDN . appC))
 
 
 -- Traversing
 
-wanderCPS :: (ContPassing k c, Applicative (c ())) => (forall f . Applicative f => (a -> f b) -> (s -> f t)) -> (c a b -> c s t)
-wanderCPS traverse c = liftCPS (exK . execC . traverse (pappC c))
+wanderC :: (ContPassing k c, Applicative (c ())) => (forall f . Applicative f => (a -> f b) -> (s -> f t)) -> (c a b -> c s t)
+wanderC traverse c = liftC (exK . execC . traverse (pappC c))
   where
   pappC :: ContPassing k c => c a b -> a -> c () b
   pappC c a = inC ((a >$) . (c ••))
@@ -241,26 +241,26 @@ wanderCPS traverse c = liftCPS (exK . execC . traverse (pappC c))
 
 -- Profunctor
 
-dimapCPS :: ContPassing k c => (a' -> a) -> (b -> b') -> (c a b -> c a' b')
-dimapCPS f g = under _CPS (dimap (contramap g) (contramap f))
+dimapC :: ContPassing k c => (a' -> a) -> (b -> b') -> (c a b -> c a' b')
+dimapC f g = under _C (dimap (contramap g) (contramap f))
 
-lmapCPS :: ContPassing k c => (a' -> a) -> (c a b -> c a' b)
-lmapCPS = (`dimapCPS` id)
+lmapC :: ContPassing k c => (a' -> a) -> (c a b -> c a' b)
+lmapC = (`dimapC` id)
 
-rmapCPS :: ContPassing k c => (b -> b') -> (c a b -> c a b')
-rmapCPS = (id `dimapCPS`)
+rmapC :: ContPassing k c => (b -> b') -> (c a b -> c a b')
+rmapC = (id `dimapC`)
 
 
 -- Sieve
 
-sieveCPS :: ContPassing k c => a `c` b -> (a -> k ••b)
-sieveCPS = fmap (Cont . inDN) . appC
+sieveC :: ContPassing k c => a `c` b -> (a -> k ••b)
+sieveC = fmap (Cont . inDN) . appC
 
 
 -- Representable
 
-tabulateCPS :: ContPassing k c => (a -> k ••b) -> a `c` b
-tabulateCPS f = liftCPS (exK . runCont . f)
+tabulateC :: ContPassing k c => (a -> k ••b) -> a `c` b
+tabulateC f = liftC (exK . runCont . f)
 
 
 -- Deriving
@@ -269,37 +269,37 @@ newtype ViaCPS c (k :: Type -> Type) a b = ViaCPS { runViaCPS :: c a b }
   deriving (ContPassing k)
 
 instance ContPassing k c => Cat.Category (ViaCPS c k) where
-  id = idCPS
-  (.) = composeCPS
+  id = idC
+  (.) = composeC
 
 instance ContPassing k c => Functor (ViaCPS c k a) where
-  fmap = fmapCPS
+  fmap = fmapC
 
 instance ContPassing k c => Applicative (ViaCPS c k a) where
-  pure = pureCPS
+  pure = pureC
 
-  liftA2 = liftA2CPS
+  liftA2 = liftA2C
 
-  (<*>) = apCPS
+  (<*>) = apC
 
 instance ContPassing k c => Monad (ViaCPS c k a) where
-  (>>=) = bindCPS
+  (>>=) = bindC
 
 instance ContPassing k c => Arrow (ViaCPS c k) where
-  arr = arrCPS
-  first = firstCPS
-  second = secondCPS
-  (***) = splitPrdCPS
-  (&&&) = fanoutCPS
+  arr = arrC
+  first = firstC
+  second = secondC
+  (***) = splitPrdC
+  (&&&) = fanoutC
 
 instance ContPassing k c => ArrowChoice (ViaCPS c k) where
-  left = leftCPS
-  right = rightCPS
-  (+++) = splitSumCPS
-  (|||) = faninCPS
+  left = leftC
+  right = rightC
+  (+++) = splitSumC
+  (|||) = faninC
 
 instance ContPassing k c => ArrowApply (ViaCPS c k) where
-  app = applyCPS
+  app = applyC
 
 instance ContPassing k c => Strong (ViaCPS c k) where
   first' = first
@@ -310,19 +310,19 @@ instance ContPassing k c => Choice (ViaCPS c k) where
   right' = right
 
 instance ContPassing k c => Traversing (ViaCPS c k) where
-  traverse' = wanderCPS traverse
-  wander = wanderCPS
+  traverse' = wanderC traverse
+  wander = wanderC
 
 instance ContPassing k c => Profunctor (ViaCPS c k) where
-  dimap = dimapCPS
+  dimap = dimapC
 
-  lmap = lmapCPS
+  lmap = lmapC
 
-  rmap = rmapCPS
+  rmap = rmapC
 
 instance ContPassing k c => Sieve (ViaCPS c k) ((••) k) where
-  sieve = sieveCPS
+  sieve = sieveC
 
 instance ContPassing k c => Pro.Representable (ViaCPS c k) where
   type Rep (ViaCPS c k) = (••) k
-  tabulate = tabulateCPS
+  tabulate = tabulateC
