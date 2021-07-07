@@ -1,4 +1,5 @@
 {-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Sequoia.EPS
 ( -- * EPS
   EPFn
@@ -37,6 +38,7 @@ module Sequoia.EPS
 import           Control.Applicative (liftA2)
 import qualified Control.Category as Cat
 import           Data.Profunctor
+import           Data.Profunctor.Sieve
 import           Sequoia.Bijection
 import           Sequoia.Value
 
@@ -159,3 +161,6 @@ instance Value v => Profunctor (E v) where
   dimap = dimapE
   lmap = lmapE
   rmap = rmapE
+
+instance (Value v, Monoid (VRep v)) => Cosieve (E v) (Env v) where
+  cosieve = cosieveE
