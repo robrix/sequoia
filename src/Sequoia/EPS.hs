@@ -43,8 +43,8 @@ exE1 = exV1 . exE
 eps :: EnvPassing v e => (a -> b) -> a `e` b
 eps = inE1 . (.)
 
-liftE :: EnvPassing v e => (v a -> VRep v -> b) -> a `e` b
-liftE = inE . fmap inV
+liftE :: EnvPassing v e => (VRep v -> (VRep v -> a) -> b) -> a `e` b
+liftE = inE . inV1 . flip
 
 
 -- Elimination
