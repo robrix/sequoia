@@ -140,15 +140,6 @@ instance Value v => EnvPassing v (E v) where
   inE = E
   exE = runE
 
-instance Value v => Cat.Category (E v) where
-  id = idE
-  (.) = composeE
-
-instance Value v => Profunctor (E v) where
-  dimap = dimapE
-  lmap = lmapE
-  rmap = rmapE
-
 instance Value v => Functor (E v a) where
   fmap = fmapE
 
@@ -159,3 +150,12 @@ instance Value v => Applicative (E v a) where
 
 instance Value v => Monad (E v a) where
   (>>=) = bindE
+
+instance Value v => Cat.Category (E v) where
+  id = idE
+  (.) = composeE
+
+instance Value v => Profunctor (E v) where
+  dimap = dimapE
+  lmap = lmapE
+  rmap = rmapE
