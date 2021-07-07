@@ -1,4 +1,5 @@
 {-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Sequoia.EPS
 ( -- * EPS
@@ -41,6 +42,7 @@ module Sequoia.EPS
 import           Control.Applicative (liftA2)
 import qualified Control.Category as Cat
 import           Data.Profunctor
+import           Data.Profunctor.Rep
 import           Data.Profunctor.Sieve
 import           Sequoia.Bijection
 import           Sequoia.Value
@@ -180,3 +182,8 @@ instance Value v => Costrong (E v) where
 
 instance (Value v, Monoid (VRep v)) => Cosieve (E v) (Env v) where
   cosieve = cosieveE
+
+instance (Value v, Monoid (VRep v)) => Corepresentable (E v) where
+  type Corep (E v) = Env v
+
+  cotabulate = cotabulateE
