@@ -11,6 +11,9 @@ module Sequoia.EPS
 , liftE
   -- ** Elimination
 , appE
+  -- ** Category
+, idE
+, composeE
 ) where
 
 import qualified Control.Category as Cat
@@ -51,3 +54,12 @@ liftE = inE . inV1 . flip
 
 appE :: EnvPassing v e => a `e` b -> VRep v -> (VRep v -> a) -> b
 appE = flip . exE1
+
+
+-- Category
+
+idE :: EnvPassing v e => e a a
+idE = inE id
+
+composeE :: EnvPassing v e => e b d -> e a b -> e a d
+composeE f g = inE (exE f . exE g)
