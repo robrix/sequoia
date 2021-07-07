@@ -13,6 +13,7 @@ module Sequoia.EPS
 , liftE
   -- ** Elimination
 , appE
+, (↑)
   -- ** Category
 , idE
 , composeE
@@ -97,6 +98,12 @@ liftE = inE . inV1 . flip
 
 appE :: EnvPassing v e => a `e` b -> VRep v -> (VRep v -> a) -> b
 appE = flip . exE1
+
+
+(↑) :: EnvPassing v e => a `e` b -> v a -> v b
+(↑) = exE
+
+infixl 9 ↑
 
 
 -- Category
