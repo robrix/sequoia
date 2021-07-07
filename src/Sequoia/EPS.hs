@@ -20,6 +20,8 @@ module Sequoia.EPS
 , pureE
 , apE
 , liftA2E
+  -- ** Monad
+, bindE
 ) where
 
 import qualified Control.Category as Cat
@@ -87,3 +89,9 @@ apE f a = inE1 (\ k -> exE1 f k <*> exE1 a k)
 
 liftA2E :: EnvPassing v e => (x -> y -> z) -> e a x -> e a y -> e a z
 liftA2E f a b = inE1 (\ k -> f <$> exE1 a k <*> exE1 b k)
+
+
+-- Monad
+
+bindE :: EnvPassing v e => e a b -> (b -> e a b') -> e a b'
+bindE m f = inE1 (\ k -> (`exE1` k) =<< f . exE1 m k)
