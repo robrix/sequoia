@@ -1,2 +1,8 @@
 module Sequoia.EPS
-() where
+( -- * EPS
+  EPFn
+) where
+
+-- EPS
+
+type EPFn v a b = v a -> v b
