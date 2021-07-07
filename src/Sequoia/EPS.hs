@@ -21,6 +21,9 @@ module Sequoia.EPS
   -- ** Distributive
 , distributeE
 , collectE
+  -- ** Representable
+, tabulateE
+, indexE
   -- ** Applicative
 , pureE
 , apE
@@ -117,6 +120,15 @@ distributeE r = inE1 (\ a s -> (\ e -> exE1 e a s) <$> r)
 
 collectE :: (EnvPassing v e, Functor f) => (c -> a `e` b) -> f c -> a `e` f b
 collectE f r = inE1 (\ a s -> (\ c -> exE1 (f c) a s) <$> r)
+
+
+-- Representable
+
+tabulateE :: EnvPassing v e => ((VFn v b, VRep v) -> a) -> b `e` a
+tabulateE = inE1 . curry
+
+indexE :: EnvPassing v e => b `e` a -> ((VFn v b, VRep v) -> a)
+indexE = uncurry . exE1
 
 
 -- Applicative
