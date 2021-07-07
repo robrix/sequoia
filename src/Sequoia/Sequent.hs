@@ -39,8 +39,8 @@ evalSeq :: Continuation k => _Δ ~ KRep k => _Γ -|Seq k|- _Δ -> k _Γ
 evalSeq = evalC
 
 newtype Seq k _Γ _Δ = Seq { runSeq :: k _Δ -> k _Γ }
-  deriving (Cat.Category, Profunctor) via C (Seq k) k
-  deriving (Applicative, Functor, Monad) via C (Seq k) k _Γ
+  deriving (Cat.Category, Profunctor) via ViaCPS (Seq k) k
+  deriving (Applicative, Functor, Monad) via ViaCPS (Seq k) k _Γ
 
 instance Continuation k => ContPassing k (Seq k) where
   inC = Seq
