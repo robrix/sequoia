@@ -6,6 +6,8 @@ module Sequoia.EPS
 , _E
 , inE1
 , exE1
+  -- ** Elimination
+, appE
 ) where
 
 import qualified Control.Category as Cat
@@ -31,3 +33,9 @@ inE1 = inE . inV1
 
 exE1 :: EnvPassing v e => a `e` b -> (VFn v a -> VFn v b)
 exE1 = exV1 . exE
+
+
+-- Elimination
+
+appE :: EnvPassing v e => a `e` b -> VRep v -> (VRep v -> a) -> b
+appE = flip . exE1
