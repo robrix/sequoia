@@ -6,6 +6,8 @@ module Sequoia.EPS
 , _E
 , inE1
 , exE1
+  -- ** Construction
+, eps
   -- ** Elimination
 , appE
 ) where
@@ -33,6 +35,12 @@ inE1 = inE . inV1
 
 exE1 :: EnvPassing v e => a `e` b -> (VFn v a -> VFn v b)
 exE1 = exV1 . exE
+
+
+-- Construction
+
+eps :: EnvPassing v e => (a -> b) -> a `e` b
+eps = inE1 . (.)
 
 
 -- Elimination
