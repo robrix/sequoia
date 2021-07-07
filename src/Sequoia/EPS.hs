@@ -34,6 +34,7 @@ module Sequoia.EPS
 , E(..)
 ) where
 
+import           Control.Applicative (liftA2)
 import qualified Control.Category as Cat
 import           Data.Profunctor
 import           Sequoia.Bijection
@@ -150,3 +151,8 @@ instance Value v => Profunctor (E v) where
 
 instance Value v => Functor (E v a) where
   fmap = fmapE
+
+instance Value v => Applicative (E v a) where
+  pure = pureE
+  (<*>) = apE
+  liftA2 = liftA2E
