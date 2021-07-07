@@ -27,6 +27,9 @@ module Sequoia.EPS
 , dimapE
 , lmapE
 , rmapE
+  -- ** Costrong
+, unfirstE
+, unsecondE
   -- ** Cosieve
 , cosieveE
   -- ** Corepresentable
@@ -120,6 +123,15 @@ lmapE = (`dimapE` id)
 
 rmapE :: EnvPassing v e => (b -> b') -> (e a b -> e a b')
 rmapE = (id `dimapE`)
+
+
+-- Costrong
+
+unfirstE  :: EnvPassing v e => (a, d) `e` (b, d) -> a `e` b
+unfirstE  e = inE1 (\ a s -> let (b, d) = appE e s ((,d) . a) in b)
+
+unsecondE :: EnvPassing v e => (d, a) `e` (d, b) -> a `e` b
+unsecondE e = inE1 (\ a s -> let (d, b) = appE e s ((d,) . a) in b)
 
 
 -- Cosieve
