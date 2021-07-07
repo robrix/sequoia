@@ -122,3 +122,6 @@ newtype E v a b = E { runE :: v a -> v b }
 instance Cat.Category (E v) where
   id = E id
   E f . E g = E (f . g)
+
+instance Value v => Profunctor (E v) where
+  dimap f g = E . dimap (fmap f) (fmap g) . runE
