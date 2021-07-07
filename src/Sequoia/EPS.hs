@@ -56,6 +56,7 @@ import           Control.Applicative (liftA2)
 import qualified Control.Category as Cat
 import           Control.Comonad
 import           Data.Distributive
+import           Data.Functor.Rep
 import           Data.Profunctor
 import qualified Data.Profunctor.Rep as Pro
 import           Data.Profunctor.Sieve
@@ -219,6 +220,11 @@ instance Value v => Functor (E v a) where
 instance Value v => Distributive (E v a) where
   distribute = distributeE
   collect = collectE
+
+instance Value v => Representable (E v b) where
+  type Rep (E v b) = (VFn v b, VRep v)
+  tabulate = tabulateE
+  index = indexE
 
 instance Value v => Applicative (E v a) where
   pure = pureE
