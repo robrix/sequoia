@@ -199,6 +199,11 @@ instance Value v => Applicative (E v a) where
 instance Value v => Monad (E v a) where
   (>>=) = bindE
 
+instance (Value v, Monoid (VRep v), Monoid a) => Comonad (E v a) where
+  extract = extractE
+  extend = extendE
+  duplicate = duplicateE
+
 instance Value v => Cat.Category (E v) where
   id = idE
   (.) = composeE
