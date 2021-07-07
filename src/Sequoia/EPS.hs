@@ -54,7 +54,7 @@ import qualified Control.Category as Cat
 import           Control.Comonad
 import           Data.Distributive
 import           Data.Profunctor
-import           Data.Profunctor.Rep
+import qualified Data.Profunctor.Rep as Pro
 import           Data.Profunctor.Sieve
 import           Sequoia.Bijection
 import           Sequoia.Disjunction
@@ -241,7 +241,7 @@ instance Value v => Costrong (E v) where
 instance (Value v, Monoid (VRep v)) => Cosieve (E v) (Env v) where
   cosieve = cosieveE
 
-instance (Value v, Monoid (VRep v)) => Corepresentable (E v) where
+instance (Value v, Monoid (VRep v)) => Pro.Corepresentable (E v) where
   type Corep (E v) = Env v
 
   cotabulate = cotabulateE
