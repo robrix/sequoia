@@ -125,6 +125,7 @@ library
     Sequoia.Continuation
     Sequoia.CPS
     Sequoia.Disjunction
+    Sequoia.EPS
     Sequoia.Functor.C
     Sequoia.Functor.I
     Sequoia.Polarity
