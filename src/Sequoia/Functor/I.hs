@@ -5,6 +5,7 @@ module Sequoia.Functor.I
 ) where
 
 import Control.Applicative (liftA2)
+import Control.Comonad
 import Data.Coerce
 import Data.Distributive
 import Data.Functor.Adjunction
@@ -20,6 +21,10 @@ instance Applicative I where
 
 instance Monad I where
   (>>=) = flip coerce
+
+instance Comonad I where
+  extract = coerce
+  extend = coerce
 
 instance Distributive I where
   distribute = I . fmap  getI
