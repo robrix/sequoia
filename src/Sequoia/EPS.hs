@@ -191,6 +191,10 @@ instance Value v => Profunctor (E v) where
   lmap = lmapE
   rmap = rmapE
 
+instance Value v => Cochoice (E v) where
+  unleft = unleftE
+  unright = unrightE
+
 instance Value v => Costrong (E v) where
   unfirst  = unfirstE
   unsecond = unsecondE
