@@ -128,7 +128,7 @@ cosieveE = Env . inV . flip . lmap exV . exE1
 -- Corepresentable
 
 cotabulateE :: EnvPassing v e => Env v a b -> a `e` b
-cotabulateE b = inE1 (\ k s -> exV (runEnv b) s (inV k))
+cotabulateE b = inE1 (\ k s -> appEnv b s (inV k))
 
 
 -- Concrete
