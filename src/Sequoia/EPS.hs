@@ -14,6 +14,8 @@ module Sequoia.EPS
   -- ** Category
 , idE
 , composeE
+  -- ** Functor
+, fmapE
 ) where
 
 import qualified Control.Category as Cat
@@ -63,3 +65,9 @@ idE = inE id
 
 composeE :: EnvPassing v e => e b d -> e a b -> e a d
 composeE f g = inE (exE f . exE g)
+
+
+-- Functor
+
+fmapE :: EnvPassing v e => (b -> b') -> (e a b -> e a b')
+fmapE = rmapE
