@@ -61,7 +61,7 @@ module Sequoia.CPS
 , sieveC
   -- ** Representable
 , tabulateC
-  -- ** Deriving
+  -- * Concrete
 , C(..)
 ) where
 
@@ -263,7 +263,7 @@ tabulateC :: ContPassing k c => (a -> k ••b) -> a `c` b
 tabulateC f = liftC (exK . runCont . f)
 
 
--- Deriving
+-- Concrete
 
 newtype C c (k :: Type -> Type) a b = C { runC :: c a b }
   deriving (ContPassing k)
