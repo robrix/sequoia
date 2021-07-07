@@ -16,6 +16,7 @@ module Sequoia.Value
   -- * Concrete values
 , V(..)
   -- * Env monad
+, appEnv
 , Env(..)
 ) where
 
@@ -82,6 +83,9 @@ instance Functor f => Pro.Corepresentable (V f) where
 
 
 -- Env monad
+
+appEnv :: Value v => Env v a b -> VRep v -> v a -> b
+appEnv f = exV (runEnv f)
 
 newtype Env v a b = Env { runEnv :: v (v a -> b) }
   deriving (Functor)
