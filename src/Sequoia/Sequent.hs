@@ -12,6 +12,7 @@ module Sequoia.Sequent
 
 import qualified Control.Category as Cat
 import           Control.Monad.Trans.Class
+import           Data.Functor.Const
 import           Data.Profunctor
 import           Prelude hiding (init)
 import           Sequoia.Bijection
@@ -32,6 +33,8 @@ import           Sequoia.Calculus.XOr
 import           Sequoia.Conjunction
 import           Sequoia.Continuation
 import           Sequoia.Disjunction
+import           Sequoia.Functor.In
+import           Sequoia.Profunctor.K
 
 -- Sequents
 
@@ -57,14 +60,14 @@ lowerLR f p = Seq $ inK1 (\ _Δ _Γ -> appC (f (inC1 (\ b a -> appC p (a <| _Γ)
 
 -- Effectful sequents
 
-runSeqT :: SeqT r _Γ m _Δ -> (K m r _Δ -> K m r _Γ)
-runSeqT = runSeq . getSeqT
+runSeqT :: SeqT r _Γ m _Δ -> ((_Δ -> m r) -> (_Γ -> m r))
+runSeqT = dimap (In . K) (runK . runIn) . runSeq . getSeqT
 
-newtype SeqT r _Γ m _Δ = SeqT { getSeqT :: Seq (K m r) _Γ _Δ }
+newtype SeqT r _Γ m _Δ = SeqT { getSeqT :: Seq (In (K (m r)) ()) _Γ _Δ }
   deriving (Applicative, Functor, Monad)
 
 instance MonadTrans (SeqT r _Γ) where
-  lift m = SeqT (Seq (inK1 (const . (m >>=))))
+  lift m = SeqT (Seq (inK1 (const . dimap (fmap getConst) Const (m >>=))))
 
 
 -- Core rules

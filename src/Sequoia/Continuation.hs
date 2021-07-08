@@ -5,7 +5,6 @@ module Sequoia.Continuation
 ( -- * Continuations
   Continuation
 , KRep
-, K(..)
   -- ** Application
 , KFn
 , _K
@@ -57,10 +56,8 @@ module Sequoia.Continuation
 , MonadK(..)
 ) where
 
-import qualified Control.Category as Cat
-import           Control.Monad (ap, (<=<))
+import           Control.Monad (ap)
 import           Data.Functor.Contravariant
-import           Data.Functor.Contravariant.Adjunction
 import           Data.Functor.Contravariant.Rep
 import           Data.Profunctor
 import qualified Data.Profunctor.Rep as Pro
@@ -76,30 +73,6 @@ type KRep k = Rep k
 
 
 instance Pro.Representable p => Continuation (In p r)
-
-
-newtype K m r a = K { runK :: a -> m r }
-
-instance Monad m => Cat.Category (K m) where
-  id = K pure
-  K f . K g = K (g <=< f)
-
-instance Contravariant (K m r) where
-  contramap = contramapRep
-
-instance Representable (K m r) where
-  type Rep (K m r) = m r
-
-  tabulate = K
-  index = runK
-
-instance Continuation (K m r)
-
-instance Adjunction (K m r) (K m r) where
-  unit   = inK . flip exK
-  counit = inK . flip exK
-  leftAdjunct  = (-<<)
-  rightAdjunct = (-<<)
 
 
 -- Application
