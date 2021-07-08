@@ -61,8 +61,6 @@ module Sequoia.Bijection
 , prism
 , _Left
 , _Right
-  -- * Tagged
-, Tagged(..)
 ) where
 
 import           Control.Applicative (Alternative)
@@ -283,23 +281,3 @@ _Left = prism Left (either Right (Left . Right))
 
 _Right :: Optic Prism (Either a b) (Either a b') b b'
 _Right = prism Right (either (Left . Left) Right)
-
-
--- Tagged
-
-newtype Tagged a b = Tagged { getTagged :: b }
-  deriving (Functor)
-
-instance Applicative (Tagged a) where
-  pure = Tagged
-  (<*>) = coerce
-
-instance Profunctor Tagged where
-  dimap _ g = Tagged . g . getTagged
-
-instance Choice Tagged where
-  left'  = Tagged . Left  . getTagged
-  right' = Tagged . Right . getTagged
-
-instance Closed Tagged where
-  closed (Tagged b) = Tagged (const b)
