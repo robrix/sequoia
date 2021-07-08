@@ -11,17 +11,12 @@ module Sequoia.Disjunction
 , bimapDisj
 , bitraverseDisj
   -- * Lifted injections
-, inlC
-, inrC
-, inlF
-, inrF
 , inlL
 , inrL
 , inlR
 , inrR
 ) where
 
-import Data.Functor.Contravariant
 import Data.Profunctor
 import Sequoia.Bijection
 
@@ -67,16 +62,6 @@ bitraverseDisj f g = fmap inl . f <--> fmap inr . g
 
 
 -- Lifted injections
-
-inlC :: (Contravariant f, Disj d) => f (a `d` b) -> f a
-inrC :: (Contravariant f, Disj d) => f (a `d` b) -> f b
-inlC = contramap inl
-inrC = contramap inr
-
-inlF :: (Functor f, Disj d) => f a -> f (a `d` b)
-inrF :: (Functor f, Disj d) => f b -> f (a `d` b)
-inlF = fmap inl
-inrF = fmap inr
 
 inlL :: (Profunctor p, Disj d) => p (a `d` b) r -> p a r
 inrL :: (Profunctor p, Disj d) => p (a `d` b) r -> p b r
