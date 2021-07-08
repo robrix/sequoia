@@ -6,7 +6,7 @@ module Sequoia.Functor.Ex
 ) where
 
 import Data.Distributive
-import Data.Functor.Rep (Representable(..))
+import Data.Functor.Rep
 import Data.Profunctor
 import Data.Profunctor.Rep (Corepresentable(..))
 import Data.Profunctor.Sieve
@@ -24,11 +24,11 @@ instance Corepresentable p => Corepresentable (Ex p) where
   type Corep (Ex p) = Corep p
   cotabulate = Ex . cotabulate
 
-instance (Profunctor p, Distributive (p s)) => Distributive (Ex p s) where
-  distribute = Ex . distribute . fmap runEx
-  collect f = Ex . collect (runEx . f)
+instance Corepresentable p => Distributive (Ex p s) where
+  distribute = distributeRep
+  collect = collectRep
 
-instance (Distributive (p s), Corepresentable p) => Representable (Ex p s) where
+instance Corepresentable p => Representable (Ex p s) where
   type Rep (Ex p s) = Corep p s
   tabulate = cotabulate
   index = cosieve
