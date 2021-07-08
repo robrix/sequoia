@@ -92,6 +92,9 @@ instance Contrasieve f p => Sieve (Flip p) f where
 instance Sieve p f => Contrasieve f (Flip p) where
   consieve = sieve . runFlip
 
+instance Contracosieve f p => Cosieve (Flip p) f where
+  cosieve = concosieve . runFlip
+
 
 -- Strength
 
