@@ -87,14 +87,14 @@ deriving via Contextually (Seq k) instance Continuation k => Exchange k (Seq k)
 -- Contextual rules
 
 instance Continuation k => Contextual k (Seq k) where
-  swapΓΔ f _Δ' _Γ' = inC (\ _Δ -> inK (\ _Γ -> f _Δ _Γ •• _Δ' • _Γ'))
+  swapΓΔ f _Δ' _Γ' = inC1' (\ _Δ _Γ -> f _Δ _Γ •• _Δ' • _Γ')
 
 
 -- Control
 
 instance Control Seq where
   reset s = inC1 (\ _Δ -> _Δ . (evalSeq s •))
-  shift s = inC (\ _Δ -> inK (\ _Γ -> s •• (inlK _Δ <••> idK) • (inrK _Δ <| _Γ)))
+  shift s = inC1' (\ _Δ _Γ -> s •• (inlK _Δ <••> idK) • (inrK _Δ <| _Γ))
 
 
 -- Negation
