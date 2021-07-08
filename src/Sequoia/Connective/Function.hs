@@ -2,8 +2,6 @@ module Sequoia.Connective.Function
 ( -- * Implication
   appFun
 , appFun2
-, liftFun
-, liftFun'
 , Fun(..)
 , type (~~)
 , type (~>)
@@ -23,12 +21,6 @@ appFun = (-<<) . getFun
 
 appFun2 :: Continuation k => (a ~~k~> b ~~k~> c) -> (a -> b -> k **c)
 appFun2 f a b = inDN (appC2 f a b)
-
-liftFun :: Continuation k => ((b -> KRep k) -> (a -> KRep k)) -> (a ~~k~> b)
-liftFun = inC1
-
-liftFun' :: Continuation k => (a -> (b -> KRep k) -> KRep k) -> (a ~~k~> b)
-liftFun' = inC1 . flip
 
 newtype Fun k a b = Fun { getFun :: k b -> k a }
   deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via ViaCPS (Fun k) k
