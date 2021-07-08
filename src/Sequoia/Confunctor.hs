@@ -41,3 +41,6 @@ instance Profunctor p => Confunctor (Flip p) where
 
 newtype Confunctorially p a b = Confunctorially { runConfunctorially :: p a b }
   deriving (Confunctor)
+
+instance Confunctor p => Contravariant (Confunctorially p a) where
+  contramap = mapr
