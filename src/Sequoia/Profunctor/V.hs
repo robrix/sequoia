@@ -11,33 +11,33 @@ import           Data.Profunctor
 import qualified Data.Profunctor.Rep as Pro
 import           Data.Profunctor.Sieve
 
-newtype V f s a b = V { runV :: f s -> b }
+newtype V s a b = V { runV :: s -> b }
   deriving (Applicative, Functor, Monad, Representable)
 
-instance Distributive (V f s a) where
+instance Distributive (V s a) where
   distribute r = V (\ s -> (`runV` s)     <$> r)
   collect  f r = V (\ s -> (`runV` s) . f <$> r)
 
-instance Profunctor (V f s) where
+instance Profunctor (V s) where
   dimap _ g = V . rmap g . runV
 
-instance Costrong (V f s) where
+instance Costrong (V s) where
   unfirst  = V . fmap fst . runV
   unsecond = V . fmap snd . runV
 
-instance Choice (V f s) where
+instance Choice (V s) where
   left'  = V . fmap Left  . runV
   right' = V . fmap Right . runV
 
-instance Closed (V f s) where
+instance Closed (V s) where
   closed = V . fmap const . runV
 
-instance Sieve (V f s) ((->) (f s)) where
+instance Sieve (V s) ((->) s) where
   sieve = const . runV
 
-instance Cosieve (V f s) (Const (f s)) where
+instance Cosieve (V s) (Const s) where
   cosieve = lmap getConst . runV
 
-instance Pro.Corepresentable (V f s) where
-  type Corep (V f s) = Const (f s)
+instance Pro.Corepresentable (V s) where
+  type Corep (V s) = Const s
   cotabulate = V . lmap Const
