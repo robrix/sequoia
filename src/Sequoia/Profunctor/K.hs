@@ -13,3 +13,7 @@ instance Profunctor (K r) where
 instance Strong (K r) where
   first'  = K . lmap fst . runK
   second' = K . lmap snd . runK
+
+instance Cochoice (K r) where
+  unleft  = K . lmap Left  . runK
+  unright = K . lmap Right . runK
