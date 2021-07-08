@@ -19,9 +19,13 @@ module Sequoia.Value
 ) where
 
 import Data.Functor.Rep
+import Data.Profunctor.Rep (Corepresentable)
 import Sequoia.Bijection
+import Sequoia.Functor.Ex
 
 class Representable v => Value v
+
+instance Corepresentable p => Value (Ex p s)
 
 type VRep v = Rep v
 type VFn v a = VRep v -> a
