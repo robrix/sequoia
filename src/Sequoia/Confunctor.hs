@@ -5,7 +5,7 @@ module Sequoia.Confunctor
   -- * Strength
 , Contrastrong(..)
 , Contracostrong(..)
-  -- * Strength
+  -- * Choice
 , Contrachoice(..)
 , Contracochoice(..)
   -- * Deriving
