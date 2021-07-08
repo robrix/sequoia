@@ -6,6 +6,7 @@ module Sequoia.Connective.Subtraction
 , sub
 ) where
 
+import Data.Functor.Contravariant
 import Data.Profunctor
 import Sequoia.Bijection
 import Sequoia.Confunctor
@@ -16,6 +17,7 @@ import Sequoia.Polarity
 -- Subtraction
 
 data Sub k a b = Sub { subA :: a, subK :: k b () }
+  deriving Contravariant via Confunctorially (Sub k) a
 
 instance Profunctor k => Confunctor (Sub k) where
   conmap f g (Sub a k) = Sub (f a) (lmap g k)
