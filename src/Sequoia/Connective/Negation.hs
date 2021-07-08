@@ -14,69 +14,61 @@ module Sequoia.Connective.Negation
 , type (-¬)
 ) where
 
-import Data.Functor.Contravariant
-import Data.Functor.Contravariant.Adjunction
-import Data.Functor.Contravariant.Rep
+import Data.Profunctor
+import Data.Profunctor.Rep
+import Data.Profunctor.Sieve
 import Sequoia.Continuation
 import Sequoia.Polarity
 
 -- Not
 
-newtype k ¬a = Not { getNot :: k a }
-  deriving (Applicative, Continuation, Contravariant, Representable, Functor)
+newtype (k ¬a) z = Not { getNot :: k a z }
+  deriving (Applicative, Continuation, Functor, Profunctor, Representable, Strong)
 
-instance Pos a => Polarized N (k ¬a) where
+instance Sieve k f => Sieve ((¬) k) f where
+  sieve = sieve . getNot
+
+instance Pos a => Polarized N ((k ¬a) z) where
 
 infixr 9 ¬
 
 
-instance Adjunction f u => Adjunction ((-) f) ((¬) u) where
-  unit   = Not    . leftAdjunct  getNegate
-  counit = Negate . rightAdjunct getNot
-  leftAdjunct  = (Not    .) . leftAdjunct  . (getNegate .)
-  rightAdjunct = (Negate .) . rightAdjunct . (getNot    .)
-
-
 -- Negate
 
-newtype k -a = Negate { getNegate :: k a }
-  deriving (Applicative, Continuation, Contravariant, Representable, Functor)
+newtype (k -a) z = Negate { getNegate :: k a z }
+  deriving (Applicative, Continuation, Functor, Profunctor, Representable, Strong)
 
-instance Neg a => Polarized P (k -a) where
+instance Sieve k f => Sieve ((-) k) f where
+  sieve = sieve . getNegate
+
+instance Neg a => Polarized P ((k -a) z) where
 
 infixr 9 -
 
 
-instance Adjunction f u => Adjunction ((¬) f) ((-) u) where
-  unit   = Negate . leftAdjunct  getNot
-  counit = Not    . rightAdjunct getNegate
-  leftAdjunct  = (Negate .) . leftAdjunct  . (getNot    .)
-  rightAdjunct = (Not    .) . rightAdjunct . (getNegate .)
-
-
 -- Negative double negation
 
-notNegate :: Contravariant k => k **a -> k ¬-a
-notNegate = Not . contramap getNegate
+notNegate :: Profunctor k => k **a -> k ¬-a
+notNegate = Not . lmap getNegate
 
-getNotNegate :: Contravariant k => k ¬-a -> k **a
-getNotNegate = contramap Negate . getNot
+getNotNegate :: Profunctor k => k ¬-a -> k **a
+getNotNegate = lmap Negate . getNot
 
 
-type k ¬-a = k ¬k -a
+type k ¬-a = (k ¬(k -a) ()) ()
 
 infixr 9 ¬-
 
 
 -- Positive double negation
 
-negateNot :: Contravariant k => k **a -> k -¬a
-negateNot = Negate . contramap getNot
+negateNot :: Profunctor k => k **a -> k -¬a
+negateNot = Negate . lmap getNot
 
-getNegateNot :: Contravariant k => k -¬a -> k **a
-getNegateNot = contramap Not . getNegate
+getNegateNot :: Profunctor k => k -¬a -> k **a
+getNegateNot = lmap Not . getNegate
 
 
-type r -¬a = r -r ¬a
+type k -¬a = (k -(k ¬a) ()) ()
 
 infixr 9 -¬

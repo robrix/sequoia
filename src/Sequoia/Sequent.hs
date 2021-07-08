@@ -33,15 +33,14 @@ import           Sequoia.Calculus.XOr
 import           Sequoia.Conjunction
 import           Sequoia.Continuation
 import           Sequoia.Disjunction
-import           Sequoia.Functor.In
 import           Sequoia.Profunctor.K
 
 -- Sequents
 
-evalSeq :: Continuation k => _Δ ~ KRep k => _Γ -|Seq k|- _Δ -> k _Γ
+evalSeq :: Continuation k => _Δ ~ KRep k () => _Γ -|Seq k|- _Δ -> k _Γ ()
 evalSeq = evalC
 
-newtype Seq k _Γ _Δ = Seq { runSeq :: k _Δ -> k _Γ }
+newtype Seq k _Γ _Δ = Seq { runSeq :: k _Δ () -> k _Γ () }
   deriving (Cat.Category, Profunctor) via ViaCPS (Seq k) k
   deriving (Applicative, Functor, Monad) via ViaCPS (Seq k) k _Γ
 
@@ -61,9 +60,9 @@ lowerLR f p = Seq $ inK1 (\ _Δ _Γ -> appC (f (inC1 (\ b a -> appC p (a <| _Γ)
 -- Effectful sequents
 
 runSeqT :: SeqT r _Γ m _Δ -> ((_Δ -> m r) -> (_Γ -> m r))
-runSeqT = dimap (In . K) (runK . runIn) . runSeq . getSeqT
+runSeqT = dimap K runK . runSeq . getSeqT
 
-newtype SeqT r _Γ m _Δ = SeqT { getSeqT :: Seq (In (K (m r)) ()) _Γ _Δ }
+newtype SeqT r _Γ m _Δ = SeqT { getSeqT :: Seq (K (m r)) _Γ _Δ }
   deriving (Applicative, Functor, Monad)
 
 instance MonadTrans (SeqT r _Γ) where
@@ -95,7 +94,7 @@ instance Continuation k => Contextual k (Seq k) where
 
 instance Control Seq where
   reset s = Seq (inK1 (\ _Δ -> _Δ . exK (evalSeq s)))
-  shift s = Seq (inK1 (\ _Δ _Γ -> appC s (inrC (inK _Δ) <| _Γ) (_Δ . inl <--> id)))
+  shift s = Seq (inK1 (\ _Δ _Γ -> appC s (inrL (inK _Δ) <| _Γ) (_Δ . inl <--> id)))
 
 
 -- Negation

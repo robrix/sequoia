@@ -69,7 +69,6 @@ module Sequoia.CPS
 import           Control.Applicative (liftA2)
 import           Control.Arrow
 import qualified Control.Category as Cat
-import           Data.Functor.Contravariant
 import           Data.Kind (Type)
 import           Data.Profunctor
 import qualified Data.Profunctor.Rep as Pro
@@ -81,7 +80,7 @@ import           Sequoia.Disjunction
 
 -- ContPassing
 
-type CFn k a b = k b -> k a
+type CFn k a b = k b () -> k a ()
 
 class (Cat.Category c, Continuation k, Profunctor c) => ContPassing k c | c -> k where
   inC :: CFn k a b -> a `c` b
@@ -92,7 +91,7 @@ _C :: (ContPassing k c, ContPassing k' c') => Optic Iso (c a b) (c' a' b') (CFn 
 _C = exC <-> inC
 
 
-inC1 :: ContPassing k c => (KFn k b -> KFn k a) -> a `c` b
+inC1 :: ContPassing k c => (KFn k () b -> KFn k () a) -> a `c` b
 inC1 = inC . inK1
 
 
@@ -107,7 +106,7 @@ infixl 9 ••
 cps :: ContPassing k c => (a -> b) -> a `c` b
 cps = inC1 . flip (.)
 
-liftC :: ContPassing k c => (a -> k b -> KRep k) -> a `c` b
+liftC :: ContPassing k c => (a -> k b () -> KRep k ()) -> a `c` b
 liftC = inC . fmap inK . flip
 
 
@@ -131,16 +130,16 @@ execC c = exC c -<< ()
 execCM :: (ContPassing k c, MonadK k m) => () `c` a -> m a
 execCM = jump . execC
 
-evalC :: ContPassing k c => i `c` KRep k -> k i
+evalC :: ContPassing k c => i `c` KRep k () -> k i ()
 evalC = (•• idK)
 
-evalCM :: (ContPassing k c, MonadK k m) => i `c` KRep k -> (i -> m ())
+evalCM :: (ContPassing k c, MonadK k m) => i `c` KRep k () -> (i -> m ())
 evalCM c i = jump (inK (const (evalC c • i)))
 
 dnE :: ContPassing k c => k **(a `c` b) -> a `c` b
 dnE f = inC1 (\ k a -> f • inK (\ f -> appC f a k))
 
-(↓) :: ContPassing k c => k b -> a `c` b -> k a
+(↓) :: ContPassing k c => k b () -> a `c` b -> k a ()
 k ↓ c = exC c k
 
 infixr 9 ↓
@@ -157,10 +156,10 @@ uncurryC c = inC1 (\ k -> ($ k) . uncurry (appC2 c))
 
 -- Delimited continuations
 
-resetC :: (ContPassing j cj, ContPassing k ck) => ck i (KRep k) -> cj i (KRep k)
+resetC :: (ContPassing j cj, ContPassing k ck) => ck i (KRep k ()) -> cj i (KRep k ())
 resetC c = inC1 (\ k -> k . (evalC c •))
 
-shiftC :: ContPassing k c => (k o -> c i (KRep k)) -> c i o
+shiftC :: ContPassing k c => (k o () -> c i (KRep k ())) -> c i o
 shiftC f = inC (evalC . f)
 
 
@@ -218,13 +217,13 @@ fanoutC = liftA2C (,)
 -- ArrowChoice
 
 leftC :: ContPassing k c => c a b -> c (Either a d) (Either b d)
-leftC  f = inC (\ k -> f •• inlC k <••> inrC k)
+leftC  f = inC (\ k -> f •• inlL k <••> inrL k)
 
 rightC :: ContPassing k c => c a b -> c (Either d a) (Either d b)
-rightC g = inC (\ k -> inlC k <••> g •• inrC k)
+rightC g = inC (\ k -> inlL k <••> g •• inrL k)
 
 splitSumC :: ContPassing k c => c a1 b1 -> c a2 b2 -> c (Either a1 a2) (Either b1 b2)
-splitSumC f g = inC (\ k -> f •• inlC k <••> g •• inrC k)
+splitSumC f g = inC (\ k -> f •• inlL k <••> g •• inrL k)
 
 faninC :: ContPassing k c => c a1 b -> c a2 b -> c (Either a1 a2) b
 faninC f g = inC ((<••>) <$> exC f <*> exC g)
@@ -242,13 +241,13 @@ wanderC :: (ContPassing k c, Applicative (c ())) => (forall f . Applicative f =>
 wanderC traverse c = liftC (exK . execC . traverse (pappC c))
   where
   pappC :: ContPassing k c => c a b -> a -> c () b
-  pappC c a = inC ((a >$) . (c ••))
+  pappC c a = inC (lmap (const a) . (c ••))
 
 
 -- Profunctor
 
 dimapC :: ContPassing k c => (a' -> a) -> (b -> b') -> (c a b -> c a' b')
-dimapC f g = under _C (dimap (contramap g) (contramap f))
+dimapC f g = under _C (dimap (lmap g) (lmap f))
 
 lmapC :: ContPassing k c => (a' -> a) -> (c a b -> c a' b)
 lmapC = (`dimapC` id)
@@ -259,19 +258,19 @@ rmapC = (id `dimapC`)
 
 -- Sieve
 
-sieveC :: ContPassing k c => a `c` b -> (a -> k ••b)
+sieveC :: ContPassing k c => a `c` b -> (a -> Cont k b)
 sieveC = fmap (Cont . inDN) . appC
 
 
 -- Representable
 
-tabulateC :: ContPassing k c => (a -> k ••b) -> a `c` b
+tabulateC :: ContPassing k c => (a -> Cont k b) -> a `c` b
 tabulateC f = liftC (exK . runCont . f)
 
 
 -- Deriving
 
-newtype ViaCPS c (k :: Type -> Type) a b = ViaCPS { runViaCPS :: c a b }
+newtype ViaCPS c (k :: Type -> Type -> Type) a b = ViaCPS { runViaCPS :: c a b }
   deriving (ContPassing k)
 
 instance ContPassing k c => Cat.Category (ViaCPS c k) where
@@ -326,9 +325,9 @@ instance ContPassing k c => Profunctor (ViaCPS c k) where
 
   rmap = rmapC
 
-instance ContPassing k c => Sieve (ViaCPS c k) ((••) k) where
+instance ContPassing k c => Sieve (ViaCPS c k) (Cont k) where
   sieve = sieveC
 
 instance ContPassing k c => Pro.Representable (ViaCPS c k) where
-  type Rep (ViaCPS c k) = (••) k
+  type Rep (ViaCPS c k) = Cont k
   tabulate = tabulateC
