@@ -55,6 +55,10 @@ instance Costrong p => Contracostrong (Flip p) where
   conunfirst  = Flip . unfirst  . runFlip
   conunsecond = Flip . unsecond . runFlip
 
+instance Contrachoice p => Choice (Flip p) where
+  left'  = Flip . conleft  . runFlip
+  right' = Flip . conright . runFlip
+
 
 -- Strength
 
