@@ -5,6 +5,8 @@ module Sequoia.Continuation
 ( -- * Continuations
   Continuation
 , KRep
+, Contravariant(..)
+, Representable(..)
   -- ** Application
 , KFn
 , _K
@@ -55,12 +57,12 @@ module Sequoia.Continuation
 ) where
 
 import Control.Monad (ap)
+import Data.Functor.Contravariant
+import Data.Functor.Contravariant.Rep
 import Data.Profunctor
-import Data.Profunctor.Rep
-import Data.Profunctor.Sieve
 import Sequoia.Bijection
 import Sequoia.Disjunction
-import Sequoia.Profunctor.K
+import Sequoia.Functor.K
 
 -- Continuations
 
@@ -74,93 +76,93 @@ instance Continuation (K r)
 
 -- Application
 
-type KFn k r a = a -> KRep k r
+type KFn k a = a -> KRep k
 
-_K :: (Representable k, Representable k') => Optic Iso (k a r) (k' a' r') (KFn k r a) (KFn k' r' a')
+_K :: (Representable k, Representable k') => Optic Iso (k a) (k' a') (KFn k a) (KFn k' a')
 _K = exK <-> inK
 
 
-inK :: Representable k => KFn k r a ->       k a r
+inK :: Representable k => KFn k a ->       k a
 inK = tabulate
 
-inK1 :: Representable k => (KFn k r a -> KFn k r b) -> (k a r -> k b r)
+inK1 :: Representable k => (KFn k a -> KFn k b) -> (k a -> k b)
 inK1 = under _K
 
-inK2 :: Representable k => (KFn k r a -> KFn k r b -> KFn k r c) -> (k a r -> k b r -> k c r)
+inK2 :: Representable k => (KFn k a -> KFn k b -> KFn k c) -> (k a -> k b -> k c)
 inK2 = dimap2 exK exK inK
 
 
-exK :: Representable k =>       k a r -> KFn k r a
-exK = sieve
+exK :: Representable k =>       k a -> KFn k a
+exK = index
 
-exK1 :: Representable k => (k a r -> k b r) -> (KFn k r a -> KFn k r b)
+exK1 :: Representable k => (k a -> k b) -> (KFn k a -> KFn k b)
 exK1 = over _K
 
-exK2 :: Representable k => (k a r -> k b r -> k c r) -> (KFn k r a -> KFn k r b -> KFn k r c)
+exK2 :: Representable k => (k a -> k b -> k c) -> (KFn k a -> KFn k b -> KFn k c)
 exK2 = dimap2 inK inK exK
 
 
-(•) :: Representable k => k a r -> KFn k r a
-(•) = sieve
+(•) :: Representable k => k a -> KFn k a
+(•) = index
 
 infixl 9 •
 
 
 -- Coercion
 
-coerceKWith :: (Representable k1, Representable k2) => (KFn k1 r a -> KFn k2 r b) -> (k1 a r -> k2 b r)
+coerceKWith :: (Representable k1, Representable k2) => (KFn k1 a -> KFn k2 b) -> (k1 a -> k2 b)
 coerceKWith = under _K
 
-coerceK :: (Representable k1, Representable k2, Rep k1 ~ Rep k2) => (k1 a r -> k2 a r)
+coerceK :: (Representable k1, Representable k2, Rep k1 ~ Rep k2) => (k1 a -> k2 a)
 coerceK = inK . exK
 
-coerceK1 :: (Representable k1, Representable k2, Rep k1 ~ Rep k2) => (k1 a r -> k1 b r) -> (k2 a r -> k2 b r)
+coerceK1 :: (Representable k1, Representable k2, Rep k1 ~ Rep k2) => (k1 a -> k1 b) -> (k2 a -> k2 b)
 coerceK1 = inK1 . exK1
 
-coerceK2 :: (Representable k1, Representable k2, Rep k1 ~ Rep k2) => (k1 a r -> k1 b r -> k1 c r) -> (k2 a r -> k2 b r -> k2 c r)
+coerceK2 :: (Representable k1, Representable k2, Rep k1 ~ Rep k2) => (k1 a -> k1 b -> k1 c) -> (k2 a -> k2 b -> k2 c)
 coerceK2 = inK2 . exK2
 
 
 -- Category
 
-idK :: Representable k => k (KRep k r) r
+idK :: Representable k => k (KRep k)
 idK = inK id
 
-composeK :: (Representable j, Representable k) => j a r -> k (KRep j r) r -> k a r
+composeK :: (Representable j, Representable k) => j a -> k (KRep j) -> k a
 composeK = dimap2 exK exK inK (flip (.))
 
 
 -- Composition
 
-(•<<) :: Profunctor k => k a r -> (b -> a) -> k b r
-(•<<) = flip lmap
+(•<<) :: Contravariant k => k a -> (b -> a) -> k b
+(•<<) = flip contramap
 
-(>>•) :: Profunctor k => (b -> a) -> k a r -> k b r
-(>>•) = lmap
+(>>•) :: Contravariant k => (b -> a) -> k a -> k b
+(>>•) = contramap
 
 infixr 1 •<<, >>•
 
-(<<•) :: (Representable j, Representable k) => (KRep j r -> KRep k r) -> (j a r -> k a r)
+(<<•) :: (Representable j, Representable k) => (KRep j -> KRep k) -> (j a -> k a)
 f <<• k = inK (f . exK k)
 
-(•>>) :: (Representable j, Representable k) => j a r -> (KRep j r -> KRep k r) -> k a r
+(•>>) :: (Representable j, Representable k) => j a -> (KRep j -> KRep k) -> k a
 k •>> f = inK (f . exK k)
 
 infixr 1 <<•, •>>
 
 
-(<••>) :: (Disj d, Representable k) => k a r -> k b r -> k (a `d` b) r
+(<••>) :: (Disj d, Representable k) => k a -> k b -> k (a `d` b)
 (<••>) = inK2 (<-->)
 
 infix 3 <••>
 
 
-(>>-) :: Representable k => a -> (b -> k a r) -> k b r
+(>>-) :: Representable k => a -> (b -> k a) -> k b
 a >>- f = inK ((• a) . f)
 
 infixl 1 >>-
 
-(-<<) :: Representable k => (b -> k a r) -> (a -> k b r)
+(-<<) :: Representable k => (b -> k a) -> (a -> k b)
 f -<< a = inK ((• a) . f)
 
 infixr 1 -<<
@@ -168,12 +170,12 @@ infixr 1 -<<
 
 -- Double negation
 
-type k **a = k (k a ()) ()
+type k **a = k (k a)
 
 infixl 9 **
 
 
-type ContFn k a = KFn k () (KFn k () a)
+type ContFn k a = KFn k (KFn k a)
 
 
 _DN :: (Representable k, Representable k') => Optic Iso (ContFn k a) (ContFn k' a') (k **a) (k' **a')
@@ -181,10 +183,10 @@ _DN = inDN <-> exDN
 
 
 mapDN :: Continuation k => (a -> b) -> (k **a -> k **b)
-mapDN f = inK1 (lmap (lmap f))
+mapDN f = inK1 (lmap (contramap f))
 
-hoistDN :: Profunctor j => (forall x . j x () <-> k x ()) -> (j **a -> k **a)
-hoistDN b = (~> b) . lmap (b <~)
+hoistDN :: Continuation j => (forall x . j x <-> k x) -> (j **a -> k **a)
+hoistDN b = (~> b) . contramap (b <~)
 
 
 -- Construction
@@ -218,7 +220,7 @@ exDN2 = dimap2 inDN inDN exDN
 
 newtype Cont k a = Cont { runCont :: k **a }
 
-instance Profunctor k => Functor (Cont k) where
+instance Contravariant k => Functor (Cont k) where
   fmap f = Cont . (•<< (•<< f)) . runCont
 
 instance Representable k => Applicative (Cont k) where
@@ -238,7 +240,7 @@ exCont = lmap inK . exK . runCont
 
 -- Monadic abstraction
 
-class (Profunctor k, Monad m) => MonadK k m | m -> k where
+class (Contravariant k, Monad m) => MonadK k m | m -> k where
   jump :: k **a -> m a
 
 instance Representable k => MonadK k (Cont k) where

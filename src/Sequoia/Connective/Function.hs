@@ -24,21 +24,21 @@ appFun = (-<<) . getFun
 appFun2 :: Continuation k => (a ~~k~> b ~~k~> c) -> (a -> b -> k **c)
 appFun2 f a b = inDN (appC2 f a b)
 
-liftFun :: Continuation k => ((b -> KRep k ()) -> (a -> KRep k ())) -> (a ~~k~> b)
+liftFun :: Continuation k => ((b -> KRep k) -> (a -> KRep k)) -> (a ~~k~> b)
 liftFun = Fun . inK1
 
-liftFun' :: Continuation k => (a -> (b -> KRep k ()) -> KRep k ()) -> (a ~~k~> b)
+liftFun' :: Continuation k => (a -> (b -> KRep k) -> KRep k) -> (a ~~k~> b)
 liftFun' = liftFun . flip
 
-newtype Fun k a b = Fun { getFun :: k b () -> k a () }
+newtype Fun k a b = Fun { getFun :: k b -> k a }
   deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via ViaCPS (Fun k) k
 
 instance Continuation k => ContPassing k (Fun k) where
   inC = Fun
   exC = getFun
 
-instance Profunctor k => Functor (Fun k a) where
-  fmap f (Fun r) = Fun (r . lmap f)
+instance Contravariant k => Functor (Fun k a) where
+  fmap f (Fun r) = Fun (r . contramap f)
 
 instance (Pos a, Neg b) => Polarized N (Fun k a b) where
 

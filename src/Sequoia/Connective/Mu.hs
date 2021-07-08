@@ -9,7 +9,6 @@ module Sequoia.Connective.Mu
 ) where
 
 import qualified Control.Category as Cat
-import           Data.Profunctor
 import           Data.Profunctor.Traversing
 import           Sequoia.CPS
 import           Sequoia.Connective.Down
@@ -31,7 +30,7 @@ newtype MuF k f a = MuF { getMuF :: Down (FAlg k f a) ~~k~> a }
 instance (Pos (f a), Neg a) => Polarized N (MuF k f a) where
 
 mu :: Continuation k => ForAll k N (MuF k f) -> Mu k f
-mu r = Mu (dnE (lmap (lmap getMuF) (runForAll r)))
+mu r = Mu (dnE (mapDN getMuF (runForAll r)))
 
 foldMu :: ContPassing k c => Neg a => f a `c` a -> Mu k f `c` a
 foldMu alg = inC1 (\ k (Mu f) -> appC f (Down (coerceC alg)) k)

@@ -12,7 +12,7 @@ module Sequoia.Sequent
 
 import qualified Control.Category as Cat
 import           Control.Monad.Trans.Class
-import           Data.Functor.Const
+import           Data.Functor.Identity
 import           Data.Profunctor
 import           Prelude hiding (init)
 import           Sequoia.Bijection
@@ -33,14 +33,14 @@ import           Sequoia.Calculus.XOr
 import           Sequoia.Conjunction
 import           Sequoia.Continuation
 import           Sequoia.Disjunction
-import           Sequoia.Profunctor.K
+import           Sequoia.Functor.K
 
 -- Sequents
 
-evalSeq :: Continuation k => _Δ ~ KRep k () => _Γ -|Seq k|- _Δ -> k _Γ ()
+evalSeq :: Continuation k => _Δ ~ KRep k => _Γ -|Seq k|- _Δ -> k _Γ
 evalSeq = evalC
 
-newtype Seq k _Γ _Δ = Seq { runSeq :: k _Δ () -> k _Γ () }
+newtype Seq k _Γ _Δ = Seq { runSeq :: k _Δ -> k _Γ }
   deriving (Cat.Category, Profunctor) via ViaCPS (Seq k) k
   deriving (Applicative, Functor, Monad) via ViaCPS (Seq k) k _Γ
 
@@ -66,7 +66,7 @@ newtype SeqT r _Γ m _Δ = SeqT { getSeqT :: Seq (K (m r)) _Γ _Δ }
   deriving (Applicative, Functor, Monad)
 
 instance MonadTrans (SeqT r _Γ) where
-  lift m = SeqT (Seq (inK1 (const . dimap (fmap getConst) Const (m >>=))))
+  lift m = SeqT (Seq (inK1 (const . dimap (fmap runIdentity) Identity (m >>=))))
 
 
 -- Core rules
@@ -94,7 +94,7 @@ instance Continuation k => Contextual k (Seq k) where
 
 instance Control Seq where
   reset s = Seq (inK1 (\ _Δ -> _Δ . exK (evalSeq s)))
-  shift s = Seq (inK1 (\ _Δ _Γ -> appC s (inrL (inK _Δ) <| _Γ) (_Δ . inl <--> id)))
+  shift s = Seq (inK1 (\ _Δ _Γ -> appC s (inrK (inK _Δ) <| _Γ) (_Δ . inl <--> id)))
 
 
 -- Negation

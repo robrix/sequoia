@@ -31,34 +31,34 @@ import           Sequoia.Continuation
 
 newtype Sol k     = Sol { runSol :: Sig k Γ Δ }
 
-mapKSol :: (forall x . k x () <-> k' x ()) -> (Sol k -> Sol k')
+mapKSol :: (forall x . k x <-> k' x) -> (Sol k -> Sol k')
 mapKSol b = Sol . mapKSig b . runSol
 
 
 newtype Src k   b = Src { runSrc :: Sig k Γ b }
   deriving (Applicative, Functor, Monad)
 
-mapKSrc :: (forall x . k x () <-> k' x ()) -> (Src k b -> Src k' b)
+mapKSrc :: (forall x . k x <-> k' x) -> (Src k b -> Src k' b)
 mapKSrc b = Src . mapKSig b . runSrc
 
 
 newtype Snk k a   = Snk { runSnk :: Sig k a Δ }
 
-mapKSnk :: (forall x . k x () <-> k' x ()) -> (Snk k a -> Snk k' a)
+mapKSnk :: (forall x . k x <-> k' x) -> (Snk k a -> Snk k' a)
 mapKSnk b = Snk . mapKSig b . runSnk
 
 
-newtype Sig k a b = Sig { runSig :: k b () -> k a () }
+newtype Sig k a b = Sig { runSig :: k b -> k a }
 
 instance Cat.Category (Sig k) where
   id = Sig id
   (.) = dimap2 runSig runSig Sig (flip (.))
 
-instance Profunctor k => Profunctor (Sig k) where
-  dimap f g = Sig . dimap (lmap g) (lmap f) . runSig
+instance Contravariant k => Profunctor (Sig k) where
+  dimap f g = Sig . dimap (contramap g) (contramap f) . runSig
 
-instance Profunctor k => Functor (Sig k a) where
-  fmap f = Sig . lmap (lmap f) . runSig
+instance Contravariant k => Functor (Sig k a) where
+  fmap f = Sig . lmap (contramap f) . runSig
 
 instance Continuation k => Applicative (Sig k a) where
   pure a = Sig (•<< const a)
@@ -67,7 +67,7 @@ instance Continuation k => Applicative (Sig k a) where
 instance Continuation k => Monad (Sig k a) where
   Sig m >>= f = Sig (inK1 (\ k a -> m (inK ((• a) . (`runSig` inK k) . f)) • a))
 
-mapKSig :: (forall x . k x () <-> k' x ()) -> (Sig k a b -> Sig k' a b)
+mapKSig :: (forall x . k x <-> k' x) -> (Sig k a b -> Sig k' a b)
 mapKSig b = Sig . (~> dimapping b b) . runSig
 
 

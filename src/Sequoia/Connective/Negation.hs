@@ -14,61 +14,52 @@ module Sequoia.Connective.Negation
 , type (-¬)
 ) where
 
-import Data.Profunctor
-import Data.Profunctor.Rep
-import Data.Profunctor.Sieve
 import Sequoia.Continuation
 import Sequoia.Polarity
 
 -- Not
 
-newtype (k ¬a) z = Not { getNot :: k a z }
-  deriving (Applicative, Continuation, Functor, Profunctor, Representable, Strong)
+newtype k ¬a = Not { getNot :: k a }
+  deriving (Applicative, Continuation, Contravariant, Functor, Representable)
 
-instance Sieve k f => Sieve ((¬) k) f where
-  sieve = sieve . getNot
-
-instance Pos a => Polarized N ((k ¬a) z) where
+instance Pos a => Polarized N (k ¬a) where
 
 infixr 9 ¬
 
 
 -- Negate
 
-newtype (k -a) z = Negate { getNegate :: k a z }
-  deriving (Applicative, Continuation, Functor, Profunctor, Representable, Strong)
+newtype k -a = Negate { getNegate :: k a }
+  deriving (Applicative, Continuation, Contravariant, Functor, Representable)
 
-instance Sieve k f => Sieve ((-) k) f where
-  sieve = sieve . getNegate
-
-instance Neg a => Polarized P ((k -a) z) where
+instance Neg a => Polarized P (k -a) where
 
 infixr 9 -
 
 
 -- Negative double negation
 
-notNegate :: Profunctor k => k **a -> k ¬-a
-notNegate = Not . lmap getNegate
+notNegate :: Contravariant k => k **a -> k ¬-a
+notNegate = Not . contramap getNegate
 
-getNotNegate :: Profunctor k => k ¬-a -> k **a
-getNotNegate = lmap Negate . getNot
+getNotNegate :: Contravariant k => k ¬-a -> k **a
+getNotNegate = contramap Negate . getNot
 
 
-type k ¬-a = (k ¬(k -a) ()) ()
+type k ¬-a = (k ¬(k -a))
 
 infixr 9 ¬-
 
 
 -- Positive double negation
 
-negateNot :: Profunctor k => k **a -> k -¬a
-negateNot = Negate . lmap getNot
+negateNot :: Contravariant k => k **a -> k -¬a
+negateNot = Negate . contramap getNot
 
-getNegateNot :: Profunctor k => k -¬a -> k **a
-getNegateNot = lmap Not . getNegate
+getNegateNot :: Contravariant k => k -¬a -> k **a
+getNegateNot = contramap Not . getNegate
 
 
-type k -¬a = (k -(k ¬a) ()) ()
+type k -¬a = (k -(k ¬a))
 
 infixr 9 -¬
