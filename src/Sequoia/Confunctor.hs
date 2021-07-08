@@ -24,12 +24,12 @@ module Sequoia.Confunctor
 , Confunctorially(..)
 ) where
 
-import Data.Functor.Contravariant
-import Data.Kind
-import Data.Profunctor
-import Data.Profunctor.Rep
-import Data.Profunctor.Sieve
-import Data.Tuple (swap)
+import           Data.Functor.Contravariant
+import           Data.Kind
+import           Data.Profunctor
+import qualified Data.Profunctor.Rep as Pro
+import           Data.Profunctor.Sieve
+import           Data.Tuple (swap)
 
 class Confunctor p where
   {-# MINIMAL conmap | (mapl, mapr) #-}
@@ -104,21 +104,21 @@ instance Contracosieve f p => Cosieve (Flip p) f where
 instance Cosieve p f => Contracosieve f (Flip p) where
   concosieve = cosieve . runFlip
 
-instance Contrarepresentable p => Representable (Flip p) where
+instance Contrarepresentable p => Pro.Representable (Flip p) where
   type Rep (Flip p) = Contrarep p
   tabulate = Flip . contabulate
 
-instance Representable p => Contrarepresentable (Flip p) where
-  type Contrarep (Flip p) = Rep p
-  contabulate = Flip . tabulate
+instance Pro.Representable p => Contrarepresentable (Flip p) where
+  type Contrarep (Flip p) = Pro.Rep p
+  contabulate = Flip . Pro.tabulate
 
-instance Contracorepresentable p => Corepresentable (Flip p) where
+instance Contracorepresentable p => Pro.Corepresentable (Flip p) where
   type Corep (Flip p) = Contracorep p
   cotabulate = Flip . concotabulate
 
-instance Corepresentable p => Contracorepresentable (Flip p) where
-  type Contracorep (Flip p) = Corep p
-  concotabulate = Flip . cotabulate
+instance Pro.Corepresentable p => Contracorepresentable (Flip p) where
+  type Contracorep (Flip p) = Pro.Corep p
+  concotabulate = Flip . Pro.cotabulate
 
 
 -- Strength
