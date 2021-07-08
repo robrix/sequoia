@@ -14,6 +14,7 @@ module Sequoia.Confunctor
 , Contraclosed(..)
   -- * Sieve
 , Contrasieve(..)
+, Contracosieve(..)
   -- * Deriving
 , Profunctorially(..)
 , Confunctorially(..)
@@ -136,6 +137,9 @@ class Confunctor p => Contraclosed p where
 
 class (Confunctor p, Functor f) => Contrasieve f p | p -> f where
   consieve :: p a b -> b -> f a
+
+class (Confunctor p, Functor f) => Contracosieve f p | p -> f where
+  concosieve :: p a b -> f b -> a
 
 
 -- Deriving
