@@ -75,6 +75,7 @@ import qualified Data.Functor.Rep as Co
 import           Data.Maybe (fromMaybe)
 import           Data.Profunctor
 import           Data.Tuple (swap)
+import           Sequoia.Functor.I
 import           Sequoia.Profunctor.K
 import           Sequoia.Profunctor.V
 
@@ -94,14 +95,14 @@ instance Profunctor p => Iso p
 
 -- Elimination
 
-views :: c (K r) => Optic c s t a b -> (a -> r) -> (s -> r)
-views b = runK . runOptic b . K
+views :: c (K I r) => Optic c s t a b -> (a -> r) -> (s -> r)
+views b = fmap getI . runK . runOptic b . K . fmap I
 
 reviews :: c (V r) => Optic c s t a b -> (r -> b) -> (r -> t)
 reviews b = runV . runOptic b . V
 
 
-(~>) :: c (K a) => s -> Optic c s t a b -> a
+(~>) :: c (K I a) => s -> Optic c s t a b -> a
 s ~> o = views o id s
 
 infixl 9 ~>
@@ -112,10 +113,10 @@ o <~ b = reviews o id b
 infixr 9 <~
 
 
-over :: (c (V b), c (K a)) => Optic c s t a b -> (t -> s) -> (b -> a)
+over :: (c (V b), c (K I a)) => Optic c s t a b -> (t -> s) -> (b -> a)
 over b = dimap (b <~) (~> b)
 
-under :: (c (V b), c (K a)) => Optic c s t a b -> (a -> b) -> (s -> t)
+under :: (c (V b), c (K I a)) => Optic c s t a b -> (a -> b) -> (s -> t)
 under b = dimap (~> b) (b <~)
 
 

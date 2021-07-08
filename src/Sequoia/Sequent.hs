@@ -62,7 +62,7 @@ lowerLR f p = Seq $ inK1 (\ _Δ _Γ -> appC (f (inC1 (\ b a -> appC p (a <| _Γ)
 runSeqT :: SeqT r _Γ m _Δ -> ((_Δ -> m r) -> (_Γ -> m r))
 runSeqT = dimap K runK . runSeq . getSeqT
 
-newtype SeqT r _Γ m _Δ = SeqT { getSeqT :: Seq (K (m r)) _Γ _Δ }
+newtype SeqT r _Γ m _Δ = SeqT { getSeqT :: Seq (K m r) _Γ _Δ }
   deriving (Applicative, Functor, Monad)
 
 instance MonadTrans (SeqT r _Γ) where

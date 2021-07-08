@@ -8,23 +8,23 @@ import           Data.Profunctor
 import qualified Data.Profunctor.Rep as Pro
 import           Data.Profunctor.Sieve
 
-newtype K r a b = K { runK :: a -> r }
+newtype K f r a b = K { runK :: a -> f r }
   deriving (Functor)
 
-instance Profunctor (K r) where
+instance Profunctor (K f r) where
   dimap f _ = K . lmap f . runK
 
-instance Strong (K r) where
+instance Strong (K f r) where
   first'  = K . lmap fst . runK
   second' = K . lmap snd . runK
 
-instance Cochoice (K r) where
+instance Cochoice (K f r) where
   unleft  = K . lmap Left  . runK
   unright = K . lmap Right . runK
 
-instance Sieve (K r) (Const r) where
+instance Sieve (K f r) (Const (f r)) where
   sieve = fmap Const . runK
 
-instance Pro.Representable (K r) where
-  type Rep (K r) = Const r
+instance Pro.Representable (K f r) where
+  type Rep (K f r) = Const (f r)
   tabulate = K . fmap getConst
