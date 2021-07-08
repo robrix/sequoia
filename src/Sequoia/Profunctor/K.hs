@@ -1,10 +1,12 @@
+{-# LANGUAGE TypeFamilies #-}
 module Sequoia.Profunctor.K
 ( K(..)
 ) where
 
-import Data.Functor.Const
-import Data.Profunctor
-import Data.Profunctor.Sieve
+import           Data.Functor.Const
+import           Data.Profunctor
+import qualified Data.Profunctor.Rep as Pro
+import           Data.Profunctor.Sieve
 
 newtype K r a b = K { runK :: a -> r }
   deriving (Functor)
@@ -22,3 +24,7 @@ instance Cochoice (K r) where
 
 instance Sieve (K r) (Const r) where
   sieve = fmap Const . runK
+
+instance Pro.Representable (K r) where
+  type Rep (K r) = Const r
+  tabulate = K . fmap getConst
