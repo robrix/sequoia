@@ -45,6 +45,10 @@ instance Strong p => Contrastrong (Flip p) where
   confirst  = Flip . first'  . runFlip
   consecond = Flip . second' . runFlip
 
+instance Contracostrong p => Costrong (Flip p) where
+  unfirst  = Flip . conunfirst  . runFlip
+  unsecond = Flip . conunsecond . runFlip
+
 instance Costrong p => Contracostrong (Flip p) where
   conunfirst  = Flip . unfirst  . runFlip
   conunsecond = Flip . unsecond . runFlip
