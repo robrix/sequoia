@@ -26,6 +26,7 @@ module Sequoia.Confunctor
 import Data.Functor.Contravariant
 import Data.Kind
 import Data.Profunctor
+import Data.Profunctor.Rep
 import Data.Profunctor.Sieve
 import Data.Tuple (swap)
 
@@ -101,6 +102,10 @@ instance Contracosieve f p => Cosieve (Flip p) f where
 
 instance Cosieve p f => Contracosieve f (Flip p) where
   concosieve = cosieve . runFlip
+
+instance Contrarepresentable p => Representable (Flip p) where
+  type Rep (Flip p) = Contrarep p
+  tabulate = Flip . contabulate
 
 
 -- Strength
