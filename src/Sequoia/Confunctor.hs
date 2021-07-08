@@ -39,6 +39,7 @@ instance Profunctor p => Confunctor (Flip p) where
 -- Deriving
 
 newtype Profunctorially p a b = Profunctorially { runProfunctorially :: p a b }
+  deriving (Profunctor)
 
 
 newtype Confunctorially p a b = Confunctorially { runConfunctorially :: p a b }
