@@ -63,14 +63,19 @@ import           Data.Functor.Contravariant
 import           Data.Functor.Contravariant.Adjunction
 import           Data.Functor.Contravariant.Rep
 import           Data.Profunctor
+import qualified Data.Profunctor.Rep as Pro
 import           Sequoia.Bijection
 import           Sequoia.Disjunction
+import           Sequoia.Functor.In
 
 -- Continuations
 
 class Representable k => Continuation k
 
 type KRep k = Rep k
+
+
+instance Pro.Representable p => Continuation (In p r)
 
 
 newtype K m r a = K { runK :: a -> m r }
