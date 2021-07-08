@@ -2,6 +2,8 @@
 module Sequoia.Confunctor
 ( Confunctor(..)
 , Flip(..)
+  -- * Deriving
+, Confunctorially(..)
 ) where
 
 import Data.Functor.Contravariant
@@ -33,3 +35,8 @@ instance Profunctor p => Contravariant (Flip p a) where
 
 instance Profunctor p => Confunctor (Flip p) where
   conmap f g = Flip . dimap g f . runFlip
+
+
+-- Deriving
+
+newtype Confunctorially p a b = Confunctorially { runConfunctorially :: p a b }
