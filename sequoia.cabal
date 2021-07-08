@@ -127,6 +127,7 @@ library
     Sequoia.Disjunction
     Sequoia.EPS
     Sequoia.Functor.C
+    Sequoia.Functor.CorepRep
     Sequoia.Functor.I
     Sequoia.Polarity
     Sequoia.Printer
