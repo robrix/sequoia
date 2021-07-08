@@ -144,7 +144,7 @@ dnE :: ContPassing k c => k **(a `c` b) -> a `c` b
 dnE f = inC1 (\ k a -> f • inK (\ f -> appC f a k))
 
 (↓) :: ContPassing k c => k b -> a `c` b -> k a
-k ↓ c = exC c k
+(↓) = flip exC
 
 infixr 9 ↓
 
