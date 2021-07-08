@@ -1,3 +1,4 @@
+-- | Like a profunctor, but with opposite variances.
 module Sequoia.Confunctor
 ( Confunctor(..)
 ) where
