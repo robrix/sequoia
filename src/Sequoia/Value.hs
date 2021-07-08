@@ -22,8 +22,11 @@ import Data.Profunctor
 import Data.Profunctor.Rep
 import Data.Profunctor.Sieve
 import Sequoia.Bijection
+import Sequoia.Profunctor.V
 
 class Corepresentable v => Value v
+
+instance Value (V s)
 
 type VRep v = Corep v ()
 type VFn v a = VRep v -> a
