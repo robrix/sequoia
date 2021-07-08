@@ -1,16 +1,18 @@
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Profunctor.V
 ( V(..)
 ) where
 
 import           Data.Distributive
 import           Data.Functor.Const
+import           Data.Functor.Rep
 import           Data.Profunctor
 import qualified Data.Profunctor.Rep as Pro
 import           Data.Profunctor.Sieve
 
 newtype V s a b = V { runV :: s -> b }
-  deriving (Functor)
+  deriving (Applicative, Functor, Monad, Representable)
 
 instance Distributive (V s a) where
   distribute r = V (\ s -> (`runV` s)     <$> r)
