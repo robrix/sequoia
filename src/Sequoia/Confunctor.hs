@@ -1,3 +1,4 @@
+{-# LANGUAGE FunctionalDependencies #-}
 -- | Like a profunctor, but with opposite variances.
 module Sequoia.Confunctor
 ( Confunctor(..)
@@ -10,6 +11,8 @@ module Sequoia.Confunctor
 , Contracochoice(..)
   -- * Closed
 , Contraclosed(..)
+  -- * Sieve
+, Contrasieve(..)
   -- * Deriving
 , Profunctorially(..)
 , Confunctorially(..)
@@ -119,6 +122,12 @@ class Confunctor p => Contracochoice p where
 
 class Confunctor p => Contraclosed p where
   conclosed :: p a b -> p (x -> a) (x -> b)
+
+
+-- Sieve
+
+class (Confunctor p, Functor f) => Contrasieve f p | p -> f where
+  consieve :: p a b -> b -> f a
 
 
 -- Deriving
