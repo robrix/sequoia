@@ -112,6 +112,10 @@ instance Representable p => Contrarepresentable (Flip p) where
   type Contrarep (Flip p) = Rep p
   contabulate = Flip . tabulate
 
+instance Contracorepresentable p => Corepresentable (Flip p) where
+  type Corep (Flip p) = Contracorep p
+  cotabulate = Flip . concotabulate
+
 
 -- Strength
 
