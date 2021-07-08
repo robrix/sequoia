@@ -23,15 +23,13 @@ class Confunctor p where
 
 
 newtype Flip p a b = Flip { runFlip :: p b a }
+  deriving Contravariant via Confunctorially (Flip p) a
 
 instance Confunctor p => Functor (Flip p a) where
   fmap = rmap
 
 instance Confunctor p => Profunctor (Flip p) where
   dimap f g = Flip . conmap g f . runFlip
-
-instance Profunctor p => Contravariant (Flip p a) where
-  contramap = mapr
 
 instance Profunctor p => Confunctor (Flip p) where
   conmap f g = Flip . dimap g f . runFlip
