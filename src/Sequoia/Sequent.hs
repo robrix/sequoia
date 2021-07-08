@@ -54,7 +54,7 @@ liftLR = dimap exl inr . Seq . exC
 
 
 lowerLR :: ContPassing k c => (c a b -> _Γ -|Seq k|- _Δ) -> a < _Γ -|Seq k|- _Δ > b -> _Γ -|Seq k|- _Δ
-lowerLR f p = inC1' (\ _Δ _Γ -> f (inC1' (\ b a -> p •• (_Δ <••> b) • (a <| _Γ))) •• _Δ • _Γ)
+lowerLR f p = inC1' (\ _Δ _Γ -> _Δ ↓ f (inC1' (\ b a -> (_Δ <••> b) ↓ p • (a <| _Γ))) • _Γ)
 
 
 -- Effectful sequents
@@ -87,14 +87,14 @@ deriving via Contextually (Seq k) instance Continuation k => Exchange k (Seq k)
 -- Contextual rules
 
 instance Continuation k => Contextual k (Seq k) where
-  swapΓΔ f _Δ' _Γ' = inC1' (\ _Δ _Γ -> f _Δ _Γ •• _Δ' • _Γ')
+  swapΓΔ f _Δ' _Γ' = inC1' (\ _Δ _Γ -> _Δ' ↓ f _Δ _Γ • _Γ')
 
 
 -- Control
 
 instance Control Seq where
   reset s = inC1 (\ _Δ -> _Δ . (evalSeq s •))
-  shift s = inC1' (\ _Δ _Γ -> s •• (inlK _Δ <••> idK) • (inrK _Δ <| _Γ))
+  shift s = inC1' (\ _Δ _Γ -> (inlK _Δ <••> idK) ↓ s • (inrK _Δ <| _Γ))
 
 
 -- Negation
@@ -178,7 +178,7 @@ instance Continuation k => SubtractionIntro k (Seq k) where
 
 instance Continuation k => UniversalIntro k (Seq k) where
   forAllL p = mapL (notNegate . runForAll) p
-  forAllR p = inC1' (\ _Δ _Γ -> inrK _Δ • ForAll (inK (\ k -> p •• (inlK _Δ <••> k) • _Γ)))
+  forAllR p = inC1' (\ _Δ _Γ -> inrK _Δ • ForAll (inK (\ k -> (inlK _Δ <••> k) ↓ p • _Γ)))
 
 instance Continuation k => ExistentialIntro k (Seq k) where
   existsL p = popL (dnE . runExists (pushL p))
