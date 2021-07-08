@@ -88,6 +88,9 @@ instance Closed p => Contraclosed (Flip p) where
 instance Contrasieve f p => Sieve (Flip p) f where
   sieve = consieve . runFlip
 
+instance Sieve p f => Contrasieve f (Flip p) where
+  consieve = sieve . runFlip
+
 
 -- Strength
 
