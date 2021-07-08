@@ -30,5 +30,5 @@ instance Corepresentable p => Distributive (Ex p s) where
 
 instance Corepresentable p => Representable (Ex p s) where
   type Rep (Ex p s) = Corep p s
-  tabulate = cotabulate
-  index = cosieve
+  tabulate = Ex . cotabulate
+  index = cosieve . runEx
