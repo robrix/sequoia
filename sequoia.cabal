@@ -132,7 +132,7 @@ library
     Sequoia.Functor.In
     Sequoia.Polarity
     Sequoia.Printer
-    Sequoia.Profunctor.Forget
+    Sequoia.Profunctor.K
     Sequoia.Profunctor.V
     Sequoia.Sequent
     Sequoia.Signal
