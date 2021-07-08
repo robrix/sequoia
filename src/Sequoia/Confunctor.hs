@@ -24,7 +24,9 @@ module Sequoia.Confunctor
 , Confunctorially(..)
 ) where
 
+import           Data.Distributive
 import           Data.Functor.Contravariant
+import qualified Data.Functor.Rep as Co
 import           Data.Kind
 import           Data.Profunctor
 import qualified Data.Profunctor.Rep as Pro
@@ -47,6 +49,15 @@ class Confunctor p where
 newtype Flip p a b = Flip { runFlip :: p b a }
   deriving Contravariant via Confunctorially (Flip p) a
   deriving Functor via Profunctorially (Flip p) a
+
+instance Contracorepresentable p => Distributive (Flip p a) where
+  distribute = Co.distributeRep
+  collect = Co.collectRep
+
+instance Contracorepresentable p => Co.Representable (Flip p a) where
+  type Rep (Flip p a) = Contracorep p a
+  tabulate = Flip . concotabulate
+  index = concosieve . runFlip
 
 instance Confunctor p => Profunctor (Flip p) where
   dimap f g = Flip . conmap g f . runFlip
