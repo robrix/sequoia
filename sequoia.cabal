@@ -129,6 +129,7 @@ library
     Sequoia.Functor.C
     Sequoia.Functor.CorepRep
     Sequoia.Functor.I
+    Sequoia.Functor.In
     Sequoia.Polarity
     Sequoia.Printer
     Sequoia.Profunctor.K
