@@ -1,6 +1,6 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
--- | 'Representable' functors from 'Corepresentable' 'Profunctor's.
+-- | A covariant functor over a profunctor’s output.
 module Sequoia.Functor.Ex
 ( CorepRep(..)
 ) where
