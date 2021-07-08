@@ -1,6 +1,7 @@
 -- | Like a profunctor, but with opposite variances.
 module Sequoia.Confunctor
 ( Confunctor(..)
+, Flip(..)
 ) where
 
 class Confunctor p where
@@ -14,3 +15,6 @@ class Confunctor p where
 
   mapr :: (b' -> b) -> ((a `p` b) -> (a `p` b'))
   mapr = (id `conmap`)
+
+
+newtype Flip p a b = Flip { runFlip :: p b a }
