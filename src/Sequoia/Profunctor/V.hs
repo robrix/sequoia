@@ -2,6 +2,7 @@ module Sequoia.Profunctor.V
 ( V(..)
 ) where
 
+import Data.Functor.Const
 import Data.Profunctor
 import Data.Profunctor.Sieve
 
@@ -24,3 +25,6 @@ instance Closed (V s) where
 
 instance Sieve (V s) ((->) s) where
   sieve = const . runV
+
+instance Cosieve (V s) (Const s) where
+  cosieve = lmap getConst . runV
