@@ -90,13 +90,13 @@ exE1 = exV1 . exE
 eps :: EnvPassing v e => (a -> b) -> a `e` b
 eps = inE1 . (.)
 
-liftE :: EnvPassing v e => (VRep v () -> (VRep v () -> a) -> b) -> a `e` b
+liftE :: EnvPassing v e => (VRep v -> (VRep v -> a) -> b) -> a `e` b
 liftE = inE . inV1 . flip
 
 
 -- Elimination
 
-appE :: EnvPassing v e => a `e` b -> VRep v () -> (VRep v () -> a) -> b
+appE :: EnvPassing v e => a `e` b -> VRep v -> (VRep v -> a) -> b
 appE = flip . exE1
 
 
@@ -132,10 +132,10 @@ collectE f r = inE1 (\ a s -> (\ c -> exE1 (f c) a s) <$> r)
 
 -- Representable
 
-tabulateE :: EnvPassing v e => ((VFn v b, VRep v ()) -> a) -> b `e` a
+tabulateE :: EnvPassing v e => ((VFn v b, VRep v) -> a) -> b `e` a
 tabulateE = inE1 . curry
 
-indexE :: EnvPassing v e => b `e` a -> ((VFn v b, VRep v ()) -> a)
+indexE :: EnvPassing v e => b `e` a -> ((VFn v b, VRep v) -> a)
 indexE = uncurry . exE1
 
 
@@ -159,7 +159,7 @@ bindE m f = inE1 (\ k -> (`exE1` k) =<< f . exE1 m k)
 
 -- Comonad
 
-extractE :: (EnvPassing v e, Monoid (VRep v ()), Monoid a) => a `e` b -> b
+extractE :: (EnvPassing v e, Monoid (VRep v), Monoid a) => a `e` b -> b
 extractE e = appE e mempty mempty
 
 extendE :: EnvPassing v e => (s `e` a -> b) -> (s `e` a -> s `e` b)
@@ -203,7 +203,7 @@ unsecondE e = inE1 (\ a s -> let (d, b) = appE e s ((d,) . a) in b)
 
 -- Cosieve
 
-cosieveE :: (EnvPassing v e, Monoid (VRep v ())) => a `e` b -> (Env v a -> b)
+cosieveE :: (EnvPassing v e, Monoid (VRep v)) => a `e` b -> (Env v a -> b)
 cosieveE e n = let s = mempty in appE e s (appEnv n s)
 
 
@@ -229,7 +229,7 @@ instance Value v => Distributive (E v a) where
   collect = collectE
 
 instance Value v => Representable (E v b) where
-  type Rep (E v b) = (VFn v b, VRep v ())
+  type Rep (E v b) = (VFn v b, VRep v)
   tabulate = tabulateE
   index = indexE
 
@@ -241,7 +241,7 @@ instance Value v => Applicative (E v a) where
 instance Value v => Monad (E v a) where
   (>>=) = bindE
 
-instance (Value v, Monoid (VRep v ()), Monoid a) => Comonad (E v a) where
+instance (Value v, Monoid (VRep v), Monoid a) => Comonad (E v a) where
   extract = extractE
   extend = extendE
   duplicate = duplicateE
@@ -263,10 +263,10 @@ instance Value v => Costrong (E v) where
   unfirst  = unfirstE
   unsecond = unsecondE
 
-instance (Value v, Monoid (VRep v ())) => Cosieve (E v) (Env v) where
+instance (Value v, Monoid (VRep v)) => Cosieve (E v) (Env v) where
   cosieve = cosieveE
 
-instance (Value v, Monoid (VRep v ())) => Pro.Corepresentable (E v) where
+instance (Value v, Monoid (VRep v)) => Pro.Corepresentable (E v) where
   type Corep (E v) = Env v
 
   cotabulate = cotabulateE
