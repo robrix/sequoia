@@ -1,4 +1,5 @@
 {-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
 -- | Like a profunctor, but with opposite variances.
 module Sequoia.Confunctor
@@ -15,12 +16,15 @@ module Sequoia.Confunctor
   -- * Sieve
 , Contrasieve(..)
 , Contracosieve(..)
+  -- * Representable
+, Contrarepresentable(..)
   -- * Deriving
 , Profunctorially(..)
 , Confunctorially(..)
 ) where
 
 import Data.Functor.Contravariant
+import Data.Kind
 import Data.Profunctor
 import Data.Profunctor.Sieve
 import Data.Tuple (swap)
@@ -146,6 +150,13 @@ class (Confunctor p, Functor f) => Contrasieve f p | p -> f where
 
 class (Confunctor p, Functor f) => Contracosieve f p | p -> f where
   concosieve :: p a b -> f b -> a
+
+
+-- Representable
+
+class (Contrasieve (Contrarep p) p, Contrastrong p) => Contrarepresentable p where
+  type Contrarep p :: Type -> Type
+  contabulate :: (c -> Contrarep p d) -> p d c
 
 
 -- Deriving
