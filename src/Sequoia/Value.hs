@@ -28,8 +28,8 @@ class Corepresentable v => Value v
 
 instance Value (V s)
 
-type VRep v = Corep v ()
-type VFn v a = VRep v -> a
+type VRep v = Corep v
+type VFn v a = VRep v () -> a
 
 
 _V :: (Value v, Value v') => Optic Iso (v () a) (v' () a') (VFn v a) (VFn v' a')
@@ -59,7 +59,7 @@ exV2 = dimap2 inV inV exV
 
 -- Env monad
 
-appEnv :: Value v => Env v a -> VRep v -> VRep v -> a
+appEnv :: Value v => Env v a -> VRep v () -> VRep v () -> a
 appEnv f = exV . exV (runEnv f)
 
 newtype Env v a = Env { runEnv :: v () (v () a) }
