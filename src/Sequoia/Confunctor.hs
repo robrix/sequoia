@@ -5,6 +5,7 @@ module Sequoia.Confunctor
 ) where
 
 import Data.Profunctor
+
 class Confunctor p where
   {-# MINIMAL conmap | (mapl, mapr) #-}
 
