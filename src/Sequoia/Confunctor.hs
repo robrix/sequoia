@@ -3,6 +3,8 @@ module Sequoia.Confunctor
 ) where
 
 class Confunctor p where
+  {-# MINIMAL conmap | (mapl, mapr) #-}
+
   conmap :: (a -> a') -> (b' -> b) -> ((a `p` b) -> (a' `p` b'))
   conmap f g = mapl f . mapr g
 
