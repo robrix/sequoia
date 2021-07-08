@@ -54,7 +54,7 @@ liftLR = dimap exl inr . Seq . exC
 
 
 lowerLR :: ContPassing k c => (c a b -> _Γ -|Seq k|- _Δ) -> a < _Γ -|Seq k|- _Δ > b -> _Γ -|Seq k|- _Δ
-lowerLR f p = inC1 (\ _Δ _Γ -> appC (f (inC1 (\ b a -> appC p (a <| _Γ) (_Δ <--> b)))) _Γ _Δ)
+lowerLR f p = inC1' (\ _Δ _Γ -> f (inC1' (\ b a -> p •• (_Δ <••> b) • (a <| _Γ))) •• _Δ • _Γ)
 
 
 -- Effectful sequents
