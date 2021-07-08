@@ -9,3 +9,4 @@ class Confunctor p where
   mapl = (`conmap` id)
 
   mapr :: (b' -> b) -> ((a `p` b) -> (a `p` b'))
+  mapr = (id `conmap`)
