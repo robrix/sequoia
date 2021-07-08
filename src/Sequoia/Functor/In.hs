@@ -5,6 +5,7 @@ module Sequoia.Functor.In
 ) where
 
 import           Data.Functor.Contravariant
+import           Data.Functor.Contravariant.Adjunction
 import           Data.Functor.Contravariant.Rep
 import           Data.Profunctor
 import qualified Data.Profunctor.Rep as Pro
@@ -19,3 +20,7 @@ instance Pro.Representable p => Representable (In p r) where
   type Rep (In p r) = Pro.Rep p r
   tabulate = In . Pro.tabulate
   index = sieve . runIn
+
+instance Pro.Representable p => Adjunction (In p r) (In p r) where
+  leftAdjunct  f a = tabulate ((`index` a) . f)
+  rightAdjunct f a = tabulate ((`index` a) . f)
