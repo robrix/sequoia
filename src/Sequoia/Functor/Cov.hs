@@ -1,7 +1,7 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
 -- | A covariant functor over a profunctor’s output.
-module Sequoia.Functor.Ex
+module Sequoia.Functor.Cov
 ( Ex(..)
 ) where
 

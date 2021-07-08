@@ -1,6 +1,6 @@
 {-# LANGUAGE TypeFamilies #-}
 -- | A contravariant functor over a profunctor’s input.
-module Sequoia.Functor.In
+module Sequoia.Functor.Con
 ( In(..)
 ) where
 
