@@ -2,6 +2,8 @@
 module Sequoia.Confunctor
 ( Confunctor(..)
 , Flip(..)
+  -- * Strength
+, Contrastrong(..)
   -- * Deriving
 , Profunctorially(..)
 , Confunctorially(..)
@@ -9,6 +11,7 @@ module Sequoia.Confunctor
 
 import Data.Functor.Contravariant
 import Data.Profunctor
+import Data.Tuple (swap)
 
 class Confunctor p where
   {-# MINIMAL conmap | (mapl, mapr) #-}
@@ -32,6 +35,16 @@ instance Confunctor p => Profunctor (Flip p) where
 
 instance Profunctor p => Confunctor (Flip p) where
   conmap f g = Flip . dimap g f . runFlip
+
+
+-- Strength
+
+class Confunctor p => Contrastrong p where
+  {-# MINIMAL confirst | consecond #-}
+  confirst  :: p a b -> p (a, c) (b, c)
+  confirst = conmap swap swap . consecond
+  consecond :: p a b -> p (c, a) (c, b)
+  consecond = conmap swap swap . confirst
 
 
 -- Deriving
