@@ -1,10 +1,12 @@
+{-# LANGUAGE TypeFamilies #-}
 module Sequoia.Profunctor.V
 ( V(..)
 ) where
 
-import Data.Functor.Const
-import Data.Profunctor
-import Data.Profunctor.Sieve
+import           Data.Functor.Const
+import           Data.Profunctor
+import qualified Data.Profunctor.Rep as Pro
+import           Data.Profunctor.Sieve
 
 newtype V s a b = V { runV :: s -> b }
   deriving (Functor)
@@ -28,3 +30,7 @@ instance Sieve (V s) ((->) s) where
 
 instance Cosieve (V s) (Const s) where
   cosieve = lmap getConst . runV
+
+instance Pro.Corepresentable (V s) where
+  type Corep (V s) = Const s
+  cotabulate = V . lmap Const
