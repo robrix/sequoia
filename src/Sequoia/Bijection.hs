@@ -77,6 +77,7 @@ import qualified Data.Functor.Rep as Co
 import           Data.Maybe (fromMaybe)
 import           Data.Profunctor
 import           Data.Tuple (swap)
+import           Sequoia.Profunctor.K
 
 -- Bijections
 
@@ -94,14 +95,14 @@ instance Profunctor p => Iso p
 
 -- Elimination
 
-views :: c (Forget r) => Optic c s t a b -> (a -> r) -> (s -> r)
-views b = runForget . runOptic b . Forget
+views :: c (K r) => Optic c s t a b -> (a -> r) -> (s -> r)
+views b = runK . runOptic b . K
 
 reviews :: c Tagged => Optic c s t a b -> (t -> r) -> (b -> r)
 reviews b f = f . getTagged . runOptic b . Tagged
 
 
-(~>) :: c (Forget a) => s -> Optic c s t a b -> a
+(~>) :: c (K a) => s -> Optic c s t a b -> a
 s ~> o = views o id s
 
 infixl 9 ~>
@@ -112,10 +113,10 @@ o <~ b = reviews o id b
 infixr 9 <~
 
 
-over :: (c Tagged, c (Forget a)) => Optic c s t a b -> (t -> s) -> (b -> a)
+over :: (c Tagged, c (K a)) => Optic c s t a b -> (t -> s) -> (b -> a)
 over b = dimap (b <~) (~> b)
 
-under :: (c Tagged, c (Forget a)) => Optic c s t a b -> (a -> b) -> (s -> t)
+under :: (c Tagged, c (K a)) => Optic c s t a b -> (a -> b) -> (s -> t)
 under b = dimap (~> b) (b <~)
 
 
