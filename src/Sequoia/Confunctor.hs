@@ -18,6 +18,7 @@ module Sequoia.Confunctor
 , Contracosieve(..)
   -- * Representable
 , Contrarepresentable(..)
+, Contracorepresentable(..)
   -- * Deriving
 , Profunctorially(..)
 , Confunctorially(..)
@@ -166,6 +167,10 @@ class (Confunctor p, Functor f) => Contracosieve f p | p -> f where
 class (Contrasieve (Contrarep p) p, Contrastrong p) => Contrarepresentable p where
   type Contrarep p :: Type -> Type
   contabulate :: (c -> Contrarep p d) -> p d c
+
+class (Contracosieve (Contracorep p) p, Contracostrong p) => Contracorepresentable p where
+  type Contracorep p :: Type -> Type
+  concotabulate :: (Contracorep p c -> d) -> p d c
 
 
 -- Deriving
