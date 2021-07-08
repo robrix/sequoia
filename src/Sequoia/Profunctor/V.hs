@@ -17,3 +17,6 @@ instance Costrong (V s) where
 instance Choice (V s) where
   left'  = V . fmap Left  . runV
   right' = V . fmap Right . runV
+
+instance Closed (V s) where
+  closed = V . fmap const . runV
