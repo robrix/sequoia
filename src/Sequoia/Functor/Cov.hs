@@ -2,7 +2,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 -- | A covariant functor over a profunctor’s output.
 module Sequoia.Functor.Cov
-( Ex(..)
+( Cov(..)
 ) where
 
 import Data.Distributive
@@ -11,17 +11,17 @@ import Data.Profunctor
 import Data.Profunctor.Rep (Corepresentable(..))
 import Data.Profunctor.Sieve
 
-newtype Ex p s a = Ex { runEx :: p s a }
+newtype Cov p s a = Cov { runCov :: p s a }
   deriving (Choice, Closed, Cochoice, Costrong, Profunctor, Strong)
 
-instance Profunctor p => Functor (Ex p s) where
-  fmap f = Ex . rmap f . runEx
+instance Profunctor p => Functor (Cov p s) where
+  fmap f = Cov . rmap f . runCov
 
-instance Corepresentable p => Distributive (Ex p s) where
+instance Corepresentable p => Distributive (Cov p s) where
   distribute = distributeRep
   collect = collectRep
 
-instance Corepresentable p => Representable (Ex p s) where
-  type Rep (Ex p s) = Corep p s
-  tabulate = Ex . cotabulate
-  index = cosieve . runEx
+instance Corepresentable p => Representable (Cov p s) where
+  type Rep (Cov p s) = Corep p s
+  tabulate = Cov . cotabulate
+  index = cosieve . runCov
