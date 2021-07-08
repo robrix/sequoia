@@ -8,7 +8,6 @@ module Sequoia.CPS
 , _C
 , inC1
 , inC1'
-, (••)
   -- ** Construction
 , cps
 , liftC
@@ -97,12 +96,6 @@ inC1 = inC . inK1
 
 inC1' :: ContPassing k c => (k b -> KFn k a) -> a `c` b
 inC1' = inC . inK1'
-
-
-(••) :: ContPassing k c => a `c` b -> CFn k a b
-(••) = exC
-
-infixl 9 ••
 
 
 -- Construction
