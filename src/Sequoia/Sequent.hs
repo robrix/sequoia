@@ -94,7 +94,7 @@ instance Continuation k => Contextual k (Seq k) where
 
 instance Control Seq where
   reset s = inC1 (\ _Δ -> _Δ . (evalSeq s •))
-  shift s = inC1 (\ _Δ _Γ -> appC s (inrK (inK _Δ) <| _Γ) (_Δ . inl <--> id))
+  shift s = inC (\ _Δ -> inK (\ _Γ -> s •• (inlK _Δ <••> idK) • (inrK _Δ <| _Γ)))
 
 
 -- Negation
