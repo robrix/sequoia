@@ -4,6 +4,7 @@ module Sequoia.Confunctor
 , Flip(..)
 ) where
 
+import Data.Profunctor
 class Confunctor p where
   {-# MINIMAL conmap | (mapl, mapr) #-}
 
@@ -20,3 +21,6 @@ class Confunctor p where
 -- FIXME: use Flip from bifunctors instead
 
 newtype Flip p a b = Flip { runFlip :: p b a }
+
+instance Profunctor p => Confunctor (Flip p) where
+  conmap f g = Flip . dimap g f . runFlip
