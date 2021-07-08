@@ -4,6 +4,7 @@ module Sequoia.Confunctor
 
 class Confunctor p where
   conmap :: (a -> a') -> (b' -> b) -> ((a `p` b) -> (a' `p` b'))
+  conmap f g = mapl f . mapr g
 
   mapl :: (a -> a') -> ((a `p` b) -> (a' `p` b))
   mapl = (`conmap` id)
