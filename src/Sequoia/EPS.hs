@@ -78,10 +78,10 @@ _E :: (EnvPassing v e, EnvPassing v' e') => Optic Iso (e a b) (e' a' b') (EPFn v
 _E = exE <-> inE
 
 
-inE1 :: EnvPassing v e => (VFn v a -> VFn v b) -> a `e` b
+inE1 :: EnvPassing v e => (VFn v () a -> VFn v () b) -> a `e` b
 inE1 = inE . inV1
 
-exE1 :: EnvPassing v e => a `e` b -> (VFn v a -> VFn v b)
+exE1 :: EnvPassing v e => a `e` b -> (VFn v () a -> VFn v () b)
 exE1 = exV1 . exE
 
 
@@ -132,10 +132,10 @@ collectE f r = inE1 (\ a s -> (\ c -> exE1 (f c) a s) <$> r)
 
 -- Representable
 
-tabulateE :: EnvPassing v e => ((VFn v b, VRep v ()) -> a) -> b `e` a
+tabulateE :: EnvPassing v e => ((VFn v () b, VRep v ()) -> a) -> b `e` a
 tabulateE = inE1 . curry
 
-indexE :: EnvPassing v e => b `e` a -> ((VFn v b, VRep v ()) -> a)
+indexE :: EnvPassing v e => b `e` a -> ((VFn v () b, VRep v ()) -> a)
 indexE = uncurry . exE1
 
 
@@ -229,7 +229,7 @@ instance Value v => Distributive (E v a) where
   collect = collectE
 
 instance Value v => Representable (E v b) where
-  type Rep (E v b) = (VFn v b, VRep v ())
+  type Rep (E v b) = (VFn v () b, VRep v ())
   tabulate = tabulateE
   index = indexE
 
