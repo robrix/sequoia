@@ -4,6 +4,7 @@ module Sequoia.Confunctor
 , Flip(..)
   -- * Strength
 , Contrastrong(..)
+, Contracostrong(..)
   -- * Deriving
 , Profunctorially(..)
 , Confunctorially(..)
@@ -45,6 +46,13 @@ class Confunctor p => Contrastrong p where
   confirst = conmap swap swap . consecond
   consecond :: p a b -> p (c, a) (c, b)
   consecond = conmap swap swap . confirst
+
+class Confunctor p => Contracostrong p where
+  {-# MINIMAL conunfirst | conunsecond #-}
+  conunfirst  :: p (a, c) (b, c) -> p a b
+  conunfirst = conunsecond . conmap swap swap
+  conunsecond :: p (c, a) (c, b) -> p a b
+  conunsecond = conunfirst . conmap swap swap
 
 
 -- Deriving
