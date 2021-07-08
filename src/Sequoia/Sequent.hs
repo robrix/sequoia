@@ -87,7 +87,7 @@ deriving via Contextually (Seq k) instance Continuation k => Exchange k (Seq k)
 -- Contextual rules
 
 instance Continuation k => Contextual k (Seq k) where
-  swapΓΔ f _Δ' _Γ' = inC1 (\ _Δ _Γ -> appC (f (inK _Δ) _Γ) _Γ' (exK _Δ'))
+  swapΓΔ f _Δ' _Γ' = inC (\ _Δ -> inK (\ _Γ -> f _Δ _Γ •• _Δ' • _Γ'))
 
 
 -- Control
