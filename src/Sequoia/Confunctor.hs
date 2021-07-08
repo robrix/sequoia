@@ -26,6 +26,7 @@ module Sequoia.Confunctor
 
 import           Data.Distributive
 import           Data.Functor.Contravariant
+import qualified Data.Functor.Contravariant.Rep as Contra
 import qualified Data.Functor.Rep as Co
 import           Data.Kind
 import           Data.Profunctor
@@ -58,6 +59,11 @@ instance Contracorepresentable p => Co.Representable (Flip p a) where
   type Rep (Flip p a) = Contracorep p a
   tabulate = Flip . concotabulate
   index = concosieve . runFlip
+
+instance Pro.Representable p => Contra.Representable (Flip p a) where
+  type Rep (Flip p a) = Pro.Rep p a
+  tabulate = Flip . Pro.tabulate
+  index = sieve . runFlip
 
 instance Confunctor p => Profunctor (Flip p) where
   dimap f g = Flip . conmap g f . runFlip
