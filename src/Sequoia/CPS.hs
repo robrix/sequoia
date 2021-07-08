@@ -117,16 +117,16 @@ liftC = inC . fmap inK . flip
 -- Elimination
 
 appC :: ContPassing k c => a `c` b -> a -> ContFn k b
-appC c a k = c •• inK k • a
+appC c a k = inK k ↓ c • a
 
 appC2 :: ContPassing k c => a `c` (b `c` d) -> a -> b -> ContFn k d
 appC2 f a b k = appC f a (\ f -> appC f b k)
 
 appCM :: (ContPassing k c, MonadK k m) => a `c` b -> (a -> m b)
-appCM c a = jump (inK (\ k -> c •• k • a))
+appCM c a = jump (inK (\ k -> k ↓ c • a))
 
 appCM2 :: (ContPassing k c, MonadK k m) => a `c` (b `c` d) -> (a -> b -> m d)
-appCM2 c a b = jump (inK (\ k -> c •• inK (\ c -> c •• k • b) • a))
+appCM2 c a b = jump (inK (\ k -> inK (\ c -> k ↓ c • b) ↓ c • a))
 
 execC :: ContPassing k c => () `c` a -> k **a
 execC c = exC c -<< ()
@@ -135,7 +135,7 @@ execCM :: (ContPassing k c, MonadK k m) => () `c` a -> m a
 execCM = jump . execC
 
 evalC :: ContPassing k c => i `c` KRep k -> k i
-evalC = (•• idK)
+evalC = (idK ↓)
 
 evalCM :: (ContPassing k c, MonadK k m) => i `c` KRep k -> (i -> m ())
 evalCM c i = jump (inK (const (evalC c • i)))
@@ -188,7 +188,7 @@ pureC :: ContPassing k c => b -> c a b
 pureC a = inC (•<< const a)
 
 apC :: ContPassing k c => c a (b -> b') -> (c a b -> c a b')
-apC f a = inC1 (\ k a' -> f •• inK (\ f -> a •• inK (k . f) • a') • a')
+apC f a = inC1 (\ k a' -> inK (\ f -> inK (k . f) ↓ a • a') ↓ f • a')
 
 liftA2C :: ContPassing k c => (x -> y -> z) -> c a x -> c a y -> c a z
 liftA2C f a b = inC1 (\ k a' -> appC a a' (appC b a' . (k .) . f))
@@ -197,7 +197,7 @@ liftA2C f a b = inC1 (\ k a' -> appC a a' (appC b a' . (k .) . f))
 -- Monad
 
 bindC :: ContPassing k c => c a b -> (b -> c a b') -> c a b'
-bindC m f = inC1 (\ k a -> m •• inK ((• a) . (•• inK k) . f) • a)
+bindC m f = inC1 (\ k a -> inK ((• a) . (inK k ↓) . f) ↓ m • a)
 
 
 -- Arrow
@@ -221,13 +221,13 @@ fanoutC = liftA2C (,)
 -- ArrowChoice
 
 leftC :: ContPassing k c => c a b -> c (Either a d) (Either b d)
-leftC  f = inC (\ k -> f •• inlK k <••> inrK k)
+leftC  f = inC (\ k -> inlK k ↓ f <••> inrK k)
 
 rightC :: ContPassing k c => c a b -> c (Either d a) (Either d b)
-rightC g = inC (\ k -> inlK k <••> g •• inrK k)
+rightC g = inC (\ k -> inlK k <••> inrK k ↓ g)
 
 splitSumC :: ContPassing k c => c a1 b1 -> c a2 b2 -> c (Either a1 a2) (Either b1 b2)
-splitSumC f g = inC (\ k -> f •• inlK k <••> g •• inrK k)
+splitSumC f g = inC (\ k -> inlK k ↓ f <••> inrK k ↓ g)
 
 faninC :: ContPassing k c => c a1 b -> c a2 b -> c (Either a1 a2) b
 faninC f g = inC ((<••>) <$> exC f <*> exC g)
@@ -245,7 +245,7 @@ wanderC :: (ContPassing k c, Applicative (c ())) => (forall f . Applicative f =>
 wanderC traverse c = liftC (exK . execC . traverse (pappC c))
   where
   pappC :: ContPassing k c => c a b -> a -> c () b
-  pappC c a = inC (contramap (const a) . (c ••))
+  pappC c a = inC (contramap (const a) . (↓ c))
 
 
 -- Profunctor
