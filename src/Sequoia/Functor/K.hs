@@ -1,2 +1,5 @@
 module Sequoia.Functor.K
-() where
+( K(..)
+) where
+
+newtype K r a = K { runK :: a -> r }
