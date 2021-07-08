@@ -37,6 +37,10 @@ instance Confunctor p => Profunctor (Flip p) where
 instance Profunctor p => Confunctor (Flip p) where
   conmap f g = Flip . dimap g f . runFlip
 
+instance Contrastrong p => Strong (Flip p) where
+  first'  = Flip . confirst  . runFlip
+  second' = Flip . consecond . runFlip
+
 instance Strong p => Contrastrong (Flip p) where
   confirst  = Flip . first'  . runFlip
   consecond = Flip . second' . runFlip
