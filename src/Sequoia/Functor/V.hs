@@ -1,2 +1,5 @@
 module Sequoia.Functor.V
-() where
+( V(..)
+) where
+
+newtype V s a = V { runV :: s -> a }
