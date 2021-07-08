@@ -77,6 +77,9 @@ instance Cochoice p => Contracochoice (Flip p) where
 instance Contraclosed p => Closed (Flip p) where
   closed = Flip . conclosed . runFlip
 
+instance Closed p => Contraclosed (Flip p) where
+  conclosed = Flip . closed . runFlip
+
 
 -- Strength
 
