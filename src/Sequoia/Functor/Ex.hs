@@ -2,7 +2,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 -- | A covariant functor over a profunctor’s output.
 module Sequoia.Functor.Ex
-( CorepRep(..)
+( Ex(..)
 ) where
 
 import Data.Distributive
@@ -11,21 +11,21 @@ import Data.Profunctor
 import Data.Profunctor.Rep (Corepresentable(..))
 import Data.Profunctor.Sieve
 
-newtype CorepRep p s a = CorepRep { getCorepRep :: p s a }
+newtype Ex p s a = Ex { getEx :: p s a }
   deriving (Choice, Closed, Cochoice, Costrong, Functor, Profunctor, Strong)
 
-instance Cosieve p r => Cosieve (CorepRep p) r where
-  cosieve = cosieve . getCorepRep
+instance Cosieve p r => Cosieve (Ex p) r where
+  cosieve = cosieve . getEx
 
-instance Corepresentable p => Corepresentable (CorepRep p) where
-  type Corep (CorepRep p) = Corep p
-  cotabulate = CorepRep . cotabulate
+instance Corepresentable p => Corepresentable (Ex p) where
+  type Corep (Ex p) = Corep p
+  cotabulate = Ex . cotabulate
 
-instance Distributive (p s) => Distributive (CorepRep p s) where
-  distribute = CorepRep . distribute . fmap getCorepRep
-  collect f = CorepRep . collect (getCorepRep . f)
+instance Distributive (p s) => Distributive (Ex p s) where
+  distribute = Ex . distribute . fmap getEx
+  collect f = Ex . collect (getEx . f)
 
-instance (Distributive (p s), Corepresentable p) => Representable (CorepRep p s) where
-  type Rep (CorepRep p s) = Corep p s
+instance (Distributive (p s), Corepresentable p) => Representable (Ex p s) where
+  type Rep (Ex p s) = Corep p s
   tabulate = cotabulate
   index = cosieve
