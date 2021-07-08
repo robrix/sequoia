@@ -13,21 +13,13 @@ module Sequoia.Value
 , exV
 , exV1
 , exV2
-  -- * Concrete values
-, V(..)
   -- * Env monad
 , appEnv
 , Env(..)
 ) where
 
-import qualified Control.Category as Cat
-import           Control.Comonad
-import           Data.Distributive
-import           Data.Functor.Rep
-import           Data.Profunctor
-import qualified Data.Profunctor.Rep as Pro
-import           Data.Profunctor.Sieve
-import           Sequoia.Bijection
+import Data.Functor.Rep
+import Sequoia.Bijection
 
 class Representable v => Value v
 
@@ -58,28 +50,6 @@ exV1 = over _V
 
 exV2 :: Value v => (v a -> v b -> v c) -> (VFn v a -> VFn v b -> VFn v c)
 exV2 = dimap2 inV inV exV
-
-
-newtype V f s a = V { runV :: f s -> a }
-  deriving (Applicative, Functor, Monad, Representable)
-  deriving (Closed, Cochoice, Costrong, Profunctor) via Costar f
-
-instance Value (V f s)
-
-instance Comonad f => Cat.Category (V f) where
-  id = V extract
-  V f . V g = V (f =<= g)
-
-instance Distributive (V f s) where
-  distribute = distributeRep
-  collect = collectRep
-
-instance Functor f => Cosieve (V f) f where
-  cosieve = runV
-
-instance Functor f => Pro.Corepresentable (V f) where
-  type Corep (V f) = f
-  cotabulate = V
 
 
 -- Env monad
