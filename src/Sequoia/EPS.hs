@@ -67,14 +67,14 @@ import           Sequoia.Value
 
 -- EPS
 
-type EPFn v a b = v () a -> v () b
+type EPFn v s a b = v s a -> v s b
 
 class (Cat.Category e, Value v, Profunctor e) => EnvPassing v e | e -> v where
-  inE :: EPFn v a b -> a `e` b
-  exE :: a `e` b    -> EPFn v a b
+  inE :: EPFn v () a b -> a `e` b
+  exE :: a `e` b    -> EPFn v () a b
 
 
-_E :: (EnvPassing v e, EnvPassing v' e') => Optic Iso (e a b) (e' a' b') (EPFn v a b) (EPFn v' a' b')
+_E :: (EnvPassing v e, EnvPassing v' e') => Optic Iso (e a b) (e' a' b') (EPFn v () a b) (EPFn v' () a' b')
 _E = exE <-> inE
 
 
@@ -100,7 +100,7 @@ appE :: EnvPassing v e => a `e` b -> VRep v () -> (VRep v () -> a) -> b
 appE = flip . exE1
 
 
-(↑) :: EnvPassing v e => a `e` b -> EPFn v a b
+(↑) :: EnvPassing v e => a `e` b -> EPFn v () a b
 (↑) = exE
 
 infixl 9 ↑
