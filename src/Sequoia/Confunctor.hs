@@ -8,6 +8,8 @@ module Sequoia.Confunctor
   -- * Choice
 , Contrachoice(..)
 , Contracochoice(..)
+  -- * Closed
+, Contraclosed(..)
   -- * Deriving
 , Profunctorially(..)
 , Confunctorially(..)
@@ -105,6 +107,12 @@ class Confunctor p => Contracochoice p where
   conunleft  = conunright . conmap (either Right Left) (either Right Left)
   conunright :: p (Either c a) (Either c b) -> p a b
   conunright = conunleft  . conmap (either Right Left) (either Right Left)
+
+
+-- Closed
+
+class Confunctor p => Contraclosed p where
+  conclosed :: p a b -> p (x -> a) (x -> b)
 
 
 -- Deriving
