@@ -3,6 +3,7 @@ module Sequoia.Profunctor.V
 ) where
 
 import Data.Profunctor
+import Data.Profunctor.Sieve
 
 newtype V s a b = V { runV :: s -> b }
   deriving (Functor)
@@ -20,3 +21,6 @@ instance Choice (V s) where
 
 instance Closed (V s) where
   closed = V . fmap const . runV
+
+instance Sieve (V s) ((->) s) where
+  sieve = const . runV
