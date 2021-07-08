@@ -9,3 +9,7 @@ newtype K r a b = K { runK :: a -> r }
 
 instance Profunctor (K r) where
   dimap f _ = K . lmap f . runK
+
+instance Strong (K r) where
+  first'  = K . lmap fst . runK
+  second' = K . lmap snd . runK
