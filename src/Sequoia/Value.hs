@@ -59,17 +59,17 @@ exV2 = dimap2 inV inV exV
 
 -- Env monad
 
-appEnv :: Value v => Env v a -> VRep v () -> VRep v () -> a
+appEnv :: Value v => Env v s a -> VRep v s -> VRep v s -> a
 appEnv f = exV . exV (runEnv f)
 
-newtype Env v a = Env { runEnv :: v () (v () a) }
+newtype Env v s a = Env { runEnv :: v s (v s a) }
 
-instance Value v => Functor (Env v) where
+instance Value v => Functor (Env v s) where
   fmap f = Env . rmap (rmap f) . runEnv
 
-instance Value v => Applicative (Env v) where
+instance Value v => Applicative (Env v s) where
   pure a = Env (inV (const (inV (const a))))
   f <*> a = Env (inV (\ so -> inV (\ si -> appEnv f so si (appEnv a so si))))
 
-instance Value v => Monad (Env v) where
+instance Value v => Monad (Env v s) where
   m >>= f = Env (inV (\ so -> inV (\ si -> appEnv (f (appEnv m so si)) so si)))
