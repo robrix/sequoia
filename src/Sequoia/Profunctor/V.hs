@@ -13,3 +13,7 @@ instance Profunctor (V s) where
 instance Costrong (V s) where
   unfirst  = V . fmap fst . runV
   unsecond = V . fmap snd . runV
+
+instance Choice (V s) where
+  left'  = V . fmap Left  . runV
+  right' = V . fmap Right . runV
