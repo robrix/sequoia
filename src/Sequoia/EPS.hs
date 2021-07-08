@@ -67,7 +67,7 @@ import           Sequoia.Value
 
 -- EPS
 
-type EPFn v a b = v () a -> v () b
+type EPFn v a b = v a -> v b
 
 class (Cat.Category e, Value v, Profunctor e) => EnvPassing v e | e -> v where
   inE :: EPFn v a b -> a `e` b
@@ -172,7 +172,7 @@ duplicateE e = inE1 (\ _ _ -> e)
 -- Profunctor
 
 dimapE :: EnvPassing v e => (a' -> a) -> (b -> b') -> (e a b -> e a' b')
-dimapE f g = under _E (dimap (rmap f) (rmap g))
+dimapE f g = under _E (dimap (fmap f) (fmap g))
 
 lmapE :: EnvPassing v e => (a' -> a) -> (e a b -> e a' b)
 lmapE = (`dimapE` id)
@@ -215,7 +215,7 @@ cotabulateE f = liftE (\ s a -> f (pure (a s)))
 
 -- Concrete
 
-newtype E v a b = E { runE :: v () a -> v () b }
+newtype E v a b = E { runE :: v a -> v b }
 
 instance Value v => EnvPassing v (E v) where
   inE = E
