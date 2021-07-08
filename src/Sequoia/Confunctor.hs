@@ -3,6 +3,7 @@ module Sequoia.Confunctor
 ( Confunctor(..)
 , Flip(..)
   -- * Deriving
+, Profunctorially(..)
 , Confunctorially(..)
 ) where
 
@@ -36,6 +37,9 @@ instance Profunctor p => Confunctor (Flip p) where
 
 
 -- Deriving
+
+newtype Profunctorially p a b = Profunctorially { runProfunctorially :: p a b }
+
 
 newtype Confunctorially p a b = Confunctorially { runConfunctorially :: p a b }
   deriving (Confunctor)
