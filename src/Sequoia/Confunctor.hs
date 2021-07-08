@@ -5,6 +5,8 @@ module Sequoia.Confunctor
   -- * Strength
 , Contrastrong(..)
 , Contracostrong(..)
+  -- * Strength
+, Contrachoice(..)
   -- * Deriving
 , Profunctorially(..)
 , Confunctorially(..)
@@ -69,6 +71,13 @@ class Confunctor p => Contracostrong p where
   conunfirst = conunsecond . conmap swap swap
   conunsecond :: p (c, a) (c, b) -> p a b
   conunsecond = conunfirst . conmap swap swap
+
+
+-- Choice
+
+class Confunctor p => Contrachoice p where
+  conleft  :: p a b -> p (Either a c) (Either b c)
+  conright :: p a b -> p (Either c a) (Either c b)
 
 
 -- Deriving
