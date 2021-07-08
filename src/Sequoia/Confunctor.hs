@@ -22,5 +22,8 @@ class Confunctor p where
 
 newtype Flip p a b = Flip { runFlip :: p b a }
 
+instance Confunctor p => Profunctor (Flip p) where
+  dimap f g = Flip . conmap g f . runFlip
+
 instance Profunctor p => Confunctor (Flip p) where
   conmap f g = Flip . dimap g f . runFlip
