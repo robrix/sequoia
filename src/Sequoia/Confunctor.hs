@@ -41,6 +41,9 @@ instance Profunctor p => Confunctor (Flip p) where
 newtype Profunctorially p a b = Profunctorially { runProfunctorially :: p a b }
   deriving (Profunctor)
 
+instance Profunctor p => Functor (Profunctorially p a) where
+  fmap = rmap
+
 
 newtype Confunctorially p a b = Confunctorially { runConfunctorially :: p a b }
   deriving (Confunctor)
