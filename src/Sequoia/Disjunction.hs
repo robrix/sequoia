@@ -1,6 +1,8 @@
 module Sequoia.Disjunction
 ( -- * Disjunction
   Disj(..)
+, _inl
+, _inr
 , exlD
 , exrD
 , foldMapDisj
@@ -21,6 +23,7 @@ module Sequoia.Disjunction
 
 import Data.Functor.Contravariant
 import Data.Profunctor
+import Sequoia.Bijection
 
 -- Disjunction
 
@@ -34,6 +37,12 @@ instance Disj Either where
   inl = Left
   inr = Right
   (<-->) = either
+
+_inl :: Disj d => Optic Prism (a `d` b) (a' `d` b) a a'
+_inl = prism inl (inr <--> inl . inr)
+
+_inr :: Disj d => Optic Prism (a `d` b) (a `d` b') b b'
+_inr = prism inr (inl . inl <--> inr)
 
 exlD :: Disj d => a `d` b -> Maybe a
 exlD = Just <--> const Nothing
