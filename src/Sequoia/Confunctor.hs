@@ -17,4 +17,6 @@ class Confunctor p where
   mapr = (id `conmap`)
 
 
+-- FIXME: use Flip from bifunctors instead
+
 newtype Flip p a b = Flip { runFlip :: p b a }
