@@ -7,6 +7,7 @@ module Sequoia.Confunctor
 , Contracostrong(..)
   -- * Strength
 , Contrachoice(..)
+, Contracochoice(..)
   -- * Deriving
 , Profunctorially(..)
 , Confunctorially(..)
@@ -85,6 +86,13 @@ class Confunctor p => Contrachoice p where
   conleft  = conmap (either Right Left) (either Right Left) . conright
   conright :: p a b -> p (Either c a) (Either c b)
   conright = conmap (either Right Left) (either Right Left) . conleft
+
+class Confunctor p => Contracochoice p where
+  {-# MINIMAL conunleft | conunright #-}
+  conunleft  :: p (Either a c) (Either b c) -> p a b
+  conunleft  = conunright . conmap (either Right Left) (either Right Left)
+  conunright :: p (Either c a) (Either c b) -> p a b
+  conunright = conunleft  . conmap (either Right Left) (either Right Left)
 
 
 -- Deriving
