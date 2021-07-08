@@ -178,7 +178,7 @@ instance Continuation k => SubtractionIntro k (Seq k) where
 
 instance Continuation k => UniversalIntro k (Seq k) where
   forAllL p = mapL (notNegate . runForAll) p
-  forAllR p = inC1 (\ _Δ _Γ -> _Δ (inr (ForAll (inK (\ k -> appC p _Γ (_Δ . inl <--> exK k))))))
+  forAllR p = inC1' (\ _Δ _Γ -> inrK _Δ • ForAll (inK (\ k -> p •• (inlK _Δ <••> k) • _Γ)))
 
 instance Continuation k => ExistentialIntro k (Seq k) where
   existsL p = popL (dnE . runExists (pushL p))
