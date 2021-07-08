@@ -12,7 +12,10 @@ import Data.Profunctor.Rep (Corepresentable(..))
 import Data.Profunctor.Sieve
 
 newtype Ex p s a = Ex { runEx :: p s a }
-  deriving (Choice, Closed, Cochoice, Costrong, Functor, Profunctor, Strong)
+  deriving (Choice, Closed, Cochoice, Costrong, Profunctor, Strong)
+
+instance Profunctor p => Functor (Ex p s) where
+  fmap f = Ex . rmap f . runEx
 
 instance Cosieve p r => Cosieve (Ex p) r where
   cosieve = cosieve . runEx
@@ -21,7 +24,7 @@ instance Corepresentable p => Corepresentable (Ex p) where
   type Corep (Ex p) = Corep p
   cotabulate = Ex . cotabulate
 
-instance Distributive (p s) => Distributive (Ex p s) where
+instance (Profunctor p, Distributive (p s)) => Distributive (Ex p s) where
   distribute = Ex . distribute . fmap runEx
   collect f = Ex . collect (runEx . f)
 
