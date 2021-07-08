@@ -1,4 +1,5 @@
 {-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE UndecidableInstances #-}
 -- | Like a profunctor, but with opposite variances.
 module Sequoia.Confunctor
 ( Confunctor(..)
@@ -20,6 +21,7 @@ module Sequoia.Confunctor
 
 import Data.Functor.Contravariant
 import Data.Profunctor
+import Data.Profunctor.Sieve
 import Data.Tuple (swap)
 
 class Confunctor p where
@@ -82,6 +84,9 @@ instance Contraclosed p => Closed (Flip p) where
 
 instance Closed p => Contraclosed (Flip p) where
   conclosed = Flip . closed . runFlip
+
+instance Contrasieve f p => Sieve (Flip p) f where
+  sieve = consieve . runFlip
 
 
 -- Strength
