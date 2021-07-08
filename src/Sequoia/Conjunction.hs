@@ -1,6 +1,8 @@
 module Sequoia.Conjunction
 ( -- * Conjunction
   Conj(..)
+, _exl
+, _exr
 , exlrC
 , curryConj
 , uncurryConj
@@ -25,6 +27,7 @@ module Sequoia.Conjunction
 import Control.Applicative (liftA2)
 import Data.Functor.Contravariant
 import Data.Profunctor
+import Sequoia.Bijection
 
 class Conj c where
   (-><-) :: a -> b -> (a `c` b)
@@ -36,6 +39,12 @@ instance Conj (,) where
   (-><-) = (,)
   exl = fst
   exr = snd
+
+_exl :: Conj c => Optic Lens (a `c` b) (a' `c` b) a a'
+_exl = lens exl (\ c -> (-><- exr c))
+
+_exr :: Conj c => Optic Lens (a `c` b) (a `c` b') b b'
+_exr = lens exr (\ c -> (exl c -><-))
 
 exlrC :: Conj c => (a' -> b' -> r) -> (a -> a') -> (b -> b') -> (a `c` b -> r)
 exlrC h f g = h <$> f . exl <*> g . exr
