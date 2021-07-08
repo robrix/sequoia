@@ -60,6 +60,10 @@ instance Contrachoice p => Choice (Flip p) where
   left'  = Flip . conleft  . runFlip
   right' = Flip . conright . runFlip
 
+instance Choice p => Contrachoice (Flip p) where
+  conleft  = Flip . left'  . runFlip
+  conright = Flip . right' . runFlip
+
 
 -- Strength
 
