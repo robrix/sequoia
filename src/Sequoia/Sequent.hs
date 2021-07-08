@@ -54,7 +54,7 @@ liftLR = dimap exl inr . Seq . exC
 
 
 lowerLR :: ContPassing k c => (c a b -> _Γ -|Seq k|- _Δ) -> a < _Γ -|Seq k|- _Δ > b -> _Γ -|Seq k|- _Δ
-lowerLR f p = Seq $ inK1 (\ _Δ _Γ -> appC (f (inC1 (\ b a -> appC p (a <| _Γ) (_Δ <--> b)))) _Γ _Δ)
+lowerLR f p = inC1 (\ _Δ _Γ -> appC (f (inC1 (\ b a -> appC p (a <| _Γ) (_Δ <--> b)))) _Γ _Δ)
 
 
 -- Effectful sequents
@@ -66,7 +66,7 @@ newtype SeqT r _Γ m _Δ = SeqT { getSeqT :: Seq (K (m r)) _Γ _Δ }
   deriving (Applicative, Functor, Monad)
 
 instance MonadTrans (SeqT r _Γ) where
-  lift m = SeqT (Seq (inK1 (const . dimap (fmap runIdentity) Identity (m >>=))))
+  lift m = SeqT (inC1 (const . dimap (fmap runIdentity) Identity (m >>=)))
 
 
 -- Core rules
@@ -87,14 +87,14 @@ deriving via Contextually (Seq k) instance Continuation k => Exchange k (Seq k)
 -- Contextual rules
 
 instance Continuation k => Contextual k (Seq k) where
-  swapΓΔ f _Δ' _Γ' = Seq (inK1 (\ _Δ _Γ -> appC (f (inK _Δ) _Γ) _Γ' (exK _Δ')))
+  swapΓΔ f _Δ' _Γ' = inC1 (\ _Δ _Γ -> appC (f (inK _Δ) _Γ) _Γ' (exK _Δ'))
 
 
 -- Control
 
 instance Control Seq where
-  reset s = Seq (inK1 (\ _Δ -> _Δ . exK (evalSeq s)))
-  shift s = Seq (inK1 (\ _Δ _Γ -> appC s (inrK (inK _Δ) <| _Γ) (_Δ . inl <--> id)))
+  reset s = inC1 (\ _Δ -> _Δ . (evalSeq s •))
+  shift s = inC1 (\ _Δ _Γ -> appC s (inrK (inK _Δ) <| _Γ) (_Δ . inl <--> id))
 
 
 -- Negation
