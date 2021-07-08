@@ -6,7 +6,9 @@ module Sequoia.Connective.Subtraction
 , sub
 ) where
 
+import Data.Profunctor
 import Sequoia.Bijection
+import Sequoia.Confunctor
 import Sequoia.Connective.Negate
 import Sequoia.Connective.Tensor
 import Sequoia.Polarity
@@ -14,6 +16,9 @@ import Sequoia.Polarity
 -- Subtraction
 
 data Sub k a b = Sub { subA :: a, subK :: k b () }
+
+instance Profunctor k => Confunctor (Sub k) where
+  conmap f g (Sub a k) = Sub (f a) (lmap g k)
 
 instance (Pos a, Neg b) => Polarized P (Sub k a b) where
 
