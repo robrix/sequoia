@@ -69,7 +69,7 @@ class Representable k => Continuation k
 type KRep k = Rep k
 
 
-instance Continuation (K f r)
+instance Continuation (K r)
 
 
 -- Application

@@ -95,14 +95,14 @@ instance Profunctor p => Iso p
 
 -- Elimination
 
-views :: c (K I r) => Optic c s t a b -> (a -> r) -> (s -> r)
-views b = fmap getI . runK . runOptic b . K . fmap I
+views :: c (K r) => Optic c s t a b -> (a -> r) -> (s -> r)
+views b = runK . runOptic b . K
 
 reviews :: c (V I r) => Optic c s t a b -> (r -> b) -> (r -> t)
 reviews b = lmap I . runV . runOptic b . V . lmap getI
 
 
-(~>) :: c (K I a) => s -> Optic c s t a b -> a
+(~>) :: c (K a) => s -> Optic c s t a b -> a
 s ~> o = views o id s
 
 infixl 9 ~>
@@ -113,10 +113,10 @@ o <~ b = reviews o id b
 infixr 9 <~
 
 
-over :: (c (V I b), c (K I a)) => Optic c s t a b -> (t -> s) -> (b -> a)
+over :: (c (V I b), c (K a)) => Optic c s t a b -> (t -> s) -> (b -> a)
 over b = dimap (b <~) (~> b)
 
-under :: (c (V I b), c (K I a)) => Optic c s t a b -> (a -> b) -> (s -> t)
+under :: (c (V I b), c (K a)) => Optic c s t a b -> (a -> b) -> (s -> t)
 under b = dimap (~> b) (b <~)
 
 
