@@ -100,7 +100,7 @@ appE :: EnvPassing v e => a `e` b -> VRep v -> (VRep v -> a) -> b
 appE = flip . exE1
 
 
-(↑) :: EnvPassing v e => a `e` b -> v () a -> v () b
+(↑) :: EnvPassing v e => a `e` b -> EPFn v a b
 (↑) = exE
 
 infixl 9 ↑
