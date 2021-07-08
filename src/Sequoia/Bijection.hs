@@ -75,7 +75,7 @@ import qualified Data.Functor.Rep as Co
 import           Data.Maybe (fromMaybe)
 import           Data.Profunctor
 import           Data.Tuple (swap)
-import           Sequoia.Profunctor.K
+import           Sequoia.Profunctor.Forget
 import           Sequoia.Profunctor.V
 
 -- Bijections

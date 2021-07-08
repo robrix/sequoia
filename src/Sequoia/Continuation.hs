@@ -60,7 +60,7 @@ import Data.Profunctor.Rep
 import Data.Profunctor.Sieve
 import Sequoia.Bijection
 import Sequoia.Disjunction
-import Sequoia.Profunctor.K
+import Sequoia.Profunctor.Forget
 
 -- Continuations
 

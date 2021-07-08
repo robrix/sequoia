@@ -33,7 +33,7 @@ import           Sequoia.Calculus.XOr
 import           Sequoia.Conjunction
 import           Sequoia.Continuation
 import           Sequoia.Disjunction
-import           Sequoia.Profunctor.K
+import           Sequoia.Profunctor.Forget
 
 -- Sequents
 

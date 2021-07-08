@@ -1,5 +1,5 @@
 {-# LANGUAGE TypeFamilies #-}
-module Sequoia.Profunctor.K
+module Sequoia.Profunctor.Forget
 ( K(..)
 ) where
 
