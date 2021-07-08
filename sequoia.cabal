@@ -131,6 +131,7 @@ library
     Sequoia.Polarity
     Sequoia.Printer
     Sequoia.Profunctor.K
+    Sequoia.Profunctor.V
     Sequoia.Sequent
     Sequoia.Signal
     Sequoia.Value
