@@ -12,6 +12,7 @@ module Sequoia.Continuation
 , _K
 , inK
 , inK1
+, inK1'
 , inK2
 , exK
 , exK1
@@ -87,6 +88,9 @@ inK = tabulate
 
 inK1 :: Representable k => (KFn k a -> KFn k b) -> (k a -> k b)
 inK1 = under _K
+
+inK1' :: Representable k => (a -> (b -> KRep k)) -> (a -> k b)
+inK1' = fmap inK
 
 inK2 :: Representable k => (KFn k a -> KFn k b -> KFn k c) -> (k a -> k b -> k c)
 inK2 = dimap2 exK exK inK
