@@ -1,7 +1,7 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
 -- | 'Representable' functors from 'Corepresentable' 'Profunctor's.
-module Sequoia.Functor.CorepRep
+module Sequoia.Functor.Ex
 ( CorepRep(..)
 ) where
 
