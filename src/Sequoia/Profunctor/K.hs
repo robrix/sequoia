@@ -2,7 +2,9 @@ module Sequoia.Profunctor.K
 ( K(..)
 ) where
 
+import Data.Functor.Const
 import Data.Profunctor
+import Data.Profunctor.Sieve
 
 newtype K r a b = K { runK :: a -> r }
   deriving (Functor)
@@ -17,3 +19,6 @@ instance Strong (K r) where
 instance Cochoice (K r) where
   unleft  = K . lmap Left  . runK
   unright = K . lmap Right . runK
+
+instance Sieve (K r) (Const r) where
+  sieve = fmap Const . runK
