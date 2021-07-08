@@ -17,13 +17,6 @@ newtype Ex p s a = Ex { runEx :: p s a }
 instance Profunctor p => Functor (Ex p s) where
   fmap f = Ex . rmap f . runEx
 
-instance Cosieve p r => Cosieve (Ex p) r where
-  cosieve = cosieve . runEx
-
-instance Corepresentable p => Corepresentable (Ex p) where
-  type Corep (Ex p) = Corep p
-  cotabulate = Ex . cotabulate
-
 instance Corepresentable p => Distributive (Ex p s) where
   distribute = distributeRep
   collect = collectRep
