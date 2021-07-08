@@ -1,2 +1,6 @@
 module Sequoia.Profunctor.K
-() where
+( K(..)
+) where
+
+newtype K r a b = K { runK :: a -> r }
+  deriving (Functor)
