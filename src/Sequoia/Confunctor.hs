@@ -82,7 +82,7 @@ class Confunctor p => Contracostrong p where
 class Confunctor p => Contrachoice p where
   {-# MINIMAL conleft | conright #-}
   conleft  :: p a b -> p (Either a c) (Either b c)
-  conleft = conmap (either Right Left) (either Right Left) . conright
+  conleft  = conmap (either Right Left) (either Right Left) . conright
   conright :: p a b -> p (Either c a) (Either c b)
   conright = conmap (either Right Left) (either Right Left) . conleft
 
