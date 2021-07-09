@@ -29,6 +29,8 @@ module Sequoia.CPS
   -- * Delimited continuations
 , resetC
 , shiftC
+  -- * Concrete
+, C(..)
   -- ** Category
 , idC
 , composeC
@@ -162,6 +164,11 @@ resetC c = inC1 (\ k -> k . (evalC c •))
 
 shiftC :: ContPassing k c => (k o -> c i (KRep k)) -> c i o
 shiftC f = inC (evalC . f)
+
+
+-- Concrete
+
+newtype C k a b = C { runC :: k b -> k a }
 
 
 -- Category
