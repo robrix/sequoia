@@ -207,6 +207,9 @@ instance Continuation k => ArrowChoice (C k) where
   (+++) = splitSumC
   (|||) = faninC
 
+instance Continuation k => ArrowApply (C k) where
+  app = applyC
+
 
 -- Category
 
