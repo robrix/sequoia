@@ -186,6 +186,11 @@ instance Continuation k => Profunctor (C k) where
 instance Continuation k => Functor (C k a) where
   fmap = rmap
 
+instance Continuation k => Applicative (C k a) where
+  pure = pureC
+  (<*>) = apC
+  liftA2 = liftA2C
+
 
 -- Category
 
