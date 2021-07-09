@@ -23,6 +23,7 @@ module Sequoia.CPS
 , evalCM
 , dnE
 , (↓)
+, (↓>)
   -- ** Currying
 , curryC
 , uncurryC
@@ -143,6 +144,11 @@ dnE f = inC1 (\ k a -> f • inK (\ f -> appC f a k))
 (↓) = flip exC
 
 infixl 8 ↓
+
+(↓>) :: (ContPassing k c, Disj d) => k a -> c _Γ (_Δ `d` a) -> c _Γ _Δ
+a ↓> c = inC (exC c . (<••> a))
+
+infixr 9 ↓>
 
 
 -- Currying

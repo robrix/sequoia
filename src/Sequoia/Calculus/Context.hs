@@ -10,7 +10,6 @@ module Sequoia.Calculus.Context
 , absurdΔ
 , type (>)(..)
 , (|>)
-, (↓>)
   -- * Mixfix syntax
 , type (|-)
 , type (-|)
@@ -20,7 +19,6 @@ import Control.Monad (ap)
 import Data.Bifoldable
 import Data.Bifunctor
 import Data.Bitraversable
-import Sequoia.CPS
 import Sequoia.Conjunction
 import Sequoia.Continuation
 import Sequoia.Disjunction
@@ -100,11 +98,6 @@ instance Monad ((>) a) where
 -- @¬A ✕ ¬B -> ¬(A + B)@
 (|>) :: Continuation k => k os -> k o -> k (os > o)
 (|>) = (<••>)
-
-(↓>) :: (ContPassing k c, Disj d) => k a -> c _Γ (_Δ `d` a) -> c _Γ _Δ
-a ↓> c = inC (exC c . (<••> a))
-
-infixr 9 ↓>
 
 
 -- Mixfix syntax
