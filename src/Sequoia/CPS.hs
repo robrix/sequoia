@@ -201,6 +201,12 @@ instance Continuation k => Arrow (C k) where
   (***) = splitPrdC
   (&&&) = fanoutC
 
+instance Continuation k => ArrowChoice (C k) where
+  left = leftC
+  right = rightC
+  (+++) = splitSumC
+  (|||) = faninC
+
 
 -- Category
 
