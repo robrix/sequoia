@@ -210,6 +210,10 @@ instance Continuation k => ArrowChoice (C k) where
 instance Continuation k => ArrowApply (C k) where
   app = applyC
 
+instance Continuation k => Choice (C k) where
+  left' = left
+  right' = right
+
 
 -- Category
 
