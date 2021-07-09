@@ -17,6 +17,7 @@ module Sequoia.EPS
 , (↑)
   -- ** Currying
 , curryE
+, uncurryE
   -- ** Category
 , idE
 , composeE
@@ -116,6 +117,9 @@ infixl 9 ↑
 
 curryE :: EnvPassing v e => (a, b) `e` d -> a `e` (b `e` d)
 curryE c = inE (fmap ((`lmap` c) . (,)))
+
+uncurryE :: EnvPassing v e => a `e` (b `e` c) -> (a, b) `e` c
+uncurryE c = inE1 (\ v -> ($ (fst . v, snd . v)) . uncurry . appE2 c)
 
 
 -- Category
