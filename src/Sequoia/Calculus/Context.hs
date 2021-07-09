@@ -52,7 +52,7 @@ instance Bitraversable (<) where
 (<|) = (-><-)
 
 (<↑) :: Contravariant k => k (a < _Γ) -> a -> k _Γ
-k <↑ a = k •<< (a <|)
+k <↑ a = k •<< (a -><-)
 
 infixl 7 <↑
 
@@ -102,7 +102,7 @@ instance Monad ((>) a) where
 (|>) = (<••>)
 
 (↓>) :: ContPassing k c => k a -> c _Γ (_Δ > a) -> c _Γ _Δ
-a ↓> c = inC (exC c . (|> a))
+a ↓> c = inC (exC c . (<••> a))
 
 infixr 9 ↓>
 
