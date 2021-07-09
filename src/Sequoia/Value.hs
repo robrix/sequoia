@@ -13,6 +13,7 @@ module Sequoia.Value
 , exV
 , exV1
 , exV2
+, (°)
   -- * Env monad
 , appEnv
 , Env(..)
@@ -53,6 +54,10 @@ exV1 = over _V
 
 exV2 :: Value v => (v a -> v b -> v c) -> (VFn v a -> VFn v b -> VFn v c)
 exV2 = dimap2 inV inV exV
+
+
+(°) :: Value v => VRep v -> v a -> a
+(°) = flip exV
 
 
 -- Env monad
