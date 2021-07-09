@@ -59,6 +59,8 @@ exV2 = dimap2 inV inV exV
 (°) :: Value v => VRep v -> v a -> a
 (°) = flip exV
 
+infixr 8 °
+
 
 -- Env monad
 
