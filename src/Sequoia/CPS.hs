@@ -170,6 +170,19 @@ shiftC f = inC (evalC . f)
 
 newtype C k a b = C { runC :: k b -> k a }
 
+instance Continuation k => ContPassing k (C k) where
+  inC = C
+  exC = runC
+
+instance Continuation k => Cat.Category (C k) where
+  id = idC
+  (.) = composeC
+
+instance Continuation k => Profunctor (C k) where
+  dimap = dimapC
+  lmap = lmapC
+  rmap = rmapC
+
 
 -- Category
 
