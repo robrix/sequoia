@@ -194,6 +194,13 @@ instance Continuation k => Applicative (C k a) where
 instance Continuation k => Monad (C k a) where
   (>>=) = bindC
 
+instance Continuation k => Arrow (C k) where
+  arr = arrC
+  first = firstC
+  second = secondC
+  (***) = splitPrdC
+  (&&&) = fanoutC
+
 
 -- Category
 
