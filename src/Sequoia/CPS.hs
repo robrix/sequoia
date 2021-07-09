@@ -218,6 +218,10 @@ instance Continuation k => Strong (C k) where
   first' = first
   second' = second
 
+instance Continuation k => Traversing (C k) where
+  traverse' = wanderC traverse
+  wander = wanderC
+
 
 -- Category
 
