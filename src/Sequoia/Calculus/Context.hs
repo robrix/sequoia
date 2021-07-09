@@ -52,7 +52,7 @@ instance Bitraversable (<) where
 (<↑) :: Contravariant k => k (a < _Γ) -> a -> k _Γ
 k <↑ a = k •<< (a <|)
 
-infixl 8 <↑
+infixl 7 <↑
 
 
 -- Δ

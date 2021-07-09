@@ -109,7 +109,7 @@ exK2 = dimap2 inK inK exK
 (•) :: Representable k => k a -> KFn k a
 (•) = index
 
-infixl 8 •
+infixl 7 •
 
 
 -- Coercion
