@@ -183,6 +183,9 @@ instance Continuation k => Profunctor (C k) where
   lmap = lmapC
   rmap = rmapC
 
+instance Continuation k => Functor (C k a) where
+  fmap = rmap
+
 
 -- Category
 
