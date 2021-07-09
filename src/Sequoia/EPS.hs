@@ -15,6 +15,7 @@ module Sequoia.EPS
 , appE
 , appE2
 , (↑)
+, (<↑)
   -- ** Currying
 , curryE
 , uncurryE
@@ -66,6 +67,7 @@ import           Data.Profunctor
 import qualified Data.Profunctor.Rep as Pro
 import           Data.Profunctor.Sieve
 import           Sequoia.Bijection
+import           Sequoia.Conjunction
 import           Sequoia.Disjunction
 import           Sequoia.Value
 
@@ -110,7 +112,12 @@ appE2 f s = (`appE` s) . appE f s
 (↑) :: EnvPassing v e => a `e` b -> EPFn v a b
 (↑) = exE
 
-infixl 9 ↑
+infixl 7 ↑
+
+(<↑) :: (EnvPassing v e, Conj c) => (a `c` _Γ) `e` _Δ -> a -> _Γ `e` _Δ
+e <↑ a = inE (exE e . fmap (a -><-))
+
+infixl 7 <↑
 
 
 -- Currying
