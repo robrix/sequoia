@@ -90,13 +90,13 @@ exE1 = exV1 . exE
 eps :: EnvPassing v e => (a -> b) -> a `e` b
 eps = inE1 . (.)
 
-liftE :: EnvPassing v e => (VRep v -> (VRep v -> a) -> b) -> a `e` b
+liftE :: EnvPassing v e => VFn v (VFn v a -> b) -> a `e` b
 liftE = inE . inV1 . flip
 
 
 -- Elimination
 
-appE :: EnvPassing v e => a `e` b -> VRep v -> (VRep v -> a) -> b
+appE :: EnvPassing v e => a `e` b -> VFn v (VFn v a -> b)
 appE = flip . exE1
 
 
