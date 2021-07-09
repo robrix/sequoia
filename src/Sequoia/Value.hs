@@ -69,7 +69,7 @@ appEnv f = exV . exV (runEnv f)
 
 newtype Env v a = Env { runEnv :: v (v a) }
 
-instance Value v => Functor (Env v) where
+instance Functor v => Functor (Env v) where
   fmap f = Env . fmap (fmap f) . runEnv
 
 instance Value v => Applicative (Env v) where
