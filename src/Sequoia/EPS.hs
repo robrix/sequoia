@@ -15,6 +15,8 @@ module Sequoia.EPS
 , appE
 , appE2
 , (↑)
+  -- ** Currying
+, curryE
   -- ** Category
 , idE
 , composeE
@@ -108,6 +110,12 @@ appE2 f s = (`appE` s) . appE f s
 (↑) = exE
 
 infixl 9 ↑
+
+
+-- Currying
+
+curryE :: EnvPassing v e => (a, b) `e` d -> a `e` (b `e` d)
+curryE c = inE (fmap ((`lmap` c) . (,)))
 
 
 -- Category
