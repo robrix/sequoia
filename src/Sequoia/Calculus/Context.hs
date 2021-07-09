@@ -4,6 +4,7 @@ module Sequoia.Calculus.Context
   Γ(..)
 , type (<)(..)
 , (<|)
+, (<↑)
   -- * Δ
 , Δ
 , absurdΔ
@@ -47,6 +48,11 @@ instance Bitraversable (<) where
 
 (<|) :: i -> is -> i < is
 (<|) = (-><-)
+
+(<↑) :: Contravariant k => k (a < _Γ) -> a -> k _Γ
+k <↑ a = k •<< (a <|)
+
+infixl 8 <↑
 
 
 -- Δ
