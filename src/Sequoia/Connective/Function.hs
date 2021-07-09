@@ -23,7 +23,7 @@ appFun2 :: Continuation k => (a ~~k~> b ~~k~> c) -> (a -> b -> k **c)
 appFun2 f a b = inDN (appC2 f a b)
 
 newtype Fun k a b = Fun { getFun :: k b -> k a }
-  deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via ViaCPS (Fun k) k
+  deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via C k
 
 instance Continuation k => ContPassing k (Fun k) where
   inC = Fun

@@ -65,14 +65,11 @@ module Sequoia.CPS
 , sieveC
   -- ** Representable
 , tabulateC
-  -- ** Deriving
-, ViaCPS(..)
 ) where
 
 import           Control.Applicative (liftA2)
 import           Control.Arrow
 import qualified Control.Category as Cat
-import           Data.Kind (Type)
 import           Data.Profunctor
 import qualified Data.Profunctor.Rep as Pro
 import           Data.Profunctor.Sieve
@@ -333,68 +330,3 @@ sieveC = fmap (Cont . inDN) . appC
 
 tabulateC :: ContPassing k c => (a -> Cont k b) -> a `c` b
 tabulateC f = liftC (exK . runCont . f)
-
-
--- Deriving
-
-newtype ViaCPS c (k :: Type -> Type) a b = ViaCPS { runViaCPS :: c a b }
-  deriving (ContPassing k)
-
-instance ContPassing k c => Cat.Category (ViaCPS c k) where
-  id = idC
-  (.) = composeC
-
-instance ContPassing k c => Functor (ViaCPS c k a) where
-  fmap = fmapC
-
-instance ContPassing k c => Applicative (ViaCPS c k a) where
-  pure = pureC
-
-  liftA2 = liftA2C
-
-  (<*>) = apC
-
-instance ContPassing k c => Monad (ViaCPS c k a) where
-  (>>=) = bindC
-
-instance ContPassing k c => Arrow (ViaCPS c k) where
-  arr = arrC
-  first = firstC
-  second = secondC
-  (***) = splitPrdC
-  (&&&) = fanoutC
-
-instance ContPassing k c => ArrowChoice (ViaCPS c k) where
-  left = leftC
-  right = rightC
-  (+++) = splitSumC
-  (|||) = faninC
-
-instance ContPassing k c => ArrowApply (ViaCPS c k) where
-  app = applyC
-
-instance ContPassing k c => Strong (ViaCPS c k) where
-  first' = first
-  second' = second
-
-instance ContPassing k c => Choice (ViaCPS c k) where
-  left' = left
-  right' = right
-
-instance ContPassing k c => Traversing (ViaCPS c k) where
-  traverse' = wanderC traverse
-  wander = wanderC
-
-instance ContPassing k c => Profunctor (ViaCPS c k) where
-  dimap = dimapC
-
-  lmap = lmapC
-
-  rmap = rmapC
-
-instance ContPassing k c => Sieve (ViaCPS c k) (Cont k) where
-  sieve = sieveC
-
-instance ContPassing k c => Pro.Representable (ViaCPS c k) where
-  type Rep (ViaCPS c k) = Cont k
-  tabulate = tabulateC
