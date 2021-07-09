@@ -191,6 +191,9 @@ instance Continuation k => Applicative (C k a) where
   (<*>) = apC
   liftA2 = liftA2C
 
+instance Continuation k => Monad (C k a) where
+  (>>=) = bindC
+
 
 -- Category
 
