@@ -214,6 +214,10 @@ instance Continuation k => Choice (C k) where
   left' = left
   right' = right
 
+instance Continuation k => Strong (C k) where
+  first' = first
+  second' = second
+
 
 -- Category
 
