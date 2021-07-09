@@ -225,6 +225,10 @@ instance Continuation k => Traversing (C k) where
 instance Continuation k => Sieve (C k) (Cont k) where
   sieve = sieveC
 
+instance Continuation k => Pro.Representable (C k) where
+  type Rep (C k) = Cont k
+  tabulate = tabulateC
+
 
 -- Category
 
