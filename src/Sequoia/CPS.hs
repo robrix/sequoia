@@ -142,7 +142,7 @@ dnE f = inC1 (\ k a -> f • inK (\ f -> appC f a k))
 (↓) :: ContPassing k c => k b -> a `c` b -> k a
 (↓) = flip exC
 
-infixr 9 ↓
+infixl 9 ↓
 
 
 -- Currying
