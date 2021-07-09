@@ -222,6 +222,9 @@ instance Continuation k => Traversing (C k) where
   traverse' = wanderC traverse
   wander = wanderC
 
+instance Continuation k => Sieve (C k) (Cont k) where
+  sieve = sieveC
+
 
 -- Category
 
