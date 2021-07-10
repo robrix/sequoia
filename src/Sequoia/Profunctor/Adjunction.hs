@@ -51,6 +51,12 @@ class (Profunctor f, Pro.Representable u) => Coadjunction f u | f -> u, u -> f w
   leftCoadjunct  f = lmap f . leftCounit
   rightCoadjunct f = lmap f . rightCounit
 
+instance Coadjunction (->) (->) where
+  leftCounit  = flip ($)
+  rightCounit = flip ($)
+  leftCoadjunct  = flip
+  rightCoadjunct = flip
+
 
 sieveCoadjunction :: Coadjunction f u => u a b -> (a -> f c b)
 sieveCoadjunction = rightCoadjunct . const
