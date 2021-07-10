@@ -140,3 +140,7 @@ newtype Coboring f a b = Coboring { runCoboring :: f a }
 
 instance Contravariant f => Profunctor (Coboring f) where
   dimap f _ = Coboring . contramap f . runCoboring
+
+instance Contravariant f => Strong (Coboring f) where
+  first'  = Coboring . contramap fst . runCoboring
+  second' = Coboring . contramap snd . runCoboring
