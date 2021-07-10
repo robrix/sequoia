@@ -10,8 +10,8 @@ module Sequoia.Profunctor.D
   -- ** Elimination
 , exDV
 , exDK
-, valueView
-, contView
+, viewV
+, viewK
   -- ** Computation
 , (↓)
 , (↑)
@@ -53,7 +53,7 @@ class (Continuation k, Value v, Cat.Category f, Profunctor f) => Dual k v f | f 
 
 instance (Continuation k, Value v) => Dual k v (D k v) where
   inD fw bw = D (dimap fw bw)
-  exD = liftA2 (,) (`valueView` id) (`contView` id)
+  exD = liftA2 (,) (`viewV` id) (`viewK` id)
 
 
 -- Construction
@@ -70,11 +70,11 @@ exDV = fst . exD
 exDK :: Dual k v f => f a b -> (k b -> k a)
 exDK = snd . exD
 
-valueView :: D k v a b -> (v b -> r) -> (v a -> r)
-valueView f = Pro.runK . runD f . Pro.K
+viewV :: D k v a b -> (v b -> r) -> (v a -> r)
+viewV f = Pro.runK . runD f . Pro.K
 
-contView :: D k v a b -> (r -> k b) -> (r -> k a)
-contView f = Pro.runV . runD f . Pro.V
+viewK :: D k v a b -> (r -> k b) -> (r -> k a)
+viewK f = Pro.runV . runD f . Pro.V
 
 
 -- Computation
