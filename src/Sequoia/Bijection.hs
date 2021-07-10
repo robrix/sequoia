@@ -6,7 +6,6 @@ module Sequoia.Bijection
 ( -- * Bijections
   type (<->)
 , Optic(..)
-, Iso
   -- ** Elimination
 , views
 , reviews
@@ -15,7 +14,6 @@ module Sequoia.Bijection
 , over
 , under
   -- ** Construction
-, (<->)
 , from
 , constant
 , involuted
@@ -51,6 +49,9 @@ module Sequoia.Bijection
 , dimapping
 , lmapping
 , rmapping
+  -- * Isos
+, Iso
+, (<->)
   -- * Lenses
 , Lens
 , lens
@@ -88,10 +89,6 @@ infix 1 <->
 newtype Optic c s t a b = Optic { runOptic :: forall p . c p => (a `p` b) -> (s `p` t) }
 
 
-class Profunctor p => Iso p
-instance Profunctor p => Iso p
-
-
 -- Elimination
 
 views :: c (K r) => Optic c s t a b -> (a -> r) -> (s -> r)
@@ -120,9 +117,6 @@ under b = dimap (~> b) (b <~)
 
 
 -- Construction
-
-(<->) :: (s -> a) -> (b -> t) -> Optic Iso s t a b
-l <-> r = Optic (dimap l r)
 
 from :: Optic Iso s t a b -> Optic Iso b a t s
 from b = (b <~) <-> (~> b)
@@ -249,6 +243,15 @@ lmapping a = lmap (a <~) <-> lmap (~> a)
 
 rmapping :: Profunctor p => (b <-> b') -> (a `p` b) <-> (a `p` b')
 rmapping b = rmap (~> b) <-> rmap (b <~)
+
+
+-- Isos
+
+class Profunctor p => Iso p
+instance Profunctor p => Iso p
+
+(<->) :: (s -> a) -> (b -> t) -> Optic Iso s t a b
+l <-> r = Optic (dimap l r)
 
 
 -- Lenses
