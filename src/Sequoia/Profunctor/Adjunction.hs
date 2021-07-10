@@ -110,6 +110,7 @@ instance (Profunctor f, Profunctor u) => Functor (Coadjoint f u a) where
   fmap = rmap
 
 
+-- | Lift a boring old covariant 'Functor' into a 'Profunctor'.
 newtype Boring f a b = Boring { runBoring :: f b }
 
 instance Functor f => Profunctor (Boring f) where
@@ -138,6 +139,7 @@ instance Co.Adjunction f u => Adjunction (Boring f) (Boring u) where
   rightAdjunct f a = Co.rightAdjunct (runBoring . f) (runBoring a)
 
 
+-- | Lift a boring old 'Contravariant' functor into a 'Profunctor'.
 newtype Coboring f a b = Coboring { runCoboring :: f a }
 
 instance Contravariant f => Profunctor (Coboring f) where
