@@ -7,7 +7,7 @@ module Sequoia.Profunctor.D
   -- * Dual profunctor abstraction
 , Dual(..)
   -- ** Construction
-, inF'
+, inD'
   -- ** Elimination
 , value
 , valueView
@@ -56,8 +56,8 @@ instance (Continuation k, Value v) => Dual k v (D k v) where
 
 -- Construction
 
-inF' :: (K.Representable k, V.Representable v) => (a -> b) -> D k v a b
-inF' f = D (dimap (inV1 (f .)) (inK1 (. f)))
+inD' :: (K.Representable k, V.Representable v) => (a -> b) -> D k v a b
+inD' f = D (dimap (inV1 (f .)) (inK1 (. f)))
 
 
 -- Elimination
