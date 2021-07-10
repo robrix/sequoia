@@ -33,5 +33,8 @@ tabulateAdjunction f = leftAdjunct f ()
 
 
 class Coadjunction f u where
+  leftCounit  :: a -> u (f a b) b
+  rightCounit :: a -> f (u a b) b
+
   leftCoadjunct  :: (a -> f b c) -> (b -> u a c)
   rightCoadjunct :: (a -> u b c) -> (b -> f a c)
