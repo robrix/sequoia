@@ -12,6 +12,7 @@ module Sequoia.Profunctor.Adjunction
 , Adjoint(..)
 , Coadjoint(..)
 , Boring(..)
+, Coboring(..)
 ) where
 
 import           Control.Comonad
@@ -132,3 +133,6 @@ instance Co.Representable f => Pro.Corepresentable (Boring f) where
 instance Co.Adjunction f u => Adjunction (Boring f) (Boring u) where
   leftAdjunct  f a = Boring (Co.leftAdjunct (f . Boring) a)
   rightAdjunct f a = Co.rightAdjunct (runBoring . f) (runBoring a)
+
+
+newtype Coboring f a b = Coboring { runCoboring :: f a }
