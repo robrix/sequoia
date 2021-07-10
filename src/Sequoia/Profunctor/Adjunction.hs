@@ -10,6 +10,7 @@ module Sequoia.Profunctor.Adjunction
 , Adjoint(..)
 ) where
 
+import           Control.Comonad
 import           Data.Profunctor
 import qualified Data.Profunctor.Rep as Pro
 
@@ -81,3 +82,8 @@ instance Adjunction f u => Applicative (Adjoint f u a) where
 
 instance Adjunction f u => Monad (Adjoint f u a) where
   Adjoint u >>= f = Adjoint (rmap (rightAdjunct (runAdjoint . f)) u)
+
+instance Adjunction f u => Comonad (Adjoint u f a) where
+  extract = rightUnit . runAdjoint
+  extend f = Adjoint . rmap (leftAdjunct (f . Adjoint)) . runAdjoint
+  duplicate = Adjoint . rmap (leftAdjunct Adjoint) . runAdjoint
