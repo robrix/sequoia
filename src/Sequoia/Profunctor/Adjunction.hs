@@ -7,5 +7,8 @@ class Adjunction f u | f -> u, u -> f where
   leftUnit :: a -> u b (f b a)
   rightUnit :: f b (u b a) -> a
 
+  leftUnit  = leftAdjunct id
+  rightUnit = rightAdjunct id
+
   leftAdjunct  :: (f b a -> c) -> (a -> u b c)
   rightAdjunct :: (c -> u a b) -> (f a c -> b)
