@@ -1,8 +1,6 @@
 {-# LANGUAGE TypeFamilies #-}
 module Sequoia.Profunctor.D
-( _KV
-, KV(..)
-, _D
+( _D
 , _DRep
 , D(..)
   -- * Optical duality
@@ -24,35 +22,13 @@ module Sequoia.Profunctor.D
 
 import           Control.Applicative (liftA2)
 import qualified Control.Category as Cat
-import           Control.Monad ((<=<))
 import           Data.Functor.Contravariant
 import           Data.Profunctor
 import           Sequoia.Bijection
-import           Sequoia.CPS (ContPassing(..))
 import           Sequoia.Continuation as K
 import qualified Sequoia.Profunctor.K as Pro
 import qualified Sequoia.Profunctor.V as Pro
 import           Sequoia.Value as V
-
-_KV :: Optic Iso (KV s r a) (KV s' r' a') (a -> s -> r) (a' -> s' -> r')
-_KV = runKV <-> KV
-
-newtype KV s r a = KV { runKV :: a -> s -> r }
-
-instance Cat.Category (KV s) where
-  id = KV const
-  KV f . KV g = KV (g <=< f)
-
-instance Contravariant (KV s r) where
-  contramap f = under _KV (lmap f)
-
-instance K.Representable (KV s r) where
-  type Rep (KV s r) = s -> r
-  tabulate = KV
-  index = runKV
-
-instance Continuation (KV s r)
-
 
 _D :: Optic Iso (D r s a b) (D r' s' a' b') ((b -> s -> r) -> (a -> s -> r)) ((b' -> s' -> r') -> (a' -> s' -> r'))
 _D = runD <-> D
@@ -73,10 +49,6 @@ instance Profunctor (D r s) where
 instance Cat.Category (D r s) where
   id = D id
   D f . D g = D (g . f)
-
-instance ContPassing (KV s r) (D r s) where
-  inC = D . over _KV
-  exC = under _KV . runD
 
 
 -- Optical duality
