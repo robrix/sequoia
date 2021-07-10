@@ -14,6 +14,7 @@ module Sequoia.Profunctor.D
 , viewK
   -- ** Computation
 , (↑)
+, (<↑)
 , (↓)
 ) where
 
@@ -22,6 +23,7 @@ import qualified Control.Category as Cat
 import           Data.Functor.Contravariant
 import           Data.Profunctor
 import           Sequoia.Bijection
+import           Sequoia.Conjunction
 import           Sequoia.Continuation as K
 import qualified Sequoia.Profunctor.K as Pro
 import qualified Sequoia.Profunctor.V as Pro
@@ -83,6 +85,11 @@ viewK f = Pro.runK . runD f . Pro.K
 (↑) = fst . exD
 
 infixl 7 ↑
+
+(<↑) :: (Dual k v f, Conj c) => (a `c` _Γ) `f` _Δ -> a -> _Γ `f` _Δ
+f <↑ a = inD (exDV f . fmap (a -><-)) (contramap (a -><-) . exDK f)
+
+infixl 7 <↑
 
 (↓) :: Dual k v f => k b -> f a b -> k a
 (↓) = flip (snd . exD)
