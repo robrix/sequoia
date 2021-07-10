@@ -58,3 +58,7 @@ newtype D r s a b = D { runD :: (b -> s -> r) -> (a -> s -> r) }
 
 instance Profunctor (D r s) where
   dimap f g = under _D (dimap (lmap g) (lmap f))
+
+instance Cat.Category (D r s) where
+  id = D id
+  D f . D g = D (g . f)
