@@ -3,6 +3,7 @@ module Sequoia.Profunctor.Adjunction
 ( Adjunction(..)
 , sieveAdjunction
 , tabulateAdjunction
+, Coadjunction(..)
 ) where
 
 import           Data.Profunctor
@@ -29,3 +30,8 @@ sieveAdjunction = rightAdjunct . const
 
 tabulateAdjunction :: Adjunction f u => (f a () -> b) -> u a b
 tabulateAdjunction f = leftAdjunct f ()
+
+
+class Coadjunction f u where
+  leftCoadjunct  :: (a -> f b c) -> (b -> u a c)
+  rightCoadjunct :: (a -> u b c) -> (b -> f a c)
