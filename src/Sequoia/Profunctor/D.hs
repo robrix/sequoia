@@ -13,8 +13,8 @@ module Sequoia.Profunctor.D
 , viewV
 , viewK
   -- ** Computation
-, (↓)
 , (↑)
+, (↓)
 ) where
 
 import           Control.Applicative (liftA2)
