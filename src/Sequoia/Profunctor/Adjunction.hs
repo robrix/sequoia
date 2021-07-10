@@ -5,6 +5,7 @@ module Sequoia.Profunctor.Adjunction
 , tabulateAdjunction
 , Coadjunction(..)
 , cosieveCoadjunction
+, cotabulateCoadjunction
 ) where
 
 import           Data.Profunctor
@@ -51,3 +52,6 @@ class (Profunctor f, Pro.Corepresentable u) => Coadjunction f u | f -> u, u -> f
 
 cosieveCoadjunction :: Coadjunction f u => u a b -> (a -> f c b)
 cosieveCoadjunction = rightCoadjunct . const
+
+cotabulateCoadjunction :: Coadjunction f u => (a -> f () b) -> u a b
+cotabulateCoadjunction f = leftCoadjunct f ()
