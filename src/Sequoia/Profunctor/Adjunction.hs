@@ -152,3 +152,7 @@ instance Contravariant f => Cochoice (Coboring f) where
 
 instance (Contra.Representable f, Contra.Rep f ~ r) => Sieve (Coboring f) (Const r) where
   sieve = fmap Const . Contra.index . runCoboring
+
+instance Contra.Representable f => Pro.Representable (Coboring f) where
+  type Rep (Coboring f) = Const (Contra.Rep f)
+  tabulate = Coboring . Contra.tabulate . fmap getConst
