@@ -27,9 +27,9 @@ import           Control.Monad ((<=<))
 import           Data.Functor.Contravariant
 import           Data.Profunctor
 import           Sequoia.Bijection
-import           Sequoia.CPS
+import           Sequoia.CPS (ContPassing(..))
 import           Sequoia.Continuation as K
-import           Sequoia.EPS
+import           Sequoia.EPS (EnvPassing(..))
 import qualified Sequoia.Profunctor.K as Pro
 import qualified Sequoia.Profunctor.V as Pro
 import           Sequoia.Value as V
