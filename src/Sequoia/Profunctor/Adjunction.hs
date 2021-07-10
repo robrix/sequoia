@@ -106,5 +106,9 @@ newtype Boring f a b = Boring { runBoring :: f b }
 instance Functor f => Profunctor (Boring f) where
   dimap _ g = Boring . fmap g . runBoring
 
+instance Functor f => Costrong (Boring f) where
+  unfirst  = Boring . fmap fst . runBoring
+  unsecond = Boring . fmap snd . runBoring
+
 instance Functor f => Sieve (Boring f) f where
   sieve = const . runBoring
