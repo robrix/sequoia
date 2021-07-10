@@ -19,6 +19,8 @@ module Sequoia.Profunctor.D
 , valueView
 , cont
 , contView
+  -- ** Computation
+, (↓)
 ) where
 
 import           Control.Applicative (liftA2)
@@ -130,3 +132,11 @@ cont = (`contView` id)
 
 contView :: F k v a b -> (r -> k b) -> (r -> k a)
 contView f = Pro.runV . runF f . Pro.V
+
+
+-- Computation
+
+(↓) :: k b -> F k v a b -> k a
+k ↓ f = cont f k
+
+infixl 8 ↓
