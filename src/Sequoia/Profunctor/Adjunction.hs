@@ -32,7 +32,7 @@ tabulateAdjunction :: Adjunction f u => (f a () -> b) -> u a b
 tabulateAdjunction f = leftAdjunct f ()
 
 
-class (Profunctor f, Profunctor u) => Coadjunction f u where
+class (Profunctor f, Profunctor u) => Coadjunction f u | f -> u, u -> f where
   leftCounit  :: a -> u (f a b) b
   rightCounit :: a -> f (u a b) b
 
