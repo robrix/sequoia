@@ -77,4 +77,4 @@ instance Value (VK r s) => EnvPassing (VK r s) (D r s) where
   exE = under _VK . (~> _D % _DRep)
 
 
-newtype F a b = F { runF :: forall p . Profunctor p => b `p` b -> a `p` a }
+newtype F k v a b = F { runF :: forall p . Profunctor p => v b `p` k b -> v a `p` k a }
