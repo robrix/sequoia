@@ -32,7 +32,7 @@ tabulateAdjunction :: Adjunction f u => (f a () -> b) -> u a b
 tabulateAdjunction f = leftAdjunct f ()
 
 
-class (Profunctor f, Profunctor u) => Coadjunction f u | f -> u, u -> f where
+class (Profunctor f, Pro.Corepresentable u) => Coadjunction f u | f -> u, u -> f where
   {-# MINIMAL (leftCounit | leftCoadjunct), (rightCounit | rightCoadjunct) #-}
 
   leftCounit  :: a -> u (f a b) b
