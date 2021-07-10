@@ -19,6 +19,9 @@ module Sequoia.Value
 , Env(..)
 ) where
 
+import Control.Applicative (liftA2)
+import Control.Comonad
+import Data.Functor.Adjunction
 import Data.Functor.Rep
 import Sequoia.Bijection
 import Sequoia.Functor.V
@@ -64,17 +67,21 @@ infixr 8 °
 
 -- Env monad
 
-appEnv :: Value v => Env v a -> VRep v -> VRep v -> a
+appEnv :: (Value v, Value g) => Env g v a -> VRep g -> VRep v -> a
 appEnv f = exV . exV (runEnv f)
 
-newtype Env v a = Env { runEnv :: v (v a) }
+newtype Env g v a = Env { runEnv :: g (v a) }
+  deriving (Functor)
 
-instance Functor v => Functor (Env v) where
-  fmap f = Env . fmap (fmap f) . runEnv
+instance Adjunction v g => Applicative (Env g v) where
+  pure = Env . unit
+  liftA2 f (Env a) b = Env (rightAdjunct (runEnv . (<$> b) . f) <$> a)
+  Env f <*> a = Env (rightAdjunct (runEnv . (<$> a)) <$> f)
 
-instance Value v => Applicative (Env v) where
-  pure a = Env (inV (const (inV (const a))))
-  f <*> a = Env (inV (\ so -> inV (\ si -> appEnv f so si (appEnv a so si))))
+instance Adjunction v g => Monad (Env g v) where
+  (>>=) = flip (\ f -> Env . fmap (rightAdjunct (runEnv . f)) . runEnv)
 
-instance Value v => Monad (Env v) where
-  m >>= f = Env (inV (\ so -> inV (\ si -> appEnv (f (appEnv m so si)) so si)))
+instance Adjunction g v => Comonad (Env g v) where
+  extract = counit . runEnv
+  extend f = Env . fmap (leftAdjunct (f . Env)) . runEnv
+  duplicate = Env . fmap (leftAdjunct Env) . runEnv
