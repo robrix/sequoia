@@ -1,10 +1,7 @@
 {-# LANGUAGE TypeFamilies #-}
 module Sequoia.Profunctor.D
-( _D
-, _DRep
-, D(..)
-  -- * Optical duality
-, _F
+( -- * Optical duality
+  _F
 , F(..)
   -- ** Construction
 , inF
@@ -29,27 +26,6 @@ import           Sequoia.Continuation as K
 import qualified Sequoia.Profunctor.K as Pro
 import qualified Sequoia.Profunctor.V as Pro
 import           Sequoia.Value as V
-
-_D :: Optic Iso (D r s a b) (D r' s' a' b') ((b -> s -> r) -> (a -> s -> r)) ((b' -> s' -> r') -> (a' -> s' -> r'))
-_D = runD <-> D
-
-_DRep :: Optic Iso
-  ((b -> s -> r) -> (a -> s -> r))
-  ((b' -> s' -> r') -> (a' -> s' -> r'))
-  (((a -> s -> r) -> r) -> ((b -> s -> r) -> r))
-  (((a' -> s' -> r') -> r') -> ((b' -> s' -> r') -> r'))
-_DRep = flip (.) <-> (\ f g a s -> f (\ h -> h a s) g)
-
-newtype D r s a b = D { runD :: (b -> s -> r) -> (a -> s -> r) }
-  deriving (Functor)
-
-instance Profunctor (D r s) where
-  dimap f g = under _D (dimap (lmap g) (lmap f))
-
-instance Cat.Category (D r s) where
-  id = D id
-  D f . D g = D (g . f)
-
 
 -- Optical duality
 
