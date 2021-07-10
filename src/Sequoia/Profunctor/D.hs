@@ -9,6 +9,7 @@ module Sequoia.Profunctor.D
 , D(..)
   -- * Optical duality
 , F(..)
+  -- ** Construction
 , inF
 , inF'
 ) where
@@ -83,6 +84,9 @@ newtype F k v a b = F { runF :: forall p . Profunctor p => v b `p` k b -> v a `p
 
 instance (Contravariant k, Functor v) => Profunctor (F k v) where
   dimap f g (F r) = F (dimap (fmap f) (contramap f) . r . dimap (fmap g) (contramap g))
+
+
+-- Construction
 
 inF :: (v s -> v a) -> (k a -> k s) -> F k v s a
 inF prj inj = F (dimap prj inj)
