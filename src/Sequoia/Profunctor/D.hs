@@ -30,7 +30,7 @@ import           Sequoia.Value as V
 
 -- Dual profunctor
 
-_D :: (Continuation k, Value v) => D k v a b <-> (v a -> v b, k b -> k a)
+_D :: Dual k v f => f a b <-> (v a -> v b, k b -> k a)
 _D = exD <-> uncurry inD
 
 newtype D k v a b = D { runD :: forall p . Profunctor p => v b `p` k b -> v a `p` k a }
