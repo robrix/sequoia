@@ -79,12 +79,12 @@ contView f = Pro.runV . runD f . Pro.V
 
 -- Computation
 
-(↑) :: D k v a b -> v a -> v b
-(↑) = value
+(↑) :: Dual k v f => f a b -> v a -> v b
+(↑) = fst . exD
 
 infixl 7 ↑
 
-(↓) :: k b -> D k v a b -> k a
-(↓) = flip cont
+(↓) :: Dual k v f => k b -> f a b -> k a
+(↓) = flip (snd . exD)
 
 infixl 8 ↓
