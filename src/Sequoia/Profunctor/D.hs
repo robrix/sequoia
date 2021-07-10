@@ -13,12 +13,14 @@ module Sequoia.Profunctor.D
 , inF
 , inF'
   -- ** Elimination
+, exF
 , value
 , valueView
 , cont
 , contView
 ) where
 
+import           Control.Applicative (liftA2)
 import qualified Control.Category as Cat
 import           Control.Monad ((<=<))
 import           Data.Functor.Contravariant
@@ -105,6 +107,9 @@ inF' f = F (dimap (inV1 (f .)) (inK1 (. f)))
 
 
 -- Elimination
+
+exF :: F k v a b -> (v a -> v b, k b -> k a)
+exF = liftA2 (,) value cont
 
 value :: F k v a b -> (v a -> v b)
 value = (`valueView` id)
