@@ -15,7 +15,7 @@ class (Profunctor f, Pro.Representable u) => Adjunction f u | f -> u, u -> f whe
   leftUnit  :: a -> u b (f b a)
   rightUnit :: f b (u b a) -> a
 
-  leftUnit  = leftAdjunct id
+  leftUnit  = leftAdjunct  id
   rightUnit = rightAdjunct id
 
   leftAdjunct  :: (f a b ->     c) -> (    b -> u a c)
