@@ -137,12 +137,12 @@ contView f = Pro.runV . runF f . Pro.V
 
 -- Computation
 
-(↓) :: k b -> F k v a b -> k a
-k ↓ f = cont f k
-
-infixl 8 ↓
-
 (↑) :: F k v a b -> v a -> v b
 (↑) = value
 
 infixl 7 ↑
+
+(↓) :: k b -> F k v a b -> k a
+k ↓ f = cont f k
+
+infixl 8 ↓
