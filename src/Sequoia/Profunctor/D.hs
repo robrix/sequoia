@@ -80,6 +80,8 @@ instance Value (VK r s) => EnvPassing (VK r s) (D r s) where
   exE = under _VK . (~> _D % _DRep)
 
 
+-- Optical duality
+
 newtype F k v a b = F { runF :: forall p . Profunctor p => v b `p` k b -> v a `p` k a }
 
 instance (Contravariant k, Functor v) => Profunctor (F k v) where
