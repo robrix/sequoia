@@ -61,6 +61,7 @@ module Sequoia.EPS
 import           Control.Applicative (liftA2)
 import qualified Control.Category as Cat
 import           Control.Comonad
+import           Control.Comonad.Store
 import           Data.Distributive
 import           Data.Functor.Rep
 import           Data.Profunctor
@@ -226,14 +227,14 @@ unsecondE e = inE1 (\ a s -> let (d, b) = appE e s ((d,) . a) in b)
 
 -- Cosieve
 
-cosieveE :: (EnvPassing v e, Monoid (VRep v)) => a `e` b -> (Env v a -> b)
-cosieveE e n = let s = mempty in appE e s (appEnv n s)
+cosieveE :: EnvPassing v e => a `e` b -> (Store (VRep v) a -> b)
+cosieveE e = uncurry (flip (appE e)) . runStore
 
 
 -- Corepresentable
 
-cotabulateE :: EnvPassing v e => (Env v a -> b) -> a `e` b
-cotabulateE f = liftE (\ s a -> f (pure (a s)))
+cotabulateE :: EnvPassing v e => (Store (VRep v) a -> b) -> a `e` b
+cotabulateE f = liftE (fmap f . flip store)
 
 
 -- Concrete
@@ -286,10 +287,10 @@ instance Value v => Costrong (E v) where
   unfirst  = unfirstE
   unsecond = unsecondE
 
-instance (Value v, Monoid (VRep v)) => Cosieve (E v) (Env v) where
+instance (Value v, s ~ VRep v) => Cosieve (E v) (Store s) where
   cosieve = cosieveE
 
-instance (Value v, Monoid (VRep v)) => Pro.Corepresentable (E v) where
-  type Corep (E v) = Env v
+instance Value v => Pro.Corepresentable (E v) where
+  type Corep (E v) = Store (VRep v)
 
   cotabulate = cotabulateE
