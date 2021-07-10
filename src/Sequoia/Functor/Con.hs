@@ -19,8 +19,8 @@ instance Profunctor p => Contravariant (Con p r) where
 
 instance (Pro.Coadjunction q p, Pro.Corep p ~ q ()) => Representable (Con p r) where
   type Rep (Con p r) = Pro.Corep p r
-  tabulate = Con . Pro.cotabulateCoadjunction
-  index = Pro.cosieveCoadjunction . runCon
+  tabulate = Con . Pro.tabulateCoadjunction
+  index = Pro.sieveCoadjunction . runCon
 
 instance (Pro.Coadjunction p q, Pro.Corep q ~ p ()) => Adjunction (Con p r) (Con q r) where
   leftAdjunct  f a = Con (Pro.leftCoadjunct  (runCon . f) a)

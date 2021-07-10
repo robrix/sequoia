@@ -1,11 +1,11 @@
 {-# LANGUAGE FunctionalDependencies #-}
 module Sequoia.Profunctor.Adjunction
 ( Adjunction(..)
-, sieveAdjunction
-, tabulateAdjunction
+, cosieveAdjunction
+, cotabulateAdjunction
 , Coadjunction(..)
-, cosieveCoadjunction
-, cotabulateCoadjunction
+, sieveCoadjunction
+, tabulateCoadjunction
 ) where
 
 import           Data.Profunctor
@@ -28,11 +28,11 @@ class (Profunctor f, Pro.Representable u) => Adjunction f u | f -> u, u -> f whe
   rightAdjunct f = rightUnit . rmap f
 
 
-sieveAdjunction :: Adjunction f u => u a b -> (f a c -> b)
-sieveAdjunction = rightAdjunct . const
+cosieveAdjunction :: Adjunction f u => u a b -> (f a c -> b)
+cosieveAdjunction = rightAdjunct . const
 
-tabulateAdjunction :: Adjunction f u => (f a () -> b) -> u a b
-tabulateAdjunction f = leftAdjunct f ()
+cotabulateAdjunction :: Adjunction f u => (f a () -> b) -> u a b
+cotabulateAdjunction f = leftAdjunct f ()
 
 
 -- | A contravariant adjunction between two profunctors.
@@ -52,8 +52,8 @@ class (Profunctor f, Pro.Corepresentable u) => Coadjunction f u | f -> u, u -> f
   rightCoadjunct f = lmap f . rightCounit
 
 
-cosieveCoadjunction :: Coadjunction f u => u a b -> (a -> f c b)
-cosieveCoadjunction = rightCoadjunct . const
+sieveCoadjunction :: Coadjunction f u => u a b -> (a -> f c b)
+sieveCoadjunction = rightCoadjunct . const
 
-cotabulateCoadjunction :: Coadjunction f u => (a -> f () b) -> u a b
-cotabulateCoadjunction f = leftCoadjunct f ()
+tabulateCoadjunction :: Coadjunction f u => (a -> f () b) -> u a b
+tabulateCoadjunction f = leftCoadjunct f ()
