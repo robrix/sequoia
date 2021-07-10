@@ -9,6 +9,7 @@ module Sequoia.Profunctor.Adjunction
   -- * Composition
 , Adjoint(..)
 , Coadjoint(..)
+, Boring(..)
 ) where
 
 import           Control.Comonad
@@ -97,3 +98,6 @@ instance (Profunctor f, Profunctor u) => Profunctor (Coadjoint f u) where
 
 instance (Profunctor f, Profunctor u) => Functor (Coadjoint f u a) where
   fmap = rmap
+
+
+newtype Boring f a b = Boring { runBoring :: f b }
