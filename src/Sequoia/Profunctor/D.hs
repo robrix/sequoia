@@ -78,3 +78,6 @@ instance Value (VK r s) => EnvPassing (VK r s) (D r s) where
 
 
 newtype F k v a b = F { runF :: forall p . Profunctor p => v b `p` k b -> v a `p` k a }
+
+instance (Contravariant k, Functor v) => Profunctor (F k v) where
+  dimap f g (F r) = F (dimap (fmap f) (contramap f) . r . dimap (fmap g) (contramap g))
