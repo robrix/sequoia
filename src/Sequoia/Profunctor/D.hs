@@ -13,7 +13,9 @@ module Sequoia.Profunctor.D
 , inF
 , inF'
   -- ** Elimination
+, value
 , valueView
+, cont
 , contView
 ) where
 
@@ -104,8 +106,14 @@ inF' f = F (dimap (inV1 (f .)) (inK1 (. f)))
 
 -- Elimination
 
+value :: F k v a b -> (v a -> v b)
+value = (`valueView` id)
+
 valueView :: F k v a b -> (v b -> r) -> (v a -> r)
 valueView f = Pro.runK . runF f . Pro.K
+
+cont :: F k v a b -> (k b -> k a)
+cont = (`contView` id)
 
 contView :: F k v a b -> (r -> k b) -> (r -> k a)
 contView f = Pro.runV . runF f . Pro.V
