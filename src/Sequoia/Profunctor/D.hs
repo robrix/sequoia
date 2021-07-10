@@ -1,6 +1,6 @@
 {-# LANGUAGE TypeFamilies #-}
 module Sequoia.Profunctor.D
-( -- * Optical duality
+( -- * Dual profunctor
   _F
 , F(..)
   -- ** Construction
@@ -27,7 +27,7 @@ import qualified Sequoia.Profunctor.K as Pro
 import qualified Sequoia.Profunctor.V as Pro
 import           Sequoia.Value as V
 
--- Optical duality
+-- Dual profunctor
 
 _F :: F k v a b <-> (v a -> v b, k b -> k a)
 _F = exF <-> uncurry inF
