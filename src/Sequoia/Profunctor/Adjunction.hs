@@ -36,5 +36,8 @@ class Coadjunction f u where
   leftCounit  :: a -> u (f a b) b
   rightCounit :: a -> f (u a b) b
 
+  leftCounit  = leftCoadjunct  id
+  rightCounit = rightCoadjunct id
+
   leftCoadjunct  :: (a -> f b c) -> (b -> u a c)
   rightCoadjunct :: (a -> u b c) -> (b -> f a c)
