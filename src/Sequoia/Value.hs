@@ -29,32 +29,32 @@ type VRep v = Rep v
 type VFn v a = VRep v -> a
 
 
-_V :: (Value v, Value v') => Optic Iso (v a) (v' a') (VFn v a) (VFn v' a')
+_V :: (Representable v, Representable v') => Optic Iso (v a) (v' a') (VFn v a) (VFn v' a')
 _V = exV <-> inV
 
-inV0 :: Value v => a -> v a
+inV0 :: Representable v => a -> v a
 inV0 = inV . const
 
-inV :: Value v => VFn v a -> v a
+inV :: Representable v => VFn v a -> v a
 inV = tabulate
 
-inV1 :: Value v => (VFn v a -> VFn v b) -> (v a -> v b)
+inV1 :: Representable v => (VFn v a -> VFn v b) -> (v a -> v b)
 inV1 = under _V
 
-inV2 :: Value v => (VFn v a -> VFn v b -> VFn v c) -> (v a -> v b -> v c)
+inV2 :: Representable v => (VFn v a -> VFn v b -> VFn v c) -> (v a -> v b -> v c)
 inV2 = dimap2 exV exV inV
 
-exV :: Value v => v a -> VFn v a
+exV :: Representable v => v a -> VFn v a
 exV = index
 
-exV1 :: Value v => (v a -> v b) -> (VFn v a -> VFn v b)
+exV1 :: Representable v => (v a -> v b) -> (VFn v a -> VFn v b)
 exV1 = over _V
 
-exV2 :: Value v => (v a -> v b -> v c) -> (VFn v a -> VFn v b -> VFn v c)
+exV2 :: Representable v => (v a -> v b -> v c) -> (VFn v a -> VFn v b -> VFn v c)
 exV2 = dimap2 inV inV exV
 
 
-(°) :: Value v => VRep v -> v a -> a
+(°) :: Representable v => VRep v -> v a -> a
 (°) = flip exV
 
 infixr 8 °
