@@ -3,9 +3,15 @@ module Sequoia.Profunctor.D
 , KV(..)
 ) where
 
-import Sequoia.Bijection
+import qualified Control.Category as Cat
+import           Control.Monad ((<=<))
+import           Sequoia.Bijection
 
 _KV :: Optic Iso (KV s r a) (KV s' r' a') (a -> s -> r) (a' -> s' -> r')
 _KV = runKV <-> KV
 
 newtype KV s r a = KV { runKV :: a -> s -> r }
+
+instance Cat.Category (KV s) where
+  id = KV const
+  KV f . KV g = KV (g <=< f)
