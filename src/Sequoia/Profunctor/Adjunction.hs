@@ -19,6 +19,7 @@ import           Control.Comonad
 import qualified Data.Functor.Adjunction as Co
 import           Data.Functor.Const
 import           Data.Functor.Contravariant
+import qualified Data.Functor.Contravariant.Rep as Contra
 import qualified Data.Functor.Rep as Co
 import           Data.Profunctor
 import qualified Data.Profunctor.Rep as Pro
@@ -148,3 +149,6 @@ instance Contravariant f => Strong (Coboring f) where
 instance Contravariant f => Cochoice (Coboring f) where
   unleft  = Coboring . contramap Left  . runCoboring
   unright = Coboring . contramap Right . runCoboring
+
+instance (Contra.Representable f, Contra.Rep f ~ r) => Sieve (Coboring f) (Const r) where
+  sieve = fmap Const . Contra.index . runCoboring
