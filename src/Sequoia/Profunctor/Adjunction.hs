@@ -144,3 +144,7 @@ instance Contravariant f => Profunctor (Coboring f) where
 instance Contravariant f => Strong (Coboring f) where
   first'  = Coboring . contramap fst . runCoboring
   second' = Coboring . contramap snd . runCoboring
+
+instance Contravariant f => Cochoice (Coboring f) where
+  unleft  = Coboring . contramap Left  . runCoboring
+  unright = Coboring . contramap Right . runCoboring
