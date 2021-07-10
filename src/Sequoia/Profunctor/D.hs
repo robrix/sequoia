@@ -51,6 +51,10 @@ class (Continuation k, Value v, Cat.Category f, Profunctor f) => Dual k v f | f 
   inD :: (v a -> v b) -> (k b -> k a) -> f a b
   exD :: f a b -> (v a -> v b, k b -> k a)
 
+instance (Continuation k, Value v) => Dual k v (D k v) where
+  inD = inF
+  exD = exF
+
 
 -- Construction
 
