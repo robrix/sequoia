@@ -2,6 +2,7 @@
 module Sequoia.Profunctor.D
 ( _KV
 , KV(..)
+, _VK
 , VK(..)
 ) where
 
@@ -31,6 +32,9 @@ instance Representable (KV s r) where
 
 instance Continuation (KV s r)
 
+
+_VK :: Optic Iso (VK r s a) (VK r' s' a') ((a -> s -> r) -> r) ((a' -> s' -> r') -> r')
+_VK = runVK <-> VK
 
 newtype VK r s a = VK { runVK :: (a -> s -> r) -> r }
   deriving (Functor)
