@@ -41,3 +41,6 @@ class (Profunctor f, Profunctor u) => Coadjunction f u where
 
   leftCoadjunct  :: (a -> f b c) -> (b -> u a c)
   rightCoadjunct :: (a -> u b c) -> (b -> f a c)
+
+  leftCoadjunct  f = lmap f . leftCounit
+  rightCoadjunct f = lmap f . rightCounit
