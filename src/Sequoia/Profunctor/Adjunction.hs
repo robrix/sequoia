@@ -123,3 +123,7 @@ instance Functor f => Sieve (Boring f) f where
 
 instance (Co.Representable f, Co.Rep f ~ r) => Cosieve (Boring f) (Const r) where
   cosieve = lmap getConst . Co.index . runBoring
+
+instance Co.Representable f => Pro.Corepresentable (Boring f) where
+  type Corep (Boring f) = Const (Co.Rep f)
+  cotabulate f = Boring (Co.tabulate (f . Const))
