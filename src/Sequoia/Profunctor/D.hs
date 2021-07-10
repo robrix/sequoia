@@ -1,2 +1,5 @@
 module Sequoia.Profunctor.D
-() where
+( KV(..)
+) where
+
+newtype KV s r a = KV { runKV :: a -> s -> r }
