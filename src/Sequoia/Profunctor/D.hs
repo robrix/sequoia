@@ -29,14 +29,14 @@ import           Sequoia.Value as V
 
 -- Dual profunctor
 
-newtype D k v a b = D { runD :: forall p . Profunctor p => v b `p` k b -> v a `p` k a }
+newtype D k v a b = D { runD :: forall p . Profunctor p => k a `p` v a -> k b `p` v b }
 
 instance (Contravariant k, Functor v) => Profunctor (D k v) where
-  dimap f g (D r) = D (dimap (fmap f) (contramap f) . r . dimap (fmap g) (contramap g))
+  dimap f g (D r) = D (dimap (contramap g) (fmap g) . r . dimap (contramap f) (fmap f))
 
 instance Cat.Category (D k v) where
   id = D id
-  D f . D g = D (g . f)
+  D f . D g = D (f . g)
 
 
 -- Dual profunctor abstraction
@@ -52,7 +52,7 @@ class (Continuation k, Value v, Cat.Category f, Profunctor f) => Dual k v f | f 
   exD = (~> _D)
 
 instance (Continuation k, Value v) => Dual k v (D k v) where
-  inD fw bw = D (dimap fw bw)
+  inD fw bw = D (dimap bw fw)
   exD = liftA2 (,) (`viewV` id) (`viewK` id)
 
 
@@ -70,11 +70,11 @@ exDV = fst . exD
 exDK :: Dual k v f => f a b -> (k b -> k a)
 exDK = snd . exD
 
-viewV :: D k v a b -> (v b -> r) -> (v a -> r)
-viewV f = Pro.runK . runD f . Pro.K
+viewV :: D k v a b -> (s -> v a) -> (s -> v b)
+viewV f = Pro.runV . runD f . Pro.V
 
-viewK :: D k v a b -> (r -> k b) -> (r -> k a)
-viewK f = Pro.runV . runD f . Pro.V
+viewK :: D k v a b -> (k a -> r) -> (k b -> r)
+viewK f = Pro.runK . runD f . Pro.K
 
 
 -- Computation
