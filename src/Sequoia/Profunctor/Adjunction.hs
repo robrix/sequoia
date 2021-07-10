@@ -6,6 +6,8 @@ module Sequoia.Profunctor.Adjunction
 , Coadjunction(..)
 , sieveCoadjunction
 , tabulateCoadjunction
+  -- * Composition
+, Adjoint(..)
 ) where
 
 import           Data.Profunctor
@@ -63,3 +65,6 @@ sieveCoadjunction = rightCoadjunct . const
 
 tabulateCoadjunction :: Coadjunction f u => (a -> f () b) -> u a b
 tabulateCoadjunction f = leftCoadjunct f ()
+
+
+newtype Adjoint f u a b = Adjoint { runAdjoint :: u a (f a b) }
