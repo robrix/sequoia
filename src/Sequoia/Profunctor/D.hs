@@ -55,3 +55,6 @@ _DRep = flip (.) <-> (\ f g a s -> f (\ h -> h a s) g)
 
 newtype D r s a b = D { runD :: (b -> s -> r) -> (a -> s -> r) }
   deriving (Functor)
+
+instance Profunctor (D r s) where
+  dimap f g = under _D (dimap (lmap g) (lmap f))
