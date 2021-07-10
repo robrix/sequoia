@@ -101,12 +101,12 @@ reviews b = runV . runOptic b . V
 (~>) :: c (K a) => s -> Optic c s t a b -> a
 s ~> o = views o id s
 
-infixl 9 ~>
+infixl 8 ~>
 
 (<~) :: c (V b) => Optic c s t a b -> (b -> t)
 o <~ b = reviews o id b
 
-infixr 9 <~
+infixr 8 <~
 
 
 over :: (c (V b), c (K a)) => Optic c s t a b -> (t -> s) -> (b -> a)
