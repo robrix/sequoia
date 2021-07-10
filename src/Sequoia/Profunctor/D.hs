@@ -10,6 +10,7 @@ module Sequoia.Profunctor.D
   -- * Optical duality
 , F(..)
 , inF
+, inF'
 ) where
 
 import qualified Control.Category as Cat
@@ -85,3 +86,6 @@ instance (Contravariant k, Functor v) => Profunctor (F k v) where
 
 inF :: (v s -> v a) -> (k a -> k s) -> F k v s a
 inF prj inj = F (dimap prj inj)
+
+inF' :: (K.Representable k, V.Representable v) => (a -> b) -> F k v a b
+inF' f = F (dimap (inV1 (f .)) (inK1 (. f)))
