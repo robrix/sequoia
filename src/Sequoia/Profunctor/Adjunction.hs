@@ -19,6 +19,7 @@ import           Control.Comonad
 import qualified Data.Functor.Adjunction as Co
 import           Data.Functor.Const
 import           Data.Functor.Contravariant
+import qualified Data.Functor.Contravariant.Adjunction as Contra
 import qualified Data.Functor.Contravariant.Rep as Contra
 import qualified Data.Functor.Rep as Co
 import           Data.Profunctor
@@ -156,3 +157,7 @@ instance (Contra.Representable f, Contra.Rep f ~ r) => Sieve (Coboring f) (Const
 instance Contra.Representable f => Pro.Representable (Coboring f) where
   type Rep (Coboring f) = Const (Contra.Rep f)
   tabulate = Coboring . Contra.tabulate . fmap getConst
+
+instance Contra.Adjunction f u => Coadjunction (Coboring f) (Coboring u) where
+  leftCoadjunct  f a = Coboring (Contra.leftAdjunct  (runCoboring . f) a)
+  rightCoadjunct f a = Coboring (Contra.rightAdjunct (runCoboring . f) a)
