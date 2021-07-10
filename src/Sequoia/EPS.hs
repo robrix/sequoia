@@ -3,8 +3,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Sequoia.EPS
 ( -- * EPS
-  EPFn
-, EnvPassing(..)
+  EnvPassing(..)
 , _E
 , inE1
 , exE1
@@ -74,14 +73,12 @@ import           Sequoia.Value
 
 -- EPS
 
-type EPFn v a b = v a -> v b
-
 class (Cat.Category e, Value v, Profunctor e) => EnvPassing v e | e -> v where
-  inE :: EPFn v a b -> a `e` b
-  exE :: a `e` b    -> EPFn v a b
+  inE :: (v a -> v b) -> a `e` b
+  exE :: a `e` b    -> (v a -> v b)
 
 
-_E :: (EnvPassing v e, EnvPassing v' e') => Optic Iso (e a b) (e' a' b') (EPFn v a b) (EPFn v' a' b')
+_E :: (EnvPassing v e, EnvPassing v' e') => Optic Iso (e a b) (e' a' b') (v a -> v b) (v' a' -> v' b')
 _E = exE <-> inE
 
 
@@ -110,7 +107,7 @@ appE2 :: EnvPassing v e => a `e` (b `e` c) -> VFn v (VFn v a -> VFn v b -> c)
 appE2 f s = (`appE` s) . appE f s
 
 
-(↑) :: EnvPassing v e => a `e` b -> EPFn v a b
+(↑) :: EnvPassing v e => a `e` b -> (v a -> v b)
 (↑) = exE
 
 infixl 7 ↑
