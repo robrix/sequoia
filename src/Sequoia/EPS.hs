@@ -156,11 +156,11 @@ collectE f r = inE1 (\ a s -> (\ c -> exE1 (f c) a s) <$> r)
 
 -- Representable
 
-tabulateE :: EnvPassing v e => ((VFn v b, VRep v) -> a) -> b `e` a
-tabulateE = inE1 . curry
+tabulateE :: EnvPassing v e => (Store (VRep v) b -> a) -> b `e` a
+tabulateE f = inE1 (fmap f . store)
 
-indexE :: EnvPassing v e => b `e` a -> ((VFn v b, VRep v) -> a)
-indexE = uncurry . exE1
+indexE :: EnvPassing v e => b `e` a -> (Store (VRep v) b -> a)
+indexE e = uncurry (exE1 e) . runStore
 
 
 -- Applicative
@@ -253,7 +253,7 @@ instance Value v => Distributive (E v a) where
   collect = collectE
 
 instance Value v => Representable (E v b) where
-  type Rep (E v b) = (VFn v b, VRep v)
+  type Rep (E v b) = Store (VRep v) b
   tabulate = tabulateE
   index = indexE
 
