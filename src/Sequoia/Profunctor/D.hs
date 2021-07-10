@@ -2,8 +2,6 @@
 module Sequoia.Profunctor.D
 ( _KV
 , KV(..)
-, _VK
-, VK(..)
 , _D
 , _DRep
 , D(..)
@@ -32,7 +30,6 @@ import           Data.Profunctor
 import           Sequoia.Bijection
 import           Sequoia.CPS (ContPassing(..))
 import           Sequoia.Continuation as K
-import           Sequoia.EPS (EnvPassing(..))
 import qualified Sequoia.Profunctor.K as Pro
 import qualified Sequoia.Profunctor.V as Pro
 import           Sequoia.Value as V
@@ -55,13 +52,6 @@ instance K.Representable (KV s r) where
   index = runKV
 
 instance Continuation (KV s r)
-
-
-_VK :: Optic Iso (VK r s a) (VK r' s' a') ((a -> s -> r) -> r) ((a' -> s' -> r') -> r')
-_VK = runVK <-> VK
-
-newtype VK r s a = VK { runVK :: (a -> s -> r) -> r }
-  deriving (Functor)
 
 
 _D :: Optic Iso (D r s a b) (D r' s' a' b') ((b -> s -> r) -> (a -> s -> r)) ((b' -> s' -> r') -> (a' -> s' -> r'))
@@ -87,10 +77,6 @@ instance Cat.Category (D r s) where
 instance ContPassing (KV s r) (D r s) where
   inC = D . over _KV
   exC = under _KV . runD
-
-instance Value (VK r s) => EnvPassing (VK r s) (D r s) where
-  inE = (_D % _DRep <~) . over _VK
-  exE = under _VK . (~> _D % _DRep)
 
 
 -- Optical duality
