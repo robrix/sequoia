@@ -53,7 +53,7 @@ class (Continuation k, Value v, Cat.Category f, Profunctor f) => Dual k v f | f 
 
 instance (Continuation k, Value v) => Dual k v (D k v) where
   inD fw bw = D (dimap fw bw)
-  exD = liftA2 (,) value cont
+  exD = liftA2 (,) (`valueView` id) (`contView` id)
 
 
 -- Construction
