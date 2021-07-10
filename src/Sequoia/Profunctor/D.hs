@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeFamilies #-}
 module Sequoia.Profunctor.D
 ( _KV
 , KV(..)
@@ -6,6 +7,7 @@ module Sequoia.Profunctor.D
 import qualified Control.Category as Cat
 import           Control.Monad ((<=<))
 import           Data.Functor.Contravariant
+import           Data.Functor.Contravariant.Rep
 import           Data.Profunctor
 import           Sequoia.Bijection
 
@@ -20,3 +22,8 @@ instance Cat.Category (KV s) where
 
 instance Contravariant (KV s r) where
   contramap f = under _KV (lmap f)
+
+instance Representable (KV s r) where
+  type Rep (KV s r) = s -> r
+  tabulate = KV
+  index = runKV
