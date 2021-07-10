@@ -71,3 +71,6 @@ newtype Adjoint f u a b = Adjoint { runAdjoint :: u a (f a b) }
 
 instance (Profunctor f, Profunctor u) => Profunctor (Adjoint f u) where
   dimap f g = Adjoint . dimap f (dimap f g) . runAdjoint
+
+instance (Profunctor f, Profunctor u) => Functor (Adjoint f u a) where
+  fmap = rmap
