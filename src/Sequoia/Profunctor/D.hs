@@ -58,8 +58,8 @@ instance (Continuation k, Value v) => Dual k v (D k v) where
 
 -- Construction
 
-inD' :: (K.Representable k, V.Representable v) => (a -> b) -> D k v a b
-inD' f = D (dimap (inV1 (f .)) (inK1 (. f)))
+inD' :: Dual k v f => (a -> b) -> f a b
+inD' f = inD (inV1 (f .)) (inK1 (. f))
 
 
 -- Elimination
