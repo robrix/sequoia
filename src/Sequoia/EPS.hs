@@ -228,13 +228,13 @@ unsecondE e = inE1 (\ a s -> let (d, b) = appE e s ((d,) . a) in b)
 -- Cosieve
 
 cosieveE :: EnvPassing v e => a `e` b -> (Store (VRep v) a -> b)
-cosieveE e = uncurry (flip (appE e)) . runStore
+cosieveE e = uncurry (exE1 e) . runStore
 
 
 -- Corepresentable
 
 cotabulateE :: EnvPassing v e => (Store (VRep v) a -> b) -> a `e` b
-cotabulateE f = liftE (fmap f . flip store)
+cotabulateE f = inE1 (fmap f . store)
 
 
 -- Concrete
