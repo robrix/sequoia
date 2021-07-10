@@ -15,6 +15,7 @@ module Sequoia.Profunctor.Adjunction
 import           Control.Comonad
 import           Data.Profunctor
 import qualified Data.Profunctor.Rep as Pro
+import           Data.Profunctor.Sieve
 
 -- | A covariant adjunction between two profunctors.
 class (Profunctor f, Pro.Corepresentable u) => Adjunction f u | f -> u, u -> f where
@@ -104,3 +105,6 @@ newtype Boring f a b = Boring { runBoring :: f b }
 
 instance Functor f => Profunctor (Boring f) where
   dimap _ g = Boring . fmap g . runBoring
+
+instance Functor f => Sieve (Boring f) f where
+  sieve = const . runBoring
