@@ -2,8 +2,7 @@
 {-# LANGUAGE TypeFamilies #-}
 module Sequoia.Profunctor.D
 ( -- * Dual profunctor
-  _D
-, D(..)
+  D(..)
   -- * Dual profunctor abstraction
 , Dual(..)
   -- ** Construction
@@ -30,9 +29,6 @@ import           Sequoia.Value as V
 
 -- Dual profunctor
 
-_D :: Dual k v f => f a b <-> (v a -> v b, k b -> k a)
-_D = exD <-> uncurry inD
-
 newtype D k v a b = D { runD :: forall p . Profunctor p => v b `p` k b -> v a `p` k a }
 
 instance (Contravariant k, Functor v) => Profunctor (D k v) where
@@ -46,8 +42,14 @@ instance Cat.Category (D k v) where
 -- Dual profunctor abstraction
 
 class (Continuation k, Value v, Cat.Category f, Profunctor f) => Dual k v f | f -> k v where
+  {-# MINIMAL _D | (inD, exD) #-}
+  _D :: f a b <-> (v a -> v b, k b -> k a)
+  _D = exD <-> uncurry inD
+
   inD :: (v a -> v b) -> (k b -> k a) -> f a b
+  inD = curry (_D <~)
   exD :: f a b -> (v a -> v b, k b -> k a)
+  exD = (~> _D)
 
 instance (Continuation k, Value v) => Dual k v (D k v) where
   inD fw bw = D (dimap fw bw)
