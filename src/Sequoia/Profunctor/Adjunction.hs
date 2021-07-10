@@ -15,6 +15,7 @@ module Sequoia.Profunctor.Adjunction
 ) where
 
 import           Control.Comonad
+import qualified Data.Functor.Adjunction as Co
 import           Data.Functor.Const
 import qualified Data.Functor.Rep as Co
 import           Data.Profunctor
@@ -127,3 +128,7 @@ instance (Co.Representable f, Co.Rep f ~ r) => Cosieve (Boring f) (Const r) wher
 instance Co.Representable f => Pro.Corepresentable (Boring f) where
   type Corep (Boring f) = Const (Co.Rep f)
   cotabulate f = Boring (Co.tabulate (f . Const))
+
+instance Co.Adjunction f u => Adjunction (Boring f) (Boring u) where
+  leftAdjunct  f a = Boring (Co.leftAdjunct (f . Boring) a)
+  rightAdjunct f a = Co.rightAdjunct (runBoring . f) (runBoring a)
