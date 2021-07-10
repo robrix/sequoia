@@ -101,3 +101,6 @@ instance (Profunctor f, Profunctor u) => Functor (Coadjoint f u a) where
 
 
 newtype Boring f a b = Boring { runBoring :: f b }
+
+instance Functor f => Profunctor (Boring f) where
+  dimap _ g = Boring . fmap g . runBoring
