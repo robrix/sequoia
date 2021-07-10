@@ -44,7 +44,7 @@ instance Cat.Category (F k v) where
 
 -- Construction
 
-inF :: (v s -> v a) -> (k a -> k s) -> F k v s a
+inF :: (v a -> v b) -> (k b -> k a) -> F k v a b
 inF prj inj = F (dimap prj inj)
 
 inF' :: (K.Representable k, V.Representable v) => (a -> b) -> F k v a b
