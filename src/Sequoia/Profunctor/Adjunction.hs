@@ -90,4 +90,4 @@ instance Adjunction f u => Comonad (Adjoint u f a) where
   duplicate = Adjoint . rmap (leftAdjunct Adjoint) . runAdjoint
 
 
-newtype Coadjoint f u a b = Coadjoint { runCoadjoint :: u (f a b) b }
+newtype Coadjoint f u a b = Coadjoint { runCoadjoint :: u (f b a) b }
