@@ -94,3 +94,6 @@ newtype Coadjoint f u a b = Coadjoint { runCoadjoint :: u (f b a) b }
 
 instance (Profunctor f, Profunctor u) => Profunctor (Coadjoint f u) where
   dimap f g = Coadjoint . dimap (dimap g f) g . runCoadjoint
+
+instance (Profunctor f, Profunctor u) => Functor (Coadjoint f u a) where
+  fmap = rmap
