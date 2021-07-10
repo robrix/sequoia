@@ -14,14 +14,8 @@ module Sequoia.Value
 , exV1
 , exV2
 , (°)
-  -- * Env monad
-, appEnv
-, Env(..)
 ) where
 
-import Control.Applicative (liftA2)
-import Control.Comonad
-import Data.Functor.Adjunction
 import Data.Functor.Rep
 import Sequoia.Bijection
 import Sequoia.Functor.V
@@ -63,25 +57,3 @@ exV2 = dimap2 inV inV exV
 (°) = flip exV
 
 infixr 8 °
-
-
--- Env monad
-
-appEnv :: (Value v, Value g) => Env g v a -> VRep g -> VRep v -> a
-appEnv f = exV . exV (runEnv f)
-
-newtype Env g v a = Env { runEnv :: g (v a) }
-  deriving (Functor)
-
-instance Adjunction v g => Applicative (Env g v) where
-  pure = Env . unit
-  liftA2 f (Env a) b = Env (rightAdjunct (runEnv . (<$> b) . f) <$> a)
-  Env f <*> a = Env (rightAdjunct (runEnv . (<$> a)) <$> f)
-
-instance Adjunction v g => Monad (Env g v) where
-  (>>=) = flip (\ f -> Env . fmap (rightAdjunct (runEnv . f)) . runEnv)
-
-instance Adjunction g v => Comonad (Env g v) where
-  extract = counit . runEnv
-  extend f = Env . fmap (leftAdjunct (f . Env)) . runEnv
-  duplicate = Env . fmap (leftAdjunct Env) . runEnv
