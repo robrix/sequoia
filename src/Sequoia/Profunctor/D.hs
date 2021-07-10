@@ -7,10 +7,8 @@ module Sequoia.Profunctor.D
   -- * Dual profunctor abstraction
 , Dual(..)
   -- ** Construction
-, inF
 , inF'
   -- ** Elimination
-, exF
 , value
 , valueView
 , cont
@@ -32,8 +30,8 @@ import           Sequoia.Value as V
 
 -- Dual profunctor
 
-_D :: D k v a b <-> (v a -> v b, k b -> k a)
-_D = exF <-> uncurry inF
+_D :: (Continuation k, Value v) => D k v a b <-> (v a -> v b, k b -> k a)
+_D = exD <-> uncurry inD
 
 newtype D k v a b = D { runD :: forall p . Profunctor p => v b `p` k b -> v a `p` k a }
 
@@ -58,17 +56,11 @@ instance (Continuation k, Value v) => Dual k v (D k v) where
 
 -- Construction
 
-inF :: (v a -> v b) -> (k b -> k a) -> D k v a b
-inF prj inj = D (dimap prj inj)
-
 inF' :: (K.Representable k, V.Representable v) => (a -> b) -> D k v a b
 inF' f = D (dimap (inV1 (f .)) (inK1 (. f)))
 
 
 -- Elimination
-
-exF :: D k v a b -> (v a -> v b, k b -> k a)
-exF = liftA2 (,) value cont
 
 value :: D k v a b -> (v a -> v b)
 value = (`valueView` id)
