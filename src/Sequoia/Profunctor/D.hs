@@ -8,9 +8,9 @@ module Sequoia.Profunctor.D
   -- ** Construction
 , inD'
   -- ** Elimination
-, value
+, exDV
+, exDK
 , valueView
-, cont
 , contView
   -- ** Computation
 , (↓)
@@ -64,14 +64,14 @@ inD' f = inD (inV1 (f .)) (inK1 (. f))
 
 -- Elimination
 
-value :: D k v a b -> (v a -> v b)
-value = (`valueView` id)
+exDV :: Dual k v f => f a b -> (v a -> v b)
+exDV = fst . exD
+
+exDK :: Dual k v f => f a b -> (k b -> k a)
+exDK = snd . exD
 
 valueView :: D k v a b -> (v b -> r) -> (v a -> r)
 valueView f = Pro.runK . runD f . Pro.K
-
-cont :: D k v a b -> (k b -> k a)
-cont = (`contView` id)
 
 contView :: D k v a b -> (r -> k b) -> (r -> k a)
 contView f = Pro.runV . runD f . Pro.V
