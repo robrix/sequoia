@@ -7,6 +7,8 @@ module Sequoia.Profunctor.D
 , _D
 , _DRep
 , D(..)
+  -- * Optical duality
+, F(..)
 ) where
 
 import qualified Control.Category as Cat
@@ -73,3 +75,6 @@ instance ContPassing (KV s r) (D r s) where
 instance Value (VK r s) => EnvPassing (VK r s) (D r s) where
   inE = (_D % _DRep <~) . over _VK
   exE = under _VK . (~> _D % _DRep)
+
+
+newtype F s t a b = F { runF :: forall p . Profunctor p => a `p` b -> s `p` t }
