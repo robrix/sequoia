@@ -12,6 +12,8 @@ module Sequoia.Profunctor.D
   -- ** Construction
 , inF
 , inF'
+  -- ** Elimination
+, valueView
 ) where
 
 import qualified Control.Category as Cat
@@ -22,6 +24,7 @@ import           Sequoia.Bijection
 import           Sequoia.CPS
 import           Sequoia.Continuation as K
 import           Sequoia.EPS
+import qualified Sequoia.Profunctor.K as Pro
 import           Sequoia.Value as V
 
 _KV :: Optic Iso (KV s r a) (KV s' r' a') (a -> s -> r) (a' -> s' -> r')
@@ -95,3 +98,9 @@ inF prj inj = F (dimap prj inj)
 
 inF' :: (K.Representable k, V.Representable v) => (a -> b) -> F k v a b
 inF' f = F (dimap (inV1 (f .)) (inK1 (. f)))
+
+
+-- Elimination
+
+valueView :: F k v a b -> (v b -> r) -> (v a -> r)
+valueView f = Pro.runK . runF f . Pro.K
