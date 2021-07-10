@@ -100,6 +100,10 @@ newtype F k v a b = F { runF :: forall p . Profunctor p => v b `p` k b -> v a `p
 instance (Contravariant k, Functor v) => Profunctor (F k v) where
   dimap f g (F r) = F (dimap (fmap f) (contramap f) . r . dimap (fmap g) (contramap g))
 
+instance Cat.Category (F k v) where
+  id = F id
+  F f . F g = F (g . f)
+
 
 -- Construction
 
