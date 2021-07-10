@@ -4,6 +4,7 @@ module Sequoia.Profunctor.D
 , KV(..)
 , _VK
 , VK(..)
+, _D
 , D(..)
 ) where
 
@@ -40,6 +41,9 @@ _VK = runVK <-> VK
 newtype VK r s a = VK { runVK :: (a -> s -> r) -> r }
   deriving (Functor)
 
+
+_D :: Optic Iso (D r s a b) (D r' s' a' b') ((b -> s -> r) -> (a -> s -> r)) ((b' -> s' -> r') -> (a' -> s' -> r'))
+_D = runD <-> D
 
 newtype D r s a b = D { runD :: (b -> s -> r) -> (a -> s -> r) }
   deriving (Functor)
