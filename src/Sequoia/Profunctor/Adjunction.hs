@@ -91,3 +91,6 @@ instance Adjunction f u => Comonad (Adjoint u f a) where
 
 
 newtype Coadjoint f u a b = Coadjoint { runCoadjoint :: u (f b a) b }
+
+instance (Profunctor f, Profunctor u) => Profunctor (Coadjoint f u) where
+  dimap f g = Coadjoint . dimap (dimap g f) g . runCoadjoint
