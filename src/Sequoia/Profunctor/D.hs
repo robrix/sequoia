@@ -1,8 +1,11 @@
+{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE TypeFamilies #-}
 module Sequoia.Profunctor.D
 ( -- * Dual profunctor
   _F
 , F(..)
+  -- * Dual profunctor abstraction
+, Dual(..)
   -- ** Construction
 , inF
 , inF'
@@ -40,6 +43,13 @@ instance (Contravariant k, Functor v) => Profunctor (F k v) where
 instance Cat.Category (F k v) where
   id = F id
   F f . F g = F (g . f)
+
+
+-- Dual profunctor abstraction
+
+class (Continuation k, Value v, Cat.Category f, Profunctor f) => Dual k v f | f -> k v where
+  inD :: (v a -> v b) -> (k b -> k a) -> f a b
+  exD :: f a b -> (v a -> v b, k b -> k a)
 
 
 -- Construction
