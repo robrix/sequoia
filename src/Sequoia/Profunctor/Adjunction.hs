@@ -18,6 +18,7 @@ module Sequoia.Profunctor.Adjunction
 import           Control.Comonad
 import qualified Data.Functor.Adjunction as Co
 import           Data.Functor.Const
+import           Data.Functor.Contravariant
 import qualified Data.Functor.Rep as Co
 import           Data.Profunctor
 import qualified Data.Profunctor.Rep as Pro
@@ -136,3 +137,6 @@ instance Co.Adjunction f u => Adjunction (Boring f) (Boring u) where
 
 
 newtype Coboring f a b = Coboring { runCoboring :: f a }
+
+instance Contravariant f => Profunctor (Coboring f) where
+  dimap f _ = Coboring . contramap f . runCoboring
