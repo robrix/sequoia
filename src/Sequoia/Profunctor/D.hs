@@ -2,6 +2,7 @@
 module Sequoia.Profunctor.D
 ( _KV
 , KV(..)
+, VK(..)
 ) where
 
 import qualified Control.Category as Cat
@@ -29,3 +30,7 @@ instance Representable (KV s r) where
   index = runKV
 
 instance Continuation (KV s r)
+
+
+newtype VK r s a = VK { runVK :: (a -> s -> r) -> r }
+  deriving (Functor)
