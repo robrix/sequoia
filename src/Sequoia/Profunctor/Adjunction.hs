@@ -8,6 +8,7 @@ module Sequoia.Profunctor.Adjunction
 , tabulateCoadjunction
   -- * Composition
 , Adjoint(..)
+, Coadjoint(..)
 ) where
 
 import           Control.Comonad
@@ -87,3 +88,6 @@ instance Adjunction f u => Comonad (Adjoint u f a) where
   extract = rightUnit . runAdjoint
   extend f = Adjoint . rmap (leftAdjunct (f . Adjoint)) . runAdjoint
   duplicate = Adjoint . rmap (leftAdjunct Adjoint) . runAdjoint
+
+
+newtype Coadjoint f u a b = Coadjoint { runCoadjoint :: u (f a b) b }
