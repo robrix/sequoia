@@ -1,6 +1,7 @@
 {-# LANGUAGE FunctionalDependencies #-}
 module Sequoia.Profunctor.Adjunction
 ( Adjunction(..)
+, sieveAdjunction
 ) where
 
 import           Data.Profunctor
@@ -20,3 +21,7 @@ class (Profunctor f, Pro.Representable u) => Adjunction f u | f -> u, u -> f whe
 
   leftAdjunct  f = rmap f . leftUnit
   rightAdjunct f = rightUnit . rmap f
+
+
+sieveAdjunction :: Adjunction f u => u a b -> (f a c -> b)
+sieveAdjunction = rightAdjunct . const
