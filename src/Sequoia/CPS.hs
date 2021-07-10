@@ -3,8 +3,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Sequoia.CPS
 ( -- * ContPassing
-  CFn
-, ContPassing(..)
+  ContPassing(..)
 , _C
 , inC1
 , inC1'
@@ -81,14 +80,12 @@ import           Sequoia.Disjunction
 
 -- ContPassing
 
-type CFn k a b = k b -> k a
-
 class (Cat.Category c, Continuation k, Profunctor c) => ContPassing k c | c -> k where
-  inC :: CFn k a b -> a `c` b
-  exC :: a `c` b     -> CFn k a b
+  inC :: (k b -> k a) -> a `c` b
+  exC :: a `c` b   -> (k b -> k a)
 
 
-_C :: (ContPassing k c, ContPassing k' c') => Optic Iso (c a b) (c' a' b') (CFn k a b) (CFn k' a' b')
+_C :: (ContPassing k c, ContPassing k' c') => Optic Iso (c a b) (c' a' b') (k b -> k a) (k' b' -> k' a')
 _C = exC <-> inC
 
 
