@@ -4,6 +4,7 @@ module Sequoia.Profunctor.D
 , KV(..)
 , _VK
 , VK(..)
+, D(..)
 ) where
 
 import qualified Control.Category as Cat
@@ -37,4 +38,8 @@ _VK :: Optic Iso (VK r s a) (VK r' s' a') ((a -> s -> r) -> r) ((a' -> s' -> r')
 _VK = runVK <-> VK
 
 newtype VK r s a = VK { runVK :: (a -> s -> r) -> r }
+  deriving (Functor)
+
+
+newtype D r s a b = D { runD :: (b -> s -> r) -> (a -> s -> r) }
   deriving (Functor)
