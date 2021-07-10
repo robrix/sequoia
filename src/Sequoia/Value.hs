@@ -5,6 +5,7 @@ module Sequoia.Value
   Value
 , VRep
 , VFn
+, Representable(..)
 , _V
 , inV0
 , inV

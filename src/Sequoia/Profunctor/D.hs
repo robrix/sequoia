@@ -15,9 +15,9 @@ import           Data.Functor.Contravariant
 import           Data.Profunctor
 import           Sequoia.Bijection
 import           Sequoia.CPS
-import           Sequoia.Continuation
+import           Sequoia.Continuation as K
 import           Sequoia.EPS
-import           Sequoia.Value
+import           Sequoia.Value as V
 
 _KV :: Optic Iso (KV s r a) (KV s' r' a') (a -> s -> r) (a' -> s' -> r')
 _KV = runKV <-> KV
@@ -31,7 +31,7 @@ instance Cat.Category (KV s) where
 instance Contravariant (KV s r) where
   contramap f = under _KV (lmap f)
 
-instance Representable (KV s r) where
+instance K.Representable (KV s r) where
   type Rep (KV s r) = s -> r
   tabulate = KV
   index = runKV
