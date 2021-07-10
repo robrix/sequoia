@@ -8,6 +8,7 @@ module Sequoia.Profunctor.D
 , _DRep
 , D(..)
   -- * Optical duality
+, _F
 , F(..)
   -- ** Construction
 , inF
@@ -90,6 +91,9 @@ instance Value (VK r s) => EnvPassing (VK r s) (D r s) where
 
 
 -- Optical duality
+
+_F :: F k v a b <-> (v a -> v b, k b -> k a)
+_F = exF <-> uncurry inF
 
 newtype F k v a b = F { runF :: forall p . Profunctor p => v b `p` k b -> v a `p` k a }
 
