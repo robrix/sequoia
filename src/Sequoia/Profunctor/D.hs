@@ -77,6 +77,6 @@ contView f = Pro.runV . runF f . Pro.V
 infixl 7 ↑
 
 (↓) :: k b -> F k v a b -> k a
-k ↓ f = cont f k
+(↓) = flip cont
 
 infixl 8 ↓
