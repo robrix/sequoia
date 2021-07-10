@@ -1,4 +1,6 @@
 {-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Profunctor.Adjunction
 ( Adjunction(..)
 , cosieveAdjunction
@@ -13,6 +15,8 @@ module Sequoia.Profunctor.Adjunction
 ) where
 
 import           Control.Comonad
+import           Data.Functor.Const
+import qualified Data.Functor.Rep as Co
 import           Data.Profunctor
 import qualified Data.Profunctor.Rep as Pro
 import           Data.Profunctor.Sieve
@@ -116,3 +120,6 @@ instance Functor f => Choice (Boring f) where
 
 instance Functor f => Sieve (Boring f) f where
   sieve = const . runBoring
+
+instance (Co.Representable f, Co.Rep f ~ r) => Cosieve (Boring f) (Const r) where
+  cosieve = lmap getConst . Co.index . runBoring
