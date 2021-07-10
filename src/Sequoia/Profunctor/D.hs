@@ -14,6 +14,7 @@ import           Control.Monad ((<=<))
 import           Data.Functor.Contravariant
 import           Data.Profunctor
 import           Sequoia.Bijection
+import           Sequoia.CPS
 import           Sequoia.Continuation
 
 _KV :: Optic Iso (KV s r a) (KV s' r' a') (a -> s -> r) (a' -> s' -> r')
@@ -62,3 +63,7 @@ instance Profunctor (D r s) where
 instance Cat.Category (D r s) where
   id = D id
   D f . D g = D (g . f)
+
+instance ContPassing (KV s r) (D r s) where
+  inC = D . over _KV
+  exC = under _KV . runD
