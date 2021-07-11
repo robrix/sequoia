@@ -23,3 +23,7 @@ instance (Costrong p, Costrong q) => Costrong (p :+: q) where
 instance (Choice p, Choice q) => Choice (p :+: q) where
   left'  = Sum . (left'  +++ left' ) . runSum
   right' = Sum . (right' +++ right') . runSum
+
+instance (Cochoice p, Cochoice q) => Cochoice (p :+: q) where
+  unleft  = Sum . (unleft  +++ unleft ) . runSum
+  unright = Sum . (unright +++ unright) . runSum
