@@ -95,7 +95,7 @@ exDK = snd . exD
 -- Computation
 
 (↑) :: a --|D k v|-> b -> v a -> v b
-(↑) = fst . exD
+(↑) = exDV
 
 infixl 7 ↑
 
@@ -105,7 +105,7 @@ f <↑ a = f Cat.<<< inD' (inlr a)
 infixl 7 <↑
 
 (↓) :: k b -> a --|D k v|-> b -> k a
-(↓) = flip (snd . exD)
+(↓) = flip exDK
 
 infixl 8 ↓
 
