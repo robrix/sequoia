@@ -14,7 +14,7 @@ module Sequoia.Value
 , exV
 , exV1
 , exV2
-, (°)
+, (∘)
 , (>∘∘<)
 ) where
 
@@ -56,10 +56,10 @@ exV2 :: Representable v => (v a -> v b -> v c) -> ((VRep v -> a) -> (VRep v -> b
 exV2 = dimap2 inV inV exV
 
 
-(°) :: Representable v => VRep v -> v a -> a
-(°) = flip exV
+(∘) :: Representable v => VRep v -> v a -> a
+(∘) = flip exV
 
-infixr 8 °
+infixr 8 ∘
 
 
 (>∘∘<) :: (Conj c, Representable v) => v a -> v b -> v (a `c` b)
