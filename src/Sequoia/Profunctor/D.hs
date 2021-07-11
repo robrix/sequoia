@@ -17,8 +17,6 @@ module Sequoia.Profunctor.D
 , exD
 , exDV
 , exDK
-, viewV
-, viewK
   -- ** Composition
 , (<<<)
 , (>>>)
@@ -92,12 +90,6 @@ exDV = fst . exD
 
 exDK :: a --|D k v|-> b -> (k b -> k a)
 exDK = snd . exD
-
-viewV :: a --|D k v|-> b -> (s -> v a) -> (s -> v b)
-viewV f = runV . runD f . V
-
-viewK :: a --|D k v|-> b -> (k a -> r) -> (k b -> r)
-viewK f = runK . runD f . K
 
 
 -- Computation
