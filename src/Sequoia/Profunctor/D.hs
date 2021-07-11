@@ -38,9 +38,9 @@ import           Sequoia.Bijection
 import           Sequoia.Conjunction
 import           Sequoia.Continuation as K
 import           Sequoia.Disjunction
-import qualified Sequoia.Profunctor.K as Pro
+import           Sequoia.Profunctor.K
 import           Sequoia.Profunctor.Product
-import qualified Sequoia.Profunctor.V as Pro
+import           Sequoia.Profunctor.V
 import           Sequoia.Value as V
 
 -- Dual profunctor
@@ -86,7 +86,7 @@ inDK f = inK (\ k -> k • inD (inV1 (\ a e -> f (inK id) • e ∘ a)) f)
 -- Elimination
 
 exD :: a --|D k v|-> b -> (v a -> v b, k b -> k a)
-exD f = (Pro.runV *** Pro.runK) (runProduct (runD f (Product (Pro.V id, Pro.K id))))
+exD f = (runV *** runK) (runProduct (runD f (Product (V id, K id))))
 
 exDV :: a --|D k v|-> b -> (v a -> v b)
 exDV = fst . exD
@@ -95,10 +95,10 @@ exDK :: a --|D k v|-> b -> (k b -> k a)
 exDK = snd . exD
 
 viewV :: D k v a b -> (s -> v a) -> (s -> v b)
-viewV f = Pro.runV . runD f . Pro.V
+viewV f = runV . runD f . V
 
 viewK :: D k v a b -> (k a -> r) -> (k b -> r)
-viewK f = Pro.runK . runD f . Pro.K
+viewK f = runK . runD f . K
 
 
 -- Computation
