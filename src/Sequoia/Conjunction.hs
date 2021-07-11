@@ -5,6 +5,7 @@ module Sequoia.Conjunction
 , _exl
 , _exr
 , exlrC
+, coerceConj
 , curryConj
 , uncurryConj
 , foldMapConj
@@ -54,6 +55,9 @@ _exr = lens exr (\ c -> (exl c -><-))
 
 exlrC :: Conj c => (a' -> b' -> r) -> (a -> a') -> (b -> b') -> (a `c` b -> r)
 exlrC h f g = h <$> f . exl <*> g . exr
+
+coerceConj :: (Conj c1, Conj c2) => a `c1` b -> a `c2` b
+coerceConj = exl ~><~ exr
 
 curryConj :: Conj p => ((a `p` b) -> r) -> (a -> b -> r)
 curryConj f = fmap f . (-><-)
