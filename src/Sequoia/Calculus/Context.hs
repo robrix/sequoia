@@ -34,7 +34,7 @@ data a < b = a :< b
 infixr 4 <, :<, <|
 
 instance Conj (<) where
-  (-><-) = liftA2 (:<)
+  (>--<) = liftA2 (:<)
   exl (a :< _) = a
   exr (_ :< b) = b
 

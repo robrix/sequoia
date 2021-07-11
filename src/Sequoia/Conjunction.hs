@@ -33,18 +33,18 @@ import Data.Profunctor
 import Sequoia.Bijection
 
 class Conj c where
-  (-><-) :: (s -> a) -> (s -> b) -> (s -> a `c` b)
-  infix 4 -><-
+  (>--<) :: (s -> a) -> (s -> b) -> (s -> a `c` b)
+  infix 4 >--<
   exl :: (a `c` b) -> a
   exr :: (a `c` b) -> b
 
 instance Conj (,) where
-  (-><-) = liftA2 (,)
+  (>--<) = liftA2 (,)
   exl = fst
   exr = snd
 
 inlr :: Conj c => a -> b -> a `c` b
-inlr a b = (const a -><- const b) ()
+inlr a b = (const a >--< const b) ()
 
 _exl :: Conj c => Optic Lens (a `c` b) (a' `c` b) a a'
 _exl = lens exl (\ c -> (`inlr` exr c))
@@ -56,10 +56,10 @@ exlrC :: Conj c => (a' -> b' -> r) -> (a -> a') -> (b -> b') -> (a `c` b -> r)
 exlrC h f g = h <$> f . exl <*> g . exr
 
 coerceConj :: (Conj c1, Conj c2) => a `c1` b -> a `c2` b
-coerceConj = exl -><- exr
+coerceConj = exl >--< exr
 
 swapConj :: Conj c => a `c` b -> b `c` a
-swapConj = exr -><- exl
+swapConj = exr >--< exl
 
 curryConj :: Conj p => (a `p` b -> r) -> (a -> b -> r)
 curryConj f = fmap f . inlr

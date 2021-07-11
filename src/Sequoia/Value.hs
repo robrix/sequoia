@@ -63,6 +63,6 @@ infixr 8 °
 
 
 (∘><∘) :: (Conj c, Representable v) => v a -> v b -> v (a `c` b)
-(∘><∘) = inV2 (-><-)
+(∘><∘) = inV2 (>--<)
 
 infix 3 ∘><∘
