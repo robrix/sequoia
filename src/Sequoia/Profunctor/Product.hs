@@ -16,6 +16,10 @@ instance (Strong p, Strong q) => Strong (p :*: q) where
   first'  = Product . (first'  *** first')  . runProduct
   second' = Product . (second' *** second') . runProduct
 
+instance (Costrong p, Costrong q) => Costrong (p :*: q) where
+  unfirst  = Product . (unfirst  *** unfirst)  . runProduct
+  unsecond = Product . (unsecond *** unsecond) . runProduct
+
 instance (Choice p, Choice q) => Choice (p :*: q) where
   left'  = Product . (left'  *** left')  . runProduct
   right' = Product . (right' *** right') . runProduct
