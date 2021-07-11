@@ -49,12 +49,12 @@ instance Cat.Category (D k v) where
 
 class (Continuation k, Value v, Cat.Category f, Profunctor f) => Dual k v f | f -> k v where
   {-# MINIMAL _D | (inD, exD) #-}
-  _D :: f a b <-> (v a -> v b, k b -> k a)
+  _D :: a --|f|-> b <-> (v a -> v b, k b -> k a)
   _D = exD <-> uncurry inD
 
-  inD :: (v a -> v b) -> (k b -> k a) -> f a b
+  inD :: (v a -> v b) -> (k b -> k a) -> a --|f|-> b
   inD = curry (_D <~)
-  exD :: f a b -> (v a -> v b, k b -> k a)
+  exD :: a --|f|-> b -> (v a -> v b, k b -> k a)
   exD = (~> _D)
 
 instance (Continuation k, Value v) => Dual k v (D k v) where
@@ -73,16 +73,16 @@ infixr 5 |->
 
 -- Construction
 
-inD' :: Dual k v f => (a -> b) -> f a b
+inD' :: Dual k v f => (a -> b) -> a --|f|-> b
 inD' f = inD (inV1 (f .)) (inK1 (. f))
 
 
 -- Elimination
 
-exDV :: Dual k v f => f a b -> (v a -> v b)
+exDV :: Dual k v f => a --|f|-> b -> (v a -> v b)
 exDV = fst . exD
 
-exDK :: Dual k v f => f a b -> (k b -> k a)
+exDK :: Dual k v f => a --|f|-> b -> (k b -> k a)
 exDK = snd . exD
 
 viewV :: D k v a b -> (s -> v a) -> (s -> v b)
@@ -94,17 +94,17 @@ viewK f = Pro.runK . runD f . Pro.K
 
 -- Computation
 
-(↑) :: Dual k v f => f a b -> v a -> v b
+(↑) :: Dual k v f => a --|f|-> b -> v a -> v b
 (↑) = fst . exD
 
 infixl 7 ↑
 
-(<↑) :: (Dual k v f, Conj c) => (a `c` _Γ) `f` _Δ -> a -> _Γ `f` _Δ
+(<↑) :: (Dual k v f, Conj c) => (a `c` _Γ) --|f|-> _Δ -> a -> _Γ --|f|-> _Δ
 f <↑ a = inD (exDV f . fmap (inlr a)) (contramap (inlr a) . exDK f)
 
 infixl 7 <↑
 
-(↓) :: Dual k v f => k b -> f a b -> k a
+(↓) :: Dual k v f => k b -> a --|f|-> b -> k a
 (↓) = flip (snd . exD)
 
 infixl 8 ↓
