@@ -119,6 +119,6 @@ infixl 8 ↓
 
 -- FIXME: this is quite limited by the need for the continuation to return locally at _Δ.
 (↓>) :: (K.Representable k, Functor v, K.Rep k ~ _Δ) => Disj d => k a -> _Γ --|D k v|-> (_Δ `d` a) -> _Γ --|D k v|-> _Δ
-a ↓> f = inD (fmap (id <--> (a •)) . exDV f) (exDK f . (<••> a))
+a ↓> f = inD (fmap (id <--> (a •))) (<••> a) <<< f
 
 infixr 9 ↓>
