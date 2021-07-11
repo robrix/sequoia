@@ -4,7 +4,7 @@ module Sequoia.Profunctor.Product
 ( (:*:)(..)
 ) where
 
-import           Control.Arrow ((***))
+import qualified Control.Arrow as A ((***))
 import qualified Control.Category as Cat
 import           Data.Functor.Product
 import           Data.Profunctor
@@ -20,26 +20,26 @@ instance (Cat.Category p, Cat.Category q) => Cat.Category (p :*: q) where
   Product (fp, fq) . Product (gp, gq) = Product (fp Cat.. gp, fq Cat.. gq)
 
 instance (Profunctor p, Profunctor q) => Profunctor (p :*: q) where
-  dimap f g = Product . (dimap f g *** dimap f g) . runProduct
+  dimap f g = Product . (dimap f g A.*** dimap f g) . runProduct
 
 instance (Strong p, Strong q) => Strong (p :*: q) where
-  first'  = Product . (first'  *** first')  . runProduct
-  second' = Product . (second' *** second') . runProduct
+  first'  = Product . (first'  A.*** first')  . runProduct
+  second' = Product . (second' A.*** second') . runProduct
 
 instance (Costrong p, Costrong q) => Costrong (p :*: q) where
-  unfirst  = Product . (unfirst  *** unfirst)  . runProduct
-  unsecond = Product . (unsecond *** unsecond) . runProduct
+  unfirst  = Product . (unfirst  A.*** unfirst)  . runProduct
+  unsecond = Product . (unsecond A.*** unsecond) . runProduct
 
 instance (Choice p, Choice q) => Choice (p :*: q) where
-  left'  = Product . (left'  *** left')  . runProduct
-  right' = Product . (right' *** right') . runProduct
+  left'  = Product . (left'  A.*** left')  . runProduct
+  right' = Product . (right' A.*** right') . runProduct
 
 instance (Cochoice p, Cochoice q) => Cochoice (p :*: q) where
-  unleft  = Product . (unleft  *** unleft)  . runProduct
-  unright = Product . (unright *** unright) . runProduct
+  unleft  = Product . (unleft  A.*** unleft)  . runProduct
+  unright = Product . (unright A.*** unright) . runProduct
 
 instance (Closed p, Closed q) => Closed (p :*: q) where
-  closed = Product . (closed *** closed) . runProduct
+  closed = Product . (closed A.*** closed) . runProduct
 
 instance (Sieve p f, Sieve q g) => Sieve (p :*: q) (Product f g) where
   sieve (Product (p, q)) a = Pair (sieve p a) (sieve q a)
