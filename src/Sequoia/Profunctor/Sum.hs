@@ -15,3 +15,7 @@ instance (Profunctor p, Profunctor q) => Profunctor (p :+: q) where
 instance (Strong p, Strong q) => Strong (p :+: q) where
   first'  = Sum . (first'  +++ first' ) . runSum
   second' = Sum . (second' +++ second') . runSum
+
+instance (Costrong p, Costrong q) => Costrong (p :+: q) where
+  unfirst  = Sum . (unfirst  +++ unfirst ) . runSum
+  unsecond = Sum . (unsecond +++ unsecond) . runSum
