@@ -138,6 +138,7 @@ library
     Sequoia.Profunctor.Adjunction
     Sequoia.Profunctor.D
     Sequoia.Profunctor.K
+    Sequoia.Profunctor.Product
     Sequoia.Profunctor.V
     Sequoia.Sequent
     Sequoia.Signal
