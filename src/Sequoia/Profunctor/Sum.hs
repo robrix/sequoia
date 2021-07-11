@@ -4,6 +4,7 @@ module Sequoia.Profunctor.Sum
 ) where
 
 import Control.Arrow ((+++))
+import Data.Functor.Sum
 import Data.Profunctor
 import Data.Profunctor.Sieve
 
@@ -33,8 +34,8 @@ instance (Cochoice p, Cochoice q) => Cochoice (p :+: q) where
 instance (Closed p, Closed q) => Closed (p :+: q) where
   closed = Sum . (closed +++ closed) . runSum
 
-instance (Sieve p f, Sieve q f) => Sieve (p :+: q) f where
-  sieve (Sum s) a = either (`sieve` a) (`sieve` a) s
+instance (Sieve p f, Sieve q g) => Sieve (p :+: q) (Sum f g) where
+  sieve (Sum s) a = either (InL . (`sieve` a)) (InR . (`sieve` a)) s
 
 instance (Cosieve p f, Cosieve q f) => Cosieve (p :+: q) f where
   cosieve (Sum s) a = either (`cosieve` a) (`cosieve` a) s
