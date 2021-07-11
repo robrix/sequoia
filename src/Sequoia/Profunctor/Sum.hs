@@ -1,9 +1,11 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Profunctor.Sum
 ( (:+:)(..)
+, (+++)
 ) where
 
 import qualified Control.Arrow as A ((+++))
+import qualified Control.Category as Cat
 import           Data.Functor.Sum
 import           Data.Profunctor
 import           Data.Profunctor.Sieve
@@ -39,3 +41,9 @@ instance (Sieve p f, Sieve q g) => Sieve (p :+: q) (Sum f g) where
 
 instance (Cosieve p f, Cosieve q f) => Cosieve (p :+: q) f where
   cosieve (Sum s) a = either (`cosieve` a) (`cosieve` a) s
+
+
+(+++) :: (Choice p, Cat.Category p) => a1 `p` b1 -> a2 `p` b2 -> Either a1 a2 `p` Either b1 b2
+f +++ g = left' f Cat.>>> right' g
+
+infixr 2 +++
