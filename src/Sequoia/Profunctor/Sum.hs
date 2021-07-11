@@ -19,3 +19,7 @@ instance (Strong p, Strong q) => Strong (p :+: q) where
 instance (Costrong p, Costrong q) => Costrong (p :+: q) where
   unfirst  = Sum . (unfirst  +++ unfirst ) . runSum
   unsecond = Sum . (unsecond +++ unsecond) . runSum
+
+instance (Choice p, Choice q) => Choice (p :+: q) where
+  left'  = Sum . (left'  +++ left' ) . runSum
+  right' = Sum . (right' +++ right') . runSum
