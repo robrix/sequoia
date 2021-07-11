@@ -19,6 +19,9 @@ module Sequoia.Profunctor.D
 , exDK
 , viewV
 , viewK
+  -- ** Composition
+, (<<<)
+, (>>>)
   -- ** Computation
 , (↑)
 , (<↑)
@@ -27,6 +30,7 @@ module Sequoia.Profunctor.D
 ) where
 
 import           Control.Applicative (liftA2)
+import           Control.Category ((<<<), (>>>))
 import qualified Control.Category as Cat
 import           Data.Functor.Contravariant
 import           Data.Profunctor
