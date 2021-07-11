@@ -12,6 +12,7 @@ module Sequoia.Profunctor.D
 , inD
 , inD'
 , inDV
+, inDK
   -- ** Elimination
 , exD
 , exDV
@@ -71,6 +72,10 @@ inD' f = inD (inV1 (f .)) (inK1 (. f))
 
 inDV :: (K.Representable k, V.Representable v) => (v a -> v b) -> v (a --|D k v|-> b)
 inDV f = inV (\ e -> inD f (inK1 (. dimap const ($ e) (exV1 f))))
+
+-- FIXME: this is quite limited by the need for the continuation to return locally at b.
+inDK :: (K.Representable k, V.Representable v, K.Rep k ~ b) => (k b -> k a) -> k **(a --|D k v|-> b)
+inDK f = inK (\ k -> k • inD (inV1 (\ a e -> f (inK id) • e ∘ a)) f)
 
 
 -- Elimination
