@@ -34,7 +34,7 @@ instance (Cochoice p, Cochoice q) => Cochoice (p :*: q) where
   unright = Product . (unright *** unright) . runProduct
 
 instance (Closed p, Closed q) => Closed (p :*: q) where
-  closed = Product . (closed  *** closed)  . runProduct
+  closed = Product . (closed *** closed) . runProduct
 
 instance (Sieve p f, Sieve q g) => Sieve (p :*: q) (Product f g) where
   sieve (Product (p, q)) a = Pair (sieve p a) (sieve q a)
