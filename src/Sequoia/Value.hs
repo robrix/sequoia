@@ -15,10 +15,13 @@ module Sequoia.Value
 , exV1
 , exV2
 , (°)
+, (∘><∘)
 ) where
 
+import Control.Applicative
 import Data.Functor.Rep
 import Sequoia.Bijection
+import Sequoia.Conjunction
 import Sequoia.Functor.V
 
 class Representable v => Value v
@@ -58,3 +61,9 @@ exV2 = dimap2 inV inV exV
 (°) = flip exV
 
 infixr 8 °
+
+
+(∘><∘) :: (Conj c, Representable v) => v a -> v b -> v (a `c` b)
+(∘><∘) = inV2 (liftA2 (-><-))
+
+infix 3 ∘><∘
