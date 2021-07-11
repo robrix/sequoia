@@ -24,5 +24,9 @@ instance (Choice p, Choice q) => Choice (p :*: q) where
   left'  = Product . (left'  *** left')  . runProduct
   right' = Product . (right' *** right') . runProduct
 
+instance (Cochoice p, Cochoice q) => Cochoice (p :*: q) where
+  unleft  = Product . (unleft  *** unleft)  . runProduct
+  unright = Product . (unright *** unright) . runProduct
+
 instance (Closed p, Closed q) => Closed (p :*: q) where
   closed = Product . (closed  *** closed)  . runProduct
