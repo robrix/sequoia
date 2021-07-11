@@ -63,13 +63,13 @@ coerceConj = exl ~><~ exr
 swapConj :: Conj c => a `c` b -> b `c` a
 swapConj = exr ~><~ exl
 
-curryConj :: Conj p => ((a `p` b) -> r) -> (a -> b -> r)
+curryConj :: Conj p => (a `p` b -> r) -> (a -> b -> r)
 curryConj f = fmap f . (-><-)
 
-uncurryConj :: Conj p => (a -> b -> r) -> ((a `p` b) -> r)
+uncurryConj :: Conj p => (a -> b -> r) -> (a `p` b -> r)
 uncurryConj f = exlrC f id id
 
-foldMapConj :: Conj p => (b -> m) -> (a `p` b) -> m
+foldMapConj :: Conj p => (b -> m) -> (a `p` b -> m)
 foldMapConj f = f . exr
 
 traverseConj :: (Conj p, Applicative m) => (b -> m b') -> (a `p` b) -> m (a `p` b')
