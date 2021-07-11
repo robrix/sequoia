@@ -12,6 +12,10 @@ module Sequoia.Conjunction
 , bimapConj
 , bitraverseConj
   -- * Lifted projections
+, exlK
+, exrK
+, exlF
+, exrF
 , exlL
 , exrL
 , exlR
@@ -21,6 +25,7 @@ module Sequoia.Conjunction
 -- Conjunction
 
 import Control.Applicative (liftA2)
+import Data.Functor.Contravariant
 import Data.Profunctor
 import Sequoia.Bijection
 
@@ -67,6 +72,16 @@ bitraverseConj = exlrC (liftA2 (-><-))
 
 
 -- Lifted projections
+
+exlK :: (Contravariant k, Conj c) => k a -> k (a `c` b)
+exrK :: (Contravariant k, Conj c) => k b -> k (a `c` b)
+exlK = contramap exl
+exrK = contramap exr
+
+exlF :: (Functor f, Conj c) => f (a `c` b) -> f a
+exrF :: (Functor f, Conj c) => f (a `c` b) -> f b
+exlF = fmap exl
+exrF = fmap exr
 
 exlL :: (Profunctor p, Conj c) => p a r -> p (a `c` b) r
 exrL :: (Profunctor p, Conj c) => p b r -> p (a `c` b) r
