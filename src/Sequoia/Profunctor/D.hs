@@ -21,6 +21,7 @@ module Sequoia.Profunctor.D
 , (↑)
 , (<↑)
 , (↓)
+, (↓>)
 ) where
 
 import           Control.Applicative (liftA2)
@@ -30,6 +31,7 @@ import           Data.Profunctor
 import           Sequoia.Bijection
 import           Sequoia.Conjunction
 import           Sequoia.Continuation as K
+import           Sequoia.Disjunction
 import qualified Sequoia.Profunctor.K as Pro
 import qualified Sequoia.Profunctor.V as Pro
 import           Sequoia.Value as V
@@ -101,3 +103,9 @@ infixl 7 <↑
 (↓) = flip (snd . exD)
 
 infixl 8 ↓
+
+-- FIXME: this is quite limited by the need for the continuation to return locally at _Δ.
+(↓>) :: (K.Representable k, Functor v, K.Rep k ~ _Δ) => Disj d => k a -> _Γ --|D k v|-> (_Δ `d` a) -> _Γ --|D k v|-> _Δ
+a ↓> f = inD (fmap (id <--> (a •)) . exDV f) (exDK f . (<••> a))
+
+infixr 9 ↓>
