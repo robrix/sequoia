@@ -29,6 +29,7 @@ module Sequoia.Profunctor.D
 , (↓>)
 ) where
 
+import           Control.Arrow ((***))
 import           Control.Category ((<<<), (>>>))
 import qualified Control.Category as Cat
 import           Data.Functor.Contravariant
@@ -85,7 +86,7 @@ inDK f = inK (\ k -> k • inD (inV1 (\ a e -> f (inK id) • e ∘ a)) f)
 -- Elimination
 
 exD :: a --|D k v|-> b -> (v a -> v b, k b -> k a)
-exD f = let (Pro.V v, Pro.K k) = runProduct (runD f (Product (Pro.V id, Pro.K id))) in (v, k)
+exD f = (Pro.runV *** Pro.runK) (runProduct (runD f (Product (Pro.V id, Pro.K id))))
 
 exDV :: a --|D k v|-> b -> (v a -> v b)
 exDV = fst . exD
