@@ -2,6 +2,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Profunctor.Product
 ( (:*:)(..)
+, (***)
 ) where
 
 import qualified Control.Arrow as A ((***))
@@ -49,3 +50,8 @@ instance (Representable p, Representable q) => Representable (p :*: q) where
   tabulate f' = let f d = let Pair a b = f' d in (a, b) in Product
     ( tabulate (fst . f)
     , tabulate (snd . f) )
+
+(***) :: (Strong p, Cat.Category p) => a1 `p` b1 -> a2 `p` b2 -> (a1, a2) `p` (b1, b2)
+f *** g = first' f Cat.>>> second' g
+
+infixr 3 ***

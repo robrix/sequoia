@@ -29,7 +29,6 @@ module Sequoia.Profunctor.D
 , (↓>)
 ) where
 
-import           Control.Arrow ((***))
 import           Control.Category ((<<<), (>>>))
 import qualified Control.Category as Cat
 import           Data.Functor.Contravariant
