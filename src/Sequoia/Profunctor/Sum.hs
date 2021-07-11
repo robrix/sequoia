@@ -35,3 +35,6 @@ instance (Closed p, Closed q) => Closed (p :+: q) where
 
 instance (Sieve p f, Sieve q f) => Sieve (p :+: q) f where
   sieve (Sum s) a = either (`sieve` a) (`sieve` a) s
+
+instance (Cosieve p f, Cosieve q f) => Cosieve (p :+: q) f where
+  cosieve (Sum s) a = either (`cosieve` a) (`cosieve` a) s
