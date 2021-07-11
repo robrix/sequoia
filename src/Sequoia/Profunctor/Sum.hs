@@ -27,3 +27,6 @@ instance (Choice p, Choice q) => Choice (p :+: q) where
 instance (Cochoice p, Cochoice q) => Cochoice (p :+: q) where
   unleft  = Sum . (unleft  +++ unleft ) . runSum
   unright = Sum . (unright +++ unright) . runSum
+
+instance (Closed p, Closed q) => Closed (p :+: q) where
+  closed = Sum . (closed +++ closed) . runSum
