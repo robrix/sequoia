@@ -51,6 +51,7 @@ instance (Representable p, Representable q) => Representable (p :*: q) where
     ( tabulate (fst . f)
     , tabulate (snd . f) )
 
+
 (***) :: (Strong p, Cat.Category p) => a1 `p` b1 -> a2 `p` b2 -> (a1, a2) `p` (b1, b2)
 f *** g = first' f Cat.>>> second' g
 
