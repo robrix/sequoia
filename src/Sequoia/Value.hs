@@ -15,7 +15,7 @@ module Sequoia.Value
 , exV1
 , exV2
 , (°)
-, (∘><∘)
+, (>∘∘<)
 ) where
 
 import Data.Functor.Rep
@@ -62,7 +62,7 @@ exV2 = dimap2 inV inV exV
 infixr 8 °
 
 
-(∘><∘) :: (Conj c, Representable v) => v a -> v b -> v (a `c` b)
-(∘><∘) = inV2 (>--<)
+(>∘∘<) :: (Conj c, Representable v) => v a -> v b -> v (a `c` b)
+(>∘∘<) = inV2 (>--<)
 
-infix 3 ∘><∘
+infix 3 >∘∘<
