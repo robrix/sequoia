@@ -15,3 +15,7 @@ instance (Profunctor p, Profunctor q) => Profunctor (p :*: q) where
 instance (Strong p, Strong q) => Strong (p :*: q) where
   first'  = Product . (first'  *** first')  . runProduct
   second' = Product . (second' *** second') . runProduct
+
+instance (Choice p, Choice q) => Choice (p :*: q) where
+  left'  = Product . (left'  *** left')  . runProduct
+  right' = Product . (right' *** right') . runProduct
