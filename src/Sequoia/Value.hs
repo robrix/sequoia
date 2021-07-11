@@ -35,22 +35,22 @@ _V = exV <-> inV
 inV0 :: Representable v => a -> v a
 inV0 = inV . const
 
-inV :: Representable v => VFn v a -> v a
+inV :: Representable v => (VRep v -> a) -> v a
 inV = tabulate
 
-inV1 :: Representable v => (VFn v a -> VFn v b) -> (v a -> v b)
+inV1 :: Representable v => ((VRep v -> a) -> (VRep v -> b)) -> (v a -> v b)
 inV1 = under _V
 
-inV2 :: Representable v => (VFn v a -> VFn v b -> VFn v c) -> (v a -> v b -> v c)
+inV2 :: Representable v => ((VRep v -> a) -> (VRep v -> b) -> (VRep v -> c)) -> (v a -> v b -> v c)
 inV2 = dimap2 exV exV inV
 
-exV :: Representable v => v a -> VFn v a
+exV :: Representable v => v a -> (VRep v -> a)
 exV = index
 
-exV1 :: Representable v => (v a -> v b) -> (VFn v a -> VFn v b)
+exV1 :: Representable v => (v a -> v b) -> ((VRep v -> a) -> (VRep v -> b))
 exV1 = over _V
 
-exV2 :: Representable v => (v a -> v b -> v c) -> (VFn v a -> VFn v b -> VFn v c)
+exV2 :: Representable v => (v a -> v b -> v c) -> ((VRep v -> a) -> (VRep v -> b) -> (VRep v -> c))
 exV2 = dimap2 inV inV exV
 
 
