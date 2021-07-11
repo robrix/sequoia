@@ -87,7 +87,7 @@ viewK f = Pro.runK . runD f . Pro.K
 infixl 7 ↑
 
 (<↑) :: (Dual k v f, Conj c) => (a `c` _Γ) `f` _Δ -> a -> _Γ `f` _Δ
-f <↑ a = inD (exDV f . fmap (a -><-)) (contramap (a -><-) . exDK f)
+f <↑ a = inD (exDV f . fmap (inlr a)) (contramap (inlr a) . exDK f)
 
 infixl 7 <↑
 

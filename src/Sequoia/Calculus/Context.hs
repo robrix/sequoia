@@ -15,6 +15,7 @@ module Sequoia.Calculus.Context
 , type (-|)
 ) where
 
+import Control.Applicative (liftA2)
 import Control.Monad (ap)
 import Data.Bifoldable
 import Data.Bifunctor
@@ -33,7 +34,7 @@ data a < b = a :< b
 infixr 4 <, :<, <|
 
 instance Conj (<) where
-  (-><-) = (:<)
+  (-><-) = liftA2 (:<)
   exl (a :< _) = a
   exr (_ :< b) = b
 
@@ -47,10 +48,10 @@ instance Bitraversable (<) where
   bitraverse = bitraverseConj
 
 (<|) :: i -> is -> i < is
-(<|) = (-><-)
+(<|) = inlr
 
 (<↑) :: (Contravariant k, Conj c) => k (a `c` _Γ) -> a -> k _Γ
-k <↑ a = k •<< (a -><-)
+k <↑ a = k •<< inlr a
 
 infixl 7 <↑
 

@@ -119,7 +119,7 @@ instance Continuation k => ZeroIntro k (Seq k) where
 instance Continuation k => WithIntro k (Seq k) where
   withL1 p = popL (pushL p . exl)
   withL2 p = popL (pushL p . exr)
-  withR = mapR2 (-><-)
+  withR = mapR2 inlr
 
 instance Continuation k => SumIntro k (Seq k) where
   sumL a b = popL (pushL a <--> pushL b)
@@ -143,7 +143,7 @@ instance Continuation k => ParIntro k (Seq k) where
 
 instance Continuation k => TensorIntro k (Seq k) where
   tensorL p = popL (pushL2 p . exl <*> exr)
-  tensorR = mapR2 (-><-)
+  tensorR = mapR2 inlr
 
 
 -- Logical biconditional/exclusive disjunction

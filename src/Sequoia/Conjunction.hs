@@ -1,7 +1,7 @@
 module Sequoia.Conjunction
 ( -- * Conjunction
   Conj(..)
-, (~><~)
+, inlr
 , _exl
 , _exr
 , exlrC
@@ -33,38 +33,36 @@ import Data.Profunctor
 import Sequoia.Bijection
 
 class Conj c where
-  (-><-) :: a -> b -> (a `c` b)
+  (-><-) :: (s -> a) -> (s -> b) -> (s -> a `c` b)
   infix 4 -><-
   exl :: (a `c` b) -> a
   exr :: (a `c` b) -> b
 
 instance Conj (,) where
-  (-><-) = (,)
+  (-><-) = liftA2 (,)
   exl = fst
   exr = snd
 
-(~><~) :: Conj c => (s -> a) -> (s -> b) -> (s -> a `c` b)
-(l ~><~ r) s = l s -><- r s
-
-infix 4 ~><~
+inlr :: Conj c => a -> b -> a `c` b
+inlr a b = (const a -><- const b) ()
 
 _exl :: Conj c => Optic Lens (a `c` b) (a' `c` b) a a'
-_exl = lens exl (\ c -> (-><- exr c))
+_exl = lens exl (\ c -> (`inlr` exr c))
 
 _exr :: Conj c => Optic Lens (a `c` b) (a `c` b') b b'
-_exr = lens exr (\ c -> (exl c -><-))
+_exr = lens exr (\ c -> (exl c `inlr`))
 
 exlrC :: Conj c => (a' -> b' -> r) -> (a -> a') -> (b -> b') -> (a `c` b -> r)
 exlrC h f g = h <$> f . exl <*> g . exr
 
 coerceConj :: (Conj c1, Conj c2) => a `c1` b -> a `c2` b
-coerceConj = exl ~><~ exr
+coerceConj = exl -><- exr
 
 swapConj :: Conj c => a `c` b -> b `c` a
-swapConj = exr ~><~ exl
+swapConj = exr -><- exl
 
 curryConj :: Conj p => (a `p` b -> r) -> (a -> b -> r)
-curryConj f = fmap f . (-><-)
+curryConj f = fmap f . inlr
 
 uncurryConj :: Conj p => (a -> b -> r) -> (a `p` b -> r)
 uncurryConj f = exlrC f id id
@@ -73,16 +71,16 @@ foldMapConj :: Conj p => (b -> m) -> (a `p` b -> m)
 foldMapConj f = f . exr
 
 traverseConj :: (Conj p, Applicative m) => (b -> m b') -> (a `p` b) -> m (a `p` b')
-traverseConj = exlrC (liftA2 (-><-)) pure
+traverseConj = exlrC (liftA2 inlr) pure
 
 bifoldMapConj :: (Conj p, Monoid m) => (a -> m) -> (b -> m) -> (a `p` b -> m)
 bifoldMapConj = exlrC (<>)
 
 bimapConj :: Conj p => (a -> a') -> (b -> b') -> (a `p` b -> a' `p` b')
-bimapConj = exlrC (-><-)
+bimapConj = exlrC inlr
 
 bitraverseConj :: (Conj p, Applicative m) => (a -> m a') -> (b -> m b') -> (a `p` b -> m (a' `p` b'))
-bitraverseConj = exlrC (liftA2 (-><-))
+bitraverseConj = exlrC (liftA2 inlr)
 
 
 -- Lifted projections

@@ -3,6 +3,7 @@ module Sequoia.Connective.Tensor
   type (⊗)(..)
 ) where
 
+import Control.Applicative (liftA2)
 import Sequoia.Conjunction
 import Sequoia.Polarity
 
@@ -16,6 +17,6 @@ infixr 7 ⊗, :⊗
 instance (Pos a, Pos b) => Polarized P (a ⊗ b) where
 
 instance Conj (⊗) where
-  (-><-) = (:⊗)
+  (-><-) = liftA2 (:⊗)
   exl (l :⊗ _) = l
   exr (_ :⊗ r) = r

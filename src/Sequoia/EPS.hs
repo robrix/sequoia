@@ -113,7 +113,7 @@ appE2 f s = (`appE` s) . appE f s
 infixl 7 ↑
 
 (<↑) :: (EnvPassing v e, Conj c) => (a `c` _Γ) `e` _Δ -> a -> _Γ `e` _Δ
-e <↑ a = inE (exE e . fmap (a -><-))
+e <↑ a = inE (exE e . fmap (inlr a))
 
 infixl 7 <↑
 
