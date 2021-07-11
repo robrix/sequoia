@@ -11,6 +11,7 @@ module Sequoia.Profunctor.D
   -- ** Construction
 , inD
 , inD'
+, inDV
   -- ** Elimination
 , exD
 , exDV
@@ -67,6 +68,9 @@ inD fw bw = D (dimap bw fw)
 
 inD' :: (K.Representable k, V.Representable v) => (a -> b) -> a --|D k v|-> b
 inD' f = inD (inV1 (f .)) (inK1 (. f))
+
+inDV :: (K.Representable k, V.Representable v) => (v a -> v b) -> v (a --|D k v|-> b)
+inDV f = inV (\ e -> inD f (inK1 (. dimap const ($ e) (exV1 f))))
 
 
 -- Elimination
