@@ -1,6 +1,7 @@
 module Sequoia.Conjunction
 ( -- * Conjunction
   Conj(..)
+, (~><~)
 , _exl
 , _exr
 , exlrC
@@ -39,6 +40,11 @@ instance Conj (,) where
   (-><-) = (,)
   exl = fst
   exr = snd
+
+(~><~) :: Conj c => (s -> a) -> (s -> b) -> (s -> (a `c` b))
+(l ~><~ r) s = l s -><- r s
+
+infix 4 ~><~
 
 _exl :: Conj c => Optic Lens (a `c` b) (a' `c` b) a a'
 _exl = lens exl (\ c -> (-><- exr c))
