@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Profunctor.Product
 ( (:*:)(..)
@@ -6,6 +7,7 @@ module Sequoia.Profunctor.Product
 import Control.Arrow ((***))
 import Data.Functor.Product
 import Data.Profunctor
+import Data.Profunctor.Rep
 import Data.Profunctor.Sieve
 
 newtype (p :*: q) a b = Product { runProduct :: (p a b, q a b) }
@@ -36,3 +38,9 @@ instance (Closed p, Closed q) => Closed (p :*: q) where
 
 instance (Sieve p f, Sieve q g) => Sieve (p :*: q) (Product f g) where
   sieve (Product (p, q)) a = Pair (sieve p a) (sieve q a)
+
+instance (Representable p, Representable q) => Representable (p :*: q) where
+  type Rep (p :*: q) = Product (Rep p) (Rep q)
+  tabulate f' = let f d = let Pair a b = f' d in (a, b) in Product
+    ( tabulate (fst . f)
+    , tabulate (snd . f) )
