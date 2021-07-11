@@ -99,7 +99,7 @@ exDK = snd . exD
 
 infixl 7 ↑
 
-(<↑) :: (K.Representable k, V.Representable v) => Conj c => (a `c` _Γ) --|D k v|-> _Δ -> a -> _Γ --|D k v|-> _Δ
+(<↑) :: (K.Representable k, V.Representable v, Conj c) => (a `c` _Γ) --|D k v|-> _Δ -> a -> _Γ --|D k v|-> _Δ
 f <↑ a = f Cat.<<< inD' (inlr a)
 
 infixl 7 <↑
