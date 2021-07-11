@@ -43,7 +43,7 @@ instance Conj (,) where
   exl = fst
   exr = snd
 
-(~><~) :: Conj c => (s -> a) -> (s -> b) -> (s -> (a `c` b))
+(~><~) :: Conj c => (s -> a) -> (s -> b) -> (s -> a `c` b)
 (l ~><~ r) s = l s -><- r s
 
 infix 4 ~><~
