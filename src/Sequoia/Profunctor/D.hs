@@ -29,7 +29,6 @@ module Sequoia.Profunctor.D
 , (↓>)
 ) where
 
-import           Control.Applicative (liftA2)
 import           Control.Category ((<<<), (>>>))
 import qualified Control.Category as Cat
 import           Data.Functor.Contravariant
@@ -39,6 +38,7 @@ import           Sequoia.Conjunction
 import           Sequoia.Continuation as K
 import           Sequoia.Disjunction
 import qualified Sequoia.Profunctor.K as Pro
+import           Sequoia.Profunctor.Product
 import qualified Sequoia.Profunctor.V as Pro
 import           Sequoia.Value as V
 
@@ -85,7 +85,7 @@ inDK f = inK (\ k -> k • inD (inV1 (\ a e -> f (inK id) • e ∘ a)) f)
 -- Elimination
 
 exD :: a --|D k v|-> b -> (v a -> v b, k b -> k a)
-exD = liftA2 (,) (`viewV` id) (`viewK` id)
+exD f = let (Pro.V v, Pro.K k) = runProduct (runD f (Product (Pro.V id, Pro.K id))) in (v, k)
 
 exDV :: a --|D k v|-> b -> (v a -> v b)
 exDV = fst . exD
