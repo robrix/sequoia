@@ -11,3 +11,7 @@ infixr 5 :+:
 
 instance (Profunctor p, Profunctor q) => Profunctor (p :+: q) where
   dimap f g = Sum . (dimap f g +++ dimap f g) . runSum
+
+instance (Strong p, Strong q) => Strong (p :+: q) where
+  first'  = Sum . (first'  +++ first' ) . runSum
+  second' = Sum . (second' +++ second') . runSum
