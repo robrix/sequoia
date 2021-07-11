@@ -1,10 +1,14 @@
 {-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE TypeFamilies #-}
 module Sequoia.Profunctor.D
 ( -- * Dual profunctor
   D(..)
   -- * Dual profunctor abstraction
 , Dual(..)
+  -- ** Mixfix notation
+, type (--|)
+, type (|->)
   -- ** Construction
 , inD'
   -- ** Elimination
@@ -56,6 +60,15 @@ class (Continuation k, Value v, Cat.Category f, Profunctor f) => Dual k v f | f 
 instance (Continuation k, Value v) => Dual k v (D k v) where
   inD fw bw = D (dimap bw fw)
   exD = liftA2 (,) (`viewV` id) (`viewK` id)
+
+
+-- Mixfix notation
+
+type l --|r = r l
+type l|-> r = l r
+
+infixr 6 --|
+infixr 5 |->
 
 
 -- Construction
