@@ -103,8 +103,8 @@ viewK f = Pro.runK . runD f . Pro.K
 
 infixl 7 ↑
 
-(<↑) :: (Contravariant k, Functor v) => Conj c => (a `c` _Γ) --|D k v|-> _Δ -> a -> _Γ --|D k v|-> _Δ
-f <↑ a = inD (exDV f . fmap (inlr a)) (contramap (inlr a) . exDK f)
+(<↑) :: (K.Representable k, V.Representable v) => Conj c => (a `c` _Γ) --|D k v|-> _Δ -> a -> _Γ --|D k v|-> _Δ
+f <↑ a = f Cat.<<< inD' (inlr a)
 
 infixl 7 <↑
 
