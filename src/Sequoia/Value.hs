@@ -18,7 +18,6 @@ module Sequoia.Value
 , (∘><∘)
 ) where
 
-import Control.Applicative
 import Data.Functor.Rep
 import Sequoia.Bijection
 import Sequoia.Conjunction
@@ -64,6 +63,6 @@ infixr 8 °
 
 
 (∘><∘) :: (Conj c, Representable v) => v a -> v b -> v (a `c` b)
-(∘><∘) = inV2 (liftA2 (-><-))
+(∘><∘) = inV2 (~><~)
 
 infix 3 ∘><∘
