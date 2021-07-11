@@ -19,3 +19,6 @@ instance (Strong p, Strong q) => Strong (p :*: q) where
 instance (Choice p, Choice q) => Choice (p :*: q) where
   left'  = Product . (left'  *** left')  . runProduct
   right' = Product . (right' *** right') . runProduct
+
+instance (Closed p, Closed q) => Closed (p :*: q) where
+  closed = Product . (closed  *** closed)  . runProduct
