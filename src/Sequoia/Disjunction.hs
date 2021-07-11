@@ -11,6 +11,8 @@ module Sequoia.Disjunction
 , bimapDisj
 , bitraverseDisj
   -- * Lifted injections
+, inlF
+, inrF
 , inlK
 , inrK
 , inlL
@@ -65,6 +67,11 @@ bitraverseDisj f g = fmap inl . f <--> fmap inr . g
 
 
 -- Lifted injections
+
+inlF :: (Functor f, Disj d) => f a -> f (a `d` b)
+inrF :: (Functor f, Disj d) => f b -> f (a `d` b)
+inlF = fmap inl
+inrF = fmap inr
 
 inlK :: (Contravariant k, Disj d) => k (a `d` b) -> k a
 inrK :: (Contravariant k, Disj d) => k (a `d` b) -> k b
