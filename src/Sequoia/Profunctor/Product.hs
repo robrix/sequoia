@@ -4,15 +4,20 @@ module Sequoia.Profunctor.Product
 ( (:*:)(..)
 ) where
 
-import Control.Arrow ((***))
-import Data.Functor.Product
-import Data.Profunctor
-import Data.Profunctor.Rep
-import Data.Profunctor.Sieve
+import           Control.Arrow ((***))
+import qualified Control.Category as Cat
+import           Data.Functor.Product
+import           Data.Profunctor
+import           Data.Profunctor.Rep
+import           Data.Profunctor.Sieve
 
 newtype (p :*: q) a b = Product { runProduct :: (p a b, q a b) }
 
 infixr 6 :*:
+
+instance (Cat.Category p, Cat.Category q) => Cat.Category (p :*: q) where
+  id = Product (Cat.id, Cat.id)
+  Product (fp, fq) . Product (gp, gq) = Product (fp Cat.. gp, fq Cat.. gq)
 
 instance (Profunctor p, Profunctor q) => Profunctor (p :*: q) where
   dimap f g = Product . (dimap f g *** dimap f g) . runProduct
