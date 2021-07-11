@@ -1,9 +1,11 @@
+{-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Profunctor.Sum
 ( (:+:)(..)
 ) where
 
 import Control.Arrow ((+++))
 import Data.Profunctor
+import Data.Profunctor.Sieve
 
 newtype (p :+: q) a b = Sum { runSum :: Either (p a b) (q a b) }
 
@@ -30,3 +32,6 @@ instance (Cochoice p, Cochoice q) => Cochoice (p :+: q) where
 
 instance (Closed p, Closed q) => Closed (p :+: q) where
   closed = Sum . (closed +++ closed) . runSum
+
+instance (Sieve p f, Sieve q f) => Sieve (p :+: q) f where
+  sieve (Sum s) a = either (`sieve` a) (`sieve` a) s
