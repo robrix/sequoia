@@ -1,8 +1,10 @@
 module Sequoia.Functor.Applicative
 ( Contrapply(..)
+, Contrapplicative(..)
 ) where
 
 import Data.Functor.Contravariant
+import Data.Functor.Contravariant.Rep
 
 class Contravariant k => Contrapply k where
   {-# MINIMAL contraliftA2 | contrap #-}
@@ -12,3 +14,7 @@ class Contravariant k => Contrapply k where
 
   contrap :: k a -> k b -> k (Either a b)
   contrap = contraliftA2 id
+
+class (Contrapply k, Representable k) => Contrapplicative k where
+  contrapure :: (a -> Rep k) -> k a
+  contrapure = tabulate
