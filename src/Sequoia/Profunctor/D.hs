@@ -4,7 +4,6 @@ module Sequoia.Profunctor.D
 ( -- * Dual profunctor
   _D
 , D(..)
-, Endpoint(..)
   -- ** Mixfix notation
 , type (--|)
 , type (|->)
@@ -29,6 +28,7 @@ module Sequoia.Profunctor.D
 
 import           Control.Category ((<<<), (>>>))
 import qualified Control.Category as Cat
+import           Data.Bifunctor (bimap)
 import           Data.Functor.Contravariant
 import           Data.Kind (Type)
 import           Data.Profunctor
@@ -36,7 +36,6 @@ import           Sequoia.Bijection
 import           Sequoia.Conjunction
 import           Sequoia.Continuation as K
 import           Sequoia.Disjunction
-import           Sequoia.Profunctor.Product
 import           Sequoia.Value as V
 
 -- Dual profunctor
@@ -44,21 +43,14 @@ import           Sequoia.Value as V
 _D :: a --|D k v|-> b <-> (v a -> v b, k b -> k a)
 _D = exD <-> uncurry inD
 
-newtype D k v a b = D { runD :: forall r s . Endpoint r s (k a) (v a) -> Endpoint r s (k b) (v b) }
+newtype D k v a b = D { runD :: forall r s . (s -> v a, k a -> r) -> (s -> v b, k b -> r) }
 
 instance (Contravariant k, Functor v) => Profunctor (D k v) where
-  dimap f g (D r) = D (dimap (contramap g) (fmap g) . r . dimap (contramap f) (fmap f))
+  dimap f g (D r) = D (bimap (rmap (fmap g)) (lmap (contramap g)) . r . bimap (rmap (fmap f)) (lmap (contramap f)))
 
 instance Cat.Category (D k v) where
   id = D id
   D f . D g = D (f . g)
-
-
-newtype Endpoint r s a b = Endpoint { runEndpoint :: (s -> b, a -> r) }
-  deriving (Functor)
-
-instance Profunctor (Endpoint r s) where
-  dimap f g = Endpoint . (rmap g *** lmap f) . runEndpoint
 
 
 -- Mixfix notation
@@ -73,7 +65,7 @@ infixr 5 |->
 -- Construction
 
 inD :: (v a -> v b) -> (k b -> k a) -> a --|D k v|-> b
-inD fw bw = D (dimap bw fw)
+inD fw bw = D (bimap (rmap fw) (lmap bw))
 
 inD' :: (K.Representable k, V.Representable v) => (a -> b) -> a --|D k v|-> b
 inD' f = inD (inV1 (f .)) (inK1 (. f))
@@ -89,7 +81,7 @@ inDK f = inD (inV1 (\ a e -> f (inK id) • e ∘ a)) f
 -- Elimination
 
 exD :: a --|D k v|-> b -> (v a -> v b, k b -> k a)
-exD f = runEndpoint (runD f (Endpoint (id, id)))
+exD f = runD f (id, id)
 
 exDV :: a --|D k v|-> b -> (v a -> v b)
 exDV = fst . exD
