@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Functor.K
 ( K(..)
@@ -12,8 +13,13 @@ import Sequoia.Functor.Applicative
 
 newtype K r a = K { runK :: a -> r }
   deriving (Monoid, Semigroup)
-  deriving (Contravariant, Representable) via Flip (->) r
+  deriving (Contravariant) via Flip (->) r
   deriving (Confunctor, Contrachoice, Contraclosed, Contracochoice, Contracosieve Identity, Contracostrong, Contracorepresentable, Contrarepresentable, Contrasieve Identity, Contrastrong) via Flip (->)
+
+instance Representable (K r) where
+  type Rep (K r) = r
+  tabulate = K
+  index = runK
 
 instance Adjunction (K r) (K r) where
   leftAdjunct  f a = K ((`runK` a) . f)
