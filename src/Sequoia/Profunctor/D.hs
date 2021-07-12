@@ -27,6 +27,7 @@ module Sequoia.Profunctor.D
 ) where
 
 import           Control.Applicative (liftA2)
+import           Control.Arrow ((***))
 import           Control.Category ((<<<), (>>>))
 import qualified Control.Category as Cat
 import           Data.Bifunctor (bimap)
@@ -34,15 +35,17 @@ import           Data.Functor.Contravariant
 import           Data.Kind (Type)
 import           Data.Profunctor
 import           Sequoia.Bijection
+import qualified Sequoia.CPS as C
 import           Sequoia.Conjunction
 import           Sequoia.Continuation as K
 import           Sequoia.Disjunction
+import qualified Sequoia.EPS as E
 import           Sequoia.Value as V
 
 -- Dual profunctor
 
-_D :: a --|D k v|-> b <-> (k b -> k a, v a -> v b)
-_D = exD <-> uncurry inD
+_D :: a --|D k v|-> b <-> (C.C k a b, E.E v a b)
+_D = (C.C *** E.E) . exD <-> uncurry inD . (C.runC *** E.runE)
 
 newtype D k v a b = D { runD :: Endpoint k v a b }
 
