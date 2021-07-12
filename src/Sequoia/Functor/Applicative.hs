@@ -5,6 +5,8 @@ module Sequoia.Functor.Applicative
 import Data.Functor.Contravariant
 
 class Contravariant k => Contrapplicative k where
+  {-# MINIMAL contraliftA2 | contrap #-}
+
   contraliftA2 :: (c -> Either a b) -> k a -> k b -> k c
   contraliftA2 f a b = contramap f (contrap a b)
 
