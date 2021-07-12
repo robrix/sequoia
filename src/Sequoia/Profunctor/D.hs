@@ -7,6 +7,7 @@ module Sequoia.Profunctor.D
 , type (|->)
   -- ** Construction
 , inD'
+, inDV
   -- ** Elimination
 , evalD
   -- ** Composition
@@ -67,6 +68,9 @@ infixr 5 |->
 
 inD' :: (a -> b) -> a --|D r s|-> b
 inD' f = D (\ e a b -> b (f (a e)))
+
+inDV :: (V s a -> V s b) -> a --|D r s|-> b
+inDV f = D (\ e a b -> b (e ∘ f (V a)))
 
 
 -- Elimination
