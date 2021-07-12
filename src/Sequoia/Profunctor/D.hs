@@ -52,6 +52,9 @@ instance Cat.Category (D k v) where
   id = D id
   D f . D g = D (f . g)
 
+instance (Contravariant k, Functor v) => Functor (D k v a) where
+  fmap f (D r) = D (bimap (lmap (contramap f)) (rmap (fmap f)) . r)
+
 
 -- Mixfix notation
 
