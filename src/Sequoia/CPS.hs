@@ -80,7 +80,7 @@ import           Sequoia.Disjunction
 
 -- ContPassing
 
-class (Cat.Category c, Continuation k, Profunctor c) => ContPassing k c | c -> k where
+class (Cat.Category c, Representable k, Profunctor c) => ContPassing k c | c -> k where
   inC :: (k b -> k a) -> a `c` b
   exC :: a `c` b   -> (k b -> k a)
 
@@ -170,62 +170,62 @@ shiftC f = inC (evalC . f)
 
 newtype C k a b = C { runC :: k b -> k a }
 
-instance Continuation k => ContPassing k (C k) where
+instance Representable k => ContPassing k (C k) where
   inC = C
   exC = runC
 
-instance Continuation k => Cat.Category (C k) where
+instance Representable k => Cat.Category (C k) where
   id = idC
   (.) = composeC
 
-instance Continuation k => Profunctor (C k) where
+instance Representable k => Profunctor (C k) where
   dimap = dimapC
   lmap = lmapC
   rmap = rmapC
 
-instance Continuation k => Functor (C k a) where
+instance Representable k => Functor (C k a) where
   fmap = rmap
 
-instance Continuation k => Applicative (C k a) where
+instance Representable k => Applicative (C k a) where
   pure = pureC
   (<*>) = apC
   liftA2 = liftA2C
 
-instance Continuation k => Monad (C k a) where
+instance Representable k => Monad (C k a) where
   (>>=) = bindC
 
-instance Continuation k => Arrow (C k) where
+instance Representable k => Arrow (C k) where
   arr = arrC
   first = firstC
   second = secondC
   (***) = splitPrdC
   (&&&) = fanoutC
 
-instance Continuation k => ArrowChoice (C k) where
+instance Representable k => ArrowChoice (C k) where
   left = leftC
   right = rightC
   (+++) = splitSumC
   (|||) = faninC
 
-instance Continuation k => ArrowApply (C k) where
+instance Representable k => ArrowApply (C k) where
   app = applyC
 
-instance Continuation k => Choice (C k) where
+instance Representable k => Choice (C k) where
   left' = left
   right' = right
 
-instance Continuation k => Strong (C k) where
+instance Representable k => Strong (C k) where
   first' = first
   second' = second
 
-instance Continuation k => Traversing (C k) where
+instance Representable k => Traversing (C k) where
   traverse' = wanderC traverse
   wander = wanderC
 
-instance Continuation k => Sieve (C k) (Cont k) where
+instance Representable k => Sieve (C k) (Cont k) where
   sieve = sieveC
 
-instance Continuation k => Pro.Representable (C k) where
+instance Representable k => Pro.Representable (C k) where
   type Rep (C k) = Cont k
   tabulate = tabulateC
 

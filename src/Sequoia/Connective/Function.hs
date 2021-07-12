@@ -16,16 +16,16 @@ import           Sequoia.Polarity
 
 -- Implication
 
-appFun :: Continuation k => (a ~~k~> b) -> (a -> k **b)
+appFun :: Representable k => (a ~~k~> b) -> (a -> k **b)
 appFun = (-<<) . getFun
 
-appFun2 :: Continuation k => (a ~~k~> b ~~k~> c) -> (a -> b -> k **c)
+appFun2 :: Representable k => (a ~~k~> b ~~k~> c) -> (a -> b -> k **c)
 appFun2 f a b = inDN (appC2 f a b)
 
 newtype Fun k a b = Fun { getFun :: k b -> k a }
   deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via C k
 
-instance Continuation k => ContPassing k (Fun k) where
+instance Representable k => ContPassing k (Fun k) where
   inC = Fun
   exC = getFun
 

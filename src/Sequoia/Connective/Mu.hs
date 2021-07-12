@@ -29,7 +29,7 @@ newtype MuF k f a = MuF { getMuF :: Down (FAlg k f a) ~~k~> a }
 
 instance (Pos (f a), Neg a) => Polarized N (MuF k f a) where
 
-mu :: Continuation k => ForAll k N (MuF k f) -> Mu k f
+mu :: Representable k => ForAll k N (MuF k f) -> Mu k f
 mu r = Mu (dnE (mapDN getMuF (runForAll r)))
 
 foldMu :: ContPassing k c => Neg a => f a `c` a -> Mu k f `c` a

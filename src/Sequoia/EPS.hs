@@ -73,7 +73,7 @@ import           Sequoia.Value
 
 -- EPS
 
-class (Cat.Category e, Value v, Profunctor e) => EnvPassing v e | e -> v where
+class (Cat.Category e, Representable v, Profunctor e) => EnvPassing v e | e -> v where
   inE :: (v a -> v b) -> a `e` b
   exE :: a `e` b    -> (v a -> v b)
 
@@ -238,56 +238,56 @@ cotabulateE = tabulateE
 
 newtype E v a b = E { runE :: v a -> v b }
 
-instance Value v => EnvPassing v (E v) where
+instance Representable v => EnvPassing v (E v) where
   inE = E
   exE = runE
 
-instance Value v => Functor (E v a) where
+instance Representable v => Functor (E v a) where
   fmap = fmapE
 
-instance Value v => Distributive (E v a) where
+instance Representable v => Distributive (E v a) where
   distribute = distributeE
   collect = collectE
 
-instance Value v => Representable (E v b) where
+instance Representable v => Representable (E v b) where
   type Rep (E v b) = Store (VRep v) b
   tabulate = tabulateE
   index = indexE
 
-instance Value v => Applicative (E v a) where
+instance Representable v => Applicative (E v a) where
   pure = pureE
   (<*>) = apE
   liftA2 = liftA2E
 
-instance Value v => Monad (E v a) where
+instance Representable v => Monad (E v a) where
   (>>=) = bindE
 
-instance (Value v, Monoid (VRep v), Monoid a) => Comonad (E v a) where
+instance (Representable v, Monoid (VRep v), Monoid a) => Comonad (E v a) where
   extract = extractE
   extend = extendE
   duplicate = duplicateE
 
-instance Value v => Cat.Category (E v) where
+instance Representable v => Cat.Category (E v) where
   id = idE
   (.) = composeE
 
-instance Value v => Profunctor (E v) where
+instance Representable v => Profunctor (E v) where
   dimap = dimapE
   lmap = lmapE
   rmap = rmapE
 
-instance Value v => Cochoice (E v) where
+instance Representable v => Cochoice (E v) where
   unleft = unleftE
   unright = unrightE
 
-instance Value v => Costrong (E v) where
+instance Representable v => Costrong (E v) where
   unfirst  = unfirstE
   unsecond = unsecondE
 
-instance (Value v, s ~ VRep v) => Cosieve (E v) (Store s) where
+instance (Representable v, s ~ VRep v) => Cosieve (E v) (Store s) where
   cosieve = cosieveE
 
-instance Value v => Pro.Corepresentable (E v) where
+instance Representable v => Pro.Corepresentable (E v) where
   type Corep (E v) = Store (VRep v)
 
   cotabulate = cotabulateE

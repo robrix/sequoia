@@ -194,10 +194,10 @@ _DN :: (Representable k, Representable k') => Optic Iso (ContFn k a) (ContFn k' 
 _DN = inDN <-> exDN
 
 
-mapDN :: Continuation k => (a -> b) -> (k **a -> k **b)
+mapDN :: Representable k => (a -> b) -> (k **a -> k **b)
 mapDN f = inK1 (lmap (contramap f))
 
-hoistDN :: Continuation j => (forall x . j x <-> k x) -> (j **a -> k **a)
+hoistDN :: Representable j => (forall x . j x <-> k x) -> (j **a -> k **a)
 hoistDN b = (~> b) . contramap (b <~)
 
 
