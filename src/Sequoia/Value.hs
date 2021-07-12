@@ -19,6 +19,7 @@ module Sequoia.Value
 , (∘)
   -- * Computation
 , liftV2
+, mapVRep
 , (>∘∘<)
 , (<∘∘>)
   -- * Env monad
@@ -80,6 +81,9 @@ infixr 8 ∘
 
 liftV2 :: Representable v => (a -> b -> c) -> v a -> v b -> v c
 liftV2 f = inV2 (liftA2 f)
+
+mapVRep :: (Representable v, Representable v') => (VRep v' -> VRep v) -> v a -> v' a
+mapVRep f = inV . (. f) . exV
 
 
 (>∘∘<) :: (Conj c, Representable v) => v a -> v b -> v (a `c` b)
