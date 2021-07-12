@@ -34,6 +34,8 @@ module Sequoia.Continuation
 , (<••>)
 , (>>-)
 , (-<<)
+  -- * Computation
+, liftK2K2
   -- * Double negation
 , type (**)
 , ContFn
@@ -170,6 +172,12 @@ infixl 1 >>-
 f -<< a = inK ((• a) . f)
 
 infixr 1 -<<
+
+
+-- Computation
+
+liftK2K2 :: (Representable k) => (a -> b -> c) -> (k a -> k r) -> (k b -> k r) -> (k c -> k r)
+liftK2K2 f kar kbr kc = inK (\ r -> kar (inK (\ a -> kbr (inK (\ b -> kc • f a b)) • r)) • r)
 
 
 -- Double negation
