@@ -112,3 +112,6 @@ instance Representable v => Monad (Env v) where
 
 class (Functor v, Monad m) => MonadV v m | m -> v where
   use :: v a -> m a
+
+instance Representable v => MonadV v (Env v) where
+  use = Env
