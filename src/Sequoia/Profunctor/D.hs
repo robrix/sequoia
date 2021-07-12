@@ -26,6 +26,7 @@ module Sequoia.Profunctor.D
 , (↓>)
 ) where
 
+import           Control.Applicative (liftA2)
 import           Control.Category ((<<<), (>>>))
 import qualified Control.Category as Cat
 import           Data.Bifunctor (bimap)
@@ -43,23 +44,33 @@ import           Sequoia.Value as V
 _D :: a --|D k v|-> b <-> (k b -> k a, v a -> v b)
 _D = exD <-> uncurry inD
 
-newtype D k v a b = D { runD :: forall r s . Endpoint r s k v a -> Endpoint r s k v b }
+newtype D k v a b = D { runD :: Endpoint k v a b }
 
 instance (Contravariant k, Functor v) => Profunctor (D k v) where
-  dimap f g (D r) = D (mapEndpoint g . r . mapEndpoint f)
+  dimap f g = D . dimapEndpoint f g . runD
 
 instance Cat.Category (D k v) where
-  id = D id
-  D f . D g = D (f . g)
+  id = D (id, id)
+  D f . D g = D (fst g . fst f, snd f . snd g)
 
 instance (Contravariant k, Functor v) => Functor (D k v a) where
-  fmap f (D r) = D (mapEndpoint f . r)
+  fmap f = D . dimapEndpoint id f . runD
+
+instance (K.Representable k, V.Representable v) => Applicative (D k v a) where
+  pure a = D (\ ka -> inK (const (ka • a)), const (inV0 a))
+
+  f <*> a = D (let (k', v') = runD f ; (k'', v'') = runD a in (liftK2K2 ($) k' k'', liftA2 (liftV2 ($)) v' v''))
+
+instance (K.Representable k, V.Representable v) => Monad (D k v c) where
+  D (k, v) >>= f = D
+    ( inK . \ b c -> k (inK (\ a -> exDK (f a) b • c)) • c
+    , inV . \ c e -> e ∘ exDV (f (e ∘ v c)) c)
 
 
-type Endpoint r s k v a = (k a -> r, s -> v a)
+type Endpoint k v a b = (k b -> k a, v a -> v b)
 
-mapEndpoint :: (Contravariant k, Functor v) => (a -> b) -> Endpoint r s k v a -> Endpoint r s k v b
-mapEndpoint f = bimap (lmap (contramap f)) (rmap (fmap f))
+dimapEndpoint :: (Contravariant k, Functor v) => (a' -> a) -> (b -> b') -> Endpoint k v a b -> Endpoint k v a' b'
+dimapEndpoint f g = bimap (dimap (contramap g) (contramap f)) (dimap (fmap f) (fmap g))
 
 
 -- Mixfix notation
@@ -74,7 +85,7 @@ infixr 5 |->
 -- Construction
 
 inD :: (k b -> k a) -> (v a -> v b) -> a --|D k v|-> b
-inD bw fw = D (bimap (lmap bw) (rmap fw))
+inD bw fw = D (bw, fw)
 
 inD' :: (K.Representable k, V.Representable v) => (a -> b) -> a --|D k v|-> b
 inD' f = inD (inK1 (. f)) (inV1 (f .))
@@ -90,7 +101,7 @@ inDK f = inD f (inV1 (\ a e -> f (inK id) • e ∘ a))
 -- Elimination
 
 exD :: a --|D k v|-> b -> (k b -> k a, v a -> v b)
-exD f = runD f (id, id)
+exD = runD
 
 exDK :: a --|D k v|-> b -> (k b -> k a)
 exDK = fst . exD
