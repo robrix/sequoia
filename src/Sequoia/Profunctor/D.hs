@@ -43,7 +43,7 @@ import           Sequoia.Value as V
 _D :: a --|D k v|-> b <-> (k b -> k a, v a -> v b)
 _D = exD <-> uncurry inD
 
-newtype D k v a b = D { runD :: forall r s . (k a -> r, s -> v a) -> (k b -> r, s -> v b) }
+newtype D k v a b = D { runD :: forall r s . Endpoint r s k v a -> Endpoint r s k v b }
 
 instance (Contravariant k, Functor v) => Profunctor (D k v) where
   dimap f g (D r) = D (mapEndpoint g . r . mapEndpoint f)
@@ -55,7 +55,10 @@ instance Cat.Category (D k v) where
 instance (Contravariant k, Functor v) => Functor (D k v a) where
   fmap f (D r) = D (mapEndpoint f . r)
 
-mapEndpoint :: (Contravariant k, Functor v) => (a -> b) -> (k a -> r, s -> v a) -> (k b -> r, s -> v b)
+
+type Endpoint r s k v a = (k a -> r, s -> v a)
+
+mapEndpoint :: (Contravariant k, Functor v) => (a -> b) -> Endpoint r s k v a -> Endpoint r s k v b
 mapEndpoint f = bimap (lmap (contramap f)) (rmap (fmap f))
 
 
