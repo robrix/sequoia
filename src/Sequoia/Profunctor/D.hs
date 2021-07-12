@@ -15,6 +15,7 @@ module Sequoia.Profunctor.D
 , exD
 , exDV
 , exDK
+, evalD
   -- ** Composition
 , (<<<)
 , (>>>)
@@ -105,6 +106,10 @@ exDK = fst . exD
 
 exDV :: a --|D k v|-> b -> E.E v a b
 exDV = snd . exD
+
+
+evalD :: (K.Representable k, _Δ ~ KRep k) => _Γ --|D k v|-> _Δ -> k _Γ
+evalD = (idK ↓)
 
 
 -- Computation
