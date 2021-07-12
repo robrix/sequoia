@@ -15,8 +15,6 @@ module Sequoia.Profunctor.D
 , inDK
   -- ** Elimination
 , exD
-, exDV
-, exDK
 , evalD
   -- ** Composition
 , (<<<)
@@ -30,7 +28,6 @@ module Sequoia.Profunctor.D
 
 import           Control.Category ((<<<), (>>>))
 import qualified Control.Category as Cat
-import           Data.Bifunctor (bimap)
 import           Data.Kind (Type)
 import           Data.Profunctor
 import           Sequoia.Bijection
@@ -48,31 +45,25 @@ import           Sequoia.Value as V
 _D :: a --|D r s|-> b <-> (C (K r) a b, E (V s) a b)
 _D = exD <-> uncurry inD
 
-newtype D r s a b = D { runD :: Endpoint r s a b }
+data D r s a b = D { exDK :: C (K r) a b, exDV :: E (V s) a b }
 
 instance Profunctor (D r s) where
-  dimap f g = D . dimapEndpoint f g . runD
+  dimap f g (D k v) = D (dimap f g k) (dimap f g v)
 
 instance Cat.Category (D r s) where
-  id = D (Cat.id, Cat.id)
-  D f . D g = D (bimap (fst f Cat..) (snd f Cat..) g)
+  id = D Cat.id Cat.id
+  D f1 f2 . D g1 g2 = D (f1 Cat.. g1) (f2 Cat.. g2)
 
 instance Functor (D r s a) where
-  fmap f = D . dimapEndpoint id f . runD
+  fmap = rmap
 
 instance Applicative (D r s a) where
-  pure a = D (pure a, pure a)
+  pure a = D (pure a) (pure a)
 
-  D (fk, fv) <*> D (ak, av) = D (fk <*> ak, fv <*> av)
+  D fk fv <*> D ak av = D (fk <*> ak) (fv <*> av)
 
 instance Monad (D r s c) where
-  D (k, v) >>= f = D (k >>= exDK . f, v >>= exDV . f)
-
-
-type Endpoint r s a b = (C (K r) a b, E (V s) a b)
-
-dimapEndpoint :: (a' -> a) -> (b -> b') -> Endpoint r s a b -> Endpoint r s a' b'
-dimapEndpoint f g = bimap (dimap f g) (dimap f g)
+  D k v >>= f = D (k >>= exDK . f) (v >>= exDV . f)
 
 
 -- Mixfix notation
@@ -87,7 +78,7 @@ infixr 5 |->
 -- Construction
 
 inD :: C (K r) a b -> E (V s) a b -> a --|D r s|-> b
-inD bw fw = D (bw, fw)
+inD = D
 
 inD1 :: ((b -> r) -> (a -> r)) -> ((s -> a) -> (s -> b)) -> a --|D r s|-> b
 inD1 k v = inD (inC1 k) (inE1 v)
@@ -108,15 +99,8 @@ inDK f = inD f (inE1 (\ a e -> exC f (inK id) • e ∘ a))
 
 -- Elimination
 
-exD :: a --|D r s|-> b -> Endpoint r s a b
-exD = runD
-
-exDK :: a --|D r s|-> b -> C (K r) a b
-exDK = fst . exD
-
-exDV :: a --|D r s|-> b -> E (V s) a b
-exDV = snd . exD
-
+exD :: a --|D r s|-> b -> (C (K r) a b, E (V s) a b)
+exD d = (exDK d, exDV d)
 
 evalD :: a --|D r s|-> r -> K r a
 evalD = (idK ↓)
