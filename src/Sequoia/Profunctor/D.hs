@@ -32,6 +32,7 @@ import           Data.Bifunctor (bimap)
 import           Data.Functor.Contravariant
 import           Data.Kind (Type)
 import           Data.Profunctor
+import           Data.Tuple (swap)
 import           Sequoia.Bijection
 import           Sequoia.Conjunction
 import           Sequoia.Continuation as K
@@ -41,7 +42,7 @@ import           Sequoia.Value as V
 -- Dual profunctor
 
 _D :: a --|D k v|-> b <-> (v a -> v b, k b -> k a)
-_D = exD <-> uncurry inD
+_D = exD <-> uncurry inD . swap
 
 newtype D k v a b = D { runD :: forall r s . (s -> v a, k a -> r) -> (s -> v b, k b -> r) }
 
@@ -64,18 +65,18 @@ infixr 5 |->
 
 -- Construction
 
-inD :: (v a -> v b) -> (k b -> k a) -> a --|D k v|-> b
-inD fw bw = D (bimap (rmap fw) (lmap bw))
+inD :: (k b -> k a) -> (v a -> v b) -> a --|D k v|-> b
+inD bw fw = D (bimap (rmap fw) (lmap bw))
 
 inD' :: (K.Representable k, V.Representable v) => (a -> b) -> a --|D k v|-> b
-inD' f = inD (inV1 (f .)) (inK1 (. f))
+inD' f = inD (inK1 (. f)) (inV1 (f .))
 
 inDV :: (K.Representable k, V.Representable v) => (v a -> v b) -> v (a --|D k v|-> b)
-inDV f = inV (\ e -> inD f (inK1 (. dimap const ($ e) (exV1 f))))
+inDV f = inV (\ e -> inD (inK1 (. dimap const ($ e) (exV1 f))) f)
 
 -- FIXME: this is quite limited by the need for the continuation to return locally at b.
 inDK :: (K.Representable k, V.Representable v, K.Rep k ~ b) => (k b -> k a) -> a --|D k v|-> b
-inDK f = inD (inV1 (\ a e -> f (inK id) • e ∘ a)) f
+inDK f = inD f (inV1 (\ a e -> f (inK id) • e ∘ a))
 
 
 -- Elimination
@@ -109,6 +110,6 @@ infixl 8 ↓
 
 -- FIXME: this is quite limited by the need for the continuation to return locally at _Δ.
 (↓>) :: (K.Representable k, Functor v, K.Rep k ~ _Δ, Disj d) => k a -> _Γ --|D k v|-> (_Δ `d` a) -> _Γ --|D k v|-> _Δ
-a ↓> f = inD (fmap (id <--> (a •))) (<••> a) <<< f
+a ↓> f = inD (<••> a) (fmap (id <--> (a •))) <<< f
 
 infixr 9 ↓>
