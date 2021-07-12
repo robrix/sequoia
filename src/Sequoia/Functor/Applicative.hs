@@ -16,10 +16,10 @@ class Contravariant k => Contrapply k where
   contrap = contraliftA2 id
 
   coapl :: k a -> k b -> k a
-  coapl a b = contraliftA2 Left a b
+  coapl = contraliftA2 Left
 
   coapr :: k a -> k b -> k b
-  coapr a b = contraliftA2 Right a b
+  coapr = contraliftA2 Right
 
 class (Contrapply k, Representable k) => Contrapplicative k where
   contrapure :: (a -> Rep k) -> k a

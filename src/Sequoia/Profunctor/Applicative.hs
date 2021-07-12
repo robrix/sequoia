@@ -14,10 +14,10 @@ class Profunctor p => Coapply p where
   coap = coliftA2 id
 
   coapl :: p a c -> p b c -> p a c
-  coapl a b = coliftA2 Left a b
+  coapl = coliftA2 Left
 
   coapr :: p a c -> p b c -> p b c
-  coapr a b = coliftA2 Right a b
+  coapr = coliftA2 Right
 
 instance Coapply (->) where
   coliftA2 f a b = either a b . f
