@@ -1,2 +1,7 @@
 module Sequoia.Functor.Applicative
-() where
+( Contrapplicative
+) where
+
+import Data.Functor.Contravariant
+
+class Contravariant k => Contrapplicative k where
