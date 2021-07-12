@@ -98,7 +98,7 @@ f ↑ a = V (K . flip (exD f a))
 infixl 7 ↑
 
 (<↑) :: Conj c => (a `c` _Γ) --|D r s|-> _Δ -> a -> _Γ --|D r s|-> _Δ
-f <↑ a = f Cat.<<< inD' (inlr a)
+f <↑ a = f <<< inD' (inlr a)
 
 infixl 7 <↑
 
