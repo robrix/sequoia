@@ -16,11 +16,13 @@ module Sequoia.Value
 , exV2
 , (∘)
 , (>∘∘<)
+, (<∘∘>)
 ) where
 
 import Data.Functor.Rep
 import Sequoia.Bijection
 import Sequoia.Conjunction
+import Sequoia.Disjunction
 import Sequoia.Functor.V
 
 class Representable v => Value v
@@ -66,3 +68,9 @@ infixr 8 ∘
 (>∘∘<) = inV2 (>--<)
 
 infix 3 >∘∘<
+
+
+(<∘∘>) :: (Disj d, Representable v) => (v a -> v r) -> (v b -> v r) -> (v (a `d` b) -> v r)
+(l <∘∘> r) ab = inV (\ e -> e ∘ (l . inV0 <--> r . inV0) (e ∘ ab))
+
+infix 3 <∘∘>
