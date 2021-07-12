@@ -116,6 +116,7 @@ instance Representable v => Monad (Env v) where
 
 class (Representable v, Monad m) => MonadV v m | m -> v where
   use :: v a -> m a
+  use v = (∘ v) <$> env
 
   env :: m (Rep v)
   env = use (inV id)
