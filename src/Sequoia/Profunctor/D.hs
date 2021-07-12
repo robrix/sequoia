@@ -36,9 +36,7 @@ import           Sequoia.Bijection
 import           Sequoia.Conjunction
 import           Sequoia.Continuation as K
 import           Sequoia.Disjunction
-import           Sequoia.Profunctor.K
 import           Sequoia.Profunctor.Product
-import           Sequoia.Profunctor.V
 import           Sequoia.Value as V
 
 -- Dual profunctor
@@ -46,7 +44,7 @@ import           Sequoia.Value as V
 _D :: a --|D k v|-> b <-> (v a -> v b, k b -> k a)
 _D = exD <-> uncurry inD
 
-newtype D k v a b = D { runD :: forall p . Profunctor p => k a `p` v a -> k b `p` v b }
+newtype D k v a b = D { runD :: forall r s . Endpoint r s (k a) (v a) -> Endpoint r s (k b) (v b) }
 
 instance (Contravariant k, Functor v) => Profunctor (D k v) where
   dimap f g (D r) = D (dimap (contramap g) (fmap g) . r . dimap (contramap f) (fmap f))
@@ -56,11 +54,11 @@ instance Cat.Category (D k v) where
   D f . D g = D (f . g)
 
 
-newtype Endpoint k v a b = Endpoint { runEndpoint :: (k a, v b) }
+newtype Endpoint r s a b = Endpoint { runEndpoint :: (s -> b, a -> r) }
   deriving (Functor)
 
-instance (Contravariant k, Functor v) => Profunctor (Endpoint k v) where
-  dimap f g = Endpoint . (contramap f *** fmap g) . runEndpoint
+instance Profunctor (Endpoint r s) where
+  dimap f g = Endpoint . (rmap g *** lmap f) . runEndpoint
 
 
 -- Mixfix notation
@@ -91,7 +89,7 @@ inDK f = inD (inV1 (\ a e -> f (inK id) • e ∘ a)) f
 -- Elimination
 
 exD :: a --|D k v|-> b -> (v a -> v b, k b -> k a)
-exD f = (runV *** runK) (runProduct (runD f (Product (V id, K id))))
+exD f = runEndpoint (runD f (Endpoint (id, id)))
 
 exDV :: a --|D k v|-> b -> (v a -> v b)
 exDV = fst . exD
