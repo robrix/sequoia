@@ -108,7 +108,7 @@ exDV :: a --|D k v|-> b -> E.E v a b
 exDV = snd . exD
 
 
-evalD :: (K.Representable k, _Δ ~ KRep k) => _Γ --|D k v|-> _Δ -> k _Γ
+evalD :: K.Representable k => a --|D k v|-> KRep k -> k a
 evalD = (idK ↓)
 
 
