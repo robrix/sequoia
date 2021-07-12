@@ -9,6 +9,7 @@ module Sequoia.Profunctor.D
   -- ** Construction
 , inD
 , inD1
+, inD1'
 , inD'
 , inDV
 , inDK
@@ -90,6 +91,9 @@ inD bw fw = D (bw, fw)
 
 inD1 :: ((b -> r) -> (a -> r)) -> ((s -> a) -> (s -> b)) -> a --|D r s|-> b
 inD1 k v = inD (inC1 k) (inE1 v)
+
+inD1' :: (K r b -> (a -> r)) -> (V s a -> (s -> b)) -> a --|D r s|-> b
+inD1' k v = inD (inC1' k) (inE1' v)
 
 inD' :: (a -> b) -> a --|D r s|-> b
 inD' f = inD (inC1 (. f)) (inE1 (f .))
