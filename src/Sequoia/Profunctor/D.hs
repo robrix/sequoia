@@ -32,7 +32,6 @@ import           Data.Bifunctor (bimap)
 import           Data.Functor.Contravariant
 import           Data.Kind (Type)
 import           Data.Profunctor
-import           Data.Tuple (swap)
 import           Sequoia.Bijection
 import           Sequoia.Conjunction
 import           Sequoia.Continuation as K
@@ -44,10 +43,10 @@ import           Sequoia.Value as V
 _D :: a --|D k v|-> b <-> (k b -> k a, v a -> v b)
 _D = exD <-> uncurry inD
 
-newtype D k v a b = D { runD :: forall r s . (s -> v a, k a -> r) -> (s -> v b, k b -> r) }
+newtype D k v a b = D { runD :: forall r s . (k a -> r, s -> v a) -> (k b -> r, s -> v b) }
 
 instance (Contravariant k, Functor v) => Profunctor (D k v) where
-  dimap f g (D r) = D (bimap (rmap (fmap g)) (lmap (contramap g)) . r . bimap (rmap (fmap f)) (lmap (contramap f)))
+  dimap f g (D r) = D (bimap (lmap (contramap g)) (rmap (fmap g)) . r . bimap (lmap (contramap f)) (rmap (fmap f)))
 
 instance Cat.Category (D k v) where
   id = D id
@@ -66,7 +65,7 @@ infixr 5 |->
 -- Construction
 
 inD :: (k b -> k a) -> (v a -> v b) -> a --|D k v|-> b
-inD bw fw = D (bimap (rmap fw) (lmap bw))
+inD bw fw = D (bimap (lmap bw) (rmap fw))
 
 inD' :: (K.Representable k, V.Representable v) => (a -> b) -> a --|D k v|-> b
 inD' f = inD (inK1 (. f)) (inV1 (f .))
@@ -82,7 +81,7 @@ inDK f = inD f (inV1 (\ a e -> f (inK id) • e ∘ a))
 -- Elimination
 
 exD :: a --|D k v|-> b -> (k b -> k a, v a -> v b)
-exD f = swap (runD f (id, id))
+exD f = runD f (id, id)
 
 exDK :: a --|D k v|-> b -> (k b -> k a)
 exDK = fst . exD
