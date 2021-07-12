@@ -1,10 +1,10 @@
 module Sequoia.Functor.Applicative
-( Contrapplicative(..)
+( Contrapply(..)
 ) where
 
 import Data.Functor.Contravariant
 
-class Contravariant k => Contrapplicative k where
+class Contravariant k => Contrapply k where
   {-# MINIMAL contraliftA2 | contrap #-}
 
   contraliftA2 :: (c -> Either a b) -> k a -> k b -> k c

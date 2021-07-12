@@ -19,6 +19,6 @@ instance Adjunction (K r) (K r) where
   leftAdjunct  f a = K ((`runK` a) . f)
   rightAdjunct f b = K ((`runK` b) . f)
 
-instance Contrapplicative (K r) where
+instance Contrapply (K r) where
   contraliftA2 f (K a) (K b) = K (either a b . f)
   contrap (K a) (K b) = K (either a b)
