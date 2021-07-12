@@ -13,6 +13,9 @@ class Profunctor p => Coapplicative p where
   coap :: p a c -> p b c -> p (Either a b) c
   coap = coliftA2 id
 
+  coapl :: p a c -> p b c -> p a c
+  coapl a b = coliftA2 Left a b
+
 instance Coapplicative (->) where
   coliftA2 f a b = either a b . f
   coap = either
