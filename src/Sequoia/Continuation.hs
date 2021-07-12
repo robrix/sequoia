@@ -252,7 +252,7 @@ exCont = lmap inK . exK . runCont
 
 -- Monadic abstraction
 
-class (Contravariant k, Monad m) => MonadK k m | m -> k where
+class (Representable k, Monad m) => MonadK k m | m -> k where
   jump :: k **a -> m a
 
 instance Representable k => MonadK k (Cont k) where
