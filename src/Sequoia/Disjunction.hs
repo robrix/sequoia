@@ -6,6 +6,8 @@ module Sequoia.Disjunction
 , exlD
 , exrD
 , coerceDisj
+, leftDisj
+, rightDisj
 , foldMapDisj
 , traverseDisj
 , bifoldMapDisj
@@ -53,6 +55,12 @@ exrD = const Nothing <--> Just
 
 coerceDisj :: (Disj c1, Disj c2) => a `c1` b -> a `c2` b
 coerceDisj = inl <--> inr
+
+leftDisj :: (Disj d, Choice p) => p a b -> p (d a c) (d b c)
+leftDisj = dimap coerceDisj coerceDisj . left'
+
+rightDisj :: (Disj d, Choice p) => p a b -> p (d c a) (d c b)
+rightDisj = dimap coerceDisj coerceDisj . right'
 
 foldMapDisj :: (Disj p, Monoid m) => (b -> m) -> (a `p` b) -> m
 foldMapDisj = (const mempty <-->)
