@@ -21,3 +21,4 @@ instance Adjunction (K r) (K r) where
 
 instance Contrapplicative (K r) where
   contraliftA2 f (K a) (K b) = K (either a b . f)
+  contrap (K a) (K b) = K (either a b)
