@@ -95,3 +95,8 @@ infix 3 <∘∘>
 
 newtype Env v a = Env { runEnv :: v a }
   deriving (Functor)
+
+instance Representable v => Applicative (Env v) where
+  pure a = Env (pureRep a)
+
+  Env f <*> Env a = Env (apRep f a)
