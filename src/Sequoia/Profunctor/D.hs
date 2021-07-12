@@ -10,8 +10,8 @@ module Sequoia.Profunctor.D
 , inDK
 , inDV
   -- ** Elimination
-, evalD
 , exDK
+, evalD
   -- ** Composition
 , (<<<)
 , (>>>)
