@@ -10,6 +10,7 @@ module Sequoia.Value
 , inV0
 , inV
 , inV1
+, inV1'
 , inV2
 , exV
 , exV1
@@ -47,6 +48,9 @@ inV = tabulate
 
 inV1 :: Representable v => ((VRep v -> a) -> (VRep v -> b)) -> (v a -> v b)
 inV1 = under _V
+
+inV1' :: Representable v => (v a -> (VRep v -> b)) -> (v a -> v b)
+inV1' = fmap inV
 
 inV2 :: Representable v => ((VRep v -> a) -> (VRep v -> b) -> (VRep v -> c)) -> (v a -> v b -> v c)
 inV2 = dimap2 exV exV inV
