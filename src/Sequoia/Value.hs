@@ -118,6 +118,7 @@ class (Representable v, Monad m) => MonadV v m | m -> v where
   use :: v a -> m a
 
   env :: m (Rep v)
+  env = use (inV id)
 
   mapEnv :: (VRep v -> VRep v) -> m a -> m a
 
