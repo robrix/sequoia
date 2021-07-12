@@ -42,7 +42,7 @@ import           Sequoia.Value as V
 -- Dual profunctor
 
 _D :: a --|D k v|-> b <-> (k b -> k a, v a -> v b)
-_D = swap . exD <-> uncurry inD
+_D = exD <-> uncurry inD
 
 newtype D k v a b = D { runD :: forall r s . (s -> v a, k a -> r) -> (s -> v b, k b -> r) }
 
@@ -81,14 +81,14 @@ inDK f = inD f (inV1 (\ a e -> f (inK id) • e ∘ a))
 
 -- Elimination
 
-exD :: a --|D k v|-> b -> (v a -> v b, k b -> k a)
-exD f = runD f (id, id)
-
-exDV :: a --|D k v|-> b -> (v a -> v b)
-exDV = fst . exD
+exD :: a --|D k v|-> b -> (k b -> k a, v a -> v b)
+exD f = swap (runD f (id, id))
 
 exDK :: a --|D k v|-> b -> (k b -> k a)
-exDK = snd . exD
+exDK = fst . exD
+
+exDV :: a --|D k v|-> b -> (v a -> v b)
+exDV = snd . exD
 
 
 -- Computation
