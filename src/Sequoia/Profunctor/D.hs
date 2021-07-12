@@ -1,4 +1,3 @@
-{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE TypeFamilies #-}
 module Sequoia.Profunctor.D
 ( -- * Dual profunctor
@@ -26,11 +25,9 @@ module Sequoia.Profunctor.D
 , (↓>)
 ) where
 
-import           Control.Arrow ((***))
 import           Control.Category ((<<<), (>>>))
 import qualified Control.Category as Cat
 import           Data.Bifunctor (bimap)
-import           Data.Functor.Contravariant
 import           Data.Kind (Type)
 import           Data.Profunctor
 import           Sequoia.Bijection
@@ -44,35 +41,33 @@ import           Sequoia.Value as V
 -- Dual profunctor
 
 _D :: a --|D k v|-> b <-> (C.C k a b, E.E v a b)
-_D = (C.C *** E.E) . exD <-> uncurry inD . (C.runC *** E.runE)
+_D = exD <-> uncurry inD
 
 newtype D k v a b = D { runD :: Endpoint k v a b }
 
-instance (Contravariant k, Functor v) => Profunctor (D k v) where
+instance (K.Representable k, V.Representable v) => Profunctor (D k v) where
   dimap f g = D . dimapEndpoint f g . runD
 
-instance Cat.Category (D k v) where
-  id = D (id, id)
-  D f . D g = D (fst g . fst f, snd f . snd g)
+instance (K.Representable k, V.Representable v) => Cat.Category (D k v) where
+  id = D (Cat.id, Cat.id)
+  D f . D g = D (bimap (fst f Cat..) (snd f Cat..) g)
 
-instance (Contravariant k, Functor v) => Functor (D k v a) where
+instance (K.Representable k, V.Representable v) => Functor (D k v a) where
   fmap f = D . dimapEndpoint id f . runD
 
 instance (K.Representable k, V.Representable v) => Applicative (D k v a) where
-  pure a = D (\ ka -> inK (const (ka • a)), const (inV0 a))
+  pure a = D (pure a, pure a)
 
-  f <*> a = D (let (fk, fv) = f ~> _D ; (ak, av) = a ~> _D in (C.runC (fk <*> ak), E.runE (fv <*> av)))
+  D (fk, fv) <*> D (ak, av) = D (fk <*> ak, fv <*> av)
 
 instance (K.Representable k, V.Representable v) => Monad (D k v c) where
-  D (k, v) >>= f = D
-    ( inK . \ b c -> k (inK (\ a -> exDK (f a) b • c)) • c
-    , inV . \ c e -> e ∘ exDV (f (e ∘ v c)) c)
+  D (k, v) >>= f = D (k >>= exDK . f, v >>= exDV . f)
 
 
-type Endpoint k v a b = (k b -> k a, v a -> v b)
+type Endpoint k v a b = (C.C k a b, E.E v a b)
 
-dimapEndpoint :: (Contravariant k, Functor v) => (a' -> a) -> (b -> b') -> Endpoint k v a b -> Endpoint k v a' b'
-dimapEndpoint f g = bimap (dimap (contramap g) (contramap f)) (dimap (fmap f) (fmap g))
+dimapEndpoint :: (K.Representable k, V.Representable v) => (a' -> a) -> (b -> b') -> Endpoint k v a b -> Endpoint k v a' b'
+dimapEndpoint f g = bimap (dimap f g) (dimap f g)
 
 
 -- Mixfix notation
@@ -86,36 +81,36 @@ infixr 5 |->
 
 -- Construction
 
-inD :: (k b -> k a) -> (v a -> v b) -> a --|D k v|-> b
+inD :: C.C k a b -> E.E v a b -> a --|D k v|-> b
 inD bw fw = D (bw, fw)
 
 inD' :: (K.Representable k, V.Representable v) => (a -> b) -> a --|D k v|-> b
-inD' f = inD (inK1 (. f)) (inV1 (f .))
+inD' f = inD (C.inC1 (. f)) (E.inE1 (f .))
 
-inDV :: (K.Representable k, V.Representable v) => (v a -> v b) -> v (a --|D k v|-> b)
-inDV f = inV (\ e -> inD (inK1 (. dimap const ($ e) (exV1 f))) f)
+inDV :: (K.Representable k, V.Representable v) => E.E v a b -> v (a --|D k v|-> b)
+inDV f = inV (\ e -> inD (C.inC1 (. dimap const ($ e) (E.exE1 f))) f)
 
 -- FIXME: this is quite limited by the need for the continuation to return locally at b.
-inDK :: (K.Representable k, V.Representable v, K.Rep k ~ b) => (k b -> k a) -> a --|D k v|-> b
-inDK f = inD f (inV1 (\ a e -> f (inK id) • e ∘ a))
+inDK :: (K.Representable k, V.Representable v, K.Rep k ~ b) => C.C k a b -> a --|D k v|-> b
+inDK f = inD f (E.inE1 (\ a e -> C.exC f (inK id) • e ∘ a))
 
 
 -- Elimination
 
-exD :: a --|D k v|-> b -> (k b -> k a, v a -> v b)
+exD :: a --|D k v|-> b -> Endpoint k v a b
 exD = runD
 
-exDK :: a --|D k v|-> b -> (k b -> k a)
+exDK :: a --|D k v|-> b -> C.C k a b
 exDK = fst . exD
 
-exDV :: a --|D k v|-> b -> (v a -> v b)
+exDV :: a --|D k v|-> b -> E.E v a b
 exDV = snd . exD
 
 
 -- Computation
 
-(↑) :: a --|D k v|-> b -> v a -> v b
-(↑) = exDV
+(↑) :: V.Representable v => a --|D k v|-> b -> v a -> v b
+(↑) = E.exE . exDV
 
 infixl 7 ↑
 
@@ -124,13 +119,13 @@ f <↑ a = f Cat.<<< inD' (inlr a)
 
 infixl 7 <↑
 
-(↓) :: k b -> a --|D k v|-> b -> k a
-(↓) = flip exDK
+(↓) :: K.Representable k => k b -> a --|D k v|-> b -> k a
+(↓) = flip (C.exC . exDK)
 
 infixl 8 ↓
 
 -- FIXME: this is quite limited by the need for the continuation to return locally at _Δ.
-(↓>) :: (K.Representable k, Functor v, K.Rep k ~ _Δ, Disj d) => k a -> _Γ --|D k v|-> (_Δ `d` a) -> _Γ --|D k v|-> _Δ
-a ↓> f = inD (<••> a) (fmap (id <--> (a •))) <<< f
+(↓>) :: (K.Representable k, V.Representable v, K.Rep k ~ _Δ, Disj d) => k a -> _Γ --|D k v|-> (_Δ `d` a) -> _Γ --|D k v|-> _Δ
+a ↓> f = inD (C.inC (<••> a)) (E.E (fmap (id <--> (a •)))) <<< f
 
 infixr 9 ↓>
