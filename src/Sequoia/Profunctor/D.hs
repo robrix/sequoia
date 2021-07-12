@@ -1,5 +1,4 @@
 {-# LANGUAGE FunctionalDependencies #-}
-{-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE TypeFamilies #-}
 module Sequoia.Profunctor.D
 ( -- * Dual profunctor
@@ -30,6 +29,7 @@ module Sequoia.Profunctor.D
 import           Control.Category ((<<<), (>>>))
 import qualified Control.Category as Cat
 import           Data.Functor.Contravariant
+import           Data.Kind (Type)
 import           Data.Profunctor
 import           Sequoia.Bijection
 import           Sequoia.Conjunction
@@ -57,7 +57,7 @@ instance Cat.Category (D k v) where
 
 -- Mixfix notation
 
-type l --|r = r l
+type l --|(r :: Type -> Type -> Type) = r l
 type l|-> r = l r
 
 infixr 6 --|
