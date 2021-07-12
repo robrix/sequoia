@@ -1,8 +1,10 @@
 module Sequoia.Profunctor.Applicative
 ( Coapply(..)
+, Coapplicative(..)
 ) where
 
 import Data.Profunctor
+import Data.Profunctor.Rep
 
 class Profunctor p => Coapply p where
   {-# MINIMAL coliftA2 | coap #-}
@@ -22,3 +24,8 @@ class Profunctor p => Coapply p where
 instance Coapply (->) where
   coliftA2 f a b = either a b . f
   coap = either
+
+
+class (Representable p, Coapply p) => Coapplicative p where
+  copure :: (a -> Rep p b) -> p a b
+  copure = tabulate
