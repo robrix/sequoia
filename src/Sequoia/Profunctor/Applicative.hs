@@ -29,3 +29,5 @@ instance Coapply (->) where
 class (Representable p, Coapply p) => Coapplicative p where
   copure :: (a -> Rep p b) -> p a b
   copure = tabulate
+
+instance Coapplicative (->)
