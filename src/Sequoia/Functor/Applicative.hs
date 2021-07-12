@@ -18,6 +18,9 @@ class Contravariant k => Contrapply k where
   coapl :: k a -> k b -> k a
   coapl a b = contraliftA2 Left a b
 
+  coapr :: k a -> k b -> k b
+  coapr a b = contraliftA2 Right a b
+
 class (Contrapply k, Representable k) => Contrapplicative k where
   contrapure :: (a -> Rep k) -> k a
   contrapure = tabulate
