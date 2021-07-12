@@ -34,6 +34,8 @@ module Sequoia.Continuation
 , (<••>)
 , (>>-)
 , (-<<)
+  -- ** Computation
+, mapKRep
   -- * Double negation
 , type (**)
 , ContFn
@@ -170,6 +172,12 @@ infixl 1 >>-
 f -<< a = inK ((• a) . f)
 
 infixr 1 -<<
+
+
+-- Computation
+
+mapKRep :: (Representable k, Representable k') => (KRep k -> KRep k') -> (k a -> k' a)
+mapKRep f = inK . (f .) . exK
 
 
 -- Double negation
