@@ -15,10 +15,13 @@ module Sequoia.Value
 , exV1
 , exV2
 , (∘)
+  -- * Computation
+, liftV2
 , (>∘∘<)
 , (<∘∘>)
 ) where
 
+import Control.Applicative (liftA2)
 import Data.Functor.Rep
 import Sequoia.Bijection
 import Sequoia.Conjunction
@@ -62,6 +65,12 @@ exV2 = dimap2 inV inV exV
 (∘) = flip exV
 
 infixr 8 ∘
+
+
+-- Computation
+
+liftV2 :: Representable v => (a -> b -> c) -> v a -> v b -> v c
+liftV2 f = inV2 (liftA2 f)
 
 
 (>∘∘<) :: (Conj c, Representable v) => v a -> v b -> v (a `c` b)
