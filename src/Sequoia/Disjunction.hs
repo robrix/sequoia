@@ -8,6 +8,8 @@ module Sequoia.Disjunction
 , coerceDisj
 , leftDisj
 , rightDisj
+, unleftDisj
+, unrightDisj
 , foldMapDisj
 , traverseDisj
 , bifoldMapDisj
@@ -61,6 +63,12 @@ leftDisj = dimap coerceDisj coerceDisj . left'
 
 rightDisj :: (Disj d, Choice p) => p a b -> p (d c a) (d c b)
 rightDisj = dimap coerceDisj coerceDisj . right'
+
+unleftDisj :: (Disj d, Cochoice p) => p (d a c) (d b c) -> p a b
+unleftDisj = unleft . dimap coerceDisj coerceDisj
+
+unrightDisj :: (Disj d, Cochoice p) => p (d c a) (d c b) -> p a b
+unrightDisj = unright . dimap coerceDisj coerceDisj
 
 foldMapDisj :: (Disj p, Monoid m) => (b -> m) -> (a `p` b) -> m
 foldMapDisj = (const mempty <-->)
