@@ -94,3 +94,4 @@ infix 3 <∘∘>
 -- Env monad
 
 newtype Env v a = Env { runEnv :: v a }
+  deriving (Functor)
