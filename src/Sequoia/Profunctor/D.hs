@@ -25,7 +25,6 @@ module Sequoia.Profunctor.D
 
 import           Control.Category ((<<<), (>>>))
 import qualified Control.Category as Cat
-import           Data.Function
 import           Data.Kind (Type)
 import           Data.Profunctor
 import           Sequoia.Conjunction
@@ -37,14 +36,14 @@ import           Sequoia.Value as V
 
 -- Dual profunctor
 
-newtype D r s a b = D { exD :: s -> (s -> a) -> (b -> r) -> r }
+newtype D r s a b = D { exD :: s -> V s a -> (b -> r) -> r }
 
 instance Profunctor (D r s) where
   dimap f g = D . rmap (dimap (rmap f) (lmap (lmap g))) . exD
 
 instance Cat.Category (D r s) where
-  id = D (fmap (&) . (&))
-  D f . D g = D (\ e a c -> g e a (\ b -> f e (const b) c))
+  id = D (\ e a b -> b (e ∘ a))
+  D f . D g = D (\ e a c -> g e a (\ b -> f e (inV0 b) c))
 
 instance Functor (D r s c) where
   fmap = rmap
@@ -70,22 +69,22 @@ infixr 5 |->
 -- Construction
 
 inD' :: (a -> b) -> a --|D r s|-> b
-inD' f = D (\ e a b -> b (f (a e)))
+inD' f = D (\ e a b -> b (f (e ∘ a)))
 
 inDK :: (K r b -> K r a) -> a --|D r s|-> b
 inDK f = D (\ e a b -> f (K b) • e ∘ a)
 
 inDV :: (V s a -> V s b) -> a --|D r s|-> b
-inDV f = D (\ e a b -> b (e ∘ f (V a)))
+inDV f = D (\ e a b -> b (e ∘ f a))
 
 
 -- Elimination
 
 exDK :: a --|D r s|-> b -> V s (K r b -> K r a)
-exDK f = V (\ e k -> K (\ a -> exD f e (const a) (exK k)))
+exDK f = V (\ e k -> K (\ a -> exD f e (inV0 a) (exK k)))
 
 exDV :: K r (V s a -> V s b) -> K r (a --|D b s|-> b)
-exDV k = K (\ f -> k • inV . \ a e -> exD f e (exV a) id)
+exDV k = K (\ f -> k • inV . \ a e -> exD f e a id)
 
 evalD :: a --|D r s|-> r -> V s (K r a)
 evalD = (idK ↓)
@@ -94,7 +93,7 @@ evalD = (idK ↓)
 -- Computation
 
 (↑) :: a --|D r s|-> b -> V s a -> V s (K r (K r b))
-f ↑ a = V (\ e -> K (\ k -> exD f e (exV a) (k •)))
+f ↑ a = V (\ e -> K (\ k -> exD f e a (k •)))
 
 infixl 7 ↑
 
@@ -104,12 +103,12 @@ f <↑ a = f Cat.<<< inD' (inlr a)
 infixl 7 <↑
 
 (↓) :: K r b -> a --|D r s|-> b -> V s (K r a)
-k ↓ f = V (\ e -> K (\ a -> exD f e (const a) (exK k)))
+k ↓ f = V (\ e -> K (\ a -> exD f e (inV0 a) (exK k)))
 
 infixl 8 ↓
 
 -- FIXME: this is quite limited by the need for the continuation to return locally at r.
 (↓>) :: Disj d => K r c -> a --|D r s|-> (b `d` c) -> a --|D r s|-> b
-c ↓> f = D (\ e v k -> (K k <••> c) • v e) <<< f
+c ↓> f = D (\ e v k -> (K k <••> c) • e ∘ v) <<< f
 
 infixr 9 ↓>
