@@ -1,10 +1,10 @@
 module Sequoia.Profunctor.Applicative
-( Coapplicative(..)
+( Coapply(..)
 ) where
 
 import Data.Profunctor
 
-class Profunctor p => Coapplicative p where
+class Profunctor p => Coapply p where
   {-# MINIMAL coliftA2 | coap #-}
 
   coliftA2 :: (c -> Either a b) -> p a d -> p b d -> p c d
@@ -19,6 +19,6 @@ class Profunctor p => Coapplicative p where
   coapr :: p a c -> p b c -> p b c
   coapr a b = coliftA2 Right a b
 
-instance Coapplicative (->) where
+instance Coapply (->) where
   coliftA2 f a b = either a b . f
   coap = either
