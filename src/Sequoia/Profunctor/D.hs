@@ -46,14 +46,17 @@ _D = exD <-> uncurry inD
 newtype D k v a b = D { runD :: forall r s . (k a -> r, s -> v a) -> (k b -> r, s -> v b) }
 
 instance (Contravariant k, Functor v) => Profunctor (D k v) where
-  dimap f g (D r) = D (bimap (lmap (contramap g)) (rmap (fmap g)) . r . bimap (lmap (contramap f)) (rmap (fmap f)))
+  dimap f g (D r) = D (mapEndpoint g . r . mapEndpoint f)
 
 instance Cat.Category (D k v) where
   id = D id
   D f . D g = D (f . g)
 
 instance (Contravariant k, Functor v) => Functor (D k v a) where
-  fmap f (D r) = D (bimap (lmap (contramap f)) (rmap (fmap f)) . r)
+  fmap f (D r) = D (mapEndpoint f . r)
+
+mapEndpoint :: (Contravariant k, Functor v) => (a -> b) -> (k a -> r, s -> v a) -> (k b -> r, s -> v b)
+mapEndpoint f = bimap (lmap (contramap f)) (rmap (fmap f))
 
 
 -- Mixfix notation
