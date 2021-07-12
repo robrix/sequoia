@@ -41,8 +41,8 @@ import           Sequoia.Value as V
 
 -- Dual profunctor
 
-_D :: a --|D k v|-> b <-> (v a -> v b, k b -> k a)
-_D = exD <-> uncurry inD . swap
+_D :: a --|D k v|-> b <-> (k b -> k a, v a -> v b)
+_D = swap . exD <-> uncurry inD
 
 newtype D k v a b = D { runD :: forall r s . (s -> v a, k a -> r) -> (s -> v b, k b -> r) }
 
