@@ -20,6 +20,8 @@ module Sequoia.Value
 , liftV2
 , (>∘∘<)
 , (<∘∘>)
+  -- * Env monad
+, Env(..)
 ) where
 
 import Control.Applicative (liftA2)
@@ -87,3 +89,8 @@ infix 3 >∘∘<
 (l <∘∘> r) ab = inV (\ e -> e ∘ (l . inV0 <--> r . inV0) (e ∘ ab))
 
 infix 3 <∘∘>
+
+
+-- Env monad
+
+newtype Env v a = Env { runEnv :: v a }
