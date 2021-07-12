@@ -15,3 +15,4 @@ class Profunctor p => Coapplicative p where
 
 instance Coapplicative (->) where
   coliftA2 f a b = either a b . f
+  coap = either
