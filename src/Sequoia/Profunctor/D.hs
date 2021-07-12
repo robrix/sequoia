@@ -4,6 +4,7 @@ module Sequoia.Profunctor.D
 ( -- * Dual profunctor
   _D
 , D(..)
+, Endpoint(..)
   -- ** Mixfix notation
 , type (--|)
 , type (|->)
@@ -53,6 +54,13 @@ instance (Contravariant k, Functor v) => Profunctor (D k v) where
 instance Cat.Category (D k v) where
   id = D id
   D f . D g = D (f . g)
+
+
+newtype Endpoint k v a b = Endpoint { runEndpoint :: (k a, v b) }
+  deriving (Functor)
+
+instance (Contravariant k, Functor v) => Profunctor (Endpoint k v) where
+  dimap f g = Endpoint . (contramap f *** fmap g) . runEndpoint
 
 
 -- Mixfix notation
