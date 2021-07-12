@@ -29,92 +29,92 @@ import           Sequoia.Continuation
 
 -- Signals
 
-newtype Sol k     = Sol { runSol :: Sig k Γ Δ }
+newtype Sol k v     = Sol { runSol :: Sig k v Γ Δ }
 
-mapKSol :: (forall x . k x <-> k' x) -> (Sol k -> Sol k')
+mapKSol :: (forall x . k x <-> k' x) -> (Sol k v -> Sol k' v)
 mapKSol b = Sol . mapKSig b . runSol
 
 
-newtype Src k   b = Src { runSrc :: Sig k Γ b }
+newtype Src k v   b = Src { runSrc :: Sig k v Γ b }
   deriving (Applicative, Functor, Monad)
 
-mapKSrc :: (forall x . k x <-> k' x) -> (Src k b -> Src k' b)
+mapKSrc :: (forall x . k x <-> k' x) -> (Src k v b -> Src k' v b)
 mapKSrc b = Src . mapKSig b . runSrc
 
 
-newtype Snk k a   = Snk { runSnk :: Sig k a Δ }
+newtype Snk k v a   = Snk { runSnk :: Sig k v a Δ }
 
-mapKSnk :: (forall x . k x <-> k' x) -> (Snk k a -> Snk k' a)
+mapKSnk :: (forall x . k x <-> k' x) -> (Snk k v a -> Snk k' v a)
 mapKSnk b = Snk . mapKSig b . runSnk
 
 
-newtype Sig k a b = Sig { runSig :: k b -> k a }
+newtype Sig k v a b = Sig { runSig :: k b -> k a }
 
-instance Cat.Category (Sig k) where
+instance Cat.Category (Sig k v) where
   id = Sig id
   (.) = dimap2 runSig runSig Sig (flip (.))
 
-instance Contravariant k => Profunctor (Sig k) where
+instance Contravariant k => Profunctor (Sig k v) where
   dimap f g = Sig . dimap (contramap g) (contramap f) . runSig
 
-instance Contravariant k => Functor (Sig k a) where
+instance Contravariant k => Functor (Sig k v a) where
   fmap f = Sig . lmap (contramap f) . runSig
 
-instance Continuation k => Applicative (Sig k a) where
+instance Continuation k => Applicative (Sig k v a) where
   pure a = Sig (•<< const a)
   Sig f <*> Sig a = Sig (inK1 (\ k a' -> f (inK (\ f -> a (inK (k . f)) • a')) • a'))
 
-instance Continuation k => Monad (Sig k a) where
+instance Continuation k => Monad (Sig k v a) where
   Sig m >>= f = Sig (inK1 (\ k a -> m (inK ((• a) . (`runSig` inK k) . f)) • a))
 
-mapKSig :: (forall x . k x <-> k' x) -> (Sig k a b -> Sig k' a b)
+mapKSig :: (forall x . k x <-> k' x) -> (Sig k v a b -> Sig k' v a b)
 mapKSig b = Sig . (~> dimapping b b) . runSig
 
 
 -- Conversions
 
 solSrc
-  ::      Sol k
-           <->
-          Src k |- Δ
+  ::      Sol k v
+            <->
+          Src k v |- Δ
 solSrc = coerced
 
 
 solSnk
-  ::      Sol k
-           <->
-     Γ -| Snk k
+  ::      Sol k v
+            <->
+     Γ -| Snk k v
 solSnk = coerced
 
 
 srcSig
-  ::      Src k |- b
-           <->
-     Γ -| Sig k |- b
+  ::      Src k v |- b
+            <->
+     Γ -| Sig k v |- b
 srcSig = coerced
 
-composeSrcSig :: Src k a -> Sig k a b -> Src k b
+composeSrcSig :: Src k v a -> Sig k v a b -> Src k v b
 composeSrcSig src sig = srcSig <~ (sig <<< src ~> srcSig)
 
 
 snkSig
-  :: a -| Snk k
-           <->
-     a -| Sig k |- Δ
+  :: a -| Snk k v
+            <->
+     a -| Sig k v |- Δ
 snkSig = coerced
 
-composeSigSnk :: Sig k a b -> Snk k b -> Snk k a
+composeSigSnk :: Sig k v a b -> Snk k v b -> Snk k v a
 composeSigSnk sig snk = snkSig <~ (snk ~> snkSig <<< sig)
 
 
 solSig
-  ::      Sol k
-           <->
-     Γ -| Sig k |- Δ
+  ::      Sol k v
+            <->
+     Γ -| Sig k v |- Δ
 solSig = coerced
 
 
-composeSrcSnk :: Src k a -> Snk k a -> Sol k
+composeSrcSnk :: Src k v a -> Snk k v a -> Sol k v
 composeSrcSnk src snk = solSig <~ (snk ~> snkSig <<< src ~> srcSig)
 
 
