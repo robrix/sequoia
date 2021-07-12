@@ -1,3 +1,4 @@
+{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Value
@@ -22,6 +23,8 @@ module Sequoia.Value
 , (<∘∘>)
   -- * Env monad
 , Env(..)
+  -- * Monadic abstraction
+, MonadV(..)
 ) where
 
 import Control.Applicative (liftA2)
@@ -103,3 +106,9 @@ instance Representable v => Applicative (Env v) where
 
 instance Representable v => Monad (Env v) where
   Env m >>= f = Env (bindRep m (runEnv . f))
+
+
+-- Monadic abstraction
+
+class (Functor v, Monad m) => MonadV v m | m -> v where
+  use :: v a -> m a
