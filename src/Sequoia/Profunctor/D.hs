@@ -11,6 +11,7 @@ module Sequoia.Profunctor.D
 , inDV
   -- ** Elimination
 , evalD
+, exDK
   -- ** Composition
 , (<<<)
 , (>>>)
@@ -78,6 +79,9 @@ inDV f = D (\ e a b -> b (e ∘ f (V a)))
 
 
 -- Elimination
+
+exDK :: a --|D r s|-> b -> V s (K r b -> K r a)
+exDK f = V (\ e k -> K (\ a -> exD f e (const a) (exK k)))
 
 evalD :: a --|D r s|-> r -> V s (K r a)
 evalD = (idK ↓)
