@@ -26,7 +26,6 @@ module Sequoia.Profunctor.D
 , (↓>)
 ) where
 
-import           Control.Applicative (liftA2)
 import           Control.Arrow ((***))
 import           Control.Category ((<<<), (>>>))
 import qualified Control.Category as Cat
@@ -62,7 +61,7 @@ instance (Contravariant k, Functor v) => Functor (D k v a) where
 instance (K.Representable k, V.Representable v) => Applicative (D k v a) where
   pure a = D (\ ka -> inK (const (ka • a)), const (inV0 a))
 
-  f <*> a = D (let (k', v') = runD f ; (k'', v'') = runD a in (liftK2K2 ($) k' k'', liftA2 (liftV2 ($)) v' v''))
+  f <*> a = D (let (fk, fv) = f ~> _D ; (ak, av) = a ~> _D in (C.runC (fk <*> ak), E.runE (fv <*> av)))
 
 instance (K.Representable k, V.Representable v) => Monad (D k v c) where
   D (k, v) >>= f = D
