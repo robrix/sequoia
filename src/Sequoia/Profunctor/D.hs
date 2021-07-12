@@ -1,20 +1,13 @@
 {-# LANGUAGE TypeFamilies #-}
 module Sequoia.Profunctor.D
 ( -- * Dual profunctor
-  _D
-, D(..)
+  D(..)
   -- ** Mixfix notation
 , type (--|)
 , type (|->)
   -- ** Construction
-, inD
-, inD1
-, inD1'
 , inD'
-, inDV
-, inDK
   -- ** Elimination
-, exD
 , evalD
   -- ** Composition
 , (<<<)
@@ -28,42 +21,37 @@ module Sequoia.Profunctor.D
 
 import           Control.Category ((<<<), (>>>))
 import qualified Control.Category as Cat
+import           Data.Function
 import           Data.Kind (Type)
 import           Data.Profunctor
-import           Sequoia.Bijection
-import           Sequoia.CPS hiding ((↓), (↓>))
 import           Sequoia.Conjunction
 import           Sequoia.Continuation as K
 import           Sequoia.Disjunction
-import           Sequoia.EPS hiding ((<↑), (↑))
 import           Sequoia.Functor.K
 import           Sequoia.Functor.V
 import           Sequoia.Value as V
 
 -- Dual profunctor
 
-_D :: a --|D r s|-> b <-> (C (K r) a b, E (V s) a b)
-_D = exD <-> uncurry inD
-
-data D r s a b = D { exDK :: C (K r) a b, exDV :: E (V s) a b }
+newtype D r s a b = D { exD :: s -> (s -> a) -> (b -> r) -> r }
 
 instance Profunctor (D r s) where
-  dimap f g (D k v) = D (dimap f g k) (dimap f g v)
+  dimap f g = D . rmap (dimap (rmap f) (lmap (lmap g))) . exD
 
 instance Cat.Category (D r s) where
-  id = D Cat.id Cat.id
-  D f1 f2 . D g1 g2 = D (f1 Cat.. g1) (f2 Cat.. g2)
+  id = D (fmap (&) . (&))
+  D f . D g = D (\ e a c -> g e a (\ b -> f e (const b) c))
 
-instance Functor (D r s a) where
+instance Functor (D r s c) where
   fmap = rmap
 
 instance Applicative (D r s a) where
-  pure a = D (pure a) (pure a)
+  pure a = D (\ _ _ b -> b a)
 
-  D fk fv <*> D ak av = D (fk <*> ak) (fv <*> av)
+  D df <*> D da = D (\ e a b -> df e a (da e a . (b .)))
 
-instance Monad (D r s c) where
-  D k v >>= f = D (k >>= exDK . f) (v >>= exDV . f)
+instance Monad (D r s a) where
+  D m >>= f = D (\ e a c -> m e a (\ b -> exD (f b) e a c))
 
 
 -- Mixfix notation
@@ -77,39 +65,20 @@ infixr 5 |->
 
 -- Construction
 
-inD :: C (K r) a b -> E (V s) a b -> a --|D r s|-> b
-inD = D
-
-inD1 :: ((b -> r) -> (a -> r)) -> ((s -> a) -> (s -> b)) -> a --|D r s|-> b
-inD1 k v = inD (inC1 k) (inE1 v)
-
-inD1' :: (K r b -> (a -> r)) -> (V s a -> (s -> b)) -> a --|D r s|-> b
-inD1' k v = inD (inC1' k) (inE1' v)
-
 inD' :: (a -> b) -> a --|D r s|-> b
-inD' f = inD (inC1 (. f)) (inE1 (f .))
-
-inDV :: E (V s) a b -> V s (a --|D r s|-> b)
-inDV f = inV (\ e -> inD (inC1 (. dimap const ($ e) (exE1 f))) f)
-
--- FIXME: this is quite limited by the need for the continuation to return locally at b.
-inDK :: C (K b) a b -> a --|D b s|-> b
-inDK f = inD f (inE1 (\ a e -> exC f (inK id) • e ∘ a))
+inD' f = D (\ e a b -> b (f (a e)))
 
 
 -- Elimination
 
-exD :: a --|D r s|-> b -> (C (K r) a b, E (V s) a b)
-exD d = (exDK d, exDV d)
-
-evalD :: a --|D r s|-> r -> K r a
+evalD :: a --|D r s|-> r -> V s (K r a)
 evalD = (idK ↓)
 
 
 -- Computation
 
-(↑) :: a --|D r s|-> b -> V s a -> V s b
-(↑) = exE . exDV
+(↑) :: a --|D r s|-> b -> V s a -> V s (K r (K r b))
+f ↑ a = V (\ e -> K (\ k -> exD f e (exV a) (k •)))
 
 infixl 7 ↑
 
@@ -118,13 +87,13 @@ f <↑ a = f Cat.<<< inD' (inlr a)
 
 infixl 7 <↑
 
-(↓) :: K r b -> a --|D r s|-> b -> K r a
-(↓) = flip (exC . exDK)
+(↓) :: K r b -> a --|D r s|-> b -> V s (K r a)
+k ↓ f = V (\ e -> K (\ a -> exD f e (const a) (exK k)))
 
 infixl 8 ↓
 
--- FIXME: this is quite limited by the need for the continuation to return locally at _Δ.
-(↓>) :: Disj d => K _Δ a -> _Γ --|D _Δ s|-> (_Δ `d` a) -> _Γ --|D _Δ s|-> _Δ
-a ↓> f = inD (inC (<••> a)) (inE (fmap (id <--> (a •)))) <<< f
+-- FIXME: this is quite limited by the need for the continuation to return locally at r.
+(↓>) :: Disj d => K r c -> a --|D r s|-> (b `d` c) -> a --|D r s|-> b
+c ↓> f = D (\ e v k -> (K k <••> c) • v e) <<< f
 
 infixr 9 ↓>
