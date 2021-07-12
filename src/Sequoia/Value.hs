@@ -115,6 +115,8 @@ instance Representable v => Monad (Env v) where
 -- Monadic abstraction
 
 class (Representable v, Monad m) => MonadV v m | m -> v where
+  {-# MINIMAL (use | env), mapEnv #-}
+
   use :: v a -> m a
   use v = (∘ v) <$> env
 
