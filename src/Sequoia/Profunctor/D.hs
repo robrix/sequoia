@@ -32,6 +32,7 @@ module Sequoia.Profunctor.D
 , evalControl
 , withEnv
 , withVal
+, liftRunControlWith
 , liftKWith
 , (•∘)
 , (••)
@@ -164,6 +165,9 @@ withEnv f = Control (evalControl =<< f)
 
 withVal :: V.Representable v => (a -> Control r (V.Rep v)) -> (v a -> Control r (V.Rep v))
 withVal f v = withEnv (f . exV v)
+
+liftRunControlWith :: ((Control r s -> r) -> Control r s) -> Control r s
+liftRunControlWith f = withEnv (f . flip runControl)
 
 liftKWith :: K.Representable k => (((a -> Control (K.Rep k) s) -> k a) -> Control (K.Rep k) s) -> Control (K.Rep k) s
 liftKWith f = withEnv (\ e -> f (inK . ((`evalControl` e) .)))
