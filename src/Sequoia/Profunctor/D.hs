@@ -43,30 +43,28 @@ import           Sequoia.Conjunction
 import           Sequoia.Continuation as K
 import           Sequoia.Disjunction
 import           Sequoia.Functor.Applicative
-import           Sequoia.Functor.K
-import           Sequoia.Functor.V
 import           Sequoia.Value as V
 
 -- Dual profunctor
 
-newtype D r s a b = D { exD :: V s a -> K r b -> Control (K r) (V s) }
+newtype D k v a b = D { exD :: v a -> k b -> Control k v }
 
-instance Profunctor (D r s) where
-  dimap f g = D . dimap (rmap f) (lmap (contramap g)) . exD
+instance (Contravariant k, Functor v) => Profunctor (D k v) where
+  dimap f g = D . dimap (fmap f) (lmap (contramap g)) . exD
 
-instance Cat.Category (D r s) where
+instance (K.Representable k, V.Representable v) => Cat.Category (D k v) where
   id = D (flip (••))
   D f . D g = D (\ a c -> liftKWith (\ _K -> g a (_K (\ b -> f (inV0 b) c))))
 
-instance Functor (D r s c) where
-  fmap = rmap
+instance Contravariant k => Functor (D k v c) where
+  fmap f = D . fmap (lmap (contramap f)) . exD
 
-instance Applicative (D r s a) where
+instance (K.Representable k, V.Representable v) => Applicative (D k v a) where
   pure a = D (\ _ b -> b •• inV0 a)
 
   D df <*> D da = D (\ a b -> liftKWith (\ _K -> df a (_K (\ f -> da a (contramap f b)))))
 
-instance Monad (D r s a) where
+instance (K.Representable k, V.Representable v) => Monad (D k v a) where
   D m >>= f = D (\ a c -> liftKWith (\ _K -> m a (_K (\ b -> exD (f b) a c))))
 
 
@@ -81,47 +79,47 @@ infixr 5 |->
 
 -- Construction
 
-inD' :: (a -> b) -> a --|D r s|-> b
+inD' :: (K.Representable k, V.Representable v) => (a -> b) -> a --|D k v|-> b
 inD' f = D (\ a b -> b •• (f <$> a))
 
-inDK :: (K r b -> K r a) -> a --|D r s|-> b
+inDK :: (K.Representable k, V.Representable v) => (k b -> k a) -> a --|D k v|-> b
 inDK f = D (\ a b -> f b •• a)
 
-inDV :: (V s a -> V s b) -> a --|D r s|-> b
+inDV :: (K.Representable k, V.Representable v) => (v a -> v b) -> a --|D k v|-> b
 inDV f = D (\ a b -> b •• f a)
 
 
 -- Elimination
 
-exDK :: a --|D r s|-> b -> V s (K r b -> K r a)
-exDK f = V (\ e k -> K (\ a -> evalControl (exD f (inV0 a) k) e))
+exDK :: (K.Representable k, V.Representable v) => a --|D k v|-> b -> v (k b -> k a)
+exDK f = inV (\ e k -> inK (\ a -> evalControl (exD f (inV0 a) k) e))
 
-exDV :: K r (V s a -> V s b) -> K r (a --|D b s|-> b)
-exDV k = K (\ f -> k • inV . \ a -> evalControl (exD f a idK))
+exDV :: (K.Representable k, K.Representable k', V.Representable v) => k (v a -> v (K.Rep k')) -> k (a --|D k' v|-> K.Rep k')
+exDV k = inK (\ f -> k • inV . \ a -> evalControl (exD f a idK))
 
-evalD :: a --|D r s|-> r -> V s (K r a)
+evalD :: (K.Representable k, V.Representable v) => a --|D k v|-> K.Rep k -> v (k a)
 evalD = (idK ↓)
 
 
 -- Computation
 
-(↑) :: a --|D r s|-> b -> V s a -> V s (K r (K r b))
-f ↑ a = V (K . flip (evalControl . exD f a))
+(↑) :: (K.Representable k, V.Representable v) => a --|D k v|-> b -> v a -> v (k (k b))
+f ↑ a = inV (inK . flip (evalControl . exD f a))
 
 infixl 7 ↑
 
-(<↑) :: Conj c => (a `c` _Γ) --|D r s|-> _Δ -> a -> _Γ --|D r s|-> _Δ
+(<↑) :: (K.Representable k, V.Representable v) => Conj c => (a `c` _Γ) --|D k v|-> _Δ -> a -> _Γ --|D k v|-> _Δ
 f <↑ a = f <<< inD' (inlr a)
 
 infixl 7 <↑
 
-(↓) :: K r b -> a --|D r s|-> b -> V s (K r a)
-k ↓ f = V (\ e -> K (\ a -> evalControl (exD f (inV0 a) k) e))
+(↓) :: (K.Representable k, V.Representable v) => k b -> a --|D k v|-> b -> v (k a)
+k ↓ f = inV (\ e -> inK (\ a -> evalControl (exD f (inV0 a) k) e))
 
 infixl 8 ↓
 
 -- FIXME: this is quite limited by the need for the continuation to return locally at r.
-(↓>) :: Disj d => K r c -> a --|D r s|-> (b `d` c) -> a --|D r s|-> b
+(↓>) :: (K.Representable k, V.Representable v) => Disj d => k c -> a --|D k v|-> (b `d` c) -> a --|D k v|-> b
 c ↓> f = D (\ v k -> (k <••> c) •• v) <<< f
 
 infixr 9 ↓>
@@ -129,12 +127,12 @@ infixr 9 ↓>
 
 -- Composition
 
-(↓↓) :: Consumer (K r) (V s) b -> a --|D r s|-> b -> Consumer (K r) (V s) a
+(↓↓) :: (K.Representable k, V.Representable v) => Consumer k v b -> a --|D k v|-> b -> Consumer k v a
 Consumer k ↓↓ f = Consumer (\ a -> liftKWith (\ _K -> exD f a (_K (k . inV0))))
 
 infixl 8 ↓↓
 
-(↑↑) :: a --|D r s|-> b -> Producer (K r) (V s) a -> Producer (K r) (V s) b
+(↑↑) :: (K.Representable k, V.Representable v) => a --|D k v|-> b -> Producer k v a -> Producer k v b
 f ↑↑ Producer v = Producer (\ b -> liftKWith (\ _K -> v (_K (\ a -> exD f (inV0 a) b))))
 
 infixr 7 ↑↑
