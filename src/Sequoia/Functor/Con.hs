@@ -11,7 +11,9 @@ import           Data.Functor.Contravariant.Rep
 import           Data.Profunctor
 import qualified Data.Profunctor.Rep as Pro
 import           Data.Profunctor.Sieve
+import           Sequoia.Functor.Applicative
 import qualified Sequoia.Profunctor.Adjunction as Pro
+import qualified Sequoia.Profunctor.Applicative as Pro
 
 newtype Con p r a = Con { runCon :: p a r }
 
@@ -26,3 +28,7 @@ instance Pro.Representable p => Representable (Con p r) where
 instance Pro.Coadjunction p q => Adjunction (Con p r) (Con q r) where
   leftAdjunct  f a = Con (Pro.leftCoadjunct  (runCon . f) a)
   rightAdjunct f a = Con (Pro.rightCoadjunct (runCon . f) a)
+
+instance Pro.Coapplicative p => Contrapply (Con p r) where
+  contraliftA2 f (Con a) (Con b) = Con (Pro.coliftA2 f a b)
+  contrap (Con a) (Con b) = Con (Pro.coap a b)
