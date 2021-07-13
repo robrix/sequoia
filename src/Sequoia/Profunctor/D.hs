@@ -168,8 +168,8 @@ infixl 8 ↓↓
 
 infixr 7 ↑↑
 
-(↓↑) :: Dual k v d => Consumer d a -> Producer d a -> Control (K.Rep k) (V.Rep v)
-c ↓↑ p = exD (c <<< p) (inV0 ()) (inK absurd)
+(↓↑) :: Dual k v d => Consumer d a -> Producer d a -> Complete d
+(↓↑) = (<<<)
 
 infix 9 ↓↑
 
