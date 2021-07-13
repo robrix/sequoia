@@ -7,6 +7,7 @@ module Sequoia.Profunctor.D
 , type (--|)
 , type (|->)
   -- ** Dual profunctor abstraction
+, _D
 , Dual(..)
   -- ** Construction
 , inD'
@@ -85,17 +86,12 @@ infixr 5 |->
 
 -- Dual profunctor abstraction
 
+_D :: Dual k v d => d a b <-> (v a -> k b -> Control k v)
+_D = exD <-> inD
+
 class (K.Representable k, V.Representable v, Cat.Category d, Profunctor d) => Dual k v d | d -> k v where
-  {-# MINIMAL _D | (inD, exD) #-}
-
-  _D :: d a b <-> (v a -> k b -> Control k v)
-  _D = exD <-> inD
-
   inD :: (v a -> k b -> Control k v) -> d a b
-  inD = (_D <~)
-
   exD :: d a b -> v a -> k b -> Control k v
-  exD = (~> _D)
 
 instance (K.Representable k, V.Representable v) => Dual k v (D k v) where
   inD = D
