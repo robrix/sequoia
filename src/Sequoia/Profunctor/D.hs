@@ -104,14 +104,14 @@ instance (K.Representable k, V.Representable v) => Dual k v (D k v) where
 
 -- Construction
 
-inD' :: (K.Representable k, V.Representable v) => (a -> b) -> a --|D k v|-> b
-inD' f = D (\ a b -> b •∘ (f <$> a))
+inD' :: Dual k v d => (a -> b) -> a --|d|-> b
+inD' f = inD (\ a b -> b •∘ (f <$> a))
 
-inDK :: (K.Representable k, V.Representable v) => (k b -> k a) -> a --|D k v|-> b
-inDK f = D (\ a b -> f b •∘ a)
+inDK :: Dual k v d => (k b -> k a) -> a --|d|-> b
+inDK f = inD (\ a b -> f b •∘ a)
 
-inDV :: (K.Representable k, V.Representable v) => (v a -> v b) -> a --|D k v|-> b
-inDV f = D (\ a b -> b •∘ f a)
+inDV :: Dual k v d => (v a -> v b) -> a --|d|-> b
+inDV f = inD (\ a b -> b •∘ f a)
 
 
 -- Elimination
