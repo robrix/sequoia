@@ -1,5 +1,6 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Profunctor.D
 ( -- * Dual profunctor
   D(..)
@@ -134,8 +135,8 @@ evalD = (idK ↓)
 
 -- Computation
 
-(↑) :: Dual k v d => a --|d|-> b -> v a -> Producer k v b
-f ↑ a = Producer (D (const (exD f a)))
+(↑) :: Dual k v d => a --|d|-> b -> v a -> Producer d b
+f ↑ a = Producer (inD (const (exD f a)))
 
 infixl 7 ↑
 
@@ -166,12 +167,12 @@ Consumer k ↓↓ f = Consumer (D (\ a b -> liftKWith (\ _K -> exD f a (_K (flip
 
 infixl 8 ↓↓
 
-(↑↑) :: Dual k v d => a --|d|-> b -> Producer k v a -> Producer k v b
-f ↑↑ Producer v = Producer (D (\ a b -> liftKWith (\ _K -> exD v a (_K (\ a -> exD f (inV0 a) b)))))
+(↑↑) :: Dual k v d => a --|d|-> b -> Producer d a -> Producer d b
+f ↑↑ Producer v = Producer (inD (\ a b -> liftKWith (\ _K -> exD v a (_K (\ a -> exD f (inV0 a) b)))))
 
 infixr 7 ↑↑
 
-(↓↑) :: (K.Representable k, V.Representable v) => Consumer k v a -> Producer k v a -> Control k v
+(↓↑) :: Dual k v d => Consumer k v a -> Producer d a -> Control k v
 Consumer k ↓↑ Producer v = liftKWith (\ _K -> exD v (inV0 ()) (_K (flip (exD k) (inK absurd) . inV0)))
 
 infix 9 ↓↑
@@ -207,10 +208,13 @@ k •• v = control (const (k • v))
 infix 7 ••
 
 
-newtype Producer k v b = Producer { runProducer :: () --|D k v|-> b }
-  deriving (Applicative, Functor, Monad)
+newtype Producer d b = Producer { runProducer :: d () b }
 
-coercePD :: Dual k v d => Producer k v b -> d () b
+deriving instance Functor (d ()) => Functor (Producer d)
+deriving instance Applicative (d ()) => Applicative (Producer d)
+deriving instance Monad (d ()) => Monad (Producer d)
+
+coercePD :: Dual k v d => Producer d b -> d () b
 coercePD = inD . exD . runProducer
 
 
