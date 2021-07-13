@@ -39,10 +39,8 @@ module Sequoia.Profunctor.D
 , liftKWith
 , (•∘)
 , (••)
-, Producer(..)
-, coercePD
-, Consumer(..)
-, coerceCD
+, Producer
+, Consumer
 ) where
 
 import           Control.Category ((<<<), (>>>))
@@ -54,8 +52,6 @@ import           Sequoia.Bijection
 import           Sequoia.Conjunction
 import           Sequoia.Continuation as K
 import           Sequoia.Disjunction
-import           Sequoia.Functor.Applicative
-import           Sequoia.Functor.Con
 import           Sequoia.Profunctor.Applicative
 import           Sequoia.Value as V
 
@@ -135,7 +131,7 @@ evalD = (idK ↓)
 -- Computation
 
 (↑) :: Dual k v d => a --|d|-> b -> v a -> Producer d b
-f ↑ a = Producer (inD (const (exD f a)))
+f ↑ a = inD (const (exD f a))
 
 infixl 7 ↑
 
@@ -145,7 +141,7 @@ f <↑ a = f <<< inD' (inlr a)
 infixl 7 <↑
 
 (↓) :: Dual k v d => k b -> a --|d|-> b -> Consumer d a
-k ↓ f = Consumer (inD (const . flip (exD f) k))
+k ↓ f = inD (const . flip (exD f) k)
 
 infixl 8 ↓
 
@@ -162,17 +158,17 @@ dnE k = inD (\ a b -> liftKWith (\ _K -> k •• _K (\ f -> exD f a b)))
 -- Composition
 
 (↓↓) :: Dual k v d => Consumer d b -> a --|d|-> b -> Consumer d a
-Consumer k ↓↓ f = Consumer (inD (\ a b -> liftKWith (\ _K -> exD f a (_K (flip (exD k) b . inV0)))))
+k ↓↓ f = inD (\ a b -> liftKWith (\ _K -> exD f a (_K (flip (exD k) b . inV0))))
 
 infixl 8 ↓↓
 
 (↑↑) :: Dual k v d => a --|d|-> b -> Producer d a -> Producer d b
-f ↑↑ Producer v = Producer (inD (\ a b -> liftKWith (\ _K -> exD v a (_K (\ a -> exD f (inV0 a) b)))))
+f ↑↑ v = inD (\ a b -> liftKWith (\ _K -> exD v a (_K (\ a -> exD f (inV0 a) b))))
 
 infixr 7 ↑↑
 
 (↓↑) :: Dual k v d => Consumer d a -> Producer d a -> Control k v
-Consumer k ↓↑ Producer v = liftKWith (\ _K -> exD v (inV0 ()) (_K (flip (exD k) (inK absurd) . inV0)))
+k ↓↑ v = liftKWith (\ _K -> exD v (inV0 ()) (_K (flip (exD k) (inK absurd) . inV0)))
 
 infix 9 ↓↑
 
@@ -204,18 +200,5 @@ k •• v = Control (const (k • v))
 infix 7 ••
 
 
-newtype Producer d b = Producer { runProducer :: d () b }
-
-deriving instance Functor (d ()) => Functor (Producer d)
-deriving instance Applicative (d ()) => Applicative (Producer d)
-deriving instance Monad (d ()) => Monad (Producer d)
-
-coercePD :: Dual k v d => Producer d b -> d () b
-coercePD = inD . exD . runProducer
-
-
-newtype Consumer d a = Consumer { runConsumer :: d a Void }
-  deriving (Contrapply, Contravariant) via Con d Void
-
-coerceCD :: Dual k v d => Consumer d a -> d a Void
-coerceCD = inD . exD . runConsumer
+type Producer d b = d () b
+type Consumer d a = d a Void
