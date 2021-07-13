@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeFamilies #-}
 module Sequoia.Calculus.Control
 ( -- * Delimited control
   Control(..)
@@ -17,15 +18,15 @@ import Sequoia.Continuation
 
 class Control s where
   reset
-    :: (Continuation _Δ j, Continuation r k)
+    :: (Continuation j, Continuation k, KRep j ~ _Δ)
     => _Γ -|s j|- _Δ
     -- -------------
     -> _Γ -|s k|- _Δ
 
   shift
-    :: Continuation r k
-    => k a < _Γ -|s k|- _Δ > r
-    -- -----------------------
+    :: Continuation k
+    => k a < _Γ -|s k|- _Δ > KRep k
+    -- ----------------------------
     ->       _Γ -|s k|- _Δ > a
 
 

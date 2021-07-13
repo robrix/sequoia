@@ -20,9 +20,7 @@ import Sequoia.Polarity
 -- Not
 
 newtype k ¬a = Not { getNot :: k a }
-  deriving (Applicative, Contravariant, Functor, Representable)
-
-deriving instance Continuation r k => Continuation r ((¬) k)
+  deriving (Applicative, Continuation, Contravariant, Functor, Representable)
 
 instance Pos a => Polarized N (k ¬a) where
 
@@ -32,9 +30,7 @@ infixr 9 ¬
 -- Negate
 
 newtype k -a = Negate { getNegate :: k a }
-  deriving (Applicative, Contravariant, Functor, Representable)
-
-deriving instance Continuation r k => Continuation r ((-) k)
+  deriving (Applicative, Continuation, Contravariant, Functor, Representable)
 
 instance Neg a => Polarized P (k -a) where
 
