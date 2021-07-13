@@ -203,14 +203,7 @@ infix 7 ••
 
 
 newtype Producer k v b = Producer { runProducer :: () --|D k v|-> b }
-  deriving (Functor)
-
-instance (K.Representable k, V.Representable v) => Applicative (Producer k v) where
-  pure = Producer . D . const . fmap (control . const) . flip (•)
-  Producer f <*> Producer a = Producer (D (\ v k -> liftKWith (\ _K -> exD f v (_K (exD a v . (k •<<))))))
-
-instance (K.Representable k, V.Representable v) => Monad (Producer k v) where
-  Producer m >>= f = Producer (D (\ v k -> liftKWith (\ _K -> exD m v (_K (\ a -> exD (runProducer (f a)) v k)))))
+  deriving (Applicative, Functor, Monad)
 
 coercePD :: Dual k v d => Producer k v b -> d () b
 coercePD = inD . exD . runProducer
