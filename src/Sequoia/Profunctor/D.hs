@@ -23,6 +23,7 @@ module Sequoia.Profunctor.D
 , (↓>)
   -- * Control context
 , Control(..)
+, withEnv
 , Producer(..)
 , Consumer(..)
 ) where
@@ -121,6 +122,9 @@ infixr 9 ↓>
 -- Control context
 
 newtype Control r s = Control { runControl :: s -> r }
+
+withEnv :: (s -> Control r s) -> Control r s
+withEnv f = Control (runControl =<< f)
 
 newtype Producer r s b = Producer { runProducer :: K r b -> Control r s }
 
