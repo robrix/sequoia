@@ -23,6 +23,8 @@ module Sequoia.Profunctor.D
 , (↓>)
   -- * Control context
 , Control(..)
+, Producer(..)
+, Consumer(..)
 ) where
 
 import           Control.Category ((<<<), (>>>))
@@ -119,3 +121,7 @@ infixr 9 ↓>
 -- Control context
 
 newtype Control r s = Control { runControl :: s -> r }
+
+newtype Producer r s b = Producer { runProducer :: K r b -> Control r s }
+
+newtype Consumer r s a = Consumer { runConsumer :: V s a -> Control r s }
