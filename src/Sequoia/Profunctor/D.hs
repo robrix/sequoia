@@ -32,6 +32,8 @@ module Sequoia.Profunctor.D
 , (↓↑)
   -- * Control context
 , Control(..)
+, evalControl
+, control
 , withEnv
 , withVal
 , liftKWith
