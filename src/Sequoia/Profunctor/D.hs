@@ -30,7 +30,7 @@ module Sequoia.Profunctor.D
 , withEnv
 , withVal
 , liftKWith
-, (••)
+, (•∘)
 , Producer(..)
 , Consumer(..)
 ) where
@@ -53,14 +53,14 @@ instance (Contravariant k, Functor v) => Profunctor (D k v) where
   dimap f g = D . dimap (fmap f) (lmap (contramap g)) . exD
 
 instance (K.Representable k, V.Representable v) => Cat.Category (D k v) where
-  id = D (flip (••))
+  id = D (flip (•∘))
   D f . D g = D (\ a c -> liftKWith (\ _K -> g a (_K (\ b -> f (inV0 b) c))))
 
 instance Contravariant k => Functor (D k v c) where
   fmap f = D . fmap (lmap (contramap f)) . exD
 
 instance (K.Representable k, V.Representable v) => Applicative (D k v a) where
-  pure a = D (\ _ b -> b •• inV0 a)
+  pure a = D (\ _ b -> b •∘ inV0 a)
 
   D df <*> D da = D (\ a b -> liftKWith (\ _K -> df a (_K (\ f -> da a (contramap f b)))))
 
@@ -80,13 +80,13 @@ infixr 5 |->
 -- Construction
 
 inD' :: (K.Representable k, V.Representable v) => (a -> b) -> a --|D k v|-> b
-inD' f = D (\ a b -> b •• (f <$> a))
+inD' f = D (\ a b -> b •∘ (f <$> a))
 
 inDK :: (K.Representable k, V.Representable v) => (k b -> k a) -> a --|D k v|-> b
-inDK f = D (\ a b -> f b •• a)
+inDK f = D (\ a b -> f b •∘ a)
 
 inDV :: (K.Representable k, V.Representable v) => (v a -> v b) -> a --|D k v|-> b
-inDV f = D (\ a b -> b •• f a)
+inDV f = D (\ a b -> b •∘ f a)
 
 
 -- Elimination
@@ -120,7 +120,7 @@ infixl 8 ↓
 
 -- FIXME: this is quite limited by the need for the continuation to return locally at r.
 (↓>) :: (K.Representable k, V.Representable v) => Disj d => k c -> a --|D k v|-> (b `d` c) -> a --|D k v|-> b
-c ↓> f = D (\ v k -> (k <••> c) •• v) <<< f
+c ↓> f = D (\ v k -> (k <••> c) •∘ v) <<< f
 
 infixr 9 ↓>
 
@@ -162,10 +162,10 @@ withVal f v = withEnv (f . exV v)
 liftKWith :: (K.Representable k, V.Representable v) => (((a -> Control k v) -> k a) -> Control k v) -> Control k v
 liftKWith f = withEnv (\ e -> f (inK . ((`evalControl` e) .)))
 
-(••) :: (K.Representable k, V.Representable v) => k a -> v a -> Control k v
-k •• v = control (\ e -> k • e ∘ v)
+(•∘) :: (K.Representable k, V.Representable v) => k a -> v a -> Control k v
+k •∘ v = control (\ e -> k • e ∘ v)
 
-infix 7 ••
+infix 7 •∘
 
 
 newtype Producer k v b = Producer { runProducer :: k b -> Control k v }
