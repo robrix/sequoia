@@ -97,6 +97,10 @@ class (K.Representable k, V.Representable v) => Dual k v d | d -> k v where
   exD :: d a b -> v a -> k b -> Control k v
   exD = (~> _D)
 
+instance (K.Representable k, V.Representable v) => Dual k v (D k v) where
+  inD = D
+  exD = runD
+
 
 -- Construction
 
