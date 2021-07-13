@@ -148,16 +148,16 @@ k •• v = control (\ e -> k • e ∘ v)
 infix 7 ••
 
 
-newtype Producer r s b = Producer { runProducer :: K r b -> Control (K r) (V s) }
+newtype Producer k v b = Producer { runProducer :: k b -> Control k v }
 
-instance Functor (Producer r s) where
+instance Contravariant k => Functor (Producer k v) where
   fmap f = Producer . lmap (contramap f) . runProducer
 
-instance Applicative (Producer r s) where
+instance (K.Representable k, V.Representable v) => Applicative (Producer k v) where
   pure = Producer . fmap (control . const) . flip (•)
   Producer f <*> Producer a = Producer (\ k -> liftKWith (\ _K -> f (_K (a . (k •<<)))))
 
-instance Monad (Producer r s) where
+instance (K.Representable k, V.Representable v) => Monad (Producer k v) where
   Producer m >>= f = Producer (\ k -> liftKWith (\ _K -> m (_K ((`runProducer` k) . f))))
 
 
