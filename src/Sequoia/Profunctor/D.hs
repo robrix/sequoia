@@ -24,6 +24,7 @@ module Sequoia.Profunctor.D
   -- * Composition
 , (↓↓)
 , (↑↑)
+, (↓↑)
   -- * Control context
 , Control(..)
 , withEnv
@@ -137,6 +138,11 @@ infixl 8 ↓↓
 f ↑↑ Producer v = Producer (\ b -> liftKWith (\ _K -> v (_K (\ a -> exD f (inV0 a) b))))
 
 infixr 7 ↑↑
+
+(↓↑) :: (K.Representable k, V.Representable v) => Consumer k v a -> Producer k v a -> Control k v
+Consumer k ↓↑ Producer v = liftKWith (\ _K -> v (_K (k . inV0)))
+
+infix 9 ↓↑
 
 
 -- Control context
