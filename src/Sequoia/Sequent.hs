@@ -12,7 +12,6 @@ module Sequoia.Sequent
 
 import qualified Control.Category as Cat
 import           Control.Monad.Trans.Class
-import           Data.Functor.Identity
 import           Data.Profunctor
 import           Prelude hiding (init)
 import           Sequoia.Bijection
@@ -66,7 +65,7 @@ newtype SeqT r _Γ m _Δ = SeqT { getSeqT :: Seq (K (m r)) _Γ _Δ }
   deriving (Applicative, Functor, Monad)
 
 instance MonadTrans (SeqT r _Γ) where
-  lift m = SeqT (inC1 (const . dimap (fmap runIdentity) Identity (m >>=)))
+  lift m = SeqT (inC1 (const . (m >>=)))
 
 
 -- Core rules
