@@ -26,6 +26,7 @@ module Sequoia.Profunctor.D
 , withEnv
 , withVal
 , liftControlWith
+, liftKWith
 , (••)
 , Producer(..)
 , Consumer(..)
@@ -135,6 +136,9 @@ withVal f v = withEnv (f . exV v)
 
 liftControlWith :: ((Control r s -> r) -> Control r s) -> Control r s
 liftControlWith f = withEnv (f . flip runControl)
+
+liftKWith :: (((a -> Control r s) -> K r a) -> Control r s) -> Control r s
+liftKWith f = withEnv (\ e -> f (K . ((`runControl` e) .)))
 
 (••) :: K r a -> V s a -> Control r s
 k •• v = Control (\ e -> k • e ∘ v)
