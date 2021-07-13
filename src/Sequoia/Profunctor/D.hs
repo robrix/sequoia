@@ -90,7 +90,10 @@ class (K.Representable k, V.Representable v) => Dual k v d | d -> k v where
   _D = exD <-> inD
 
   inD :: (v a -> k b -> Control k v) -> d k v
+  inD = (_D <~)
+
   exD :: d k v -> v a -> k b -> Control k v
+  exD = (~> _D)
 
 
 -- Construction
