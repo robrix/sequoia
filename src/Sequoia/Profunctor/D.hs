@@ -24,6 +24,7 @@ module Sequoia.Profunctor.D
   -- * Control context
 , Control(..)
 , withEnv
+, withVal
 , liftControlWith
 , Producer(..)
 , Consumer(..)
@@ -126,6 +127,9 @@ newtype Control r s = Control { runControl :: s -> r }
 
 withEnv :: (s -> Control r s) -> Control r s
 withEnv f = Control (runControl =<< f)
+
+withVal :: V s a -> (a -> Control r s) -> Control r s
+withVal v f = withEnv (f . exV v)
 
 liftControlWith :: ((Control r s -> r) -> Control r s) -> Control r s
 liftControlWith f = withEnv (f . flip runControl)
