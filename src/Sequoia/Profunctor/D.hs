@@ -25,7 +25,6 @@ module Sequoia.Profunctor.D
 , Control(..)
 , withEnv
 , withVal
-, liftControlWith
 , liftKWith
 , (••)
 , Producer(..)
@@ -134,9 +133,6 @@ withEnv f = Control (runControl =<< f)
 withVal :: (a -> Control r s) -> (V s a -> Control r s)
 withVal f v = withEnv (f . exV v)
 
-liftControlWith :: ((Control r s -> r) -> Control r s) -> Control r s
-liftControlWith f = withEnv (f . flip runControl)
-
 liftKWith :: (((a -> Control r s) -> K r a) -> Control r s) -> Control r s
 liftKWith f = withEnv (\ e -> f (K . ((`runControl` e) .)))
 
@@ -153,10 +149,10 @@ instance Functor (Producer r s) where
 
 instance Applicative (Producer r s) where
   pure = Producer . fmap (Control . const) . flip (•)
-  Producer f <*> Producer a = Producer (\ k -> liftControlWith (\ run -> f (K (run . a . (k •<<)))))
+  Producer f <*> Producer a = Producer (\ k -> liftKWith (\ _K -> f (_K (a . (k •<<)))))
 
 instance Monad (Producer r s) where
-  Producer m >>= f = Producer (\ k -> liftControlWith (\ run -> m (K (run . (`runProducer` k) . f))))
+  Producer m >>= f = Producer (\ k -> liftKWith (\ _K -> m (_K ((`runProducer` k) . f))))
 
 
 newtype Consumer r s a = Consumer { runConsumer :: V s a -> Control r s }
