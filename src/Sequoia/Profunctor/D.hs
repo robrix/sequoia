@@ -86,6 +86,8 @@ infixr 5 |->
 -- Dual profunctor abstraction
 
 class (K.Representable k, V.Representable v) => Dual k v d | d -> k v where
+  {-# MINIMAL _D | (inD, exD) #-}
+
   _D :: d k v <-> (v a -> k b -> Control k v)
   _D = exD <-> inD
 
