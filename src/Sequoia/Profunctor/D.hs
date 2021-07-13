@@ -1,3 +1,4 @@
+{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE TypeFamilies #-}
 module Sequoia.Profunctor.D
 ( -- * Dual profunctor
@@ -5,6 +6,8 @@ module Sequoia.Profunctor.D
   -- ** Mixfix notation
 , type (--|)
 , type (|->)
+  -- ** Dual profunctor abstraction
+, Dual(..)
   -- ** Construction
 , inD'
 , inDK
@@ -49,17 +52,17 @@ import           Sequoia.Value as V
 
 -- Dual profunctor
 
-newtype D k v a b = D { exD :: v a -> k b -> Control k v }
+newtype D k v a b = D { runD :: v a -> k b -> Control k v }
 
 instance (Contravariant k, Functor v) => Profunctor (D k v) where
-  dimap f g = D . dimap (fmap f) (lmap (contramap g)) . exD
+  dimap f g = D . dimap (fmap f) (lmap (contramap g)) . runD
 
 instance (K.Representable k, V.Representable v) => Cat.Category (D k v) where
   id = D (flip (•∘))
   D f . D g = D (\ a c -> liftKWith (\ _K -> g a (_K (\ b -> f (inV0 b) c))))
 
 instance Contravariant k => Functor (D k v c) where
-  fmap f = D . fmap (lmap (contramap f)) . exD
+  fmap f = D . fmap (lmap (contramap f)) . runD
 
 instance (K.Representable k, V.Representable v) => Applicative (D k v a) where
   pure a = D (\ _ b -> b •∘ inV0 a)
@@ -67,7 +70,7 @@ instance (K.Representable k, V.Representable v) => Applicative (D k v a) where
   D df <*> D da = D (\ a b -> liftKWith (\ _K -> df a (_K (\ f -> da a (contramap f b)))))
 
 instance (K.Representable k, V.Representable v) => Monad (D k v a) where
-  D m >>= f = D (\ a c -> liftKWith (\ _K -> m a (_K (\ b -> exD (f b) a c))))
+  D m >>= f = D (\ a c -> liftKWith (\ _K -> m a (_K (\ b -> runD (f b) a c))))
 
 
 -- Mixfix notation
@@ -77,6 +80,13 @@ type l|-> r = l r
 
 infixr 6 --|
 infixr 5 |->
+
+
+-- Dual profunctor abstraction
+
+class (K.Representable k, V.Representable v) => Dual k v d | d -> k v where
+  inD :: v a -> k b -> Control k v -> d k v
+  exD :: d k v -> v a -> k b -> Control k v
 
 
 -- Construction
@@ -94,10 +104,10 @@ inDV f = D (\ a b -> b •∘ f a)
 -- Elimination
 
 exDK :: (K.Representable k, V.Representable v) => a --|D k v|-> b -> v (k b -> k a)
-exDK f = inV (\ e k -> inK (\ a -> evalControl (exD f (inV0 a) k) e))
+exDK f = inV (\ e k -> inK (\ a -> evalControl (runD f (inV0 a) k) e))
 
 exDV :: (K.Representable k, K.Representable k', V.Representable v) => k (v a -> v (K.Rep k')) -> k (a --|D k' v|-> K.Rep k')
-exDV k = inK (\ f -> k • inV . \ a -> evalControl (exD f a idK))
+exDV k = inK (\ f -> k • inV . \ a -> evalControl (runD f a idK))
 
 evalD :: K.Representable k => a --|D k v|-> K.Rep k -> Consumer k v a
 evalD = (idK ↓)
@@ -106,7 +116,7 @@ evalD = (idK ↓)
 -- Computation
 
 (↑) :: a --|D k v|-> b -> v a -> Producer k v b
-f ↑ a = Producer (exD f a)
+f ↑ a = Producer (runD f a)
 
 infixl 7 ↑
 
@@ -116,7 +126,7 @@ f <↑ a = f <<< inD' (inlr a)
 infixl 7 <↑
 
 (↓) :: k b -> a --|D k v|-> b -> Consumer k v a
-k ↓ f = Consumer (flip (exD f) k)
+k ↓ f = Consumer (flip (runD f) k)
 
 infixl 8 ↓
 
@@ -127,18 +137,18 @@ c ↓> f = D (\ v k -> (k <••> c) •∘ v) <<< f
 infixr 9 ↓>
 
 dnE :: (K.Representable k, V.Representable v) => k **(a --|D k v|-> b) -> a --|D k v|-> b
-dnE k = D (\ a b -> liftKWith (\ _K -> k •• _K (\ f -> exD f a b)))
+dnE k = D (\ a b -> liftKWith (\ _K -> k •• _K (\ f -> runD f a b)))
 
 
 -- Composition
 
 (↓↓) :: (K.Representable k, V.Representable v) => Consumer k v b -> a --|D k v|-> b -> Consumer k v a
-Consumer k ↓↓ f = Consumer (\ a -> liftKWith (\ _K -> exD f a (_K (k . inV0))))
+Consumer k ↓↓ f = Consumer (\ a -> liftKWith (\ _K -> runD f a (_K (k . inV0))))
 
 infixl 8 ↓↓
 
 (↑↑) :: (K.Representable k, V.Representable v) => a --|D k v|-> b -> Producer k v a -> Producer k v b
-f ↑↑ Producer v = Producer (\ b -> liftKWith (\ _K -> v (_K (\ a -> exD f (inV0 a) b))))
+f ↑↑ Producer v = Producer (\ b -> liftKWith (\ _K -> v (_K (\ a -> runD f (inV0 a) b))))
 
 infixr 7 ↑↑
 
