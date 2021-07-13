@@ -37,6 +37,7 @@ import           Data.Profunctor
 import           Sequoia.Conjunction
 import           Sequoia.Continuation as K
 import           Sequoia.Disjunction
+import           Sequoia.Functor.Applicative
 import           Sequoia.Functor.K
 import           Sequoia.Functor.V
 import           Sequoia.Value as V
@@ -152,3 +153,6 @@ newtype Consumer r s a = Consumer { runConsumer :: V s a -> Control r s }
 
 instance Contravariant (Consumer r s) where
   contramap f = Consumer . lmap (fmap f) . runConsumer
+
+instance Contrapply (Consumer r s) where
+  contraliftA2 f (Consumer a) (Consumer b) = Consumer (\ v -> withVal v ((a . inV0 <--> b . inV0) . f))
