@@ -32,3 +32,6 @@ instance Pro.Coadjunction p q => Adjunction (Con p r) (Con q r) where
 instance Pro.Coapply p => Contrapply (Con p r) where
   contraliftA2 f (Con a) (Con b) = Con (Pro.coliftA2 f a b)
   contrap (Con a) (Con b) = Con (Pro.coap a b)
+
+instance Pro.Coapplicative p => Contrapplicative (Con p r) where
+  contrapure = Con . Pro.copure
