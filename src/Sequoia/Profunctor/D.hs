@@ -135,6 +135,10 @@ newtype Producer r s b = Producer { runProducer :: K r b -> Control r s }
 instance Functor (Producer r s) where
   fmap f = Producer . lmap (contramap f) . runProducer
 
+instance Applicative (Producer r s) where
+  pure = Producer . fmap (Control . const) . flip (•)
+  Producer f <*> Producer a = Producer (\ k -> liftControlWith (\ run -> f (K (run . a . (k •<<)))))
+
 
 newtype Consumer r s a = Consumer { runConsumer :: V s a -> Control r s }
 
