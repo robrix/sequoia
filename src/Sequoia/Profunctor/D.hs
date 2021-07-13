@@ -88,13 +88,13 @@ infixr 5 |->
 class (K.Representable k, V.Representable v) => Dual k v d | d -> k v where
   {-# MINIMAL _D | (inD, exD) #-}
 
-  _D :: d k v <-> (v a -> k b -> Control k v)
+  _D :: d a b <-> (v a -> k b -> Control k v)
   _D = exD <-> inD
 
-  inD :: (v a -> k b -> Control k v) -> d k v
+  inD :: (v a -> k b -> Control k v) -> d a b
   inD = (_D <~)
 
-  exD :: d k v -> v a -> k b -> Control k v
+  exD :: d a b -> v a -> k b -> Control k v
   exD = (~> _D)
 
 
