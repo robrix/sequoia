@@ -129,8 +129,8 @@ newtype Control r s = Control { runControl :: s -> r }
 withEnv :: (s -> Control r s) -> Control r s
 withEnv f = Control (runControl =<< f)
 
-withVal :: V s a -> (a -> Control r s) -> Control r s
-withVal v f = withEnv (f . exV v)
+withVal :: (a -> Control r s) -> (V s a -> Control r s)
+withVal f v = withEnv (f . exV v)
 
 liftControlWith :: ((Control r s -> r) -> Control r s) -> Control r s
 liftControlWith f = withEnv (f . flip runControl)
@@ -156,10 +156,10 @@ instance Contravariant (Consumer r s) where
 
 instance K.Representable (Consumer r s) where
   type Rep (Consumer r s) = Control r s
-  tabulate = Consumer . flip withVal
+  tabulate = Consumer . withVal
   index (Consumer r) = r . inV0
 
 instance Contrapply (Consumer r s) where
-  contraliftA2 f (Consumer a) (Consumer b) = Consumer (\ v -> withVal v ((a . inV0 <--> b . inV0) . f))
+  contraliftA2 f (Consumer a) (Consumer b) = Consumer (withVal ((a . inV0 <--> b . inV0) . f))
 
 instance Contrapplicative (Consumer r s)
