@@ -116,11 +116,11 @@ inDV f = inD (\ a b -> b •∘ f a)
 
 -- Elimination
 
-exDK :: (K.Representable k, V.Representable v) => a --|D k v|-> b -> v (k b -> k a)
-exDK f = inV (\ e k -> inK (\ a -> evalControl (runD f (inV0 a) k) e))
+exDK :: Dual k v d => a --|d|-> b -> v (k b -> k a)
+exDK f = inV (\ e k -> inK (\ a -> evalControl (exD f (inV0 a) k) e))
 
-exDV :: (K.Representable k, K.Representable k', V.Representable v) => k (v a -> v (K.Rep k')) -> k (a --|D k' v|-> K.Rep k')
-exDV k = inK (\ f -> k • inV . \ a -> evalControl (runD f a idK))
+exDV :: (K.Representable k', Dual k v d) => k' (v a -> v (K.Rep k)) -> k' (a --|d|-> K.Rep k)
+exDV k = inK (\ f -> k • inV . \ a -> evalControl (exD f a idK))
 
 evalD :: K.Representable k => a --|D k v|-> K.Rep k -> Consumer k v a
 evalD = (idK ↓)
