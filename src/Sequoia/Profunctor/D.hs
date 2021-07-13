@@ -129,7 +129,7 @@ evalD f = runControl (exD f (inV id) idK)
 -- Computation
 
 (↑) :: Dual k v d => a --|d|-> b -> v a -> Producer d v b
-f ↑ a = inD (const (exD f a))
+f ↑ a = f <<< producer a
 
 infixl 7 ↑
 
@@ -139,7 +139,7 @@ f <↑ a = f <<< inD' (inlr a)
 infixl 7 <↑
 
 (↓) :: Dual k v d => k b -> a --|d|-> b -> Consumer d k a
-k ↓ f = inD (const . flip (exD f) k)
+k ↓ f = consumer k <<< f
 
 infixl 8 ↓
 
