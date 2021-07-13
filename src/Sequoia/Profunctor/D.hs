@@ -154,5 +154,10 @@ newtype Consumer r s a = Consumer { runConsumer :: V s a -> Control r s }
 instance Contravariant (Consumer r s) where
   contramap f = Consumer . lmap (fmap f) . runConsumer
 
+instance K.Representable (Consumer r s) where
+  type Rep (Consumer r s) = Control r s
+  tabulate = Consumer . flip withVal
+  index (Consumer r) = r . inV0
+
 instance Contrapply (Consumer r s) where
   contraliftA2 f (Consumer a) (Consumer b) = Consumer (\ v -> withVal v ((a . inV0 <--> b . inV0) . f))
