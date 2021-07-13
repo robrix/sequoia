@@ -135,6 +135,7 @@ newtype Producer r s b = Producer { runProducer :: K r b -> Control r s }
 instance Functor (Producer r s) where
   fmap f = Producer . lmap (contramap f) . runProducer
 
+
 newtype Consumer r s a = Consumer { runConsumer :: V s a -> Control r s }
 
 instance Contravariant (Consumer r s) where
