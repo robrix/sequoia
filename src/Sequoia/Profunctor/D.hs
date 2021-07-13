@@ -87,6 +87,7 @@ infixr 5 |->
 
 class (K.Representable k, V.Representable v) => Dual k v d | d -> k v where
   _D :: d k v <-> (v a -> k b -> Control k v)
+  _D = exD <-> inD
 
   inD :: (v a -> k b -> Control k v) -> d k v
   exD :: d k v -> v a -> k b -> Control k v
