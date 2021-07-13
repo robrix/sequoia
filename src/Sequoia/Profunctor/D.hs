@@ -125,8 +125,8 @@ exDK f = inV (\ e k -> inK (\ a -> evalControl (exD f (inV0 a) k) e))
 exDV :: (K.Representable k', Dual k v d) => k' (v a -> v (K.Rep k)) -> k' (a --|d|-> K.Rep k)
 exDV k = inK (\ f -> k • inV . \ a -> evalControl (exD f a idK))
 
-evalD :: Dual k v d => a --|d|-> K.Rep k -> Consumer d a
-evalD = (idK ↓)
+evalD :: Dual k v d => V.Rep v --|d|-> K.Rep k -> (V.Rep v -> K.Rep k)
+evalD f = runControl (exD f (inV id) idK)
 
 
 -- Computation
