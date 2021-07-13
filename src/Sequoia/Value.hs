@@ -35,9 +35,9 @@ import Sequoia.Conjunction
 import Sequoia.Disjunction
 import Sequoia.Functor.V
 
-class Representable v => Value v
+class (Representable v, Rep v ~ s) => Value s v | v -> s
 
-instance Value (V s)
+instance Value s (V s)
 
 type VRep v = Rep v
 type VFn v a = VRep v -> a
