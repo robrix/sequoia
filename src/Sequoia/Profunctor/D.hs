@@ -55,6 +55,7 @@ import           Sequoia.Conjunction
 import           Sequoia.Continuation as K
 import           Sequoia.Disjunction
 import           Sequoia.Functor.Applicative
+import           Sequoia.Profunctor.Applicative
 import           Sequoia.Value as V
 
 -- Dual profunctor
@@ -78,6 +79,9 @@ instance (K.Representable k, V.Representable v) => Applicative (D k v a) where
 
 instance (K.Representable k, V.Representable v) => Monad (D k v a) where
   D m >>= f = D (\ a c -> liftKWith (\ _K -> m a (_K (\ b -> runD (f b) a c))))
+
+instance (K.Representable k, V.Representable v) => Coapply (D k v) where
+  coliftA2 f a b = D (\ v k -> withVal ((flip (exD a) k . inV0 <--> flip (exD b) k . inV0) . f) v)
 
 
 -- Mixfix notation
