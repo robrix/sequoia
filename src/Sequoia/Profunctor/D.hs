@@ -140,7 +140,7 @@ f <↑ a = f <<< inD' (inlr a)
 infixl 7 <↑
 
 (↓) :: Dual k v d => k b -> a --|d|-> b -> Consumer k v a
-k ↓ f = Consumer (flip (exD f) k)
+k ↓ f = Consumer (\ a _ -> exD f a k)
 
 infixl 8 ↓
 
@@ -157,7 +157,7 @@ dnE k = inD (\ a b -> liftKWith (\ _K -> k •• _K (\ f -> exD f a b)))
 -- Composition
 
 (↓↓) :: Dual k v d => Consumer k v b -> a --|d|-> b -> Consumer k v a
-Consumer k ↓↓ f = Consumer (\ a -> liftKWith (\ _K -> exD f a (_K (k . inV0))))
+Consumer k ↓↓ f = Consumer (\ a b -> liftKWith (\ _K -> exD f a (_K ((`k` b) . inV0))))
 
 infixl 8 ↓↓
 
@@ -167,7 +167,7 @@ f ↑↑ Producer v = Producer (\ b -> liftKWith (\ _K -> v (_K (\ a -> exD f (i
 infixr 7 ↑↑
 
 (↓↑) :: (K.Representable k, V.Representable v) => Consumer k v a -> Producer k v a -> Control k v
-Consumer k ↓↑ Producer v = liftKWith (\ _K -> v (_K (k . inV0)))
+Consumer k ↓↑ Producer v = liftKWith (\ _K -> v (_K ((`k` inK absurd) . inV0)))
 
 infix 9 ↓↑
 
@@ -218,20 +218,20 @@ coercePD :: Dual k v d => Producer k v b -> d () b
 coercePD (Producer r) = inD (\ _ b -> r b)
 
 
-newtype Consumer k v a = Consumer { runConsumer :: v a -> Control k v }
+newtype Consumer k v a = Consumer { runConsumer :: v a -> k Void -> Control k v }
 
 instance Functor v => Contravariant (Consumer k v) where
   contramap f = Consumer . lmap (fmap f) . runConsumer
 
 instance (K.Representable k, V.Representable v) => K.Representable (Consumer k v) where
   type Rep (Consumer k v) = Control k v
-  tabulate = Consumer . withVal
-  index (Consumer r) = r . inV0
+  tabulate = Consumer . fmap const . withVal
+  index (Consumer r) = (`r` inK absurd) . inV0
 
 instance (K.Representable k, V.Representable v) => Contrapply (Consumer k v) where
-  contraliftA2 f (Consumer a) (Consumer b) = Consumer (withVal ((a . inV0 <--> b . inV0) . f))
+  contraliftA2 f (Consumer a) (Consumer b) = Consumer (\ v k -> withVal (((`a` k) . inV0 <--> (`b` k) . inV0) . f) v)
 
 instance (K.Representable k, V.Representable v) => Contrapplicative (Consumer k v)
 
 coerceCD :: Dual k v d => Consumer k v a -> d a Void
-coerceCD (Consumer r) = inD (\ a _ -> r a)
+coerceCD (Consumer r) = inD r
