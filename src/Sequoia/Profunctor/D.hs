@@ -31,6 +31,7 @@ module Sequoia.Profunctor.D
 , withVal
 , liftKWith
 , (•∘)
+, (••)
 , Producer(..)
 , Consumer(..)
 ) where
@@ -166,6 +167,11 @@ liftKWith f = withEnv (\ e -> f (inK . ((`evalControl` e) .)))
 k •∘ v = control (\ e -> k • e ∘ v)
 
 infix 7 •∘
+
+(••) :: (K.Representable k, V.Representable v) => k a -> a -> Control k v
+k •• v = control (const (k • v))
+
+infix 7 ••
 
 
 newtype Producer k v b = Producer { runProducer :: k b -> Control k v }
