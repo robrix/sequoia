@@ -94,82 +94,82 @@ infixr 5 |->
 
 -- Dual profunctor abstraction
 
-_D :: Dual r s d => d a b <-> (V s a -> K r b -> Control r s)
+_D :: Dual k v d => d a b <-> (v a -> k b -> Control (K.Rep k) (V.Rep v))
 _D = exD <-> inD
 
-class (Cat.Category d, Profunctor d) => Dual r s d | d -> r s where
-  inD :: (V s a -> K r b -> Control r s) -> d a b
-  exD :: d a b -> V s a -> K r b -> Control r s
+class (K.Representable k, V.Representable v, Cat.Category d, Profunctor d) => Dual k v d | d -> k v where
+  inD :: (v a -> k b -> Control (K.Rep k) (V.Rep v)) -> d a b
+  exD :: d a b -> v a -> k b -> Control (K.Rep k) (V.Rep v)
 
-instance Dual r s (D r s) where
+instance Dual (K r) (V s) (D r s) where
   inD = D
   exD = runD
 
 
 -- Construction
 
-inD' :: Dual r s d => (a -> b) -> a --|d|-> b
+inD' :: Dual k v d => (a -> b) -> a --|d|-> b
 inD' f = inD (\ a b -> b •∘ (f <$> a))
 
-inDK :: Dual r s d => (K r b -> K r a) -> a --|d|-> b
+inDK :: Dual k v d => (k b -> k a) -> a --|d|-> b
 inDK f = inD (\ a b -> f b •∘ a)
 
-inDV :: Dual r s d => (V s a -> V s b) -> a --|d|-> b
+inDV :: Dual k v d => (v a -> v b) -> a --|d|-> b
 inDV f = inD (\ a b -> b •∘ f a)
 
 
 -- Elimination
 
-exDK :: Dual r s d => a --|d|-> b -> V s (K r b -> K r a)
+exDK :: Dual k v d => a --|d|-> b -> v (k b -> k a)
 exDK f = inV (\ e k -> inK (\ a -> evalControl (exD f (inV0 a) k) e))
 
-exDV :: Dual r s d => K r' (V s a -> V s r) -> K r' (a --|d|-> r)
+exDV :: (K.Representable k', Dual k v d) => k' (v a -> v (K.Rep k)) -> k' (a --|d|-> K.Rep k)
 exDV k = inK (\ f -> k • inV . \ a -> evalControl (exD f a idK))
 
-evalD :: Dual r s d => a --|d|-> r -> Consumer d a
+evalD :: Dual k v d => a --|d|-> K.Rep k -> Consumer d a
 evalD = (idK ↓)
 
 
 -- Computation
 
-(↑) :: Dual r s d => a --|d|-> b -> V s a -> Producer d b
+(↑) :: Dual k v d => a --|d|-> b -> v a -> Producer d b
 f ↑ a = inD (const (exD f a))
 
 infixl 7 ↑
 
-(<↑) :: Dual r s d => Conj c => (a `c` _Γ) --|d|-> _Δ -> a -> _Γ --|d|-> _Δ
+(<↑) :: Dual k v d => Conj c => (a `c` _Γ) --|d|-> _Δ -> a -> _Γ --|d|-> _Δ
 f <↑ a = f <<< inD' (inlr a)
 
 infixl 7 <↑
 
-(↓) :: Dual r s d => K r b -> a --|d|-> b -> Consumer d a
+(↓) :: Dual k v d => k b -> a --|d|-> b -> Consumer d a
 k ↓ f = inD (const . flip (exD f) k)
 
 infixl 8 ↓
 
 -- FIXME: this is quite limited by the need for the continuation to return locally at r.
-(↓>) :: (Dual r s d, Disj p) => K r c -> a --|d|-> (b `p` c) -> a --|d|-> b
+(↓>) :: (Dual k v d, Disj p) => k c -> a --|d|-> (b `p` c) -> a --|d|-> b
 c ↓> f = inD (\ v k -> (k <••> c) •∘ v) <<< f
 
 infixr 9 ↓>
 
-dnE :: Dual r s d => K r **(a --|d|-> b) -> a --|d|-> b
+dnE :: Dual k v d => k **(a --|d|-> b) -> a --|d|-> b
 dnE k = inD (\ a b -> liftKWith (\ _K -> k •• _K (\ f -> exD f a b)))
 
 
 -- Composition
 
-(↓↓) :: Dual r s d => Consumer d b -> a --|d|-> b -> Consumer d a
+(↓↓) :: Dual k v d => Consumer d b -> a --|d|-> b -> Consumer d a
 k ↓↓ f = inD (\ a b -> liftKWith (\ _K -> exD f a (_K (flip (exD k) b . inV0))))
 
 infixl 8 ↓↓
 
-(↑↑) :: Dual r s d => a --|d|-> b -> Producer d a -> Producer d b
+(↑↑) :: Dual k v d => a --|d|-> b -> Producer d a -> Producer d b
 f ↑↑ v = inD (\ a b -> liftKWith (\ _K -> exD v a (_K (\ a -> exD f (inV0 a) b))))
 
 infixr 7 ↑↑
 
-(↓↑) :: Dual r s d => Consumer d a -> Producer d a -> Control r s
+(↓↑) :: Dual k v d => Consumer d a -> Producer d a -> Control (K.Rep k) (V.Rep v)
 k ↓↑ v = liftKWith (\ _K -> exD v (inV0 ()) (_K (flip (exD k) (inK absurd) . inV0)))
 
 infix 9 ↓↑
@@ -185,18 +185,18 @@ evalControl (Control v) = (∘ v)
 withEnv :: (s -> Control r s) -> Control r s
 withEnv f = Control (evalControl =<< f)
 
-withVal :: Value s v => (a -> Control r s) -> (v a -> Control r s)
+withVal :: V.Representable v => (a -> Control r (V.Rep v)) -> (v a -> Control r (V.Rep v))
 withVal f v = withEnv (f . exV v)
 
-liftKWith :: Continuation r k => (((a -> Control r s) -> k a) -> Control r s) -> Control r s
+liftKWith :: K.Representable k => (((a -> Control (K.Rep k) s) -> k a) -> Control (K.Rep k) s) -> Control (K.Rep k) s
 liftKWith f = withEnv (\ e -> f (inK . ((`evalControl` e) .)))
 
-(•∘) :: (Continuation r k, Value s v) => k a -> v a -> Control r s
+(•∘) :: (K.Representable k, V.Representable v) => k a -> v a -> Control (K.Rep k) (V.Rep v)
 k •∘ v = Control (\ e -> k • e ∘ v)
 
 infix 7 •∘
 
-(••) :: Continuation r k => k a -> a -> Control r s
+(••) :: K.Representable k => k a -> a -> Control (K.Rep k) s
 k •• v = Control (const (k • v))
 
 infix 7 ••
