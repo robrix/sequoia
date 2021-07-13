@@ -17,6 +17,7 @@ module Sequoia.Value
 , exV1
 , exV2
 , (∘)
+, idV
   -- * Computation
 , liftV2
 , mapVRep
@@ -75,6 +76,10 @@ exV2 = dimap2 inV inV exV
 (∘) = flip exV
 
 infixr 8 ∘
+
+
+idV :: Representable v => v (VRep v)
+idV = inV id
 
 
 -- Computation
