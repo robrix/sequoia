@@ -45,7 +45,7 @@ import           Sequoia.Value as V
 
 -- Dual profunctor
 
-newtype D r s a b = D { exD :: V s a -> K r b -> Control r s }
+newtype D r s a b = D { exD :: V s a -> K r b -> Control (K r) (V s) }
 
 instance Profunctor (D r s) where
   dimap f g = D . dimap (rmap f) (lmap (contramap g)) . exD
@@ -90,10 +90,10 @@ inDV f = D (\ a b -> b •• f a)
 -- Elimination
 
 exDK :: a --|D r s|-> b -> V s (K r b -> K r a)
-exDK f = V (\ e k -> K (\ a -> runControl (exD f (inV0 a) k) e))
+exDK f = V (\ e k -> K (\ a -> evalControl (exD f (inV0 a) k) e))
 
 exDV :: K r (V s a -> V s b) -> K r (a --|D b s|-> b)
-exDV k = K (\ f -> k • inV . \ a -> runControl (exD f a idK))
+exDV k = K (\ f -> k • inV . \ a -> evalControl (exD f a idK))
 
 evalD :: a --|D r s|-> r -> V s (K r a)
 evalD = (idK ↓)
@@ -102,7 +102,7 @@ evalD = (idK ↓)
 -- Computation
 
 (↑) :: a --|D r s|-> b -> V s a -> V s (K r (K r b))
-f ↑ a = V (K . flip (runControl . exD f a))
+f ↑ a = V (K . flip (evalControl . exD f a))
 
 infixl 7 ↑
 
@@ -112,7 +112,7 @@ f <↑ a = f <<< inD' (inlr a)
 infixl 7 <↑
 
 (↓) :: K r b -> a --|D r s|-> b -> V s (K r a)
-k ↓ f = V (\ e -> K (\ a -> runControl (exD f (inV0 a) k) e))
+k ↓ f = V (\ e -> K (\ a -> evalControl (exD f (inV0 a) k) e))
 
 infixl 8 ↓
 
@@ -125,43 +125,49 @@ infixr 9 ↓>
 
 -- Control context
 
-newtype Control r s = Control { runControl :: s -> r }
+newtype Control k v = Control { runControl :: forall x . v (k x) }
 
-withEnv :: (s -> Control r s) -> Control r s
-withEnv f = Control (runControl =<< f)
+evalControl :: (K.Representable k, V.Representable v) => Control k v -> (V.Rep v -> K.Rep k)
+evalControl (Control v) = (• ()) . (∘ v)
 
-withVal :: (a -> Control r s) -> (V s a -> Control r s)
+control :: (K.Representable k, V.Representable v) => (V.Rep v -> K.Rep k) -> Control k v
+control f = Control (inV (inK . const . f))
+
+withEnv :: (K.Representable k, V.Representable v) => (V.Rep v -> Control k v) -> Control k v
+withEnv f = control (evalControl =<< f)
+
+withVal :: (K.Representable k, V.Representable v) => (a -> Control k v) -> (v a -> Control k v)
 withVal f v = withEnv (f . exV v)
 
-liftKWith :: (((a -> Control r s) -> K r a) -> Control r s) -> Control r s
-liftKWith f = withEnv (\ e -> f (K . ((`runControl` e) .)))
+liftKWith :: (K.Representable k, V.Representable v) => (((a -> Control k v) -> k a) -> Control k v) -> Control k v
+liftKWith f = withEnv (\ e -> f (inK . ((`evalControl` e) .)))
 
-(••) :: K r a -> V s a -> Control r s
-k •• v = Control (\ e -> k • e ∘ v)
+(••) :: (K.Representable k, V.Representable v) => k a -> v a -> Control k v
+k •• v = control (\ e -> k • e ∘ v)
 
 infix 7 ••
 
 
-newtype Producer r s b = Producer { runProducer :: K r b -> Control r s }
+newtype Producer r s b = Producer { runProducer :: K r b -> Control (K r) (V s) }
 
 instance Functor (Producer r s) where
   fmap f = Producer . lmap (contramap f) . runProducer
 
 instance Applicative (Producer r s) where
-  pure = Producer . fmap (Control . const) . flip (•)
+  pure = Producer . fmap (control . const) . flip (•)
   Producer f <*> Producer a = Producer (\ k -> liftKWith (\ _K -> f (_K (a . (k •<<)))))
 
 instance Monad (Producer r s) where
   Producer m >>= f = Producer (\ k -> liftKWith (\ _K -> m (_K ((`runProducer` k) . f))))
 
 
-newtype Consumer r s a = Consumer { runConsumer :: V s a -> Control r s }
+newtype Consumer r s a = Consumer { runConsumer :: V s a -> Control (K r) (V s) }
 
 instance Contravariant (Consumer r s) where
   contramap f = Consumer . lmap (fmap f) . runConsumer
 
 instance K.Representable (Consumer r s) where
-  type Rep (Consumer r s) = Control r s
+  type Rep (Consumer r s) = Control (K r) (V s)
   tabulate = Consumer . withVal
   index (Consumer r) = r . inV0
 
