@@ -140,7 +140,7 @@ f <↑ a = f <<< inD' (inlr a)
 infixl 7 <↑
 
 (↓) :: Dual k v d => k b -> a --|d|-> b -> Consumer k v a
-k ↓ f = Consumer (\ a _ -> exD f a k)
+k ↓ f = Consumer (D (const . flip (exD f) k))
 
 infixl 8 ↓
 
@@ -157,7 +157,7 @@ dnE k = inD (\ a b -> liftKWith (\ _K -> k •• _K (\ f -> exD f a b)))
 -- Composition
 
 (↓↓) :: Dual k v d => Consumer k v b -> a --|d|-> b -> Consumer k v a
-Consumer k ↓↓ f = Consumer (\ a b -> liftKWith (\ _K -> exD f a (_K ((`k` b) . inV0))))
+Consumer k ↓↓ f = Consumer (D (\ a b -> liftKWith (\ _K -> exD f a (_K (flip (exD k) b . inV0)))))
 
 infixl 8 ↓↓
 
@@ -167,7 +167,7 @@ f ↑↑ Producer v = Producer (D (\ a b -> liftKWith (\ _K -> exD v a (_K (\ a 
 infixr 7 ↑↑
 
 (↓↑) :: (K.Representable k, V.Representable v) => Consumer k v a -> Producer k v a -> Control k v
-Consumer k ↓↑ Producer v = liftKWith (\ _K -> exD v (inV0 ()) (_K ((`k` inK absurd) . inV0)))
+Consumer k ↓↑ Producer v = liftKWith (\ _K -> exD v (inV0 ()) (_K (flip (exD k) (inK absurd) . inV0)))
 
 infix 9 ↓↑
 
@@ -209,20 +209,20 @@ coercePD :: Dual k v d => Producer k v b -> d () b
 coercePD = inD . exD . runProducer
 
 
-newtype Consumer k v a = Consumer { runConsumer :: v a -> k Void -> Control k v }
+newtype Consumer k v a = Consumer { runConsumer :: D k v a Void }
 
-instance Functor v => Contravariant (Consumer k v) where
-  contramap f = Consumer . lmap (fmap f) . runConsumer
+instance (Contravariant k, Functor v) => Contravariant (Consumer k v) where
+  contramap f = Consumer . lmap f . runConsumer
 
 instance (K.Representable k, V.Representable v) => K.Representable (Consumer k v) where
   type Rep (Consumer k v) = Control k v
-  tabulate = Consumer . fmap const . withVal
-  index (Consumer r) = (`r` inK absurd) . inV0
+  tabulate = Consumer . D . fmap const . withVal
+  index (Consumer r) = flip (exD r) (inK absurd) . inV0
 
 instance (K.Representable k, V.Representable v) => Contrapply (Consumer k v) where
-  contraliftA2 f (Consumer a) (Consumer b) = Consumer (\ v k -> withVal (((`a` k) . inV0 <--> (`b` k) . inV0) . f) v)
+  contraliftA2 f (Consumer a) (Consumer b) = Consumer (D (\ v k -> withVal ((flip (exD a) k . inV0 <--> flip (exD b) k . inV0) . f) v))
 
 instance (K.Representable k, V.Representable v) => Contrapplicative (Consumer k v)
 
 coerceCD :: Dual k v d => Consumer k v a -> d a Void
-coerceCD (Consumer r) = inD r
+coerceCD = inD . exD . runConsumer
