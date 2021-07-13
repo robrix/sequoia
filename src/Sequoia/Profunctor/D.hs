@@ -21,6 +21,8 @@ module Sequoia.Profunctor.D
 , (<↑)
 , (↓)
 , (↓>)
+  -- * Composition
+, (↓↓)
   -- * Control context
 , Control(..)
 , withEnv
@@ -121,6 +123,14 @@ infixl 8 ↓
 c ↓> f = D (\ v k -> (k <••> c) •• v) <<< f
 
 infixr 9 ↓>
+
+
+-- Composition
+
+(↓↓) :: Consumer (K r) (V s) b -> a --|D r s|-> b -> Consumer (K r) (V s) a
+Consumer k ↓↓ f = Consumer (\ a -> liftKWith (\ _K -> exD f a (_K (k . inV0))))
+
+infixl 8 ↓↓
 
 
 -- Control context
