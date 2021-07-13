@@ -21,6 +21,8 @@ module Sequoia.Profunctor.D
 , (<↑)
 , (↓)
 , (↓>)
+  -- * Control context
+, KV(..)
 ) where
 
 import           Control.Category ((<<<), (>>>))
@@ -112,3 +114,8 @@ infixl 8 ↓
 c ↓> f = D (\ v k e -> (k <••> c) • e ∘ v) <<< f
 
 infixr 9 ↓>
+
+
+-- Control context
+
+newtype KV r s = KV { runKV :: s -> r }
