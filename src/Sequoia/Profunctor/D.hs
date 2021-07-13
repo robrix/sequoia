@@ -44,6 +44,7 @@ import           Control.Category ((<<<), (>>>))
 import qualified Control.Category as Cat
 import           Data.Kind (Type)
 import           Data.Profunctor
+import           Sequoia.Bijection
 import           Sequoia.Conjunction
 import           Sequoia.Continuation as K
 import           Sequoia.Disjunction
@@ -85,6 +86,8 @@ infixr 5 |->
 -- Dual profunctor abstraction
 
 class (K.Representable k, V.Representable v) => Dual k v d | d -> k v where
+  _D :: d k v <-> v a -> k b -> Control k v
+
   inD :: v a -> k b -> Control k v -> d k v
   exD :: d k v -> v a -> k b -> Control k v
 
