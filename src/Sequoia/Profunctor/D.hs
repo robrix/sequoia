@@ -161,3 +161,5 @@ instance K.Representable (Consumer r s) where
 
 instance Contrapply (Consumer r s) where
   contraliftA2 f (Consumer a) (Consumer b) = Consumer (\ v -> withVal v ((a . inV0 <--> b . inV0) . f))
+
+instance Contrapplicative (Consumer r s)
