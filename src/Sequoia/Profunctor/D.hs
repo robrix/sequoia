@@ -21,6 +21,7 @@ module Sequoia.Profunctor.D
 , (<↑)
 , (↓)
 , (↓>)
+, dnE
   -- * Composition
 , (↓↓)
 , (↑↑)
@@ -124,6 +125,9 @@ infixl 8 ↓
 c ↓> f = D (\ v k -> (k <••> c) •∘ v) <<< f
 
 infixr 9 ↓>
+
+dnE :: (K.Representable k, V.Representable v) => k **(a --|D k v|-> b) -> a --|D k v|-> b
+dnE k = D (\ a b -> liftKWith (\ _K -> k •• _K (\ f -> exD f a b)))
 
 
 -- Composition
