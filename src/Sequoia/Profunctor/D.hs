@@ -34,7 +34,6 @@ module Sequoia.Profunctor.D
   -- * Control context
 , Control(..)
 , evalControl
-, control
 , withEnv
 , withVal
 , liftKWith
@@ -180,30 +179,27 @@ infix 9 ↓↑
 
 -- Control context
 
-newtype Control k v = Control { runControl :: forall x . v (k x) }
+newtype Control k v = Control { runControl :: V.Rep v -> K.Rep k }
 
-evalControl :: (K.Representable k, V.Representable v) => Control k v -> (V.Rep v -> K.Rep k)
-evalControl (Control v) = (• ()) . (∘ v)
+evalControl :: Control k v -> (V.Rep v -> K.Rep k)
+evalControl (Control v) = (∘ v)
 
-control :: (K.Representable k, V.Representable v) => (V.Rep v -> K.Rep k) -> Control k v
-control f = Control (inV (inK . const . f))
+withEnv :: (V.Rep v -> Control k v) -> Control k v
+withEnv f = Control (evalControl =<< f)
 
-withEnv :: (K.Representable k, V.Representable v) => (V.Rep v -> Control k v) -> Control k v
-withEnv f = control (evalControl =<< f)
-
-withVal :: (K.Representable k, V.Representable v) => (a -> Control k v) -> (v a -> Control k v)
+withVal :: V.Representable v => (a -> Control k v) -> (v a -> Control k v)
 withVal f v = withEnv (f . exV v)
 
-liftKWith :: (K.Representable k, V.Representable v) => (((a -> Control k v) -> k a) -> Control k v) -> Control k v
+liftKWith :: K.Representable k => (((a -> Control k v) -> k a) -> Control k v) -> Control k v
 liftKWith f = withEnv (\ e -> f (inK . ((`evalControl` e) .)))
 
 (•∘) :: (K.Representable k, V.Representable v) => k a -> v a -> Control k v
-k •∘ v = control (\ e -> k • e ∘ v)
+k •∘ v = Control (\ e -> k • e ∘ v)
 
 infix 7 •∘
 
-(••) :: (K.Representable k, V.Representable v) => k a -> a -> Control k v
-k •• v = control (const (k • v))
+(••) :: K.Representable k => k a -> a -> Control k v
+k •• v = Control (const (k • v))
 
 infix 7 ••
 
