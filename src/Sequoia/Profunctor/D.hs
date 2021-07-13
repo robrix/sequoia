@@ -57,27 +57,27 @@ import           Sequoia.Value as V
 
 -- Dual profunctor
 
-newtype D k v a b = D { runD :: v a -> k b -> Control k v }
+newtype D k v a b = D { runD :: v a -> k b -> Control (K.Rep k) (V.Rep v) }
 
 instance (Contravariant k, Functor v) => Profunctor (D k v) where
   dimap f g = D . dimap (fmap f) (lmap (contramap g)) . runD
 
-instance (K.Representable k, V.Representable v) => Cat.Category (D k v) where
+instance (Continuation r k, Value s v) => Cat.Category (D k v) where
   id = D (flip (•∘))
   D f . D g = D (\ a c -> liftKWith (\ _K -> g a (_K (\ b -> f (inV0 b) c))))
 
 instance Contravariant k => Functor (D k v c) where
   fmap f = D . fmap (lmap (contramap f)) . runD
 
-instance (K.Representable k, V.Representable v) => Applicative (D k v a) where
-  pure a = D (\ _ b -> b •∘ inV0 a)
+instance (Continuation r k, V.Representable v) => Applicative (D k v a) where
+  pure a = D (\ _ b -> b •• a)
 
   D df <*> D da = D (\ a b -> liftKWith (\ _K -> df a (_K (\ f -> da a (contramap f b)))))
 
-instance (K.Representable k, V.Representable v) => Monad (D k v a) where
+instance (Continuation r k, V.Representable v) => Monad (D k v a) where
   D m >>= f = D (\ a c -> liftKWith (\ _K -> m a (_K (\ b -> runD (f b) a c))))
 
-instance (K.Representable k, V.Representable v) => Coapply (D k v) where
+instance (Continuation r k, Value s v) => Coapply (D k v) where
   coliftA2 f a b = D (\ v k -> withVal ((flip (exD a) k . inV0 <--> flip (exD b) k . inV0) . f) v)
 
 
@@ -92,14 +92,14 @@ infixr 5 |->
 
 -- Dual profunctor abstraction
 
-_D :: Dual k v d => d a b <-> (v a -> k b -> Control k v)
+_D :: Dual k v d => d a b <-> (v a -> k b -> Control (K.Rep k) (V.Rep v))
 _D = exD <-> inD
 
-class (K.Representable k, V.Representable v, Cat.Category d, Profunctor d) => Dual k v d | d -> k v where
-  inD :: (v a -> k b -> Control k v) -> d a b
-  exD :: d a b -> v a -> k b -> Control k v
+class (Continuation (K.Rep k) k, Value (V.Rep v) v, Cat.Category d, Profunctor d) => Dual k v d | d -> k v where
+  inD :: (v a -> k b -> Control (K.Rep k) (V.Rep v)) -> d a b
+  exD :: d a b -> v a -> k b -> Control (K.Rep k) (V.Rep v)
 
-instance (K.Representable k, V.Representable v) => Dual k v (D k v) where
+instance (Continuation r k, Value s v) => Dual k v (D k v) where
   inD = D
   exD = runD
 
@@ -167,7 +167,7 @@ f ↑↑ v = inD (\ a b -> liftKWith (\ _K -> exD v a (_K (\ a -> exD f (inV0 a)
 
 infixr 7 ↑↑
 
-(↓↑) :: Dual k v d => Consumer d a -> Producer d a -> Control k v
+(↓↑) :: Dual k v d => Consumer d a -> Producer d a -> Control (K.Rep k) (V.Rep v)
 k ↓↑ v = liftKWith (\ _K -> exD v (inV0 ()) (_K (flip (exD k) (inK absurd) . inV0)))
 
 infix 9 ↓↑
@@ -175,26 +175,26 @@ infix 9 ↓↑
 
 -- Control context
 
-newtype Control k v = Control { runControl :: V.Rep v -> K.Rep k }
+newtype Control r s = Control { runControl :: s -> r }
 
-evalControl :: Control k v -> (V.Rep v -> K.Rep k)
+evalControl :: Control r s -> (s -> r)
 evalControl (Control v) = (∘ v)
 
-withEnv :: (V.Rep v -> Control k v) -> Control k v
+withEnv :: (s -> Control r s) -> Control r s
 withEnv f = Control (evalControl =<< f)
 
-withVal :: V.Representable v => (a -> Control k v) -> (v a -> Control k v)
+withVal :: Value s v => (a -> Control r s) -> (v a -> Control r s)
 withVal f v = withEnv (f . exV v)
 
-liftKWith :: K.Representable k => (((a -> Control k v) -> k a) -> Control k v) -> Control k v
+liftKWith :: Continuation r k => (((a -> Control r s) -> k a) -> Control r s) -> Control r s
 liftKWith f = withEnv (\ e -> f (inK . ((`evalControl` e) .)))
 
-(•∘) :: (K.Representable k, V.Representable v) => k a -> v a -> Control k v
+(•∘) :: (Continuation r k, Value s v) => k a -> v a -> Control r s
 k •∘ v = Control (\ e -> k • e ∘ v)
 
 infix 7 •∘
 
-(••) :: K.Representable k => k a -> a -> Control k v
+(••) :: Continuation r k => k a -> a -> Control r s
 k •• v = Control (const (k • v))
 
 infix 7 ••
