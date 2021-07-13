@@ -27,10 +27,6 @@ module Sequoia.Profunctor.D
 , (↓)
 , (↓>)
 , dnE
-  -- * Composition
-, (↓↓)
-, (↑↑)
-, (↓↑)
   -- * Control context
 , Control(..)
 , evalControl
@@ -153,24 +149,6 @@ infixr 9 ↓>
 
 dnE :: Dual k v d => k **(a --|d|-> b) -> a --|d|-> b
 dnE k = inD (\ a b -> liftKWith (\ _K -> k •• _K (\ f -> exD f a b)))
-
-
--- Composition
-
-(↓↓) :: Dual k v d => Consumer d k b -> a --|d|-> b -> Consumer d k a
-(↓↓) = (<<<)
-
-infixl 8 ↓↓
-
-(↑↑) :: Dual k v d => a --|d|-> b -> Producer d v a -> Producer d v b
-(↑↑) = (<<<)
-
-infixr 7 ↑↑
-
-(↓↑) :: Dual k v d => Consumer d k a -> Producer d v a -> Complete d k v
-(↓↑) = (<<<)
-
-infix 9 ↓↑
 
 
 -- Control context
