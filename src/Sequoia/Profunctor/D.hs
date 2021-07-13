@@ -103,8 +103,8 @@ evalD = (idK ↓)
 
 -- Computation
 
-(↑) :: (K.Representable k, V.Representable v) => a --|D k v|-> b -> v a -> v (k (k b))
-f ↑ a = inV (inK . flip (evalControl . exD f a))
+(↑) :: a --|D k v|-> b -> v a -> Producer k v b
+f ↑ a = Producer (exD f a)
 
 infixl 7 ↑
 
