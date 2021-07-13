@@ -129,7 +129,7 @@ exDK f = inV (\ e k -> inK (\ a -> evalControl (exD f (inV0 a) k) e))
 exDV :: (K.Representable k', Dual k v d) => k' (v a -> v (K.Rep k)) -> k' (a --|d|-> K.Rep k)
 exDV k = inK (\ f -> k • inV . \ a -> evalControl (exD f a idK))
 
-evalD :: Dual k v d => a --|d|-> K.Rep k -> Consumer k v a
+evalD :: Dual k v d => a --|d|-> K.Rep k -> Consumer d a
 evalD = (idK ↓)
 
 
@@ -145,8 +145,8 @@ f <↑ a = f <<< inD' (inlr a)
 
 infixl 7 <↑
 
-(↓) :: Dual k v d => k b -> a --|d|-> b -> Consumer k v a
-k ↓ f = Consumer (D (const . flip (exD f) k))
+(↓) :: Dual k v d => k b -> a --|d|-> b -> Consumer d a
+k ↓ f = Consumer (inD (const . flip (exD f) k))
 
 infixl 8 ↓
 
@@ -162,8 +162,8 @@ dnE k = inD (\ a b -> liftKWith (\ _K -> k •• _K (\ f -> exD f a b)))
 
 -- Composition
 
-(↓↓) :: Dual k v d => Consumer k v b -> a --|d|-> b -> Consumer k v a
-Consumer k ↓↓ f = Consumer (D (\ a b -> liftKWith (\ _K -> exD f a (_K (flip (exD k) b . inV0)))))
+(↓↓) :: Dual k v d => Consumer d b -> a --|d|-> b -> Consumer d a
+Consumer k ↓↓ f = Consumer (inD (\ a b -> liftKWith (\ _K -> exD f a (_K (flip (exD k) b . inV0)))))
 
 infixl 8 ↓↓
 
@@ -172,7 +172,7 @@ f ↑↑ Producer v = Producer (inD (\ a b -> liftKWith (\ _K -> exD v a (_K (\ 
 
 infixr 7 ↑↑
 
-(↓↑) :: Dual k v d => Consumer k v a -> Producer d a -> Control k v
+(↓↑) :: Dual k v d => Consumer d a -> Producer d a -> Control k v
 Consumer k ↓↑ Producer v = liftKWith (\ _K -> exD v (inV0 ()) (_K (flip (exD k) (inK absurd) . inV0)))
 
 infix 9 ↓↑
@@ -218,15 +218,8 @@ coercePD :: Dual k v d => Producer d b -> d () b
 coercePD = inD . exD . runProducer
 
 
-newtype Consumer k v a = Consumer { runConsumer :: D k v a Void }
-  deriving (Contrapply, Contravariant) via Con (D k v) Void
+newtype Consumer d a = Consumer { runConsumer :: d a Void }
+  deriving (Contrapply, Contravariant) via Con d Void
 
-instance (K.Representable k, V.Representable v) => K.Representable (Consumer k v) where
-  type Rep (Consumer k v) = Control k v
-  tabulate = Consumer . D . fmap const . withVal
-  index (Consumer r) = flip (exD r) (inK absurd) . inV0
-
-instance (K.Representable k, V.Representable v) => Contrapplicative (Consumer k v)
-
-coerceCD :: Dual k v d => Consumer k v a -> d a Void
+coerceCD :: Dual k v d => Consumer d a -> d a Void
 coerceCD = inD . exD . runConsumer
