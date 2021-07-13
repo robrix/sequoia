@@ -39,6 +39,7 @@ module Sequoia.Profunctor.D
 , liftKWith
 , (•∘)
 , (••)
+, Complete
 , Producer
 , Consumer
 ) where
@@ -200,5 +201,6 @@ k •• v = Control (const (k • v))
 infix 7 ••
 
 
+type Complete d = d () Void
 type Producer d b = d () b
 type Consumer d a = d a Void
