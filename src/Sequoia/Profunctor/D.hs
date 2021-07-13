@@ -29,7 +29,6 @@ module Sequoia.Profunctor.D
 , dnE
   -- * Control context
 , Control(..)
-, evalControl
 , withEnv
 , withVal
 , liftRunControlWith
@@ -118,10 +117,10 @@ inDV f = inD (\ a b -> b •∘ f a)
 -- Elimination
 
 exDK :: Dual k v d => a --|d|-> b -> v (k b -> k a)
-exDK f = inV (\ e k -> inK (\ a -> evalControl (exD f (inV0 a) k) e))
+exDK f = inV (\ e k -> inK (\ a -> runControl (exD f (inV0 a) k) e))
 
 exDV :: (K.Representable k', Dual k v d) => k' (v a -> v (K.Rep k)) -> k' (a --|d|-> K.Rep k)
-exDV k = inK (\ f -> k • inV . \ a -> evalControl (exD f a idK))
+exDV k = inK (\ f -> k • inV . \ a -> runControl (exD f a idK))
 
 evalD :: Dual k v d => V.Rep v --|d|-> K.Rep k -> (V.Rep v -> K.Rep k)
 evalD f = runControl (exD f (inV id) idK)
@@ -157,11 +156,8 @@ dnE k = inD (\ a b -> liftKWith (\ _K -> k •• _K (\ f -> exD f a b)))
 
 newtype Control r s = Control { runControl :: s -> r }
 
-evalControl :: Control r s -> (s -> r)
-evalControl (Control v) = (∘ v)
-
 withEnv :: (s -> Control r s) -> Control r s
-withEnv f = Control (evalControl =<< f)
+withEnv f = Control (runControl =<< f)
 
 withVal :: V.Representable v => (a -> Control r (V.Rep v)) -> (v a -> Control r (V.Rep v))
 withVal f v = withEnv (f . exV v)
@@ -170,7 +166,7 @@ liftRunControlWith :: ((Control r s -> r) -> Control r s) -> Control r s
 liftRunControlWith f = withEnv (f . flip runControl)
 
 liftKWith :: K.Representable k => (((a -> Control (K.Rep k) s) -> k a) -> Control (K.Rep k) s) -> Control (K.Rep k) s
-liftKWith f = withEnv (\ e -> f (inK . ((`evalControl` e) .)))
+liftKWith f = withEnv (\ e -> f (inK . ((`runControl` e) .)))
 
 (•∘) :: (K.Representable k, V.Representable v) => k a -> v a -> Control (K.Rep k) (V.Rep v)
 k •∘ v = Control (\ e -> k • e ∘ v)
