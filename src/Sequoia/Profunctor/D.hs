@@ -155,13 +155,13 @@ dnE k = D (\ a b -> liftKWith (\ _K -> k •• _K (\ f -> runD f a b)))
 
 -- Composition
 
-(↓↓) :: (K.Representable k, V.Representable v) => Consumer k v b -> a --|D k v|-> b -> Consumer k v a
-Consumer k ↓↓ f = Consumer (\ a -> liftKWith (\ _K -> runD f a (_K (k . inV0))))
+(↓↓) :: Dual k v d => Consumer k v b -> a --|d|-> b -> Consumer k v a
+Consumer k ↓↓ f = Consumer (\ a -> liftKWith (\ _K -> exD f a (_K (k . inV0))))
 
 infixl 8 ↓↓
 
-(↑↑) :: (K.Representable k, V.Representable v) => a --|D k v|-> b -> Producer k v a -> Producer k v b
-f ↑↑ Producer v = Producer (\ b -> liftKWith (\ _K -> v (_K (\ a -> runD f (inV0 a) b))))
+(↑↑) :: Dual k v d => a --|d|-> b -> Producer k v a -> Producer k v b
+f ↑↑ Producer v = Producer (\ b -> liftKWith (\ _K -> v (_K (\ a -> exD f (inV0 a) b))))
 
 infixr 7 ↑↑
 
