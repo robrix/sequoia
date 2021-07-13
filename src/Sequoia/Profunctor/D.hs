@@ -40,6 +40,7 @@ module Sequoia.Profunctor.D
 , (•∘)
 , (••)
 , Producer(..)
+, coercePD
 , Consumer(..)
 , coerceCD
 ) where
@@ -212,6 +213,9 @@ instance (K.Representable k, V.Representable v) => Applicative (Producer k v) wh
 
 instance (K.Representable k, V.Representable v) => Monad (Producer k v) where
   Producer m >>= f = Producer (\ k -> liftKWith (\ _K -> m (_K ((`runProducer` k) . f))))
+
+coercePD :: Dual k v d => Producer k v b -> d () b
+coercePD (Producer r) = inD (\ _ b -> r b)
 
 
 newtype Consumer k v a = Consumer { runConsumer :: v a -> Control k v }
