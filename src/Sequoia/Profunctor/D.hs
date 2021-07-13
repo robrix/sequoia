@@ -161,17 +161,17 @@ instance (K.Representable k, V.Representable v) => Monad (Producer k v) where
   Producer m >>= f = Producer (\ k -> liftKWith (\ _K -> m (_K ((`runProducer` k) . f))))
 
 
-newtype Consumer r s a = Consumer { runConsumer :: V s a -> Control (K r) (V s) }
+newtype Consumer k v a = Consumer { runConsumer :: v a -> Control k v }
 
-instance Contravariant (Consumer r s) where
+instance Functor v => Contravariant (Consumer k v) where
   contramap f = Consumer . lmap (fmap f) . runConsumer
 
-instance K.Representable (Consumer r s) where
-  type Rep (Consumer r s) = Control (K r) (V s)
+instance (K.Representable k, V.Representable v) => K.Representable (Consumer k v) where
+  type Rep (Consumer k v) = Control k v
   tabulate = Consumer . withVal
   index (Consumer r) = r . inV0
 
-instance Contrapply (Consumer r s) where
+instance (K.Representable k, V.Representable v) => Contrapply (Consumer k v) where
   contraliftA2 f (Consumer a) (Consumer b) = Consumer (withVal ((a . inV0 <--> b . inV0) . f))
 
-instance Contrapplicative (Consumer r s)
+instance (K.Representable k, V.Representable v) => Contrapplicative (Consumer k v)
