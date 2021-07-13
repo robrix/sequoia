@@ -36,6 +36,7 @@ module Sequoia.Profunctor.D
 , (•∘)
 , (••)
 , Complete
+, producer
 , Producer
 , consumer
 , Consumer
@@ -180,6 +181,11 @@ infix 7 ••
 
 
 type Complete d k v = d (V.Rep v) (K.Rep k)
+
+
+producer :: Dual k v d => v a -> Producer d v a
+producer v = inD (\ _ k -> k •∘ v)
+
 type Producer d v b = d (V.Rep v) b
 
 
