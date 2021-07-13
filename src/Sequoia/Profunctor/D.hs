@@ -158,17 +158,17 @@ dnE k = inD (\ a b -> liftKWith (\ _K -> k •• _K (\ f -> exD f a b)))
 -- Composition
 
 (↓↓) :: Dual k v d => Consumer d b -> a --|d|-> b -> Consumer d a
-k ↓↓ f = inD (\ a b -> liftKWith (\ _K -> exD f a (_K (flip (exD k) b . inV0))))
+(↓↓) = (<<<)
 
 infixl 8 ↓↓
 
 (↑↑) :: Dual k v d => a --|d|-> b -> Producer d a -> Producer d b
-f ↑↑ v = inD (\ a b -> liftKWith (\ _K -> exD v a (_K (\ a -> exD f (inV0 a) b))))
+(↑↑) = (<<<)
 
 infixr 7 ↑↑
 
 (↓↑) :: Dual k v d => Consumer d a -> Producer d a -> Control (K.Rep k) (V.Rep v)
-k ↓↑ v = liftKWith (\ _K -> exD v (inV0 ()) (_K (flip (exD k) (inK absurd) . inV0)))
+c ↓↑ p = exD (c <<< p) (inV0 ()) (inK absurd)
 
 infix 9 ↓↑
 
