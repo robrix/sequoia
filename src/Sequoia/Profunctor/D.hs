@@ -55,6 +55,7 @@ import           Sequoia.Conjunction
 import           Sequoia.Continuation as K
 import           Sequoia.Disjunction
 import           Sequoia.Functor.Applicative
+import           Sequoia.Functor.Con
 import           Sequoia.Profunctor.Applicative
 import           Sequoia.Value as V
 
@@ -214,17 +215,12 @@ coercePD = inD . exD . runProducer
 
 
 newtype Consumer k v a = Consumer { runConsumer :: D k v a Void }
-
-instance (Contravariant k, Functor v) => Contravariant (Consumer k v) where
-  contramap f = Consumer . lmap f . runConsumer
+  deriving (Contrapply, Contravariant) via Con (D k v) Void
 
 instance (K.Representable k, V.Representable v) => K.Representable (Consumer k v) where
   type Rep (Consumer k v) = Control k v
   tabulate = Consumer . D . fmap const . withVal
   index (Consumer r) = flip (exD r) (inK absurd) . inV0
-
-instance (K.Representable k, V.Representable v) => Contrapply (Consumer k v) where
-  contraliftA2 f (Consumer a) (Consumer b) = Consumer (D (\ v k -> withVal ((flip (exD a) k . inV0 <--> flip (exD b) k . inV0) . f) v))
 
 instance (K.Representable k, V.Representable v) => Contrapplicative (Consumer k v)
 
