@@ -41,12 +41,14 @@ module Sequoia.Profunctor.D
 , (••)
 , Producer(..)
 , Consumer(..)
+, coerceCD
 ) where
 
 import           Control.Category ((<<<), (>>>))
 import qualified Control.Category as Cat
 import           Data.Kind (Type)
 import           Data.Profunctor
+import           Data.Void
 import           Sequoia.Bijection
 import           Sequoia.Conjunction
 import           Sequoia.Continuation as K
@@ -226,3 +228,6 @@ instance (K.Representable k, V.Representable v) => Contrapply (Consumer k v) whe
   contraliftA2 f (Consumer a) (Consumer b) = Consumer (withVal ((a . inV0 <--> b . inV0) . f))
 
 instance (K.Representable k, V.Representable v) => Contrapplicative (Consumer k v)
+
+coerceCD :: Dual k v d => Consumer k v a -> d a Void
+coerceCD (Consumer r) = inD (\ a _ -> r a)
