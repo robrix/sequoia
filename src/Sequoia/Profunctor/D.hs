@@ -48,7 +48,6 @@ import           Control.Category ((<<<), (>>>))
 import qualified Control.Category as Cat
 import           Data.Kind (Type)
 import           Data.Profunctor
-import           Data.Void
 import           Sequoia.Bijection
 import           Sequoia.Conjunction
 import           Sequoia.Continuation as K
@@ -131,7 +130,7 @@ evalD f = runControl (exD f (inV id) idK)
 
 -- Computation
 
-(↑) :: Dual k v d => a --|d|-> b -> v a -> Producer d b
+(↑) :: Dual k v d => a --|d|-> b -> v a -> Producer d v b
 f ↑ a = inD (const (exD f a))
 
 infixl 7 ↑
@@ -141,7 +140,7 @@ f <↑ a = f <<< inD' (inlr a)
 
 infixl 7 <↑
 
-(↓) :: Dual k v d => k b -> a --|d|-> b -> Consumer d a
+(↓) :: Dual k v d => k b -> a --|d|-> b -> Consumer d k a
 k ↓ f = inD (const . flip (exD f) k)
 
 infixl 8 ↓
@@ -158,17 +157,17 @@ dnE k = inD (\ a b -> liftKWith (\ _K -> k •• _K (\ f -> exD f a b)))
 
 -- Composition
 
-(↓↓) :: Dual k v d => Consumer d b -> a --|d|-> b -> Consumer d a
+(↓↓) :: Dual k v d => Consumer d k b -> a --|d|-> b -> Consumer d k a
 (↓↓) = (<<<)
 
 infixl 8 ↓↓
 
-(↑↑) :: Dual k v d => a --|d|-> b -> Producer d a -> Producer d b
+(↑↑) :: Dual k v d => a --|d|-> b -> Producer d v a -> Producer d v b
 (↑↑) = (<<<)
 
 infixr 7 ↑↑
 
-(↓↑) :: Dual k v d => Consumer d a -> Producer d a -> Complete d
+(↓↑) :: Dual k v d => Consumer d k a -> Producer d v a -> Complete d k v
 (↓↑) = (<<<)
 
 infix 9 ↓↑
@@ -201,6 +200,6 @@ k •• v = Control (const (k • v))
 infix 7 ••
 
 
-type Complete d = d () Void
-type Producer d b = d () b
-type Consumer d a = d a Void
+type Complete d k v = d (V.Rep v) (K.Rep k)
+type Producer d v b = d (V.Rep v) b
+type Consumer d k a = d a (K.Rep k)
