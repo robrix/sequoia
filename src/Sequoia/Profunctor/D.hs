@@ -130,7 +130,7 @@ evalD = (idK ↓)
 -- Computation
 
 (↑) :: Dual k v d => a --|d|-> b -> v a -> Producer k v b
-f ↑ a = Producer (exD f a)
+f ↑ a = Producer (const (exD f a))
 
 infixl 7 ↑
 
@@ -162,12 +162,12 @@ Consumer k ↓↓ f = Consumer (\ a b -> liftKWith (\ _K -> exD f a (_K ((`k` b)
 infixl 8 ↓↓
 
 (↑↑) :: Dual k v d => a --|d|-> b -> Producer k v a -> Producer k v b
-f ↑↑ Producer v = Producer (\ b -> liftKWith (\ _K -> v (_K (\ a -> exD f (inV0 a) b))))
+f ↑↑ Producer v = Producer (\ a b -> liftKWith (\ _K -> v a (_K (\ a -> exD f (inV0 a) b))))
 
 infixr 7 ↑↑
 
 (↓↑) :: (K.Representable k, V.Representable v) => Consumer k v a -> Producer k v a -> Control k v
-Consumer k ↓↑ Producer v = liftKWith (\ _K -> v (_K ((`k` inK absurd) . inV0)))
+Consumer k ↓↑ Producer v = liftKWith (\ _K -> v (inV0 ()) (_K ((`k` inK absurd) . inV0)))
 
 infix 9 ↓↑
 
@@ -202,20 +202,20 @@ k •• v = control (const (k • v))
 infix 7 ••
 
 
-newtype Producer k v b = Producer { runProducer :: k b -> Control k v }
+newtype Producer k v b = Producer { runProducer :: v () -> k b -> Control k v }
 
 instance Contravariant k => Functor (Producer k v) where
-  fmap f = Producer . lmap (contramap f) . runProducer
+  fmap f = Producer . rmap (lmap (contramap f)) . runProducer
 
 instance (K.Representable k, V.Representable v) => Applicative (Producer k v) where
-  pure = Producer . fmap (control . const) . flip (•)
-  Producer f <*> Producer a = Producer (\ k -> liftKWith (\ _K -> f (_K (a . (k •<<)))))
+  pure = Producer . const . fmap (control . const) . flip (•)
+  Producer f <*> Producer a = Producer (\ v k -> liftKWith (\ _K -> f v (_K (a v . (k •<<)))))
 
 instance (K.Representable k, V.Representable v) => Monad (Producer k v) where
-  Producer m >>= f = Producer (\ k -> liftKWith (\ _K -> m (_K ((`runProducer` k) . f))))
+  Producer m >>= f = Producer (\ v k -> liftKWith (\ _K -> m v (_K (\ a -> runProducer (f a) v k))))
 
 coercePD :: Dual k v d => Producer k v b -> d () b
-coercePD (Producer r) = inD (\ _ b -> r b)
+coercePD (Producer r) = inD r
 
 
 newtype Consumer k v a = Consumer { runConsumer :: v a -> k Void -> Control k v }
