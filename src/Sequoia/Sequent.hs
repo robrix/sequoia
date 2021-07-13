@@ -44,7 +44,7 @@ newtype Seq k _Γ _Δ = Seq { runSeq :: k _Δ -> k _Γ }
   deriving (Cat.Category, Profunctor) via C k
   deriving (Applicative, Functor, Monad) via C k _Γ
 
-instance Continuation k => ContPassing k (Seq k) where
+instance Representable k => ContPassing k (Seq k) where
   inC = Seq
   exC = runSeq
 
