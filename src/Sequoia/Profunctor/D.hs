@@ -122,35 +122,35 @@ exDK f = inV (\ e k -> inK (\ a -> evalControl (exD f (inV0 a) k) e))
 exDV :: (K.Representable k', Dual k v d) => k' (v a -> v (K.Rep k)) -> k' (a --|d|-> K.Rep k)
 exDV k = inK (\ f -> k • inV . \ a -> evalControl (exD f a idK))
 
-evalD :: K.Representable k => a --|D k v|-> K.Rep k -> Consumer k v a
+evalD :: Dual k v d => a --|d|-> K.Rep k -> Consumer k v a
 evalD = (idK ↓)
 
 
 -- Computation
 
-(↑) :: a --|D k v|-> b -> v a -> Producer k v b
-f ↑ a = Producer (runD f a)
+(↑) :: Dual k v d => a --|d|-> b -> v a -> Producer k v b
+f ↑ a = Producer (exD f a)
 
 infixl 7 ↑
 
-(<↑) :: (K.Representable k, V.Representable v) => Conj c => (a `c` _Γ) --|D k v|-> _Δ -> a -> _Γ --|D k v|-> _Δ
+(<↑) :: Dual k v d => Conj c => (a `c` _Γ) --|d|-> _Δ -> a -> _Γ --|d|-> _Δ
 f <↑ a = f <<< inD' (inlr a)
 
 infixl 7 <↑
 
-(↓) :: k b -> a --|D k v|-> b -> Consumer k v a
-k ↓ f = Consumer (flip (runD f) k)
+(↓) :: Dual k v d => k b -> a --|d|-> b -> Consumer k v a
+k ↓ f = Consumer (flip (exD f) k)
 
 infixl 8 ↓
 
 -- FIXME: this is quite limited by the need for the continuation to return locally at r.
-(↓>) :: (K.Representable k, V.Representable v) => Disj d => k c -> a --|D k v|-> (b `d` c) -> a --|D k v|-> b
-c ↓> f = D (\ v k -> (k <••> c) •∘ v) <<< f
+(↓>) :: (Dual k v d, Disj s) => k c -> a --|d|-> (b `s` c) -> a --|d|-> b
+c ↓> f = inD (\ v k -> (k <••> c) •∘ v) <<< f
 
 infixr 9 ↓>
 
-dnE :: (K.Representable k, V.Representable v) => k **(a --|D k v|-> b) -> a --|D k v|-> b
-dnE k = D (\ a b -> liftKWith (\ _K -> k •• _K (\ f -> runD f a b)))
+dnE :: Dual k v d => k **(a --|d|-> b) -> a --|d|-> b
+dnE k = inD (\ a b -> liftKWith (\ _K -> k •• _K (\ f -> exD f a b)))
 
 
 -- Composition
