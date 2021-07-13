@@ -97,7 +97,7 @@ exDK f = inV (\ e k -> inK (\ a -> evalControl (exD f (inV0 a) k) e))
 exDV :: (K.Representable k, K.Representable k', V.Representable v) => k (v a -> v (K.Rep k')) -> k (a --|D k' v|-> K.Rep k')
 exDV k = inK (\ f -> k • inV . \ a -> evalControl (exD f a idK))
 
-evalD :: (K.Representable k, V.Representable v) => a --|D k v|-> K.Rep k -> v (k a)
+evalD :: K.Representable k => a --|D k v|-> K.Rep k -> Consumer k v a
 evalD = (idK ↓)
 
 
@@ -113,8 +113,8 @@ f <↑ a = f <<< inD' (inlr a)
 
 infixl 7 <↑
 
-(↓) :: (K.Representable k, V.Representable v) => k b -> a --|D k v|-> b -> v (k a)
-k ↓ f = inV (\ e -> inK (\ a -> evalControl (exD f (inV0 a) k) e))
+(↓) :: k b -> a --|D k v|-> b -> Consumer k v a
+k ↓ f = Consumer (flip (exD f) k)
 
 infixl 8 ↓
 
