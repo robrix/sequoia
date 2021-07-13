@@ -57,7 +57,7 @@ import Sequoia.Conjunction
 import Sequoia.Continuation
 import Sequoia.Disjunction
 
-class Continuation k => Core k s | s -> k where
+class Continuation (Rep k) k => Core k s | s -> k where
   {-# MINIMAL ((>>>) | (<<<)), init #-}
 
   (>>>)

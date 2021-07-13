@@ -97,7 +97,7 @@ instance Monad ((>) a) where
 -- | Discrimination of continuations in '>'.
 --
 -- @¬A ✕ ¬B -> ¬(A + B)@
-(|>) :: Continuation k => k os -> k o -> k (os > o)
+(|>) :: Representable k => k os -> k o -> k (os > o)
 (|>) = (<••>)
 
 

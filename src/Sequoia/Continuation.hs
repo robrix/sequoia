@@ -69,12 +69,12 @@ import Sequoia.Functor.K
 
 -- Continuations
 
-class Representable k => Continuation k
+class (Representable k, Rep k ~ r) => Continuation r k | k -> r
 
 type KRep k = Rep k
 
 
-instance Continuation (K r)
+instance Continuation r (K r)
 
 
 -- Application
