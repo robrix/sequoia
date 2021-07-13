@@ -140,6 +140,9 @@ instance Applicative (Producer r s) where
   pure = Producer . fmap (Control . const) . flip (•)
   Producer f <*> Producer a = Producer (\ k -> liftControlWith (\ run -> f (K (run . a . (k •<<)))))
 
+instance Monad (Producer r s) where
+  Producer m >>= f = Producer (\ k -> liftControlWith (\ run -> m (K (run . (`runProducer` k) . f))))
+
 
 newtype Consumer r s a = Consumer { runConsumer :: V s a -> Control r s }
 
