@@ -143,7 +143,6 @@ k ↓ f = consumer k <<< f
 
 infixl 8 ↓
 
--- FIXME: this is quite limited by the need for the continuation to return locally at r.
 (↓>) :: (Dual k v d, Disj s) => k c -> a --|d|-> (b `s` c) -> a --|d|-> b
 c ↓> f = inD (\ v k -> (k <••> c) •∘ v) <<< f
 
