@@ -30,6 +30,7 @@ module Sequoia.Profunctor.D
 , (↓)
 , (↓>)
 , dnE
+, coerceD
   -- * Control context
 , Control(..)
 , ControlT(..)
@@ -166,6 +167,9 @@ infixr 9 ↓>
 
 dnE :: Dual r s d => K r **(a --|d|-> b) -> a --|d|-> b
 dnE k = inD (\ a b -> liftKWith (\ _K -> k •• _K (\ f -> exD f a b)))
+
+coerceD :: (Dual k v c, Dual k v d) => c a b -> d a b
+coerceD = inD . exD
 
 
 -- Control context
