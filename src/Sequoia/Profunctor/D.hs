@@ -256,7 +256,7 @@ inPrd :: Dual r s d => (K r a -> Context r s) -> Producer d s a
 inPrd = inD . const
 
 producer :: Dual r s d => V s a -> Producer d s a
-producer v = inD (\ _ k -> k •∘ v)
+producer v = inPrd (•∘ v)
 
 type Producer d s b = d s b
 
@@ -265,6 +265,6 @@ inCns :: Dual r s d => (V s a -> Context r s) -> Consumer d r a
 inCns = inD . fmap const
 
 consumer :: Dual r s d => K r a -> Consumer d r a
-consumer k = inD (\ a _ -> k •∘ a)
+consumer k = inCns (k •∘)
 
 type Consumer d r a = d a r
