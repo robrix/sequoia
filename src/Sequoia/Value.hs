@@ -97,10 +97,13 @@ mapVRep f = inV . (. f) . exV
 infix 3 >∘∘<
 
 
-(<∘∘>) :: (Disj d, Representable v) => (v a -> v r) -> (v b -> v r) -> (v (a `d` b) -> v r)
-(l <∘∘> r) ab = inV (\ e -> e ∘ (l . inV0 <--> r . inV0) (e ∘ ab))
+(<∘∘>) :: (Disj d, Representable v) => (v a -> r) -> (v b -> r) -> (v (a `d` b) -> Rep v -> r)
+(l <∘∘> r) ab e = (l <--> r) (bitraverseDisjV ab e)
 
 infix 3 <∘∘>
+
+bitraverseDisjV :: (Disj d, Representable v) => v (a `d` b) -> Rep v -> (v a `d` v b)
+bitraverseDisjV d e = bimapDisj inV0 inV0 (e ∘ d)
 
 
 -- Env monad
