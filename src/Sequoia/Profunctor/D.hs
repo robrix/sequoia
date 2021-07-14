@@ -184,8 +184,8 @@ withEnv f = control (runControl =<< f)
 withVal :: (Control c, VFor v c) => (a -> c) -> (v a -> c)
 withVal f v = withEnv (f . exV v)
 
-liftRunControlWith :: ((Context r s -> r) -> Context r s) -> Context r s
-liftRunControlWith f = withEnv (f . flip runContext)
+liftRunControlWith :: Control c => ((c -> R c) -> c) -> c
+liftRunControlWith f = withEnv (f . flip runControl)
 
 liftKWith :: K.Representable k => (((a -> Context (K.Rep k) s) -> k a) -> Context (K.Rep k) s) -> Context (K.Rep k) s
 liftKWith f = liftRunControlWith (\ run -> f (inK . (run .)))
