@@ -96,65 +96,65 @@ infixr 5 |->
 
 -- Dual profunctor abstraction
 
-_D :: Dual k v d => d a b <-> (v a -> k b -> Context (K.Rep k) (V.Rep v))
+_D :: Dual r s d => d a b <-> (V s a -> K r b -> Context r s)
 _D = exD <-> inD
 
-class (K.Representable k, V.Representable v, Cat.Category d, Profunctor d) => Dual k v d | d -> k v where
-  inD :: (v a -> k b -> Context (K.Rep k) (V.Rep v)) -> d a b
-  exD :: d a b -> v a -> k b -> Context (K.Rep k) (V.Rep v)
+class (Cat.Category d, Profunctor d) => Dual r s d | d -> r s where
+  inD :: (V s a -> K r b -> Context r s) -> d a b
+  exD :: d a b -> V s a -> K r b -> Context r s
 
-instance Dual (K r) (V s) (D r s) where
+instance Dual r s (D r s) where
   inD = D
   exD = runD
 
 
 -- Construction
 
-inD' :: Dual k v d => (a -> b) -> a --|d|-> b
+inD' :: Dual r s d => (a -> b) -> a --|d|-> b
 inD' f = inD (\ a b -> b •∘ (f <$> a))
 
-inDK :: Dual k v d => (k b -> k a) -> a --|d|-> b
+inDK :: Dual r s d => (K r b -> K r a) -> a --|d|-> b
 inDK f = inD (\ a b -> f b •∘ a)
 
-inDV :: Dual k v d => (v a -> v b) -> a --|d|-> b
+inDV :: Dual r s d => (V s a -> V s b) -> a --|d|-> b
 inDV f = inD (\ a b -> b •∘ f a)
 
 
 -- Elimination
 
-exDK :: Dual k v d => a --|d|-> b -> v (k b -> k a)
+exDK :: Dual r s d => a --|d|-> b -> V s (K r b -> K r a)
 exDK f = inV (\ e k -> inK (\ a -> runContext (exD f (inV0 a) k) e))
 
-exDV :: (K.Representable k', Dual k v d) => k' (v a -> v (K.Rep k)) -> k' (a --|d|-> K.Rep k)
+exDV :: Dual r s d => K r' (V s a -> V s r) -> K r' (a --|d|-> r)
 exDV k = inK (\ f -> k • inV . \ a -> runContext (exD f a idK))
 
-evalD :: Dual k v d => V.Rep v --|d|-> K.Rep k -> (V.Rep v -> K.Rep k)
+evalD :: Dual r s d => s --|d|-> r -> (s -> r)
 evalD f = runContext (exD f (inV id) idK)
 
 
 -- Computation
 
-(↑) :: Dual k v d => a --|d|-> b -> v a -> Producer d v b
+(↑) :: Dual r s d => a --|d|-> b -> V s a -> Producer d s b
 f ↑ a = f <<< producer a
 
 infixl 7 ↑
 
-(<↑) :: Dual k v d => Conj c => (a `c` _Γ) --|d|-> _Δ -> a -> _Γ --|d|-> _Δ
+(<↑) :: Dual r s d => Conj c => (a `c` _Γ) --|d|-> _Δ -> a -> _Γ --|d|-> _Δ
 f <↑ a = f <<< inD' (inlr a)
 
 infixl 7 <↑
 
-(↓) :: Dual k v d => k b -> a --|d|-> b -> Consumer d k a
+(↓) :: Dual r s d => K r b -> a --|d|-> b -> Consumer d r a
 k ↓ f = consumer k <<< f
 
 infixl 8 ↓
 
-(↓>) :: (Dual k v d, Disj s) => k c -> a --|d|-> (b `s` c) -> a --|d|-> b
+(↓>) :: (Dual r s d, Disj p) => K r c -> a --|d|-> (b `p` c) -> a --|d|-> b
 c ↓> f = inD (\ v k -> (k <••> c) •∘ v) <<< f
 
 infixr 9 ↓>
 
-dnE :: Dual k v d => k **(a --|d|-> b) -> a --|d|-> b
+dnE :: Dual r s d => K r **(a --|d|-> b) -> a --|d|-> b
 dnE k = inD (\ a b -> liftKWith (\ _K -> k •• _K (\ f -> exD f a b)))
 
 
@@ -175,42 +175,42 @@ instance Control Context where
 withEnv :: Control c => (s -> c r s) -> c r s
 withEnv f = control (runControl =<< f)
 
-withVal :: (Control c, V.Representable v, V.Rep v ~ s) => (a -> c r s) -> (v a -> c r s)
+withVal :: Control c => (a -> c r s) -> (V s a -> c r s)
 withVal f v = withEnv (f . exV v)
 
 liftRunControlWith :: Control c => ((c r s -> r) -> c r s) -> c r s
 liftRunControlWith f = withEnv (f . flip runControl)
 
-liftKWith :: (Control c, K.Representable k, K.Rep k ~ r) => (((a -> c r s) -> k a) -> c r s) -> c r s
+liftKWith :: Control c => (((a -> c r s) -> K r a) -> c r s) -> c r s
 liftKWith f = liftRunControlWith (\ run -> f (inK . (run .)))
 
-(•∘) :: (Control c, K.Representable k, K.Rep k ~ r, V.Representable v, V.Rep v ~ s) => k a -> v a -> c r s
+(•∘) :: Control c => K r a -> V s a -> c r s
 k •∘ v = control (\ e -> k • e ∘ v)
 
 infix 7 •∘
 
-(••) :: (Control c, K.Representable k, K.Rep k ~ r) => k a -> a -> c r s
+(••) :: Control c => K r a -> a -> c r s
 k •• v = control (const (k • v))
 
 infix 7 ••
 
 
-complete :: (Dual k v d, Control c, K.Rep k ~ r, V.Rep v ~ s) => c r s -> Complete d k v
+complete :: (Dual r s d, Control c) => c r s -> Complete d r s
 complete = inD . const . const . control . runControl
 
-runComplete :: (Dual k v d, Control c, K.Rep k ~ r, V.Rep v ~ s) => Complete d k v -> c r s
+runComplete :: (Dual r s d, Control c) => Complete d r s -> c r s
 runComplete f = control (runControl (exD f idV idK))
 
-type Complete d k v = d (V.Rep v) (K.Rep k)
+type Complete d r s = d s r
 
 
-producer :: Dual k v d => v a -> Producer d v a
+producer :: Dual r s d => V s a -> Producer d s a
 producer v = inD (\ _ k -> k •∘ v)
 
-type Producer d v b = d (V.Rep v) b
+type Producer d s b = d s b
 
 
-consumer :: Dual k v d => k a -> Consumer d k a
+consumer :: Dual r s d => K r a -> Consumer d r a
 consumer k = inD (\ a _ -> k •∘ a)
 
-type Consumer d k a = d a (K.Rep k)
+type Consumer d r a = d a r
