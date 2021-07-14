@@ -71,6 +71,10 @@ newtype D r s a b = D { runD :: V s a -> K r b -> Context r s }
 instance Profunctor (D r s) where
   dimap f g = D . dimap (fmap f) (lmap (contramap g)) . runD
 
+instance Strong (D r s) where
+  first'  (D r) = D (\ a b -> withVal (\ (a, c) -> r (inV0 a) (contramap (,c) b)) a)
+  second' (D r) = D (\ a b -> withVal (\ (c, a) -> r (inV0 a) (contramap (c,) b)) a)
+
 instance Choice (D r s) where
   left'  (D r) = D (\ a b -> withVal ((`r` inlK b) . inV0 <--> (inrK b ••)) a)
   right' (D r) = D (\ a b -> withVal ((inlK b ••) <--> (`r` inrK b) . inV0) a)
