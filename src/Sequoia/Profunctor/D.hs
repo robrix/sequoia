@@ -120,9 +120,15 @@ class (Cat.Category d, Profunctor d) => Dual r s d | d -> r s where
   inD :: (V s a -> K r b -> Context r s) -> d a b
   exD :: d a b -> V s a -> K r b -> Context r s
 
+  type R d
+  type S d
+
 instance Dual r s (D r s) where
   inD = D
   exD = runD
+
+  type R (D r s) = r
+  type S (D r s) = s
 
 
 -- Construction
