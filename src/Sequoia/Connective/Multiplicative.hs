@@ -14,11 +14,11 @@ import Sequoia.Connective.Negation
 import Sequoia.Connective.One
 import Sequoia.Connective.Par
 import Sequoia.Connective.Tensor
-import Sequoia.Continuation
+import Sequoia.Continuation as K
 import Sequoia.Disjunction
 
-elimPar :: Continuation k => a ⅋ b -> k -a ⊗ k -b -> KRep k
+elimPar :: K.Representable k => a ⅋ b -> k -a ⊗ k -b -> KRep k
 elimPar = (. exl) . flip (•) <--> (. exr) . flip (•)
 
-elimTensor :: Continuation k => a ⊗ b -> k ¬a ⅋ k ¬b -> KRep k
+elimTensor :: K.Representable k => a ⊗ b -> k ¬a ⅋ k ¬b -> KRep k
 elimTensor = flip ((. exl) . (•) <--> (. exr) . (•))

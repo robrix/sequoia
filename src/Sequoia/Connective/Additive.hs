@@ -15,11 +15,11 @@ import Sequoia.Connective.Sum
 import Sequoia.Connective.Top
 import Sequoia.Connective.With
 import Sequoia.Connective.Zero
-import Sequoia.Continuation
+import Sequoia.Continuation as K
 import Sequoia.Disjunction
 
-elimWith :: Continuation k => a & b -> k -a ⊕ k -b -> KRep k
+elimWith :: K.Representable k => a & b -> k -a ⊕ k -b -> KRep k
 elimWith = flip ((. exl) . (•) <--> (. exr) . (•))
 
-elimSum :: Continuation k => a ⊕ b -> k ¬a & k ¬b -> KRep k
+elimSum :: K.Representable k => a ⊕ b -> k ¬a & k ¬b -> KRep k
 elimSum = (. exl) . flip (•) <--> (. exr) . flip (•)
