@@ -164,6 +164,13 @@ class Control c where
 
 newtype Context r s = Context { runContext :: s -> r }
 
+instance Control (Context r s) where
+  type R (Context r s) = r
+  type S (Context r s) = s
+  control = Context
+  runControl = runContext
+
+
 withEnv :: (s -> Context r s) -> Context r s
 withEnv f = Context (runContext =<< f)
 
