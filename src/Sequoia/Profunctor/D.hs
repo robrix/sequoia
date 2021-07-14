@@ -49,6 +49,7 @@ module Sequoia.Profunctor.D
 
 import           Control.Category ((<<<), (>>>))
 import qualified Control.Category as Cat
+import           Control.Monad.Trans.Class
 import           Data.Kind (Type)
 import           Data.Profunctor
 import           Sequoia.Bijection
@@ -175,6 +176,9 @@ instance Applicative (ControlT r s m) where
 
 instance Monad (ControlT r s m) where
   ControlT a >>= f = ControlT (\ e k -> a e (\ a' -> runControlT (f a') e k))
+
+instance MonadTrans (ControlT r s) where
+  lift m = ControlT (const (m >>=))
 
 
 newtype Context r s = Context { runContext :: s -> r }
