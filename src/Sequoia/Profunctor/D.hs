@@ -30,6 +30,7 @@ module Sequoia.Profunctor.D
 , dnE
   -- * Control context
 , Control(..)
+, ControlT(..)
 , Context(..)
 , withEnv
 , withVal
@@ -163,6 +164,10 @@ dnE k = inD (\ a b -> liftKWith (\ _K -> k •• _K (\ f -> exD f a b)))
 class Control c where
   control :: (s -> r) -> c r s
   runControl :: c r s -> (s -> r)
+
+
+newtype ControlT r s m a = ControlT { runControlT :: (a -> m r) -> (s -> m r) }
+  deriving (Functor)
 
 
 newtype Context r s = Context { runContext :: s -> r }
