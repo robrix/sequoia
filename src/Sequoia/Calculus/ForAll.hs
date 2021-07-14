@@ -8,17 +8,17 @@ module Sequoia.Calculus.ForAll
 , module Sequoia.Connective.ForAll
 ) where
 
+import Prelude hiding (init)
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Core
 import Sequoia.Calculus.Negation
 import Sequoia.Connective.ForAll
 import Sequoia.Connective.Quantification
 import Sequoia.Polarity
-import Prelude hiding (init)
 
 -- Universal quantification
 
-class Core k s => UniversalIntro k s where
+class Core k v s => UniversalIntro k v s where
   forAllL
     :: (Polarized n x, Neg (f x))
     =>        k ¬-f x < _Γ -|s|- _Δ
@@ -33,7 +33,7 @@ class Core k s => UniversalIntro k s where
 
 
 forAllR'
-  :: (Weaken k s, Exchange k s, UniversalIntro k s, NegationIntro k s, (Polarized n ==> Neg) f)
+  :: (Weaken k v s, Exchange k v s, UniversalIntro k v s, NegationIntro k v s, (Polarized n ==> Neg) f)
   =>                              _Γ -|s|- _Δ > ForAll k n f
   -- ----------------------------------------------------------
   -> (forall x . Polarized n x => _Γ -|s|- _Δ >            f x)

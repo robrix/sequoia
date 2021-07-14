@@ -7,15 +7,15 @@ module Sequoia.Calculus.Iff
 , module Sequoia.Connective.Iff
 ) where
 
+import Prelude hiding (init)
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Core
 import Sequoia.Connective.Iff
 import Sequoia.Polarity
-import Prelude hiding (init)
 
 -- * Logical biconditional
 
-class Core k s => IffIntro k s where
+class Core k v s => IffIntro k v s where
   iffL1
     :: (Neg a, Neg b)
     => _Γ -|s|- _Δ > a   ->   b < _Γ -|s|- _Δ
@@ -36,14 +36,14 @@ class Core k s => IffIntro k s where
 
 
 iffR1'
-  :: (Weaken k s, Exchange k s, IffIntro k s, Neg a, Neg b)
+  :: (Weaken k v s, Exchange k v s, IffIntro k v s, Neg a, Neg b)
   =>     _Γ -|s|- _Δ > a <~k~> b
   -- ---------------------------
   -> a < _Γ -|s|- _Δ > b
 iffR1' s = wkL (wkR' s) >>> iffL1 init init
 
 iffR2'
-  :: (Weaken k s, Exchange k s, IffIntro k s, Neg a, Neg b)
+  :: (Weaken k v s, Exchange k v s, IffIntro k v s, Neg a, Neg b)
   =>     _Γ -|s|- _Δ > a <~k~> b
   -- ---------------------------------
   -> b < _Γ -|s|- _Δ > a

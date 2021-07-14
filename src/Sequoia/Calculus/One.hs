@@ -12,7 +12,7 @@ import Sequoia.Connective.One
 
 -- One
 
-class Core k s => OneIntro k s where
+class Core k v s => OneIntro k v s where
   oneL
     ::       _Γ -|s|- _Δ
     -- -----------------
@@ -24,7 +24,7 @@ class Core k s => OneIntro k s where
 
 
 oneL'
-  :: OneIntro k s
+  :: OneIntro k v s
   => One < _Γ -|s|- _Δ
   -- -----------------
   ->       _Γ -|s|- _Δ

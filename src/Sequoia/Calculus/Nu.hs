@@ -7,16 +7,16 @@ module Sequoia.Calculus.Nu
 , module Sequoia.Connective.Nu
 ) where
 
+import Prelude hiding (init)
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Core
 import Sequoia.Connective.Nu
 import Sequoia.Connective.Quantification
 import Sequoia.Polarity
-import Prelude hiding (init)
 
 -- Corecursion
 
-class Core k s => NuIntro k s where
+class Core k v s => NuIntro k v s where
   nuL
     :: (Pos ==> Neg) f
     => Exists k P (NuF k f) < _Γ -|s|- _Δ
@@ -31,7 +31,7 @@ class Core k s => NuIntro k s where
 
 
 nuR'
-  :: (Weaken k s, Exchange k s, NuIntro k s, (Pos ==> Neg) f)
+  :: (Weaken k v s, Exchange k v s, NuIntro k v s, (Pos ==> Neg) f)
   => _Γ -|s|- _Δ >             Nu  k f
   -- ----------------------------------
   -> _Γ -|s|- _Δ > Exists k P (NuF k f)

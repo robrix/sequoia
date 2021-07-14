@@ -7,15 +7,15 @@ module Sequoia.Calculus.Down
 , module Sequoia.Connective.Down
 ) where
 
+import Prelude hiding (init)
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Core
 import Sequoia.Connective.Down
 import Sequoia.Polarity
-import Prelude hiding (init)
 
 -- Down
 
-class Core k s => DownIntro k s where
+class Core k v s => DownIntro k v s where
   downL
     :: Neg a
     =>      a < _Γ -|s|- _Δ
@@ -30,14 +30,14 @@ class Core k s => DownIntro k s where
 
 
 downL'
-  :: (Weaken k s, Exchange k s, DownIntro k s, Neg a)
+  :: (Weaken k v s, Exchange k v s, DownIntro k v s, Neg a)
   => Down a < _Γ -|s|- _Δ
   -- --------------------
   ->      a < _Γ -|s|- _Δ
 downL' p = downR init >>> wkL' p
 
 downR'
-  :: (Weaken k s, Exchange k s, DownIntro k s, Neg a)
+  :: (Weaken k v s, Exchange k v s, DownIntro k v s, Neg a)
   => _Γ -|s|- _Δ > Down a
   -- --------------------
   -> _Γ -|s|- _Δ >      a

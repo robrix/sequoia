@@ -7,15 +7,15 @@ module Sequoia.Calculus.XOr
 , module Sequoia.Connective.XOr
 ) where
 
+import Prelude hiding (init)
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Core
 import Sequoia.Connective.XOr
 import Sequoia.Polarity
-import Prelude hiding (init)
 
 -- Exclusive disjunction
 
-class Core k s => XOrIntro k s where
+class Core k v s => XOrIntro k v s where
   xorL
     :: (Pos a, Pos b)
     => a < _Γ -|s|- _Δ > b   ->   b < _Γ -|s|- _Δ > a
@@ -35,14 +35,14 @@ class Core k s => XOrIntro k s where
     ->       _Γ -|s|- _Δ > a </k/> b
 
 xorL1'
-  :: (Weaken k s, Exchange k s, XOrIntro k s, Pos a, Pos b)
+  :: (Weaken k v s, Exchange k v s, XOrIntro k v s, Pos a, Pos b)
   => a </k/> b < _Γ -|s|- _Δ
   -- ---------------------------
   ->         a < _Γ -|s|- _Δ > b
 xorL1' s = xorR1 init init >>> wkR (wkL' s)
 
 xorL2'
-  :: (Weaken k s, Exchange k s, XOrIntro k s, Pos a, Pos b)
+  :: (Weaken k v s, Exchange k v s, XOrIntro k v s, Pos a, Pos b)
   => a </k/> b < _Γ -|s|- _Δ
   -- ---------------------------
   ->         b < _Γ -|s|- _Δ > a

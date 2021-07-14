@@ -10,4 +10,4 @@ module Sequoia.Calculus.Recursive
 import Sequoia.Calculus.Mu
 import Sequoia.Calculus.Nu
 
-type RecursiveIntro k s = (NuIntro k s, MuIntro k s)
+type RecursiveIntro k v s = (NuIntro k v s, MuIntro k v s)

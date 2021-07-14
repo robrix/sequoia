@@ -10,4 +10,4 @@ module Sequoia.Calculus.Shift
 import Sequoia.Calculus.Down
 import Sequoia.Calculus.Up
 
-type ShiftIntro k s = (UpIntro k s, DownIntro k s)
+type ShiftIntro k v s = (UpIntro k v s, DownIntro k v s)

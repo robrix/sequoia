@@ -25,7 +25,7 @@ import Sequoia.Polarity
 
 -- Not
 
-class Core k s => NotIntro k s where
+class Core k v s => NotIntro k v s where
   notL
     :: Pos a
     =>        _Γ -|s|- _Δ > a
@@ -40,14 +40,14 @@ class Core k s => NotIntro k s where
 
 
 notL'
-  :: (NotIntro k s, Weaken k s, Pos a)
+  :: (NotIntro k v s, Weaken k v s, Pos a)
   =>  k ¬a < _Γ -|s|- _Δ
   -- -----------------------
   ->         _Γ -|s|- _Δ > a
 notL' p = notR init >>> wkR p
 
 notR'
-  :: (NotIntro k s, Weaken k s, Pos a)
+  :: (NotIntro k v s, Weaken k v s, Pos a)
   =>     _Γ -|s|- _Δ > k ¬a
   -- ----------------------
   -> a < _Γ -|s|- _Δ
@@ -55,22 +55,22 @@ notR' p = wkL p >>> notL init
 
 
 shiftP
-  :: (Control s, Contextual k (s k))
-  =>  k ¬a < _Γ -|s k|- _Δ > KRep k
-  -- -------------------------------
-  ->         _Γ -|s k|- _Δ > a
+  :: (Control s, Contextual k v (s k v))
+  =>  k ¬a < _Γ -|s k v|- _Δ > KRep k
+  -- --------------------------------
+  ->         _Γ -|s k v|- _Δ > a
 shiftP = shift . notLK'
 
 
 dneNK
-  :: Contextual k s
+  :: Contextual k v s
   => k **a < _Γ -|s|- _Δ
   -- -------------------
   -> k ¬-a < _Γ -|s|- _Δ
 dneNK = mapL getNotNegate
 
 dniNK
-  :: Contextual k s
+  :: Contextual k v s
   => _Γ -|s|- _Δ > k **a
   -- -------------------
   -> _Γ -|s|- _Δ > k ¬-a
@@ -78,14 +78,14 @@ dniNK = mapR notNegate
 
 
 notLK
-  :: Contextual k s
+  :: Contextual k v s
   => k  a < _Γ -|s|- _Δ
   -- ------------------
   -> k ¬a < _Γ -|s|- _Δ
 notLK = mapL getNot
 
 notRK
-  :: Contextual k s
+  :: Contextual k v s
   => _Γ -|s|- _Δ > k  a
   -- ------------------
   -> _Γ -|s|- _Δ > k ¬a
@@ -93,14 +93,14 @@ notRK = mapR Not
 
 
 notLK'
-  :: Contextual k s
+  :: Contextual k v s
   => k ¬a < _Γ -|s|- _Δ
   -- ------------------
   -> k  a < _Γ -|s|- _Δ
 notLK' = mapL Not
 
 notRK'
-  :: Contextual k s
+  :: Contextual k v s
   => _Γ -|s|- _Δ > k ¬a
   -- ------------------
   -> _Γ -|s|- _Δ > k  a

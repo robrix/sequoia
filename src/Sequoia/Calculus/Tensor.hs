@@ -14,6 +14,7 @@ module Sequoia.Calculus.Tensor
 , module Sequoia.Connective.Tensor
 ) where
 
+import Prelude hiding (init)
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Core
 import Sequoia.Calculus.One
@@ -21,11 +22,10 @@ import Sequoia.Calculus.Sum
 import Sequoia.Calculus.Zero
 import Sequoia.Connective.Tensor
 import Sequoia.Polarity
-import Prelude hiding (init)
 
 -- Tensor
 
-class Core k s => TensorIntro k s where
+class Core k v s => TensorIntro k v s where
   tensorL
     :: (Pos a, Pos b)
     => a < b < _Γ -|s|- _Δ
@@ -43,7 +43,7 @@ class Core k s => TensorIntro k s where
 
 
 tensorL'
-  :: (Contextual k s, Weaken k s, TensorIntro k s, Pos a, Pos b)
+  :: (Contextual k v s, Weaken k v s, TensorIntro k v s, Pos a, Pos b)
   => a ⊗ b < _Γ -|s|- _Δ
   -- -------------------
   -> a < b < _Γ -|s|- _Δ
@@ -51,49 +51,49 @@ tensorL' p = init ⊢⊗ wkL init >>> popL (wkL . wkL . pushL p)
 
 
 tensorIdentityL
-  :: (TensorIntro k s, OneIntro k s, Pos a)
+  :: (TensorIntro k v s, OneIntro k v s, Pos a)
   -- -------------------------
   => One ⊗ a < _Γ -|s|- _Δ > a
 tensorIdentityL = tensorL (oneL init)
 
 tensorIdentityR
-  :: (TensorIntro k s, OneIntro k s, Pos a)
+  :: (TensorIntro k v s, OneIntro k v s, Pos a)
   -- -------------------------
   => a < _Γ -|s|- _Δ > a ⊗ One
 tensorIdentityR = init ⊢⊗ oneR
 
 tensorAssociativity
-  :: (Weaken k s, Exchange k s, TensorIntro k s, Pos a, Pos b, Pos c)
+  :: (Weaken k v s, Exchange k v s, TensorIntro k v s, Pos a, Pos b, Pos c)
   -- ---------------------------------------
   => a ⊗ (b ⊗ c) < _Γ -|s|- _Δ > (a ⊗ b) ⊗ c
 tensorAssociativity = tensorL (exL (tensorL ((wkL (exL init) ⊢⊗ init) ⊢⊗ exL init)))
 
 tensorCommutativity
-  :: (Exchange k s, TensorIntro k s, Pos a, Pos b)
+  :: (Exchange k v s, TensorIntro k v s, Pos a, Pos b)
   -- ---------------------------
   => a ⊗ b < _Γ -|s|- _Δ > b ⊗ a
 tensorCommutativity = tensorL (exL init ⊢⊗ init)
 
 tensorDistributivityL
-  :: (Exchange k s, TensorIntro k s, SumIntro k s, Pos a, Pos b, Pos c)
+  :: (Exchange k v s, TensorIntro k v s, SumIntro k v s, Pos a, Pos b, Pos c)
   -- -----------------------------------------
   => a ⊗ c ⊕ b ⊗ c < _Γ -|s|- _Δ > (a ⊕ b) ⊗ c
 tensorDistributivityL = tensorL (sumR1 init ⊢⊗ exL init) ⊕⊢ tensorL (sumR2 init ⊢⊗ exL init)
 
 tensorDistributivityR
-  :: (Exchange k s, TensorIntro k s, SumIntro k s, Pos a, Pos b, Pos c)
+  :: (Exchange k v s, TensorIntro k v s, SumIntro k v s, Pos a, Pos b, Pos c)
   -- -----------------------------------------
   => a ⊗ (b ⊕ c) < _Γ -|s|- _Δ > a ⊗ b ⊕ a ⊗ c
 tensorDistributivityR = tensorL (exL (sumR1 (exL init ⊢⊗ init) ⊕⊢ sumR2 (exL init ⊢⊗ init)))
 
 tensorAnnihilationL
-  :: (TensorIntro k s, ZeroIntro k s, Pos a)
+  :: (TensorIntro k v s, ZeroIntro k v s, Pos a)
   -- -----------------------------
   => Zero ⊗ a < _Γ -|s|- _Δ > Zero
 tensorAnnihilationL = tensorL zeroL
 
 tensorAnnihilationR
-  :: ZeroIntro k s
+  :: ZeroIntro k v s
   -- -----------------------------
   => Zero < _Γ -|s|- _Δ > a ⊗ Zero
 tensorAnnihilationR = zeroL

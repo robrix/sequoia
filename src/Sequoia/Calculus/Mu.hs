@@ -7,17 +7,17 @@ module Sequoia.Calculus.Mu
 , module Sequoia.Connective.Mu
 ) where
 
+import Prelude hiding (init)
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Core
 import Sequoia.Connective.Function
 import Sequoia.Connective.Mu
 import Sequoia.Connective.Quantification
 import Sequoia.Polarity
-import Prelude hiding (init)
 
 -- Recursion
 
-class Core k s => MuIntro k s where
+class Core k v s => MuIntro k v s where
   muL
     :: ((Neg ==> Pos) f, Neg a)
     => _Γ -|s|- _Δ > f a ~~k~> a   ->   a < _Γ -|s|- _Δ
@@ -32,7 +32,7 @@ class Core k s => MuIntro k s where
 
 
 muL'
-  :: (Weaken k s, Exchange k s, MuIntro k s, (Neg ==> Pos) f)
+  :: (Weaken k v s, Exchange k v s, MuIntro k v s, (Neg ==> Pos) f)
   =>             Mu  k f  < _Γ -|s|- _Δ
   -- ----------------------------------
   -> ForAll k N (MuF k f) < _Γ -|s|- _Δ

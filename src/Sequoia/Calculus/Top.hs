@@ -11,7 +11,7 @@ import Sequoia.Connective.Top
 
 -- Top
 
-class Core k s => TopIntro k s where
+class Core k v s => TopIntro k v s where
   topR
     -- -----------------
     :: _Γ -|s|- _Δ > Top

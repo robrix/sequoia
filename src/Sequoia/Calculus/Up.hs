@@ -7,15 +7,15 @@ module Sequoia.Calculus.Up
 , module Sequoia.Connective.Up
 ) where
 
+import Prelude hiding (init)
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Core
 import Sequoia.Connective.Up
 import Sequoia.Polarity
-import Prelude hiding (init)
 
 -- Up
 
-class Core k s => UpIntro k s where
+class Core k v s => UpIntro k v s where
   upL
     :: Pos a
     =>    a < _Γ -|s|- _Δ
@@ -30,14 +30,14 @@ class Core k s => UpIntro k s where
 
 
 upL'
-  :: (Weaken k s, Exchange k s, UpIntro k s, Pos a)
+  :: (Weaken k v s, Exchange k v s, UpIntro k v s, Pos a)
   => Up a < _Γ -|s|- _Δ
   -- ------------------
   ->    a < _Γ -|s|- _Δ
 upL' p = upR init >>> wkL' p
 
 upR'
-  :: (Weaken k s, Exchange k s, UpIntro k s, Pos a)
+  :: (Weaken k v s, Exchange k v s, UpIntro k v s, Pos a)
   => _Γ -|s|- _Δ > Up a
   -- ------------------
   -> _Γ -|s|- _Δ >    a

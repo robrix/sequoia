@@ -6,15 +6,15 @@ module Sequoia.Calculus.Subtraction
 , module Sequoia.Connective.Subtraction
 ) where
 
+import Prelude hiding (init)
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Core
 import Sequoia.Connective.Subtraction
 import Sequoia.Polarity
-import Prelude hiding (init)
 
 -- Subtraction
 
-class Core k s => SubtractionIntro k s where
+class Core k v s => SubtractionIntro k v s where
   subL
     :: (Pos a, Neg b)
     =>         a < _Γ -|s|- _Δ > b
@@ -32,7 +32,7 @@ class Core k s => SubtractionIntro k s where
 
 
 subL'
-  :: (Weaken k s, Exchange k s, SubtractionIntro k s, Pos a, Neg b)
+  :: (Weaken k v s, Exchange k v s, SubtractionIntro k v s, Pos a, Neg b)
   => a ~-k-< b < _Γ -|s|- _Δ
   -- ---------------------------
   ->         a < _Γ -|s|- _Δ > b

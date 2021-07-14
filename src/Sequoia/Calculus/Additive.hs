@@ -21,17 +21,17 @@ import Sequoia.Calculus.With
 import Sequoia.Calculus.Zero
 import Sequoia.Polarity
 
-type AdditiveIntro k s = (TopIntro k s, ZeroIntro k s, WithIntro k s, SumIntro k s)
+type AdditiveIntro k v s = (TopIntro k v s, ZeroIntro k v s, WithIntro k v s, SumIntro k v s)
 
 withLSum
-  :: (Weaken k s, SumIntro k s, WithIntro k s, NegateIntro k s, Neg a, Neg b)
+  :: (Weaken k v s, SumIntro k v s, WithIntro k v s, NegateIntro k v s, Neg a, Neg b)
   =>         _Γ -|s|- _Δ > k -a ⊕ k -b
   -- ---------------------------------
   -> a & b < _Γ -|s|- _Δ
 withLSum s = wkL s >>> sumL (negateL (withL1 init)) (negateL (withL2 init))
 
 sumLWith
-  :: (Weaken k s, Exchange k s, SumIntro k s, WithIntro k s, NotIntro k s, Pos a, Pos b)
+  :: (Weaken k v s, Exchange k v s, SumIntro k v s, WithIntro k v s, NotIntro k v s, Pos a, Pos b)
   =>         _Γ -|s|- _Δ > k ¬a & k ¬b
   -- ---------------------------------
   -> a ⊕ b < _Γ -|s|- _Δ

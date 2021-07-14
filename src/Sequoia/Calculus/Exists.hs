@@ -8,16 +8,16 @@ module Sequoia.Calculus.Exists
 , module Sequoia.Connective.Exists
 ) where
 
+import Prelude hiding (init)
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Core
 import Sequoia.Connective.Exists
 import Sequoia.Connective.Quantification
 import Sequoia.Polarity
-import Prelude hiding (init)
 
 -- Existential quantification
 
-class Core k s => ExistentialIntro k s where
+class Core k v s => ExistentialIntro k v s where
   existsL
     :: (forall x . Polarized n x => f x < _Γ -|s|- _Δ)
     -- -----------------------------------------------
@@ -31,7 +31,7 @@ class Core k s => ExistentialIntro k s where
 
 
 existsL'
-  :: (Weaken k s, Exchange k s, ExistentialIntro k s, (Polarized n ==> Pos) f)
+  :: (Weaken k v s, Exchange k v s, ExistentialIntro k v s, (Polarized n ==> Pos) f)
   =>                   Exists k n f   < _Γ -|s|- _Δ
   -- -----------------------------------------------
   -> (forall x . Polarized n x => f x < _Γ -|s|- _Δ)
