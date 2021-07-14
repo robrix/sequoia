@@ -48,6 +48,7 @@ module Sequoia.Profunctor.D
 , producer
 , Producer
 , consumer
+, inCns
 , Consumer
 ) where
 
@@ -259,6 +260,9 @@ producer v = inD (\ _ k -> k •∘ v)
 
 type Producer d s b = d s b
 
+
+inCns :: Dual r s d => (V s a -> Context r s) -> Consumer d r a
+inCns = inD . fmap const
 
 consumer :: Dual r s d => K r a -> Consumer d r a
 consumer k = inD (\ a _ -> k •∘ a)
