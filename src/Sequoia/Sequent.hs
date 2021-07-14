@@ -30,13 +30,13 @@ import           Sequoia.Calculus.Quantification
 import           Sequoia.Calculus.Shift
 import           Sequoia.Calculus.XOr
 import           Sequoia.Conjunction
-import           Sequoia.Continuation
+import           Sequoia.Continuation as K
 import           Sequoia.Disjunction
 import           Sequoia.Functor.K
 
 -- Sequents
 
-evalSeq :: Continuation k => _Δ ~ KRep k => _Γ -|Seq k|- _Δ -> k _Γ
+evalSeq :: K.Representable k => _Δ ~ KRep k => _Γ -|Seq k|- _Δ -> k _Γ
 evalSeq = evalC
 
 newtype Seq k _Γ _Δ = Seq { runSeq :: k _Δ -> k _Γ }

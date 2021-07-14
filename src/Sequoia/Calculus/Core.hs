@@ -54,10 +54,10 @@ import Data.Profunctor
 import Prelude hiding (init)
 import Sequoia.Calculus.Context
 import Sequoia.Conjunction
-import Sequoia.Continuation
+import Sequoia.Continuation as K
 import Sequoia.Disjunction
 
-class Continuation k => Core k s | s -> k where
+class K.Representable k => Core k s | s -> k where
   {-# MINIMAL ((>>>) | (<<<)), init #-}
 
   (>>>)

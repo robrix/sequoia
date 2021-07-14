@@ -12,19 +12,19 @@ module Sequoia.Calculus.Control
 import Prelude hiding (init)
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Core
-import Sequoia.Continuation
+import Sequoia.Continuation as K
 
 -- Delimited control
 
 class Control s where
   reset
-    :: (Continuation j, Continuation k, KRep j ~ _Δ)
+    :: (K.Representable j, K.Representable k, K.Rep j ~ _Δ)
     => _Γ -|s j|- _Δ
     -- -------------
     -> _Γ -|s k|- _Δ
 
   shift
-    :: Continuation k
+    :: K.Representable k
     => k a < _Γ -|s k|- _Δ > KRep k
     -- ----------------------------
     ->       _Γ -|s k|- _Δ > a
