@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeFamilies #-}
 module Sequoia.Calculus.Negate
 ( -- * Negate
   NegateIntro(..)
@@ -20,7 +21,7 @@ import Sequoia.Calculus.Control
 import Sequoia.Calculus.Core
 import Sequoia.Connective.Negate
 import Sequoia.Connective.Negation
-import Sequoia.Continuation
+import Sequoia.Continuation as K
 import Sequoia.Polarity
 
 -- Negate
@@ -54,10 +55,10 @@ negateR' p = wkL p >>> negateL init
 
 
 shiftN
-  :: (Control s, Contextual k v (s k v))
-  => k -a < _Γ -|s k v|- _Δ > KRep k
-  -- -------------------------------
-  ->        _Γ -|s k v|- _Δ > a
+  :: (Control k s, Contextual (k r) v (s r e), K.Rep (k r) ~ r)
+  => k r -a < _Γ -|s r e|- _Δ > r
+  -- ----------------------------
+  ->          _Γ -|s r e|- _Δ > a
 shiftN = shift . negateLK'
 
 

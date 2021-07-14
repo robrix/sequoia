@@ -1,3 +1,4 @@
+{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE TypeFamilies #-}
 module Sequoia.Calculus.Control
 ( -- * Delimited control
@@ -9,26 +10,24 @@ module Sequoia.Calculus.Control
 , kR'
 ) where
 
-import           Prelude hiding (init)
-import           Sequoia.Calculus.Context
-import           Sequoia.Calculus.Core
-import           Sequoia.Continuation as K
-import qualified Sequoia.Value as V
+import Prelude hiding (init)
+import Sequoia.Calculus.Context
+import Sequoia.Calculus.Core
+import Sequoia.Continuation as K
 
 -- Delimited control
 
-class Control s where
+class Control k s | s -> k where
   reset
-    :: (K.Representable j, K.Representable k, K.Rep j ~ _Δ, V.Representable v)
-    => _Γ -|s j v|- _Δ
-    -- ---------------
-    -> _Γ -|s k v|- _Δ
+    :: _Γ -|s _Δ e|- _Δ
+    -- ----------------
+    -> _Γ -|s r  e|- _Δ
 
   shift
-    :: (K.Representable k, V.Representable v)
-    => k a < _Γ -|s k v|- _Δ > KRep k
-    -- ------------------------------
-    ->       _Γ -|s k v|- _Δ > a
+    :: (K.Representable (k r), K.Rep (k r) ~ r)
+    => k r a < _Γ -|s r e|- _Δ > r
+    -- ---------------------------
+    ->         _Γ -|s r e|- _Δ > a
 
 
 -- Continuations
