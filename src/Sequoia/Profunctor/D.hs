@@ -169,6 +169,10 @@ class Control c where
 newtype ControlT r s m a = ControlT { runControlT :: (a -> m r) -> (s -> m r) }
   deriving (Functor)
 
+instance Applicative m => Applicative (ControlT r s m) where
+  pure a = ControlT $ \ k _ -> k a
+  ControlT f <*> ControlT a = ControlT (\ k e -> f ((`a` e) . (k .)) e)
+
 
 newtype Context r s = Context { runContext :: s -> r }
 
