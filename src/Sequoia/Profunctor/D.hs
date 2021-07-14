@@ -30,8 +30,6 @@ module Sequoia.Profunctor.D
 , dnE
   -- * Control context
 , Control(..)
-, KFor
-, VFor
 , Context(..)
 , withEnv
 , withVal
@@ -163,52 +161,44 @@ dnE k = inD (\ a b -> liftKWith (\ _K -> k •• _K (\ f -> exD f a b)))
 -- Control context
 
 class Control c where
-  type R c
-  type S c
-
-  control :: (S c -> R c) -> c
-  runControl :: c -> (S c -> R c)
-
-type KFor k c = (K.Representable k, K.Rep k ~ R c)
-type VFor v c = (V.Representable v, V.Rep v ~ S c)
+  control :: (s -> r) -> c r s
+  runControl :: c r s -> (s -> r)
 
 
 newtype Context r s = Context { runContext :: s -> r }
 
-instance Control (Context r s) where
-  type R (Context r s) = r
-  type S (Context r s) = s
+instance Control Context where
   control = Context
   runControl = runContext
 
 
-withEnv :: Control c => (S c -> c) -> c
+withEnv :: Control c => (s -> c r s) -> c r s
 withEnv f = control (runControl =<< f)
 
-withVal :: (Control c, VFor v c) => (a -> c) -> (v a -> c)
+withVal :: (Control c, V.Representable v, V.Rep v ~ s) => (a -> c r s) -> (v a -> c r s)
 withVal f v = withEnv (f . exV v)
 
-liftRunControlWith :: Control c => ((c -> R c) -> c) -> c
+liftRunControlWith :: Control c => ((c r s -> r) -> c r s) -> c r s
 liftRunControlWith f = withEnv (f . flip runControl)
 
-liftKWith :: (Control c, KFor k c) => (((a -> c) -> k a) -> c) -> c
+liftKWith :: (Control c, K.Representable k, K.Rep k ~ r) => (((a -> c r s) -> k a) -> c r s) -> c r s
 liftKWith f = liftRunControlWith (\ run -> f (inK . (run .)))
 
-(•∘) :: (Control c, KFor k c, VFor v c) => k a -> v a -> c
+(•∘) :: (Control c, K.Representable k, K.Rep k ~ r, V.Representable v, V.Rep v ~ s) => k a -> v a -> c r s
 k •∘ v = control (\ e -> k • e ∘ v)
 
 infix 7 •∘
 
-(••) :: (Control c, KFor k c) => k a -> a -> c
+(••) :: (Control c, K.Representable k, K.Rep k ~ r) => k a -> a -> c r s
 k •• v = control (const (k • v))
 
 infix 7 ••
 
 
-complete :: (Control c, Dual k v d, KFor k c, VFor v c) => c -> Complete d k v
+complete :: (Dual k v d, Control c, K.Rep k ~ r, V.Rep v ~ s) => c r s -> Complete d k v
 complete = inD . const . const . control . runControl
 
-runComplete :: (Dual k v d, Control c, KFor k c, VFor v c) => Complete d k v -> c
+runComplete :: (Dual k v d, Control c, K.Rep k ~ r, V.Rep v ~ s) => Complete d k v -> c r s
 runComplete f = control (runControl (exD f idV idK))
 
 type Complete d k v = d (V.Rep v) (K.Rep k)
