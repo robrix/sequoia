@@ -34,6 +34,8 @@ import           Sequoia.Continuation as K
 import           Sequoia.Disjunction
 import           Sequoia.Functor.K
 import           Sequoia.Functor.V
+import           Sequoia.Profunctor.D (Dual(..), runControl, (•∘))
+import           Sequoia.Value
 
 -- Sequents
 
@@ -43,6 +45,10 @@ evalSeq = evalC
 newtype Seq r s _Γ _Δ = Seq { runSeq :: K r _Δ -> K r _Γ }
   deriving (Cat.Category, Profunctor) via C (K r)
   deriving (Applicative, Functor, Monad) via C (K r) _Γ
+
+instance Monoid s => Dual r s (Seq r s) where
+  inD f = Seq (inK . \ b a -> runControl (f (inV0 a) b) mempty)
+  exD (Seq f) v k = f k •∘ v
 
 instance ContPassing (K r) (Seq r s) where
   inC = Seq
