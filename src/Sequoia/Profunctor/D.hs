@@ -55,6 +55,7 @@ import qualified Control.Category as Cat
 import           Control.Monad.Trans.Class
 import           Data.Kind (Type)
 import           Data.Profunctor
+import           Data.Profunctor.Traversing
 import           Sequoia.Bijection
 import           Sequoia.Conjunction
 import           Sequoia.Continuation as K
@@ -78,6 +79,9 @@ instance Strong (D r s) where
 instance Choice (D r s) where
   left'  (D r) = D (\ a b -> withVal ((`r` inlK b) . inV0 <--> (inrK b ••)) a)
   right' (D r) = D (\ a b -> withVal ((inlK b ••) <--> (`r` inrK b) . inV0) a)
+
+instance Traversing (D r s) where
+  wander traverse r = D (\ s t -> withVal (\ s -> exD (traverse ((r ↑) . inV0) s) idV t) s)
 
 instance Cat.Category (D r s) where
   id = D (flip (•∘))
