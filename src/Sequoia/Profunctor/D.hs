@@ -10,6 +10,9 @@ module Sequoia.Profunctor.D
   -- ** Dual profunctor abstraction
 , _D
 , Dual(..)
+, producer
+, _Producer
+, Producer(..)
   -- ** Construction
 , inD'
 , inDK
@@ -36,8 +39,6 @@ module Sequoia.Profunctor.D
 , (•∘)
 , (••)
 , Complete
-, producer
-, Producer
 , consumer
 , Consumer
 ) where
@@ -102,6 +103,20 @@ instance (K.Representable k, V.Representable v) => Dual k v (D k v) where
   exD = runD
 
 
+_Producer :: Producer k v p => p b <-> (k b -> Control (K.Rep k) (V.Rep v))
+_Producer = exPrd <-> inPrd
+
+class (K.Representable k, V.Representable v) => Producer k v p | p -> k v where
+  inPrd :: (k b -> Control (K.Rep k) (V.Rep v)) -> p b
+  exPrd :: p b -> (k b -> Control (K.Rep k) (V.Rep v))
+
+producer :: Producer k v p => v a -> p a
+producer v = inPrd (•∘ v)
+
+_ProducerFunction :: (Producer k v p, Producer k' v' p', Dual k v d, Dual k' v' d') => Optic Iso (d (V.Rep v) a) (d' (V.Rep v') a') (p a) (p' a')
+_ProducerFunction = inPrd . (`exD` idV) <-> inD . const . exPrd
+
+
 -- Construction
 
 inD' :: Dual k v d => (a -> b) -> a --|d|-> b
@@ -128,8 +143,11 @@ evalD f = runControl (exD f (inV id) idK)
 
 -- Computation
 
-(↑) :: Dual k v d => a --|d|-> b -> v a -> Producer d v b
-f ↑ a = f <<< producer a
+(↑) :: (Dual k v d, Producer k v p) => a --|d|-> b -> v a -> p b
+f ↑ a = let x = over _ProducerFunction (f <<<) (producer a `asTypeOf1` x) in x
+  where
+  asTypeOf1 :: f a -> f b -> f a
+  asTypeOf1 = const
 
 infixl 7 ↑
 
@@ -180,12 +198,6 @@ infix 7 ••
 
 
 type Complete d k v = d (V.Rep v) (K.Rep k)
-
-
-producer :: Dual k v d => v a -> Producer d v a
-producer v = inD (\ _ k -> k •∘ v)
-
-type Producer d v b = d (V.Rep v) b
 
 
 consumer :: Dual k v d => k a -> Consumer d k a
