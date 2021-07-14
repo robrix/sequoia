@@ -39,6 +39,7 @@ module Sequoia.Profunctor.D
 , liftKWith
 , (•∘)
 , (••)
+, runComplete
 , Complete
 , producer
 , Producer
@@ -200,6 +201,9 @@ k •• v = control (const (k • v))
 
 infix 7 ••
 
+
+runComplete :: (Dual k v d, Control c, KFor k c, VFor v c) => Complete d k v -> c
+runComplete f = control (runControl (exD f idV idK))
 
 type Complete d k v = d (V.Rep v) (K.Rep k)
 
