@@ -43,8 +43,14 @@ evalSeq :: _Γ -|Seq _Δ s|- _Δ -> K _Δ _Γ
 evalSeq = evalC
 
 newtype Seq r s _Γ _Δ = Seq { runSeq :: K r _Δ -> K r _Γ }
-  deriving (Cat.Category, Profunctor) via C (K r)
   deriving (Applicative, Functor, Monad) via C (K r) _Γ
+
+instance Cat.Category (Seq r s) where
+  id = Seq id
+  Seq f . Seq g = Seq (g . f)
+
+instance Profunctor (Seq r s) where
+  dimap f g = Seq . dimap (contramap g) (contramap f) . runSeq
 
 instance Monoid s => Dual r s (Seq r s) where
   inD f = Seq (inK . \ b a -> runControl (f (inV0 a) b) mempty)
