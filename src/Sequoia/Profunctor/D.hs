@@ -1,7 +1,4 @@
-{-# LANGUAGE ConstraintKinds #-}
-{-# LANGUAGE FunctionalDependencies #-}
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE QuantifiedConstraints #-}
 module Sequoia.Profunctor.D
 ( -- * Dual profunctor
   D(..)
@@ -96,65 +93,65 @@ infixr 5 |->
 
 -- Dual profunctor abstraction
 
-_D :: Dual r s d => d a b <-> (V s a -> K r b -> Context r s)
+_D :: Dual d => d r s a b <-> (V s a -> K r b -> Context r s)
 _D = exD <-> inD
 
-class (Cat.Category d, Profunctor d) => Dual r s d | d -> r s where
-  inD :: (V s a -> K r b -> Context r s) -> d a b
-  exD :: d a b -> V s a -> K r b -> Context r s
+class (forall r s . Cat.Category (d r s), forall r s . Profunctor (d r s)) => Dual d where
+  inD :: (V s a -> K r b -> Context r s) -> d r s a b
+  exD :: d r s a b -> V s a -> K r b -> Context r s
 
-instance Dual r s (D r s) where
+instance Dual D where
   inD = D
   exD = runD
 
 
 -- Construction
 
-inD' :: Dual r s d => (a -> b) -> a --|d|-> b
+inD' :: Dual d => (a -> b) -> a --|d r s|-> b
 inD' f = inD (\ a b -> b •∘ (f <$> a))
 
-inDK :: Dual r s d => (K r b -> K r a) -> a --|d|-> b
+inDK :: Dual d => (K r b -> K r a) -> a --|d r s|-> b
 inDK f = inD (\ a b -> f b •∘ a)
 
-inDV :: Dual r s d => (V s a -> V s b) -> a --|d|-> b
+inDV :: Dual d => (V s a -> V s b) -> a --|d r s|-> b
 inDV f = inD (\ a b -> b •∘ f a)
 
 
 -- Elimination
 
-exDK :: Dual r s d => a --|d|-> b -> V s (K r b -> K r a)
+exDK :: Dual d => a --|d r s|-> b -> V s (K r b -> K r a)
 exDK f = inV (\ e k -> inK (\ a -> runContext (exD f (inV0 a) k) e))
 
-exDV :: Dual r s d => K r' (V s a -> V s r) -> K r' (a --|d|-> r)
+exDV :: Dual d => K r' (V s a -> V s r) -> K r' (a --|d r s|-> r)
 exDV k = inK (\ f -> k • inV . \ a -> runContext (exD f a idK))
 
-evalD :: Dual r s d => s --|d|-> r -> (s -> r)
+evalD :: Dual d => s --|d r s|-> r -> (s -> r)
 evalD f = runContext (exD f (inV id) idK)
 
 
 -- Computation
 
-(↑) :: Dual r s d => a --|d|-> b -> V s a -> Producer d s b
+(↑) :: Dual d => a --|d r s|-> b -> V s a -> Producer d r s b
 f ↑ a = f <<< producer a
 
 infixl 7 ↑
 
-(<↑) :: Dual r s d => Conj c => (a `c` _Γ) --|d|-> _Δ -> a -> _Γ --|d|-> _Δ
+(<↑) :: Dual d => Conj c => (a `c` _Γ) --|d r s|-> _Δ -> a -> _Γ --|d r s|-> _Δ
 f <↑ a = f <<< inD' (inlr a)
 
 infixl 7 <↑
 
-(↓) :: Dual r s d => K r b -> a --|d|-> b -> Consumer d r a
+(↓) :: Dual d => K r b -> a --|d r s|-> b -> Consumer d r s a
 k ↓ f = consumer k <<< f
 
 infixl 8 ↓
 
-(↓>) :: (Dual r s d, Disj p) => K r c -> a --|d|-> (b `p` c) -> a --|d|-> b
+(↓>) :: (Dual d, Disj p) => K r c -> a --|d r s|-> (b `p` c) -> a --|d r s|-> b
 c ↓> f = inD (\ v k -> (k <••> c) •∘ v) <<< f
 
 infixr 9 ↓>
 
-dnE :: Dual r s d => K r **(a --|d|-> b) -> a --|d|-> b
+dnE :: Dual d => K r **(a --|d r s|-> b) -> a --|d r s|-> b
 dnE k = inD (\ a b -> liftKWith (\ _K -> k •• _K (\ f -> exD f a b)))
 
 
@@ -195,22 +192,22 @@ k •• v = control (const (k • v))
 infix 7 ••
 
 
-complete :: (Dual r s d, Control c) => c r s -> Complete d r s
+complete :: (Dual d, Control c) => c r s -> Complete d r s
 complete = inD . const . const . control . runControl
 
-runComplete :: (Dual r s d, Control c) => Complete d r s -> c r s
+runComplete :: (Dual d, Control c) => Complete d r s -> c r s
 runComplete f = control (runControl (exD f idV idK))
 
-type Complete d r s = d s r
+type Complete d r s = d r s s r
 
 
-producer :: Dual r s d => V s a -> Producer d s a
+producer :: Dual d => V s a -> Producer d r s a
 producer v = inD (\ _ k -> k •∘ v)
 
-type Producer d s b = d s b
+type Producer d r s b = d r s s b
 
 
-consumer :: Dual r s d => K r a -> Consumer d r a
+consumer :: Dual d => K r a -> Consumer d r s a
 consumer k = inD (\ a _ -> k •∘ a)
 
-type Consumer d r a = d a r
+type Consumer d r s a = d r s a r
