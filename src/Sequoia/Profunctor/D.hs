@@ -46,6 +46,7 @@ module Sequoia.Profunctor.D
 , Complete
 , inPrd
 , producer
+, joinl
 , Producer
 , consumer
 , inCns
@@ -257,6 +258,9 @@ inPrd = inD . const
 
 producer :: Dual r s d => V s a -> Producer d s a
 producer v = inPrd (•∘ v)
+
+joinl :: Dual r s d => Producer d s (d a b) -> d a b
+joinl p = inD (\ a b -> liftKWith (\ _K -> exD p idV (_K (\ f -> exD f a b))))
 
 type Producer d s b = d s b
 
