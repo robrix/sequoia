@@ -28,10 +28,10 @@ module Sequoia.Profunctor.D
 , (↓>)
 , dnE
   -- * Control context
-, Control(..)
+, Context(..)
 , withEnv
 , withVal
-, liftRunControlWith
+, liftRunContextWith
 , liftKWith
 , (•∘)
 , (••)
@@ -55,7 +55,7 @@ import           Sequoia.Value as V
 
 -- Dual profunctor
 
-newtype D k v a b = D { runD :: v a -> k b -> Control (K.Rep k) (V.Rep v) }
+newtype D k v a b = D { runD :: v a -> k b -> Context (K.Rep k) (V.Rep v) }
 
 instance (Contravariant k, Functor v) => Profunctor (D k v) where
   dimap f g = D . dimap (fmap f) (lmap (contramap g)) . runD
@@ -90,12 +90,12 @@ infixr 5 |->
 
 -- Dual profunctor abstraction
 
-_D :: Dual k v d => d a b <-> (v a -> k b -> Control (K.Rep k) (V.Rep v))
+_D :: Dual k v d => d a b <-> (v a -> k b -> Context (K.Rep k) (V.Rep v))
 _D = exD <-> inD
 
 class (K.Representable k, V.Representable v, Cat.Category d, Profunctor d) => Dual k v d | d -> k v where
-  inD :: (v a -> k b -> Control (K.Rep k) (V.Rep v)) -> d a b
-  exD :: d a b -> v a -> k b -> Control (K.Rep k) (V.Rep v)
+  inD :: (v a -> k b -> Context (K.Rep k) (V.Rep v)) -> d a b
+  exD :: d a b -> v a -> k b -> Context (K.Rep k) (V.Rep v)
 
 instance (K.Representable k, V.Representable v) => Dual k v (D k v) where
   inD = D
@@ -117,13 +117,13 @@ inDV f = inD (\ a b -> b •∘ f a)
 -- Elimination
 
 exDK :: Dual k v d => a --|d|-> b -> v (k b -> k a)
-exDK f = inV (\ e k -> inK (\ a -> runControl (exD f (inV0 a) k) e))
+exDK f = inV (\ e k -> inK (\ a -> runContext (exD f (inV0 a) k) e))
 
 exDV :: (K.Representable k', Dual k v d) => k' (v a -> v (K.Rep k)) -> k' (a --|d|-> K.Rep k)
-exDV k = inK (\ f -> k • inV . \ a -> runControl (exD f a idK))
+exDV k = inK (\ f -> k • inV . \ a -> runContext (exD f a idK))
 
 evalD :: Dual k v d => V.Rep v --|d|-> K.Rep k -> (V.Rep v -> K.Rep k)
-evalD f = runControl (exD f (inV id) idK)
+evalD f = runContext (exD f (inV id) idK)
 
 
 -- Computation
@@ -154,27 +154,27 @@ dnE k = inD (\ a b -> liftKWith (\ _K -> k •• _K (\ f -> exD f a b)))
 
 -- Control context
 
-newtype Control r s = Control { runControl :: s -> r }
+newtype Context r s = Context { runContext :: s -> r }
 
-withEnv :: (s -> Control r s) -> Control r s
-withEnv f = Control (runControl =<< f)
+withEnv :: (s -> Context r s) -> Context r s
+withEnv f = Context (runContext =<< f)
 
-withVal :: V.Representable v => (a -> Control r (V.Rep v)) -> (v a -> Control r (V.Rep v))
+withVal :: V.Representable v => (a -> Context r (V.Rep v)) -> (v a -> Context r (V.Rep v))
 withVal f v = withEnv (f . exV v)
 
-liftRunControlWith :: ((Control r s -> r) -> Control r s) -> Control r s
-liftRunControlWith f = withEnv (f . flip runControl)
+liftRunContextWith :: ((Context r s -> r) -> Context r s) -> Context r s
+liftRunContextWith f = withEnv (f . flip runContext)
 
-liftKWith :: K.Representable k => (((a -> Control (K.Rep k) s) -> k a) -> Control (K.Rep k) s) -> Control (K.Rep k) s
-liftKWith f = liftRunControlWith (\ run -> f (inK . (run .)))
+liftKWith :: K.Representable k => (((a -> Context (K.Rep k) s) -> k a) -> Context (K.Rep k) s) -> Context (K.Rep k) s
+liftKWith f = liftRunContextWith (\ run -> f (inK . (run .)))
 
-(•∘) :: (K.Representable k, V.Representable v) => k a -> v a -> Control (K.Rep k) (V.Rep v)
-k •∘ v = Control (\ e -> k • e ∘ v)
+(•∘) :: (K.Representable k, V.Representable v) => k a -> v a -> Context (K.Rep k) (V.Rep v)
+k •∘ v = Context (\ e -> k • e ∘ v)
 
 infix 7 •∘
 
-(••) :: K.Representable k => k a -> a -> Control (K.Rep k) s
-k •• v = Control (const (k • v))
+(••) :: K.Representable k => k a -> a -> Context (K.Rep k) s
+k •• v = Context (const (k • v))
 
 infix 7 ••
 
