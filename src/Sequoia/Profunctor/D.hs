@@ -171,8 +171,8 @@ instance Control (Context r s) where
   runControl = runContext
 
 
-withEnv :: (s -> Context r s) -> Context r s
-withEnv f = Context (runContext =<< f)
+withEnv :: Control c => (S c -> c) -> c
+withEnv f = control (runControl =<< f)
 
 withVal :: V.Representable v => (a -> Context r (V.Rep v)) -> (v a -> Context r (V.Rep v))
 withVal f v = withEnv (f . exV v)
