@@ -56,32 +56,34 @@ import           Sequoia.Bijection
 import           Sequoia.Conjunction
 import           Sequoia.Continuation as K
 import           Sequoia.Disjunction
+import           Sequoia.Functor.K
+import           Sequoia.Functor.V
 import           Sequoia.Profunctor.Applicative
 import           Sequoia.Value as V
 
 -- Dual profunctor
 
-newtype D k v a b = D { runD :: v a -> k b -> Context (K.Rep k) (V.Rep v) }
+newtype D r s a b = D { runD :: V s a -> K r b -> Context r s }
 
-instance (Contravariant k, Functor v) => Profunctor (D k v) where
+instance Profunctor (D r s) where
   dimap f g = D . dimap (fmap f) (lmap (contramap g)) . runD
 
-instance (K.Representable k, V.Representable v) => Cat.Category (D k v) where
+instance Cat.Category (D r s) where
   id = D (flip (•∘))
   D f . D g = D (\ a c -> liftKWith (\ _K -> g a (_K (\ b -> f (inV0 b) c))))
 
-instance Contravariant k => Functor (D k v c) where
+instance Functor (D r s c) where
   fmap f = D . fmap (lmap (contramap f)) . runD
 
-instance (K.Representable k, V.Representable v) => Applicative (D k v a) where
+instance Applicative (D r s a) where
   pure a = D (\ _ b -> b •• a)
 
   D df <*> D da = D (\ a b -> liftKWith (\ _K -> df a (_K (\ f -> da a (contramap f b)))))
 
-instance (K.Representable k, V.Representable v) => Monad (D k v a) where
+instance Monad (D r s a) where
   D m >>= f = D (\ a c -> liftKWith (\ _K -> m a (_K (\ b -> runD (f b) a c))))
 
-instance (K.Representable k, V.Representable v) => Coapply (D k v) where
+instance Coapply (D r s) where
   coliftA2 f a b = D (\ v k -> withVal ((flip (exD a) k . inV0 <--> flip (exD b) k . inV0) . f) v)
 
 
@@ -103,7 +105,7 @@ class (K.Representable k, V.Representable v, Cat.Category d, Profunctor d) => Du
   inD :: (v a -> k b -> Context (K.Rep k) (V.Rep v)) -> d a b
   exD :: d a b -> v a -> k b -> Context (K.Rep k) (V.Rep v)
 
-instance (K.Representable k, V.Representable v) => Dual k v (D k v) where
+instance Dual (K r) (V s) (D r s) where
   inD = D
   exD = runD
 
