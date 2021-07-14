@@ -19,6 +19,8 @@ module Sequoia.Profunctor.D
 , exDK
 , exDV
 , evalD
+, appD
+, appD2
   -- ** Composition
 , (<<<)
 , (>>>)
@@ -132,6 +134,12 @@ exDV k = inK (\ f -> k • inV . \ a -> runContext (exD f a idK))
 
 evalD :: Dual r s d => s --|d|-> r -> (s -> r)
 evalD f = runContext (exD f (inV id) idK)
+
+appD :: Dual r s d => a --|d|-> b -> V s (V s a -> K r **b)
+appD f = inV (\ e a -> inK (\ b -> runControl (exD f a b) e))
+
+appD2 :: Dual r s d => a --|d|-> b --|d|-> c -> V s (V s a -> V s b -> K r **c)
+appD2 f = inV (\ e a b -> inK (\ c -> runControl (exD f a (inK (\ g -> runControl (exD g b c) e))) e))
 
 
 -- Computation
