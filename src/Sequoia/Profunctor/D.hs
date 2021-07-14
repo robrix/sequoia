@@ -44,6 +44,7 @@ module Sequoia.Profunctor.D
 , complete
 , runComplete
 , Complete
+, inPrd
 , producer
 , Producer
 , consumer
@@ -249,6 +250,9 @@ runComplete f = control (runControl (exD f idV idK))
 
 type Complete d r s = d s r
 
+
+inPrd :: Dual r s d => (K r a -> Context r s) -> Producer d s a
+inPrd = inD . const
 
 producer :: Dual r s d => V s a -> Producer d s a
 producer v = inD (\ _ k -> k •∘ v)
