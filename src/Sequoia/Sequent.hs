@@ -11,6 +11,7 @@ module Sequoia.Sequent
 ) where
 
 import qualified Control.Category as Cat
+import           Control.Monad (ap)
 import           Control.Monad.Trans.Class
 import           Data.Profunctor
 import           Prelude hiding (init)
@@ -43,7 +44,16 @@ evalSeq :: _Γ -|Seq _Δ s|- _Δ -> K _Δ _Γ
 evalSeq = evalC
 
 newtype Seq r s _Γ _Δ = Seq { runSeq :: K r _Δ -> K r _Γ }
-  deriving (Applicative, Functor, Monad) via C (K r) _Γ
+
+instance Functor (Seq r s a) where
+  fmap = rmap
+
+instance Applicative (Seq r s a) where
+  pure a = Seq (inK . const . (• a))
+  (<*>) = ap
+
+instance Monad (Seq r s a) where
+  Seq m >>= f = Seq (inK . \ b a -> m (inK (\ a' -> exC (f a') b • a)) • a)
 
 instance Cat.Category (Seq r s) where
   id = Seq id
