@@ -116,7 +116,7 @@ infixr 5 |->
 _D :: Dual r s d => d a b <-> (V s a -> K r b -> Context r s)
 _D = exD <-> inD
 
-class (Cat.Category d, Profunctor d) => Dual r s d | d -> r s where
+class (Cat.Category d, Profunctor d, R d ~ r, S d ~ s) => Dual r s d | d -> r s where
   inD :: (V s a -> K r b -> Context r s) -> d a b
   exD :: d a b -> V s a -> K r b -> Context r s
 
