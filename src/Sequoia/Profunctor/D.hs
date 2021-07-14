@@ -35,7 +35,7 @@ module Sequoia.Profunctor.D
 , Context(..)
 , withEnv
 , withVal
-, liftRunContextWith
+, liftRunControlWith
 , liftKWith
 , (•∘)
 , (••)
@@ -184,11 +184,11 @@ withEnv f = control (runControl =<< f)
 withVal :: (Control c, VFor v c) => (a -> c) -> (v a -> c)
 withVal f v = withEnv (f . exV v)
 
-liftRunContextWith :: ((Context r s -> r) -> Context r s) -> Context r s
-liftRunContextWith f = withEnv (f . flip runContext)
+liftRunControlWith :: ((Context r s -> r) -> Context r s) -> Context r s
+liftRunControlWith f = withEnv (f . flip runContext)
 
 liftKWith :: K.Representable k => (((a -> Context (K.Rep k) s) -> k a) -> Context (K.Rep k) s) -> Context (K.Rep k) s
-liftKWith f = liftRunContextWith (\ run -> f (inK . (run .)))
+liftKWith f = liftRunControlWith (\ run -> f (inK . (run .)))
 
 (•∘) :: (K.Representable k, V.Representable v) => k a -> v a -> Context (K.Rep k) (V.Rep v)
 k •∘ v = Context (\ e -> k • e ∘ v)
