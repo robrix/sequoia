@@ -1,3 +1,4 @@
+{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -29,6 +30,8 @@ module Sequoia.Profunctor.D
 , dnE
   -- * Control context
 , Control(..)
+, KFor
+, VFor
 , Context(..)
 , withEnv
 , withVal
@@ -51,8 +54,6 @@ import           Sequoia.Bijection
 import           Sequoia.Conjunction
 import           Sequoia.Continuation as K
 import           Sequoia.Disjunction
-import qualified Sequoia.Functor.K as K
-import qualified Sequoia.Functor.V as V
 import           Sequoia.Profunctor.Applicative
 import           Sequoia.Value as V
 
@@ -157,18 +158,15 @@ dnE k = inD (\ a b -> liftKWith (\ _K -> k •• _K (\ f -> exD f a b)))
 
 -- Control context
 
-class (K.Representable (K c), V.Representable (V c)) => Control c where
+class Control c where
   type R c
   type S c
 
   control :: (S c -> R c) -> c
   runControl :: c -> (S c -> R c)
 
-  type K c :: Type -> Type
-  type K c = K.K (R c)
-
-  type V c :: Type -> Type
-  type V c = V.V (S c)
+type KFor k c = (K.Representable k, K.Rep k ~ R c)
+type VFor v c = (V.Representable v, V.Rep v ~ S c)
 
 
 newtype Context r s = Context { runContext :: s -> r }
