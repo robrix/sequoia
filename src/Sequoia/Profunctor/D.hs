@@ -173,6 +173,9 @@ instance Applicative (ControlT r s m) where
   pure a = ControlT $ \ _ k -> k a
   ControlT f <*> ControlT a = ControlT (\ e k -> f e (a e . (k .)))
 
+instance Monad (ControlT r s m) where
+  ControlT a >>= f = ControlT (\ e k -> a e (\ a' -> runControlT (f a') e k))
+
 
 newtype Context r s = Context { runContext :: s -> r }
 
