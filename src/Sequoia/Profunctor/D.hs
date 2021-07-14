@@ -195,8 +195,8 @@ k •∘ v = control (\ e -> k • e ∘ v)
 
 infix 7 •∘
 
-(••) :: K.Representable k => k a -> a -> Context (K.Rep k) s
-k •• v = Context (const (k • v))
+(••) :: (Control c, KFor k c) => k a -> a -> c
+k •• v = control (const (k • v))
 
 infix 7 ••
 
