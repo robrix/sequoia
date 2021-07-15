@@ -44,7 +44,7 @@ evalSeq = evalD
 runSeq :: Seq e r _Γ _Δ -> ((e -> _Γ) -> (_Δ -> r) -> (e -> r))
 runSeq s f g = evalSeq (dimap f g s)
 
-newtype Seq e r _Γ _Δ = Seq { getSeq :: V e _Γ -> K r _Δ -> Context e r }
+newtype Seq e r _Γ _Δ = Seq { getSeq :: V e _Γ -> K r _Δ -> D.Control e r }
   deriving (Applicative, Functor, Monad) via (D e r _Γ)
   deriving (Cat.Category, Choice, Profunctor, Strong) via (D e r)
 

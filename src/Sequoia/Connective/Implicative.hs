@@ -19,7 +19,7 @@ import Sequoia.Functor.V
 import Sequoia.Profunctor.D
 import Sequoia.Value
 
-elimFun :: a ~~Fun e r~> b -> a ~-r-< b -> Context e r
+elimFun :: a ~~Fun e r~> b -> a ~-r-< b -> Control e r
 elimFun f = exD f <$> inV0 . subA <*> subK
 
 funPar1 :: K r (V e (r ¬a ⅋ b)) <-> K r (V e (a ~~Fun e r~> b))

@@ -25,7 +25,7 @@ appFun = appD
 appFun2 :: (a ~~Fun e r~> b ~~Fun e r~> c) -> V e (V e a -> V e b -> K r **c)
 appFun2 = appD2
 
-newtype Fun e r a b = Fun { getFun :: V e a -> K r b -> Context e r }
+newtype Fun e r a b = Fun { getFun :: V e a -> K r b -> Control e r }
   deriving (Cat.Category, Choice, Dual e r, Profunctor, Strong, Traversing) via D e r
   deriving (Functor) via D e r a
 

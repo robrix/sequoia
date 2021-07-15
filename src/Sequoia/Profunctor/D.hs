@@ -38,7 +38,7 @@ module Sequoia.Profunctor.D
 , liftKWith
 , (•∘)
 , (••)
-, Context(..)
+, Control(..)
 , inPrd
 , producer
 , joinl
@@ -62,7 +62,7 @@ import           Sequoia.Value as V
 
 -- Dual profunctor
 
-newtype D e r a b = D { runD :: V e a -> K r b -> Context e r }
+newtype D e r a b = D { runD :: V e a -> K r b -> Control e r }
 
 instance Profunctor (D e r) where
   dimap f g = D . dimap (fmap f) (lmap (contramap g)) . runD
@@ -108,12 +108,12 @@ infixr 5 |->
 
 -- Dual profunctor abstraction
 
-_D :: Dual e r d => d a b <-> (V e a -> K r b -> Context e r)
+_D :: Dual e r d => d a b <-> (V e a -> K r b -> Control e r)
 _D = exD <-> inD
 
 class (Cat.Category d, Profunctor d) => Dual e r d | d -> e r where
-  inD :: (V e a -> K r b -> Context e r) -> d a b
-  exD :: d a b -> V e a -> K r b -> Context e r
+  inD :: (V e a -> K r b -> Control e r) -> d a b
+  exD :: d a b -> V e a -> K r b -> Control e r
 
 instance Dual e r (D e r) where
   inD = D
@@ -135,13 +135,13 @@ inDV f = inD (\ a b -> b •∘ f a)
 -- Elimination
 
 exDK :: Dual e r d => a --|d|-> b -> V e (K r b -> K r a)
-exDK f = inV (\ e k -> inK (\ a -> runContext (exD f (inV0 a) k) e))
+exDK f = inV (\ e k -> inK (\ a -> getControl (exD f (inV0 a) k) e))
 
 exDV :: Dual e r d => K r' (V e a -> V e r) -> K r' (a --|d|-> r)
-exDV k = inK (\ f -> k • inV . \ a -> runContext (exD f a idK))
+exDV k = inK (\ f -> k • inV . \ a -> getControl (exD f a idK))
 
 evalD :: Dual e r d => e --|d|-> r -> (e -> r)
-evalD f = runContext (exD f (inV id) idK)
+evalD f = getControl (exD f (inV id) idK)
 
 appD :: Dual e r d => a --|d|-> b -> V e (V e a -> K r **b)
 appD f = inV (\ e a -> inK (\ b -> runControl (exD f a b) e))
@@ -184,18 +184,18 @@ coerceD = inD . exD
 class InControl e r c | c -> e r where
   control :: (e -> r) -> c
 
-instance InControl e r (Context e r) where
-  control = Context
+instance InControl e r (Control e r) where
+  control = Control
 
 instance InControl e r (D e r a b) where
-  control = D . const . const . Context
+  control = D . const . const . Control
 
 
 class ExControl e r c | c -> e r where
   runControl :: c -> (e -> r)
 
-instance ExControl e r (Context e r) where
-  runControl = runContext
+instance ExControl e r (Control e r) where
+  runControl = getControl
 
 instance ExControl e r (D e r e r) where
   runControl f = runControl (exD f idV idK)
@@ -224,10 +224,10 @@ k •• v = control (const (k • v))
 infix 7 ••
 
 
-newtype Context e r = Context { runContext :: e -> r }
+newtype Control e r = Control { getControl :: e -> r }
 
 
-inPrd :: Dual e r d => (K r a -> Context e r) -> d s a
+inPrd :: Dual e r d => (K r a -> Control e r) -> d s a
 inPrd = inD . const
 
 producer :: (Dual e r d, V.Representable v, V.Rep v ~ e) => v a -> d s a
@@ -237,7 +237,7 @@ joinl :: Dual e r d => d e (d a b) -> d a b
 joinl p = inD (\ a b -> liftKWith (\ _K -> exD p idV (_K (\ f -> exD f a b))))
 
 
-inCns :: Dual e r d => (V e a -> Context e r) -> d a r
+inCns :: Dual e r d => (V e a -> Control e r) -> d a r
 inCns = inD . fmap const
 
 consumer :: (Dual e r d, K.Representable k, K.Rep k ~ r) => k a -> d a r
