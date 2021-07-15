@@ -5,7 +5,6 @@ module Sequoia.Value
 ( -- * Values
   Value
 , VRep
-, VFn
 , Representable(..)
 , _V
 , inV0
@@ -41,10 +40,9 @@ class Representable v => Value s v | v -> s
 instance Value s (V s)
 
 type VRep v = Rep v
-type VFn v a = VRep v -> a
 
 
-_V :: (Representable v, Representable v') => Optic Iso (v a) (v' a') (VFn v a) (VFn v' a')
+_V :: (Representable v, Representable v') => Optic Iso (v a) (v' a') (VRep v -> a) (VRep v' -> a')
 _V = exV <-> inV
 
 inV0 :: Representable v => a -> v a

@@ -83,13 +83,13 @@ _E :: (EnvPassing v e, EnvPassing v' e') => Optic Iso (e a b) (e' a' b') (v a ->
 _E = exE <-> inE
 
 
-inE1 :: EnvPassing v e => (VFn v a -> VFn v b) -> a `e` b
+inE1 :: EnvPassing v e => ((VRep v -> a) -> (VRep v -> b)) -> a `e` b
 inE1 = inE . inV1
 
-inE1' :: EnvPassing v e => (v a -> VFn v b) -> a `e` b
+inE1' :: EnvPassing v e => (v a -> (VRep v -> b)) -> a `e` b
 inE1' = inE . inV1'
 
-exE1 :: EnvPassing v e => a `e` b -> (VFn v a -> VFn v b)
+exE1 :: EnvPassing v e => a `e` b -> ((VRep v -> a) -> (VRep v -> b))
 exE1 = exV1 . exE
 
 
@@ -98,16 +98,16 @@ exE1 = exV1 . exE
 eps :: EnvPassing v e => (a -> b) -> a `e` b
 eps = inE1 . (.)
 
-liftE :: EnvPassing v e => VFn v (VFn v a -> b) -> a `e` b
+liftE :: EnvPassing v e => (VRep v -> ((VRep v -> a) -> b)) -> a `e` b
 liftE = inE . inV1 . flip
 
 
 -- Elimination
 
-appE :: EnvPassing v e => a `e` b -> VFn v (VFn v a -> b)
+appE :: EnvPassing v e => a `e` b -> (VRep v -> ((VRep v -> a) -> b))
 appE = flip . exE1
 
-appE2 :: EnvPassing v e => a `e` (b `e` c) -> VFn v (VFn v a -> VFn v b -> c)
+appE2 :: EnvPassing v e => a `e` (b `e` c) -> (VRep v -> ((VRep v -> a) -> (VRep v -> b) -> c))
 appE2 f s = (`appE` s) . appE f s
 
 
