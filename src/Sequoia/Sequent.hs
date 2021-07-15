@@ -40,13 +40,13 @@ import           Sequoia.Value
 evalSeq :: _Γ -|Seq _Δ _Γ|- _Δ -> (_Γ -> _Δ)
 evalSeq = evalD
 
-newtype Seq r e _Γ _Δ = Seq { runSeq :: V e _Γ -> K r _Δ -> Context r e }
+newtype Seq r e _Γ _Δ = Seq { getSeq :: V e _Γ -> K r _Δ -> Context r e }
   deriving (Applicative, Functor, Monad) via (D r e _Γ)
   deriving (Cat.Category, Choice, Profunctor, Strong) via (D r e)
 
 instance Dual r e (Seq r e) where
   inD = Seq
-  exD = runSeq
+  exD = getSeq
 
 
 liftLR :: Dual r e d => d a b -> Seq r e (a < _Γ) (_Δ > b)
@@ -59,7 +59,7 @@ lowerLR f p = inD (\ _Γ _Δ -> exD (f (inD (\ a b -> exD p (a <| _Γ) (_Δ |> b
 -- Effectful sequents
 
 runSeqT :: SeqT r e _Γ m _Δ -> ((e -> _Γ) -> (_Δ -> m r) -> (e -> m r))
-runSeqT = dimap V (dimap K runControl) . runSeq . getSeqT
+runSeqT = dimap V (dimap K runControl) . getSeq . getSeqT
 
 newtype SeqT r s _Γ m _Δ = SeqT { getSeqT :: Seq (m r) s _Γ _Δ }
   deriving (Applicative, Functor, Monad)
