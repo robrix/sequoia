@@ -46,17 +46,13 @@ runSeq s f g = evalSeq (dimap f g s)
 
 newtype Seq e r _Γ _Δ = Seq { getSeq :: V e _Γ -> K r _Δ -> D.Control e r }
   deriving (Applicative, Functor, Monad) via (D e r _Γ)
-  deriving (Cat.Category, Choice, Profunctor, Strong) via (D e r)
-
-instance Dual e r (Seq e r) where
-  inD = Seq
-  exD = getSeq
+  deriving (Cat.Category, Choice, ControlPassing e r, Profunctor, Strong) via (D e r)
 
 
-liftLR :: Dual e r d => d a b -> Seq e r (a < _Γ) (_Δ > b)
+liftLR :: ControlPassing e r d => d a b -> Seq e r (a < _Γ) (_Δ > b)
 liftLR = dimap exl inr . coerceD
 
-lowerLR :: Dual e r d => (d a b -> _Γ -|Seq e r|- _Δ) -> a < _Γ -|Seq e r|- _Δ > b -> _Γ -|Seq e r|- _Δ
+lowerLR :: ControlPassing e r d => (d a b -> _Γ -|Seq e r|- _Δ) -> a < _Γ -|Seq e r|- _Δ > b -> _Γ -|Seq e r|- _Δ
 lowerLR f p = inD (\ _Γ _Δ -> exD (f (inD (\ a b -> exD p (a <| _Γ) (_Δ |> b)))) _Γ _Δ)
 
 

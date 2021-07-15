@@ -1,14 +1,14 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE TypeFamilies #-}
 module Sequoia.Profunctor.D
-( -- * Dual profunctor
+( -- * Control-passing profunctor
   D(..)
   -- ** Mixfix notation
 , type (--|)
 , type (|->)
-  -- ** Dual profunctor abstraction
+  -- ** Control-passing profunctor abstraction
 , _D
-, Dual(..)
+, ControlPassing(..)
   -- ** Construction
 , inD'
   -- ** Elimination
@@ -47,7 +47,7 @@ import           Sequoia.Functor.V
 import           Sequoia.Profunctor.Applicative
 import           Sequoia.Value as V
 
--- Dual profunctor
+-- Control-passing profunctor
 
 newtype D e r a b = D { getD :: V e a -> K r b -> Control e r }
 
@@ -100,57 +100,57 @@ infixr 6 --|
 infixr 5 |->
 
 
--- Dual profunctor abstraction
+-- Control-passing profunctor abstraction
 
-_D :: Dual e r d => d a b <-> (V e a -> K r b -> Control e r)
+_D :: ControlPassing e r d => d a b <-> (V e a -> K r b -> Control e r)
 _D = exD <-> inD
 
-class (Cat.Category d, Profunctor d) => Dual e r d | d -> e r where
+class (Cat.Category d, Profunctor d) => ControlPassing e r d | d -> e r where
   inD :: (V e a -> K r b -> Control e r) -> d a b
   exD :: d a b -> V e a -> K r b -> Control e r
 
-instance Dual e r (D e r) where
+instance ControlPassing e r (D e r) where
   inD = D
   exD = getD
 
 
 -- Construction
 
-inD' :: Dual e r d => (a -> b) -> a --|d|-> b
+inD' :: ControlPassing e r d => (a -> b) -> a --|d|-> b
 inD' f = inD (\ a b -> b •∘ (f <$> a))
 
 
 -- Elimination
 
-evalD :: Dual e r d => e --|d|-> r -> (e -> r)
+evalD :: ControlPassing e r d => e --|d|-> r -> (e -> r)
 evalD f = getControl (exD f (inV id) idK)
 
-appD :: Dual e r d => a --|d|-> b -> V e (V e a -> K r **b)
+appD :: ControlPassing e r d => a --|d|-> b -> V e (V e a -> K r **b)
 appD f = inV (\ e a -> inK (\ b -> getControl (exD f a b) e))
 
-appD2 :: Dual e r d => a --|d|-> b --|d|-> c -> V e (V e a -> V e b -> K r **c)
+appD2 :: ControlPassing e r d => a --|d|-> b --|d|-> c -> V e (V e a -> V e b -> K r **c)
 appD2 f = inV (\ e a b -> inK (\ c -> getControl (exD f a (inK (\ g -> getControl (exD g b c) e))) e))
 
-runD :: Dual e r d => V e a -> K r b -> a --|d|-> b -> Control e r
+runD :: ControlPassing e r d => V e a -> K r b -> a --|d|-> b -> Control e r
 runD v k f = exD f v k
 
 
 -- Computation
 
-(↑) :: Dual e r d => a --|d|-> b -> V e a -> d e|-> b
+(↑) :: ControlPassing e r d => a --|d|-> b -> V e a -> d e|-> b
 f ↑ a = f <<< producer a
 
 infixl 7 ↑
 
-(↓) :: Dual e r d => K r b -> a --|d|-> b -> a --|d|-> r
+(↓) :: ControlPassing e r d => K r b -> a --|d|-> b -> a --|d|-> r
 k ↓ f = consumer k <<< f
 
 infixl 8 ↓
 
-dnE :: Dual e r d => K r **(a --|d|-> b) -> a --|d|-> b
+dnE :: ControlPassing e r d => K r **(a --|d|-> b) -> a --|d|-> b
 dnE k = inD (\ a b -> cont (\ _K -> k •• _K (\ f -> exD f a b)))
 
-coerceD :: (Dual k v c, Dual k v d) => c a b -> d a b
+coerceD :: (ControlPassing k v c, ControlPassing k v d) => c a b -> d a b
 coerceD = inD . exD
 
 
@@ -172,18 +172,18 @@ instance Res r (Control e r) where
   liftRes f = Control (\ e -> let run = (`getControl` e) in run (f run))
 
 
-inPrd :: Dual e r d => (K r a -> Control e r) -> d e a
+inPrd :: ControlPassing e r d => (K r a -> Control e r) -> d e a
 inPrd = inD . const
 
-producer :: (Dual e r d, V.Representable v, V.Rep v ~ e) => v a -> d e a
+producer :: (ControlPassing e r d, V.Representable v, V.Rep v ~ e) => v a -> d e a
 producer v = inPrd (•∘ v)
 
-joinl :: Dual e r d => d e (d a b) -> d a b
+joinl :: ControlPassing e r d => d e (d a b) -> d a b
 joinl p = inD (\ a b -> cont (\ _K -> exD p idV (_K (\ f -> exD f a b))))
 
 
-inCns :: Dual e r d => (V e a -> Control e r) -> d a r
+inCns :: ControlPassing e r d => (V e a -> Control e r) -> d a r
 inCns = inD . fmap const
 
-consumer :: (Dual e r d, K.Representable k, K.Rep k ~ r) => k a -> d a r
+consumer :: (ControlPassing e r d, K.Representable k, K.Rep k ~ r) => k a -> d a r
 consumer k = inCns (k •∘)
