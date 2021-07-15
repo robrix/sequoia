@@ -220,6 +220,10 @@ instance Control r e (Context r e) where
   control = Context
   runControl = runContext
 
+instance Applicative m => Control (m r) e (ControlT r e m r) where
+  control f = ControlT (\ e _ -> f e)
+  runControl c e = runControlT c e pure
+
 
 withEnv :: Control r e c => (e -> c) -> c
 withEnv f = control (runControl =<< f)
