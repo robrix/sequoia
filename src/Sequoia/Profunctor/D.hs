@@ -1,7 +1,4 @@
-{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE FunctionalDependencies #-}
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Profunctor.D
 ( -- * Dual profunctor
   D(..)
@@ -119,19 +116,13 @@ infixr 5 |->
 _D :: Dual r e d => d a b <-> (V e a -> K r b -> Context r e)
 _D = exD <-> inD
 
-class (Cat.Category d, Profunctor d, R d ~ r, E d ~ e) => Dual r e d | d -> r e where
+class (Cat.Category d, Profunctor d) => Dual r e d | d -> r e where
   inD :: (V e a -> K r b -> Context r e) -> d a b
   exD :: d a b -> V e a -> K r b -> Context r e
-
-  type R d
-  type E d
 
 instance Dual r e (D r e) where
   inD = D
   exD = runD
-
-  type R (D r e) = r
-  type E (D r e) = e
 
 
 -- Construction

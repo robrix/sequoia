@@ -1,4 +1,3 @@
-{-# LANGUAGE TypeFamilies #-}
 module Sequoia.Sequent
 ( -- * Sequents
   evalSeq
@@ -48,9 +47,6 @@ newtype Seq r e _Γ _Δ = Seq { runSeq :: V e _Γ -> K r _Δ -> Context r e }
 instance Dual r e (Seq r e) where
   inD = Seq
   exD = runSeq
-
-  type R (Seq r e) = r
-  type E (Seq r e) = e
 
 
 liftLR :: D r e a b -> Seq r e (a < _Γ) (_Δ > b)
