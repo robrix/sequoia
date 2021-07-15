@@ -31,13 +31,12 @@ import           Data.Profunctor
 import           Sequoia.Bijection
 import           Sequoia.Calculus.Context
 import           Sequoia.Continuation as K
-import           Sequoia.Functor.C
 import           Sequoia.Value as V
 
 -- Signals
 
 sol :: (K.Representable k, V.Representable v) => (V.Rep v -> K.Rep k) -> Sol k v
-sol f = Sol (C (inV (inK . const . f)))
+sol f = Sol (inV (inK . const . f))
 
 (••) :: (K.Representable k, V.Representable v) => k a -> v a -> Sol k v
 k •• a = sol (\ e -> k • e ∘ a)
@@ -52,16 +51,16 @@ liftSolWithK f = withEnv (f . flip evalSol)
 
 
 evalSol :: (K.Representable k, V.Representable v) => Sol k v -> (V.Rep v -> K.Rep k)
-evalSol (Sol (C r)) e = e ∘ r • ()
+evalSol (Sol r) e = e ∘ r • ()
 
 
-newtype Sol k v     = Sol { runSol :: forall x . (v · k) x }
+newtype Sol k v     = Sol { runSol :: forall x . v (k x) }
 
 mapKSol :: Functor v => (forall x . k x -> k' x) -> (Sol k v -> Sol k' v)
-mapKSol f (Sol r) = Sol (C (fmap f (getC r)))
+mapKSol f (Sol r) = Sol (f <$> r)
 
 mapVSol :: (forall x . v x -> v' x) -> (Sol k v -> Sol k v')
-mapVSol f (Sol r) = Sol (C (f (getC r)))
+mapVSol f (Sol r) = Sol (f r)
 
 
 newtype Src k v   b = Src { runSrc :: k b -> Sol k v }
