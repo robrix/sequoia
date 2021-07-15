@@ -1,6 +1,6 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE TypeFamilies #-}
-module Sequoia.Profunctor.D
+module Sequoia.Profunctor.ControlPassing
 ( -- * Control-passing profunctor
   D(..)
   -- ** Mixfix notation

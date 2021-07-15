@@ -16,7 +16,7 @@ import Sequoia.Continuation
 import Sequoia.Disjunction
 import Sequoia.Functor.K
 import Sequoia.Functor.V
-import Sequoia.Profunctor.D
+import Sequoia.Profunctor.ControlPassing
 import Sequoia.Value
 
 elimFun :: a ~~Fun e r~> b -> a ~-r-< b -> Control e r

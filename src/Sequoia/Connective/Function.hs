@@ -15,7 +15,7 @@ import           Sequoia.Continuation
 import           Sequoia.Functor.K
 import           Sequoia.Functor.V
 import           Sequoia.Polarity
-import           Sequoia.Profunctor.D
+import           Sequoia.Profunctor.ControlPassing
 
 -- Implication
 

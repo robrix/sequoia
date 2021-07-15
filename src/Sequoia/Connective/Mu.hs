@@ -15,7 +15,7 @@ import           Sequoia.Connective.Function
 import           Sequoia.Connective.Quantification
 import           Sequoia.Continuation
 import           Sequoia.Polarity
-import           Sequoia.Profunctor.D
+import           Sequoia.Profunctor.ControlPassing
 import           Sequoia.Value
 
 -- Recursion
