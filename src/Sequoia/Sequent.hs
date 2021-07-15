@@ -66,6 +66,9 @@ instance Monoid s => Dual r s (Seq r s) where
   inD f = Seq (inK . \ b a -> runControl (f (inV0 a) b) mempty)
   exD (Seq f) v k = f k •∘ v
 
+  type R (Seq r s) = r
+  type S (Seq r s) = s
+
 instance ContPassing (K r) (Seq r s) where
   inC = Seq
   exC = runSeq
