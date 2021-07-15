@@ -65,19 +65,19 @@ instance Profunctor (D e r) where
   dimap f g = D . dimap (fmap f) (lmap (contramap g)) . getD
 
 instance Strong (D e r) where
-  first'  (D r) = D (\ a b -> withVal (\ (a, c) -> r (inV0 a) (contramap (,c) b)) a)
-  second' (D r) = D (\ a b -> withVal (\ (c, a) -> r (inV0 a) (contramap (c,) b)) a)
+  first'  (D r) = D (\ a b -> val (\ (a, c) -> r (inV0 a) (contramap (,c) b)) a)
+  second' (D r) = D (\ a b -> val (\ (c, a) -> r (inV0 a) (contramap (c,) b)) a)
 
 instance Choice (D e r) where
-  left'  (D r) = D (\ a b -> withVal ((`r` inlK b) . inV0 <--> (inrK b ••)) a)
-  right' (D r) = D (\ a b -> withVal ((inlK b ••) <--> (`r` inrK b) . inV0) a)
+  left'  (D r) = D (\ a b -> val ((`r` inlK b) . inV0 <--> (inrK b ••)) a)
+  right' (D r) = D (\ a b -> val ((inlK b ••) <--> (`r` inrK b) . inV0) a)
 
 instance Traversing (D e r) where
-  wander traverse r = D (\ s t -> withVal (\ s -> exD (traverse ((r ↑) . inV0) s) idV t) s)
+  wander traverse r = D (\ s t -> val (\ s -> exD (traverse ((r ↑) . inV0) s) idV t) s)
 
 instance Cat.Category (D e r) where
   id = D (flip (•∘))
-  D f . D g = D (\ a c -> liftKWith (\ _K -> g a (_K (\ b -> f (inV0 b) c))))
+  D f . D g = D (\ a c -> cont (\ _K -> g a (_K (\ b -> f (inV0 b) c))))
 
 instance Functor (D e r c) where
   fmap f = D . fmap (lmap (contramap f)) . getD
@@ -85,13 +85,13 @@ instance Functor (D e r c) where
 instance Applicative (D e r a) where
   pure a = D (\ _ b -> b •• a)
 
-  D df <*> D da = D (\ a b -> liftKWith (\ _K -> df a (_K (\ f -> da a (contramap f b)))))
+  D df <*> D da = D (\ a b -> cont (\ _K -> df a (_K (\ f -> da a (contramap f b)))))
 
 instance Monad (D e r a) where
-  D m >>= f = D (\ a c -> liftKWith (\ _K -> m a (_K (\ b -> getD (f b) a c))))
+  D m >>= f = D (\ a c -> cont (\ _K -> m a (_K (\ b -> getD (f b) a c))))
 
 instance Coapply (D e r) where
-  coliftA2 f a b = D (\ v k -> withEnv ((flip (exD a) k <∘∘> flip (exD b) k) (f <$> v)))
+  coliftA2 f a b = D (\ v k -> env ((flip (exD a) k <∘∘> flip (exD b) k) (f <$> v)))
 
 instance Env e (D e r a b) where
   env f = D (\ v k -> env (runD v k . f))
@@ -170,7 +170,7 @@ k ↓ f = consumer k <<< f
 infixl 8 ↓
 
 dnE :: Dual e r d => K r **(a --|d|-> b) -> a --|d|-> b
-dnE k = inD (\ a b -> liftKWith (\ _K -> k •• _K (\ f -> exD f a b)))
+dnE k = inD (\ a b -> cont (\ _K -> k •• _K (\ f -> exD f a b)))
 
 coerceD :: (Dual k v c, Dual k v d) => c a b -> d a b
 coerceD = inD . exD
@@ -198,20 +198,20 @@ instance ExControl e r (D e r e r) where
   runControl f = runControl (exD f idV idK)
 
 
-withEnv :: (InControl e r c, ExControl e r c) => (e -> c) -> c
-withEnv f = control (runControl =<< f)
+withEnv :: Env e c => (e -> c) -> c
+withEnv = env
 
-withVal :: (InControl e r c, ExControl e r c, V.Representable v, V.Rep v ~ e) => (a -> c) -> (v a -> c)
-withVal f v = withEnv (f . exV v)
+withVal :: (Env (V.Rep v) c, V.Representable v) => (a -> c) -> (v a -> c)
+withVal = val
 
-liftRunControlWith :: (InControl e r c, ExControl e r c) => ((c -> r) -> c) -> c
-liftRunControlWith f = withEnv (f . flip runControl)
+liftRunControlWith :: Res r c => ((c -> r) -> c) -> c
+liftRunControlWith = liftRes
 
-liftKWith :: (InControl e r c, ExControl e r c, K.Representable k, K.Rep k ~ r) => (((a -> c) -> k a) -> c) -> c
-liftKWith f = liftRunControlWith (\ run -> f (inK . (run .)))
+liftKWith :: (Res (K.Rep k) c, K.Representable k) => (((a -> c) -> k a) -> c) -> c
+liftKWith = cont
 
-(•∘) :: (InControl e r c, K.Representable k, K.Rep k ~ r, V.Representable v, V.Rep v ~ e) => k a -> v a -> c
-k •∘ v = control (\ e -> k • e ∘ v)
+(•∘) :: (Env (V.Rep v) c, V.Representable v, Res (K.Rep k) c, K.Representable k) => k a -> v a -> c
+k •∘ v = env (\ e -> res (k • e ∘ v))
 
 infix 7 •∘
 
@@ -233,7 +233,7 @@ producer :: (Dual e r d, V.Representable v, V.Rep v ~ e) => v a -> d s a
 producer v = inPrd (•∘ v)
 
 joinl :: Dual e r d => d e (d a b) -> d a b
-joinl p = inD (\ a b -> liftKWith (\ _K -> exD p idV (_K (\ f -> exD f a b))))
+joinl p = inD (\ a b -> cont (\ _K -> exD p idV (_K (\ f -> exD f a b))))
 
 
 inCns :: Dual e r d => (V e a -> Control e r) -> d a r
