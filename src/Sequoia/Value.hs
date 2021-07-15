@@ -28,6 +28,7 @@ module Sequoia.Value
 , (<∘∘>)
   -- * Ambient environment
 , Env(..)
+, val
 ) where
 
 import Control.Applicative (liftA2)
@@ -126,3 +127,6 @@ class Env e c | c -> e where
 
 instance Env e (V e a) where
   env f = V (runV =<< f)
+
+val :: (Env (Rep v) c, Representable v) => (a -> c) -> (v a -> c)
+val f v = env (f . exV v)
