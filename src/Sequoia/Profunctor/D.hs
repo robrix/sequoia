@@ -94,6 +94,9 @@ instance Monad (D e r a) where
 instance Coapply (D e r) where
   coliftA2 f a b = D (\ v k -> withEnv ((flip (exD a) k <∘∘> flip (exD b) k) (f <$> v)))
 
+instance Env e (D e r a b) where
+  env f = D (\ v k -> env (runD v k . f))
+
 
 -- Mixfix notation
 
