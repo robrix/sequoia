@@ -11,7 +11,7 @@ import Sequoia.Connective.Zero
 
 -- Zero
 
-class Core k v s => ZeroIntro k v s where
+class Core e r s => ZeroIntro e r s where
   zeroL
     -- ------------------
     :: Zero < _Γ -|s|- _Δ

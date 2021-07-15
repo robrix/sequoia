@@ -19,21 +19,21 @@ import Sequoia.Functor.V
 import Sequoia.Profunctor.D
 import Sequoia.Value
 
-elimFun :: a ~~Fun r e~> b -> a ~-r-< b -> Context r e
+elimFun :: a ~~Fun e r~> b -> a ~-r-< b -> Context e r
 elimFun f = exD f <$> inV0 . subA <*> subK
 
-funPar1 :: K r (V e (r ¬a ⅋ b)) <-> K r (V e (a ~~Fun r e~> b))
+funPar1 :: K r (V e (r ¬a ⅋ b)) <-> K r (V e (a ~~Fun e r~> b))
 funPar1
   =   inK1' (\ k -> exK k . (mkPar (inrK (contramap inV0 k)) =<<))
   <-> inK1 (. fmap mkFun)
 
-funPar2 :: K r **V e (r ¬a ⅋ b) <-> K r **V e (a ~~Fun r e~> b)
+funPar2 :: K r **V e (r ¬a ⅋ b) <-> K r **V e (a ~~Fun e r~> b)
 funPar2
   =   inK1 (\ k f -> k (inK ((f •) . fmap mkFun)))
   <-> inK1 (\ k p -> k (inK ((p •) . (mkPar (inrK (contramap inV0 p)) =<<))))
 
-mkPar :: K r b -> a ~~Fun r e~> b -> V e (r ¬a ⅋ b)
+mkPar :: K r b -> a ~~Fun e r~> b -> V e (r ¬a ⅋ b)
 mkPar p f = V (\ e -> inl (inK (\ a -> runControl (exD f (inV0 a) p) e)))
 
-mkFun :: r ¬a ⅋ b -> a ~~Fun r e~> b
+mkFun :: r ¬a ⅋ b -> a ~~Fun e r~> b
 mkFun p = inD (\ a b -> ((•∘ a) <--> (b ••)) p)

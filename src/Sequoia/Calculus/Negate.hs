@@ -27,7 +27,7 @@ import Sequoia.Polarity
 
 -- Negate
 
-class Core r e s => NegateIntro r e s where
+class Core e r s => NegateIntro e r s where
   negateL
     :: Neg a
     =>        _Γ -|s|- _Δ > a
@@ -41,14 +41,14 @@ class Core r e s => NegateIntro r e s where
 
 
 negateL'
-  :: (NegateIntro r e s, Weaken r e s, Neg a)
+  :: (NegateIntro e r s, Weaken e r s, Neg a)
   => r -a < _Γ -|s|- _Δ
   -- ----------------------
   ->        _Γ -|s|- _Δ > a
 negateL' p = negateR init >>> wkR p
 
 negateR'
-  :: (NegateIntro r e s, Weaken r e s, Neg a)
+  :: (NegateIntro e r s, Weaken e r s, Neg a)
   =>     _Γ -|s|- _Δ > r -a
   -- ----------------------
   -> a < _Γ -|s|- _Δ
@@ -56,22 +56,22 @@ negateR' p = wkL p >>> negateL init
 
 
 shiftN
-  :: (Control s, Contextual r e (s r e))
-  => r -a < _Γ -|s r e|- _Δ > r
+  :: (Control s, Contextual e r (s e r))
+  => r -a < _Γ -|s e r|- _Δ > r
   -- --------------------------
-  ->        _Γ -|s r e|- _Δ > a
+  ->        _Γ -|s e r|- _Δ > a
 shiftN = shift . negateLK'
 
 
 dnePK
-  :: Contextual r e s
+  :: Contextual e r s
   => K r **a < _Γ -|s|- _Δ
   -- ---------------------
   ->   r -¬a < _Γ -|s|- _Δ
 dnePK = mapL getNegateNot
 
 dniPK
-  :: Contextual r e s
+  :: Contextual e r s
   => _Γ -|s|- _Δ > K r **a
   -- ---------------------
   -> _Γ -|s|- _Δ >   r -¬a
@@ -79,14 +79,14 @@ dniPK = mapR negateNot
 
 
 negateLK
-  :: Contextual r e s
+  :: Contextual e r s
   => K r  a < _Γ -|s|- _Δ
   -- --------------------
   ->   r -a < _Γ -|s|- _Δ
 negateLK = mapL getNegate
 
 negateRK
-  :: Contextual r e s
+  :: Contextual e r s
   => _Γ -|s|- _Δ > K r  a
   -- --------------------
   -> _Γ -|s|- _Δ >   r -a
@@ -94,14 +94,14 @@ negateRK = mapR Negate
 
 
 negateLK'
-  :: Contextual r e s
+  :: Contextual e r s
   =>   r -a < _Γ -|s|- _Δ
   -- --------------------
   -> K r  a < _Γ -|s|- _Δ
 negateLK' = mapL Negate
 
 negateRK'
-  :: Contextual r e s
+  :: Contextual e r s
   => _Γ -|s|- _Δ >   r -a
   -- --------------------
   -> _Γ -|s|- _Δ > K r  a

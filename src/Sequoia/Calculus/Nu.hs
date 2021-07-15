@@ -16,23 +16,23 @@ import Sequoia.Polarity
 
 -- Corecursion
 
-class Core r e s => NuIntro r e s where
+class Core e r s => NuIntro e r s where
   nuL
     :: (Pos ==> Neg) f
-    => Exists r P (NuF r e f) < _Γ -|s|- _Δ
+    => Exists r P (NuF e r f) < _Γ -|s|- _Δ
     -- ------------------------------------
-    ->             Nu  r e f  < _Γ -|s|- _Δ
+    ->             Nu  e r f  < _Γ -|s|- _Δ
 
   nuR
     :: (Pos ==> Neg) f
-    => _Γ -|s|- _Δ > Exists r P (NuF r e f)
+    => _Γ -|s|- _Δ > Exists r P (NuF e r f)
     -- ------------------------------------
-    -> _Γ -|s|- _Δ >             Nu  r e f
+    -> _Γ -|s|- _Δ >             Nu  e r f
 
 
 nuR'
-  :: (Weaken r e s, Exchange r e s, NuIntro r e s, (Pos ==> Neg) f)
-  => _Γ -|s|- _Δ >             Nu  r e f
+  :: (Weaken e r s, Exchange e r s, NuIntro e r s, (Pos ==> Neg) f)
+  => _Γ -|s|- _Δ >             Nu  e r f
   -- ------------------------------------
-  -> _Γ -|s|- _Δ > Exists r P (NuF r e f)
+  -> _Γ -|s|- _Δ > Exists r P (NuF e r f)
 nuR' p = wkR' p >>> nuL init

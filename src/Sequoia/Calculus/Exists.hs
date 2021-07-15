@@ -17,11 +17,11 @@ import Sequoia.Polarity
 
 -- Existential quantification
 
-class Core k v s => ExistentialIntro k v s where
+class Core e r s => ExistentialIntro e r s where
   existsL
     :: (forall x . Polarized n x => f x < _Γ -|s|- _Δ)
     -- -----------------------------------------------
-    ->                   Exists k n f   < _Γ -|s|- _Δ
+    ->                   Exists r n f   < _Γ -|s|- _Δ
 
   existsR
     :: (Polarized n x, Pos (f x))
@@ -31,7 +31,7 @@ class Core k v s => ExistentialIntro k v s where
 
 
 existsL'
-  :: (Weaken k v s, Exchange k v s, ExistentialIntro k v s, (Polarized n ==> Pos) f)
+  :: (Weaken e r s, Exchange e r s, ExistentialIntro e r s, (Polarized n ==> Pos) f)
   =>                   Exists k n f   < _Γ -|s|- _Δ
   -- -----------------------------------------------
   -> (forall x . Polarized n x => f x < _Γ -|s|- _Δ)

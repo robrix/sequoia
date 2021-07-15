@@ -18,23 +18,23 @@ import Sequoia.Polarity
 
 -- Universal quantification
 
-class Core k v s => UniversalIntro k v s where
+class Core e r s => UniversalIntro e r s where
   forAllL
     :: (Polarized n x, Neg (f x))
-    =>        k ¬-f x < _Γ -|s|- _Δ
+    =>        r ¬-f x < _Γ -|s|- _Δ
     -- ----------------------------
-    -> ForAll k n f   < _Γ -|s|- _Δ
+    -> ForAll r n f   < _Γ -|s|- _Δ
 
   forAllR
     :: (Polarized n ==> Neg) f
     => (forall x . Polarized n x => _Γ -|s|- _Δ >            f x)
     -- ----------------------------------------------------------
-    ->                              _Γ -|s|- _Δ > ForAll k n f
+    ->                              _Γ -|s|- _Δ > ForAll r n f
 
 
 forAllR'
-  :: (Weaken k v s, Exchange k v s, UniversalIntro k v s, NegationIntro k v s, (Polarized n ==> Neg) f)
-  =>                              _Γ -|s|- _Δ > ForAll k n f
+  :: (Weaken e r s, Exchange e r s, UniversalIntro e r s, NegationIntro e r s, (Polarized n ==> Neg) f)
+  =>                              _Γ -|s|- _Δ > ForAll r n f
   -- ----------------------------------------------------------
   -> (forall x . Polarized n x => _Γ -|s|- _Δ >            f x)
 forAllR' p = wkR' p >>> forAllL (dneN init)

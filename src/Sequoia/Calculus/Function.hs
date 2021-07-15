@@ -20,12 +20,12 @@ import Sequoia.Polarity
 
 -- Function
 
-class Core r e s => FunctionIntro r e s where
+class Core e r s => FunctionIntro e r s where
   funL, (->⊢)
     :: (Pos a, Neg b)
     => _Γ -|s|- _Δ > a   ->   b < _Γ -|s|- _Δ
     -- --------------------------------------
-    ->     a ~~Fun r e~> b < _Γ -|s|- _Δ
+    ->     a ~~Fun e r~> b < _Γ -|s|- _Δ
   (->⊢) = funL
 
   infixr 5 ->⊢
@@ -34,39 +34,39 @@ class Core r e s => FunctionIntro r e s where
     :: (Pos a, Neg b)
     => a < _Γ -|s|- _Δ > b
     -- ---------------------------------
-    ->     _Γ -|s|- _Δ > a ~~Fun r e~> b
+    ->     _Γ -|s|- _Δ > a ~~Fun e r~> b
 
 
 funL2
-  :: (FunctionIntro r e s, Pos a, Neg b)
+  :: (FunctionIntro e r s, Pos a, Neg b)
   -- -------------------------------------
-  => a ~~Fun r e~> b < a < _Γ -|s|- _Δ > b
+  => a ~~Fun e r~> b < a < _Γ -|s|- _Δ > b
 funL2 = init ->⊢ init
 
 ($$)
-  :: (Weaken r e s, Exchange r e s, FunctionIntro r e s, Pos a, Neg b)
-  => _Γ -|s|- _Δ > a ~~Fun r e~> b   ->   _Γ -|s|- _Δ > a
+  :: (Weaken e r s, Exchange e r s, FunctionIntro e r s, Pos a, Neg b)
+  => _Γ -|s|- _Δ > a ~~Fun e r~> b   ->   _Γ -|s|- _Δ > a
   -- ----------------------------------------------------
   ->                  _Γ -|s|- _Δ > b
 f $$ a = wkR' f >>> wkR' a ->⊢ init
 
 funR'
-  :: (Weaken r e s, Exchange r e s, FunctionIntro r e s, Pos a, Neg b)
-  =>     _Γ -|s|- _Δ > a ~~Fun r e~> b
+  :: (Weaken e r s, Exchange e r s, FunctionIntro e r s, Pos a, Neg b)
+  =>     _Γ -|s|- _Δ > a ~~Fun e r~> b
   ------------------------------------
   -> a < _Γ -|s|- _Δ > b
 funR' p = wkL (wkR' p) >>> funL2
 
 funLPar
-  :: (Weaken r e s, Exchange r e s, FunctionIntro r e s, ParIntro r e s, NotIntro r e s, Pos a, Neg b)
+  :: (Weaken e r s, Exchange e r s, FunctionIntro e r s, ParIntro e r s, NotIntro e r s, Pos a, Neg b)
   =>        r ¬a ⅋ b < _Γ -|s|- _Δ
   -- -----------------------------
-  -> a ~~Fun r e~> b < _Γ -|s|- _Δ
+  -> a ~~Fun e r~> b < _Γ -|s|- _Δ
 funLPar s = parR (exR (notR (exL (init ->⊢ init)))) >>> wkL' s
 
 funRPar
-  :: (Weaken r e s, Exchange r e s, FunctionIntro r e s, ParIntro r e s, NotIntro r e s, Pos a, Neg b)
+  :: (Weaken e r s, Exchange e r s, FunctionIntro e r s, ParIntro e r s, NotIntro e r s, Pos a, Neg b)
   => _Γ -|s|- _Δ > r ¬a ⅋ b
   -- -----------------------------
-  -> _Γ -|s|- _Δ > a ~~Fun r e~> b
+  -> _Γ -|s|- _Δ > a ~~Fun e r~> b
 funRPar s = wkR' s >>> funR (exL (notL init ⅋⊢ init))
