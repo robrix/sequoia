@@ -1,6 +1,7 @@
 module Sequoia.Connective.Negate
 ( -- * Negate
-  type (-)(..)
+  Negate(..)
+, type (-)
 ) where
 
 import Sequoia.Connective.Negation

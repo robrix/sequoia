@@ -1,9 +1,11 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Connective.Negation
 ( -- * Not
-  type (¬)(..)
+  Not(..)
+, type (¬)
   -- * Negate
-, type (-)(..)
+, Negate(..)
+, type (-)
   -- * Negative double negation
 , notNegate
 , getNotNegate
@@ -20,20 +22,24 @@ import Sequoia.Polarity
 
 -- Not
 
-newtype r ¬a = Not { getNot :: K r a }
+newtype Not r a = Not { getNot :: K r a }
   deriving (Continuation r, Contravariant, Representable)
 
-instance Pos a => Polarized N (k ¬a) where
+instance Pos a => Polarized N (Not r a) where
+
+type (¬) = Not
 
 infixr 9 ¬
 
 
 -- Negate
 
-newtype r -a = Negate { getNegate :: K r a }
+newtype Negate r a = Negate { getNegate :: K r a }
   deriving (Continuation r, Contravariant, Representable)
 
-instance Neg a => Polarized P (k -a) where
+instance Neg a => Polarized P (Negate r a) where
+
+type (-) = Negate
 
 infixr 9 -
 

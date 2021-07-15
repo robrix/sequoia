@@ -1,6 +1,7 @@
 module Sequoia.Connective.Not
 ( -- * Not
-  type (¬)(..)
+  Not(..)
+, type (¬)
 ) where
 
 import Sequoia.Connective.Negation
