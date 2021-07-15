@@ -11,7 +11,6 @@ module Sequoia.Profunctor.D
 , Dual(..)
   -- ** Construction
 , inD'
-, inDK
 , inDV
   -- ** Elimination
 , evalD
@@ -120,9 +119,6 @@ instance Dual e r (D e r) where
 
 inD' :: Dual e r d => (a -> b) -> a --|d|-> b
 inD' f = inD (\ a b -> b •∘ (f <$> a))
-
-inDK :: Dual e r d => (K r b -> K r a) -> a --|d|-> b
-inDK f = inD (\ a b -> f b •∘ a)
 
 inDV :: Dual e r d => (V e a -> V e b) -> a --|d|-> b
 inDV f = inD (\ a b -> b •∘ f a)
