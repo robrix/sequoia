@@ -49,6 +49,8 @@ module Sequoia.Profunctor.D
 , consumer
 , inCns
 , Consumer
+  -- * Continuations
+, Cont(..)
 ) where
 
 import           Control.Category ((<<<), (>>>))
@@ -59,7 +61,7 @@ import           Data.Profunctor
 import           Data.Profunctor.Traversing
 import           Sequoia.Bijection
 import           Sequoia.Conjunction
-import           Sequoia.Continuation as K
+import           Sequoia.Continuation as K hiding (Cont(..))
 import           Sequoia.Disjunction
 import           Sequoia.Functor.K
 import           Sequoia.Functor.V
@@ -272,3 +274,16 @@ consumer :: (Dual r e d, K.Representable k, K.Rep k ~ r) => k a -> Consumer d r 
 consumer k = inCns (k •∘)
 
 type Consumer d r a = d a r
+
+
+newtype Cont r e a = Cont { runCont :: V e a -> Context r e }
+
+instance Contravariant (Cont r e) where
+  contramap f = Cont . lmap (fmap f) . runCont
+
+instance K.Representable (Cont r e) where
+  type Rep (Cont r e) = Context r e
+  tabulate f = Cont (\ v -> withVal id (f <$> v))
+  index (Cont r) a = r (inV0 a)
+
+instance Continuation r (Cont r e) where
