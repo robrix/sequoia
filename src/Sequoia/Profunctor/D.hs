@@ -19,6 +19,7 @@ module Sequoia.Profunctor.D
 , evalD
 , appD
 , appD2
+, runD
   -- ** Composition
 , (<<<)
 , (>>>)
@@ -59,10 +60,10 @@ import           Sequoia.Value as V
 
 -- Dual profunctor
 
-newtype D e r a b = D { runD :: V e a -> K r b -> Control e r }
+newtype D e r a b = D { getD :: V e a -> K r b -> Control e r }
 
 instance Profunctor (D e r) where
-  dimap f g = D . dimap (fmap f) (lmap (contramap g)) . runD
+  dimap f g = D . dimap (fmap f) (lmap (contramap g)) . getD
 
 instance Strong (D e r) where
   first'  (D r) = D (\ a b -> withVal (\ (a, c) -> r (inV0 a) (contramap (,c) b)) a)
@@ -80,7 +81,7 @@ instance Cat.Category (D e r) where
   D f . D g = D (\ a c -> liftKWith (\ _K -> g a (_K (\ b -> f (inV0 b) c))))
 
 instance Functor (D e r c) where
-  fmap f = D . fmap (lmap (contramap f)) . runD
+  fmap f = D . fmap (lmap (contramap f)) . getD
 
 instance Applicative (D e r a) where
   pure a = D (\ _ b -> b •• a)
@@ -88,7 +89,7 @@ instance Applicative (D e r a) where
   D df <*> D da = D (\ a b -> liftKWith (\ _K -> df a (_K (\ f -> da a (contramap f b)))))
 
 instance Monad (D e r a) where
-  D m >>= f = D (\ a c -> liftKWith (\ _K -> m a (_K (\ b -> runD (f b) a c))))
+  D m >>= f = D (\ a c -> liftKWith (\ _K -> m a (_K (\ b -> getD (f b) a c))))
 
 instance Coapply (D e r) where
   coliftA2 f a b = D (\ v k -> withEnv ((flip (exD a) k <∘∘> flip (exD b) k) (f <$> v)))
@@ -114,7 +115,7 @@ class (Cat.Category d, Profunctor d) => Dual e r d | d -> e r where
 
 instance Dual e r (D e r) where
   inD = D
-  exD = runD
+  exD = getD
 
 
 -- Construction
@@ -145,6 +146,9 @@ appD f = inV (\ e a -> inK (\ b -> runControl (exD f a b) e))
 
 appD2 :: Dual e r d => a --|d|-> b --|d|-> c -> V e (V e a -> V e b -> K r **c)
 appD2 f = inV (\ e a b -> inK (\ c -> runControl (exD f a (inK (\ g -> runControl (exD g b c) e))) e))
+
+runD :: Dual e r d => V e a -> K r b -> a --|d|-> b -> Control e r
+runD v k f = exD f v k
 
 
 -- Computation
