@@ -37,10 +37,10 @@ import           Sequoia.Value as V
 
 -- Signals
 
-(••) :: K r a -> V e a -> Sol e r
-k •• a = Sol (\ e -> k • e ∘ a)
+(•∘) :: K r a -> V e a -> Sol e r
+k •∘ a = Sol (\ e -> k • e ∘ a)
 
-infix 7 ••
+infix 7 •∘
 
 withEnv :: (e -> Sol e r) -> Sol e r
 withEnv f = Sol (runSol =<< f)
@@ -85,7 +85,7 @@ mapVSnk b = Snk . dimap (b <~) (mapVSol (~> b)) . runSnk
 newtype Sig e r a b = Sig { runSig :: V e a -> K r b -> Sol e r }
 
 instance Cat.Category (Sig e r) where
-  id = Sig (flip (••))
+  id = Sig (flip (•∘))
   Sig f . Sig g = Sig (\ a c -> liftSolWithK (\ go -> g a (inK (go . (`f` c) . inV0))))
 
 instance Profunctor (Sig e r) where
@@ -95,7 +95,7 @@ instance Functor (Sig e r a) where
   fmap = rmap
 
 instance Applicative (Sig e r a) where
-  pure a = Sig (const (•• inV0 a))
+  pure a = Sig (const (•∘ inV0 a))
   (<*>) = ap
 
 instance Monad (Sig e r a) where

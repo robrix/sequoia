@@ -52,6 +52,7 @@ module Sequoia.Continuation
   -- * Ambient control
 , Res(..)
 , cont
+, (••)
 ) where
 
 import Data.Functor.Contravariant
@@ -226,3 +227,8 @@ instance Res r (K r a) where
 
 cont :: (Res (Rep k) c, Representable k) => (((a -> c) -> k a) -> c) -> c
 cont f = liftRes (\ run -> f (inK . (run .)))
+
+(••) :: (Res (Rep k) c, Representable k) => k a -> a -> c
+k •• v = res (k • v)
+
+infix 7 ••

@@ -36,7 +36,6 @@ module Sequoia.Profunctor.D
 , liftRunControlWith
 , liftKWith
 , (•∘)
-, (••)
 , Control(..)
 , inPrd
 , producer
@@ -215,11 +214,6 @@ liftKWith f = liftRunControlWith (\ run -> f (inK . (run .)))
 k •∘ v = control (\ e -> k • e ∘ v)
 
 infix 7 •∘
-
-(••) :: (InControl e r c, K.Representable k, K.Rep k ~ r) => k a -> a -> c
-k •• v = control (const (k • v))
-
-infix 7 ••
 
 
 newtype Control e r = Control { getControl :: e -> r }
