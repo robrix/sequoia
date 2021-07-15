@@ -28,8 +28,6 @@ module Sequoia.Value
 , (<∘∘>)
   -- * Env monad
 , Env(..)
-  -- * Monadic abstraction
-, MonadV(..)
 ) where
 
 import Control.Applicative (liftA2)
@@ -133,24 +131,3 @@ instance Representable v => Applicative (Env v) where
 
 instance Representable v => Monad (Env v) where
   Env m >>= f = Env (bindRep m (runEnv . f))
-
-
--- Monadic abstraction
-
-class (Representable v, Monad m) => MonadV v m | m -> v where
-  {-# MINIMAL (use | env), mapEnv #-}
-
-  use :: v a -> m a
-  use v = (∘ v) <$> env
-
-  env :: m (Rep v)
-  env = use (inV id)
-
-  mapEnv :: (Rep v -> Rep v) -> m a -> m a
-
-instance Representable v => MonadV v (Env v) where
-  use = Env
-
-  env = Env (inV id)
-
-  mapEnv f (Env v) = Env (mapVRep f v)
