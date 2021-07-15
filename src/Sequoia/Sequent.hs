@@ -45,8 +45,8 @@ runSeq :: Seq e r _Γ _Δ -> ((e -> _Γ) -> (_Δ -> r) -> (e -> r))
 runSeq s f g = evalSeq (dimap f g s)
 
 newtype Seq e r _Γ _Δ = Seq { getSeq :: V e _Γ -> K r _Δ -> ControlPassing.Control e r }
-  deriving (Applicative, Functor, Monad) via (D e r _Γ)
-  deriving (Cat.Category, Choice, ControlPassing e r, Profunctor, Strong) via (D e r)
+  deriving (Applicative, Functor, Monad) via (CP e r _Γ)
+  deriving (Cat.Category, Choice, ControlPassing e r, Profunctor, Strong) via (CP e r)
 
 
 liftLR :: ControlPassing e r d => d a b -> Seq e r (a < _Γ) (_Δ > b)

@@ -2,7 +2,7 @@
 {-# LANGUAGE TypeFamilies #-}
 module Sequoia.Profunctor.ControlPassing
 ( -- * Control-passing profunctor
-  D(..)
+  CP(..)
   -- ** Mixfix notation
 , type (--|)
 , type (|->)
@@ -49,46 +49,46 @@ import           Sequoia.Value as V
 
 -- Control-passing profunctor
 
-newtype D e r a b = D { getD :: V e a -> K r b -> Control e r }
+newtype CP e r a b = CP { getD :: V e a -> K r b -> Control e r }
 
-instance Profunctor (D e r) where
-  dimap f g = D . dimap (fmap f) (lmap (contramap g)) . getD
+instance Profunctor (CP e r) where
+  dimap f g = CP . dimap (fmap f) (lmap (contramap g)) . getD
 
-instance Strong (D e r) where
-  first'  (D r) = D (\ a b -> val (\ (a, c) -> r (inV0 a) (contramap (,c) b)) a)
-  second' (D r) = D (\ a b -> val (\ (c, a) -> r (inV0 a) (contramap (c,) b)) a)
+instance Strong (CP e r) where
+  first'  (CP r) = CP (\ a b -> val (\ (a, c) -> r (inV0 a) (contramap (,c) b)) a)
+  second' (CP r) = CP (\ a b -> val (\ (c, a) -> r (inV0 a) (contramap (c,) b)) a)
 
-instance Choice (D e r) where
-  left'  (D r) = D (\ a b -> val ((`r` inlK b) . inV0 <--> (inrK b ••)) a)
-  right' (D r) = D (\ a b -> val ((inlK b ••) <--> (`r` inrK b) . inV0) a)
+instance Choice (CP e r) where
+  left'  (CP r) = CP (\ a b -> val ((`r` inlK b) . inV0 <--> (inrK b ••)) a)
+  right' (CP r) = CP (\ a b -> val ((inlK b ••) <--> (`r` inrK b) . inV0) a)
 
-instance Traversing (D e r) where
-  wander traverse r = D (\ s t -> val (\ s -> exD (traverse ((r ↑) . inV0) s) idV t) s)
+instance Traversing (CP e r) where
+  wander traverse r = CP (\ s t -> val (\ s -> exD (traverse ((r ↑) . inV0) s) idV t) s)
 
-instance Cat.Category (D e r) where
-  id = D (flip (•∘))
-  D f . D g = D (\ a c -> cont (\ _K -> g a (_K (\ b -> f (inV0 b) c))))
+instance Cat.Category (CP e r) where
+  id = CP (flip (•∘))
+  CP f . CP g = CP (\ a c -> cont (\ _K -> g a (_K (\ b -> f (inV0 b) c))))
 
-instance Functor (D e r c) where
-  fmap f = D . fmap (lmap (contramap f)) . getD
+instance Functor (CP e r c) where
+  fmap f = CP . fmap (lmap (contramap f)) . getD
 
-instance Applicative (D e r a) where
-  pure a = D (\ _ b -> b •• a)
+instance Applicative (CP e r a) where
+  pure a = CP (\ _ b -> b •• a)
 
-  D df <*> D da = D (\ a b -> cont (\ _K -> df a (_K (\ f -> da a (contramap f b)))))
+  CP df <*> CP da = CP (\ a b -> cont (\ _K -> df a (_K (\ f -> da a (contramap f b)))))
 
-instance Monad (D e r a) where
-  D m >>= f = D (\ a c -> cont (\ _K -> m a (_K (\ b -> getD (f b) a c))))
+instance Monad (CP e r a) where
+  CP m >>= f = CP (\ a c -> cont (\ _K -> m a (_K (\ b -> getD (f b) a c))))
 
-instance Coapply (D e r) where
-  coliftA2 f a b = D (\ v k -> env ((flip (exD a) k <∘∘> flip (exD b) k) (f <$> v)))
+instance Coapply (CP e r) where
+  coliftA2 f a b = CP (\ v k -> env ((flip (exD a) k <∘∘> flip (exD b) k) (f <$> v)))
 
-instance Env e (D e r a b) where
-  env f = D (\ v k -> env (runD v k . f))
+instance Env e (CP e r a b) where
+  env f = CP (\ v k -> env (runD v k . f))
 
-instance Res r (D e r a b) where
-  res = D . const . const . res
-  liftRes f = D (\ v k -> liftRes (\ run -> exD (f (run . runD v k)) v k))
+instance Res r (CP e r a b) where
+  res = CP . const . const . res
+  liftRes f = CP (\ v k -> liftRes (\ run -> exD (f (run . runD v k)) v k))
 
 
 -- Mixfix notation
@@ -109,8 +109,8 @@ class (Cat.Category d, Profunctor d) => ControlPassing e r d | d -> e r where
   inD :: (V e a -> K r b -> Control e r) -> d a b
   exD :: d a b -> V e a -> K r b -> Control e r
 
-instance ControlPassing e r (D e r) where
-  inD = D
+instance ControlPassing e r (CP e r) where
+  inD = CP
   exD = getD
 
 
