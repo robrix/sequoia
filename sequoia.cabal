@@ -124,7 +124,6 @@ library
     Sequoia.Connective.XOr
     Sequoia.Connective.Zero
     Sequoia.Continuation
-    Sequoia.CPS
     Sequoia.Disjunction
     Sequoia.Functor.Applicative
     Sequoia.Functor.C
