@@ -217,3 +217,6 @@ exDN2 = dimap2 inDN inDN exDN
 
 class Res r c | c -> r where
   res :: ((c -> r) -> c) -> c
+
+instance Res r (K r a) where
+  res f = K (\ a -> f (• a) • a)
