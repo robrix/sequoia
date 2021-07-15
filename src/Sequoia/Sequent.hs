@@ -16,7 +16,7 @@ import           Data.Profunctor
 import           Prelude hiding (init)
 import           Sequoia.Bijection
 import           Sequoia.Calculus.Additive
-import           Sequoia.Calculus.Context hiding ((<↑))
+import           Sequoia.Calculus.Context
 import           Sequoia.Calculus.Control as Calculus
 import           Sequoia.Calculus.Core
 import           Sequoia.Calculus.Iff
