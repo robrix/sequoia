@@ -95,7 +95,7 @@ instance Contextual e r (Seq e r) where
 -- Control
 
 instance Calculus.Control Seq where
-  reset s = inD (\ _Γ _Δ -> control (exK _Δ . runControl (exD s _Γ idK)))
+  reset s = inD (\ _Γ _Δ -> control (exK _Δ . getControl (exD s _Γ idK)))
   shift s = inD (\ _Γ _Δ -> exD s (inV0 (inrK _Δ) <| _Γ) (inlK _Δ |> idK))
 
 

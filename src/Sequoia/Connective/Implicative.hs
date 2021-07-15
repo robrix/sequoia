@@ -33,7 +33,7 @@ funPar2
   <-> inK1 (\ k p -> k (inK ((p •) . (mkPar (inrK (contramap inV0 p)) =<<))))
 
 mkPar :: K r b -> a ~~Fun e r~> b -> V e (r ¬a ⅋ b)
-mkPar p f = V (\ e -> inl (inK (\ a -> runControl (exD f (inV0 a) p) e)))
+mkPar p f = V (\ e -> inl (inK (\ a -> getControl (exD f (inV0 a) p) e)))
 
 mkFun :: r ¬a ⅋ b -> a ~~Fun e r~> b
 mkFun p = inD (\ a b -> ((•∘ a) <--> (b ••)) p)

@@ -30,7 +30,6 @@ module Sequoia.Profunctor.D
 , coerceD
   -- * Control context
 , control
-, ExControl(..)
 , withEnv
 , withVal
 , liftRunControlWith
@@ -148,10 +147,10 @@ evalD :: Dual e r d => e --|d|-> r -> (e -> r)
 evalD f = getControl (exD f (inV id) idK)
 
 appD :: Dual e r d => a --|d|-> b -> V e (V e a -> K r **b)
-appD f = inV (\ e a -> inK (\ b -> runControl (exD f a b) e))
+appD f = inV (\ e a -> inK (\ b -> getControl (exD f a b) e))
 
 appD2 :: Dual e r d => a --|d|-> b --|d|-> c -> V e (V e a -> V e b -> K r **c)
-appD2 f = inV (\ e a b -> inK (\ c -> runControl (exD f a (inK (\ g -> runControl (exD g b c) e))) e))
+appD2 f = inV (\ e a b -> inK (\ c -> getControl (exD f a (inK (\ g -> getControl (exD g b c) e))) e))
 
 runD :: Dual e r d => V e a -> K r b -> a --|d|-> b -> Control e r
 runD v k f = exD f v k
@@ -180,15 +179,6 @@ coerceD = inD . exD
 
 control :: (Env e c, Res r c) => (e -> r) -> c
 control = env . (res .)
-
-class ExControl e r c | c -> e r where
-  runControl :: c -> (e -> r)
-
-instance ExControl e r (Control e r) where
-  runControl = getControl
-
-instance ExControl e r (D e r e r) where
-  runControl f = runControl (exD f idV idK)
 
 
 withEnv :: Env e c => (e -> c) -> c
