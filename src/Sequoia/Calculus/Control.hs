@@ -13,19 +13,18 @@ module Sequoia.Calculus.Control
 import Prelude hiding (init)
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Core
-import Sequoia.Continuation as K
+import Sequoia.Functor.K
 
 -- Delimited control
 
-class Control k s | s -> k where
+class Control s where
   reset
     :: _Γ -|s _Δ e|- _Δ
     -- ----------------
     -> _Γ -|s r  e|- _Δ
 
   shift
-    :: (K.Representable (k r), K.Rep (k r) ~ r)
-    => k r a < _Γ -|s r e|- _Δ > r
+    :: K r a < _Γ -|s r e|- _Δ > r
     -- ---------------------------
     ->         _Γ -|s r e|- _Δ > a
 
@@ -33,29 +32,29 @@ class Control k s | s -> k where
 -- Continuations
 
 kL
-  :: Contextual k v s
-  =>       _Γ -|s|- _Δ > a
-  -- ---------------------
-  -> k a < _Γ -|s|- _Δ
+  :: Contextual r e s
+  =>         _Γ -|s|- _Δ > a
+  -- -----------------------
+  -> K r a < _Γ -|s|- _Δ
 kL = popL . pushR
 
 kR
-  :: (Contextual k v s, Weaken k v s)
+  :: (Contextual r e s, Weaken r e s)
   => a < _Γ -|s|- _Δ
-  -- ---------------------
-  ->     _Γ -|s|- _Δ > k a
+  -- -----------------------
+  ->     _Γ -|s|- _Δ > K r a
 kR s = lowerL (pushL init) (wkR s)
 
 kL'
-  :: (Contextual k v s, Weaken k v s)
-  => k a < _Γ -|s|- _Δ
-  -- ---------------------
-  ->       _Γ -|s|- _Δ > a
+  :: (Contextual r e s, Weaken r e s)
+  => K r a < _Γ -|s|- _Δ
+  -- -----------------------
+  ->         _Γ -|s|- _Δ > a
 kL' s = kR init >>> wkR s
 
 kR'
-  :: (Contextual k v s, Weaken k v s)
-  =>     _Γ -|s|- _Δ > k a
-  -- ---------------------
+  :: (Contextual r e s, Weaken r e s)
+  =>     _Γ -|s|- _Δ > K r a
+  -- -----------------------
   -> a < _Γ -|s|- _Δ
 kR' s = wkL s >>> kL init

@@ -11,24 +11,25 @@ import Sequoia.Bijection
 import Sequoia.Confunctor
 import Sequoia.Connective.Negate
 import Sequoia.Connective.Tensor
+import Sequoia.Functor.K
 import Sequoia.Polarity
 
 -- Subtraction
 
-data Sub k a b = Sub { subA :: a, subK :: k b }
-  deriving Contravariant via Confunctorially (Sub k) a
+data Sub r a b = Sub { subA :: a, subK :: K r b }
+  deriving Contravariant via Confunctorially (Sub r) a
 
-instance Contravariant k => Confunctor (Sub k) where
+instance Confunctor (Sub r) where
   conmap f g (Sub a k) = Sub (f a) (contramap g k)
 
-instance (Pos a, Neg b) => Polarized P (Sub k a b) where
+instance (Pos a, Neg b) => Polarized P (Sub r a b) where
 
-type a ~-k = Sub k a
+type a ~-r = Sub r a
 type s-< b = s b
 
 infixr 6 ~-
 infixr 5 -<
 
 
-sub :: a ⊗ k -b <-> a ~-k-< b
+sub :: a ⊗ r -b <-> a ~-r-< b
 sub = (\ (a :⊗ k) -> Sub a (getNegate k)) <-> (\ (Sub a k) -> a :⊗ Negate k)

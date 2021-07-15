@@ -16,16 +16,16 @@ import Sequoia.Polarity
 
 -- Corecursion
 
-data Nu k f = forall x . Pos x => Nu { getNu :: Down (x ~~k~> f x) ⊗ x }
+data Nu r f = forall x . Pos x => Nu { getNu :: Down (x ~~r~> f x) ⊗ x }
 
-instance Polarized N (Nu k f) where
+instance Polarized N (Nu r f) where
 
-newtype NuF k f a = NuF { getNuF :: Down (a ~~k~> f a) ⊗ a }
+newtype NuF r f a = NuF { getNuF :: Down (a ~~r~> f a) ⊗ a }
 
-instance (Neg (f a), Pos a) => Polarized P (NuF k f a)
+instance (Neg (f a), Pos a) => Polarized P (NuF r f a)
 
-nu :: Pos x => NuF k f x -> Nu k f
+nu :: Pos x => NuF r f x -> Nu r f
 nu r = Nu (getNuF r)
 
-runNu :: K.Representable k => Nu k f -> Exists k P (NuF k f)
+runNu :: Nu r f -> Exists r P (NuF r f)
 runNu (Nu r) = Exists (liftDN (NuF r))

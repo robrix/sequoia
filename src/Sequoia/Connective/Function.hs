@@ -12,27 +12,28 @@ import           Data.Profunctor
 import           Data.Profunctor.Traversing
 import           Sequoia.CPS
 import           Sequoia.Continuation
+import           Sequoia.Functor.K
 import           Sequoia.Polarity
 
 -- Implication
 
-appFun :: Representable k => (a ~~k~> b) -> (a -> k **b)
+appFun :: (a ~~r~> b) -> (a -> K r **b)
 appFun = (-<<) . getFun
 
-appFun2 :: Representable k => (a ~~k~> b ~~k~> c) -> (a -> b -> k **c)
+appFun2 :: (a ~~r~> b ~~r~> c) -> (a -> b -> K r **c)
 appFun2 f a b = inDN (appC2 f a b)
 
-newtype Fun k a b = Fun { getFun :: k b -> k a }
-  deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via C k
+newtype Fun r a b = Fun { getFun :: K r b -> K r a }
+  deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via C (K r)
 
-instance Representable k => ContPassing k (Fun k) where
+instance ContPassing (K r) (Fun r) where
   inC = Fun
   exC = getFun
 
-instance Contravariant k => Functor (Fun k a) where
+instance Functor (Fun r a) where
   fmap f (Fun r) = Fun (r . contramap f)
 
-instance (Pos a, Neg b) => Polarized N (Fun k a b) where
+instance (Pos a, Neg b) => Polarized N (Fun r a b) where
 
 type a ~~ r = Fun r a
 type f ~> b = f b

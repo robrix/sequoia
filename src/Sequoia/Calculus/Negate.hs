@@ -22,86 +22,87 @@ import Sequoia.Calculus.Core
 import Sequoia.Connective.Negate
 import Sequoia.Connective.Negation
 import Sequoia.Continuation as K
+import Sequoia.Functor.K
 import Sequoia.Polarity
 
 -- Negate
 
-class Core k v s => NegateIntro k v s where
+class Core r e s => NegateIntro r e s where
   negateL
     :: Neg a
     =>        _Γ -|s|- _Δ > a
     -- ----------------------
-    -> k -a < _Γ -|s|- _Δ
+    -> r -a < _Γ -|s|- _Δ
   negateR
     :: Neg a
     => a < _Γ -|s|- _Δ
     -- ----------------------
-    ->     _Γ -|s|- _Δ > k -a
+    ->     _Γ -|s|- _Δ > r -a
 
 
 negateL'
-  :: (NegateIntro k v s, Weaken k v s, Neg a)
-  => k -a < _Γ -|s|- _Δ
+  :: (NegateIntro r e s, Weaken r e s, Neg a)
+  => r -a < _Γ -|s|- _Δ
   -- ----------------------
   ->        _Γ -|s|- _Δ > a
 negateL' p = negateR init >>> wkR p
 
 negateR'
-  :: (NegateIntro k v s, Weaken k v s, Neg a)
-  =>     _Γ -|s|- _Δ > k -a
+  :: (NegateIntro r e s, Weaken r e s, Neg a)
+  =>     _Γ -|s|- _Δ > r -a
   -- ----------------------
   -> a < _Γ -|s|- _Δ
 negateR' p = wkL p >>> negateL init
 
 
 shiftN
-  :: (Control k s, Contextual (k r) v (s r e), K.Rep (k r) ~ r)
-  => k r -a < _Γ -|s r e|- _Δ > r
-  -- ----------------------------
-  ->          _Γ -|s r e|- _Δ > a
+  :: (Control s, Contextual r e (s r e))
+  => r -a < _Γ -|s r e|- _Δ > r
+  -- --------------------------
+  ->        _Γ -|s r e|- _Δ > a
 shiftN = shift . negateLK'
 
 
 dnePK
-  :: Contextual k v s
-  => k **a < _Γ -|s|- _Δ
-  -- -------------------
-  -> k -¬a < _Γ -|s|- _Δ
+  :: Contextual r e s
+  => K r **a < _Γ -|s|- _Δ
+  -- ---------------------
+  ->   r -¬a < _Γ -|s|- _Δ
 dnePK = mapL getNegateNot
 
 dniPK
-  :: Contextual k v s
-  => _Γ -|s|- _Δ > k **a
-  -- -------------------
-  -> _Γ -|s|- _Δ > k -¬a
+  :: Contextual r e s
+  => _Γ -|s|- _Δ > K r **a
+  -- ---------------------
+  -> _Γ -|s|- _Δ >   r -¬a
 dniPK = mapR negateNot
 
 
 negateLK
-  :: Contextual k v s
-  => k  a < _Γ -|s|- _Δ
-  -- ------------------
-  -> k -a < _Γ -|s|- _Δ
+  :: Contextual r e s
+  => K r  a < _Γ -|s|- _Δ
+  -- --------------------
+  ->   r -a < _Γ -|s|- _Δ
 negateLK = mapL getNegate
 
 negateRK
-  :: Contextual k v s
-  => _Γ -|s|- _Δ > k  a
-  -- ------------------
-  -> _Γ -|s|- _Δ > k -a
+  :: Contextual r e s
+  => _Γ -|s|- _Δ > K r  a
+  -- --------------------
+  -> _Γ -|s|- _Δ >   r -a
 negateRK = mapR Negate
 
 
 negateLK'
-  :: Contextual k v s
-  => k -a < _Γ -|s|- _Δ
-  -- ------------------
-  -> k  a < _Γ -|s|- _Δ
+  :: Contextual r e s
+  =>   r -a < _Γ -|s|- _Δ
+  -- --------------------
+  -> K r  a < _Γ -|s|- _Δ
 negateLK' = mapL Negate
 
 negateRK'
-  :: Contextual k v s
-  => _Γ -|s|- _Δ > k -a
-  -- ------------------
-  -> _Γ -|s|- _Δ > k  a
+  :: Contextual r e s
+  => _Γ -|s|- _Δ >   r -a
+  -- --------------------
+  -> _Γ -|s|- _Δ > K r  a
 negateRK' = mapR getNegate

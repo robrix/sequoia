@@ -17,8 +17,8 @@ import Sequoia.Connective.Tensor
 import Sequoia.Continuation as K
 import Sequoia.Disjunction
 
-elimPar :: K.Representable k => a ⅋ b -> k -a ⊗ k -b -> KRep k
+elimPar ::a ⅋ b -> r -a ⊗ r -b -> r
 elimPar = (. exl) . flip (•) <--> (. exr) . flip (•)
 
-elimTensor :: K.Representable k => a ⊗ b -> k ¬a ⅋ k ¬b -> KRep k
+elimTensor ::a ⊗ b -> r ¬a ⅋ r ¬b -> r
 elimTensor = flip ((. exl) . (•) <--> (. exr) . (•))

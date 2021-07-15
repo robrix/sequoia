@@ -15,30 +15,31 @@ import           Sequoia.Connective.Down
 import           Sequoia.Connective.Function
 import           Sequoia.Connective.Quantification
 import           Sequoia.Continuation
+import           Sequoia.Functor.K
 import           Sequoia.Polarity
 
 -- Recursion
 
-newtype Mu k f = Mu { getMu :: forall x . Neg x => Down (FAlg k f x) ~~k~> x }
+newtype Mu r f = Mu { getMu :: forall x . Neg x => Down (FAlg r f x) ~~r~> x }
 
-type FAlg k f x = f x ~~k~> x
+type FAlg r f x = f x ~~r~> x
 
-instance Polarized N (Mu k f) where
+instance Polarized N (Mu r f) where
 
-newtype MuF k f a = MuF { getMuF :: Down (FAlg k f a) ~~k~> a }
+newtype MuF r f a = MuF { getMuF :: Down (FAlg r f a) ~~r~> a }
 
-instance (Pos (f a), Neg a) => Polarized N (MuF k f a) where
+instance (Pos (f a), Neg a) => Polarized N (MuF r f a) where
 
-mu :: Representable k => ForAll k N (MuF k f) -> Mu k f
+mu :: ForAll r N (MuF r f) -> Mu r f
 mu r = Mu (dnE (mapDN getMuF (runForAll r)))
 
-foldMu :: ContPassing k c => Neg a => f a `c` a -> Mu k f `c` a
+foldMu :: ContPassing (K r) c => Neg a => f a `c` a -> Mu r f `c` a
 foldMu alg = inC1 (\ k (Mu f) -> appC f (Down (coerceC alg)) k)
 
-unfoldMu :: (Traversable f, ContPassing k c) => a `c` f a -> a `c` Mu k f
+unfoldMu :: (Traversable f, ContPassing (K r) c) => a `c` f a -> a `c` Mu r f
 unfoldMu coalg = cps (\ a -> Mu (Fun (inK1 (\ k (Down alg) -> appC (refoldCPS alg (coerceC coalg)) a k))))
 
-refoldMu :: (Traversable f, ContPassing k c, Neg b) => f b `c` b -> a `c` f a -> a `c` b
+refoldMu :: (Traversable f, ContPassing (K r) c, Neg b) => f b `c` b -> a `c` f a -> a `c` b
 refoldMu f g = foldMu f Cat.<<< unfoldMu g
 
 
