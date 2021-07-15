@@ -49,6 +49,8 @@ module Sequoia.Continuation
 , exDN
 , exDN1
 , exDN2
+  -- * Ambient control
+, Res(..)
 ) where
 
 import Data.Functor.Contravariant
@@ -209,3 +211,9 @@ exDN1 = dimap inDN exDN
 
 exDN2 :: Representable k => (k **a -> k **b -> k **c) -> (ContFn k a -> ContFn k b -> ContFn k c)
 exDN2 = dimap2 inDN inDN exDN
+
+
+-- Ambient control
+
+class Res r c | c -> r where
+  res :: ((c -> r) -> c) -> c
