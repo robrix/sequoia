@@ -50,6 +50,7 @@ module Sequoia.Profunctor.D
 , inCns
 , Consumer
   -- * Continuations
+, liftCont
 , Cont(..)
 ) where
 
@@ -277,6 +278,9 @@ type Consumer d r a = d a r
 
 
 -- Continuations
+
+liftCont :: K r a -> Cont r e a
+liftCont k = Cont (k •∘)
 
 newtype Cont r e a = Cont { runCont :: V e a -> Context r e }
 
