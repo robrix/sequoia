@@ -42,7 +42,6 @@ module Sequoia.Profunctor.D
 , inPrd
 , producer
 , joinl
-, Producer
 , consumer
 , inCns
 , Consumer
@@ -154,7 +153,7 @@ appD2 f = inV (\ e a b -> inK (\ c -> runControl (exD f a (inK (\ g -> runContro
 
 -- Computation
 
-(↑) :: Dual e r d => a --|d|-> b -> V e a -> Producer d s b
+(↑) :: Dual e r d => a --|d|-> b -> V e a -> d s|-> b
 f ↑ a = f <<< producer a
 
 infixl 7 ↑
@@ -229,16 +228,15 @@ infix 7 ••
 newtype Context e r = Context { runContext :: e -> r }
 
 
-inPrd :: Dual e r d => (K r a -> Context e r) -> Producer d s a
+inPrd :: Dual e r d => (K r a -> Context e r) -> d s a
 inPrd = inD . const
 
-producer :: (Dual e r d, V.Representable v, V.Rep v ~ e) => v a -> Producer d s a
+producer :: (Dual e r d, V.Representable v, V.Rep v ~ e) => v a -> d s a
 producer v = inPrd (•∘ v)
 
-joinl :: Dual e r d => Producer d e (d a b) -> d a b
+joinl :: Dual e r d => d e (d a b) -> d a b
 joinl p = inD (\ a b -> liftKWith (\ _K -> exD p idV (_K (\ f -> exD f a b))))
 
-type Producer d s b = d s b
 
 
 inCns :: Dual e r d => (V e a -> Context e r) -> Consumer d r a
