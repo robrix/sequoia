@@ -195,9 +195,9 @@ coerceD = inD . exD
 
 -- Control context
 
-class Control c where
-  control :: (e -> r) -> c r e
-  runControl :: c r e -> (e -> r)
+class Control r e c | c -> r e where
+  control :: (e -> r) -> c
+  runControl :: c -> (e -> r)
 
 
 newtype ControlT r e m a = ControlT { runControlT :: e -> (a -> m r) -> m r }
@@ -216,38 +216,38 @@ instance MonadTrans (ControlT r e) where
 
 newtype Context r e = Context { runContext :: e -> r }
 
-instance Control Context where
+instance Control r e (Context r e) where
   control = Context
   runControl = runContext
 
 
-withEnv :: Control c => (e -> c r e) -> c r e
+withEnv :: Control r e c => (e -> c) -> c
 withEnv f = control (runControl =<< f)
 
-withVal :: Control c => (a -> c r e) -> (V e a -> c r e)
+withVal :: Control r e c => (a -> c) -> (V e a -> c)
 withVal f v = withEnv (f . exV v)
 
-liftRunControlWith :: Control c => ((c r e -> r) -> c r e) -> c r e
+liftRunControlWith :: Control r e c => ((c -> r) -> c) -> c
 liftRunControlWith f = withEnv (f . flip runControl)
 
-liftKWith :: Control c => (((a -> c r e) -> K r a) -> c r e) -> c r e
+liftKWith :: Control r e c => (((a -> c) -> K r a) -> c) -> c
 liftKWith f = liftRunControlWith (\ run -> f (inK . (run .)))
 
-(•∘) :: Control c => K r a -> V e a -> c r e
+(•∘) :: Control r e c => K r a -> V e a -> c
 k •∘ v = control (\ e -> k • e ∘ v)
 
 infix 7 •∘
 
-(••) :: Control c => K r a -> a -> c r e
+(••) :: Control r e c => K r a -> a -> c
 k •• v = control (const (k • v))
 
 infix 7 ••
 
 
-complete :: (Dual r e d, Control c) => c r e -> Complete d r e
+complete :: (Dual r e d, Control r e c) => c -> Complete d r e
 complete = inD . const . const . control . runControl
 
-runComplete :: (Dual r e d, Control c) => Complete d r e -> c r e
+runComplete :: (Dual r e d, Control r e c) => Complete d r e -> c
 runComplete f = control (runControl (exD f idV idK))
 
 type Complete d r e = d e r
