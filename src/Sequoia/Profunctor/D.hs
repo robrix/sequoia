@@ -153,7 +153,7 @@ runD v k f = exD f v k
 
 -- Computation
 
-(↑) :: Dual e r d => a --|d|-> b -> V e a -> d s|-> b
+(↑) :: Dual e r d => a --|d|-> b -> V e a -> d e|-> b
 f ↑ a = f <<< producer a
 
 infixl 7 ↑
@@ -188,10 +188,10 @@ instance Res r (Control e r) where
   liftRes f = Control (\ e -> let run = (`getControl` e) in run (f run))
 
 
-inPrd :: Dual e r d => (K r a -> Control e r) -> d s a
+inPrd :: Dual e r d => (K r a -> Control e r) -> d e a
 inPrd = inD . const
 
-producer :: (Dual e r d, V.Representable v, V.Rep v ~ e) => v a -> d s a
+producer :: (Dual e r d, V.Representable v, V.Rep v ~ e) => v a -> d e a
 producer v = inPrd (•∘ v)
 
 joinl :: Dual e r d => d e (d a b) -> d a b
