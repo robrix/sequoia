@@ -26,8 +26,6 @@ module Sequoia.Value
 , mapVRep
 , (>∘∘<)
 , (<∘∘>)
-  -- * Env monad
-, Env(..)
 ) where
 
 import Control.Applicative (liftA2)
@@ -117,17 +115,3 @@ infix 3 <∘∘>
 
 bitraverseDisjV :: (Disj d, Representable v) => v (a `d` b) -> Rep v -> (v a `d` v b)
 bitraverseDisjV d e = bimapDisj inV0 inV0 (e ∘ d)
-
-
--- Env monad
-
-newtype Env v a = Env { runEnv :: v a }
-  deriving (Functor)
-
-instance Representable v => Applicative (Env v) where
-  pure a = Env (pureRep a)
-
-  Env f <*> Env a = Env (apRep f a)
-
-instance Representable v => Monad (Env v) where
-  Env m >>= f = Env (bindRep m (runEnv . f))
