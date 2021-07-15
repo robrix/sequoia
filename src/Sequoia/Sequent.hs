@@ -63,7 +63,7 @@ lowerLR f p = inD (\ _Γ _Δ -> exD (f (inD (\ a b -> exD p (a <| _Γ) (_Δ |> b
 -- Effectful sequents
 
 runSeqT :: SeqT r e _Γ m _Δ -> ((e -> _Γ) -> (_Δ -> m r) -> (e -> m r))
-runSeqT = dimap V (dimap K runControl) . getSeq . getSeqT
+runSeqT = runSeq . getSeqT
 
 newtype SeqT r s _Γ m _Δ = SeqT { getSeqT :: Seq (m r) s _Γ _Δ }
   deriving (Applicative, Functor, Monad)
