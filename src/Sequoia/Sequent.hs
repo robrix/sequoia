@@ -90,12 +90,12 @@ deriving via Contextually (Seq e r) instance Exchange e r (Seq e r)
 -- Contextual rules
 
 instance Contextual e r (Seq e r) where
-  swapΓΔ f _Δ' _Γ' = inD (\ _Γ _Δ -> withVal (\ _Γ -> exD (f _Δ _Γ) (inV0 _Γ') _Δ') _Γ)
+  swapΓΔ f _Δ' _Γ' = inD (\ _Γ _Δ -> val (\ _Γ -> exD (f _Δ _Γ) (inV0 _Γ') _Δ') _Γ)
 
 -- Control
 
 instance Calculus.Control Seq where
-  reset s = inD (\ _Γ _Δ -> control (exK _Δ . getControl (exD s _Γ idK)))
+  reset s = inD (\ _Γ _Δ -> Control (exK _Δ . getControl (exD s _Γ idK)))
   shift s = inD (\ _Γ _Δ -> exD s (inV0 (inrK _Δ) <| _Γ) (inlK _Δ |> idK))
 
 
@@ -180,7 +180,7 @@ instance SubtractionIntro e r (Seq e r) where
 
 instance UniversalIntro e r (Seq e r) where
   forAllL p = mapL (notNegate . runForAll) p
-  forAllR p = inD (\ _Γ _Δ -> liftRunControlWith (\ run -> inrK _Δ •• ForAll (inK (\ k -> run (exD p _Γ (inlK _Δ |> k))))))
+  forAllR p = inD (\ _Γ _Δ -> liftRes (\ run -> inrK _Δ •• ForAll (inK (\ k -> run (exD p _Γ (inlK _Δ |> k))))))
 
 instance ExistentialIntro e r (Seq e r) where
   existsL p = popL (dnE . runExists (pushL p))

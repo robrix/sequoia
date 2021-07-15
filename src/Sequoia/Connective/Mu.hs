@@ -34,10 +34,10 @@ mu :: ForAll r N (MuF e r f) -> Mu e r f
 mu r = Mu (dnE (mapDN getMuF (runForAll r)))
 
 foldMu :: Dual e r d => Neg a => f a `d` a -> Mu e r f `d` a
-foldMu alg = inD (\ v k -> withVal (\ (Mu f) -> exD f (inV0 (Down (coerceD alg))) k) v)
+foldMu alg = inD (\ v k -> val (\ (Mu f) -> exD f (inV0 (Down (coerceD alg))) k) v)
 
 unfoldMu :: (Traversable f, Dual e r d) => a `d` f a -> a `d` Mu e r f
-unfoldMu coalg = inD' (\ a -> Mu (inD (\ v k -> withVal (\ (Down alg) -> exD (refoldCat alg (coerceD coalg)) (inV0 a) k) v)))
+unfoldMu coalg = inD' (\ a -> Mu (inD (\ v k -> val (\ (Down alg) -> exD (refoldCat alg (coerceD coalg)) (inV0 a) k) v)))
 
 refoldMu :: (Traversable f, Dual e r d, Neg b) => f b `d` b -> a `d` f a -> a `d` b
 refoldMu f g = foldMu f Cat.<<< unfoldMu g

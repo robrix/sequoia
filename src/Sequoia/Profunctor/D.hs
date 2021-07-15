@@ -30,10 +30,6 @@ module Sequoia.Profunctor.D
 , coerceD
   -- * Control context
 , control
-, withEnv
-, withVal
-, liftRunControlWith
-, liftKWith
 , (•∘)
 , Control(..)
 , inPrd
@@ -180,18 +176,6 @@ coerceD = inD . exD
 control :: (Env e c, Res r c) => (e -> r) -> c
 control = env . (res .)
 
-
-withEnv :: Env e c => (e -> c) -> c
-withEnv = env
-
-withVal :: (Env (V.Rep v) c, V.Representable v) => (a -> c) -> (v a -> c)
-withVal = val
-
-liftRunControlWith :: Res r c => ((c -> r) -> c) -> c
-liftRunControlWith = liftRes
-
-liftKWith :: (Res (K.Rep k) c, K.Representable k) => (((a -> c) -> k a) -> c) -> c
-liftKWith = cont
 
 (•∘) :: (Env (V.Rep v) c, V.Representable v, Res (K.Rep k) c, K.Representable k) => k a -> v a -> c
 k •∘ v = env (\ e -> res (k • e ∘ v))
