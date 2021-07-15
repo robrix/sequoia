@@ -109,7 +109,7 @@ infix 3 >∘∘<
 
 
 (<∘∘>) :: (Disj d, Representable v) => (v a -> r) -> (v b -> r) -> (v (a `d` b) -> Rep v -> r)
-(l <∘∘> r) ab e = (l <--> r) (bitraverseDisjV ab e)
+(l <∘∘> r) ab = (l <--> r) . bitraverseDisjV ab
 
 infix 3 <∘∘>
 
