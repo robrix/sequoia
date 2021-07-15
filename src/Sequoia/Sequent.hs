@@ -1,6 +1,7 @@
 module Sequoia.Sequent
 ( -- * Sequents
   evalSeq
+, runSeq
 , Seq(..)
 , liftLR
 , lowerLR
@@ -39,6 +40,9 @@ import           Sequoia.Value
 
 evalSeq :: _Γ -|Seq _Δ _Γ|- _Δ -> (_Γ -> _Δ)
 evalSeq = evalD
+
+runSeq :: Seq r e _Γ _Δ -> ((e -> _Γ) -> (_Δ -> r) -> (e -> r))
+runSeq s f g = evalSeq (dimap f g s)
 
 newtype Seq r e _Γ _Δ = Seq { getSeq :: V e _Γ -> K r _Δ -> Context r e }
   deriving (Applicative, Functor, Monad) via (D r e _Γ)
