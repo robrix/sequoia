@@ -223,6 +223,9 @@ newtype Control e r = Control { getControl :: e -> r }
 instance Env e (Control e r) where
   env f = Control (getControl =<< f)
 
+instance Res r (Control e r) where
+  res f = Control (\ e -> let run = (`getControl` e) in run (f run))
+
 
 inPrd :: Dual e r d => (K r a -> Control e r) -> d s a
 inPrd = inD . const
