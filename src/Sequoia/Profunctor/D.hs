@@ -49,10 +49,6 @@ module Sequoia.Profunctor.D
 , consumer
 , inCns
 , Consumer
-  -- * Continuations
-, liftCont
-, lowerCont
-, Cont(..)
 ) where
 
 import           Control.Category ((<<<), (>>>))
@@ -264,24 +260,3 @@ consumer :: (Dual e r d, K.Representable k, K.Rep k ~ r) => k a -> Consumer d r 
 consumer k = inCns (k •∘)
 
 type Consumer d r a = d a r
-
-
--- Continuations
-
-liftCont :: K r a -> Cont e r a
-liftCont k = Cont (k •∘)
-
-lowerCont :: Cont e r a -> V e (K r a)
-lowerCont (Cont r) = V $ \ e -> K (\ a -> runControl (r (inV0 a)) e)
-
-newtype Cont e r a = Cont { runCont :: V e a -> Context e r }
-
-instance Contravariant (Cont e r) where
-  contramap f = Cont . lmap (fmap f) . runCont
-
-instance K.Representable (Cont e r) where
-  type Rep (Cont e r) = Context e r
-  tabulate f = Cont (\ v -> withVal id (f <$> v))
-  index (Cont r) a = r (inV0 a)
-
-instance Continuation r (Cont e r) where
