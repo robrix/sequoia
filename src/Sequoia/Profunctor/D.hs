@@ -29,7 +29,7 @@ module Sequoia.Profunctor.D
 , dnE
 , coerceD
   -- * Control context
-, InControl(..)
+, control
 , ExControl(..)
 , withEnv
 , withVal
@@ -178,15 +178,8 @@ coerceD = inD . exD
 
 -- Control context
 
-class InControl e r c | c -> e r where
-  control :: (e -> r) -> c
-
-instance InControl e r (Control e r) where
-  control = Control
-
-instance InControl e r (D e r a b) where
-  control = D . const . const . Control
-
+control :: (Env e c, Res r c) => (e -> r) -> c
+control = env . (res .)
 
 class ExControl e r c | c -> e r where
   runControl :: c -> (e -> r)
