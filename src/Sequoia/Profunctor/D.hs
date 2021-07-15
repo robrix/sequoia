@@ -217,6 +217,9 @@ infix 7 ••
 
 newtype Control e r = Control { getControl :: e -> r }
 
+instance Env e (Control e r) where
+  env f = Control (getControl =<< f)
+
 
 inPrd :: Dual e r d => (K r a -> Control e r) -> d s a
 inPrd = inD . const
