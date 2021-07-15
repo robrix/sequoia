@@ -29,7 +29,6 @@ module Sequoia.Profunctor.D
 , dnE
 , coerceD
   -- * Control context
-, control
 , (•∘)
 , Control(..)
 , inPrd
@@ -172,10 +171,6 @@ coerceD = inD . exD
 
 
 -- Control context
-
-control :: (Env e c, Res r c) => (e -> r) -> c
-control = env . (res .)
-
 
 (•∘) :: (Env (V.Rep v) c, V.Representable v, Res (K.Rep k) c, K.Representable k) => k a -> v a -> c
 k •∘ v = env (\ e -> res (k • e ∘ v))
