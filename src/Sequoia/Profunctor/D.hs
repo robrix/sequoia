@@ -62,7 +62,7 @@ import           Data.Profunctor
 import           Data.Profunctor.Traversing
 import           Sequoia.Bijection
 import           Sequoia.Conjunction
-import           Sequoia.Continuation as K hiding (Cont(..))
+import           Sequoia.Continuation as K
 import           Sequoia.Disjunction
 import           Sequoia.Functor.K
 import           Sequoia.Functor.V

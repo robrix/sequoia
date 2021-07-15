@@ -51,13 +51,8 @@ module Sequoia.Continuation
 , exDN
 , exDN1
 , exDN2
-  -- * Cont monad
-, Cont(..)
-, inCont
-, exCont
 ) where
 
-import Control.Monad (ap)
 import Data.Functor.Contravariant
 import Data.Functor.Contravariant.Rep
 import Data.Profunctor
@@ -224,25 +219,3 @@ exDN1 = dimap inDN exDN
 
 exDN2 :: Representable k => (k **a -> k **b -> k **c) -> (ContFn k a -> ContFn k b -> ContFn k c)
 exDN2 = dimap2 inDN inDN exDN
-
-
--- Cont monad
-
-newtype Cont k a = Cont { runCont :: k **a }
-
-instance Contravariant k => Functor (Cont k) where
-  fmap f = Cont . (•<< (•<< f)) . runCont
-
-instance Representable k => Applicative (Cont k) where
-  pure = Cont . liftDN
-  (<*>) = ap
-
-instance Representable k => Monad (Cont k) where
-  Cont m >>= f = Cont (m •<< inK . \ k a -> runCont (f a) • k)
-
-
-inCont :: Representable k => ContFn k a -> Cont k a
-inCont = Cont . inK . lmap exK
-
-exCont :: Representable k => Cont k a -> ContFn k a
-exCont = lmap inK . exK . runCont
