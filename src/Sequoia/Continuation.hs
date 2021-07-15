@@ -51,6 +51,7 @@ module Sequoia.Continuation
 , exDN2
   -- * Ambient control
 , Res(..)
+, cont
 ) where
 
 import Data.Functor.Contravariant
@@ -220,3 +221,6 @@ class Res r c | c -> r where
 
 instance Res r (K r a) where
   res f = K (\ a -> f (• a) • a)
+
+cont :: (Res (Rep k) c, Representable k) => (((a -> c) -> k a) -> c) -> c
+cont f = res (\ run -> f (inK . (run .)))
