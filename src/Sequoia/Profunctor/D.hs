@@ -44,7 +44,6 @@ module Sequoia.Profunctor.D
 , joinl
 , consumer
 , inCns
-, Consumer
 ) where
 
 import           Control.Category ((<<<), (>>>))
@@ -163,7 +162,7 @@ f <↑ a = f <<< inD' (inlr a)
 
 infixl 7 <↑
 
-(↓) :: Dual e r d => K r b -> a --|d|-> b -> Consumer d r a
+(↓) :: Dual e r d => K r b -> a --|d|-> b -> a --|d|-> r
 k ↓ f = consumer k <<< f
 
 infixl 8 ↓
@@ -238,11 +237,8 @@ joinl :: Dual e r d => d e (d a b) -> d a b
 joinl p = inD (\ a b -> liftKWith (\ _K -> exD p idV (_K (\ f -> exD f a b))))
 
 
-
-inCns :: Dual e r d => (V e a -> Context e r) -> Consumer d r a
+inCns :: Dual e r d => (V e a -> Context e r) -> d a r
 inCns = inD . fmap const
 
-consumer :: (Dual e r d, K.Representable k, K.Rep k ~ r) => k a -> Consumer d r a
+consumer :: (Dual e r d, K.Representable k, K.Rep k ~ r) => k a -> d a r
 consumer k = inCns (k •∘)
-
-type Consumer d r a = d a r
