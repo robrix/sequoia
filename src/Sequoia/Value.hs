@@ -123,3 +123,6 @@ bitraverseDisjV d e = bimapDisj inV0 inV0 (e ∘ d)
 
 class Env e c | c -> e where
   env :: (e -> c) -> c
+
+instance Env e (V e a) where
+  env f = V (runV =<< f)
