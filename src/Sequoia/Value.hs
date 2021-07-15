@@ -26,6 +26,8 @@ module Sequoia.Value
 , mapVRep
 , (>∘∘<)
 , (<∘∘>)
+  -- * Ambient environment
+, Env(..)
 ) where
 
 import Control.Applicative (liftA2)
@@ -115,3 +117,9 @@ infix 3 <∘∘>
 
 bitraverseDisjV :: (Disj d, Representable v) => v (a `d` b) -> Rep v -> (v a `d` v b)
 bitraverseDisjV d e = bimapDisj inV0 inV0 (e ∘ d)
+
+
+-- Ambient environment
+
+class Env e c | c -> e where
+  env :: (e -> c) -> c
