@@ -14,7 +14,6 @@ module Sequoia.Profunctor.D
 , inDK
 , inDV
   -- ** Elimination
-, exDV
 , evalD
 , appD
 , appD2
@@ -130,9 +129,6 @@ inDV f = inD (\ a b -> b •∘ f a)
 
 
 -- Elimination
-
-exDV :: Dual e r d => K r' (V e a -> V e r) -> K r' (a --|d|-> r)
-exDV k = inK (\ f -> k • inV . \ a -> getControl (exD f a idK))
 
 evalD :: Dual e r d => e --|d|-> r -> (e -> r)
 evalD f = getControl (exD f (inV id) idK)
