@@ -113,22 +113,22 @@ mapVSig b = Sig . dimap (b <~) (rmap (mapVSol (~> b))) . runSig
 solSrc
   ::      Sol e r
             <->
-          Src e r |- Δ
-solSrc = Src . const <-> ($ inK absurdΔ) . runSrc
+          Src e r |- r
+solSrc = Src . const <-> ($ idK) . runSrc
 
 
 solSnk
   ::      Sol e r
             <->
-     Γ -| Snk e r
-solSnk = Snk . const <-> ($ inV (const Γ)) . runSnk
+     e -| Snk e r
+solSnk = Snk . const <-> ($ idV) . runSnk
 
 
 srcSig
   ::      Src e r |- b
             <->
-     Γ -| Sig e r |- b
-srcSig = Sig . const . runSrc <-> Src . ($ inV (const Γ)) . runSig
+     e -| Sig e r |- b
+srcSig = Sig . const . runSrc <-> Src . ($ idV) . runSig
 
 composeSrcSig :: Src e r a -> Sig e r a b -> Src e r b
 composeSrcSig src sig = srcSig <~ (sig <<< src ~> srcSig)
@@ -137,8 +137,8 @@ composeSrcSig src sig = srcSig <~ (sig <<< src ~> srcSig)
 snkSig
   :: a -| Snk e r
             <->
-     a -| Sig e r |- Δ
-snkSig = Sig . fmap const . runSnk <-> Snk . fmap ($ inK absurdΔ) . runSig
+     a -| Sig e r |- r
+snkSig = Sig . fmap const . runSnk <-> Snk . fmap ($ idK) . runSig
 
 composeSigSnk :: Sig e r a b -> Snk e r b -> Snk e r a
 composeSigSnk sig snk = snkSig <~ (snk ~> snkSig <<< sig)
@@ -147,8 +147,8 @@ composeSigSnk sig snk = snkSig <~ (snk ~> snkSig <<< sig)
 solSig
   ::      Sol e r
             <->
-     Γ -| Sig e r |- Δ
-solSig = Sig . const . const <-> ($ inK absurdΔ) . ($ inV (const Γ)) . runSig
+     e -| Sig e r |- r
+solSig = Sig . const . const <-> ($ idK) . ($ idV) . runSig
 
 
 composeSrcSnk :: Src e r a -> Snk e r a -> Sol e r
