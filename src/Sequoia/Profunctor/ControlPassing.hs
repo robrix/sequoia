@@ -49,10 +49,10 @@ import           Sequoia.Value as V
 
 -- Control-passing profunctor
 
-newtype CP e r a b = CP { getD :: V e a -> K r b -> Control e r }
+newtype CP e r a b = CP { getCP :: V e a -> K r b -> Control e r }
 
 instance Profunctor (CP e r) where
-  dimap f g = CP . dimap (fmap f) (lmap (contramap g)) . getD
+  dimap f g = CP . dimap (fmap f) (lmap (contramap g)) . getCP
 
 instance Strong (CP e r) where
   first'  (CP r) = CP (\ a b -> val (\ (a, c) -> r (inV0 a) (contramap (,c) b)) a)
@@ -70,7 +70,7 @@ instance Cat.Category (CP e r) where
   CP f . CP g = CP (\ a c -> cont (\ _K -> g a (_K (\ b -> f (inV0 b) c))))
 
 instance Functor (CP e r c) where
-  fmap f = CP . fmap (lmap (contramap f)) . getD
+  fmap f = CP . fmap (lmap (contramap f)) . getCP
 
 instance Applicative (CP e r a) where
   pure a = CP (\ _ b -> b •• a)
@@ -78,7 +78,7 @@ instance Applicative (CP e r a) where
   CP df <*> CP da = CP (\ a b -> cont (\ _K -> df a (_K (\ f -> da a (contramap f b)))))
 
 instance Monad (CP e r a) where
-  CP m >>= f = CP (\ a c -> cont (\ _K -> m a (_K (\ b -> getD (f b) a c))))
+  CP m >>= f = CP (\ a c -> cont (\ _K -> m a (_K (\ b -> getCP (f b) a c))))
 
 instance Coapply (CP e r) where
   coliftA2 f a b = CP (\ v k -> env ((flip (exD a) k <∘∘> flip (exD b) k) (f <$> v)))
@@ -111,7 +111,7 @@ class (Cat.Category d, Profunctor d) => ControlPassing e r d | d -> e r where
 
 instance ControlPassing e r (CP e r) where
   inD = CP
-  exD = getD
+  exD = getCP
 
 
 -- Construction
