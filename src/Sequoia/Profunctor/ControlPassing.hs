@@ -102,12 +102,12 @@ infixr 5 |->
 
 -- Control-passing profunctor abstraction
 
-_ControlPassing :: ControlPassing e r d => d a b <-> (V e a -> K r b -> Control e r)
+_ControlPassing :: ControlPassing e r f => f a b <-> (V e a -> K r b -> Control e r)
 _ControlPassing = exCP <-> inCP
 
-class (Cat.Category d, Profunctor d) => ControlPassing e r d | d -> e r where
-  inCP :: (V e a -> K r b -> Control e r) -> d a b
-  exCP :: d a b -> V e a -> K r b -> Control e r
+class (Cat.Category f, Profunctor f) => ControlPassing e r f | f -> e r where
+  inCP :: (V e a -> K r b -> Control e r) -> f a b
+  exCP :: f a b -> V e a -> K r b -> Control e r
 
 instance ControlPassing e r (CP e r) where
   inCP = CP
@@ -116,38 +116,38 @@ instance ControlPassing e r (CP e r) where
 
 -- Construction
 
-inCP' :: ControlPassing e r d => (a -> b) -> a --|d|-> b
+inCP' :: ControlPassing e r f => (a -> b) -> a --|f|-> b
 inCP' f = inCP (\ a b -> b •∘ (f <$> a))
 
 
 -- Elimination
 
-evalCP :: ControlPassing e r d => e --|d|-> r -> (e -> r)
+evalCP :: ControlPassing e r f => e --|f|-> r -> (e -> r)
 evalCP f = getControl (exCP f (inV id) idK)
 
-appCP :: ControlPassing e r d => a --|d|-> b -> V e (V e a -> K r **b)
+appCP :: ControlPassing e r f => a --|f|-> b -> V e (V e a -> K r **b)
 appCP f = inV (\ e a -> inK (\ b -> getControl (exCP f a b) e))
 
-appCP2 :: ControlPassing e r d => a --|d|-> b --|d|-> c -> V e (V e a -> V e b -> K r **c)
+appCP2 :: ControlPassing e r f => a --|f|-> b --|f|-> c -> V e (V e a -> V e b -> K r **c)
 appCP2 f = inV (\ e a b -> inK (\ c -> getControl (exCP f a (inK (\ g -> getControl (exCP g b c) e))) e))
 
-runCP :: ControlPassing e r d => V e a -> K r b -> a --|d|-> b -> Control e r
+runCP :: ControlPassing e r f => V e a -> K r b -> a --|f|-> b -> Control e r
 runCP v k f = exCP f v k
 
 
 -- Computation
 
-(↑) :: ControlPassing e r d => a --|d|-> b -> V e a -> d e|-> b
+(↑) :: ControlPassing e r f => a --|f|-> b -> V e a -> f e|-> b
 f ↑ a = f <<< producer a
 
 infixl 7 ↑
 
-(↓) :: ControlPassing e r d => K r b -> a --|d|-> b -> a --|d|-> r
+(↓) :: ControlPassing e r f => K r b -> a --|f|-> b -> a --|f|-> r
 k ↓ f = consumer k <<< f
 
 infixl 8 ↓
 
-dnE :: ControlPassing e r d => K r **(a --|d|-> b) -> a --|d|-> b
+dnE :: ControlPassing e r f => K r **(a --|f|-> b) -> a --|f|-> b
 dnE k = inCP (\ a b -> cont (\ _K -> k •• _K (\ f -> exCP f a b)))
 
 coerceCP :: (ControlPassing k v c, ControlPassing k v d) => c a b -> d a b
@@ -172,18 +172,18 @@ instance Res r (Control e r) where
   liftRes f = Control (\ e -> let run = (`getControl` e) in run (f run))
 
 
-inPrd :: ControlPassing e r d => (K r a -> Control e r) -> d e a
+inPrd :: ControlPassing e r f => (K r a -> Control e r) -> f e a
 inPrd = inCP . const
 
-producer :: (ControlPassing e r d, V.Representable v, V.Rep v ~ e) => v a -> d e a
+producer :: (ControlPassing e r f, V.Representable v, V.Rep v ~ e) => v a -> f e a
 producer v = inPrd (•∘ v)
 
-joinl :: ControlPassing e r d => d e (d a b) -> d a b
+joinl :: ControlPassing e r f => f e (f a b) -> f a b
 joinl p = inCP (\ a b -> cont (\ _K -> exCP p idV (_K (\ f -> exCP f a b))))
 
 
-inCns :: ControlPassing e r d => (V e a -> Control e r) -> d a r
+inCns :: ControlPassing e r f => (V e a -> Control e r) -> f a r
 inCns = inCP . fmap const
 
-consumer :: (ControlPassing e r d, K.Representable k, K.Rep k ~ r) => k a -> d a r
+consumer :: (ControlPassing e r f, K.Representable k, K.Rep k ~ r) => k a -> f a r
 consumer k = inCns (k •∘)
