@@ -97,6 +97,9 @@ instance Coapply (D e r) where
 instance Env e (D e r a b) where
   env f = D (\ v k -> env (runD v k . f))
 
+instance Res r (D e r a b) where
+  res f = D (\ v k -> res (\ run -> exD (f (run . runD v k)) v k))
+
 
 -- Mixfix notation
 
