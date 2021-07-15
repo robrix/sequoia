@@ -27,7 +27,6 @@ module Sequoia.Continuation
 , idK
 , composeK
   -- ** Composition
-, (•<<)
 , (<<•)
 , (•>>)
 , (<••>)
@@ -131,11 +130,6 @@ composeK = dimap2 exK exK inK (flip (.))
 
 
 -- Composition
-
-(•<<) :: Contravariant k => k a -> (b -> a) -> k b
-(•<<) = flip contramap
-
-infixr 1 •<<
 
 (<<•) :: (Representable j, Representable k) => (KRep j -> KRep k) -> (j a -> k a)
 f <<• k = inK (f . exK k)

@@ -52,7 +52,7 @@ instance Bitraversable (<) where
 (<|) = (V.>∘∘<)
 
 (<↑) :: (Contravariant k, Conj c) => k (a `c` _Γ) -> a -> k _Γ
-k <↑ a = k •<< inlr a
+k <↑ a = contramap (inlr a) k
 
 infixl 7 <↑
 

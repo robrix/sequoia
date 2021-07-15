@@ -359,7 +359,7 @@ mapΓΔ
   -> _Γ  -|s|- _Δ
   -- -------------
   -> _Γ' -|s|- _Δ'
-mapΓΔ f g p = popΓΔ (\ _Δ _Γ -> pushΓΔ p (_Δ •<< g) (f _Γ))
+mapΓΔ f g p = popΓΔ (\ _Δ _Γ -> pushΓΔ p (contramap g _Δ) (f _Γ))
 
 mapΓ
   :: Contextual e r s
