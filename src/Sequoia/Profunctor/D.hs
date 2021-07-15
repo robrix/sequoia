@@ -31,7 +31,6 @@ module Sequoia.Profunctor.D
 , coerceD
   -- * Control context
 , Control(..)
-, ControlT(..)
 , Context(..)
 , withEnv
 , withVal
@@ -57,7 +56,6 @@ module Sequoia.Profunctor.D
 
 import           Control.Category ((<<<), (>>>))
 import qualified Control.Category as Cat
-import           Control.Monad.Trans.Class
 import           Data.Kind (Type)
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
@@ -196,29 +194,11 @@ class Control e r c | c -> e r where
   runControl :: c -> (e -> r)
 
 
-newtype ControlT e r m a = ControlT { runControlT :: e -> (a -> m r) -> m r }
-  deriving (Functor)
-
-instance Applicative (ControlT e r m) where
-  pure a = ControlT $ \ _ k -> k a
-  ControlT f <*> ControlT a = ControlT (\ e k -> f e (a e . (k .)))
-
-instance Monad (ControlT e r m) where
-  ControlT a >>= f = ControlT (\ e k -> a e (\ a' -> runControlT (f a') e k))
-
-instance MonadTrans (ControlT e r) where
-  lift m = ControlT (const (m >>=))
-
-
 newtype Context e r = Context { runContext :: e -> r }
 
 instance Control e r (Context e r) where
   control = Context
   runControl = runContext
-
-instance Applicative m => Control e (m r) (ControlT e r m r) where
-  control f = ControlT (\ e _ -> f e)
-  runControl c e = runControlT c e pure
 
 instance Control e r (D e r e r) where
   control = complete . Context
