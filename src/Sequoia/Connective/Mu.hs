@@ -37,11 +37,11 @@ foldMu :: Dual e r d => Neg a => f a `d` a -> Mu e r f `d` a
 foldMu alg = inD (\ v k -> withVal (\ (Mu f) -> exD f (inV0 (Down (coerceD alg))) k) v)
 
 unfoldMu :: (Traversable f, Dual e r d) => a `d` f a -> a `d` Mu e r f
-unfoldMu coalg = inD' (\ a -> Mu (inD (\ v k -> withVal (\ (Down alg) -> exD (refoldCPS alg (coerceD coalg)) (inV0 a) k) v)))
+unfoldMu coalg = inD' (\ a -> Mu (inD (\ v k -> withVal (\ (Down alg) -> exD (refoldCat alg (coerceD coalg)) (inV0 a) k) v)))
 
 refoldMu :: (Traversable f, Dual e r d, Neg b) => f b `d` b -> a `d` f a -> a `d` b
 refoldMu f g = foldMu f Cat.<<< unfoldMu g
 
 
-refoldCPS :: (Cat.Category c, Traversing c, Traversable f) => f b `c` b -> a `c` f a -> a `c` b
-refoldCPS f g = go where go = f Cat.<<< traverse' go Cat.<<< g
+refoldCat :: (Cat.Category c, Traversing c, Traversable f) => f b `c` b -> a `c` f a -> a `c` b
+refoldCat f g = go where go = f Cat.<<< traverse' go Cat.<<< g
