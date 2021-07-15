@@ -16,6 +16,11 @@ module Sequoia.Value
 , exV2
 , (∘)
 , idV
+  -- * Coercion
+, coerceVWith
+, coerceV
+, coerceV1
+, coerceV2
   -- * Computation
 , liftV2
 , mapVRep
@@ -75,6 +80,21 @@ infixr 8 ∘
 
 idV :: Representable v => v (Rep v)
 idV = inV id
+
+
+-- Coercion
+
+coerceVWith :: (Representable v1, Representable v2) => ((Rep v1 -> a) -> (Rep v2 -> b)) -> (v1 a -> v2 b)
+coerceVWith = under _V
+
+coerceV :: (Representable v1, Representable v2, Rep v1 ~ Rep v2) => (v1 a -> v2 a)
+coerceV = inV . exV
+
+coerceV1 :: (Representable v1, Representable v2, Rep v1 ~ Rep v2) => (v1 a -> v1 b) -> (v2 a -> v2 b)
+coerceV1 = inV1 . exV1
+
+coerceV2 :: (Representable v1, Representable v2, Rep v1 ~ Rep v2) => (v1 a -> v1 b -> v1 c) -> (v2 a -> v2 b -> v2 c)
+coerceV2 = inV2 . exV2
 
 
 -- Computation
