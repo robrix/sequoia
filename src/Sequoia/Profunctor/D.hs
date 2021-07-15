@@ -256,7 +256,7 @@ type Complete d r e = d e r
 inPrd :: Dual r e d => (K r a -> Context r e) -> Producer d s a
 inPrd = inD . const
 
-producer :: Dual r e d => V e a -> Producer d s a
+producer :: (Dual r e d, V.Representable v, V.Rep v ~ e) => v a -> Producer d s a
 producer v = inPrd (•∘ v)
 
 joinl :: Dual r e d => Producer d e (d a b) -> d a b
@@ -268,7 +268,7 @@ type Producer d s b = d s b
 inCns :: Dual r e d => (V e a -> Context r e) -> Consumer d r a
 inCns = inD . fmap const
 
-consumer :: Dual r e d => K r a -> Consumer d r a
+consumer :: (Dual r e d, K.Representable k, K.Rep k ~ r) => k a -> Consumer d r a
 consumer k = inCns (k •∘)
 
 type Consumer d r a = d a r
