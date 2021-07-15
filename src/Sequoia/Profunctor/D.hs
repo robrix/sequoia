@@ -39,9 +39,6 @@ module Sequoia.Profunctor.D
 , (•∘)
 , (••)
 , Context(..)
-, complete
-, runComplete
-, Complete
 , inPrd
 , producer
 , joinl
@@ -203,7 +200,7 @@ instance ExControl e r (Context e r) where
   runControl = runContext
 
 instance ExControl e r (D e r e r) where
-  runControl = runContext . runComplete
+  runControl f = runControl (exD f idV idK)
 
 
 withEnv :: (InControl e r c, ExControl e r c) => (e -> c) -> c
@@ -230,15 +227,6 @@ infix 7 ••
 
 
 newtype Context e r = Context { runContext :: e -> r }
-
-
-complete :: (Dual e r d, ExControl e r c) => c -> Complete d e r
-complete = inD . const . const . control . runControl
-
-runComplete :: (Dual e r d, InControl e r c) => Complete d e r -> c
-runComplete f = control (runControl (exD f idV idK))
-
-type Complete d e r = d e r
 
 
 inPrd :: Dual e r d => (K r a -> Context e r) -> Producer d s a
