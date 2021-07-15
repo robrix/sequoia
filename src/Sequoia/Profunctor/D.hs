@@ -98,7 +98,8 @@ instance Env e (D e r a b) where
   env f = D (\ v k -> env (runD v k . f))
 
 instance Res r (D e r a b) where
-  res f = D (\ v k -> res (\ run -> exD (f (run . runD v k)) v k))
+  res = D . const . const . res
+  liftRes f = D (\ v k -> liftRes (\ run -> exD (f (run . runD v k)) v k))
 
 
 -- Mixfix notation
@@ -227,7 +228,8 @@ instance Env e (Control e r) where
   env f = Control (getControl =<< f)
 
 instance Res r (Control e r) where
-  res f = Control (\ e -> let run = (`getControl` e) in run (f run))
+  res = Control . const
+  liftRes f = Control (\ e -> let run = (`getControl` e) in run (f run))
 
 
 inPrd :: Dual e r d => (K r a -> Control e r) -> d s a
