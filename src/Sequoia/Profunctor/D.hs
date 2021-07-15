@@ -233,7 +233,7 @@ liftRunControlWith f = withEnv (f . flip runControl)
 liftKWith :: (Control r e c, K.Representable k, K.Rep k ~ r) => (((a -> c) -> k a) -> c) -> c
 liftKWith f = liftRunControlWith (\ run -> f (inK . (run .)))
 
-(•∘) :: (Control r e c, K.Representable k, K.Rep k ~ r) => k a -> V e a -> c
+(•∘) :: (Control r e c, K.Representable k, K.Rep k ~ r, V.Representable v, V.Rep v ~ e) => k a -> v a -> c
 k •∘ v = control (\ e -> k • e ∘ v)
 
 infix 7 •∘
