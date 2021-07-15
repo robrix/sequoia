@@ -39,7 +39,7 @@ import           Sequoia.Value
 -- Sequents
 
 evalSeq :: _Γ -|Seq _Γ _Δ|- _Δ -> (_Γ -> _Δ)
-evalSeq = evalD
+evalSeq = evalCP
 
 runSeq :: Seq e r _Γ _Δ -> ((e -> _Γ) -> (_Δ -> r) -> (e -> r))
 runSeq s f g = evalSeq (dimap f g s)
@@ -50,10 +50,10 @@ newtype Seq e r _Γ _Δ = Seq { getSeq :: V e _Γ -> K r _Δ -> ControlPassing.C
 
 
 liftLR :: ControlPassing e r d => d a b -> Seq e r (a < _Γ) (_Δ > b)
-liftLR = dimap exl inr . coerceD
+liftLR = dimap exl inr . coerceCP
 
 lowerLR :: ControlPassing e r d => (d a b -> _Γ -|Seq e r|- _Δ) -> a < _Γ -|Seq e r|- _Δ > b -> _Γ -|Seq e r|- _Δ
-lowerLR f p = inD (\ _Γ _Δ -> exD (f (inD (\ a b -> exD p (a <| _Γ) (_Δ |> b)))) _Γ _Δ)
+lowerLR f p = inCP (\ _Γ _Δ -> exCP (f (inCP (\ a b -> exCP p (a <| _Γ) (_Δ |> b)))) _Γ _Δ)
 
 
 -- Effectful sequents
@@ -65,7 +65,7 @@ newtype SeqT e r _Γ m _Δ = SeqT { getSeqT :: Seq e (m r) _Γ _Δ }
   deriving (Applicative, Functor, Monad)
 
 instance MonadTrans (SeqT r s _Γ) where
-  lift m = SeqT (inD (const (Control . const . (m >>=) . (•))))
+  lift m = SeqT (inCP (const (Control . const . (m >>=) . (•))))
 
 
 -- Core rules
@@ -86,13 +86,13 @@ deriving via Contextually (Seq e r) instance Exchange e r (Seq e r)
 -- Contextual rules
 
 instance Contextual e r (Seq e r) where
-  swapΓΔ f _Δ' _Γ' = inD (\ _Γ _Δ -> val (\ _Γ -> exD (f _Δ _Γ) (inV0 _Γ') _Δ') _Γ)
+  swapΓΔ f _Δ' _Γ' = inCP (\ _Γ _Δ -> val (\ _Γ -> exCP (f _Δ _Γ) (inV0 _Γ') _Δ') _Γ)
 
 -- Control
 
 instance Calculus.Control Seq where
-  reset s = inD (\ _Γ _Δ -> Control (exK _Δ . getControl (exD s _Γ idK)))
-  shift s = inD (\ _Γ _Δ -> exD s (inV0 (inrK _Δ) <| _Γ) (inlK _Δ |> idK))
+  reset s = inCP (\ _Γ _Δ -> Control (exK _Δ . getControl (exCP s _Γ idK)))
+  shift s = inCP (\ _Γ _Δ -> exCP s (inV0 (inrK _Δ) <| _Γ) (inlK _Δ |> idK))
 
 
 -- Negation
@@ -176,7 +176,7 @@ instance SubtractionIntro e r (Seq e r) where
 
 instance UniversalIntro e r (Seq e r) where
   forAllL p = mapL (notNegate . runForAll) p
-  forAllR p = inD (\ _Γ _Δ -> liftRes (\ run -> inrK _Δ •• ForAll (inK (\ k -> run (exD p _Γ (inlK _Δ |> k))))))
+  forAllR p = inCP (\ _Γ _Δ -> liftRes (\ run -> inrK _Δ •• ForAll (inK (\ k -> run (exCP p _Γ (inlK _Δ |> k))))))
 
 instance ExistentialIntro e r (Seq e r) where
   existsL p = popL (dnE . runExists (pushL p))

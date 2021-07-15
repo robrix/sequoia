@@ -7,15 +7,15 @@ module Sequoia.Profunctor.ControlPassing
 , type (--|)
 , type (|->)
   -- ** Control-passing profunctor abstraction
-, _D
+, _ControlPassing
 , ControlPassing(..)
   -- ** Construction
-, inD'
+, inCP'
   -- ** Elimination
-, evalD
-, appD
-, appD2
-, runD
+, evalCP
+, appCP
+, appCP2
+, runCP
   -- ** Composition
 , (<<<)
 , (>>>)
@@ -23,7 +23,7 @@ module Sequoia.Profunctor.ControlPassing
 , (↑)
 , (↓)
 , dnE
-, coerceD
+, coerceCP
   -- * Control context
 , (•∘)
 , Control(..)
@@ -63,7 +63,7 @@ instance Choice (CP e r) where
   right' (CP r) = CP (\ a b -> val ((inlK b ••) <--> (`r` inrK b) . inV0) a)
 
 instance Traversing (CP e r) where
-  wander traverse r = CP (\ s t -> val (\ s -> exD (traverse ((r ↑) . inV0) s) idV t) s)
+  wander traverse r = CP (\ s t -> val (\ s -> exCP (traverse ((r ↑) . inV0) s) idV t) s)
 
 instance Cat.Category (CP e r) where
   id = CP (flip (•∘))
@@ -81,14 +81,14 @@ instance Monad (CP e r a) where
   CP m >>= f = CP (\ a c -> cont (\ _K -> m a (_K (\ b -> getCP (f b) a c))))
 
 instance Coapply (CP e r) where
-  coliftA2 f a b = CP (\ v k -> env ((flip (exD a) k <∘∘> flip (exD b) k) (f <$> v)))
+  coliftA2 f a b = CP (\ v k -> env ((flip (exCP a) k <∘∘> flip (exCP b) k) (f <$> v)))
 
 instance Env e (CP e r a b) where
-  env f = CP (\ v k -> env (runD v k . f))
+  env f = CP (\ v k -> env (runCP v k . f))
 
 instance Res r (CP e r a b) where
   res = CP . const . const . res
-  liftRes f = CP (\ v k -> liftRes (\ run -> exD (f (run . runD v k)) v k))
+  liftRes f = CP (\ v k -> liftRes (\ run -> exCP (f (run . runCP v k)) v k))
 
 
 -- Mixfix notation
@@ -102,37 +102,37 @@ infixr 5 |->
 
 -- Control-passing profunctor abstraction
 
-_D :: ControlPassing e r d => d a b <-> (V e a -> K r b -> Control e r)
-_D = exD <-> inD
+_ControlPassing :: ControlPassing e r d => d a b <-> (V e a -> K r b -> Control e r)
+_ControlPassing = exCP <-> inCP
 
 class (Cat.Category d, Profunctor d) => ControlPassing e r d | d -> e r where
-  inD :: (V e a -> K r b -> Control e r) -> d a b
-  exD :: d a b -> V e a -> K r b -> Control e r
+  inCP :: (V e a -> K r b -> Control e r) -> d a b
+  exCP :: d a b -> V e a -> K r b -> Control e r
 
 instance ControlPassing e r (CP e r) where
-  inD = CP
-  exD = getCP
+  inCP = CP
+  exCP = getCP
 
 
 -- Construction
 
-inD' :: ControlPassing e r d => (a -> b) -> a --|d|-> b
-inD' f = inD (\ a b -> b •∘ (f <$> a))
+inCP' :: ControlPassing e r d => (a -> b) -> a --|d|-> b
+inCP' f = inCP (\ a b -> b •∘ (f <$> a))
 
 
 -- Elimination
 
-evalD :: ControlPassing e r d => e --|d|-> r -> (e -> r)
-evalD f = getControl (exD f (inV id) idK)
+evalCP :: ControlPassing e r d => e --|d|-> r -> (e -> r)
+evalCP f = getControl (exCP f (inV id) idK)
 
-appD :: ControlPassing e r d => a --|d|-> b -> V e (V e a -> K r **b)
-appD f = inV (\ e a -> inK (\ b -> getControl (exD f a b) e))
+appCP :: ControlPassing e r d => a --|d|-> b -> V e (V e a -> K r **b)
+appCP f = inV (\ e a -> inK (\ b -> getControl (exCP f a b) e))
 
-appD2 :: ControlPassing e r d => a --|d|-> b --|d|-> c -> V e (V e a -> V e b -> K r **c)
-appD2 f = inV (\ e a b -> inK (\ c -> getControl (exD f a (inK (\ g -> getControl (exD g b c) e))) e))
+appCP2 :: ControlPassing e r d => a --|d|-> b --|d|-> c -> V e (V e a -> V e b -> K r **c)
+appCP2 f = inV (\ e a b -> inK (\ c -> getControl (exCP f a (inK (\ g -> getControl (exCP g b c) e))) e))
 
-runD :: ControlPassing e r d => V e a -> K r b -> a --|d|-> b -> Control e r
-runD v k f = exD f v k
+runCP :: ControlPassing e r d => V e a -> K r b -> a --|d|-> b -> Control e r
+runCP v k f = exCP f v k
 
 
 -- Computation
@@ -148,10 +148,10 @@ k ↓ f = consumer k <<< f
 infixl 8 ↓
 
 dnE :: ControlPassing e r d => K r **(a --|d|-> b) -> a --|d|-> b
-dnE k = inD (\ a b -> cont (\ _K -> k •• _K (\ f -> exD f a b)))
+dnE k = inCP (\ a b -> cont (\ _K -> k •• _K (\ f -> exCP f a b)))
 
-coerceD :: (ControlPassing k v c, ControlPassing k v d) => c a b -> d a b
-coerceD = inD . exD
+coerceCP :: (ControlPassing k v c, ControlPassing k v d) => c a b -> d a b
+coerceCP = inCP . exCP
 
 
 -- Control context
@@ -173,17 +173,17 @@ instance Res r (Control e r) where
 
 
 inPrd :: ControlPassing e r d => (K r a -> Control e r) -> d e a
-inPrd = inD . const
+inPrd = inCP . const
 
 producer :: (ControlPassing e r d, V.Representable v, V.Rep v ~ e) => v a -> d e a
 producer v = inPrd (•∘ v)
 
 joinl :: ControlPassing e r d => d e (d a b) -> d a b
-joinl p = inD (\ a b -> cont (\ _K -> exD p idV (_K (\ f -> exD f a b))))
+joinl p = inCP (\ a b -> cont (\ _K -> exCP p idV (_K (\ f -> exCP f a b))))
 
 
 inCns :: ControlPassing e r d => (V e a -> Control e r) -> d a r
-inCns = inD . fmap const
+inCns = inCP . fmap const
 
 consumer :: (ControlPassing e r d, K.Representable k, K.Rep k ~ r) => k a -> d a r
 consumer k = inCns (k •∘)

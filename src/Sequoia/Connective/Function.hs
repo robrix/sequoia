@@ -20,10 +20,10 @@ import           Sequoia.Profunctor.ControlPassing
 -- Implication
 
 appFun :: (a ~~Fun e r~> b) -> V e (V e a -> K r **b)
-appFun = appD
+appFun = appCP
 
 appFun2 :: (a ~~Fun e r~> b ~~Fun e r~> c) -> V e (V e a -> V e b -> K r **c)
-appFun2 = appD2
+appFun2 = appCP2
 
 newtype Fun e r a b = Fun { getFun :: V e a -> K r b -> Control e r }
   deriving (Cat.Category, Choice, ControlPassing e r, Profunctor, Strong, Traversing) via CP e r

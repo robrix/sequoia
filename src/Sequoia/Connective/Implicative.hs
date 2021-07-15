@@ -20,7 +20,7 @@ import Sequoia.Profunctor.ControlPassing
 import Sequoia.Value
 
 elimFun :: a ~~Fun e r~> b -> a ~-r-< b -> Control e r
-elimFun f = exD f <$> inV0 . subA <*> subK
+elimFun f = exCP f <$> inV0 . subA <*> subK
 
 funPar1 :: K r (V e (r ¬a ⅋ b)) <-> K r (V e (a ~~Fun e r~> b))
 funPar1
@@ -33,7 +33,7 @@ funPar2
   <-> inK1 (\ k p -> k (inK ((p •) . (mkPar (inrK (contramap inV0 p)) =<<))))
 
 mkPar :: K r b -> a ~~Fun e r~> b -> V e (r ¬a ⅋ b)
-mkPar p f = V (\ e -> inl (inK (\ a -> getControl (exD f (inV0 a) p) e)))
+mkPar p f = V (\ e -> inl (inK (\ a -> getControl (exCP f (inV0 a) p) e)))
 
 mkFun :: r ¬a ⅋ b -> a ~~Fun e r~> b
-mkFun p = inD (\ a b -> ((•∘ a) <--> (b ••)) p)
+mkFun p = inCP (\ a b -> ((•∘ a) <--> (b ••)) p)
