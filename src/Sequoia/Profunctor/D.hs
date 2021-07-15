@@ -196,8 +196,8 @@ class InControl e r c | c -> e r where
 instance InControl e r (Context e r) where
   control = Context
 
-instance InControl e r (D e r e r) where
-  control = complete . Context
+instance InControl e r (D e r a b) where
+  control = D . const . const . Context
 
 
 class ExControl e r c | c -> e r where
