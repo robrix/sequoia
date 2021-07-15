@@ -276,6 +276,8 @@ consumer k = inCns (k •∘)
 type Consumer d r a = d a r
 
 
+-- Continuations
+
 newtype Cont r e a = Cont { runCont :: V e a -> Context r e }
 
 instance Contravariant (Cont r e) where
