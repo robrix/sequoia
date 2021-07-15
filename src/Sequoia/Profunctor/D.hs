@@ -1,4 +1,5 @@
 {-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE TypeFamilies #-}
 module Sequoia.Profunctor.D
 ( -- * Dual profunctor
   D(..)
@@ -223,21 +224,21 @@ instance Control r e (D r e e r) where
 withEnv :: Control r e c => (e -> c) -> c
 withEnv f = control (runControl =<< f)
 
-withVal :: Control r e c => (a -> c) -> (V e a -> c)
+withVal :: (Control r e c, V.Representable v, V.Rep v ~ e) => (a -> c) -> (v a -> c)
 withVal f v = withEnv (f . exV v)
 
 liftRunControlWith :: Control r e c => ((c -> r) -> c) -> c
 liftRunControlWith f = withEnv (f . flip runControl)
 
-liftKWith :: Control r e c => (((a -> c) -> K r a) -> c) -> c
+liftKWith :: (Control r e c, K.Representable k, K.Rep k ~ r) => (((a -> c) -> k a) -> c) -> c
 liftKWith f = liftRunControlWith (\ run -> f (inK . (run .)))
 
-(•∘) :: Control r e c => K r a -> V e a -> c
+(•∘) :: (Control r e c, K.Representable k, K.Rep k ~ r) => k a -> V e a -> c
 k •∘ v = control (\ e -> k • e ∘ v)
 
 infix 7 •∘
 
-(••) :: Control r e c => K r a -> a -> c
+(••) :: (Control r e c, K.Representable k, K.Rep k ~ r) => k a -> a -> c
 k •• v = control (const (k • v))
 
 infix 7 ••
