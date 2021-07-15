@@ -15,22 +15,25 @@ import Sequoia.Connective.Subtraction
 import Sequoia.Continuation
 import Sequoia.Disjunction
 import Sequoia.Functor.K
+import Sequoia.Functor.V
+import Sequoia.Profunctor.D
+import Sequoia.Value
 
-elimFun :: a ~~r~> b -> a ~-r-< b -> r
-elimFun f = (•) <$> appFun f . subA <*> subK
+elimFun :: a ~~Fun r e~> b -> a ~-r-< b -> Context r e
+elimFun f = exD f <$> inV0 . subA <*> subK
 
-funPar1 :: K r (r ¬a ⅋ b) <-> K r (a ~~r~> b)
+funPar1 :: K r (V e (r ¬a ⅋ b)) <-> K r (V e (a ~~Fun r e~> b))
 funPar1
-  =   inK1 (\ k -> k . mkPar (inK k))
-  <-> inK1 (. mkFun)
+  =   inK1' (\ k -> exK k . (mkPar (inrK (contramap inV0 k)) =<<))
+  <-> inK1 (. fmap mkFun)
 
-funPar2 :: K r **(r ¬a ⅋ b) <-> K r **(a ~~r~> b)
+funPar2 :: K r **V e (r ¬a ⅋ b) <-> K r **V e (a ~~Fun r e~> b)
 funPar2
-  =   inK1 (\ k f -> k (inK ((f •) . mkFun)))
-  <-> inK1 (\ k p -> k (inK ((p •) . mkPar p)))
+  =   inK1 (\ k f -> k (inK ((f •) . fmap mkFun)))
+  <-> inK1 (\ k p -> k (inK ((p •) . (mkPar (inrK (contramap inV0 p)) =<<))))
 
-mkPar :: K r (r ¬a ⅋ b) -> a ~~r~> b -> r ¬a ⅋ b
-mkPar p f = inl (inK (\ a -> appFun f a • inK ((p •) . inr)))
+mkPar :: K r b -> a ~~Fun r e~> b -> V e (r ¬a ⅋ b)
+mkPar p f = V (\ e -> inl (inK (\ a -> runControl (exD f (inV0 a) p) e)))
 
-mkFun :: r ¬a ⅋ b -> a ~~r~> b
-mkFun p = Fun (inK1 (\ b a -> ((• a) <--> b) p))
+mkFun :: r ¬a ⅋ b -> a ~~Fun r e~> b
+mkFun p = inD (\ a b -> ((•∘ a) <--> (b ••)) p)

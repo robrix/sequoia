@@ -15,36 +15,36 @@ import Sequoia.Polarity
 
 -- * Logical biconditional
 
-class Core k v s => IffIntro k v s where
+class Core r e s => IffIntro r e s where
   iffL1
     :: (Neg a, Neg b)
     => _Γ -|s|- _Δ > a   ->   b < _Γ -|s|- _Δ
     -- --------------------------------------
-    ->     a <~k~> b < _Γ -|s|- _Δ
+    ->     a <~Iff r e~> b < _Γ -|s|- _Δ
 
   iffL2
     :: (Neg a, Neg b)
     => _Γ -|s|- _Δ > b   ->   a < _Γ -|s|- _Δ
     -- --------------------------------------
-    ->     a <~k~> b < _Γ -|s|- _Δ
+    ->     a <~Iff r e~> b < _Γ -|s|- _Δ
 
   iffR
     :: (Neg a, Neg b)
     => a < _Γ -|s|- _Δ > b   ->   b < _Γ -|s|- _Δ > a
     -- ----------------------------------------------
-    ->           _Γ -|s|- _Δ > a <~k~> b
+    ->           _Γ -|s|- _Δ > a <~Iff r e~> b
 
 
 iffR1'
-  :: (Weaken k v s, Exchange k v s, IffIntro k v s, Neg a, Neg b)
-  =>     _Γ -|s|- _Δ > a <~k~> b
-  -- ---------------------------
+  :: (Weaken r e s, Exchange r e s, IffIntro r e s, Neg a, Neg b)
+  =>     _Γ -|s|- _Δ > a <~Iff r e~> b
+  -- ---------------------------------
   -> a < _Γ -|s|- _Δ > b
 iffR1' s = wkL (wkR' s) >>> iffL1 init init
 
 iffR2'
-  :: (Weaken k v s, Exchange k v s, IffIntro k v s, Neg a, Neg b)
-  =>     _Γ -|s|- _Δ > a <~k~> b
+  :: (Weaken r e s, Exchange r e s, IffIntro r e s, Neg a, Neg b)
+  =>     _Γ -|s|- _Δ > a <~Iff r e~> b
   -- ---------------------------------
   -> b < _Γ -|s|- _Δ > a
 iffR2' s = wkL (wkR' s) >>> iffL2 init init

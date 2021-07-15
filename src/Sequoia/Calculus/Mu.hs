@@ -17,23 +17,23 @@ import Sequoia.Polarity
 
 -- Recursion
 
-class Core k v s => MuIntro k v s where
+class Core r e s => MuIntro r e s where
   muL
     :: ((Neg ==> Pos) f, Neg a)
-    => _Γ -|s|- _Δ > f a ~~k~> a   ->   a < _Γ -|s|- _Δ
-    -- ------------------------------------------------
-    ->              Mu k f < _Γ -|s|- _Δ
+    => _Γ -|s|- _Δ > f a ~~Fun r e~> a   ->   a < _Γ -|s|- _Δ
+    -- ------------------------------------------------------
+    ->                 Mu r e f < _Γ -|s|- _Δ
 
   muR
     :: (Neg ==> Pos) f
-    => _Γ -|s|- _Δ > ForAll k N (MuF k f)
-    -- ----------------------------------
-    -> _Γ -|s|- _Δ >             Mu  k f
+    => _Γ -|s|- _Δ > ForAll r N (MuF r e f)
+    -- ------------------------------------
+    -> _Γ -|s|- _Δ >             Mu  r e f
 
 
 muL'
-  :: (Weaken k v s, Exchange k v s, MuIntro k v s, (Neg ==> Pos) f)
-  =>             Mu  k f  < _Γ -|s|- _Δ
-  -- ----------------------------------
-  -> ForAll k N (MuF k f) < _Γ -|s|- _Δ
+  :: (Weaken r e s, Exchange r e s, MuIntro r e s, (Neg ==> Pos) f)
+  =>             Mu  r e f  < _Γ -|s|- _Δ
+  -- ------------------------------------
+  -> ForAll r N (MuF r e f) < _Γ -|s|- _Δ
 muL' p = muR init >>> wkL' p

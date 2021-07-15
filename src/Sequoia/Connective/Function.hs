@@ -8,35 +8,31 @@ module Sequoia.Connective.Function
 ) where
 
 import qualified Control.Category as Cat
+import           Data.Kind (Type)
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
-import           Sequoia.CPS
 import           Sequoia.Continuation
 import           Sequoia.Functor.K
+import           Sequoia.Functor.V
 import           Sequoia.Polarity
+import           Sequoia.Profunctor.D
 
 -- Implication
 
-appFun :: (a ~~r~> b) -> (a -> K r **b)
-appFun = (-<<) . getFun
+appFun :: (a ~~Fun r e~> b) -> V e (V e a -> K r **b)
+appFun = appD
 
-appFun2 :: (a ~~r~> b ~~r~> c) -> (a -> b -> K r **c)
-appFun2 f a b = inDN (appC2 f a b)
+appFun2 :: (a ~~Fun r e~> b ~~Fun r e~> c) -> V e (V e a -> V e b -> K r **c)
+appFun2 = appD2
 
-newtype Fun r a b = Fun { getFun :: K r b -> K r a }
-  deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via C (K r)
+newtype Fun r e a b = Fun { getFun :: V e a -> K r b -> Context r e }
+  deriving (Cat.Category, Choice, Dual r e, Profunctor, Strong, Traversing) via D r e
+  deriving (Functor) via D r e a
 
-instance ContPassing (K r) (Fun r) where
-  inC = Fun
-  exC = getFun
+instance (Pos a, Neg b) => Polarized N (Fun r e a b) where
 
-instance Functor (Fun r a) where
-  fmap f (Fun r) = Fun (r . contramap f)
-
-instance (Pos a, Neg b) => Polarized N (Fun r a b) where
-
-type a ~~ r = Fun r a
-type f ~> b = f b
+type l ~~(r :: Type -> Type -> Type) = r l
+type l~> r = l r
 
 infixr 6 ~~
 infixr 5 ~>

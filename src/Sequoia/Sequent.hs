@@ -49,10 +49,10 @@ instance Dual r e (Seq r e) where
   exD = runSeq
 
 
-liftLR :: D r e a b -> Seq r e (a < _Γ) (_Δ > b)
+liftLR :: Dual r e d => d a b -> Seq r e (a < _Γ) (_Δ > b)
 liftLR = dimap exl inr . coerceD
 
-lowerLR :: (D r e a b -> _Γ -|Seq r e|- _Δ) -> a < _Γ -|Seq r e|- _Δ > b -> _Γ -|Seq r e|- _Δ
+lowerLR :: Dual r e d => (d a b -> _Γ -|Seq r e|- _Δ) -> a < _Γ -|Seq r e|- _Δ > b -> _Γ -|Seq r e|- _Δ
 lowerLR f p = inD (\ _Γ _Δ -> exD (f (inD (\ a b -> exD p (a <| _Γ) (_Δ |> b)))) _Γ _Δ)
 
 
@@ -164,8 +164,8 @@ instance XOrIntro r e (Seq r e) where
 -- Implication
 
 instance FunctionIntro r e (Seq r e) where
-  funL a b = popL (\ f -> a >>> liftLR (inDK (getFun f)) >>> wkL' b)
-  funR = lowerLR (\ f -> inD (\ _ k -> inrK k •∘ (Fun <$> exDK f))) . wkR'
+  funL a b = popL (\ f -> a >>> liftLR f >>> wkL' b)
+  funR = lowerLR liftR . wkR'
 
 instance SubtractionIntro r e (Seq r e) where
   subL f = mapL (sub <~) (tensorL (wkL' f >>> poppedL2 negateL init))
