@@ -283,8 +283,8 @@ type Consumer d r a = d a r
 liftCont :: K r a -> Cont r e a
 liftCont k = Cont (k •∘)
 
-lowerCont :: Cont r e a -> e -> K r a
-lowerCont (Cont r) e = K (\ a -> runControl (r (inV0 a)) e)
+lowerCont :: Cont r e a -> V e (K r a)
+lowerCont (Cont r) = V $ \ e -> K (\ a -> runControl (r (inV0 a)) e)
 
 newtype Cont r e a = Cont { runCont :: V e a -> Context r e }
 
