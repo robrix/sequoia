@@ -24,9 +24,7 @@ module Sequoia.Profunctor.D
 , (>>>)
   -- ** Computation
 , (↑)
-, (<↑)
 , (↓)
-, (↓>)
 , dnE
 , coerceD
   -- * Control context
@@ -52,7 +50,6 @@ import           Data.Kind (Type)
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
 import           Sequoia.Bijection
-import           Sequoia.Conjunction
 import           Sequoia.Continuation as K
 import           Sequoia.Disjunction
 import           Sequoia.Functor.K
@@ -157,20 +154,10 @@ f ↑ a = f <<< producer a
 
 infixl 7 ↑
 
-(<↑) :: Dual e r d => Conj c => (a `c` _Γ) --|d|-> _Δ -> a -> _Γ --|d|-> _Δ
-f <↑ a = f <<< inD' (inlr a)
-
-infixl 7 <↑
-
 (↓) :: Dual e r d => K r b -> a --|d|-> b -> a --|d|-> r
 k ↓ f = consumer k <<< f
 
 infixl 8 ↓
-
-(↓>) :: (Dual e r d, Disj p) => K r c -> a --|d|-> (b `p` c) -> a --|d|-> b
-c ↓> f = inD (\ v k -> (k <••> c) •∘ v) <<< f
-
-infixr 9 ↓>
 
 dnE :: Dual e r d => K r **(a --|d|-> b) -> a --|d|-> b
 dnE k = inD (\ a b -> liftKWith (\ _K -> k •• _K (\ f -> exD f a b)))
