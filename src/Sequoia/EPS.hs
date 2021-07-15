@@ -83,13 +83,13 @@ _E :: (EnvPassing v e, EnvPassing v' e') => Optic Iso (e a b) (e' a' b') (v a ->
 _E = exE <-> inE
 
 
-inE1 :: EnvPassing v e => ((VRep v -> a) -> (VRep v -> b)) -> a `e` b
+inE1 :: EnvPassing v e => ((Rep v -> a) -> (Rep v -> b)) -> a `e` b
 inE1 = inE . inV1
 
-inE1' :: EnvPassing v e => (v a -> (VRep v -> b)) -> a `e` b
+inE1' :: EnvPassing v e => (v a -> (Rep v -> b)) -> a `e` b
 inE1' = inE . inV1'
 
-exE1 :: EnvPassing v e => a `e` b -> ((VRep v -> a) -> (VRep v -> b))
+exE1 :: EnvPassing v e => a `e` b -> ((Rep v -> a) -> (Rep v -> b))
 exE1 = exV1 . exE
 
 
@@ -98,16 +98,16 @@ exE1 = exV1 . exE
 eps :: EnvPassing v e => (a -> b) -> a `e` b
 eps = inE1 . (.)
 
-liftE :: EnvPassing v e => (VRep v -> ((VRep v -> a) -> b)) -> a `e` b
+liftE :: EnvPassing v e => (Rep v -> ((Rep v -> a) -> b)) -> a `e` b
 liftE = inE . inV1 . flip
 
 
 -- Elimination
 
-appE :: EnvPassing v e => a `e` b -> (VRep v -> ((VRep v -> a) -> b))
+appE :: EnvPassing v e => a `e` b -> (Rep v -> ((Rep v -> a) -> b))
 appE = flip . exE1
 
-appE2 :: EnvPassing v e => a `e` (b `e` c) -> (VRep v -> ((VRep v -> a) -> (VRep v -> b) -> c))
+appE2 :: EnvPassing v e => a `e` (b `e` c) -> (Rep v -> ((Rep v -> a) -> (Rep v -> b) -> c))
 appE2 f s = (`appE` s) . appE f s
 
 
@@ -157,10 +157,10 @@ collectE f r = inE1 (\ a s -> (\ c -> exE1 (f c) a s) <$> r)
 
 -- Representable
 
-tabulateE :: EnvPassing v e => (Store (VRep v) b -> a) -> b `e` a
+tabulateE :: EnvPassing v e => (Store (Rep v) b -> a) -> b `e` a
 tabulateE f = inE1 (fmap f . store)
 
-indexE :: EnvPassing v e => b `e` a -> (Store (VRep v) b -> a)
+indexE :: EnvPassing v e => b `e` a -> (Store (Rep v) b -> a)
 indexE e = uncurry (exE1 e) . runStore
 
 
@@ -184,7 +184,7 @@ bindE m f = inE1 (\ k -> (`exE1` k) =<< f . exE1 m k)
 
 -- Comonad
 
-extractE :: (EnvPassing v e, Monoid (VRep v), Monoid a) => a `e` b -> b
+extractE :: (EnvPassing v e, Monoid (Rep v), Monoid a) => a `e` b -> b
 extractE e = appE e mempty mempty
 
 extendE :: EnvPassing v e => (s `e` a -> b) -> (s `e` a -> s `e` b)
@@ -228,13 +228,13 @@ unsecondE e = inE1 (\ a s -> let (d, b) = appE e s ((d,) . a) in b)
 
 -- Cosieve
 
-cosieveE :: EnvPassing v e => a `e` b -> (Store (VRep v) a -> b)
+cosieveE :: EnvPassing v e => a `e` b -> (Store (Rep v) a -> b)
 cosieveE = indexE
 
 
 -- Corepresentable
 
-cotabulateE :: EnvPassing v e => (Store (VRep v) a -> b) -> a `e` b
+cotabulateE :: EnvPassing v e => (Store (Rep v) a -> b) -> a `e` b
 cotabulateE = tabulateE
 
 
@@ -254,7 +254,7 @@ instance Representable v => Distributive (E v a) where
   collect = collectE
 
 instance Representable v => Representable (E v b) where
-  type Rep (E v b) = Store (VRep v) b
+  type Rep (E v b) = Store (Rep v) b
   tabulate = tabulateE
   index = indexE
 
@@ -266,7 +266,7 @@ instance Representable v => Applicative (E v a) where
 instance Representable v => Monad (E v a) where
   (>>=) = bindE
 
-instance (Representable v, Monoid (VRep v), Monoid a) => Comonad (E v a) where
+instance (Representable v, Monoid (Rep v), Monoid a) => Comonad (E v a) where
   extract = extractE
   extend = extendE
   duplicate = duplicateE
@@ -288,10 +288,10 @@ instance Representable v => Costrong (E v) where
   unfirst  = unfirstE
   unsecond = unsecondE
 
-instance (Representable v, s ~ VRep v) => Cosieve (E v) (Store s) where
+instance (Representable v, s ~ Rep v) => Cosieve (E v) (Store s) where
   cosieve = cosieveE
 
 instance Representable v => Pro.Corepresentable (E v) where
-  type Corep (E v) = Store (VRep v)
+  type Corep (E v) = Store (Rep v)
 
   cotabulate = cotabulateE
