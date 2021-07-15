@@ -11,15 +11,13 @@ module Sequoia.Sequent
 ) where
 
 import qualified Control.Category as Cat
-import           Control.Monad (ap)
 import           Control.Monad.Trans.Class
 import           Data.Profunctor
 import           Prelude hiding (init)
 import           Sequoia.Bijection
-import           Sequoia.CPS
 import           Sequoia.Calculus.Additive
-import           Sequoia.Calculus.Context
-import           Sequoia.Calculus.Control
+import           Sequoia.Calculus.Context hiding ((<↑))
+import           Sequoia.Calculus.Control as Calculus
 import           Sequoia.Calculus.Core
 import           Sequoia.Calculus.Iff
 import           Sequoia.Calculus.Implicative
@@ -34,63 +32,44 @@ import           Sequoia.Conjunction
 import           Sequoia.Continuation as K
 import           Sequoia.Disjunction
 import           Sequoia.Functor.K
-import           Sequoia.Profunctor.D (Dual(..), runControl, (•∘))
+import           Sequoia.Functor.V
+import           Sequoia.Profunctor.D as D hiding ((>>>))
 import           Sequoia.Value
 
 -- Sequents
 
-evalSeq :: _Γ -|Seq _Δ s|- _Δ -> K _Δ _Γ
-evalSeq = evalC
+evalSeq :: _Γ -|Seq _Δ _Γ|- _Δ -> (_Γ -> _Δ)
+evalSeq = evalD
 
-newtype Seq r e _Γ _Δ = Seq { runSeq :: K r _Δ -> K r _Γ }
+newtype Seq r e _Γ _Δ = Seq { runSeq :: V e _Γ -> K r _Δ -> Context r e }
+  deriving (Applicative, Functor, Monad) via (D r e _Γ)
+  deriving (Cat.Category, Choice, Profunctor, Strong) via (D r e)
 
-instance Functor (Seq r e a) where
-  fmap = rmap
-
-instance Applicative (Seq r e a) where
-  pure a = Seq (inK . const . (• a))
-  (<*>) = ap
-
-instance Monad (Seq r e a) where
-  Seq m >>= f = Seq (inK . \ b a -> m (inK (\ a' -> exC (f a') b • a)) • a)
-
-instance Cat.Category (Seq r e) where
-  id = Seq id
-  Seq f . Seq g = Seq (g . f)
-
-instance Profunctor (Seq r e) where
-  dimap f g = Seq . dimap (contramap g) (contramap f) . runSeq
-
-instance Monoid e => Dual r e (Seq r e) where
-  inD f = Seq (inK . \ b a -> runControl (f (inV0 a) b) mempty)
-  exD (Seq f) v k = f k •∘ v
+instance Dual r e (Seq r e) where
+  inD = Seq
+  exD = runSeq
 
   type R (Seq r e) = r
   type E (Seq r e) = e
 
-instance ContPassing (K r) (Seq r e) where
-  inC = Seq
-  exC = runSeq
 
+liftLR :: D r e a b -> Seq r e (a < _Γ) (_Δ > b)
+liftLR = dimap exl inr . coerceD
 
-liftLR :: ContPassing (K r) c => c a b -> Seq r e (a < _Γ) (_Δ > b)
-liftLR = dimap exl inr . Seq . exC
-
-
-lowerLR :: ContPassing (K r) c => (c a b -> _Γ -|Seq r e|- _Δ) -> a < _Γ -|Seq r e|- _Δ > b -> _Γ -|Seq r e|- _Δ
-lowerLR f p = inC1' (\ _Δ _Γ -> _Δ ↓ f (inC1' (\ b a -> _Δ ↓ b ↓> p <↑ a • _Γ)) • _Γ)
+lowerLR :: (D r e a b -> _Γ -|Seq r e|- _Δ) -> a < _Γ -|Seq r e|- _Δ > b -> _Γ -|Seq r e|- _Δ
+lowerLR f p = inD (\ _Γ _Δ -> exD (f (inD (\ a b -> exD p (a <| _Γ) (_Δ |> b)))) _Γ _Δ)
 
 
 -- Effectful sequents
 
-runSeqT :: SeqT r s _Γ m _Δ -> ((_Δ -> m r) -> (_Γ -> m r))
-runSeqT = dimap K runK . runSeq . getSeqT
+runSeqT :: SeqT r e _Γ m _Δ -> ((e -> _Γ) -> (_Δ -> m r) -> (e -> m r))
+runSeqT = dimap V (dimap K runControl) . runSeq . getSeqT
 
 newtype SeqT r s _Γ m _Δ = SeqT { getSeqT :: Seq (m r) s _Γ _Δ }
   deriving (Applicative, Functor, Monad)
 
 instance MonadTrans (SeqT r s _Γ) where
-  lift m = SeqT (inC1 (const . (m >>=)))
+  lift m = SeqT (inD (const (control . const . (m >>=) . (•))))
 
 
 -- Core rules
@@ -111,14 +90,13 @@ deriving via Contextually (Seq r e) instance Exchange r e (Seq r e)
 -- Contextual rules
 
 instance Contextual r e (Seq r e) where
-  swapΓΔ f _Δ' _Γ' = inC1' (\ _Δ _Γ -> _Δ' ↓ f _Δ _Γ • _Γ')
-
+  swapΓΔ f _Δ' _Γ' = inD (\ _Γ _Δ -> withVal (\ _Γ -> exD (f _Δ _Γ) (inV0 _Γ') _Δ') _Γ)
 
 -- Control
 
-instance Control Seq where
-  reset s = inC (•<< (evalSeq s •))
-  shift s = inC1' (\ _Δ _Γ -> exC s (inlK _Δ |> idK) • (inrK _Δ <| _Γ))
+instance Calculus.Control Seq where
+  reset s = inD (\ _Γ _Δ -> control (exK _Δ . runControl (exD s _Γ idK)))
+  shift s = inD (\ _Γ _Δ -> exD s (inV0 (inrK _Δ) <| _Γ) (inlK _Δ |> idK))
 
 
 -- Negation
@@ -190,8 +168,8 @@ instance XOrIntro r e (Seq r e) where
 -- Implication
 
 instance FunctionIntro r e (Seq r e) where
-  funL a b = popL (\ f -> a >>> liftLR f >>> wkL' b)
-  funR = lowerLR liftR . wkR'
+  funL a b = popL (\ f -> a >>> liftLR (inDK (getFun f)) >>> wkL' b)
+  funR = lowerLR (\ f -> inD (\ _ k -> inrK k •∘ (Fun <$> exDK f))) . wkR'
 
 instance SubtractionIntro r e (Seq r e) where
   subL f = mapL (sub <~) (tensorL (wkL' f >>> poppedL2 negateL init))
@@ -202,7 +180,7 @@ instance SubtractionIntro r e (Seq r e) where
 
 instance UniversalIntro r e (Seq r e) where
   forAllL p = mapL (notNegate . runForAll) p
-  forAllR p = inC1' (\ _Δ _Γ -> inrK _Δ • ForAll (inK (\ k -> inlK _Δ ↓ k ↓> p • _Γ)))
+  forAllR p = inD (\ _Γ _Δ -> liftRunControlWith (\ run -> inrK _Δ •• ForAll (inK (\ k -> run (exD p _Γ (inlK _Δ |> k))))))
 
 instance ExistentialIntro r e (Seq r e) where
   existsL p = popL (dnE . runExists (pushL p))

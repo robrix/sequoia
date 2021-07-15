@@ -23,6 +23,7 @@ import Data.Bitraversable
 import Sequoia.Conjunction
 import Sequoia.Continuation as K
 import Sequoia.Disjunction
+import Sequoia.Value as V
 
 -- Γ
 
@@ -47,8 +48,8 @@ instance Bifunctor (<) where
 instance Bitraversable (<) where
   bitraverse = bitraverseConj
 
-(<|) :: i -> is -> i < is
-(<|) = inlr
+(<|) :: V.Representable v => v i -> v is -> v (i < is)
+(<|) = (V.>∘∘<)
 
 (<↑) :: (Contravariant k, Conj c) => k (a `c` _Γ) -> a -> k _Γ
 k <↑ a = k •<< inlr a
