@@ -35,32 +35,25 @@ import           Sequoia.Value as V
 
 -- Signals
 
-sol :: (K.Representable k, V.Representable v) => (V.Rep v -> K.Rep k) -> Sol k v
-sol f = Sol (inV (inK . const . f))
-
 (••) :: (K.Representable k, V.Representable v) => k a -> v a -> Sol k v
-k •• a = sol (\ e -> k • e ∘ a)
+k •• a = Sol (\ e -> k • e ∘ a)
 
 infix 7 ••
 
-withEnv :: (K.Representable k, V.Representable v) => (V.Rep v -> Sol k v) -> Sol k v
-withEnv f = sol (evalSol =<< f)
+withEnv :: (V.Rep v -> Sol k v) -> Sol k v
+withEnv f = Sol (runSol =<< f)
 
-liftSolWithK :: (K.Representable k, V.Representable v) => ((Sol k v -> K.Rep k) -> Sol k v) -> Sol k v
-liftSolWithK f = withEnv (f . flip evalSol)
-
-
-evalSol :: (K.Representable k, V.Representable v) => Sol k v -> (V.Rep v -> K.Rep k)
-evalSol (Sol r) e = e ∘ r • ()
+liftSolWithK :: ((Sol k v -> K.Rep k) -> Sol k v) -> Sol k v
+liftSolWithK f = withEnv (f . flip runSol)
 
 
-newtype Sol k v     = Sol { runSol :: forall x . v (k x) }
+newtype Sol k v     = Sol { runSol :: V.Rep v -> K.Rep k }
 
-mapKSol :: Functor v => (forall x . k x -> k' x) -> (Sol k v -> Sol k' v)
-mapKSol f (Sol r) = Sol (f <$> r)
+mapKSol :: (K.Representable k, K.Representable k') => (forall x . k x -> k' x) -> (Sol k v -> Sol k' v)
+mapKSol f (Sol r) = Sol (over _K f r)
 
-mapVSol :: (forall x . v x -> v' x) -> (Sol k v -> Sol k v')
-mapVSol f (Sol r) = Sol (f r)
+mapVSol :: (V.Representable v, V.Representable v') => (forall x . v x -> v' x) -> (Sol k v -> Sol k v')
+mapVSol f (Sol r) = Sol (over _V f r)
 
 
 newtype Src k v   b = Src { runSrc :: k b -> Sol k v }
@@ -68,10 +61,10 @@ newtype Src k v   b = Src { runSrc :: k b -> Sol k v }
 instance Contravariant k => Functor (Src k v) where
   fmap f (Src r) = Src (lmap (contramap f) r)
 
-mapKSrc :: Functor v => (forall x . k x <-> k' x) -> (Src k v b -> Src k' v b)
+mapKSrc :: (K.Representable k, K.Representable k') => (forall x . k x <-> k' x) -> (Src k v b -> Src k' v b)
 mapKSrc b = Src . dimap (b <~) (mapKSol (~> b)) . runSrc
 
-mapVSrc :: (forall x . v x -> v' x) -> (Src k v b -> Src k v' b)
+mapVSrc :: (V.Representable v, V.Representable v') => (forall x . v x -> v' x) -> (Src k v b -> Src k v' b)
 mapVSrc f = Src . rmap (mapVSol f) . runSrc
 
 
@@ -80,10 +73,10 @@ newtype Snk k v a   = Snk { runSnk :: v a -> Sol k v }
 instance Functor v => Contravariant (Snk k v) where
   contramap f = Snk . lmap (fmap f) . runSnk
 
-mapKSnk :: Functor v => (forall x . k x -> k' x) -> (Snk k v a -> Snk k' v a)
+mapKSnk :: (K.Representable k, K.Representable k') => (forall x . k x -> k' x) -> (Snk k v a -> Snk k' v a)
 mapKSnk f = Snk . fmap (mapKSol f) . runSnk
 
-mapVSnk :: (forall x . v x <-> v' x) -> (Snk k v a -> Snk k v' a)
+mapVSnk :: (V.Representable v, V.Representable v') => (forall x . v x <-> v' x) -> (Snk k v a -> Snk k v' a)
 mapVSnk b = Snk . dimap (b <~) (mapVSol (~> b)) . runSnk
 
 
@@ -106,10 +99,10 @@ instance (K.Representable k, V.Representable v) => Applicative (Sig k v a) where
 instance (K.Representable k, V.Representable v) => Monad (Sig k v a) where
   Sig m >>= f = Sig (\ a b -> liftSolWithK (\ go -> m a (inK (\ a' -> go (runSig (f a') a b)))))
 
-mapKSig :: Functor v => (forall x . k x <-> k' x) -> (Sig k v a b -> Sig k' v a b)
+mapKSig :: (K.Representable k, K.Representable k') => (forall x . k x <-> k' x) -> (Sig k v a b -> Sig k' v a b)
 mapKSig b = Sig . fmap (dimap (b <~) (mapKSol (~> b))) . runSig
 
-mapVSig :: (forall x . v x <-> v' x) -> (Sig k v a b -> Sig k v' a b)
+mapVSig :: (V.Representable v, V.Representable v') => (forall x . v x <-> v' x) -> (Sig k v a b -> Sig k v' a b)
 mapVSig b = Sig . dimap (b <~) (rmap (mapVSol (~> b))) . runSig
 
 
