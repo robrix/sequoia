@@ -15,3 +15,6 @@ instance Diagonal (->) where
 
 class Profunctor p => Codiagonal p where
   dedup :: Either a a `p` a
+
+instance Codiagonal (->) where
+  dedup = join either id
