@@ -123,6 +123,7 @@ library
     Sequoia.Connective.With
     Sequoia.Connective.XOr
     Sequoia.Connective.Zero
+    Sequoia.Contextual
     Sequoia.Continuation
     Sequoia.Disjunction
     Sequoia.Functor.Applicative
