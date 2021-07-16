@@ -44,24 +44,31 @@ import Sequoia.Bijection
 import Sequoia.Profunctor.Diagonal
 
 class Conj c where
-  (>--<) :: (s -> a) -> (s -> b) -> (s -> a `c` b)
+  (>--<) :: a -> b -> a `c` b
+  a >--< b = (const a >---< const b) ()
   infix 4 >--<
+
+  (>---<) :: (s -> a) -> (s -> b) -> (s -> a `c` b)
+  (>---<) = liftA2 (>--<)
+
+  infix 4 >---<
+
   exl :: (a `c` b) -> a
   exr :: (a `c` b) -> b
 
 instance Conj (,) where
-  (>--<) = liftA2 (,)
+  (>--<) = (,)
   exl = fst
   exr = snd
 
 inlr :: Conj c => a -> b -> a `c` b
-inlr a b = (const a >--< const b) ()
+inlr = (>--<)
 
 _exl :: Conj c => Optic Lens (a `c` b) (a' `c` b) a a'
-_exl = lens exl (\ c -> (`inlr` exr c))
+_exl = lens exl (\ c -> (>--< exr c))
 
 _exr :: Conj c => Optic Lens (a `c` b) (a `c` b') b b'
-_exr = lens exr (\ c -> (exl c `inlr`))
+_exr = lens exr (\ c -> (exl c >--<))
 
 exlrC :: Conj c => (a' -> b' -> r) -> (a -> a') -> (b -> b') -> (a `c` b -> r)
 exlrC h f g = h <$> f . exl <*> g . exr
@@ -70,10 +77,10 @@ exlrC h f g = h <$> f . exl <*> g . exr
 -- Generalizations
 
 coerceConj :: (Conj c1, Conj c2) => a `c1` b -> a `c2` b
-coerceConj = exl >--< exr
+coerceConj = exl >---< exr
 
 swapConj :: Conj c => a `c` b -> b `c` a
-swapConj = exr >--< exl
+swapConj = exr >---< exl
 
 curryConj :: Conj p => (a `p` b -> r) -> (a -> b -> r)
 curryConj f = fmap f . inlr
