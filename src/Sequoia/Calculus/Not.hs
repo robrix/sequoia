@@ -76,7 +76,7 @@ dniNK
   => _Γ -|s|- _Δ > K r **a
   -- ---------------------
   -> _Γ -|s|- _Δ >   r ¬-a
-dniNK = mapR (contramap notNegate)
+dniNK = mapR notNegate
 
 
 notLK
@@ -91,7 +91,7 @@ notRK
   => _Γ -|s|- _Δ > K r  a
   -- --------------------
   -> _Γ -|s|- _Δ >   r ¬a
-notRK = mapR (contramap Not)
+notRK = mapR Not
 
 
 notLK'
@@ -106,4 +106,4 @@ notRK'
   => _Γ -|s|- _Δ >   r ¬a
   -- --------------------
   -> _Γ -|s|- _Δ > K r  a
-notRK' = mapR (contramap getNot)
+notRK' = mapR getNot

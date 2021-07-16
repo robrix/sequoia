@@ -75,7 +75,7 @@ dniPK
   => _Γ -|s|- _Δ > K r **a
   -- ---------------------
   -> _Γ -|s|- _Δ >   r -¬a
-dniPK = mapR (contramap negateNot)
+dniPK = mapR negateNot
 
 
 negateLK
@@ -90,7 +90,7 @@ negateRK
   => _Γ -|s|- _Δ > K r  a
   -- --------------------
   -> _Γ -|s|- _Δ >   r -a
-negateRK = mapR (contramap Negate)
+negateRK = mapR Negate
 
 
 negateLK'
@@ -105,4 +105,4 @@ negateRK'
   => _Γ -|s|- _Δ >   r -a
   -- --------------------
   -> _Γ -|s|- _Δ > K r  a
-negateRK' = mapR (contramap getNegate)
+negateRK' = mapR getNegate
