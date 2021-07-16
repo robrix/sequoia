@@ -406,7 +406,7 @@ mapΓL
   -> a  < _Γ -|s|- _Δ
   -- ----------------
   -> a' < _Γ -|s|- _Δ
-mapΓL f = mapΓ (f . exlF >∘∘< exrF)
+mapΓL f = mapΓ (f . exlF >∘∘∘< exrF)
 
 
 mapL
@@ -415,7 +415,7 @@ mapL
   -> a  < _Γ -|s|- _Δ
   -- ----------------
   -> a' < _Γ -|s|- _Δ
-mapL f = mapΓ (f . exlF >∘∘< exrF)
+mapL f = mapΓ (f . exlF >∘∘∘< exrF)
 
 mapR
   :: Contextual e r s

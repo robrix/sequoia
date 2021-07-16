@@ -25,6 +25,7 @@ module Sequoia.Value
 , liftV2
 , mapVRep
 , (>∘∘<)
+, (>∘∘∘<)
 , (<∘∘>)
   -- * Ambient environment
 , Env(..)
@@ -106,10 +107,15 @@ mapVRep :: (Representable v, Representable v') => (Rep v' -> Rep v) -> v a -> v'
 mapVRep f = under _V (. f)
 
 
-(>∘∘<) :: (Conj d, Representable v) => (a -> v b) -> (a -> v c) -> (a -> v (b `d` c))
-(f >∘∘< g) a = inV2 (>--<) (f a) (g a)
+(>∘∘<) :: (Conj d, Representable v) => v b -> v c -> v (b `d` c)
+(>∘∘<) = inV2 (>--<)
 
 infix 3 >∘∘<
+
+(>∘∘∘<) :: (Conj d, Representable v) => (a -> v b) -> (a -> v c) -> (a -> v (b `d` c))
+(f >∘∘∘< g) a = inV2 (>--<) (f a) (g a)
+
+infix 3 >∘∘∘<
 
 
 (<∘∘>) :: (Disj d, Representable v) => (v a -> r) -> (v b -> r) -> (v (a `d` b) -> Rep v -> r)

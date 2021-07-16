@@ -43,7 +43,7 @@ instance Bitraversable (<) where
   bitraverse = bitraverseConj
 
 (<|) :: V.Representable v => v i -> v is -> v (i < is)
-(<|) = inV2 (>--<)
+(<|) = (>∘∘<)
 
 
 -- Δ
