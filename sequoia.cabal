@@ -87,6 +87,7 @@ library
     Sequoia.Calculus.Quantification
     Sequoia.Calculus.Recursive
     Sequoia.Calculus.Shift
+    Sequoia.Calculus.Structural
     Sequoia.Calculus.Subtraction
     Sequoia.Calculus.Sum
     Sequoia.Calculus.Tensor
