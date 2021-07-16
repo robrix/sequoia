@@ -5,20 +5,21 @@ module Sequoia.Continuation
 ( -- * Continuations
   Continuation
 , KRep
+, KFn
 , Contravariant(..)
 , Representable(..)
-  -- ** Application
-, KFn
-, _K
+  -- ** Construction
 , inK
 , inK1
 , inK1'
 , inK2
+  -- ** Elimination
 , exK
 , exK1
 , exK2
 , (•)
   -- ** Coercion
+, _K
 , coerceKWith
 , coerceK
 , coerceK1
@@ -55,6 +56,7 @@ module Sequoia.Continuation
 , (••)
 ) where
 
+import Control.Applicative (liftA2)
 import Data.Functor.Contravariant
 import Data.Functor.Contravariant.Rep
 import Data.Profunctor
@@ -67,18 +69,13 @@ import Sequoia.Functor.K
 class Representable k => Continuation r k | k -> r
 
 type KRep k = Rep k
+type KFn k a = a -> KRep k
 
 
 instance Continuation r (K r)
 
 
--- Application
-
-type KFn k a = a -> KRep k
-
-_K :: (Representable k, Representable k') => Optic Iso (k a) (k' a') (KFn k a) (KFn k' a')
-_K = exK <-> inK
-
+-- Construction
 
 inK :: Representable k => KFn k a ->       k a
 inK = tabulate
@@ -92,6 +89,8 @@ inK1' = fmap inK
 inK2 :: Representable k => (KFn k a -> KFn k b -> KFn k c) -> (k a -> k b -> k c)
 inK2 = dimap2 exK exK inK
 
+
+-- Elimination
 
 exK :: Representable k =>       k a -> KFn k a
 exK = index
@@ -110,6 +109,10 @@ infixl 7 •
 
 
 -- Coercion
+
+_K :: (Representable k, Representable k') => Optic Iso (k a) (k' a') (KFn k a) (KFn k' a')
+_K = exK <-> inK
+
 
 coerceKWith :: (Representable k1, Representable k2) => (KFn k1 a -> KFn k2 b) -> (k1 a -> k2 b)
 coerceKWith = under _K
