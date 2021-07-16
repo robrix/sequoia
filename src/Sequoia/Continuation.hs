@@ -33,6 +33,7 @@ module Sequoia.Continuation
 , (<<•)
 , (•>>)
 , (<••>)
+, (<•••>)
 , (>>-)
 , (-<<)
   -- ** Computation
@@ -162,6 +163,12 @@ infixr 1 <<•, •>>
 (<••>) = inK2 (<-->)
 
 infix 3 <••>
+
+
+(<•••>) :: (Disj d, Representable k) => (e -> k a) -> (e -> k b) -> (e -> k (a `d` b))
+(<•••>) = liftA2 (<••>)
+
+infix 3 <•••>
 
 
 (>>-) :: Representable k => a -> (b -> k a) -> k b
