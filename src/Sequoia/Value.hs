@@ -113,7 +113,7 @@ mapVRep f = under _V (. f)
 infix 3 >∘∘<
 
 (>∘∘∘<) :: (Conj d, Representable v) => (a -> v b) -> (a -> v c) -> (a -> v (b `d` c))
-(f >∘∘∘< g) a = inV2 (>--<) (f a) (g a)
+f >∘∘∘< g = (>∘∘<) <$> f <*> g
 
 infix 3 >∘∘∘<
 
