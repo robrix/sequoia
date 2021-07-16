@@ -117,7 +117,7 @@ infix 3 >∘∘<
 
 infix 3 <∘∘>
 
-bitraverseDisjV :: (Disj d, Representable v) => v (a `d` b) -> Rep v -> (v a `d` v b)
+bitraverseDisjV :: (Disj d, Representable v) => v (a `d` b) -> Rep v -> v a `d` v b
 bitraverseDisjV d e = bimapDisj inV0 inV0 (e ∘ d)
 
 
