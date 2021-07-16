@@ -44,6 +44,8 @@ import Sequoia.Bijection
 import Sequoia.Profunctor.Diagonal
 
 class Conj c where
+  {-# MINIMAL exl, exr, ((>--<) | (>---<)) #-}
+
   (>--<) :: a -> b -> a `c` b
   a >--< b = (const a >---< const b) ()
   infix 4 >--<
