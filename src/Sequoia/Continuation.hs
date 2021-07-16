@@ -94,11 +94,11 @@ inK2 = dimap2 exK exK inK
 
 -- | Negate a unary function by translating it to operate on continuations.
 negK :: Representable k => (a -> b) -> (k b -> k a)
-negK f = inK1 (. f)
+negK = inK1 . flip (.)
 
 -- | Negate a binary function by translating it to operate on continuations.
 negK2 :: Representable k => (a -> b -> c) -> (k (k c -> k b) -> k a)
-negK2 f = negK (negK . f)
+negK2 = negK . (negK .)
 
 
 -- Elimination
