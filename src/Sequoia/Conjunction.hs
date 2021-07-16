@@ -12,6 +12,7 @@ module Sequoia.Conjunction
 , uncurryConj
 , firstConj
 , secondConj
+, (***)
 , unfirstConj
 , unsecondConj
   -- * Defaults
@@ -34,6 +35,7 @@ module Sequoia.Conjunction
 -- Conjunction
 
 import Control.Applicative (liftA2)
+import Control.Category (Category, (>>>))
 import Data.Functor.Contravariant
 import Data.Profunctor
 import Sequoia.Bijection
@@ -81,6 +83,11 @@ firstConj = dimap coerceConj coerceConj . first'
 
 secondConj :: (Conj c, Strong p) => p a b -> p (c d a) (c d b)
 secondConj = dimap coerceConj coerceConj . second'
+
+(***) :: (Strong p, Category p, Conj c) => a1 `p` b1 -> a2 `p` b2 -> (a1 `c` a2) `p` (b1 `c` b2)
+f *** g = firstConj f >>> secondConj g
+
+infixr 3 ***
 
 unfirstConj :: (Conj c, Costrong p) => p (c a d) (c b d) -> p a b
 unfirstConj = unfirst . dimap coerceConj coerceConj
