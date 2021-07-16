@@ -33,6 +33,7 @@ class Core e r s => NegateIntro e r s where
     =>        _Γ -|s|- _Δ > a
     -- ----------------------
     -> r -a < _Γ -|s|- _Δ
+
   negateR
     :: Neg a
     => a < _Γ -|s|- _Δ
