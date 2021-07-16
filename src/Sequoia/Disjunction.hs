@@ -6,6 +6,7 @@ module Sequoia.Disjunction
 , exlD
 , exrD
 , mirrorDisj
+, cocurryDisj
   -- * Generalizations
 , coerceDisj
 , leftDisj
@@ -34,6 +35,7 @@ module Sequoia.Disjunction
 
 import Control.Category (Category, (>>>))
 import Data.Functor.Contravariant
+import Data.Functor.Contravariant.Rep as K
 import Data.Profunctor
 import Sequoia.Bijection
 import Sequoia.Profunctor.Diagonal
@@ -65,6 +67,9 @@ exrD = const Nothing <--> Just
 
 mirrorDisj :: Disj d => a `d` b -> b `d` a
 mirrorDisj = inr <--> inl
+
+cocurryDisj :: (Disj d, K.Representable k) => (c -> k (k (b `d` a))) -> ((c, k b) -> k (k a))
+cocurryDisj f (c, b) = tabulate (\ k -> index (f c) (tabulate (index b <--> index k)))
 
 
 -- Generalizations
