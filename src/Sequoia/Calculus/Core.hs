@@ -58,6 +58,8 @@ import Sequoia.Continuation as K
 import Sequoia.Disjunction
 import Sequoia.Functor.K
 
+-- Core
+
 class Core e r s | s -> e r where
   {-# MINIMAL ((>>>) | (<<<)), init #-}
 
@@ -135,6 +137,8 @@ class Core e r s => Exchange e r s where
     -- -------------------
     -> _Γ -|s|- _Δ > b > a
 
+
+-- Contextual
 
 class Core e r s => Contextual e r s where
   swapΓΔ
