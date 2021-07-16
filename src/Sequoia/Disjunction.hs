@@ -78,7 +78,7 @@ rightDisj = dimap coerceDisj coerceDisj . right'
 (+++) :: (Choice p, Category p, Disj c) => a1 `p` b1 -> a2 `p` b2 -> (a1 `c` a2) `p` (b1 `c` b2)
 f +++ g = leftDisj f >>> rightDisj g
 
-infixr 3 +++
+infixr 2 +++
 
 unleftDisj :: (Disj d, Cochoice p) => p (d a c) (d b c) -> p a b
 unleftDisj = unleft . dimap coerceDisj coerceDisj
