@@ -42,6 +42,7 @@ module Sequoia.Calculus.Core
 , mapΓΔ
 , mapΓ
 , mapΔ
+, mapΓL
 , mapL
 , mapR
 , mapL2
@@ -397,6 +398,15 @@ mapΔ
   -- ------------
   -> _Γ -|s|- _Δ'
 mapΔ = (id `mapΓΔ`)
+
+
+mapΓL
+  :: Contextual e r s
+  => (V e a' -> V e a)
+  -> a  < _Γ -|s|- _Δ
+  -- ----------------
+  -> a' < _Γ -|s|- _Δ
+mapΓL f = mapΓ (f . exlF >∘∘< exrF)
 
 
 mapL
