@@ -12,6 +12,7 @@ module Sequoia.Disjunction
 , rightDisj
 , (+++)
 , (|||)
+, dedupDisj
 , unleftDisj
 , unrightDisj
   -- * Defaults
@@ -86,6 +87,9 @@ infixr 2 +++
 f ||| g = f +++ g >>> lmap coerceDisj dedup
 
 infixr 2 |||
+
+dedupDisj :: (Codiagonal p, Disj d) => (a `d` a) `p` a
+dedupDisj = lmap coerceDisj dedup
 
 unleftDisj :: (Disj d, Cochoice p) => p (d a c) (d b c) -> p a b
 unleftDisj = unleft . dimap coerceDisj coerceDisj
