@@ -376,16 +376,16 @@ pushR2 p = pushR . pushR p
 
 mapΓΔ
   :: Contextual e r s
-  => (_Γ' -> _Γ)
-  -> (_Δ -> _Δ')
+  => (V e _Γ' -> V e _Γ)
+  -> (K r _Δ' -> K r _Δ)
   -> _Γ  -|s|- _Δ
   -- -------------
   -> _Γ' -|s|- _Δ'
-mapΓΔ f g p = popΓΔ (\ _Γ _Δ -> pushΓΔ p (f <$> _Γ) (contramap g _Δ))
+mapΓΔ f g p = popΓΔ (\ _Γ _Δ -> pushΓΔ p (f _Γ) (g _Δ))
 
 mapΓ
   :: Contextual e r s
-  => (_Γ' -> _Γ)
+  => (V e _Γ' -> V e _Γ)
   -> _Γ  -|s|- _Δ
   -- ------------
   -> _Γ' -|s|- _Δ
@@ -393,7 +393,7 @@ mapΓ = (`mapΓΔ` id)
 
 mapΔ
   :: Contextual e r s
-  => (_Δ -> _Δ')
+  => (K r _Δ' -> K r _Δ)
   -> _Γ -|s|- _Δ
   -- ------------
   -> _Γ -|s|- _Δ'
@@ -406,7 +406,7 @@ mapL
   -> a  < _Γ -|s|- _Δ
   -- ----------------
   -> a' < _Γ -|s|- _Δ
-mapL f = mapΓ (first f)
+mapL f = mapΓ (fmap (first f))
 
 mapR
   :: Contextual e r s
@@ -414,7 +414,7 @@ mapR
   -> _Γ -|s|- _Δ > a
   -- ----------------
   -> _Γ -|s|- _Δ > a'
-mapR f = mapΔ (fmap f)
+mapR f = mapΔ (contramap (fmap f))
 
 
 mapL2
@@ -487,4 +487,4 @@ instance Contextual e r s => Exchange e r (Contextually s) where
   exR = Contextually . popR2 . flip . pushR2 . getContextually
 
 instance Contextual e r s => Profunctor (Contextually s) where
-  dimap f g (Contextually p) = Contextually (mapΓΔ f g p)
+  dimap f g (Contextually p) = Contextually (mapΓΔ (fmap f) (contramap g) p)
