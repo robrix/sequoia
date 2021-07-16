@@ -419,11 +419,11 @@ mapL f = mapΓ (f . exlF >∘∘∘< exrF)
 
 mapR
   :: Contextual e r s
-  => (a -> a')
+  => (K r a' -> K r a)
   -> _Γ -|s|- _Δ > a
   -- ----------------
   -> _Γ -|s|- _Δ > a'
-mapR f = mapΔ (contramap (fmap f))
+mapR f = mapΔ (inlK <•••> f . inrK)
 
 
 mapL2
@@ -440,7 +440,7 @@ mapR2
   -> _Γ -|s|- _Δ > a   ->   _Γ -|s|- _Δ > b
   -- --------------------------------------
   ->            _Γ -|s|- _Δ > c
-mapR2 f a b = mapR f (wkR' a) >>> popL (`mapR` b)
+mapR2 f a b = mapR (negK2 f) (wkR' a) >>> popL (`mapR` b)
   where wkR' = popR2 . flip . const . pushR
 
 

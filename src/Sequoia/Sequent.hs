@@ -123,8 +123,8 @@ instance WithIntro e r (Seq e r) where
 
 instance SumIntro e r (Seq e r) where
   sumL a b = popL (pushL a <--> pushL b)
-  sumR1 = mapR inl
-  sumR2 = mapR inr
+  sumR1 = mapR (contramap inl)
+  sumR2 = mapR (contramap inr)
 
 
 -- Multiplicative
@@ -153,14 +153,14 @@ instance IffIntro e r (Seq e r) where
 
   iffL2 s1 s2 = mapL (fmap getIff) (withL2 (downR s1 ->⊢ s2))
 
-  iffR s1 s2 = mapR Iff (funR (downL s1) ⊢& funR (downL s2))
+  iffR s1 s2 = mapR (contramap Iff) (funR (downL s1) ⊢& funR (downL s2))
 
 instance XOrIntro e r (Seq e r) where
   xorL s1 s2 = mapL (fmap getXOr) (subL (upR s1) ⊕⊢ subL (upR s2))
 
-  xorR1 s1 s2 = mapR XOr (sumR1 (s1 ⊢-< upL s2))
+  xorR1 s1 s2 = mapR (contramap XOr) (sumR1 (s1 ⊢-< upL s2))
 
-  xorR2 s1 s2 = mapR XOr (sumR2 (s1 ⊢-< upL s2))
+  xorR2 s1 s2 = mapR (contramap XOr) (sumR2 (s1 ⊢-< upL s2))
 
 
 -- Implication
@@ -171,7 +171,7 @@ instance FunctionIntro e r (Seq e r) where
 
 instance SubtractionIntro e r (Seq e r) where
   subL f = mapL (fmap (sub <~)) (tensorL (wkL' f >>> poppedL2 negateL init))
-  subR a b = mapR (~> sub) (a ⊢⊗ negateR b)
+  subR a b = mapR (contramap (~> sub)) (a ⊢⊗ negateR b)
 
 
 -- Quantification
@@ -182,7 +182,7 @@ instance UniversalIntro e r (Seq e r) where
 
 instance ExistentialIntro e r (Seq e r) where
   existsL p = popL (dnE . runExists (pushL p))
-  existsR p = mapR (Exists . liftDN) p
+  existsR p = mapR (contramap (Exists . liftDN)) p
 
 
 -- Recursion
@@ -193,15 +193,15 @@ instance NuIntro e r (Seq e r) where
 
 instance MuIntro e r (Seq e r) where
   muL f k = wkL (downR f) >>> exL (mapL (fmap getMu) (funL init (wkL' k)))
-  muR = mapR mu
+  muR = mapR (contramap mu)
 
 
 -- Polarity shifts
 
 instance UpIntro e r (Seq e r) where
   upL   = mapL (fmap getUp)
-  upR   = mapR Up
+  upR   = mapR (contramap Up)
 
 instance DownIntro e r (Seq e r) where
   downL = mapL (fmap getDown)
-  downR = mapR Down
+  downR = mapR (contramap Down)
