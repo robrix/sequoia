@@ -19,6 +19,7 @@ import Prelude hiding (init)
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Control
 import Sequoia.Calculus.Core
+import Sequoia.Calculus.Structural
 import Sequoia.Connective.Negation
 import Sequoia.Connective.Not
 import Sequoia.Contextual

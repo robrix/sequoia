@@ -14,6 +14,7 @@ module Sequoia.Calculus.With
 import Prelude hiding (init)
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Core
+import Sequoia.Calculus.Structural
 import Sequoia.Calculus.Top
 import Sequoia.Connective.With
 import Sequoia.Polarity

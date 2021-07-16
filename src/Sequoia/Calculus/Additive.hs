@@ -15,6 +15,7 @@ import Prelude hiding (init)
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Core
 import Sequoia.Calculus.Negation
+import Sequoia.Calculus.Structural
 import Sequoia.Calculus.Sum
 import Sequoia.Calculus.Top
 import Sequoia.Calculus.With

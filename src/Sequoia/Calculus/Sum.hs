@@ -14,6 +14,7 @@ module Sequoia.Calculus.Sum
 import Prelude hiding (init)
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Core
+import Sequoia.Calculus.Structural
 import Sequoia.Calculus.Zero
 import Sequoia.Connective.Sum
 import Sequoia.Polarity

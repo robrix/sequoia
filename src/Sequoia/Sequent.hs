@@ -27,6 +27,7 @@ import           Sequoia.Calculus.Negation
 import           Sequoia.Calculus.Nu
 import           Sequoia.Calculus.Quantification
 import           Sequoia.Calculus.Shift
+import           Sequoia.Calculus.Structural
 import           Sequoia.Calculus.XOr
 import           Sequoia.Conjunction
 import           Sequoia.Contextual

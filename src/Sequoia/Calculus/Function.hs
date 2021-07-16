@@ -15,6 +15,7 @@ import Sequoia.Calculus.Context
 import Sequoia.Calculus.Core
 import Sequoia.Calculus.Not
 import Sequoia.Calculus.Par
+import Sequoia.Calculus.Structural
 import Sequoia.Connective.Function
 import Sequoia.Polarity
 

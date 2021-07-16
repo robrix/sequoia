@@ -18,6 +18,7 @@ import Sequoia.Calculus.Core
 import Sequoia.Calculus.Negation
 import Sequoia.Calculus.One
 import Sequoia.Calculus.Par
+import Sequoia.Calculus.Structural
 import Sequoia.Calculus.Tensor
 import Sequoia.Polarity
 

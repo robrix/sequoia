@@ -52,6 +52,7 @@ import Data.Profunctor
 import Prelude hiding (init)
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Core
+import Sequoia.Calculus.Structural
 import Sequoia.Conjunction
 import Sequoia.Continuation as K
 import Sequoia.Disjunction

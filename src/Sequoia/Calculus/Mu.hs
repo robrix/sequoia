@@ -10,6 +10,7 @@ module Sequoia.Calculus.Mu
 import Prelude hiding (init)
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Core
+import Sequoia.Calculus.Structural
 import Sequoia.Connective.Function
 import Sequoia.Connective.Mu
 import Sequoia.Connective.Quantification

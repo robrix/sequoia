@@ -9,6 +9,7 @@ module Sequoia.Calculus.Subtraction
 import Prelude hiding (init)
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Core
+import Sequoia.Calculus.Structural
 import Sequoia.Connective.Subtraction
 import Sequoia.Polarity
 

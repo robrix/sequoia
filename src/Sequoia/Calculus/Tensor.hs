@@ -18,6 +18,7 @@ import Prelude hiding (init)
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Core
 import Sequoia.Calculus.One
+import Sequoia.Calculus.Structural
 import Sequoia.Calculus.Sum
 import Sequoia.Calculus.Zero
 import Sequoia.Connective.Tensor
