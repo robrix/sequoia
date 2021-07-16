@@ -175,10 +175,10 @@ swapΔ f _Δ' = popΓΔ (\ _Δ -> pushΓΔ (f _Δ) _Δ')
 
 popΓΔ
   :: Contextual e r s
-  => (K r _Δ -> V e _Γ -> Γ -|s|- r)
+  => (K r _Δ -> V e _Γ -> e -|s|- r)
   -- -------------------------------
   ->                     _Γ -|s|- _Δ
-popΓΔ f = swapΓΔ f idK (inV0 Γ)
+popΓΔ f = swapΓΔ f idK idV
 
 -- | Pop something off the input context which can later be pushed. Used with 'pushΓ', this provides a generalized context restructuring facility.
 --
@@ -190,10 +190,10 @@ popΓΔ f = swapΓΔ f idK (inV0 Γ)
 -- @
 popΓ
   :: Contextual e r s
-  => (V e _Γ -> Γ -|s|- _Δ)
+  => (V e _Γ -> e -|s|- _Δ)
   -- ----------------------
   ->      _Γ      -|s|- _Δ
-popΓ f = swapΓ f (inV0 Γ)
+popΓ f = swapΓ f idV
 
 -- | Pop something off the output context which can later be pushed. Used with 'pushΔ', this provides a generalized context restructuring facility.
 --
@@ -292,7 +292,7 @@ pushΓΔ
   :: Contextual e r s
   =>                     _Γ -|s|- _Δ
   -- -------------------------------
-  -> (K r _Δ -> V e _Γ -> Γ -|s|- r)
+  -> (K r _Δ -> V e _Γ -> e -|s|- r)
 pushΓΔ = swapΓΔ . const . const
 
 -- | Push something onto the input context which was previously popped off it. Used with 'popΓ', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
@@ -307,7 +307,7 @@ pushΓ
   :: Contextual e r s
   =>      _Γ      -|s|- _Δ
   -- ----------------------
-  -> (V e _Γ -> Γ -|s|- _Δ)
+  -> (V e _Γ -> e -|s|- _Δ)
 pushΓ = swapΓ . const
 
 -- | Push something onto the output context which was previously popped off it. Used with 'popΔ', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.

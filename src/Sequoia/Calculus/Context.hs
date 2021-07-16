@@ -1,8 +1,7 @@
 {-# LANGUAGE PolyKinds #-}
 module Sequoia.Calculus.Context
 ( -- * Γ
-  Γ(..)
-, type (<)(..)
+  type (<)(..)
 , (<|)
   -- * Δ
 , Δ
@@ -25,8 +24,6 @@ import Sequoia.Disjunction
 import Sequoia.Value as V
 
 -- Γ
-
-data Γ = Γ
 
 data a < b = a :< b
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
