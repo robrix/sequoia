@@ -10,6 +10,7 @@ module Sequoia.Disjunction
 , coerceDisj
 , leftDisj
 , rightDisj
+, (+++)
 , unleftDisj
 , unrightDisj
   -- * Defaults
@@ -29,6 +30,7 @@ module Sequoia.Disjunction
 , inrR
 ) where
 
+import Control.Category (Category, (>>>))
 import Data.Functor.Contravariant
 import Data.Profunctor
 import Sequoia.Bijection
@@ -72,6 +74,11 @@ leftDisj = dimap coerceDisj coerceDisj . left'
 
 rightDisj :: (Disj d, Choice p) => p a b -> p (d c a) (d c b)
 rightDisj = dimap coerceDisj coerceDisj . right'
+
+(+++) :: (Choice p, Category p, Disj c) => a1 `p` b1 -> a2 `p` b2 -> (a1 `c` a2) `p` (b1 `c` b2)
+f +++ g = leftDisj f >>> rightDisj g
+
+infixr 3 +++
 
 unleftDisj :: (Disj d, Cochoice p) => p (d a c) (d b c) -> p a b
 unleftDisj = unleft . dimap coerceDisj coerceDisj
