@@ -29,6 +29,7 @@ import           Sequoia.Calculus.Quantification
 import           Sequoia.Calculus.Shift
 import           Sequoia.Calculus.XOr
 import           Sequoia.Conjunction
+import           Sequoia.Contextual
 import           Sequoia.Continuation as K
 import           Sequoia.Disjunction
 import           Sequoia.Functor.K

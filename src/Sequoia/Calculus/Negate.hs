@@ -21,6 +21,7 @@ import Sequoia.Calculus.Control
 import Sequoia.Calculus.Core
 import Sequoia.Connective.Negate
 import Sequoia.Connective.Negation
+import Sequoia.Contextual
 import Sequoia.Continuation as K
 import Sequoia.Functor.K
 import Sequoia.Polarity

@@ -21,6 +21,7 @@ import Sequoia.Calculus.Core
 import Sequoia.Calculus.Top
 import Sequoia.Calculus.With
 import Sequoia.Connective.Par
+import Sequoia.Contextual
 import Sequoia.Polarity
 
 -- Par

@@ -21,6 +21,7 @@ import Sequoia.Calculus.One
 import Sequoia.Calculus.Sum
 import Sequoia.Calculus.Zero
 import Sequoia.Connective.Tensor
+import Sequoia.Contextual
 import Sequoia.Polarity
 
 -- Tensor

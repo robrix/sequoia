@@ -13,6 +13,7 @@ module Sequoia.Calculus.Control
 import Prelude hiding (init)
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Core
+import Sequoia.Contextual
 import Sequoia.Functor.K
 
 -- Delimited control
