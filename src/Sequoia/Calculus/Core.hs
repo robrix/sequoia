@@ -14,13 +14,16 @@ module Sequoia.Calculus.Core
 , Exchange(..)
   -- * Contextual
 , Contextual(..)
+  -- ** Swapping
 , swapΓ
 , swapΔ
+  -- ** Popping
 , popΓΔ
 , popΓ
 , popΔ
 , popL
 , popR
+  -- ** Pushing
 , pushL
 , pushR
 , pushΓΔ
@@ -34,6 +37,7 @@ module Sequoia.Calculus.Core
 , popR2
 , pushL2
 , pushR2
+  -- ** Mapping
 , mapΓΔ
 , mapΓ
 , mapΔ
@@ -41,10 +45,13 @@ module Sequoia.Calculus.Core
 , mapR
 , mapL2
 , mapR2
+  -- ** Lifting
 , liftL
 , liftR
+  -- ** Lowering
 , lowerL
 , lowerR
+  -- ** Deriving
 , Contextually(..)
 ) where
 
@@ -146,6 +153,8 @@ class Core e r s => Contextual e r s where
     -> (K r _Δ' -> _Γ' -> _Γ  -|s|- _Δ)
 
 
+-- Swapping
+
 swapΓ
   :: Contextual e r s
   => (_Γ  -> _Γ' -|s|- _Δ)
@@ -158,6 +167,8 @@ swapΔ
   -> (K r _Δ' -> _Γ -|s|- _Δ)
 swapΔ f _Δ' = popΓΔ (\ _Δ -> pushΓΔ (f _Δ) _Δ')
 
+
+-- Popping
 
 popΓΔ
   :: Contextual e r s
@@ -228,6 +239,52 @@ popR
 popR f = popΔ (\ c -> pushΔ (f (inrK c)) (inlK c))
 
 
+popL2
+  :: Contextual e r s
+  => (a -> b -> _Γ -|s|- _Δ)
+  -- -----------------------
+  ->  a  < b  < _Γ -|s|- _Δ
+popL2 f = popL (popL . f)
+
+popR2
+  :: Contextual e r s
+  => (K r a -> K r b -> _Γ -|s|- _Δ)
+  -- --------------------------------------
+  ->                    _Γ -|s|- _Δ > b > a
+popR2 f = popR (popR . f)
+
+
+poppedL
+  :: Contextual e r s
+  => (    _Γ -|s|- _Δ ->     _Γ' -|s|- _Δ')
+  -- --------------------------------------
+  -> (a < _Γ -|s|- _Δ -> a < _Γ' -|s|- _Δ')
+poppedL f p = popL (f . pushL p)
+
+poppedR
+  :: Contextual e r s
+  => (_Γ -|s|- _Δ     -> _Γ' -|s|- _Δ')
+  -- --------------------------------------
+  -> (_Γ -|s|- _Δ > a -> _Γ' -|s|- _Δ' > a)
+poppedR f p = popR (f . pushR p)
+
+poppedL2
+  :: Contextual e r s
+  =>         (_Γ -|s|- _Δ ->         _Γ' -|s|- _Δ')
+  -- ----------------------------------------------
+  -> (a < b < _Γ -|s|- _Δ -> a < b < _Γ' -|s|- _Δ')
+poppedL2 = poppedL . poppedL
+
+poppedR2
+  :: Contextual e r s
+  => (_Γ -|s|- _Δ         -> _Γ' -|s|- _Δ')
+  -- ----------------------------------------------
+  -> (_Γ -|s|- _Δ > a > b -> _Γ' -|s|- _Δ' > a > b)
+poppedR2 = poppedR . poppedR
+
+
+-- Pushing
+
 pushΓΔ
   :: Contextual e r s
   =>                 _Γ -|s|- _Δ
@@ -297,50 +354,6 @@ pushR
 pushR s a = popΔ (\ c -> pushΔ s (c |> a))
 
 
-poppedL
-  :: Contextual e r s
-  => (    _Γ -|s|- _Δ ->     _Γ' -|s|- _Δ')
-  -- --------------------------------------
-  -> (a < _Γ -|s|- _Δ -> a < _Γ' -|s|- _Δ')
-poppedL f p = popL (f . pushL p)
-
-poppedR
-  :: Contextual e r s
-  => (_Γ -|s|- _Δ     -> _Γ' -|s|- _Δ')
-  -- --------------------------------------
-  -> (_Γ -|s|- _Δ > a -> _Γ' -|s|- _Δ' > a)
-poppedR f p = popR (f . pushR p)
-
-poppedL2
-  :: Contextual e r s
-  =>         (_Γ -|s|- _Δ ->         _Γ' -|s|- _Δ')
-  -- ----------------------------------------------
-  -> (a < b < _Γ -|s|- _Δ -> a < b < _Γ' -|s|- _Δ')
-poppedL2 = poppedL . poppedL
-
-poppedR2
-  :: Contextual e r s
-  => (_Γ -|s|- _Δ         -> _Γ' -|s|- _Δ')
-  -- ----------------------------------------------
-  -> (_Γ -|s|- _Δ > a > b -> _Γ' -|s|- _Δ' > a > b)
-poppedR2 = poppedR . poppedR
-
-
-popL2
-  :: Contextual e r s
-  => (a -> b -> _Γ -|s|- _Δ)
-  -- -----------------------
-  ->  a  < b  < _Γ -|s|- _Δ
-popL2 f = popL (popL . f)
-
-popR2
-  :: Contextual e r s
-  => (K r a -> K r b -> _Γ -|s|- _Δ)
-  -- --------------------------------------
-  ->                    _Γ -|s|- _Δ > b > a
-popR2 f = popR (popR . f)
-
-
 pushL2
   :: Contextual e r s
   => a < b < _Γ -|s|- _Δ -> a -> b
@@ -355,6 +368,8 @@ pushR2
   -> _Γ -|s|- _Δ
 pushR2 p = pushR . pushR p
 
+
+-- Mapping
 
 mapΓΔ
   :: Contextual e r s
@@ -417,6 +432,8 @@ mapR2 f a b = mapR f (wkR' a) >>> popL (`mapR` b)
   where wkR' = popR2 . flip . const . pushR
 
 
+-- Lifting
+
 liftL
   :: Contextual e r s
   => K r a
@@ -432,6 +449,8 @@ liftR
 liftR = pushL init
 
 
+-- Lowering
+
 lowerL
   :: Contextual e r s
   => (K r a           -> _Γ -|s|- _Δ)
@@ -446,6 +465,8 @@ lowerR
   -> (_Γ -|s|- _Δ > a -> _Γ -|s|- _Δ)
 lowerR k p = p >>> popL k
 
+
+-- Deriving
 
 newtype Contextually s _Γ _Δ = Contextually { getContextually :: _Γ -|s|- _Δ }
   deriving (Core e r)
