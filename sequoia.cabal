@@ -137,6 +137,7 @@ library
     Sequoia.Profunctor.Adjunction
     Sequoia.Profunctor.Applicative
     Sequoia.Profunctor.ControlPassing
+    Sequoia.Profunctor.Diagonal
     Sequoia.Profunctor.K
     Sequoia.Profunctor.Product
     Sequoia.Profunctor.Sum
