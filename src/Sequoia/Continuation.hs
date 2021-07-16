@@ -13,6 +13,7 @@ module Sequoia.Continuation
 , inK1
 , inK1'
 , inK2
+, negK
   -- ** Elimination
 , exK
 , exK1
@@ -88,6 +89,11 @@ inK1' = fmap inK
 
 inK2 :: Representable k => (KFn k a -> KFn k b -> KFn k c) -> (k a -> k b -> k c)
 inK2 = dimap2 exK exK inK
+
+
+-- | Negate a unary function by translating it to operate on continuations.
+negK :: Representable k => (a -> b) -> (k b -> k a)
+negK f = inK1 (. f)
 
 
 -- Elimination
