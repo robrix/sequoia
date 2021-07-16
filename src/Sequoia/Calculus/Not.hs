@@ -69,7 +69,7 @@ dneNK
   => K r **a < _Γ -|s|- _Δ
   -- ---------------------
   ->   r ¬-a < _Γ -|s|- _Δ
-dneNK = mapL (fmap getNotNegate)
+dneNK = mapL getNotNegate
 
 dniNK
   :: Contextual e r s
@@ -84,7 +84,7 @@ notLK
   => K r  a < _Γ -|s|- _Δ
   -- --------------------
   ->   r ¬a < _Γ -|s|- _Δ
-notLK = mapL (fmap getNot)
+notLK = mapL getNot
 
 notRK
   :: Contextual e r s
@@ -99,7 +99,7 @@ notLK'
   =>   r ¬a < _Γ -|s|- _Δ
   -- --------------------
   -> K r  a < _Γ -|s|- _Δ
-notLK' = mapL (fmap Not)
+notLK' = mapL Not
 
 notRK'
   :: Contextual e r s

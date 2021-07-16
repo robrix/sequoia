@@ -420,11 +420,11 @@ mapΔR f = mapΔ (inlK <•••> f . inrK)
 
 mapL
   :: Contextual e r s
-  => (V e a' -> V e a)
+  => (a' -> a)
   -> a  < _Γ -|s|- _Δ
   -- ----------------
   -> a' < _Γ -|s|- _Δ
-mapL f = mapΓ (f . exlF >∘∘∘< exrF)
+mapL f = mapΓL (fmap f)
 
 mapR
   :: Contextual e r s
