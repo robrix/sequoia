@@ -5,6 +5,7 @@ module Sequoia.Disjunction
 , _inr
 , exlD
 , exrD
+, mirrorDisj
   -- * Generalizations
 , coerceDisj
 , leftDisj
@@ -56,6 +57,9 @@ exlD = Just <--> const Nothing
 
 exrD :: Disj d => a `d` b -> Maybe b
 exrD = const Nothing <--> Just
+
+mirrorDisj :: Disj d => a `d` b -> b `d` a
+mirrorDisj = inr <--> inl
 
 
 -- Generalizations
