@@ -84,7 +84,7 @@ f +++ g = leftDisj f >>> rightDisj g
 infixr 2 +++
 
 (|||) :: (Choice p, Category p, Disj c, Codiagonal p) => a1 `p` b -> a2 `p` b -> (a1 `c` a2) `p` b
-f ||| g = f +++ g >>> lmap coerceDisj dedup
+f ||| g = f +++ g >>> dedupDisj
 
 infixr 2 |||
 
