@@ -5,12 +5,13 @@ module Sequoia.Disjunction
 , _inr
 , exlD
 , exrD
+  -- * Generalizations
 , coerceDisj
-  -- * Defaults
 , leftDisj
 , rightDisj
 , unleftDisj
 , unrightDisj
+  -- * Defaults
 , foldMapDisj
 , traverseDisj
 , bifoldMapDisj
@@ -56,11 +57,11 @@ exlD = Just <--> const Nothing
 exrD :: Disj d => a `d` b -> Maybe b
 exrD = const Nothing <--> Just
 
+
+-- Generalizations
+
 coerceDisj :: (Disj c1, Disj c2) => a `c1` b -> a `c2` b
 coerceDisj = inl <--> inr
-
-
--- Defaults
 
 leftDisj :: (Disj d, Choice p) => p a b -> p (d a c) (d b c)
 leftDisj = dimap coerceDisj coerceDisj . left'
@@ -73,6 +74,9 @@ unleftDisj = unleft . dimap coerceDisj coerceDisj
 
 unrightDisj :: (Disj d, Cochoice p) => p (d c a) (d c b) -> p a b
 unrightDisj = unright . dimap coerceDisj coerceDisj
+
+
+-- Defaults
 
 foldMapDisj :: (Disj p, Monoid m) => (b -> m) -> (a `p` b) -> m
 foldMapDisj = (const mempty <-->)

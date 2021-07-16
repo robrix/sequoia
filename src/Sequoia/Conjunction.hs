@@ -5,6 +5,7 @@ module Sequoia.Conjunction
 , _exl
 , _exr
 , exlrC
+  -- * Generalizations
 , coerceConj
 , swapConj
 , curryConj
@@ -55,6 +56,9 @@ _exr = lens exr (\ c -> (exl c `inlr`))
 
 exlrC :: Conj c => (a' -> b' -> r) -> (a -> a') -> (b -> b') -> (a `c` b -> r)
 exlrC h f g = h <$> f . exl <*> g . exr
+
+
+-- Generalizations
 
 coerceConj :: (Conj c1, Conj c2) => a `c1` b -> a `c2` b
 coerceConj = exl >--< exr
