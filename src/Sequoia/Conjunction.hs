@@ -12,6 +12,8 @@ module Sequoia.Conjunction
 , uncurryConj
 , firstConj
 , secondConj
+, unfirstConj
+, unsecondConj
   -- * Defaults
 , foldMapConj
 , traverseConj
@@ -79,6 +81,12 @@ firstConj = dimap coerceConj coerceConj . first'
 
 secondConj :: (Conj c, Strong p) => p a b -> p (c d a) (c d b)
 secondConj = dimap coerceConj coerceConj . second'
+
+unfirstConj :: (Conj c, Costrong p) => p (c a d) (c b d) -> p a b
+unfirstConj = unfirst . dimap coerceConj coerceConj
+
+unsecondConj :: (Conj c, Costrong p) => p (c d a) (c d b) -> p a b
+unsecondConj = unsecond . dimap coerceConj coerceConj
 
 
 -- Defaults
