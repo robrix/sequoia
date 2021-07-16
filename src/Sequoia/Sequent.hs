@@ -87,7 +87,7 @@ deriving via Contextually (Seq e r) instance Exchange e r (Seq e r)
 -- Contextual rules
 
 instance Contextual e r (Seq e r) where
-  swapΓΔ f _Δ' _Γ' = inCP (\ _Γ _Δ -> val (\ _Γ -> exCP (f _Δ _Γ) _Γ' _Δ') _Γ)
+  swapΓΔ f _Δ' _Γ' = inCP (\ _Γ _Δ -> exCP (f _Δ _Γ) _Γ' _Δ')
 
 -- Control
 

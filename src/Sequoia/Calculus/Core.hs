@@ -152,7 +152,7 @@ class Core e r s => Exchange e r s where
 
 class (Core e r s, forall a b . Env e (s a b)) => Contextual e r s where
   swapΓΔ
-    :: (K r _Δ  ->     _Γ  -> _Γ' -|s|- _Δ')
+    :: (K r _Δ  -> V e _Γ  -> _Γ' -|s|- _Δ')
     -> (K r _Δ' -> V e _Γ' -> _Γ  -|s|- _Δ)
 
 
@@ -160,7 +160,7 @@ class (Core e r s, forall a b . Env e (s a b)) => Contextual e r s where
 
 swapΓ
   :: Contextual e r s
-  => (    _Γ  -> _Γ' -|s|- _Δ)
+  => (V e _Γ  -> _Γ' -|s|- _Δ)
   -> (V e _Γ' -> _Γ  -|s|- _Δ)
 swapΓ f _Γ' = popΓΔ (\ _Δ _Γ -> pushΓΔ (f _Γ) _Δ _Γ')
 
@@ -168,16 +168,16 @@ swapΔ
   :: Contextual e r s
   => (K r _Δ  -> _Γ -|s|- _Δ')
   -> (K r _Δ' -> _Γ -|s|- _Δ)
-swapΔ f _Δ' = popΓΔ (\ _Δ -> pushΓΔ (f _Δ) _Δ' . inV0)
+swapΔ f _Δ' = popΓΔ (\ _Δ -> pushΓΔ (f _Δ) _Δ')
 
 
 -- Popping
 
 popΓΔ
   :: Contextual e r s
-  => (K r _Δ -> _Γ -> Γ -|s|- r)
-  -- ---------------------------
-  ->                 _Γ -|s|- _Δ
+  => (K r _Δ -> V e _Γ -> Γ -|s|- r)
+  -- -------------------------------
+  ->                     _Γ -|s|- _Δ
 popΓΔ f = swapΓΔ f idK (inV0 Γ)
 
 -- | Pop something off the input context which can later be pushed. Used with 'pushΓ', this provides a generalized context restructuring facility.
@@ -190,9 +190,9 @@ popΓΔ f = swapΓΔ f idK (inV0 Γ)
 -- @
 popΓ
   :: Contextual e r s
-  => (_Γ -> Γ -|s|- _Δ)
-  -- ------------------
-  ->  _Γ      -|s|- _Δ
+  => (V e _Γ -> Γ -|s|- _Δ)
+  -- ----------------------
+  ->      _Γ      -|s|- _Δ
 popΓ f = swapΓ f (inV0 Γ)
 
 -- | Pop something off the output context which can later be pushed. Used with 'pushΔ', this provides a generalized context restructuring facility.
@@ -224,7 +224,7 @@ popL
   => (a -> _Γ -|s|- _Δ)
   -- ------------------
   ->  a  < _Γ -|s|- _Δ
-popL f = popΓ (\ c -> pushΓ (f (exl c)) (inV0 (exr c)))
+popL f = popΓ (\ c -> val (\ a -> pushΓ (f a) (exrF c)) (exlF c))
 
 -- | Pop something off the output context which can later be pushed. Used with 'pushR', this provides a generalized context restructuring facility.
 --
@@ -339,7 +339,7 @@ pushL
   =>  a  < _Γ -|s|- _Δ
   -- ------------------
   -> (a -> _Γ -|s|- _Δ)
-pushL s a = popΓ (\ c -> pushΓ s (inV0 (a `inlr` c)))
+pushL s a = popΓ (\ c -> pushΓ s (inV0 a <| c))
 
 -- | Push something onto the output context which was previously popped off it. Used with 'popR', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
 --
@@ -381,7 +381,7 @@ mapΓΔ
   -> _Γ  -|s|- _Δ
   -- -------------
   -> _Γ' -|s|- _Δ'
-mapΓΔ f g p = popΓΔ (\ _Δ _Γ -> pushΓΔ p (contramap g _Δ) (inV0 (f _Γ)))
+mapΓΔ f g p = popΓΔ (\ _Δ _Γ -> pushΓΔ p (contramap g _Δ) (f <$> _Γ))
 
 mapΓ
   :: Contextual e r s
