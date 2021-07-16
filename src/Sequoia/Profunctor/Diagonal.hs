@@ -19,6 +19,9 @@ instance Monad m => Diagonal (Kleisli m) where
 instance Diagonal p => Diagonal (Pastro p) where
   dup = Pastro fst dup (,())
 
+instance Diagonal p => Diagonal (Copastro p) where
+  dup = Copastro ($ dup)
+
 
 class Profunctor p => Codiagonal p where
   dedup :: Either a a `p` a
@@ -31,3 +34,6 @@ instance Monad m => Codiagonal (Kleisli m) where
 
 instance Codiagonal p => Codiagonal (Pastro p) where
   dedup = Pastro fst dedup (,())
+
+instance Codiagonal p => Codiagonal (Copastro p) where
+  dedup = Copastro ($ dedup)
