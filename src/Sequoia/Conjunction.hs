@@ -10,6 +10,8 @@ module Sequoia.Conjunction
 , swapConj
 , curryConj
 , uncurryConj
+, firstConj
+, secondConj
   -- * Defaults
 , foldMapConj
 , traverseConj
@@ -71,6 +73,12 @@ curryConj f = fmap f . inlr
 
 uncurryConj :: Conj p => (a -> b -> r) -> (a `p` b -> r)
 uncurryConj f = exlrC f id id
+
+firstConj :: (Conj c, Strong p) => p a b -> p (c a d) (c b d)
+firstConj = dimap coerceConj coerceConj . first'
+
+secondConj :: (Conj c, Strong p) => p a b -> p (c d a) (c d b)
+secondConj = dimap coerceConj coerceConj . second'
 
 
 -- Defaults
