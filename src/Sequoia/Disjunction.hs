@@ -6,6 +6,7 @@ module Sequoia.Disjunction
 , exlD
 , exrD
 , coerceDisj
+  -- * Defaults
 , leftDisj
 , rightDisj
 , unleftDisj
@@ -57,6 +58,9 @@ exrD = const Nothing <--> Just
 
 coerceDisj :: (Disj c1, Disj c2) => a `c1` b -> a `c2` b
 coerceDisj = inl <--> inr
+
+
+-- Defaults
 
 leftDisj :: (Disj d, Choice p) => p a b -> p (d a c) (d b c)
 leftDisj = dimap coerceDisj coerceDisj . left'
