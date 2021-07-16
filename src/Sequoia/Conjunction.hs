@@ -14,6 +14,7 @@ module Sequoia.Conjunction
 , secondConj
 , (***)
 , (&&&)
+, dupConj
 , unfirstConj
 , unsecondConj
   -- * Defaults
@@ -95,6 +96,9 @@ infixr 3 ***
 f &&& g = rmap coerceConj dup >>> f *** g
 
 infixr 3 &&&
+
+dupConj :: (Diagonal p, Conj c) => a `p` (a `c` a)
+dupConj = rmap coerceConj dup
 
 unfirstConj :: (Conj c, Costrong p) => p (c a d) (c b d) -> p a b
 unfirstConj = unfirst . dimap coerceConj coerceConj
