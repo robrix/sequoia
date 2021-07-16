@@ -1,2 +1,8 @@
 module Sequoia.Profunctor.Diagonal
-() where
+( Diagonal(..)
+) where
+
+import Data.Profunctor
+
+class Profunctor p => Diagonal p where
+  dup :: a `p` (a, a)
