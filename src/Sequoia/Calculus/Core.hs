@@ -1,5 +1,6 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Calculus.Core
@@ -149,7 +150,7 @@ class Core e r s => Exchange e r s where
 
 -- Contextual
 
-class Core e r s => Contextual e r s where
+class (Core e r s, forall a b . Env e (s a b)) => Contextual e r s where
   swapΓΔ
     :: (K r _Δ  ->     _Γ  -> _Γ' -|s|- _Δ')
     -> (K r _Δ' -> V e _Γ' -> _Γ  -|s|- _Δ)
