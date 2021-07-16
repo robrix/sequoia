@@ -64,6 +64,8 @@ import Sequoia.Conjunction
 import Sequoia.Continuation as K
 import Sequoia.Disjunction
 import Sequoia.Functor.K
+import Sequoia.Functor.V
+import Sequoia.Value
 
 -- Core
 
@@ -149,23 +151,23 @@ class Core e r s => Exchange e r s where
 
 class Core e r s => Contextual e r s where
   swapΓΔ
-    :: (K r _Δ  -> _Γ  -> _Γ' -|s|- _Δ')
-    -> (K r _Δ' -> _Γ' -> _Γ  -|s|- _Δ)
+    :: (K r _Δ  ->     _Γ  -> _Γ' -|s|- _Δ')
+    -> (K r _Δ' -> V e _Γ' -> _Γ  -|s|- _Δ)
 
 
 -- Swapping
 
 swapΓ
   :: Contextual e r s
-  => (_Γ  -> _Γ' -|s|- _Δ)
-  -> (_Γ' -> _Γ  -|s|- _Δ)
+  => (    _Γ  -> _Γ' -|s|- _Δ)
+  -> (V e _Γ' -> _Γ  -|s|- _Δ)
 swapΓ f _Γ' = popΓΔ (\ _Δ _Γ -> pushΓΔ (f _Γ) _Δ _Γ')
 
 swapΔ
   :: Contextual e r s
   => (K r _Δ  -> _Γ -|s|- _Δ')
   -> (K r _Δ' -> _Γ -|s|- _Δ)
-swapΔ f _Δ' = popΓΔ (\ _Δ -> pushΓΔ (f _Δ) _Δ')
+swapΔ f _Δ' = popΓΔ (\ _Δ -> pushΓΔ (f _Δ) _Δ' . inV0)
 
 
 -- Popping
@@ -175,7 +177,7 @@ popΓΔ
   => (K r _Δ -> _Γ -> Γ -|s|- r)
   -- ---------------------------
   ->                 _Γ -|s|- _Δ
-popΓΔ f = swapΓΔ f idK Γ
+popΓΔ f = swapΓΔ f idK (inV0 Γ)
 
 -- | Pop something off the input context which can later be pushed. Used with 'pushΓ', this provides a generalized context restructuring facility.
 --
@@ -190,7 +192,7 @@ popΓ
   => (_Γ -> Γ -|s|- _Δ)
   -- ------------------
   ->  _Γ      -|s|- _Δ
-popΓ f = swapΓ f Γ
+popΓ f = swapΓ f (inV0 Γ)
 
 -- | Pop something off the output context which can later be pushed. Used with 'pushΔ', this provides a generalized context restructuring facility.
 --
@@ -221,7 +223,7 @@ popL
   => (a -> _Γ -|s|- _Δ)
   -- ------------------
   ->  a  < _Γ -|s|- _Δ
-popL f = popΓ (\ c -> pushΓ (f (exl c)) (exr c))
+popL f = popΓ (\ c -> pushΓ (f (exl c)) (inV0 (exr c)))
 
 -- | Pop something off the output context which can later be pushed. Used with 'pushR', this provides a generalized context restructuring facility.
 --
@@ -287,9 +289,9 @@ poppedR2 = poppedR . poppedR
 
 pushΓΔ
   :: Contextual e r s
-  =>                 _Γ -|s|- _Δ
-  -- ---------------------------
-  -> (K r _Δ -> _Γ -> Γ -|s|- r)
+  =>                     _Γ -|s|- _Δ
+  -- -------------------------------
+  -> (K r _Δ -> V e _Γ -> Γ -|s|- r)
 pushΓΔ = swapΓΔ . const . const
 
 -- | Push something onto the input context which was previously popped off it. Used with 'popΓ', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
@@ -302,9 +304,9 @@ pushΓΔ = swapΓΔ . const . const
 -- @
 pushΓ
   :: Contextual e r s
-  =>  _Γ      -|s|- _Δ
-  -- ------------------
-  -> (_Γ -> Γ -|s|- _Δ)
+  =>      _Γ      -|s|- _Δ
+  -- ----------------------
+  -> (V e _Γ -> Γ -|s|- _Δ)
 pushΓ = swapΓ . const
 
 -- | Push something onto the output context which was previously popped off it. Used with 'popΔ', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
@@ -336,7 +338,7 @@ pushL
   =>  a  < _Γ -|s|- _Δ
   -- ------------------
   -> (a -> _Γ -|s|- _Δ)
-pushL s a = popΓ (\ c -> pushΓ s (a `inlr` c))
+pushL s a = popΓ (\ c -> pushΓ s (inV0 (a `inlr` c)))
 
 -- | Push something onto the output context which was previously popped off it. Used with 'popR', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
 --
@@ -378,7 +380,7 @@ mapΓΔ
   -> _Γ  -|s|- _Δ
   -- -------------
   -> _Γ' -|s|- _Δ'
-mapΓΔ f g p = popΓΔ (\ _Δ _Γ -> pushΓΔ p (contramap g _Δ) (f _Γ))
+mapΓΔ f g p = popΓΔ (\ _Δ _Γ -> pushΓΔ p (contramap g _Δ) (inV0 (f _Γ)))
 
 mapΓ
   :: Contextual e r s
