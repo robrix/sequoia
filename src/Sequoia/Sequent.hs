@@ -89,6 +89,7 @@ deriving via Contextually (Seq e r) instance Exchange e r (Seq e r)
 instance Contextual e r (Seq e r) where
   swapΓΔ f _Δ' _Γ' = inCP (\ _Γ _Δ -> exCP (f _Δ _Γ) _Γ' _Δ')
 
+
 -- Control
 
 instance Calculus.Control Seq where
