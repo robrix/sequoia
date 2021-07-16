@@ -93,7 +93,7 @@ f *** g = firstConj f >>> secondConj g
 infixr 3 ***
 
 (&&&) :: (Strong p, Category p, Conj c, Diagonal p) => a `p` b1 -> a `p` b2 -> a `p` (b1 `c` b2)
-f &&& g = rmap coerceConj dup >>> f *** g
+f &&& g = dupConj >>> f *** g
 
 infixr 3 &&&
 
