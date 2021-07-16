@@ -4,8 +4,6 @@ module Sequoia.Calculus.Context
   type (<)(..)
 , (<|)
   -- * Δ
-, Δ
-, absurdΔ
 , type (>)(..)
 , (|>)
   -- * Mixfix syntax
@@ -49,12 +47,6 @@ instance Bitraversable (<) where
 
 
 -- Δ
-
-data Δ
-
-absurdΔ :: Δ -> a
-absurdΔ = \case
-
 
 data a > b
   = L a
