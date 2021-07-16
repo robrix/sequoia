@@ -8,6 +8,7 @@ module Sequoia.Disjunction
 , mirrorDisj
 , cocurryDisj
 , councurryDisj
+, coapDisj
   -- * Generalizations
 , coerceDisj
 , leftDisj
@@ -74,6 +75,9 @@ cocurryDisj f (c, b) = tabulate (\ k -> index (f c) (tabulate (index b <--> inde
 
 councurryDisj :: (Disj d, K.Representable k) => ((c, k b) -> k (k a)) -> (c -> k (k (b `d` a)))
 councurryDisj f c = tabulate (\ k -> index (f (c, inlK k)) (inrK k))
+
+coapDisj :: (Disj d, K.Representable k) => c -> k (k ((c, k b) `d` b))
+coapDisj c = tabulate (\ k -> index k (inl (c, tabulate (index k . inr))))
 
 
 -- Generalizations
