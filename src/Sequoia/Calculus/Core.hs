@@ -152,8 +152,8 @@ class Core e r s => Exchange e r s where
 
 class (Core e r s, forall a b . Env e (s a b)) => Contextual e r s where
   swapΓΔ
-    :: (K r _Δ  -> V e _Γ  -> _Γ' -|s|- _Δ')
-    -> (K r _Δ' -> V e _Γ' -> _Γ  -|s|- _Δ)
+    :: (V e _Γ  -> K r _Δ  -> _Γ' -|s|- _Δ')
+    -> (V e _Γ' -> K r _Δ' -> _Γ  -|s|- _Δ)
 
 
 -- Swapping
@@ -162,23 +162,23 @@ swapΓ
   :: Contextual e r s
   => (V e _Γ  -> _Γ' -|s|- _Δ)
   -> (V e _Γ' -> _Γ  -|s|- _Δ)
-swapΓ f _Γ' = popΓΔ (\ _Δ _Γ -> pushΓΔ (f _Γ) _Δ _Γ')
+swapΓ f _Γ' = popΓΔ (\ _Γ _Δ -> pushΓΔ (f _Γ) _Γ' _Δ)
 
 swapΔ
   :: Contextual e r s
   => (K r _Δ  -> _Γ -|s|- _Δ')
   -> (K r _Δ' -> _Γ -|s|- _Δ)
-swapΔ f _Δ' = popΓΔ (\ _Δ -> pushΓΔ (f _Δ) _Δ')
+swapΔ f _Δ' = popΓΔ (\ _Γ _Δ -> pushΓΔ (f _Δ) _Γ _Δ')
 
 
 -- Popping
 
 popΓΔ
   :: Contextual e r s
-  => (K r _Δ -> V e _Γ -> e -|s|- r)
+  => (V e _Γ -> K r _Δ -> e -|s|- r)
   -- -------------------------------
   ->                     _Γ -|s|- _Δ
-popΓΔ f = swapΓΔ f idK idV
+popΓΔ f = swapΓΔ f idV idK
 
 -- | Pop something off the input context which can later be pushed. Used with 'pushΓ', this provides a generalized context restructuring facility.
 --
@@ -292,7 +292,7 @@ pushΓΔ
   :: Contextual e r s
   =>                     _Γ -|s|- _Δ
   -- -------------------------------
-  -> (K r _Δ -> V e _Γ -> e -|s|- r)
+  -> (V e _Γ -> K r _Δ -> e -|s|- r)
 pushΓΔ = swapΓΔ . const . const
 
 -- | Push something onto the input context which was previously popped off it. Used with 'popΓ', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
@@ -381,7 +381,7 @@ mapΓΔ
   -> _Γ  -|s|- _Δ
   -- -------------
   -> _Γ' -|s|- _Δ'
-mapΓΔ f g p = popΓΔ (\ _Δ _Γ -> pushΓΔ p (contramap g _Δ) (f <$> _Γ))
+mapΓΔ f g p = popΓΔ (\ _Γ _Δ -> pushΓΔ p (f <$> _Γ) (contramap g _Δ))
 
 mapΓ
   :: Contextual e r s
