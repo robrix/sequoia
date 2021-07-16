@@ -149,14 +149,14 @@ instance TensorIntro e r (Seq e r) where
 -- Logical biconditional/exclusive disjunction
 
 instance IffIntro e r (Seq e r) where
-  iffL1 s1 s2 = mapL getIff (withL1 (downR s1 ->⊢ s2))
+  iffL1 s1 s2 = mapL (fmap getIff) (withL1 (downR s1 ->⊢ s2))
 
-  iffL2 s1 s2 = mapL getIff (withL2 (downR s1 ->⊢ s2))
+  iffL2 s1 s2 = mapL (fmap getIff) (withL2 (downR s1 ->⊢ s2))
 
   iffR s1 s2 = mapR Iff (funR (downL s1) ⊢& funR (downL s2))
 
 instance XOrIntro e r (Seq e r) where
-  xorL s1 s2 = mapL getXOr (subL (upR s1) ⊕⊢ subL (upR s2))
+  xorL s1 s2 = mapL (fmap getXOr) (subL (upR s1) ⊕⊢ subL (upR s2))
 
   xorR1 s1 s2 = mapR XOr (sumR1 (s1 ⊢-< upL s2))
 
@@ -170,14 +170,14 @@ instance FunctionIntro e r (Seq e r) where
   funR = lowerLR liftR . wkR'
 
 instance SubtractionIntro e r (Seq e r) where
-  subL f = mapL (sub <~) (tensorL (wkL' f >>> poppedL2 negateL init))
+  subL f = mapL (fmap (sub <~)) (tensorL (wkL' f >>> poppedL2 negateL init))
   subR a b = mapR (~> sub) (a ⊢⊗ negateR b)
 
 
 -- Quantification
 
 instance UniversalIntro e r (Seq e r) where
-  forAllL p = mapL (notNegate . runForAll) p
+  forAllL p = mapL (fmap (notNegate . runForAll)) p
   forAllR p = inCP (\ _Γ _Δ -> liftRes (\ run -> inrK _Δ •• ForAll (inK (\ k -> run (exCP p _Γ (inlK _Δ |> k))))))
 
 instance ExistentialIntro e r (Seq e r) where
@@ -188,20 +188,20 @@ instance ExistentialIntro e r (Seq e r) where
 -- Recursion
 
 instance NuIntro e r (Seq e r) where
-  nuL = mapL runNu
-  nuR s = wkR' s >>> existsL (mapL nu init)
+  nuL = mapL (fmap runNu)
+  nuR s = wkR' s >>> existsL (mapL (fmap nu) init)
 
 instance MuIntro e r (Seq e r) where
-  muL f k = wkL (downR f) >>> exL (mapL getMu (funL init (wkL' k)))
+  muL f k = wkL (downR f) >>> exL (mapL (fmap getMu) (funL init (wkL' k)))
   muR = mapR mu
 
 
 -- Polarity shifts
 
 instance UpIntro e r (Seq e r) where
-  upL   = mapL getUp
+  upL   = mapL (fmap getUp)
   upR   = mapR Up
 
 instance DownIntro e r (Seq e r) where
-  downL = mapL getDown
+  downL = mapL (fmap getDown)
   downR = mapR Down

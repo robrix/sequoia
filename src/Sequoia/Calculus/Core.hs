@@ -57,7 +57,6 @@ module Sequoia.Calculus.Core
 ) where
 
 import Control.Monad (join)
-import Data.Bifunctor
 import Data.Profunctor
 import Prelude hiding (init)
 import Sequoia.Calculus.Context
@@ -402,11 +401,11 @@ mapΔ = (id `mapΓΔ`)
 
 mapL
   :: Contextual e r s
-  => (a' -> a)
+  => (V e a' -> V e a)
   -> a  < _Γ -|s|- _Δ
   -- ----------------
   -> a' < _Γ -|s|- _Δ
-mapL f = mapΓ (fmap (first f))
+mapL f = mapΓ (f . exlF >∘∘< exrF)
 
 mapR
   :: Contextual e r s
