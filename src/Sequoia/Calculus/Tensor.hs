@@ -89,13 +89,13 @@ tensorDistributivityR
 tensorDistributivityR = tensorL (exL (sumR1 (exL init ⊢⊗ init) ⊕⊢ sumR2 (exL init ⊢⊗ init)))
 
 tensorAnnihilationL
-  :: (TensorIntro s, ZeroIntro e r (s e r), Pos a)
+  :: (TensorIntro s, ZeroIntro s, Pos a)
   -- ---------------------------------
   => Zero ⊗ a < _Γ -|s e r|- _Δ > Zero
 tensorAnnihilationL = tensorL zeroL
 
 tensorAnnihilationR
-  :: ZeroIntro e r (s e r)
+  :: ZeroIntro s
   -- ---------------------------------
   => Zero < _Γ -|s e r|- _Δ > a ⊗ Zero
 tensorAnnihilationR = zeroL

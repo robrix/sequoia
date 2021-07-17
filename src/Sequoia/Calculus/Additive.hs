@@ -22,7 +22,7 @@ import Sequoia.Calculus.With
 import Sequoia.Calculus.Zero
 import Sequoia.Polarity
 
-type AdditiveIntro e r s = (TopIntro e r s, ZeroIntro e r s, WithIntro e r s, SumIntro e r s)
+type AdditiveIntro e r s = (TopIntro e r (s e r), ZeroIntro s, WithIntro e r (s e r), SumIntro e r (s e r))
 
 withLSum
   :: (Weaken e r s, SumIntro e r s, WithIntro e r s, NegateIntro e r s, Neg a, Neg b)

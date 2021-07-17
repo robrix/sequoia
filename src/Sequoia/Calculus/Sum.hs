@@ -60,21 +60,21 @@ sumL2' p = sumR2 init >>> wkL' p
 
 
 sumIdentityL
-  :: (SumIntro e r s, ZeroIntro e r s, Pos a)
-  -- --------------------------
-  =>Zero ⊕ a < _Γ -|s|- _Δ > a
+  :: (SumIntro e r (s e r), ZeroIntro s, Pos a)
+  -- ------------------------------
+  => Zero ⊕ a < _Γ -|s e r|- _Δ > a
 sumIdentityL = zeroL ⊕⊢ init
 
 sumIdentityR
   :: (SumIntro e r s, Pos a)
   -- --------------------------
-  =>a < _Γ -|s|- _Δ > a ⊕ Zero
+  => a < _Γ -|s|- _Δ > a ⊕ Zero
 sumIdentityR = sumR1 init
 
 sumAssociativity
   :: (SumIntro e r s, Pos a, Pos b, Pos c)
   -- ---------------------------------------
-  =>a ⊕ (b ⊕ c) < _Γ -|s|- _Δ > (a ⊕ b) ⊕ c
+  => a ⊕ (b ⊕ c) < _Γ -|s|- _Δ > (a ⊕ b) ⊕ c
 sumAssociativity = sumR1 (sumR1 init) ⊕⊢ sumR1 (sumR2 init) ⊕⊢ sumR2 init
 
 sumCommutativity

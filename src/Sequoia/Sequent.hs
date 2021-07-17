@@ -116,7 +116,7 @@ instance NegateIntro e r (Seq e r) where
 instance TopIntro e r (Seq e r) where
   topR = pure (inr Top)
 
-instance ZeroIntro e r (Seq e r) where
+instance ZeroIntro Seq where
   zeroL = liftL (inK absurdP)
 
 instance WithIntro e r (Seq e r) where
