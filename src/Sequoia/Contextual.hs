@@ -330,20 +330,20 @@ mapΔR f = mapΔ (inlK <•••> f . inrK)
 
 
 mapL
-  :: Contextual s
+  :: Profunctor p
   => (a' -> a)
-  -> a  < _Γ -|s e r|- _Δ
-  -- --------------------
-  -> a' < _Γ -|s e r|- _Δ
-mapL f = mapΓL (fmap f)
+  -> a  < _Γ -|p|- _Δ
+  -- ----------------
+  -> a' < _Γ -|p|- _Δ
+mapL = lmap . firstConj
 
 mapR
-  :: Contextual s
+  :: Profunctor p
   => (a -> a')
-  -> _Γ -|s e r|- _Δ > a
-  -- --------------------
-  -> _Γ -|s e r|- _Δ > a'
-mapR f = mapΔR (contramap f)
+  -> _Γ -|p|- _Δ > a
+  -- ----------------
+  -> _Γ -|p|- _Δ > a'
+mapR = rmap . fmap
 
 
 mapL2
