@@ -91,9 +91,8 @@ instance Functor (CP e r c) where
   fmap = rmap
 
 instance Applicative (CP e r a) where
-  pure a = CP (\ _ b -> b •• a)
-
-  CP df <*> CP da = CP (\ a b -> cont (\ _K -> df a (_K (\ f -> da a (contramap f b)))))
+  pure = pureCP
+  (<*>) = apCP
 
 instance Monad (CP e r a) where
   CP m >>= f = CP (\ a c -> cont (\ _K -> m a (_K (\ b -> getCP (f b) a c))))
