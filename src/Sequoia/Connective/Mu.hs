@@ -33,13 +33,13 @@ instance (Pos (f a), Neg a) => Polarized N (MuF e r f a) where
 mu :: ForAll r N (MuF e r f) -> Mu e r f
 mu r = Mu (dnE (mapDN getMuF (runForAll r)))
 
-foldMu :: ControlPassing e r d => Neg a => f a `d` a -> Mu e r f `d` a
+foldMu :: ControlPassing d => Neg a => f a --|d e r|-> a -> Mu e r f --|d e r|-> a
 foldMu alg = inCP (\ v k -> val (\ (Mu f) -> exCP f (inV0 (Down (coerceCP alg))) k) v)
 
-unfoldMu :: (Traversable f, ControlPassing e r d) => a `d` f a -> a `d` Mu e r f
+unfoldMu :: (Traversable f, ControlPassing d) => a --|d e r|-> f a -> a --|d e r|-> Mu e r f
 unfoldMu coalg = inCP' (\ a -> Mu (inCP (\ v k -> val (\ (Down alg) -> exCP (refoldCat alg (coerceCP coalg)) (inV0 a) k) v)))
 
-refoldMu :: (Traversable f, ControlPassing e r d, Neg b) => f b `d` b -> a `d` f a -> a `d` b
+refoldMu :: (Traversable f, ControlPassing d, Neg b) => f b --|d e r|-> b -> a --|d e r|-> f a -> a --|d e r|-> b
 refoldMu f g = foldMu f Cat.<<< unfoldMu g
 
 
