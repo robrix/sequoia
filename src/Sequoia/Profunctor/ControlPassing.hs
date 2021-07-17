@@ -83,7 +83,7 @@ instance Cat.Category (CP e r) where
   CP f . CP g = CP (\ a c -> cont (\ _K -> g a (_K (\ b -> f (inV0 b) c))))
 
 instance Functor (CP e r c) where
-  fmap f = CP . fmap (lmap (contramap f)) . getCP
+  fmap = rmap
 
 instance Applicative (CP e r a) where
   pure a = CP (\ _ b -> b •• a)
