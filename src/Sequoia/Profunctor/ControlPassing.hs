@@ -96,7 +96,7 @@ instance Applicative (CP e r a) where
   (<*>) = apCP
 
 instance Monad (CP e r a) where
-  CP m >>= f = CP (\ a c -> cont (\ _K -> m a (_K (\ b -> getCP (f b) a c))))
+  (>>=) = bindCP
 
 instance Coapply (CP e r) where
   coliftA2 f a b = CP (\ v k -> env ((flip (exCP a) k <∘∘> flip (exCP b) k) (f <$> v)))
