@@ -43,9 +43,9 @@ import Sequoia.Conjunction
 import Sequoia.Disjunction
 import Sequoia.Functor.V
 
-class Representable v => Value s v | v -> s
+class Representable v => Value v
 
-instance Value s (V s)
+instance Value (V s)
 
 
 _V :: (Representable v, Representable v') => Optic Iso (v a) (v' a') (Rep v -> a) (Rep v' -> a')
