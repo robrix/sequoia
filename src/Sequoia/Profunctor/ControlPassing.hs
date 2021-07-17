@@ -39,6 +39,8 @@ module Sequoia.Profunctor.ControlPassing
 , wanderCP
 , idCP
 , composeCP
+, pureCP
+, apCP
   -- * Control context
 , (•∘)
 , localEnv
@@ -211,6 +213,12 @@ idCP = inCP (flip (•∘))
 
 composeCP :: ControlPassing f => b --|f e r|-> c -> a --|f e r|-> b -> a --|f e r|-> c
 composeCP f g = inCP (\ a c -> cont (\ _K -> exCP g a (_K (\ b -> exCP f (inV0 b) c))))
+
+pureCP :: ControlPassing f => b -> a --|f e r|-> b
+pureCP = inCP . const . flip (••)
+
+apCP :: ControlPassing f => a --|f e r|-> (b -> c) -> a --|f e r|-> b -> a --|f e r|-> c
+apCP df da = inCP (\ a b -> cont (\ _K -> exCP df a (_K (\ f -> exCP da a (contramap f b)))))
 
 
 -- Control context
