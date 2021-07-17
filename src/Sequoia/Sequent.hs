@@ -1,4 +1,3 @@
-{-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Sequent
 ( -- * Sequents
   evalSeq

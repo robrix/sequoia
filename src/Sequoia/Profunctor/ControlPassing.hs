@@ -86,11 +86,6 @@ instance Coapply (CP e r) where
 instance Env e (CP e r a b) where
   env f = CP (\ v k -> env (runCP v k . f))
 
-  type WithEnv (CP e r a b) e' = CP e' r a b
-
-  -- FIXME: this could change the semantics of programs dependent on dynamic vs. lexical scoping.
-  localEnv f c = CP (\ v k -> val (\ v -> localEnv f (getCP c (inV0 v) k)) v)
-
 instance Res r (CP e r a b) where
   res = CP . const . const . res
   liftRes f = CP (\ v k -> liftRes (\ run -> exCP (f (run . runCP v k)) v k))
@@ -172,10 +167,6 @@ newtype Control e r = Control { getControl :: e -> r }
 
 instance Env e (Control e r) where
   env f = Control (getControl =<< f)
-
-  type WithEnv (Control e r) e' = Control e' r
-
-  localEnv f = Control . lmap f . getControl
 
 instance Res r (Control e r) where
   res = Control . const

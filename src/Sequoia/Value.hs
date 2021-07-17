@@ -35,7 +35,6 @@ module Sequoia.Value
 
 import Control.Applicative (liftA2)
 import Data.Functor.Rep
-import Data.Profunctor
 import Sequoia.Bijection
 import Sequoia.Conjunction
 import Sequoia.Disjunction
@@ -133,16 +132,8 @@ bitraverseDisjV d e = bimapDisj inV0 inV0 (e ∘ d)
 class Env e c | c -> e where
   env :: (e -> c) -> c
 
-  type WithEnv c e'
-
-  localEnv :: (e' -> e) -> (c -> WithEnv c e')
-
 instance Env e (V e a) where
   env f = V (runV =<< f)
-
-  type WithEnv (V e a) e' = V e' a
-
-  localEnv = lmap
 
 val :: (Env (Rep v) c, Representable v) => (a -> c) -> (v a -> c)
 val f v = env (f . exV v)
