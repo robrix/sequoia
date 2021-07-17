@@ -1,0 +1,2 @@
+module Sequoia.Lambda
+() where

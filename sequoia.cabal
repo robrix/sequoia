@@ -134,6 +134,7 @@ library
     Sequoia.Functor.I
     Sequoia.Functor.K
     Sequoia.Functor.V
+    Sequoia.Lambda
     Sequoia.Polarity
     Sequoia.Printer
     Sequoia.Profunctor.Adjunction
