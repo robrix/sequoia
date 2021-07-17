@@ -5,18 +5,20 @@ module Sequoia.Value
 ( -- * Values
   Value
 , Representable(..)
-, _V
+  -- * Construction
 , inV0
 , inV
 , inV1
 , inV1'
 , inV2
+, idV
+  -- * Elimination
 , exV
 , exV1
 , exV2
 , (∘)
-, idV
   -- * Coercion
+, _V
 , coerceVWith
 , coerceV
 , coerceV1
@@ -48,8 +50,7 @@ class Representable v => Value v
 instance Value (V s)
 
 
-_V :: (Representable v, Representable v') => Optic Iso (v a) (v' a') (Rep v -> a) (Rep v' -> a')
-_V = exV <-> inV
+-- Construction
 
 inV0 :: Representable v => a -> v a
 inV0 = inV . const
@@ -65,6 +66,12 @@ inV1' = fmap inV
 
 inV2 :: Representable v => ((Rep v -> a) -> (Rep v -> b) -> (Rep v -> c)) -> (v a -> v b -> v c)
 inV2 = dimap2 exV exV inV
+
+idV :: Representable v => v (Rep v)
+idV = inV id
+
+
+-- Elimination
 
 exV :: Representable v => v a -> (Rep v -> a)
 exV = index
@@ -82,11 +89,10 @@ exV2 = dimap2 inV inV exV
 infixr 8 ∘
 
 
-idV :: Representable v => v (Rep v)
-idV = inV id
-
-
 -- Coercion
+
+_V :: (Representable v, Representable v') => Optic Iso (v a) (v' a') (Rep v -> a) (Rep v' -> a')
+_V = exV <-> inV
 
 coerceVWith :: (Representable v1, Representable v2) => ((Rep v1 -> a) -> (Rep v2 -> b)) -> (v1 a -> v2 b)
 coerceVWith = under _V
