@@ -32,6 +32,7 @@ module Sequoia.Value
 , val
 , Env1(..)
 , LocalEnv(..)
+, LocalEnv2(..)
 ) where
 
 import Control.Applicative (liftA2)
@@ -153,3 +154,7 @@ class LocalEnv c where
 
 instance LocalEnv V where
   localEnv = lmap
+
+
+class LocalEnv2 c where
+  localEnv2 :: (e -> e') -> c e' r s t -> c e r s t
