@@ -28,6 +28,8 @@ module Sequoia.Profunctor.ControlPassing
 , dimapVK
 , lmapV
 , rmapK
+  -- * Defaults
+, lmapCP
   -- * Control context
 , (•∘)
 , localEnv
@@ -167,6 +169,12 @@ lmapV = (`dimapVK` id)
 
 rmapK :: ControlPassing f => (K r b' -> K r b) -> (a --|f e r|-> b -> a --|f e r|-> b')
 rmapK = (id `dimapVK`)
+
+
+-- Defaults
+
+lmapCP :: ControlPassing f => (a' -> a) -> a --|f e r|-> b -> a' --|f e r|-> b
+lmapCP = lmapV . fmap
 
 
 -- Control context
