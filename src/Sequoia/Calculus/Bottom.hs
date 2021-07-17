@@ -15,12 +15,12 @@ import Sequoia.Connective.Bottom
 class BottomIntro s where
   botL
     -- ------------------------
-    :: Bottom < _Γ -|s r e|- _Δ
+    :: Bottom < _Γ -|s e r|- _Δ
 
   botR
-    :: _Γ -|s r e|- _Δ
+    :: _Γ -|s e r|- _Δ
     -- ------------------------
-    -> _Γ -|s r e|- _Δ > Bottom
+    -> _Γ -|s e r|- _Δ > Bottom
 
 
 botR'
