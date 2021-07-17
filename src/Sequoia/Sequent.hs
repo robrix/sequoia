@@ -136,7 +136,7 @@ instance BottomIntro Seq where
   botL = liftL (inK absurdN)
   botR = wkR
 
-instance OneIntro e r (Seq e r) where
+instance OneIntro Seq where
   oneL = wkL
   oneR = liftR One
 

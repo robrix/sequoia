@@ -12,20 +12,20 @@ import Sequoia.Connective.One
 
 -- One
 
-class Core e r s => OneIntro e r s where
+class OneIntro s where
   oneL
-    ::       _Γ -|s|- _Δ
-    -- -----------------
-    -> One < _Γ -|s|- _Δ
+    ::       _Γ -|s e r|- _Δ
+    -- ---------------------
+    -> One < _Γ -|s e r|- _Δ
 
   oneR
-    -- -----------------
-    :: _Γ -|s|- _Δ > One
+    -- ---------------------
+    :: _Γ -|s e r|- _Δ > One
 
 
 oneL'
-  :: OneIntro e r s
-  => One < _Γ -|s|- _Δ
-  -- -----------------
-  ->       _Γ -|s|- _Δ
+  :: (Core e r (s e r), OneIntro s)
+  => One < _Γ -|s e r|- _Δ
+  -- ---------------------
+  ->       _Γ -|s e r|- _Δ
 oneL' = (oneR >>>)
