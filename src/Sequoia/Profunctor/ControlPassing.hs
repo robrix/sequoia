@@ -72,8 +72,8 @@ instance Strong (CP e r) where
   second' = secondCP
 
 instance Choice (CP e r) where
-  left'  (CP r) = CP (\ a b -> val ((`r` inlK b) . inV0 <--> (inrK b ••)) a)
-  right' (CP r) = CP (\ a b -> val ((inlK b ••) <--> (`r` inrK b) . inV0) a)
+  left'  = leftCP
+  right' = rightCP
 
 instance Traversing (CP e r) where
   wander traverse r = CP (\ s t -> val (\ s -> exCP (traverse ((r ↑) . inV0) s) idV t) s)
