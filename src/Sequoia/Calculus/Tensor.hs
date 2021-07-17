@@ -77,13 +77,13 @@ tensorCommutativity
 tensorCommutativity = tensorL (exL init ⊢⊗ init)
 
 tensorDistributivityL
-  :: (Exchange e r (s e r), TensorIntro s, SumIntro e r (s e r), Pos a, Pos b, Pos c)
+  :: (Exchange e r (s e r), TensorIntro s, SumIntro s, Pos a, Pos b, Pos c)
   -- ---------------------------------------------
   => a ⊗ c ⊕ b ⊗ c < _Γ -|s e r|- _Δ > (a ⊕ b) ⊗ c
 tensorDistributivityL = tensorL (sumR1 init ⊢⊗ exL init) ⊕⊢ tensorL (sumR2 init ⊢⊗ exL init)
 
 tensorDistributivityR
-  :: (Exchange e r (s e r), TensorIntro s, SumIntro e r (s e r), Pos a, Pos b, Pos c)
+  :: (Exchange e r (s e r), TensorIntro s, SumIntro s, Pos a, Pos b, Pos c)
   -- ---------------------------------------------
   => a ⊗ (b ⊕ c) < _Γ -|s e r|- _Δ > a ⊗ b ⊕ a ⊗ c
 tensorDistributivityR = tensorL (exL (sumR1 (exL init ⊢⊗ init) ⊕⊢ sumR2 (exL init ⊢⊗ init)))

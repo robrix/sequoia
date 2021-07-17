@@ -124,7 +124,7 @@ instance WithIntro Seq where
   withL2 p = popL (pushL p . exr)
   withR = mapR2 inlr
 
-instance SumIntro e r (Seq e r) where
+instance SumIntro Seq where
   sumL a b = popL (pushL a <--> pushL b)
   sumR1 = mapR inl
   sumR2 = mapR inr
