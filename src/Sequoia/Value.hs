@@ -151,5 +151,9 @@ val f v = env (f . exV v)
 class Env1 c where
   env1 :: (e -> c e x) -> c e x
 
+  localEnv1 :: (e -> e') -> c e' x -> c e x
+
 instance Env1 V where
   env1 = env
+
+  localEnv1 = lmap
