@@ -32,6 +32,8 @@ module Sequoia.Profunctor.ControlPassing
 , dimapCP
 , lmapCP
 , rmapCP
+, firstCP
+, secondCP
   -- * Control context
 , (•∘)
 , localEnv
@@ -183,6 +185,12 @@ lmapCP = lmapV . fmap
 
 rmapCP :: ControlPassing f => (b -> b') -> a --|f e r|-> b -> a --|f e r|-> b'
 rmapCP = rmapK . contramap
+
+firstCP  :: ControlPassing f => a --|f e r|-> b -> (a, c) --|f e r|-> (b, c)
+firstCP  r = inCP (\ a b -> val (\ (a, c) -> exCP r (inV0 a) (contramap (,c) b)) a)
+
+secondCP :: ControlPassing f => a --|f e r|-> b -> (c, a) --|f e r|-> (c, b)
+secondCP r = inCP (\ a b -> val (\ (c, a) -> exCP r (inV0 a) (contramap (c,) b)) a)
 
 
 -- Control context
