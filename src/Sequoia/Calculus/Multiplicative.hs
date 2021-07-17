@@ -22,7 +22,7 @@ import Sequoia.Calculus.Structural
 import Sequoia.Calculus.Tensor
 import Sequoia.Polarity
 
-type MultiplicativeIntro e r s = (BottomIntro s, OneIntro e r s, ParIntro e r s, TensorIntro e r s)
+type MultiplicativeIntro e r s = (BottomIntro s, OneIntro e r (s e r), ParIntro e r (s e r), TensorIntro e r (s e r))
 
 
 parLTensor

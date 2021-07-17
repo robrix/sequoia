@@ -132,7 +132,7 @@ instance SumIntro e r (Seq e r) where
 
 -- Multiplicative
 
-instance BottomIntro (Seq e r) where
+instance BottomIntro Seq where
   botL = liftL (inK absurdN)
   botR = wkR
 

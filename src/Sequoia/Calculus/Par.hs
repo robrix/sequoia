@@ -53,15 +53,15 @@ parR' p = poppedR (wkR . wkR) p >>> wkR init ⅋⊢ init
 
 
 parIdentityL
-  :: (ParIntro e r s, BottomIntro s, Neg a)
-  -- ----------------------------
-  => Bottom ⅋ a < _Γ -|s|- _Δ > a
+  :: (ParIntro e r (s e r), BottomIntro s, Neg a)
+  -- --------------------------------
+  => Bottom ⅋ a < _Γ -|s e r|- _Δ > a
 parIdentityL = botL ⅋⊢ init
 
 parIdentityR
-  :: (ParIntro e r s, BottomIntro s, Neg a)
-  -- ----------------------------
-  => a < _Γ -|s|- _Δ > a ⅋ Bottom
+  :: (ParIntro e r (s e r), BottomIntro s, Neg a)
+  -- --------------------------------
+  => a < _Γ -|s e r|- _Δ > a ⅋ Bottom
 parIdentityR = parR (botR init)
 
 parAssociativity
