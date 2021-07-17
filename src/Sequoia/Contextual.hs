@@ -62,7 +62,7 @@ import Sequoia.Value
 
 -- Contextual
 
-class (Core s, forall e r a b . Env e (s e r a b), forall e r . Profunctor (s e r)) => Contextual s where
+class (Core s, Env2 s, forall e r . Profunctor (s e r)) => Contextual s where
   swapΓΔ
     :: (V e _Γ  -> K r _Δ  -> _Γ' -|s e r|- _Δ')
     -> (V e _Γ' -> K r _Δ' -> _Γ  -|s e r|- _Δ)
@@ -136,7 +136,7 @@ popL
   => (a -> _Γ -|s e r|- _Δ)
   -- ----------------------
   ->  a  < _Γ -|s e r|- _Δ
-popL f = popΓ (\ c -> val (\ a -> pushΓ (f a) (exrF c)) (exlF c))
+popL f = popΓ (\ c -> val2 (\ a -> pushΓ (f a) (exrF c)) (exlF c))
 
 -- | Pop something off the output context which can later be pushed. Used with 'pushR', this provides a generalized context restructuring facility.
 --

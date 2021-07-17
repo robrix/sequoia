@@ -101,8 +101,8 @@ instance Monad (CP e r a) where
 instance Coapply (CP e r) where
   coliftA2 f a b = CP (\ v k -> env ((flip (exCP a) k <∘∘> flip (exCP b) k) (f <$> v)))
 
-instance Env e (CP e r a b) where
-  env f = CP (\ v k -> env (runCP v k . f))
+instance Env2 CP where
+  env2 f = inCP (\ v k -> env (runCP v k . f))
 
 
 -- Mixfix notation
@@ -222,7 +222,7 @@ bindCP m f = inCP (\ a c -> cont (\ _K -> exCP m a (_K (\ b -> exCP (f b) a c)))
 
 -- Control context
 
-(•∘) :: (Env (V.Rep v) (c (V.Rep v) (K.Rep k)), V.Representable v, Res c, K.Representable k) => k a -> v a -> c (V.Rep v) (K.Rep k)
+(•∘) :: (Env c, V.Representable v, Res c, K.Representable k) => k a -> v a -> c (V.Rep v) (K.Rep k)
 k •∘ v = env (\ e -> res (k • e ∘ v))
 
 infix 7 •∘
@@ -235,7 +235,7 @@ localEnv f c = inCP (\ v k -> val (\ v -> lmap f (exCP c (inV0 v) k)) v)
 newtype Control e r = Control { getControl :: e -> r }
   deriving (Cat.Category, Profunctor)
 
-instance Env e (Control e r) where
+instance Env Control where
   env f = Control (getControl =<< f)
 
 instance Res Control where
