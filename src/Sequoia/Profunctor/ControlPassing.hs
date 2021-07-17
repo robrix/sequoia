@@ -77,7 +77,7 @@ instance Choice (CP e r) where
   right' = rightCP
 
 instance Traversing (CP e r) where
-  wander traverse r = CP (\ s t -> val (\ s -> exCP (traverse ((r ↑) . inV0) s) idV t) s)
+  wander = wanderCP
 
 instance Cat.Category (CP e r) where
   id = CP (flip (•∘))
