@@ -66,8 +66,8 @@ instance Profunctor (CP e r) where
   dimap = dimapCP
 
 instance Strong (CP e r) where
-  first'  (CP r) = CP (\ a b -> val (\ (a, c) -> r (inV0 a) (contramap (,c) b)) a)
-  second' (CP r) = CP (\ a b -> val (\ (c, a) -> r (inV0 a) (contramap (c,) b)) a)
+  first'  = firstCP
+  second' = secondCP
 
 instance Choice (CP e r) where
   left'  (CP r) = CP (\ a b -> val ((`r` inlK b) . inV0 <--> (inrK b ••)) a)
