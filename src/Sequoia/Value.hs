@@ -150,3 +150,6 @@ instance Env1 e (V e) where
 
 class LocalEnv c where
   localEnv :: (e -> e') -> c e' r -> c e r
+
+instance LocalEnv V where
+  localEnv = lmap
