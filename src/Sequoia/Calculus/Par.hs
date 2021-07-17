@@ -77,13 +77,13 @@ parCommutativity
 parCommutativity = parR (init ⅋⊢ exR init)
 
 parDistributivityL
-  :: (Exchange e r (s e r), ParIntro s, WithIntro e r (s e r), Neg a, Neg b, Neg c)
+  :: (Exchange e r (s e r), ParIntro s, WithIntro s, Neg a, Neg b, Neg c)
   -- ---------------------------------------------
   => a ⅋ c & b ⅋ c < _Γ -|s e r|- _Δ > (a & b) ⅋ c
 parDistributivityL = parR (exR (withL1 (init ⅋⊢ exR init) ⊢& withL2 (init ⅋⊢ exR init)))
 
 parDistributivityR
-  :: (Exchange e r (s e r), ParIntro s, WithIntro e r (s e r), Neg a, Neg b, Neg c)
+  :: (Exchange e r (s e r), ParIntro s, WithIntro s, Neg a, Neg b, Neg c)
   -- ---------------------------------------------
   => a ⅋ (b & c) < _Γ -|s e r|- _Δ > a ⅋ b & a ⅋ c
 parDistributivityR = parR (exR init ⅋⊢ withL1 init) ⊢& parR (exR init ⅋⊢ withL2 init)

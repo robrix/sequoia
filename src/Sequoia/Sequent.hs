@@ -119,7 +119,7 @@ instance TopIntro e r (Seq e r) where
 instance ZeroIntro Seq where
   zeroL = liftL (inK absurdP)
 
-instance WithIntro e r (Seq e r) where
+instance WithIntro Seq where
   withL1 p = popL (pushL p . exl)
   withL2 p = popL (pushL p . exr)
   withR = mapR2 inlr
