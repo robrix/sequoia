@@ -82,8 +82,8 @@ instance Traversing (CP e r) where
   wander = wanderCP
 
 instance Cat.Category (CP e r) where
-  id = CP (flip (•∘))
-  CP f . CP g = CP (\ a c -> cont (\ _K -> g a (_K (\ b -> f (inV0 b) c))))
+  id = idCP
+  (.) = composeCP
 
 instance Functor (CP e r c) where
   fmap = rmap
