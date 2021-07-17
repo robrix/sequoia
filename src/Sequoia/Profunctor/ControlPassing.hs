@@ -159,13 +159,13 @@ coerceCP :: (ControlPassing c, ControlPassing d) => c e r a b -> d e r a b
 coerceCP = inCP . exCP
 
 
-dimapVK :: ControlPassing f => (V e _Γ' -> V e _Γ) -> (K r _Δ' -> K r _Δ) -> (f e r _Γ _Δ -> f e r _Γ' _Δ')
+dimapVK :: ControlPassing f => (V e a' -> V e a) -> (K r b' -> K r b) -> (a --|f e r|-> b -> a' --|f e r|-> b')
 dimapVK f g = inCP . dimap f (lmap g) . exCP
 
-lmapV :: ControlPassing f => (V e _Γ' -> V e _Γ) -> (f e r _Γ _Δ -> f e r _Γ' _Δ)
+lmapV :: ControlPassing f => (V e a' -> V e a) -> (a --|f e r|-> b -> a' --|f e r|-> b)
 lmapV = (`dimapVK` id)
 
-rmapK :: ControlPassing f => (K r _Δ' -> K r _Δ) -> (f e r _Γ _Δ -> f e r _Γ _Δ')
+rmapK :: ControlPassing f => (K r b' -> K r b) -> (a --|f e r|-> b -> a --|f e r|-> b')
 rmapK = (id `dimapVK`)
 
 
