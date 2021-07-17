@@ -242,6 +242,10 @@ class Res c where
   res :: r -> c e r
   liftRes :: ((c e r -> r) -> c e r) -> c e r
 
+instance Res (->) where
+  res = pure
+  liftRes f = f =<< flip ($)
+
 cont :: (Res c, Representable k) => (((a -> c e (Rep k)) -> k a) -> c e (Rep k)) -> c e (Rep k)
 cont f = liftRes (\ run -> f (inK . (run .)))
 
