@@ -104,10 +104,6 @@ instance Coapply (CP e r) where
 instance Env e (CP e r a b) where
   env f = CP (\ v k -> env (runCP v k . f))
 
-instance Res r (CP e r a b) where
-  res = CP . const . const . res
-  liftRes f = CP (\ v k -> liftRes (\ run -> exCP (f (run . runCP v k)) v k))
-
 
 -- Mixfix notation
 
@@ -226,7 +222,7 @@ bindCP m f = inCP (\ a c -> cont (\ _K -> exCP m a (_K (\ b -> exCP (f b) a c)))
 
 -- Control context
 
-(•∘) :: (Env (V.Rep v) c, V.Representable v, Res (K.Rep k) c, K.Representable k) => k a -> v a -> c
+(•∘) :: (Env (V.Rep v) (c (V.Rep v) (K.Rep k)), V.Representable v, Res c, K.Representable k) => k a -> v a -> c (V.Rep v) (K.Rep k)
 k •∘ v = env (\ e -> res (k • e ∘ v))
 
 infix 7 •∘
@@ -242,7 +238,7 @@ newtype Control e r = Control { getControl :: e -> r }
 instance Env e (Control e r) where
   env f = Control (getControl =<< f)
 
-instance Res r (Control e r) where
+instance Res Control where
   res = Control . const
   liftRes f = Control (\ e -> let run = (`getControl` e) in run (f run))
 

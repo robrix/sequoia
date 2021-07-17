@@ -238,18 +238,14 @@ exDN2 = dimap2 inDN inDN exDN
 
 -- Ambient control
 
-class Res r c | c -> r where
-  res :: r -> c
-  liftRes :: ((c -> r) -> c) -> c
+class Res c where
+  res :: r -> c e r
+  liftRes :: ((c e r -> r) -> c e r) -> c e r
 
-instance Res r (K r a) where
-  res = K . const
-  liftRes f = K (\ a -> f (• a) • a)
-
-cont :: (Res (Rep k) c, Representable k) => (((a -> c) -> k a) -> c) -> c
+cont :: (Res c, Representable k) => (((a -> c e (Rep k)) -> k a) -> c e (Rep k)) -> c e (Rep k)
 cont f = liftRes (\ run -> f (inK . (run .)))
 
-(••) :: (Res (Rep k) c, Representable k) => k a -> a -> c
+(••) :: (Res c, Representable k) => k a -> a -> c e (Rep k)
 k •• v = res (k • v)
 
 infix 7 ••
