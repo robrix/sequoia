@@ -32,6 +32,7 @@ module Sequoia.Value
 , val
 , Env1(..)
 , Env2(..)
+, Env3(..)
 ) where
 
 import Control.Applicative (liftA2)
@@ -164,3 +165,9 @@ class Env2 c where
   env2 :: (e -> c e x y) -> c e x y
 
   localEnv2 :: (e -> e') -> c e' x y -> c e x y
+
+
+class Env3 c where
+  env3 :: (e -> c e x y z) -> c e x y z
+
+  localEnv3 :: (e -> e') -> c e' x y z -> c e x y z
