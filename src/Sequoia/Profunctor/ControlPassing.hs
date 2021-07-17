@@ -86,6 +86,10 @@ instance Coapply (CP e r) where
 instance Env e (CP e r a b) where
   env f = CP (\ v k -> env (runCP v k . f))
 
+instance LocalEnv2 CP where
+  -- FIXME: this always evaluates the argument in the current scope
+  localEnv2 f c = CP (\ v k -> val (\ v -> localEnv f (getCP c (inV0 v) k)) v)
+
 instance Res r (CP e r a b) where
   res = CP . const . const . res
   liftRes f = CP (\ v k -> liftRes (\ run -> exCP (f (run . runCP v k)) v k))
