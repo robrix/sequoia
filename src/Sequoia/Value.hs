@@ -148,8 +148,8 @@ val :: (Env (Rep v) c, Representable v) => (a -> c) -> (v a -> c)
 val f v = env (f . exV v)
 
 
-class Env1 e c | c -> e where
-  env1 :: (e -> c x) -> c x
+class Env1 c where
+  env1 :: (e -> c e x) -> c e x
 
-instance Env1 e (V e) where
+instance Env1 V where
   env1 = env
