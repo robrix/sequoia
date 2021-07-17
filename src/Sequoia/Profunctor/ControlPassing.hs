@@ -25,6 +25,7 @@ module Sequoia.Profunctor.ControlPassing
 , (↓)
 , dnE
 , coerceCP
+, dimapVK
 , lmapV
 , rmapK
   -- * Control context
@@ -157,6 +158,9 @@ dnE k = inCP (\ a b -> cont (\ _K -> k •• _K (\ f -> exCP f a b)))
 coerceCP :: (ControlPassing c, ControlPassing d) => c e r a b -> d e r a b
 coerceCP = inCP . exCP
 
+
+dimapVK :: ControlPassing f => (V e _Γ' -> V e _Γ) -> (K r _Δ' -> K r _Δ) -> (f e r _Γ _Δ -> f e r _Γ' _Δ')
+dimapVK f g = inCP . dimap f (lmap g) . exCP
 
 lmapV :: ControlPassing f => (V e _Γ' -> V e _Γ) -> (f e r _Γ _Δ -> f e r _Γ' _Δ)
 lmapV f = inCP . lmap f . exCP
