@@ -168,6 +168,9 @@ newtype Control e r = Control { getControl :: e -> r }
 instance Env e (Control e r) where
   env f = Control (getControl =<< f)
 
+instance LocalEnv Control where
+  localEnv = lmap
+
 instance Res r (Control e r) where
   res = Control . const
   liftRes f = Control (\ e -> let run = (`getControl` e) in run (f run))
