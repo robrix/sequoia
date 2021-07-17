@@ -36,6 +36,7 @@ module Sequoia.Value
 ) where
 
 import Control.Applicative (liftA2)
+import Control.Monad (join)
 import Data.Functor.Rep
 import Sequoia.Bijection
 import Sequoia.Conjunction
@@ -136,6 +137,9 @@ bitraverseDisjV d e = bimapDisj inV0 inV0 (e ∘ d)
 
 class Env c where
   env :: (e -> c e r) -> c e r
+
+instance Env (->) where
+  env = join
 
 instance Env V where
   env f = V (runV =<< f)
