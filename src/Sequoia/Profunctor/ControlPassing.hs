@@ -163,10 +163,10 @@ dimapVK :: ControlPassing f => (V e _Γ' -> V e _Γ) -> (K r _Δ' -> K r _Δ) ->
 dimapVK f g = inCP . dimap f (lmap g) . exCP
 
 lmapV :: ControlPassing f => (V e _Γ' -> V e _Γ) -> (f e r _Γ _Δ -> f e r _Γ' _Δ)
-lmapV f = inCP . lmap f . exCP
+lmapV = (`dimapVK` id)
 
 rmapK :: ControlPassing f => (K r _Δ' -> K r _Δ) -> (f e r _Γ _Δ -> f e r _Γ _Δ')
-rmapK f = inCP . fmap (lmap f) . exCP
+rmapK = (id `dimapVK`)
 
 
 -- Control context
