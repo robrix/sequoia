@@ -61,7 +61,7 @@ import           Sequoia.Value as V
 newtype CP e r a b = CP { getCP :: V e a -> K r b -> Control e r }
 
 instance Profunctor (CP e r) where
-  dimap f g = CP . dimap (fmap f) (lmap (contramap g)) . getCP
+  dimap = dimapCP
 
 instance Strong (CP e r) where
   first'  (CP r) = CP (\ a b -> val (\ (a, c) -> r (inV0 a) (contramap (,c) b)) a)
