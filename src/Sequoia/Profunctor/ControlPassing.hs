@@ -177,10 +177,6 @@ instance Env e (Control e r) where
 
   localEnv f = Control . lmap f . getControl
 
-instance Env1 Control where
-  env1 f = Control (getControl =<< f)
-  localEnv1 f = Control . lmap f . getControl
-
 instance Res r (Control e r) where
   res = Control . const
   liftRes f = Control (\ e -> let run = (`getControl` e) in run (f run))
