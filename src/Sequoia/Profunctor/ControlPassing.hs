@@ -29,6 +29,7 @@ module Sequoia.Profunctor.ControlPassing
 , rmapCP
   -- * Control context
 , (•∘)
+, localEnv
 , Control(..)
 , inPrd
 , producer
@@ -88,10 +89,6 @@ instance Coapply (CP e r) where
 
 instance Env e (CP e r a b) where
   env f = CP (\ v k -> env (runCP v k . f))
-
-instance LocalEnv2 CP where
-  -- FIXME: this always evaluates the argument in the current scope
-  localEnv2 f c = CP (\ v k -> val (\ v -> localEnv f (getCP c (inV0 v) k)) v)
 
 instance Res r (CP e r a b) where
   res = CP . const . const . res
@@ -175,15 +172,16 @@ k •∘ v = env (\ e -> res (k • e ∘ v))
 
 infix 7 •∘
 
+localEnv :: ControlPassing c => (e -> e') -> c e' r s t -> c e r s t
+-- FIXME: this always evaluates the argument in the current scope
+localEnv f c = inCP (\ v k -> val (\ v -> lmap f (exCP c (inV0 v) k)) v)
+
 
 newtype Control e r = Control { getControl :: e -> r }
   deriving (Cat.Category, Profunctor)
 
 instance Env e (Control e r) where
   env f = Control (getControl =<< f)
-
-instance LocalEnv Control where
-  localEnv = lmap
 
 instance Res r (Control e r) where
   res = Control . const

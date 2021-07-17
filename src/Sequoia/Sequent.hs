@@ -50,7 +50,7 @@ newtype Seq e r _Γ _Δ = Seq { getSeq :: V e _Γ -> K r _Δ -> ControlPassing.C
   deriving (Env e, Res r) via (CP e r _Γ _Δ)
   deriving (Applicative, Functor, Monad) via (CP e r _Γ)
   deriving (Cat.Category, Choice, Profunctor, Strong) via (CP e r)
-  deriving (ControlPassing, LocalEnv2) via CP
+  deriving (ControlPassing) via CP
 
 
 liftLR :: ControlPassing d => d e r a b -> Seq e r (a < _Γ) (_Δ > b)

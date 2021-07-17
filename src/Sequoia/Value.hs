@@ -32,13 +32,10 @@ module Sequoia.Value
 , Env(..)
 , val
 , Env1(..)
-, LocalEnv(..)
-, LocalEnv2(..)
 ) where
 
 import Control.Applicative (liftA2)
 import Data.Functor.Rep
-import Data.Profunctor
 import Sequoia.Bijection
 import Sequoia.Conjunction
 import Sequoia.Disjunction
@@ -151,14 +148,3 @@ class Env1 e c | c -> e where
 
 instance Env1 e (V e) where
   env1 = env
-
-
-class LocalEnv c where
-  localEnv :: (e -> e') -> c e' r -> c e r
-
-instance LocalEnv V where
-  localEnv = lmap
-
-
-class LocalEnv2 c where
-  localEnv2 :: (e -> e') -> c e' r s t -> c e r s t
