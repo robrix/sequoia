@@ -66,7 +66,7 @@ withIdentityL
 withIdentityL = withL2 init
 
 withIdentityR
-  :: (WithIntro s, TopIntro e r (s e r), Neg a)
+  :: (Core e r (s e r), WithIntro s, TopIntro s, Neg a)
   -- -----------------------------
   => a < _Γ -|s e r|- _Δ > a & Top
 withIdentityR = init ⊢& topR

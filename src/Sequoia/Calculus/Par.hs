@@ -89,13 +89,13 @@ parDistributivityR
 parDistributivityR = parR (exR init ⅋⊢ withL1 init) ⊢& parR (exR init ⅋⊢ withL2 init)
 
 parAnnihilationL
-  :: TopIntro e r (s e r)
+  :: TopIntro s
   -- -------------------------------
   => Top ⅋ a < _Γ -|s e r|- _Δ > Top
 parAnnihilationL = topR
 
 parAnnihilationR
-  :: (ParIntro s, TopIntro e r (s e r), Neg a)
+  :: (ParIntro s, TopIntro s, Neg a)
   -- -------------------------------
   => Top < _Γ -|s e r|- _Δ > a ⅋ Top
 parAnnihilationR = parR topR

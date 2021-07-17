@@ -113,7 +113,7 @@ instance NegateIntro e r (Seq e r) where
 
 -- Additive
 
-instance TopIntro e r (Seq e r) where
+instance TopIntro Seq where
   topR = pure (inr Top)
 
 instance ZeroIntro Seq where
