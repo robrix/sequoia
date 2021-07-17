@@ -45,6 +45,8 @@ import Sequoia.Conjunction
 import Sequoia.Disjunction
 import Sequoia.Functor.V
 
+-- Values
+
 class Representable v => Value v
 
 instance Value (V s)
