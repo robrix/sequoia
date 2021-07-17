@@ -144,7 +144,7 @@ instance ParIntro e r (Seq e r) where
   parL a b = popL (pushL a <--> pushL b)
   parR = fmap ((>>= inr . inl) <--> inr . inr)
 
-instance TensorIntro e r (Seq e r) where
+instance TensorIntro Seq where
   tensorL p = popL (pushL2 p . exl <*> exr)
   tensorR = mapR2 inlr
 
