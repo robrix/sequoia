@@ -22,18 +22,18 @@ import Sequoia.Calculus.Structural
 import Sequoia.Calculus.Tensor
 import Sequoia.Polarity
 
-type MultiplicativeIntro e r s = (BottomIntro s, OneIntro s, ParIntro e r (s e r), TensorIntro s)
+type MultiplicativeIntro s = (BottomIntro s, OneIntro s, ParIntro s, TensorIntro s)
 
 
 parLTensor
-  :: (Weaken e r (s e r), ParIntro e r (s e r), TensorIntro s, NegateIntro e r (s e r), Neg a, Neg b)
+  :: (Weaken e r (s e r), ParIntro s, TensorIntro s, NegateIntro e r (s e r), Neg a, Neg b)
   =>         _Γ -|s e r|- _Δ > r -a ⊗ r -b
   -- -------------------------------------
   -> a ⅋ b < _Γ -|s e r|- _Δ
 parLTensor s = wkL s >>> tensorL (negateL (negateL (parL (wkR init) init)))
 
 tensorLPar
-  :: (Weaken e r (s e r), ParIntro e r (s e r), TensorIntro s, NotIntro e r (s e r), Pos a, Pos b)
+  :: (Weaken e r (s e r), ParIntro s, TensorIntro s, NotIntro e r (s e r), Pos a, Pos b)
   =>         _Γ -|s e r|- _Δ > r ¬a ⅋ r ¬b
   -- -------------------------------------
   -> a ⊗ b < _Γ -|s e r|- _Δ

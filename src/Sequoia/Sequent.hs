@@ -140,7 +140,7 @@ instance OneIntro Seq where
   oneL = wkL
   oneR = liftR One
 
-instance ParIntro e r (Seq e r) where
+instance ParIntro Seq where
   parL a b = popL (pushL a <--> pushL b)
   parR = fmap ((>>= inr . inl) <--> inr . inr)
 
