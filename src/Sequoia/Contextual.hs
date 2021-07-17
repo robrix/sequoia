@@ -62,7 +62,7 @@ import Sequoia.Value
 
 -- Contextual
 
-class (Core s, forall e r a b . Env e (s e r a b)) => Contextual s where
+class (Core s, forall e r a b . Env e (s e r a b), forall e r . Profunctor (s e r)) => Contextual s where
   swapΓΔ
     :: (V e _Γ  -> K r _Δ  -> _Γ' -|s e r|- _Δ')
     -> (V e _Γ' -> K r _Δ' -> _Γ  -|s e r|- _Δ)
