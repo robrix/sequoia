@@ -168,6 +168,7 @@ infix 7 •∘
 
 
 newtype Control e r = Control { getControl :: e -> r }
+  deriving (Cat.Category, Profunctor)
 
 instance Env e (Control e r) where
   env f = Control (getControl =<< f)
