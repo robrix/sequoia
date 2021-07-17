@@ -12,4 +12,4 @@ import Sequoia.Calculus.ForAll
 
 -- Quantification rules
 
-type QuantificationIntro e r s = (UniversalIntro e r s, ExistentialIntro e r s)
+type QuantificationIntro s = (UniversalIntro s, ExistentialIntro s)

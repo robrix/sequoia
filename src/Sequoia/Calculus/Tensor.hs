@@ -27,7 +27,7 @@ import Sequoia.Polarity
 
 -- Tensor
 
-class TensorIntro s where
+class Core s => TensorIntro s where
   tensorL
     :: (Pos a, Pos b)
     => a < b < _Γ -|s e r|- _Δ
@@ -45,7 +45,7 @@ class TensorIntro s where
 
 
 tensorL'
-  :: (Contextual e r (s e r), Weaken e r (s e r), TensorIntro s, Pos a, Pos b)
+  :: (Contextual s, Weaken s, TensorIntro s, Pos a, Pos b)
   => a ⊗ b < _Γ -|s e r|- _Δ
   -- -----------------------
   -> a < b < _Γ -|s e r|- _Δ
@@ -53,37 +53,37 @@ tensorL' p = init ⊢⊗ wkL init >>> popL (wkL . wkL . pushL p)
 
 
 tensorIdentityL
-  :: (Core e r (s e r), TensorIntro s, OneIntro s, Pos a)
+  :: (TensorIntro s, OneIntro s, Pos a)
   -- -----------------------------
   => One ⊗ a < _Γ -|s e r|- _Δ > a
 tensorIdentityL = tensorL (oneL init)
 
 tensorIdentityR
-  :: (Core e r (s e r), TensorIntro s, OneIntro s, Pos a)
+  :: (TensorIntro s, OneIntro s, Pos a)
   -- -----------------------------
   => a < _Γ -|s e r|- _Δ > a ⊗ One
 tensorIdentityR = init ⊢⊗ oneR
 
 tensorAssociativity
-  :: (Weaken e r (s e r), Exchange e r (s e r), TensorIntro s, Pos a, Pos b, Pos c)
+  :: (Weaken s, Exchange s, TensorIntro s, Pos a, Pos b, Pos c)
   -- -------------------------------------------
   => a ⊗ (b ⊗ c) < _Γ -|s e r|- _Δ > (a ⊗ b) ⊗ c
 tensorAssociativity = tensorL (exL (tensorL ((wkL (exL init) ⊢⊗ init) ⊢⊗ exL init)))
 
 tensorCommutativity
-  :: (Exchange e r (s e r), TensorIntro s, Pos a, Pos b)
+  :: (Exchange s, TensorIntro s, Pos a, Pos b)
   -- -------------------------------
   => a ⊗ b < _Γ -|s e r|- _Δ > b ⊗ a
 tensorCommutativity = tensorL (exL init ⊢⊗ init)
 
 tensorDistributivityL
-  :: (Exchange e r (s e r), TensorIntro s, SumIntro s, Pos a, Pos b, Pos c)
+  :: (Exchange s, TensorIntro s, SumIntro s, Pos a, Pos b, Pos c)
   -- ---------------------------------------------
   => a ⊗ c ⊕ b ⊗ c < _Γ -|s e r|- _Δ > (a ⊕ b) ⊗ c
 tensorDistributivityL = tensorL (sumR1 init ⊢⊗ exL init) ⊕⊢ tensorL (sumR2 init ⊢⊗ exL init)
 
 tensorDistributivityR
-  :: (Exchange e r (s e r), TensorIntro s, SumIntro s, Pos a, Pos b, Pos c)
+  :: (Exchange s, TensorIntro s, SumIntro s, Pos a, Pos b, Pos c)
   -- ---------------------------------------------
   => a ⊗ (b ⊕ c) < _Γ -|s e r|- _Δ > a ⊗ b ⊕ a ⊗ c
 tensorDistributivityR = tensorL (exL (sumR1 (exL init ⊢⊗ init) ⊕⊢ sumR2 (exL init ⊢⊗ init)))

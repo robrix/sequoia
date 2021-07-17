@@ -15,26 +15,26 @@ import Sequoia.Polarity
 
 -- Subtraction
 
-class Core e r s => SubtractionIntro e r s where
+class Core s => SubtractionIntro s where
   subL
     :: (Pos a, Neg b)
-    =>         a < _Γ -|s|- _Δ > b
-    -- ---------------------------
-    -> a ~-r-< b < _Γ -|s|- _Δ
+    =>         a < _Γ -|s e r|- _Δ > b
+    -- -------------------------------
+    -> a ~-r-< b < _Γ -|s e r|- _Δ
 
   subR, (⊢-<)
     :: (Pos a, Neg b)
-    => _Γ -|s|- _Δ > a   ->   b < _Γ -|s|- _Δ
-    -- --------------------------------------
-    ->       _Γ -|s|- _Δ > a ~-r-< b
+    => _Γ -|s e r|- _Δ > a   ->   b < _Γ -|s e r|- _Δ
+    -- ----------------------------------------------
+    ->          _Γ -|s e r|- _Δ > a ~-r-< b
   (⊢-<) = subR
 
   infixr 5 ⊢-<
 
 
 subL'
-  :: (Weaken e r s, Exchange e r s, SubtractionIntro e r s, Pos a, Neg b)
-  => a ~-r-< b < _Γ -|s|- _Δ
-  -- ---------------------------
-  ->         a < _Γ -|s|- _Δ > b
+  :: (Weaken s, Exchange s, SubtractionIntro s, Pos a, Neg b)
+  => a ~-r-< b < _Γ -|s e r|- _Δ
+  -- -------------------------------
+  ->         a < _Γ -|s e r|- _Δ > b
 subL' p = subR init init >>> wkR (wkL' p)

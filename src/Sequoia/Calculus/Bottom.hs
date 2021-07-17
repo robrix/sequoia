@@ -12,7 +12,7 @@ import Sequoia.Connective.Bottom
 
 -- Bottom
 
-class BottomIntro s where
+class Core s => BottomIntro s where
   botL
     -- ------------------------
     :: Bottom < _Γ -|s e r|- _Δ
@@ -24,7 +24,7 @@ class BottomIntro s where
 
 
 botR'
-  :: (Core e r (s e r), BottomIntro s)
+  :: BottomIntro s
   => _Γ -|s e r|- _Δ > Bottom
   -- ------------------------
   -> _Γ -|s e r|- _Δ

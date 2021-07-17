@@ -62,34 +62,34 @@ import Sequoia.Value
 
 -- Contextual
 
-class (Core e r s, forall a b . Env e (s a b)) => Contextual e r s where
+class (Core s, forall e r a b . Env e (s e r a b)) => Contextual s where
   swapΓΔ
-    :: (V e _Γ  -> K r _Δ  -> _Γ' -|s|- _Δ')
-    -> (V e _Γ' -> K r _Δ' -> _Γ  -|s|- _Δ)
+    :: (V e _Γ  -> K r _Δ  -> _Γ' -|s e r|- _Δ')
+    -> (V e _Γ' -> K r _Δ' -> _Γ  -|s e r|- _Δ)
 
 
 -- Swapping
 
 swapΓ
-  :: Contextual e r s
-  => (V e _Γ  -> _Γ' -|s|- _Δ)
-  -> (V e _Γ' -> _Γ  -|s|- _Δ)
+  :: Contextual s
+  => (V e _Γ  -> _Γ' -|s e r|- _Δ)
+  -> (V e _Γ' -> _Γ  -|s e r|- _Δ)
 swapΓ f _Γ' = popΓΔ (\ _Γ _Δ -> pushΓΔ (f _Γ) _Γ' _Δ)
 
 swapΔ
-  :: Contextual e r s
-  => (K r _Δ  -> _Γ -|s|- _Δ')
-  -> (K r _Δ' -> _Γ -|s|- _Δ)
+  :: Contextual s
+  => (K r _Δ  -> _Γ -|s e r|- _Δ')
+  -> (K r _Δ' -> _Γ -|s e r|- _Δ)
 swapΔ f _Δ' = popΓΔ (\ _Γ _Δ -> pushΓΔ (f _Δ) _Γ _Δ')
 
 
 -- Popping
 
 popΓΔ
-  :: Contextual e r s
-  => (V e _Γ -> K r _Δ -> e -|s|- r)
-  -- -------------------------------
-  ->                     _Γ -|s|- _Δ
+  :: Contextual s
+  => (V e _Γ -> K r _Δ -> e -|s e r|- r)
+  -- -----------------------------------
+  ->                     _Γ -|s e r|- _Δ
 popΓΔ f = swapΓΔ f idV idK
 
 -- | Pop something off the input context which can later be pushed. Used with 'pushΓ', this provides a generalized context restructuring facility.
@@ -101,10 +101,10 @@ popΓΔ f = swapΓΔ f idV idK
 -- pushΓ . popΓ = id
 -- @
 popΓ
-  :: Contextual e r s
-  => (V e _Γ -> e -|s|- _Δ)
-  -- ----------------------
-  ->      _Γ      -|s|- _Δ
+  :: Contextual s
+  => (V e _Γ -> e -|s e r|- _Δ)
+  -- --------------------------
+  ->      _Γ      -|s e r|- _Δ
 popΓ f = swapΓ f idV
 
 -- | Pop something off the output context which can later be pushed. Used with 'pushΔ', this provides a generalized context restructuring facility.
@@ -116,10 +116,10 @@ popΓ f = swapΓ f idV
 -- pushΔ . popΔ = id
 -- @
 popΔ
-  :: Contextual e r s
-  => (K r _Δ -> _Γ -|s|- r)
-  -- ----------------------
-  ->            _Γ -|s|- _Δ
+  :: Contextual s
+  => (K r _Δ -> _Γ -|s e r|- r)
+  -- --------------------------
+  ->            _Γ -|s e r|- _Δ
 popΔ f = swapΔ f idK
 
 
@@ -132,10 +132,10 @@ popΔ f = swapΔ f idK
 -- pushL . popL = id
 -- @
 popL
-  :: Contextual e r s
-  => (a -> _Γ -|s|- _Δ)
-  -- ------------------
-  ->  a  < _Γ -|s|- _Δ
+  :: Contextual s
+  => (a -> _Γ -|s e r|- _Δ)
+  -- ----------------------
+  ->  a  < _Γ -|s e r|- _Δ
 popL f = popΓ (\ c -> val (\ a -> pushΓ (f a) (exrF c)) (exlF c))
 
 -- | Pop something off the output context which can later be pushed. Used with 'pushR', this provides a generalized context restructuring facility.
@@ -147,64 +147,64 @@ popL f = popΓ (\ c -> val (\ a -> pushΓ (f a) (exrF c)) (exlF c))
 -- pushR . popR = id
 -- @
 popR
-  :: Contextual e r s
-  => (K r a -> _Γ -|s|- _Δ)
-  -- -------------------------
-  ->           _Γ -|s|- _Δ > a
+  :: Contextual s
+  => (K r a -> _Γ -|s e r|- _Δ)
+  -- -----------------------------
+  ->           _Γ -|s e r|- _Δ > a
 popR f = popΔ (\ c -> pushΔ (f (inrK c)) (inlK c))
 
 
 popL2
-  :: Contextual e r s
-  => (a -> b -> _Γ -|s|- _Δ)
-  -- -----------------------
-  ->  a  < b  < _Γ -|s|- _Δ
+  :: Contextual s
+  => (a -> b -> _Γ -|s e r|- _Δ)
+  -- ---------------------------
+  ->  a  < b  < _Γ -|s e r|- _Δ
 popL2 f = popL (popL . f)
 
 popR2
-  :: Contextual e r s
-  => (K r a -> K r b -> _Γ -|s|- _Δ)
-  -- --------------------------------------
-  ->                    _Γ -|s|- _Δ > b > a
+  :: Contextual s
+  => (K r a -> K r b -> _Γ -|s e r|- _Δ)
+  -- ------------------------------------------
+  ->                    _Γ -|s e r|- _Δ > b > a
 popR2 f = popR (popR . f)
 
 
 poppedL
-  :: Contextual e r s
-  => (    _Γ -|s|- _Δ ->     _Γ' -|s|- _Δ')
-  -- --------------------------------------
-  -> (a < _Γ -|s|- _Δ -> a < _Γ' -|s|- _Δ')
+  :: Contextual s
+  => (    _Γ -|s e r|- _Δ ->     _Γ' -|s e r|- _Δ')
+  -- ----------------------------------------------
+  -> (a < _Γ -|s e r|- _Δ -> a < _Γ' -|s e r|- _Δ')
 poppedL f p = popL (f . pushL p)
 
 poppedR
-  :: Contextual e r s
-  => (_Γ -|s|- _Δ     -> _Γ' -|s|- _Δ')
-  -- --------------------------------------
-  -> (_Γ -|s|- _Δ > a -> _Γ' -|s|- _Δ' > a)
+  :: Contextual s
+  => (_Γ -|s e r|- _Δ     -> _Γ' -|s e r|- _Δ')
+  -- ----------------------------------------------
+  -> (_Γ -|s e r|- _Δ > a -> _Γ' -|s e r|- _Δ' > a)
 poppedR f p = popR (f . pushR p)
 
 poppedL2
-  :: Contextual e r s
-  =>         (_Γ -|s|- _Δ ->         _Γ' -|s|- _Δ')
-  -- ----------------------------------------------
-  -> (a < b < _Γ -|s|- _Δ -> a < b < _Γ' -|s|- _Δ')
+  :: Contextual s
+  =>         (_Γ -|s e r|- _Δ ->         _Γ' -|s e r|- _Δ')
+  -- ------------------------------------------------------
+  -> (a < b < _Γ -|s e r|- _Δ -> a < b < _Γ' -|s e r|- _Δ')
 poppedL2 = poppedL . poppedL
 
 poppedR2
-  :: Contextual e r s
-  => (_Γ -|s|- _Δ         -> _Γ' -|s|- _Δ')
-  -- ----------------------------------------------
-  -> (_Γ -|s|- _Δ > a > b -> _Γ' -|s|- _Δ' > a > b)
+  :: Contextual s
+  => (_Γ -|s e r|- _Δ         -> _Γ' -|s e r|- _Δ')
+  -- ------------------------------------------------------
+  -> (_Γ -|s e r|- _Δ > a > b -> _Γ' -|s e r|- _Δ' > a > b)
 poppedR2 = poppedR . poppedR
 
 
 -- Pushing
 
 pushΓΔ
-  :: Contextual e r s
-  =>                     _Γ -|s|- _Δ
-  -- -------------------------------
-  -> (V e _Γ -> K r _Δ -> e -|s|- r)
+  :: Contextual s
+  =>                     _Γ -|s e r|- _Δ
+  -- -----------------------------------
+  -> (V e _Γ -> K r _Δ -> e -|s e r|- r)
 pushΓΔ = swapΓΔ . const . const
 
 -- | Push something onto the input context which was previously popped off it. Used with 'popΓ', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
@@ -216,10 +216,10 @@ pushΓΔ = swapΓΔ . const . const
 -- pushΓ . popΓ = id
 -- @
 pushΓ
-  :: Contextual e r s
-  =>      _Γ      -|s|- _Δ
-  -- ----------------------
-  -> (V e _Γ -> e -|s|- _Δ)
+  :: Contextual s
+  =>      _Γ      -|s e r|- _Δ
+  -- --------------------------
+  -> (V e _Γ -> e -|s e r|- _Δ)
 pushΓ = swapΓ . const
 
 -- | Push something onto the output context which was previously popped off it. Used with 'popΔ', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
@@ -231,10 +231,10 @@ pushΓ = swapΓ . const
 -- pushΔ . popΔ = id
 -- @
 pushΔ
-  :: Contextual e r s
-  =>            _Γ -|s|- _Δ
-  -- -----------------------
-  -> (K r _Δ -> _Γ -|s|-  r)
+  :: Contextual s
+  =>            _Γ -|s e r|- _Δ
+  -- ---------------------------
+  -> (K r _Δ -> _Γ -|s e r|-  r)
 pushΔ = swapΔ . const
 
 
@@ -247,10 +247,10 @@ pushΔ = swapΔ . const
 -- pushL . popL = id
 -- @
 pushL
-  :: Contextual e r s
-  =>  a  < _Γ -|s|- _Δ
-  -- ------------------
-  -> (a -> _Γ -|s|- _Δ)
+  :: Contextual s
+  =>  a  < _Γ -|s e r|- _Δ
+  -- ----------------------
+  -> (a -> _Γ -|s e r|- _Δ)
 pushL s a = popΓ (\ c -> pushΓ s (inV0 a <| c))
 
 -- | Push something onto the output context which was previously popped off it. Used with 'popR', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
@@ -262,104 +262,104 @@ pushL s a = popΓ (\ c -> pushΓ s (inV0 a <| c))
 -- pushR . popR = id
 -- @
 pushR
-  :: Contextual e r s
-  =>           _Γ -|s|- _Δ > a
-  -- -------------------------
-  -> (K r a -> _Γ -|s|- _Δ)
+  :: Contextual s
+  =>           _Γ -|s e r|- _Δ > a
+  -- -----------------------------
+  -> (K r a -> _Γ -|s e r|- _Δ)
 pushR s a = popΔ (\ c -> pushΔ s (c |> a))
 
 
 pushL2
-  :: Contextual e r s
-  => a < b < _Γ -|s|- _Δ -> a -> b
-  -- -----------------------------
-  ->         _Γ -|s|- _Δ
+  :: Contextual s
+  => a < b < _Γ -|s e r|- _Δ -> a -> b
+  -- ---------------------------------
+  ->         _Γ -|s e r|- _Δ
 pushL2 p = pushL . pushL p
 
 pushR2
-  :: Contextual e r s
-  => _Γ -|s|- _Δ > b > a -> K r a -> K r b
-  -- -------------------------------------
-  -> _Γ -|s|- _Δ
+  :: Contextual s
+  => _Γ -|s e r|- _Δ > b > a -> K r a -> K r b
+  -- -----------------------------------------
+  -> _Γ -|s e r|- _Δ
 pushR2 p = pushR . pushR p
 
 
 -- Mapping
 
 mapΓΔ
-  :: Contextual e r s
+  :: Contextual s
   => (V e _Γ' -> V e _Γ)
   -> (K r _Δ' -> K r _Δ)
-  -> _Γ  -|s|- _Δ
-  -- -------------
-  -> _Γ' -|s|- _Δ'
+  -> _Γ  -|s e r|- _Δ
+  -- -----------------
+  -> _Γ' -|s e r|- _Δ'
 mapΓΔ f g p = popΓΔ (\ _Γ _Δ -> pushΓΔ p (f _Γ) (g _Δ))
 
 mapΓ
-  :: Contextual e r s
+  :: Contextual s
   => (V e _Γ' -> V e _Γ)
-  -> _Γ  -|s|- _Δ
-  -- ------------
-  -> _Γ' -|s|- _Δ
+  -> _Γ  -|s e r|- _Δ
+  -- ----------------
+  -> _Γ' -|s e r|- _Δ
 mapΓ = (`mapΓΔ` id)
 
 mapΔ
-  :: Contextual e r s
+  :: Contextual s
   => (K r _Δ' -> K r _Δ)
-  -> _Γ -|s|- _Δ
-  -- ------------
-  -> _Γ -|s|- _Δ'
+  -> _Γ -|s e r|- _Δ
+  -- ----------------
+  -> _Γ -|s e r|- _Δ'
 mapΔ = (id `mapΓΔ`)
 
 
 mapΓL
-  :: Contextual e r s
+  :: Contextual s
   => (V e a' -> V e a)
-  -> a  < _Γ -|s|- _Δ
-  -- ----------------
-  -> a' < _Γ -|s|- _Δ
+  -> a  < _Γ -|s e r|- _Δ
+  -- --------------------
+  -> a' < _Γ -|s e r|- _Δ
 mapΓL f = mapΓ (f . exlF >∘∘∘< exrF)
 
 mapΔR
-  :: Contextual e r s
+  :: Contextual s
   => (K r a' -> K r a)
-  -> _Γ -|s|- _Δ > a
-  -- ----------------
-  -> _Γ -|s|- _Δ > a'
+  -> _Γ -|s e r|- _Δ > a
+  -- --------------------
+  -> _Γ -|s e r|- _Δ > a'
 mapΔR f = mapΔ (inlK <•••> f . inrK)
 
 
 mapL
-  :: Contextual e r s
+  :: Contextual s
   => (a' -> a)
-  -> a  < _Γ -|s|- _Δ
-  -- ----------------
-  -> a' < _Γ -|s|- _Δ
+  -> a  < _Γ -|s e r|- _Δ
+  -- --------------------
+  -> a' < _Γ -|s e r|- _Δ
 mapL f = mapΓL (fmap f)
 
 mapR
-  :: Contextual e r s
+  :: Contextual s
   => (a -> a')
-  -> _Γ -|s|- _Δ > a
-  -- ----------------
-  -> _Γ -|s|- _Δ > a'
+  -> _Γ -|s e r|- _Δ > a
+  -- --------------------
+  -> _Γ -|s e r|- _Δ > a'
 mapR f = mapΔR (contramap f)
 
 
 mapL2
- :: Contextual e r s
+ :: Contextual s
  => (c -> Either b a)
- -> a < _Γ -|s|- _Δ   ->   b < _Γ -|s|- _Δ
- -- --------------------------------------
- ->            c < _Γ -|s|- _Δ
+ -> a < _Γ -|s e r|- _Δ   ->   b < _Γ -|s e r|- _Δ
+ -- ----------------------------------------------
+ ->            c < _Γ -|s e r|- _Δ
 mapL2 f a b = popL ((pushL b <--> pushL a) . f)
 
 mapR2
-  :: Contextual e r s
+  :: Contextual s
   => (a -> b -> c)
-  -> _Γ -|s|- _Δ > a   ->   _Γ -|s|- _Δ > b
-  -- --------------------------------------
-  ->            _Γ -|s|- _Δ > c
+  -> _Γ -|s e r|- _Δ > a   ->   _Γ -|s e r|- _Δ > b
+  -- ----------------------------------------------
+  ->            _Γ -|s e r|- _Δ > c
 mapR2 f a b = mapR f (wkR' a) >>> popL (`mapR` b)
   where wkR' = popR2 . flip . const . pushR
 
@@ -367,53 +367,53 @@ mapR2 f a b = mapR f (wkR' a) >>> popL (`mapR` b)
 -- Lifting
 
 liftL
-  :: Contextual e r s
+  :: Contextual s
   => K r a
-  -- ---------------
-  -> a < _Γ -|s|- _Δ
+  -- -------------------
+  -> a < _Γ -|s e r|- _Δ
 liftL = pushR init
 
 liftR
-  :: Contextual e r s
+  :: Contextual s
   => a
-  -- ---------------
-  -> _Γ -|s|- _Δ > a
+  -- -------------------
+  -> _Γ -|s e r|- _Δ > a
 liftR = pushL init
 
 
 -- Lowering
 
 lowerL
-  :: Contextual e r s
-  => (K r a           -> _Γ -|s|- _Δ)
-  -- --------------------------------
-  -> (a < _Γ -|s|- _Δ -> _Γ -|s|- _Δ)
+  :: Contextual s
+  => (K r a           -> _Γ -|s e r|- _Δ)
+  -- ----------------------------------------
+  -> (a < _Γ -|s e r|- _Δ -> _Γ -|s e r|- _Δ)
 lowerL k p = popR k >>> p
 
 lowerR
-  :: Contextual e r s
-  => (a               -> _Γ -|s|- _Δ)
-  -- --------------------------------
-  -> (_Γ -|s|- _Δ > a -> _Γ -|s|- _Δ)
+  :: Contextual s
+  => (a               -> _Γ -|s e r|- _Δ)
+  -- ----------------------------------------
+  -> (_Γ -|s e r|- _Δ > a -> _Γ -|s e r|- _Δ)
 lowerR k p = p >>> popL k
 
 
 -- Deriving
 
-newtype Contextually s _Γ _Δ = Contextually { getContextually :: _Γ -|s|- _Δ }
-  deriving (Core e r)
+newtype Contextually s e r _Γ _Δ = Contextually { getContextually :: _Γ -|s e r|- _Δ }
+  deriving Core
 
-instance Contextual e r s => Weaken e r (Contextually s) where
+instance Contextual s => Weaken (Contextually s) where
   wkL = Contextually . popL . const . getContextually
   wkR = Contextually . popR . const . getContextually
 
-instance Contextual e r s => Contract e r (Contextually s) where
+instance Contextual s => Contract (Contextually s) where
   cnL = Contextually . popL . join . pushL2 . getContextually
   cnR = Contextually . popR . join . pushR2 . getContextually
 
-instance Contextual e r s => Exchange e r (Contextually s) where
+instance Contextual s => Exchange (Contextually s) where
   exL = Contextually . popL2 . flip . pushL2 . getContextually
   exR = Contextually . popR2 . flip . pushR2 . getContextually
 
-instance Contextual e r s => Profunctor (Contextually s) where
+instance Contextual s => Profunctor (Contextually s e r) where
   dimap f g (Contextually p) = Contextually (mapΓΔ (fmap f) (contramap g) p)

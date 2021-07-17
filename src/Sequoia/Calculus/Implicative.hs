@@ -17,18 +17,18 @@ import Sequoia.Calculus.Structural
 import Sequoia.Calculus.Subtraction
 import Sequoia.Polarity
 
-type ImplicativeIntro e r s = (FunctionIntro e r s, SubtractionIntro e r s)
+type ImplicativeIntro s = (FunctionIntro s, SubtractionIntro s)
 
 funLSub
-  :: (Weaken e r s, Exchange e r s, FunctionIntro e r s, SubtractionIntro e r s, Pos a, Neg b)
-  =>             _Γ -|s|- _Δ > a ~-r-< b
-  -- -----------------------------------
-  -> a ~~Fun e r~> b < _Γ -|s|- _Δ
+  :: (Weaken s, Exchange s, FunctionIntro s, SubtractionIntro s, Pos a, Neg b)
+  =>                   _Γ -|s e r|- _Δ > a ~-r-< b
+  -- ---------------------------------------------
+  -> a ~~Fun e r~> b < _Γ -|s e r|- _Δ
 funLSub s = wkL s >>> subL (exL (funL init init))
 
 subLFun
-  :: (Weaken e r s, Exchange e r s, FunctionIntro e r s, SubtractionIntro e r s, Pos a, Neg b)
-  =>             _Γ -|s|- _Δ > a ~~Fun e r~> b
-  -- -----------------------------------------
-  -> a ~-r-< b < _Γ -|s|- _Δ
+  :: (Weaken s, Exchange s, FunctionIntro s, SubtractionIntro s, Pos a, Neg b)
+  =>             _Γ -|s e r|- _Δ > a ~~Fun e r~> b
+  -- ---------------------------------------------
+  -> a ~-r-< b < _Γ -|s e r|- _Δ
 subLFun s = wkL s >>> funL (subL (wkR init)) (exL (subL (wkL init)))

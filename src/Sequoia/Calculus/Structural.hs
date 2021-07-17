@@ -14,55 +14,55 @@ import Sequoia.Calculus.Core
 
 -- Structural
 
-type Structural e r s = (Weaken e r s, Contract e r s, Exchange e r s)
+type Structural s = (Weaken s, Contract s, Exchange s)
 
 
-class Core e r s => Weaken e r s where
+class Core s => Weaken s where
   wkL
-    ::     _Γ -|s|- _Δ
-    -- ---------------
-    -> a < _Γ -|s|- _Δ
+    ::     _Γ -|s e r|- _Δ
+    -- -------------------
+    -> a < _Γ -|s e r|- _Δ
 
   wkR
-    :: _Γ -|s|- _Δ
-    -- ---------------
-    -> _Γ -|s|- _Δ > a
+    :: _Γ -|s e r|- _Δ
+    -- -------------------
+    -> _Γ -|s e r|- _Δ > a
 
 
 wkL'
-  :: (Weaken e r s, Exchange e r s)
-  => a     < _Γ -|s|- _Δ
-  -- -------------------
-  -> a < b < _Γ -|s|- _Δ
+  :: (Weaken s, Exchange s)
+  => a     < _Γ -|s e r|- _Δ
+  -- -----------------------
+  -> a < b < _Γ -|s e r|- _Δ
 wkL' = exL . wkL
 
 wkR'
-  :: (Weaken e r s, Exchange e r s)
-  => _Γ -|s|- _Δ > a
-  -- -------------------
-  -> _Γ -|s|- _Δ > b > a
+  :: (Weaken s, Exchange s)
+  => _Γ -|s e r|- _Δ > a
+  -- -----------------------
+  -> _Γ -|s e r|- _Δ > b > a
 wkR' = exR . wkR
 
 
-class Core e r s => Contract e r s where
+class Core s => Contract s where
   cnL
-    :: a < a < _Γ -|s|- _Δ
-    -- -------------------
-    ->     a < _Γ -|s|- _Δ
+    :: a < a < _Γ -|s e r|- _Δ
+    -- -----------------------
+    ->     a < _Γ -|s e r|- _Δ
 
   cnR
-    :: _Γ -|s|- _Δ > a > a
-    -- -------------------
-    -> _Γ -|s|- _Δ > a
+    :: _Γ -|s e r|- _Δ > a > a
+    -- -----------------------
+    -> _Γ -|s e r|- _Δ > a
 
 
-class Core e r s => Exchange e r s where
+class Core s => Exchange s where
   exL
-    :: a < b < _Γ -|s|- _Δ
-    -- -------------------
-    -> b < a < _Γ -|s|- _Δ
+    :: a < b < _Γ -|s e r|- _Δ
+    -- -----------------------
+    -> b < a < _Γ -|s e r|- _Δ
 
   exR
-    :: _Γ -|s|- _Δ > a > b
-    -- -------------------
-    -> _Γ -|s|- _Δ > b > a
+    :: _Γ -|s e r|- _Δ > a > b
+    -- -----------------------
+    -> _Γ -|s e r|- _Δ > b > a

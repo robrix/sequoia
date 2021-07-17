@@ -16,30 +16,30 @@ import Sequoia.Polarity
 
 -- Down
 
-class Core e r s => DownIntro e r s where
+class Core s => DownIntro s where
   downL
     :: Neg a
-    =>      a < _Γ -|s|- _Δ
-    -- --------------------
-    -> Down a < _Γ -|s|- _Δ
+    =>      a < _Γ -|s e r|- _Δ
+    -- ------------------------
+    -> Down a < _Γ -|s e r|- _Δ
 
   downR
     :: Neg a
-    => _Γ -|s|- _Δ >      a
-    -- --------------------
-    -> _Γ -|s|- _Δ > Down a
+    => _Γ -|s e r|- _Δ >      a
+    -- ------------------------
+    -> _Γ -|s e r|- _Δ > Down a
 
 
 downL'
-  :: (Weaken e r s, Exchange e r s, DownIntro e r s, Neg a)
-  => Down a < _Γ -|s|- _Δ
-  -- --------------------
-  ->      a < _Γ -|s|- _Δ
+  :: (Weaken s, Exchange s, DownIntro s, Neg a)
+  => Down a < _Γ -|s e r|- _Δ
+  -- ------------------------
+  ->      a < _Γ -|s e r|- _Δ
 downL' p = downR init >>> wkL' p
 
 downR'
-  :: (Weaken e r s, Exchange e r s, DownIntro e r s, Neg a)
-  => _Γ -|s|- _Δ > Down a
-  -- --------------------
-  -> _Γ -|s|- _Δ >      a
+  :: (Weaken s, Exchange s, DownIntro s, Neg a)
+  => _Γ -|s e r|- _Δ > Down a
+  -- ------------------------
+  -> _Γ -|s e r|- _Δ >      a
 downR' p = wkR' p >>> downL init

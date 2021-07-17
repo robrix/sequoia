@@ -16,35 +16,35 @@ import Sequoia.Polarity
 
 -- Exclusive disjunction
 
-class Core e r s => XOrIntro e r s where
+class Core s => XOrIntro s where
   xorL
     :: (Pos a, Pos b)
-    => a < _Γ -|s|- _Δ > b   ->   b < _Γ -|s|- _Δ > a
-    -- ----------------------------------------------
-    ->           a </r/> b < _Γ -|s|- _Δ
+    => a < _Γ -|s e r|- _Δ > b   ->   b < _Γ -|s e r|- _Δ > a
+    -- ------------------------------------------------------
+    ->           a </r/> b < _Γ -|s e r|- _Δ
 
   xorR1
     :: (Pos a, Pos b)
-    => _Γ -|s|- _Δ > a   ->   b < _Γ -|s|- _Δ
-    -- --------------------------------------
-    ->       _Γ -|s|- _Δ > a </r/> b
+    => _Γ -|s e r|- _Δ > a   ->   b < _Γ -|s e r|- _Δ
+    -- ----------------------------------------------
+    ->       _Γ -|s e r|- _Δ > a </r/> b
 
   xorR2
     :: (Pos a, Pos b)
-    => _Γ -|s|- _Δ > b   ->   a < _Γ -|s|- _Δ
-    -- --------------------------------------
-    ->       _Γ -|s|- _Δ > a </r/> b
+    => _Γ -|s e r|- _Δ > b   ->   a < _Γ -|s e r|- _Δ
+    -- ----------------------------------------------
+    ->       _Γ -|s e r|- _Δ > a </r/> b
 
 xorL1'
-  :: (Weaken e r s, Exchange e r s, XOrIntro e r s, Pos a, Pos b)
-  => a </r/> b < _Γ -|s|- _Δ
-  -- ---------------------------
-  ->         a < _Γ -|s|- _Δ > b
+  :: (Weaken s, Exchange s, XOrIntro s, Pos a, Pos b)
+  => a </r/> b < _Γ -|s e r|- _Δ
+  -- -------------------------------
+  ->         a < _Γ -|s e r|- _Δ > b
 xorL1' s = xorR1 init init >>> wkR (wkL' s)
 
 xorL2'
-  :: (Weaken e r s, Exchange e r s, XOrIntro e r s, Pos a, Pos b)
-  => a </r/> b < _Γ -|s|- _Δ
-  -- ---------------------------
-  ->         b < _Γ -|s|- _Δ > a
+  :: (Weaken s, Exchange s, XOrIntro s, Pos a, Pos b)
+  => a </r/> b < _Γ -|s e r|- _Δ
+  -- -------------------------------
+  ->         b < _Γ -|s e r|- _Δ > a
 xorL2' s = xorR2 init init >>> wkR (wkL' s)

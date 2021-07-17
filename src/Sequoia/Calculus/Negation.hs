@@ -23,38 +23,38 @@ import Sequoia.Polarity
 
 -- Negation
 
-type NegationIntro e r s = (NotIntro e r s, NegateIntro e r s)
+type NegationIntro s = (NotIntro s, NegateIntro s)
 
 
 -- Negative double negation
 
 dneN
-  :: (NegationIntro e r s, Neg a)
-  =>     a < _Γ -|s|- _Δ
-  -- -------------------
-  -> r ¬-a < _Γ -|s|- _Δ
+  :: (NegationIntro s, Neg a)
+  =>     a < _Γ -|s e r|- _Δ
+  -- -----------------------
+  -> r ¬-a < _Γ -|s e r|- _Δ
 dneN = notL . negateR
 
 dniN
-  :: (NegationIntro e r s, Neg a)
-  => _Γ -|s|- _Δ > a
-  -- -------------------
-  -> _Γ -|s|- _Δ > r ¬-a
+  :: (NegationIntro s, Neg a)
+  => _Γ -|s e r|- _Δ > a
+  -- -----------------------
+  -> _Γ -|s e r|- _Δ > r ¬-a
 dniN = notR . negateL
 
 
 -- Positive double negation
 
 dneP
-  :: (NegationIntro e r s, Pos a)
-  =>     a < _Γ -|s|- _Δ
-  -- -------------------
-  -> r -¬a < _Γ -|s|- _Δ
+  :: (NegationIntro s, Pos a)
+  =>     a < _Γ -|s e r|- _Δ
+  -- -----------------------
+  -> r -¬a < _Γ -|s e r|- _Δ
 dneP = negateL . notR
 
 dniP
-  :: (NegationIntro e r s, Pos a)
-  => _Γ -|s|- _Δ > a
-  -- -------------------
-  -> _Γ -|s|- _Δ > r -¬a
+  :: (NegationIntro s, Pos a)
+  => _Γ -|s e r|- _Δ > a
+  -- -----------------------
+  -> _Γ -|s e r|- _Δ > r -¬a
 dniP = negateR . notL

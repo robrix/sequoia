@@ -74,7 +74,7 @@ instance MonadTrans (SeqT r s _Γ) where
 
 -- Core rules
 
-instance Core e r (Seq e r) where
+instance Core Seq where
   f >>> g = f >>= pure <--> pushL g
 
   init = popL liftR
@@ -82,14 +82,14 @@ instance Core e r (Seq e r) where
 
 -- Structural rules
 
-deriving via Contextually (Seq e r) instance Weaken   e r (Seq e r)
-deriving via Contextually (Seq e r) instance Contract e r (Seq e r)
-deriving via Contextually (Seq e r) instance Exchange e r (Seq e r)
+deriving via Contextually Seq instance Weaken   Seq
+deriving via Contextually Seq instance Contract Seq
+deriving via Contextually Seq instance Exchange Seq
 
 
 -- Contextual rules
 
-instance Contextual e r (Seq e r) where
+instance Contextual Seq where
   swapΓΔ f _Γ' _Δ' = inCP (\ _Γ _Δ -> exCP (f _Γ _Δ) _Γ' _Δ')
 
 
@@ -102,11 +102,11 @@ instance Calculus.Control Seq where
 
 -- Negation
 
-instance NotIntro e r (Seq e r) where
+instance NotIntro Seq where
   notL = notLK . kL
   notR = notRK . kR
 
-instance NegateIntro e r (Seq e r) where
+instance NegateIntro Seq where
   negateL = negateLK . kL
   negateR = negateRK . kR
 
@@ -151,14 +151,14 @@ instance TensorIntro Seq where
 
 -- Logical biconditional/exclusive disjunction
 
-instance IffIntro e r (Seq e r) where
+instance IffIntro Seq where
   iffL1 s1 s2 = mapL getIff (withL1 (downR s1 ->⊢ s2))
 
   iffL2 s1 s2 = mapL getIff (withL2 (downR s1 ->⊢ s2))
 
   iffR s1 s2 = mapR Iff (funR (downL s1) ⊢& funR (downL s2))
 
-instance XOrIntro e r (Seq e r) where
+instance XOrIntro Seq where
   xorL s1 s2 = mapL getXOr (subL (upR s1) ⊕⊢ subL (upR s2))
 
   xorR1 s1 s2 = mapR XOr (sumR1 (s1 ⊢-< upL s2))
@@ -168,43 +168,43 @@ instance XOrIntro e r (Seq e r) where
 
 -- Implication
 
-instance FunctionIntro e r (Seq e r) where
+instance FunctionIntro Seq where
   funL a b = popL (\ f -> a >>> liftLR f >>> wkL' b)
   funR = lowerLR liftR . wkR'
 
-instance SubtractionIntro e r (Seq e r) where
+instance SubtractionIntro Seq where
   subL f = mapL (sub <~) (tensorL (wkL' f >>> poppedL2 negateL init))
   subR a b = mapR (~> sub) (a ⊢⊗ negateR b)
 
 
 -- Quantification
 
-instance UniversalIntro e r (Seq e r) where
+instance UniversalIntro Seq where
   forAllL p = mapL (notNegate . runForAll) p
   forAllR p = inCP (\ _Γ _Δ -> liftRes (\ run -> inrK _Δ •• ForAll (inK (\ k -> run (exCP p _Γ (inlK _Δ |> k))))))
 
-instance ExistentialIntro e r (Seq e r) where
+instance ExistentialIntro Seq where
   existsL p = popL (dnE . runExists (pushL p))
   existsR p = mapR (Exists . liftDN) p
 
 
 -- Recursion
 
-instance NuIntro e r (Seq e r) where
+instance NuIntro Seq where
   nuL = mapL runNu
   nuR s = wkR' s >>> existsL (mapL nu init)
 
-instance MuIntro e r (Seq e r) where
+instance MuIntro Seq where
   muL f k = wkL (downR f) >>> exL (mapL getMu (funL init (wkL' k)))
   muR = mapR mu
 
 
 -- Polarity shifts
 
-instance UpIntro e r (Seq e r) where
+instance UpIntro Seq where
   upL   = mapL getUp
   upR   = mapR Up
 
-instance DownIntro e r (Seq e r) where
+instance DownIntro Seq where
   downL = mapL getDown
   downR = mapR Down

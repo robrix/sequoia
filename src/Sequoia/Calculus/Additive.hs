@@ -25,14 +25,14 @@ import Sequoia.Polarity
 type AdditiveIntro s = (TopIntro s, ZeroIntro s, WithIntro s, SumIntro s)
 
 withLSum
-  :: (Weaken e r (s e r), SumIntro s, WithIntro s, NegateIntro e r (s e r), Neg a, Neg b)
+  :: (Weaken s, SumIntro s, WithIntro s, NegateIntro s, Neg a, Neg b)
   =>         _Γ -|s e r|- _Δ > r -a ⊕ r -b
   -- -------------------------------------
   -> a & b < _Γ -|s e r|- _Δ
 withLSum s = wkL s >>> sumL (negateL (withL1 init)) (negateL (withL2 init))
 
 sumLWith
-  :: (Weaken e r (s e r), Exchange e r (s e r), SumIntro s, WithIntro s, NotIntro e r (s e r), Pos a, Pos b)
+  :: (Weaken s, Exchange s, SumIntro s, WithIntro s, NotIntro s, Pos a, Pos b)
   =>         _Γ -|s e r|- _Δ > r ¬a & r ¬b
   -- -------------------------------------
   -> a ⊕ b < _Γ -|s e r|- _Δ
