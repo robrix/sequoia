@@ -54,6 +54,7 @@ module Sequoia.Profunctor.ControlPassing
   -- * Modular computations
 , I(..)
 , O(..)
+, MCP(..)
 ) where
 
 import           Control.Category ((<<<), (>>>))
@@ -268,3 +269,5 @@ consumer k = inCns (k •∘)
 newtype I a c e r = I { runI :: V e a -> c e r }
 
 newtype O b c e r = O { runO :: K r b -> c e r }
+
+newtype MCP e r a b = MCP { runMCP :: I a (O b Control) e r }
