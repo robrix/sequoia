@@ -21,6 +21,7 @@ module Sequoia.Profunctor.ControlPassing
 , appCP2
 , runCP
 , elimCP
+, argCS_
 , argCS
 , contCS
   -- ** Composition
@@ -178,6 +179,9 @@ runCP v k f = exCP f v k
 elimCP :: (ControlPassing f, ControlStoring s) => a --|f e r|-> b -> s e r a b -> Control e r
 elimCP f = uncurry (exCP f) . exCS
 
+
+argCS_ :: ControlStoring s => Optic Lens (s e r a b) (s e' r a' b) (V e a) (V e' a')
+argCS_ = lens argCS (\ s v -> inCS (v, contCS s))
 
 argCS :: ControlStoring s => s e r a b -> V e a
 argCS = fst . exCS
