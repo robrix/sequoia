@@ -265,6 +265,6 @@ consumer k = inCns (k •∘)
 
 -- Modular computations
 
-newtype I e a b = I { runI :: V e a -> b }
+newtype I a c e r = I { runI :: V e a -> c e r }
 
-newtype O r b a = O { runO :: K r b -> a }
+newtype O b c e r = O { runO :: K r b -> c e r }
