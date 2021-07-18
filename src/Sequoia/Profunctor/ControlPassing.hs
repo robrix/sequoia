@@ -62,6 +62,7 @@ module Sequoia.Profunctor.ControlPassing
 , CoMCP(..)
 ) where
 
+import           Control.Arrow ((&&&))
 import           Control.Category ((<<<), (>>>))
 import qualified Control.Category as Cat
 import           Data.Kind (Type)
@@ -119,6 +120,10 @@ instance Env2 CP where
 
 
 data CS e r a b = CS { getV :: V e a, getK :: K r b }
+
+instance ControlStoring CS where
+  inCS = uncurry CS
+  exCS = getV &&& getK
 
 
 -- Mixfix notation
