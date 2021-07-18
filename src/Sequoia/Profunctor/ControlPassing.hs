@@ -73,6 +73,7 @@ import           Data.Kind (Type)
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
 import           Sequoia.Bijection
+import           Sequoia.Confunctor
 import           Sequoia.Continuation as K
 import           Sequoia.Disjunction
 import           Sequoia.Functor.K
@@ -124,6 +125,9 @@ instance Env2 CP where
 
 
 data CS e r a b = CS { getV :: V e a, getK :: K r b }
+
+instance Confunctor (CS e r) where
+  conmap f g (CS a k) = CS (f <$> a) (contramap g k)
 
 instance ControlStoring CS where
   inCS = uncurry CS
