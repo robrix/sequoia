@@ -20,7 +20,7 @@ import Sequoia.Profunctor.ControlPassing
 import Sequoia.Value
 
 elimFun :: a ~~Fun e r~> b -> a ~-Sub e r-< b -> Control e r
-elimFun f = exCP f <$> inV0 . subA <*> subK
+elimFun f = exCP f <$> subA <*> subK
 
 funPar1 :: K r (V e (r ¬a ⅋ b)) <-> K r (V e (a ~~Fun e r~> b))
 funPar1
