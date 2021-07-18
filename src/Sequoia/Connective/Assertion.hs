@@ -1,7 +1,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Connective.Assertion
-( -- * NotNo
-  NotNo(..)
+( -- * NotUntrue
+  NotUntrue(..)
   -- * True
 , True(..)
 , type (✓)
@@ -12,19 +12,19 @@ import Sequoia.Functor.V
 import Sequoia.Polarity
 import Sequoia.Value as V
 
--- NotNo
+-- NotUntrue
 
-newtype NotNo r a = NotNo { runNotNo :: (a -> r) -> r }
+newtype NotUntrue r a = NotUntrue { runNotUntrue :: (a -> r) -> r }
   deriving (Functor)
 
-instance Applicative (NotNo r) where
-  pure a = NotNo ($ a)
-  NotNo f <*> NotNo a = NotNo (f . (a .) . (.))
+instance Applicative (NotUntrue r) where
+  pure a = NotUntrue ($ a)
+  NotUntrue f <*> NotUntrue a = NotUntrue (f . (a .) . (.))
 
-instance Monad (NotNo r) where
-  m >>= f = NotNo (\ k -> runNotNo m ((`runNotNo` k) . f))
+instance Monad (NotUntrue r) where
+  m >>= f = NotUntrue (\ k -> runNotUntrue m ((`runNotUntrue` k) . f))
 
-instance Neg a => Polarized P (NotNo r a)
+instance Neg a => Polarized P (NotUntrue r a)
 
 
 -- True
