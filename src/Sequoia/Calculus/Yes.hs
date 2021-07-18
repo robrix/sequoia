@@ -1,2 +1,15 @@
 module Sequoia.Calculus.Yes
-() where
+( -- * Yes
+  YesIntro(..)
+  -- * Connectives
+, module Sequoia.Connective.Assertion
+) where
+
+import Sequoia.Calculus.Context
+import Sequoia.Calculus.Core
+import Sequoia.Connective.Assertion (Yes(..))
+import Sequoia.Polarity
+
+-- Yes
+
+class Core s => YesIntro s where

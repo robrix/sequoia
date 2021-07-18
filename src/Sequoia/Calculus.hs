@@ -9,6 +9,7 @@ module Sequoia.Calculus
 , module Sequoia.Calculus.Control
   -- * Connectives
 , module Sequoia.Calculus.Additive
+, module Sequoia.Calculus.Assertion
 , module Sequoia.Calculus.Iff
 , module Sequoia.Calculus.Implicative
 , module Sequoia.Calculus.Mu
@@ -23,6 +24,7 @@ module Sequoia.Calculus
 ) where
 
 import Sequoia.Calculus.Additive
+import Sequoia.Calculus.Assertion
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Control
 import Sequoia.Calculus.Core
