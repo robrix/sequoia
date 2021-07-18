@@ -3,9 +3,9 @@ module Sequoia.Calculus.Assertion
 ( -- * Assertion
   AssertionIntro
   -- * Re-exports
-, module Sequoia.Calculus.Yes
+, module Sequoia.Calculus.True
 ) where
 
-import Sequoia.Calculus.Yes
+import Sequoia.Calculus.True
 
-type AssertionIntro s = Yes s
+type AssertionIntro s = True s

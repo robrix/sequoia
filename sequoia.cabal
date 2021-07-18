@@ -94,10 +94,10 @@ library
     Sequoia.Calculus.Sum
     Sequoia.Calculus.Tensor
     Sequoia.Calculus.Top
+    Sequoia.Calculus.True
     Sequoia.Calculus.Up
     Sequoia.Calculus.With
     Sequoia.Calculus.XOr
-    Sequoia.Calculus.Yes
     Sequoia.Calculus.Zero
     Sequoia.Confunctor
     Sequoia.Conjunction

@@ -2,8 +2,8 @@
 module Sequoia.Connective.Assertion
 ( -- * NotNo
   NotNo(..)
-  -- * Yes
-, Yes(..)
+  -- * True
+, True(..)
 ) where
 
 import Data.Distributive
@@ -26,12 +26,12 @@ instance Monad (NotNo r) where
 instance Neg a => Polarized P (NotNo r a)
 
 
--- Yes
+-- True
 
-newtype Yes e a = Yes { getYes :: V e a }
+newtype True e a = True' { getTrue :: V e a }
   deriving (Applicative, Functor, Monad, V.Representable, Value)
 
-instance Distributive (Yes e) where
-  distribute = Yes . distribute . fmap getYes
+instance Distributive (True e) where
+  distribute = True' . distribute . fmap getTrue
 
-instance Pos a => Polarized P (Yes e a)
+instance Pos a => Polarized P (True e a)

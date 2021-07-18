@@ -102,8 +102,8 @@ instance Calculus.Control Seq where
 
 -- Assertion
 
-instance YesIntro Seq where
-  yesL = mapΓL (>>= getYes)
+instance TrueIntro Seq where
+  yesL = mapΓL (>>= getTrue)
   yesR = mapΔR (contramap inV0)
 
 

@@ -40,5 +40,5 @@ infixr 6 ~-
 infixr 5 -<
 
 
-sub :: Yes e a ⊗ r -b <-> a ~-Sub e r-< b
-sub = (\ (a :⊗ k) -> Sub (getYes a) (getNegate k)) <-> (\ (Sub a k) -> Yes a :⊗ Negate k)
+sub :: True e a ⊗ r -b <-> a ~-Sub e r-< b
+sub = (\ (a :⊗ k) -> Sub (getTrue a) (getNegate k)) <-> (\ (Sub a k) -> True' a :⊗ Negate k)
