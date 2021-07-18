@@ -18,3 +18,9 @@ class Core s => YesIntro s where
     =>       a < _Γ -|s e r|- _Δ
     -- -------------------------
     -> Yes e a < _Γ -|s e r|- _Δ
+
+  yesR
+    :: Pos a
+    => _Γ -|s e r|- _Δ > a
+    -- -------------------------
+    -> _Γ -|s e r|- _Δ > Yes e a
