@@ -6,6 +6,7 @@ module Sequoia.Connective.Subtraction
 , sub
 ) where
 
+import Control.Arrow ((&&&))
 import Data.Functor.Contravariant
 import Data.Kind (Type)
 import Sequoia.Bijection
@@ -16,6 +17,7 @@ import Sequoia.Connective.Tensor
 import Sequoia.Functor.K
 import Sequoia.Functor.V
 import Sequoia.Polarity
+import Sequoia.Profunctor.ControlPassing
 
 -- Subtraction
 
@@ -24,6 +26,10 @@ data Sub e r a b = Sub { subA :: V e a, subK :: K r b }
 
 instance Confunctor (Sub e r) where
   conmap f g (Sub a k) = Sub (f <$> a) (contramap g k)
+
+instance ControlStoring Sub where
+  inCS = uncurry Sub
+  exCS = subA &&& subK
 
 instance (Pos a, Neg b) => Polarized P (Sub e r a b) where
 
