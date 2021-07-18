@@ -16,6 +16,10 @@ import Sequoia.Value as V
 newtype NotNo r a = NotNo { runNotNo :: (a -> r) -> r }
   deriving (Functor)
 
+instance Applicative (NotNo r) where
+  pure a = NotNo ($ a)
+  NotNo f <*> NotNo a = NotNo (f . (a .) . (.))
+
 
 -- Yes
 
