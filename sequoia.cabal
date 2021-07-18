@@ -67,6 +67,7 @@ library
     Sequoia.Bijection
     Sequoia.Calculus
     Sequoia.Calculus.Additive
+    Sequoia.Calculus.Assertion
     Sequoia.Calculus.Bottom
     Sequoia.Calculus.Context
     Sequoia.Calculus.Control
