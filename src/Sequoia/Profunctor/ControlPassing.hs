@@ -114,8 +114,8 @@ instance Env2 CP where
 
 data CoCP e r a b = CoCP { getV :: V e a, getK :: K r b }
 
-elimCP :: CP e r a b -> CoCP e r a b -> Control e r
-elimCP (CP f) (CoCP v k) = f v k
+elimCP :: ControlPassing f => a --|f e r|-> b -> CoCP e r a b -> Control e r
+elimCP f (CoCP v k) = exCP f v k
 
 
 -- Mixfix notation
