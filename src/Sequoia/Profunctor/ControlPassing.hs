@@ -5,6 +5,7 @@ module Sequoia.Profunctor.ControlPassing
 ( -- * Control-passing profunctor
   CP(..)
 , CoCP(..)
+, elimCP
   -- ** Mixfix notation
 , type (--|)
 , type (|->)
@@ -112,6 +113,9 @@ instance Env2 CP where
 
 
 data CoCP e r a b = CoCP { getV :: V e a, getK :: K r b, getE :: e }
+
+elimCP :: CP e r a b -> CoCP e r a b -> r
+elimCP (CP f) (CoCP v k e) = getControl (f v k) e
 
 
 -- Mixfix notation
