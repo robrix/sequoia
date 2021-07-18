@@ -13,3 +13,8 @@ import Sequoia.Polarity
 -- Yes
 
 class Core s => YesIntro s where
+  yesL
+    :: Pos a
+    =>       a < _Γ -|s e r|- _Δ
+    -- -------------------------
+    -> Yes e a < _Γ -|s e r|- _Δ
