@@ -1,5 +1,6 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Polarity
 ( -- * Polarities
   N(..)
@@ -12,20 +13,21 @@ module Sequoia.Polarity
 
 import Data.Distributive
 import Data.Functor.Identity
+import Data.Functor.Rep as Co
 import Data.Kind (Type)
 
 -- Polarities
 
 newtype N a = N { getN :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-  deriving (Applicative, Monad) via Identity
+  deriving (Applicative, Monad, Co.Representable) via Identity
 
 instance Distributive N where
   distribute = N . fmap getN
 
 newtype P a = P { getP :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-  deriving (Applicative, Monad) via Identity
+  deriving (Applicative, Monad, Co.Representable) via Identity
 
 instance Distributive P where
   distribute = P . fmap getP
