@@ -290,4 +290,7 @@ instance (Res c, p ~ (->)) => Res (O p a c) where
 
 newtype MCP e r a b = MCP { runMCP :: I (->) a (O (->) b Control) e r }
 
+instance Env2 MCP where
+  env2 f = MCP (env (runMCP . f))
+
 newtype CoMCP e r a b = CoMCP { runCoMCP :: I (,) a (O (,) b Control) e r }
