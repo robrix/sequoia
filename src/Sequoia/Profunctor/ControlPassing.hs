@@ -24,6 +24,7 @@ module Sequoia.Profunctor.ControlPassing
 , argCS_
 , argCS
 , contCS
+, contCS_
   -- ** Composition
 , (<<<)
 , (>>>)
@@ -185,6 +186,9 @@ argCS_ = lens argCS (\ s v -> inCS (v, contCS s))
 
 argCS :: ControlStoring s => s e r a b -> V e a
 argCS = fst . exCS
+
+contCS_ :: ControlStoring s => Optic Lens (s e r a b) (s e r' a b') (K r b) (K r' b')
+contCS_ = lens contCS (\ s k -> inCS (argCS s, k))
 
 contCS :: ControlStoring s => s e r a b -> K r b
 contCS = snd . exCS
