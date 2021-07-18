@@ -1,5 +1,3 @@
-{-# LANGUAGE FunctionalDependencies #-}
-{-# LANGUAGE TypeFamilies #-}
 module Sequoia.Calculus.Control
 ( -- * Delimited control
   Control(..)
