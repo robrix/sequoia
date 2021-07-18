@@ -11,6 +11,7 @@ module Sequoia.Profunctor.ControlPassing
   -- ** Control-passing profunctor abstraction
 , _ControlPassing
 , ControlPassing(..)
+, _ControlStoring
 , ControlStoring(..)
   -- ** Construction
 , inCP'
@@ -138,6 +139,9 @@ class (forall e r . Cat.Category (f e r), forall e r . Profunctor (f e r)) => Co
   inCP :: (V e a -> K r b -> Control e r) -> f e r a b
   exCP :: f e r a b -> V e a -> K r b -> Control e r
 
+
+_ControlStoring :: ControlStoring p => p e r a b <-> (V e a, K r b)
+_ControlStoring = exCS <-> inCS
 
 class (forall e r . Cat.Category (f e r), forall e r . Profunctor (f e r)) => ControlStoring f where
   inCS :: (V e a, K r b) -> f e r a b
