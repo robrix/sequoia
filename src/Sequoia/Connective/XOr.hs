@@ -5,6 +5,7 @@ module Sequoia.Connective.XOr
 , type (/>)
 ) where
 
+import Data.Kind (Type)
 import Sequoia.Connective.Subtraction
 import Sequoia.Connective.Sum
 import Sequoia.Connective.Up
@@ -12,11 +13,11 @@ import Sequoia.Polarity
 
 -- Exclusive disjunction
 
-newtype XOr r a b = XOr { getXOr :: (a ~-r-< Up b) ⊕ (b ~-r-< Up a) }
+newtype XOr e r a b = XOr { getXOr :: (a ~-Sub e r-< Up b) ⊕ (b ~-Sub e r-< Up a) }
 
-instance (Pos a, Pos b) => Polarized P (XOr r a b)
+instance (Pos a, Pos b) => Polarized P (XOr e r a b)
 
-type a </r = XOr r a
+type a </r = (r :: Type -> Type -> Type) a
 type x/> b = x b
 
 infixr 6 </
