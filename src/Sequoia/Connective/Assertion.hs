@@ -14,6 +14,7 @@ import Sequoia.Value as V
 -- NotNo
 
 newtype NotNo r a = NotNo { runNotNo :: (a -> r) -> r }
+  deriving (Functor)
 
 
 -- Yes
