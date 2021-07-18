@@ -272,6 +272,9 @@ newtype I p a c e r = I { runI :: V e a `p` c e r }
 instance (forall x . Functor (c x), forall x . Functor (p x)) => Functor (I p a c e) where
   fmap f = I . fmap (fmap f) . runI
 
+instance (Env c, p ~ (->)) => Env (I p a c) where
+  env f = I (\ v -> env ((`runI` v) . f))
+
 newtype O p b c e r = O { runO :: K r b `p` c e r }
 
 newtype MCP e r a b = MCP { runMCP :: I (->) a (O (->) b Control) e r }
