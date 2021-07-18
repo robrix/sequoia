@@ -53,6 +53,7 @@ module Sequoia.Profunctor.ControlPassing
 , inCns
   -- * Modular computations
 , I(..)
+, O(..)
 ) where
 
 import           Control.Category ((<<<), (>>>))
@@ -265,3 +266,5 @@ consumer k = inCns (k •∘)
 -- Modular computations
 
 newtype I e a b = I { runI :: V e a -> b }
+
+newtype O r b a = O { runO :: K r b -> a }
