@@ -275,6 +275,10 @@ instance (forall x . Functor (c x), forall x . Functor (p x)) => Functor (I p a 
 instance (Env c, p ~ (->)) => Env (I p a c) where
   env f = I (\ v -> env ((`runI` v) . f))
 
+instance (Res c, p ~ (->)) => Res (I p a c) where
+  res r = I (const (res r))
+  liftRes f = I (\ v -> let run = (`runI` v) in liftRes (run . f . (. run)))
+
 newtype O p b c e r = O { runO :: K r b `p` c e r }
 
 instance (Env c, p ~ (->)) => Env (O p a c) where
