@@ -9,7 +9,7 @@ module Sequoia.Connective.Assertion
 import Data.Distributive
 import Sequoia.Functor.V
 import Sequoia.Polarity
-import Sequoia.Value
+import Sequoia.Value as V
 
 -- NotNo
 
@@ -19,7 +19,7 @@ newtype NotNo r a = NotNo { runNotNo :: (a -> r) -> r }
 -- Yes
 
 newtype Yes e a = Yes { getYes :: V e a }
-  deriving (Functor, Representable, Value)
+  deriving (Functor, V.Representable, Value)
 
 instance Distributive (Yes e) where
   distribute = Yes . distribute . fmap getYes
