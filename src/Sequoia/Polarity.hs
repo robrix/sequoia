@@ -10,6 +10,7 @@ module Sequoia.Polarity
 , Pos
 ) where
 
+import Data.Distributive
 import Data.Functor.Identity
 import Data.Kind (Type)
 
@@ -19,9 +20,15 @@ newtype N a = N { getN :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
   deriving (Applicative, Monad) via Identity
 
+instance Distributive N where
+  distribute = N . fmap getN
+
 newtype P a = P { getP :: a }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
   deriving (Applicative, Monad) via Identity
+
+instance Distributive P where
+  distribute = P . fmap getP
 
 
 -- Polarization
