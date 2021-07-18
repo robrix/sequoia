@@ -173,8 +173,8 @@ appCP2 f = inV (\ e a b -> inK (\ c -> getControl (exCP f a (inK (\ g -> getCont
 runCP :: ControlPassing f => V e a -> K r b -> a --|f e r|-> b -> Control e r
 runCP v k f = exCP f v k
 
-elimCP :: ControlPassing f => a --|f e r|-> b -> CS e r a b -> Control e r
-elimCP f (CS v k) = exCP f v k
+elimCP :: (ControlPassing f, ControlStoring s) => a --|f e r|-> b -> s e r a b -> Control e r
+elimCP f = uncurry (exCP f) . exCS
 
 
 -- Computation
