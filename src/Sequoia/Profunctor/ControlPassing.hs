@@ -78,6 +78,10 @@ import           Sequoia.Value as V
 
 newtype CP e r a b = CP { getCP :: V e a -> K r b -> Control e r }
 
+instance ControlPassing CP where
+  inCP = CP
+  exCP = getCP
+
 instance Profunctor (CP e r) where
   dimap = dimapCP
 
@@ -133,10 +137,6 @@ _ControlPassing = exCP <-> inCP
 class (forall e r . Cat.Category (f e r), forall e r . Profunctor (f e r)) => ControlPassing f where
   inCP :: (V e a -> K r b -> Control e r) -> f e r a b
   exCP :: f e r a b -> V e a -> K r b -> Control e r
-
-instance ControlPassing CP where
-  inCP = CP
-  exCP = getCP
 
 
 class (forall e r . Cat.Category (f e r), forall e r . Profunctor (f e r)) => ControlStoring f where
