@@ -143,7 +143,7 @@ class (forall e r . Cat.Category (f e r), forall e r . Profunctor (f e r)) => Co
 _ControlStoring :: ControlStoring p => p e r a b <-> (V e a, K r b)
 _ControlStoring = exCS <-> inCS
 
-class (forall e r . Cat.Category (f e r), forall e r . Profunctor (f e r)) => ControlStoring f where
+class ControlStoring f where
   inCS :: (V e a, K r b) -> f e r a b
   exCS :: f e r a b -> (V e a, K r b)
 
