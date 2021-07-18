@@ -16,6 +16,7 @@ import           Data.Profunctor
 import           Prelude hiding (init)
 import           Sequoia.Bijection
 import           Sequoia.Calculus.Additive
+import           Sequoia.Calculus.Assertion
 import           Sequoia.Calculus.Context
 import           Sequoia.Calculus.Control as Calculus
 import           Sequoia.Calculus.Core
@@ -97,6 +98,13 @@ instance Contextual Seq where
 instance Calculus.Control Seq where
   reset s = inCP (\ _Γ _Δ -> Control (exK _Δ . getControl (exCP s _Γ idK)))
   shift s = inCP (\ _Γ _Δ -> exCP s (inV0 (inrK _Δ) <| _Γ) (inlK _Δ |> idK))
+
+
+-- Assertion
+
+instance YesIntro Seq where
+  yesL = mapΓL (>>= getYes)
+  yesR = mapΔR (contramap inV0)
 
 
 -- Negation
