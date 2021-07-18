@@ -1,6 +1,8 @@
 module Sequoia.Calculus.Control
-( -- * Delimited control
-  Control(..)
+( -- * Values
+  vL
+  -- * Delimited control
+, Control(..)
   -- * Continuations
 , kL
 , kR
@@ -8,12 +10,24 @@ module Sequoia.Calculus.Control
 , kR'
 ) where
 
+import Control.Monad (join)
 import Prelude hiding (init)
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Core
 import Sequoia.Calculus.Structural
 import Sequoia.Contextual
 import Sequoia.Functor.K
+import Sequoia.Functor.V
+
+-- Values
+
+vL
+  :: Contextual s
+  =>     a < _Γ -|s e r|- _Δ
+  -- -----------------------
+  -> V e a < _Γ -|s e r|- _Δ
+vL = mapΓL join
+
 
 -- Delimited control
 
