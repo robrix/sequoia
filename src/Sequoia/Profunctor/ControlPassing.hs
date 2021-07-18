@@ -277,6 +277,9 @@ instance (Env c, p ~ (->)) => Env (I p a c) where
 
 newtype O p b c e r = O { runO :: K r b `p` c e r }
 
+instance (Env c, p ~ (->)) => Env (O p a c) where
+  env f = O (\ k -> env ((`runO` k) . f))
+
 newtype MCP e r a b = MCP { runMCP :: I (->) a (O (->) b Control) e r }
 
 newtype CoMCP e r a b = CoMCP { runCoMCP :: I (,) a (O (,) b Control) e r }
