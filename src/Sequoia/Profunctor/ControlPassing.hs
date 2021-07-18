@@ -51,6 +51,8 @@ module Sequoia.Profunctor.ControlPassing
 , joinl
 , consumer
 , inCns
+  -- * Modular computations
+, I(..)
 ) where
 
 import           Control.Category ((<<<), (>>>))
@@ -258,3 +260,8 @@ inCns = inCP . fmap const
 
 consumer :: (ControlPassing f, K.Representable k, K.Rep k ~ r) => k a -> a --|f e r|-> r
 consumer k = inCns (k •∘)
+
+
+-- Modular computations
+
+newtype I e a b = I { runI :: V e a -> b }
