@@ -23,6 +23,8 @@ instance Applicative (NotNo r) where
 instance Monad (NotNo r) where
   m >>= f = NotNo (\ k -> runNotNo m ((`runNotNo` k) . f))
 
+instance Neg a => Polarized P (NotNo r a)
+
 
 -- Yes
 
