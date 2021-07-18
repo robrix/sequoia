@@ -2,6 +2,7 @@
 module Sequoia.Connective.Assertion
 ( -- * NotUntrue
   NotUntrue(..)
+, type (≁)
   -- * True
 , True(..)
 , type (✓)
@@ -26,6 +27,10 @@ instance Monad (NotUntrue r) where
   m >>= f = NotUntrue (\ k -> runNotUntrue m ((`runNotUntrue` k) . f))
 
 instance Neg a => Polarized P (NotUntrue r a)
+
+type (≁) = NotUntrue
+
+infixr 9 ≁
 
 
 -- True
