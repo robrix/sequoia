@@ -55,6 +55,7 @@ module Sequoia.Profunctor.ControlPassing
 , I(..)
 , O(..)
 , MCP(..)
+, CoMCP(..)
 ) where
 
 import           Control.Category ((<<<), (>>>))
@@ -271,3 +272,5 @@ newtype I p a c e r = I { runI :: V e a `p` c e r }
 newtype O p b c e r = O { runO :: K r b `p` c e r }
 
 newtype MCP e r a b = MCP { runMCP :: I (->) a (O (->) b Control) e r }
+
+newtype CoMCP e r a b = CoMCP { runCoMCP :: I (,) a (O (,) b Control) e r }
