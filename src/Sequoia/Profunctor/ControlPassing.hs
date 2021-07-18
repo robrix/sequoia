@@ -323,6 +323,7 @@ instance (Res c, p ~ (->)) => Res (I p a c) where
   res r = I (const (res r))
   liftRes f = I (\ v -> let run = (`runI` v) in liftRes (run . f . (. run)))
 
+
 newtype O p b c e r = O { runO :: K r b `p` c e r }
 
 instance (Env c, p ~ (->)) => Env (O p a c) where
@@ -331,6 +332,7 @@ instance (Env c, p ~ (->)) => Env (O p a c) where
 instance (Res c, p ~ (->)) => Res (O p a c) where
   res r = O (const (res r))
   liftRes f = O (\ k -> let run = (`runO` k) in liftRes (run . f . (. run)))
+
 
 newtype MCP e r a b = MCP { runMCP :: I (->) a (O (->) b Control) e r }
 
