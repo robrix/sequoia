@@ -1,6 +1,7 @@
 module Sequoia.Calculus.Control
 ( -- * Values
   vL
+, vR
   -- * Delimited control
 , Control(..)
   -- * Continuations
@@ -18,6 +19,7 @@ import Sequoia.Calculus.Structural
 import Sequoia.Contextual
 import Sequoia.Functor.K
 import Sequoia.Functor.V
+import Sequoia.Value
 
 -- Values
 
@@ -27,6 +29,14 @@ vL
   -- -----------------------
   -> V e a < _Γ -|s e r|- _Δ
 vL = mapΓL join
+
+vR
+  :: Contextual s
+  => _Γ -|s e r|- _Δ > a
+  -- -----------------------
+  -> _Γ -|s e r|- _Δ > V e a
+-- FIXME: this should preserve extant dependency on the env
+vR = mapR inV0
 
 
 -- Delimited control
