@@ -34,7 +34,7 @@ vL = mapΓL join
 
 vR
   :: Contextual s
-  => _Γ -|s e r|- _Δ > a
+  => _Γ -|s e r|- _Δ >     a
   -- -----------------------
   -> _Γ -|s e r|- _Δ > V e a
 -- FIXME: this should preserve extant dependency on the env
@@ -51,7 +51,7 @@ vR'
   :: (Contextual s, Exchange s, Weaken s)
   => _Γ -|s e r|- _Δ > V e a
   -- -----------------------
-  -> _Γ -|s e r|- _Δ > a
+  -> _Γ -|s e r|- _Δ >     a
 vR' s = wkR' s >>> vL init
 
 
