@@ -243,18 +243,18 @@ instance Res Control where
   liftRes f = Control (\ e -> let run = (`getControl` e) in run (f run))
 
 
-inPrd :: ControlPassing f => (K r a -> Control e r) -> f e r e a
+inPrd :: ControlPassing f => (K r a -> Control e r) -> f e r e|-> a
 inPrd = inCP . const
 
-producer :: (ControlPassing f, V.Representable v, V.Rep v ~ e) => v a -> f e r e a
+producer :: (ControlPassing f, V.Representable v, V.Rep v ~ e) => v a -> f e r e|-> a
 producer v = inPrd (•∘ v)
 
-joinl :: ControlPassing f => f e r e (f e r a b) -> f e r a b
+joinl :: ControlPassing f => f e r e|-> f e r a b -> f e r a b
 joinl p = inCP (\ a b -> cont (\ _K -> exCP p idV (_K (\ f -> exCP f a b))))
 
 
-inCns :: ControlPassing f => (V e a -> Control e r) -> f e r a r
+inCns :: ControlPassing f => (V e a -> Control e r) -> a --|f e r|-> r
 inCns = inCP . fmap const
 
-consumer :: (ControlPassing f, K.Representable k, K.Rep k ~ r) => k a -> f e r a r
+consumer :: (ControlPassing f, K.Representable k, K.Rep k ~ r) => k a -> a --|f e r|-> r
 consumer k = inCns (k •∘)
