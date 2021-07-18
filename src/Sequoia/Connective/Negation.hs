@@ -53,6 +53,7 @@ instance Adjunction (Not r) (Negate r) where
   leftAdjunct  f a = inK ((• a) . f)
   rightAdjunct f a = inK ((• a) . f)
 
+
 type (-) = Negate
 
 infixr 9 -
