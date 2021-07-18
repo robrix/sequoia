@@ -24,7 +24,7 @@ instance Applicative (NotNo r) where
 -- Yes
 
 newtype Yes e a = Yes { getYes :: V e a }
-  deriving (Functor, V.Representable, Value)
+  deriving (Applicative, Functor, Monad, V.Representable, Value)
 
 instance Distributive (Yes e) where
   distribute = Yes . distribute . fmap getYes
