@@ -82,6 +82,7 @@ function flags {
   echo "-XMultiParamTypeClasses"
   echo "-XMultiWayIf"
   echo "-XNamedFieldPuns"
+  echo "-XNoStarIsType"
   echo "-XRankNTypes"
   echo "-XStandaloneDeriving"
   echo "-XTupleSections"

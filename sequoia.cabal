@@ -53,6 +53,7 @@ common common
     MultiParamTypeClasses
     MultiWayIf
     NamedFieldPuns
+    NoStarIsType
     RankNTypes
     StandaloneDeriving
     TupleSections
