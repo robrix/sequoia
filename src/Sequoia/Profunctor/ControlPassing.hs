@@ -112,10 +112,10 @@ instance Env2 CP where
   env2 f = inCP (\ v k -> env (runCP v k . f))
 
 
-data CoCP e r a b = CoCP { getV :: V e a, getK :: K r b, getE :: e }
+data CoCP e r a b = CoCP { getV :: V e a, getK :: K r b }
 
-elimCP :: CP e r a b -> CoCP e r a b -> r
-elimCP (CP f) (CoCP v k e) = getControl (f v k) e
+elimCP :: CP e r a b -> CoCP e r a b -> Control e r
+elimCP (CP f) (CoCP v k) = f v k
 
 
 -- Mixfix notation
