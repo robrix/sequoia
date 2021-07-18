@@ -6,6 +6,7 @@ module Sequoia.Profunctor.ControlPassing
   CP(..)
   -- ** Mixfix notation
 , type (--|)
+, type (>-|)
 , type (|->)
   -- ** Control-passing profunctor abstraction
 , _ControlPassing
@@ -108,8 +109,10 @@ instance Env2 CP where
 -- Mixfix notation
 
 type l --|(r :: Type -> Type -> Type) = r l
+type l >-|(r :: Type -> Type -> Type) = r l
 type l|-> r = l r
 
+infixr 6 >-|
 infixr 6 --|
 infixr 5 |->
 
