@@ -1,13 +1,20 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Connective.Assertion
-( -- * Yes
-  Yes(..)
+( -- * NotNo
+  NotNo(..)
+  -- * Yes
+, Yes(..)
 ) where
 
 import Data.Distributive
 import Sequoia.Functor.V
 import Sequoia.Polarity
 import Sequoia.Value
+
+-- NotNo
+
+newtype NotNo r a = NotNo { runNotNo :: (a -> r) -> r }
+
 
 -- Yes
 
