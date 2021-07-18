@@ -21,6 +21,8 @@ module Sequoia.Profunctor.ControlPassing
 , appCP2
 , runCP
 , elimCP
+, argCS
+, contCS
   -- ** Composition
 , (<<<)
 , (>>>)
@@ -175,6 +177,13 @@ runCP v k f = exCP f v k
 
 elimCP :: (ControlPassing f, ControlStoring s) => a --|f e r|-> b -> s e r a b -> Control e r
 elimCP f = uncurry (exCP f) . exCS
+
+
+argCS :: ControlStoring s => s e r a b -> V e a
+argCS = fst . exCS
+
+contCS :: ControlStoring s => s e r a b -> K r b
+contCS = snd . exCS
 
 
 -- Computation
