@@ -4,6 +4,7 @@ module Sequoia.Connective.Assertion
   NotNo(..)
   -- * True
 , True(..)
+, type (✓)
 ) where
 
 import Data.Distributive
@@ -35,3 +36,7 @@ instance Distributive (True e) where
   distribute = True' . distribute . fmap getTrue
 
 instance Pos a => Polarized P (True e a)
+
+type (✓) = True
+
+infixr 9 ✓
