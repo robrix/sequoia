@@ -20,6 +20,9 @@ instance Applicative (NotNo r) where
   pure a = NotNo ($ a)
   NotNo f <*> NotNo a = NotNo (f . (a .) . (.))
 
+instance Monad (NotNo r) where
+  m >>= f = NotNo (\ k -> runNotNo m ((`runNotNo` k) . f))
+
 
 -- Yes
 
