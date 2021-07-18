@@ -3,6 +3,7 @@ module Sequoia.Calculus.Control
   vL
 , vR
 , vL'
+, vR'
   -- * Delimited control
 , Control(..)
   -- * Continuations
@@ -45,6 +46,13 @@ vL'
   -- -----------------------
   ->     a < _Γ -|s e r|- _Δ
 vL' s = vR init >>> wkL' s
+
+vR'
+  :: (Contextual s, Exchange s, Weaken s)
+  => _Γ -|s e r|- _Δ > V e a
+  -- -----------------------
+  -> _Γ -|s e r|- _Δ > a
+vR' s = wkR' s >>> vL init
 
 
 -- Delimited control
