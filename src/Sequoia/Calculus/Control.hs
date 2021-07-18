@@ -2,6 +2,7 @@ module Sequoia.Calculus.Control
 ( -- * Values
   vL
 , vR
+, vL'
   -- * Delimited control
 , Control(..)
   -- * Continuations
@@ -37,6 +38,13 @@ vR
   -> _Γ -|s e r|- _Δ > V e a
 -- FIXME: this should preserve extant dependency on the env
 vR = mapR inV0
+
+vL'
+  :: (Contextual s, Exchange s, Weaken s)
+  => V e a < _Γ -|s e r|- _Δ
+  -- -----------------------
+  ->     a < _Γ -|s e r|- _Δ
+vL' s = vR init >>> wkL' s
 
 
 -- Delimited control
