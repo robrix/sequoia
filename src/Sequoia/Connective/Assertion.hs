@@ -32,4 +32,4 @@ newtype Yes e a = Yes { getYes :: V e a }
 instance Distributive (Yes e) where
   distribute = Yes . distribute . fmap getYes
 
-instance Pos a => Polarized P (Yes e a) where
+instance Pos a => Polarized P (Yes e a)
