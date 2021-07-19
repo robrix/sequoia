@@ -39,6 +39,6 @@ view :: Optic (Forget a) s t a b -> (s -> a)
 view = (`views` id)
 
 (~>) :: s -> Optic (Forget a) s t a b -> a
-s ~> o = views o id s
+(~>) = flip view
 
 infixl 8 ~>
