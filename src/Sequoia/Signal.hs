@@ -52,10 +52,10 @@ liftSolWithK f = withEnv (f . flip runSol)
 newtype Sol e r     = Sol { runSol :: e -> r }
 
 mapKSol :: (forall x . K r x -> K r' x) -> (Sol e r -> Sol e r')
-mapKSol f (Sol r) = Sol (over _K f r)
+mapKSol f (Sol r) = Sol (under _K f r)
 
 mapVSol :: (forall x . V e x -> V e' x) -> (Sol e r -> Sol e' r)
-mapVSol f (Sol r) = Sol (over _V f r)
+mapVSol f (Sol r) = Sol (under _V f r)
 
 
 newtype Src e r   b = Src { runSrc :: K r b -> Sol e r }

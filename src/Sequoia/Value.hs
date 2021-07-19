@@ -59,7 +59,7 @@ inV :: Representable v => (Rep v -> a) -> v a
 inV = tabulate
 
 inV1 :: Representable v => ((Rep v -> a) -> (Rep v -> b)) -> (v a -> v b)
-inV1 = under _V
+inV1 = over _V
 
 inV2 :: Representable v => ((Rep v -> a) -> (Rep v -> b) -> (Rep v -> c)) -> (v a -> v b -> v c)
 inV2 = dimap2 exV exV inV
@@ -74,7 +74,7 @@ exV :: Representable v => v a -> (Rep v -> a)
 exV = index
 
 exV1 :: Representable v => (v a -> v b) -> ((Rep v -> a) -> (Rep v -> b))
-exV1 = over _V
+exV1 = under _V
 
 exV2 :: Representable v => (v a -> v b -> v c) -> ((Rep v -> a) -> (Rep v -> b) -> (Rep v -> c))
 exV2 = dimap2 inV inV exV
@@ -92,7 +92,7 @@ _V :: (Representable v, Representable v') => Optic Iso (v a) (v' a') (Rep v -> a
 _V = exV <-> inV
 
 coerceVWith :: (Representable v1, Representable v2) => ((Rep v1 -> a) -> (Rep v2 -> b)) -> (v1 a -> v2 b)
-coerceVWith = under _V
+coerceVWith = over _V
 
 coerceV :: (Representable v1, Representable v2, Rep v1 ~ Rep v2) => (v1 a -> v2 a)
 coerceV = inV . exV
@@ -110,7 +110,7 @@ liftV2 :: Representable v => (a -> b -> c) -> v a -> v b -> v c
 liftV2 f = inV2 (liftA2 f)
 
 mapVRep :: (Representable v, Representable v') => (Rep v' -> Rep v) -> v a -> v' a
-mapVRep f = under _V (. f)
+mapVRep f = over _V (. f)
 
 
 (>∘∘<) :: (Conj d, Representable v) => v b -> v c -> v (b `d` c)

@@ -84,7 +84,7 @@ inK :: Representable k => KFn k a ->       k a
 inK = tabulate
 
 inK1 :: Representable k => (KFn k a -> KFn k b) -> (k a -> k b)
-inK1 = under _K
+inK1 = over _K
 
 inK1' :: Representable k => (a -> (b -> KRep k)) -> (a -> k b)
 inK1' = fmap inK
@@ -108,7 +108,7 @@ exK :: Representable k =>       k a -> KFn k a
 exK = index
 
 exK1 :: Representable k => (k a -> k b) -> (KFn k a -> KFn k b)
-exK1 = over _K
+exK1 = under _K
 
 exK2 :: Representable k => (k a -> k b -> k c) -> (KFn k a -> KFn k b -> KFn k c)
 exK2 = dimap2 inK inK exK
@@ -127,7 +127,7 @@ _K = exK <-> inK
 
 
 coerceKWith :: (Representable k1, Representable k2) => (KFn k1 a -> KFn k2 b) -> (k1 a -> k2 b)
-coerceKWith = under _K
+coerceKWith = over _K
 
 coerceK :: (Representable k1, Representable k2, Rep k1 ~ Rep k2) => (k1 a -> k2 a)
 coerceK = inK . exK
