@@ -24,6 +24,7 @@ module Sequoia.Contextual
 , pushΔR
 , poppedL
 , poppedR
+, poppedΓ
 , poppedL2
 , poppedR2
 , popL2
@@ -204,6 +205,16 @@ popR2
   -- ------------------------------------------
   ->                    _Γ -|s e r|- _Δ > b > a
 popR2 f = popR (popR . f)
+
+
+poppedΓ
+  :: Contextual s
+  => (V e _Γ''' -> (x, V e _Γ''))
+  -> (x -> V e _Γ' -> V e _Γ)
+  -> (_Γ' -|s e r|- _Δ -> _Γ''  -|s e r|- _Δ')
+  -- -----------------------------------------
+  -> (_Γ  -|s e r|- _Δ -> _Γ''' -|s e r|- _Δ')
+poppedΓ g h f p = traverseΓ g (\ x -> f (mapΓ (h x) p))
 
 
 poppedL
