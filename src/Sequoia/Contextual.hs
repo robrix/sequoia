@@ -11,6 +11,7 @@ module Sequoia.Contextual
 , popΓ
 , popΔ
 , popΓL
+, popΔR
 , popL
 , popR
   -- ** Pushing
@@ -130,6 +131,13 @@ popΓL
   -- --------------------------
   ->      a  < _Γ -|s e r|- _Δ
 popΓL f = popΓ (pushΓ . f . exlF <*> exrF)
+
+popΔR
+  :: Contextual s
+  => (K r a -> _Γ -|s e r|- _Δ)
+  -- -----------------------------
+  ->           _Γ -|s e r|- _Δ > a
+popΔR f = popΔ (\ c -> pushΔ (f (inrK c)) (inlK c))
 
 
 -- | Pop something off the input context which can later be pushed. Used with 'pushL', this provides a generalized context restructuring facility.
