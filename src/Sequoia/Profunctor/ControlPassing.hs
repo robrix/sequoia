@@ -76,6 +76,7 @@ import           Sequoia.Continuation as K
 import           Sequoia.Disjunction
 import           Sequoia.Functor.K
 import           Sequoia.Functor.V
+import           Sequoia.Optic.Lens
 import           Sequoia.Profunctor.Applicative
 import           Sequoia.Profunctor.Coexponential
 import           Sequoia.Value as V

@@ -46,11 +46,6 @@ module Sequoia.Bijection
   -- * Isos
 , Iso
 , (<->)
-  -- * Lenses
-, Lens
-, lens
-, _fst
-, _snd
 ) where
 
 import           Control.Applicative (Alternative)
@@ -234,18 +229,3 @@ type Iso s t a b = forall p . Profunctor p => Optic p s t a b
 
 (<->) :: (s -> a) -> (b -> t) -> Iso s t a b
 l <-> r = dimap l r
-
-
--- Lenses
-
-type Lens s t a b = forall p . Strong p => Optic p s t a b
-
-lens :: (s -> a) -> (s -> b -> t) -> Lens s t a b
-lens prj inj = dimap (\ s -> (prj s, s)) (\ (b, s) -> inj s b) . first'
-
-
-_fst :: Lens (a, b) (a', b) a a'
-_fst = lens fst (\ ~(_, b) a' -> (a', b))
-
-_snd :: Lens (a, b) (a, b') b b'
-_snd = lens snd (\ ~(a, _) b' -> (a, b'))

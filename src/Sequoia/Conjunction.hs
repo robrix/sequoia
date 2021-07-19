@@ -44,7 +44,7 @@ import Control.Applicative (liftA2)
 import Control.Category (Category, (>>>))
 import Data.Functor.Contravariant
 import Data.Profunctor
-import Sequoia.Bijection
+import Sequoia.Optic.Lens
 import Sequoia.Profunctor.Diagonal
 
 class Conj c where
