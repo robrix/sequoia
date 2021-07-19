@@ -3,8 +3,10 @@ module Sequoia.Profunctor.Recall
 ( Recall(..)
 ) where
 
+import Data.Coerce
 import Data.Distributive
 import Data.Functor.Rep
+import Data.Profunctor
 
 newtype Recall e a b = Recall { runRecall :: e -> b }
   deriving (Applicative, Functor, Monad, Representable)
@@ -12,3 +14,8 @@ newtype Recall e a b = Recall { runRecall :: e -> b }
 instance Distributive (Recall s a) where
   distribute = distributeRep
   collect = collectRep
+
+instance Profunctor (Recall e) where
+  dimap _ g = Recall . fmap g . runRecall
+  lmap _ = coerce
+  rmap = fmap
