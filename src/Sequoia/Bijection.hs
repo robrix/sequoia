@@ -99,7 +99,7 @@ newtype Optic c s t a b = Optic { runOptic :: forall p . c p => (a `p` b) -> (s 
 views :: c (Forget r) => Optic c s t a b -> (a -> r) -> (s -> r)
 views b = runForget . runOptic b . Forget
 
-reviews :: c (Recall r) => Optic c s t a b -> (r -> b) -> (r -> t)
+reviews :: c (Recall e) => Optic c s t a b -> (e -> b) -> (e -> t)
 reviews b = runRecall . runOptic b . Recall
 
 
