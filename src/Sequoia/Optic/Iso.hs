@@ -2,8 +2,8 @@ module Sequoia.Optic.Iso
 ( -- * Isos
   Iso
 , type (<->)
-, (<->)
   -- * Construction
+, (<->)
 , from
 , constant
 , involuted
@@ -59,11 +59,11 @@ type a <-> b = Iso a a b b
 infix 1 <->
 
 
+-- Construction
+
 (<->) :: (s -> a) -> (b -> t) -> Iso s t a b
 l <-> r = dimap l r
 
-
--- Construction
 
 from :: Iso s t a b -> Iso b a t s
 from b = (b <~) <-> (~> b)
