@@ -29,6 +29,8 @@ module Sequoia.Bijection
 , dimap2
   -- ** Composition
 , type (∨)
+, ImplL
+, ImplR
 , idB
 , (%)
   -- ** Coercion
