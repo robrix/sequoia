@@ -88,7 +88,7 @@ infixr 8 ∘
 
 -- Coercion
 
-_V :: (Representable v, Representable v') => Optic Iso (v a) (v' a') (Rep v -> a) (Rep v' -> a')
+_V :: (Representable v, Representable v') => Iso (v a) (v' a') (Rep v -> a) (Rep v' -> a')
 _V = exV <-> inV
 
 coerceVWith :: (Representable v1, Representable v2) => ((Rep v1 -> a) -> (Rep v2 -> b)) -> (v1 a -> v2 b)

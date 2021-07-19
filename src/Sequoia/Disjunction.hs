@@ -57,16 +57,16 @@ instance Disj Either where
   inr = Right
   (<-->) = either
 
-_inl :: Disj d => Optic Prism (a `d` b) (a' `d` b) a a'
+_inl :: Disj d => Prism (a `d` b) (a' `d` b) a a'
 _inl = prism inl (inr <--> inl . inr)
 
-_inr :: Disj d => Optic Prism (a `d` b) (a `d` b') b b'
+_inr :: Disj d => Prism (a `d` b) (a `d` b') b b'
 _inr = prism inr (inl . inl <--> inr)
 
-_inlK :: (Disj d, K.Representable k) => Optic Lens (k (a `d` b)) (k (a' `d` b)) (k a) (k a')
+_inlK :: (Disj d, K.Representable k) => Lens (k (a `d` b)) (k (a' `d` b)) (k a) (k a')
 _inlK = lens inlK (dimap2 index index tabulate (flip (<-->)) . inrK)
 
-_inrK :: (Disj d, K.Representable k) => Optic Lens (k (a `d` b)) (k (a `d` b')) (k b) (k b')
+_inrK :: (Disj d, K.Representable k) => Lens (k (a `d` b)) (k (a `d` b')) (k b) (k b')
 _inrK = lens inrK (dimap2 index index tabulate (<-->) . inlK)
 
 exlD :: Disj d => a `d` b -> Maybe a

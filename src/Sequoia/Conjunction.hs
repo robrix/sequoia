@@ -70,16 +70,16 @@ instance Conj (,) where
 inlr :: Conj c => a -> b -> a `c` b
 inlr = (>--<)
 
-_exl :: Conj c => Optic Lens (a `c` b) (a' `c` b) a a'
+_exl :: Conj c => Lens (a `c` b) (a' `c` b) a a'
 _exl = lens exl (\ c -> (>--< exr c))
 
-_exr :: Conj c => Optic Lens (a `c` b) (a `c` b') b b'
+_exr :: Conj c => Lens (a `c` b) (a `c` b') b b'
 _exr = lens exr (\ c -> (exl c >--<))
 
-_exlA :: (Conj c, Applicative f) => Optic Lens (f (a `c` b)) (f (a' `c` b)) (f a) (f a')
+_exlA :: (Conj c, Applicative f) => Lens (f (a `c` b)) (f (a' `c` b)) (f a) (f a')
 _exlA = lens exlF (liftA2 (flip (>--<)) . exrF)
 
-_exrA :: (Conj c, Applicative f) => Optic Lens (f (a `c` b)) (f (a `c` b')) (f b) (f b')
+_exrA :: (Conj c, Applicative f) => Lens (f (a `c` b)) (f (a `c` b')) (f b) (f b')
 _exrA = lens exrF (liftA2 (>--<) . exlF)
 
 exlrC :: Conj c => (a' -> b' -> r) -> (a -> a') -> (b -> b') -> (a `c` b -> r)

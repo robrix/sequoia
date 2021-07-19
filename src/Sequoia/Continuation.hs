@@ -122,7 +122,7 @@ infixl 7 •
 
 -- Coercion
 
-_K :: (Representable k, Representable k') => Optic Iso (k a) (k' a') (KFn k a) (KFn k' a')
+_K :: (Representable k, Representable k') => Iso (k a) (k' a') (KFn k a) (KFn k' a')
 _K = exK <-> inK
 
 
@@ -198,7 +198,7 @@ infixl 9 **
 type ContFn k a = KFn k (KFn k a)
 
 
-_DN :: (Representable k, Representable k') => Optic Iso (ContFn k a) (ContFn k' a') (k **a) (k' **a')
+_DN :: (Representable k, Representable k') => Iso (ContFn k a) (ContFn k' a') (k **a) (k' **a')
 _DN = inDN <-> exDN
 
 

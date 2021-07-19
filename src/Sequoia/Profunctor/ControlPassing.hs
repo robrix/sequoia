@@ -134,7 +134,7 @@ infixr 5 |->
 
 -- Control-passing profunctor abstraction
 
-_ControlPassing :: (ControlPassing f, ControlPassing f') => Optic Iso (f e r a b) (f' e' r' a' b') (V e a -> K r b -> Control e r) (V e' a' -> K r' b' -> Control e' r')
+_ControlPassing :: (ControlPassing f, ControlPassing f') => Iso (f e r a b) (f' e' r' a' b') (V e a -> K r b -> Control e r) (V e' a' -> K r' b' -> Control e' r')
 _ControlPassing = exCP <-> inCP
 
 class (forall e r . Cat.Category (f e r), forall e r . Profunctor (f e r)) => ControlPassing f where
@@ -142,7 +142,7 @@ class (forall e r . Cat.Category (f e r), forall e r . Profunctor (f e r)) => Co
   exCP :: f e r a b -> V e a -> K r b -> Control e r
 
 
-_ControlStoring :: (ControlStoring p, ControlStoring p') => Optic Iso (p e r a b) (p' e' r' a' b') (Coexp e r b a) (Coexp e' r' b' a')
+_ControlStoring :: (ControlStoring p, ControlStoring p') => Iso (p e r a b) (p' e' r' a' b') (Coexp e r b a) (Coexp e' r' b' a')
 _ControlStoring = exCS <-> inCS
 
 class (forall e r . Confunctor (f e r)) => ControlStoring f where
@@ -174,13 +174,13 @@ elimCP :: (ControlPassing f, ControlStoring s) => a --|f e r|-> b -> s e r a b -
 elimCP f = (exCP f <$> recall <*> forget) . exCS
 
 
-argCS_ :: ControlStoring s => Optic Lens (s e r a b) (s e' r a' b) (V e a) (V e' a')
+argCS_ :: ControlStoring s => Lens (s e r a b) (s e' r a' b) (V e a) (V e' a')
 argCS_ = lens argCS (\ s v -> inCS (Coexp v (contCS s)))
 
 argCS :: ControlStoring s => s e r a b -> V e a
 argCS = recall . exCS
 
-contCS_ :: ControlStoring s => Optic Lens (s e r a b) (s e r' a b') (K r b) (K r' b')
+contCS_ :: ControlStoring s => Lens (s e r a b) (s e r' a b') (K r b) (K r' b')
 contCS_ = lens contCS (\ s k -> inCS (Coexp (argCS s) k))
 
 contCS :: ControlStoring s => s e r a b -> K r b

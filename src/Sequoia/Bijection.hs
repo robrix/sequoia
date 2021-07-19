@@ -7,8 +7,7 @@
 module Sequoia.Bijection
 ( -- * Bijections
   type (<->)
-, Optic(..)
-, OpticF
+, Optic
   -- ** Elimination
 , views
 , reviews
@@ -25,14 +24,10 @@ module Sequoia.Bijection
 , uncurried
 , swapped
 , non
-, bij
+-- , bij
 , dimap2
   -- ** Composition
-, type (∨)
-, ImplL
-, ImplR
 , idB
-, (%)
   -- ** Coercion
 , coerced
 , coercedFrom
@@ -82,7 +77,6 @@ import           Data.Functor.Contravariant
 import qualified Data.Functor.Contravariant.Adjunction as Contra
 import qualified Data.Functor.Contravariant.Rep as Contra
 import qualified Data.Functor.Rep as Co
-import           Data.Kind (Constraint)
 import           Data.Maybe (fromMaybe)
 import           Data.Profunctor
 import           Data.Tuple (swap)
@@ -91,46 +85,44 @@ import           Sequoia.Profunctor.Recall
 
 -- Bijections
 
-type a <-> b = Optic Iso a a b b
+type a <-> b = Iso a a b b
 
 infix 1 <->
 
 
-newtype Optic c s t a b = Optic { runOptic :: OpticF c s t a b }
-
-type OpticF c s t a b = forall p . c p => (a `p` b) -> (s `p` t)
+type Optic p s t a b = (a `p` b) -> (s `p` t)
 
 
 -- Elimination
 
-views   :: c (Forget r) => Optic c s t a b -> (a -> r) -> (s -> r)
-views   b = runForget . runOptic b . Forget
+views   :: Optic (Forget r) s t a b -> (a -> r) -> (s -> r)
+views   b = runForget . b . Forget
 
-reviews :: c (Recall e) => Optic c s t a b -> (e -> b) -> (e -> t)
-reviews b = runRecall . runOptic b . Recall
+reviews :: Optic (Recall e) s t a b -> (e -> b) -> (e -> t)
+reviews b = runRecall . b . Recall
 
 
-(~>) :: c (Forget a) => s -> Optic c s t a b -> a
+(~>) :: s -> Optic (Forget a) s t a b -> a
 s ~> o = views o id s
 
 infixl 8 ~>
 
-(<~) :: c (Recall b) => Optic c s t a b -> (b -> t)
+(<~) :: Optic (Recall b) s t a b -> (b -> t)
 o <~ b = reviews o id b
 
 infixr 8 <~
 
 
-under :: c (Coexp b a) => Optic c s t a b -> (t -> s) -> (b -> a)
-under = runCoexp . (`runOptic` idCoexp)
+under :: Optic (Coexp b a) s t a b -> (t -> s) -> (b -> a)
+under = runCoexp . ($ idCoexp)
 
-over :: c (->) => Optic c s t a b -> (a -> b) -> (s -> t)
-over (Optic f) = f
+over :: Optic (->) s t a b -> (a -> b) -> (s -> t)
+over f = f
 
 
 -- Construction
 
-from :: Optic Iso s t a b -> Optic Iso b a t s
+from :: Iso s t a b -> Iso b a t s
 from b = (b <~) <-> (~> b)
 
 constant :: a -> (a -> b) <-> b
@@ -157,8 +149,8 @@ non a = fromMaybe a <-> select (/= a)
 select :: Alternative f => (a -> Bool) -> (a -> f a)
 select p a = a <$ guard (p a)
 
-bij :: (a <-> b) <-> (a -> b, b -> a)
-bij = ((,) <$> flip (~>) <*> (<~)) <-> uncurry (<->)
+-- bij :: (a <-> b) <-> (a -> b, b -> a)
+-- bij = ((,) <$> flip (~>) <*> (<~)) <-> uncurry (<->)
 
 dimap2 :: (a' -> a) -> (b' -> b) -> (c -> c') -> (a -> b -> c) -> (a' -> b' -> c')
 dimap2 l1 l2 r f a1 a2 = r (f (l1 a1) (l2 a2))
@@ -166,18 +158,8 @@ dimap2 l1 l2 r f a1 a2 = r (f (l1 a1) (l2 a2))
 
 -- Composition
 
-type family c1 ∨ c2 where
-  Iso ∨ b    = b
-  a   ∨ Iso  = a
-
-type ImplL c1 c2 = (forall p . (c1 ∨ c2) p => c1 p) :: Constraint
-type ImplR c1 c2 = (forall p . (c1 ∨ c2) p => c2 p) :: Constraint
-
-idB :: Optic c s s s s
-idB = Optic id
-
-(%) :: (ImplL c1 c2, ImplR c1 c2) => Optic c1 s t u v -> Optic c2 u v a b -> Optic (c1 ∨ c2) s t a b
-f % g = Optic (runOptic f . runOptic g)
+idB :: Optic p s s s s
+idB = id
 
 
 -- Coercion
@@ -263,52 +245,48 @@ rmapping b = rmap (~> b) <-> rmap (b <~)
 
 -- Isos
 
-class    Profunctor p => Iso p
-instance Profunctor p => Iso p
+type Iso s t a b = forall p . Profunctor p => Optic p s t a b
 
-(<->) :: (s -> a) -> (b -> t) -> Optic Iso s t a b
-l <-> r = Optic (dimap l r)
+(<->) :: (s -> a) -> (b -> t) -> Iso s t a b
+l <-> r = dimap l r
 
 
 -- Lenses
 
-class    (Strong p, Iso p) => Lens p
-instance (Strong p, Iso p) => Lens p
+type Lens s t a b = forall p . Strong p => Optic p s t a b
 
-lens :: (s -> a) -> (s -> b -> t) -> Optic Lens s t a b
-lens prj inj = Optic (dimap (\ s -> (prj s, s)) (\ (b, s) -> inj s b) . first')
+lens :: (s -> a) -> (s -> b -> t) -> Lens s t a b
+lens prj inj = dimap (\ s -> (prj s, s)) (\ (b, s) -> inj s b) . first'
 
 
-_fst :: Optic Lens (a, b) (a', b) a a'
+_fst :: Lens (a, b) (a', b) a a'
 _fst = lens fst (\ ~(_, b) a' -> (a', b))
 
-_snd :: Optic Lens (a, b) (a, b') b b'
+_snd :: Lens (a, b) (a, b') b b'
 _snd = lens snd (\ ~(a, _) b' -> (a, b'))
 
 
 -- Prisms
 
-class    (Choice p, Iso p) => Prism p
-instance (Choice p, Iso p) => Prism p
+type Prism s t a b = forall p . Choice p => Optic p s t a b
 
-prism :: (b -> t) -> (s -> Either t a) -> Optic Prism s t a b
-prism inj prj = Optic (dimap prj (either id inj) . right')
+prism :: (b -> t) -> (s -> Either t a) -> Prism s t a b
+prism inj prj = dimap prj (either id inj) . right'
 
 
-_Left :: Optic Prism (Either a b) (Either a' b) a a'
+_Left :: Prism (Either a b) (Either a' b) a a'
 _Left = prism Left (either Right (Left . Right))
 
-_Right :: Optic Prism (Either a b) (Either a b') b b'
+_Right :: Prism (Either a b) (Either a b') b b'
 _Right = prism Right (either (Left . Left) Right)
 
 
 -- Setters
 
-class    Mapping p => Setter p
-instance Mapping p => Setter p
+type Setter s t a b = forall p . Mapping p => Optic p s t a b
 
-sets :: ((a -> b) -> (s -> t)) -> Optic Setter s t a b
-sets f = Optic (roam f)
+sets :: ((a -> b) -> (s -> t)) -> Setter s t a b
+sets = roam
 
-set :: Optic Setter s t a b -> b -> s -> t
+set :: Setter s t a b -> b -> s -> t
 set o = over o . const
