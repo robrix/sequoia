@@ -117,8 +117,8 @@ infixr 8 <~
 over :: (c (Recall b), c (Forget a)) => Optic c s t a b -> (t -> s) -> (b -> a)
 over b = dimap (b <~) (~> b)
 
-under :: (c (Recall b), c (Forget a)) => Optic c s t a b -> (a -> b) -> (s -> t)
-under b = dimap (~> b) (b <~)
+under :: c (->) => Optic c s t a b -> (a -> b) -> (s -> t)
+under (Optic f) = f
 
 
 -- Construction
