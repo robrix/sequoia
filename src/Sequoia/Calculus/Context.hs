@@ -45,6 +45,16 @@ instance Bifunctor (<) where
 instance Bitraversable (<) where
   bitraverse = bitraverseConj
 
+-- | Prepend a value onto a '<'-context.
+--
+-- This is left- and right-inverse to 'splitΓ':
+--
+-- @
+-- uncurry (<|) . splitΓ = id
+-- @
+-- @
+-- splitΓ . uncurry (<|) = id
+-- @
 (<|) :: V.Representable v => v i -> v is -> v (i < is)
 (<|) = (>∘∘<)
 
