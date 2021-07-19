@@ -9,7 +9,7 @@ module Sequoia.Profunctor.Coexponential
 
 -- Coexponential profunctor
 
-data Coexp e r a b = Coexp { coexpA :: e -> b, coexpB :: a -> r }
+data Coexp e r a b = Coexp { coexpIn :: e -> b, coexpOut :: a -> r }
   deriving (Functor)
 
 
