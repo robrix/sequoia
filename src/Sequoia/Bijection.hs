@@ -80,6 +80,7 @@ import           Data.Functor.Contravariant
 import qualified Data.Functor.Contravariant.Adjunction as Contra
 import qualified Data.Functor.Contravariant.Rep as Contra
 import qualified Data.Functor.Rep as Co
+import           Data.Kind (Constraint)
 import           Data.Maybe (fromMaybe)
 import           Data.Profunctor
 import           Data.Tuple (swap)
@@ -167,10 +168,13 @@ type family c1 ∨ c2 where
   Iso ∨ b    = b
   a   ∨ Iso  = a
 
+type ImplL c1 c2 = (forall p . (c1 ∨ c2) p => c1 p) :: Constraint
+type ImplR c1 c2 = (forall p . (c1 ∨ c2) p => c2 p) :: Constraint
+
 idB :: Optic c s s s s
 idB = Optic id
 
-(%) :: (forall p . (c1 ∨ c2) p => c1 p, forall p . (c1 ∨ c2) p => c2 p) => Optic c1 s t u v -> Optic c2 u v a b -> Optic (c1 ∨ c2) s t a b
+(%) :: (ImplL c1 c2, ImplR c1 c2) => Optic c1 s t u v -> Optic c2 u v a b -> Optic (c1 ∨ c2) s t a b
 f % g = Optic (runOptic f . runOptic g)
 
 
