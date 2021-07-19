@@ -375,10 +375,10 @@ liftL = pushR init
 
 liftR
   :: Contextual s
-  =>                   a
+  =>               V e a
   -- -------------------
   -> _Γ -|s e r|- _Δ > a
-liftR = pushL init
+liftR v = popΓ (\ _Γ -> pushΓ init (v <| _Γ))
 
 
 -- Lowering

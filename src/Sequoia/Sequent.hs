@@ -77,7 +77,7 @@ instance MonadTrans (SeqT r s _Γ) where
 instance Core Seq where
   f >>> g = f >>= pure <--> pushL g
 
-  init = popL liftR
+  init = popΓ (pushΓ . liftR . exlF <*> exrF)
 
 
 -- Structural rules
@@ -149,7 +149,7 @@ instance BottomIntro Seq where
 
 instance OneIntro Seq where
   oneL = wkL
-  oneR = liftR One
+  oneR = liftR (inV0 One)
 
 instance ParIntro Seq where
   parL a b = popL (pushL a <--> pushL b)
@@ -181,7 +181,7 @@ instance XOrIntro Seq where
 
 instance FunctionIntro Seq where
   funL a b = popL (\ f -> a >>> liftLR f >>> wkL' b)
-  funR = lowerLR liftR . wkR'
+  funR = lowerLR (liftR . inV0) . wkR'
 
 instance SubtractionIntro Seq where
   subL f = mapL (sub <~) (tensorL (wkL' (trueL f) >>> poppedL2 negateL init))
