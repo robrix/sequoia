@@ -77,7 +77,7 @@ instance MonadTrans (SeqT r s _Γ) where
 instance Core Seq where
   f >>> g = f >>= pure <--> pushL g
 
-  init = popΓL liftR
+  init = mapΓΔ exlF inrK Cat.id
 
 
 -- Structural rules
