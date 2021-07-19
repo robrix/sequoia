@@ -19,3 +19,7 @@ instance Profunctor (Recall e) where
   dimap _ g = Recall . fmap g . runRecall
   lmap _ = coerce
   rmap = fmap
+
+instance Costrong (Recall e) where
+  unfirst  = Recall . (fst .) . runRecall
+  unsecond = Recall . (snd .) . runRecall
