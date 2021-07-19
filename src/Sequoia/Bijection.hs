@@ -1,5 +1,7 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE QuantifiedConstraints #-}
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE UndecidableSuperClasses #-}
 module Sequoia.Bijection
@@ -154,13 +156,14 @@ dimap2 l1 l2 r f a1 a2 = r (f (l1 a1) (l2 a2))
 
 -- Composition
 
-class    (c1 p, c2 p) => (c1 ∨ c2) p
-instance (c1 p, c2 p) => (c1 ∨ c2) p
+type family c1 ∨ c2 where
+  Iso ∨ b    = b
+  a   ∨ Iso  = a
 
 idB :: Optic c s s s s
 idB = Optic id
 
-(%) :: Optic c1 s t u v -> Optic c2 u v a b -> Optic (c1 ∨ c2) s t a b
+(%) :: (forall p . (c1 ∨ c2) p => c1 p, forall p . (c1 ∨ c2) p => c2 p) => Optic c1 s t u v -> Optic c2 u v a b -> Optic (c1 ∨ c2) s t a b
 f % g = Optic (runOptic f . runOptic g)
 
 
