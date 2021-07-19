@@ -30,8 +30,8 @@ instance Confunctor (Sub e r) where
   conmap f g (Sub a k) = Sub (f <$> a) (contramap g k)
 
 instance ControlStoring Sub where
-  inCS (Coexp a b) = Sub (V a) (K b)
-  exCS = Coexp <$> runV . subA <*> runK . subK
+  inCS (Coexp a b) = Sub a b
+  exCS = Coexp <$> subA <*> subK
 
 instance (Pos a, Neg b) => Polarized P (Sub e r a b) where
 
