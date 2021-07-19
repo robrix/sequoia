@@ -6,7 +6,6 @@ module Sequoia.Bijection
 , reviews
 , (<~)
 , (~>)
-, under
 , over
 , dimap2
   -- ** Composition
@@ -14,7 +13,6 @@ module Sequoia.Bijection
 ) where
 
 import Data.Profunctor
-import Sequoia.Profunctor.Coexponential
 import Sequoia.Profunctor.Recall
 
 -- Bijections
@@ -41,9 +39,6 @@ o <~ b = reviews o id b
 
 infixr 8 <~
 
-
-under :: Optic (Coexp b a) s t a b -> (t -> s) -> (b -> a)
-under = runCoexp . ($ idCoexp)
 
 over :: Optic (->) s t a b -> (a -> b) -> (s -> t)
 over f = f

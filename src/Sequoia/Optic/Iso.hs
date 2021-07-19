@@ -12,6 +12,8 @@ module Sequoia.Optic.Iso
 , uncurried
 , swapped
 , non
+  -- * Elimination
+, under
   -- * Coercion
 , coerced
 , coercedFrom
@@ -48,6 +50,7 @@ import           Data.Maybe (fromMaybe)
 import           Data.Profunctor
 import           Data.Tuple (swap)
 import           Sequoia.Bijection
+import           Sequoia.Profunctor.Coexponential
 
 -- Isos
 
@@ -91,6 +94,12 @@ non a = fromMaybe a <-> select (/= a)
 
 select :: Alternative f => (a -> Bool) -> (a -> f a)
 select p a = a <$ guard (p a)
+
+
+-- Elimination
+
+under :: Optic (Coexp b a) s t a b -> (t -> s) -> (b -> a)
+under = runCoexp . ($ idCoexp)
 
 
 -- Coercion
