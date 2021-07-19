@@ -8,6 +8,8 @@ module Sequoia.Bicontravariant
 , lphantom
 , rphantom
 , bivacuous
+, firstvacuous
+, secondvacuous
 , contravacuous
 , contrabivacuous
 , divacuous
@@ -45,6 +47,12 @@ rphantom = rmap absurd . contrasecond absurd
 
 bivacuous :: Bifunctor p => p Void Void -> p a b
 bivacuous = bimap absurd absurd
+
+firstvacuous :: Bifunctor p => p Void b -> p a b
+firstvacuous = first absurd
+
+secondvacuous :: Bifunctor p => p a Void -> p a b
+secondvacuous = second absurd
 
 contravacuous :: Contravariant f => f a -> f Void
 contravacuous = contramap absurd
