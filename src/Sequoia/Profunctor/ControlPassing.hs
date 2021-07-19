@@ -171,20 +171,20 @@ runCP :: ControlPassing f => V e a -> K r b -> a --|f e r|-> b -> Control e r
 runCP v k f = exCP f v k
 
 elimCP :: (ControlPassing f, ControlStoring s) => a --|f e r|-> b -> s e r a b -> Control e r
-elimCP f = (exCP f <$> V . coexpIn <*> K . coexpOut) . exCS
+elimCP f = (exCP f <$> V . recall <*> K . forget) . exCS
 
 
 argCS_ :: ControlStoring s => Optic Lens (s e r a b) (s e' r a' b) (V e a) (V e' a')
 argCS_ = lens argCS (\ s v -> inCS (Coexp (runV v) (runK (contCS s))))
 
 argCS :: ControlStoring s => s e r a b -> V e a
-argCS = V . coexpIn . exCS
+argCS = V . recall . exCS
 
 contCS_ :: ControlStoring s => Optic Lens (s e r a b) (s e r' a b') (K r b) (K r' b')
 contCS_ = lens contCS (\ s k -> inCS (Coexp (runV (argCS s)) (runK k)))
 
 contCS :: ControlStoring s => s e r a b -> K r b
-contCS = K . coexpOut . exCS
+contCS = K . forget . exCS
 
 
 -- Computation
