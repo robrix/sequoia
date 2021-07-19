@@ -1,18 +1,14 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Connective.Assertion
-( -- * NotUntrue
+( -- * Connectives
   NotUntrue(..)
 , type (≁)
-  -- * True
-, True(..)
-, type (✓)
+, module Sequoia.Connective.True
 ) where
 
-import Data.Distributive
 import Prelude hiding (True)
-import Sequoia.Functor.V
+import Sequoia.Connective.True
 import Sequoia.Polarity
-import Sequoia.Value as V
 
 -- NotUntrue
 
@@ -31,18 +27,3 @@ instance Neg a => Polarized P (NotUntrue r a)
 type (≁) = NotUntrue
 
 infixr 9 ≁
-
-
--- True
-
-newtype True e a = True { getTrue :: V e a }
-  deriving (Applicative, Functor, Monad, V.Representable, Value)
-
-instance Distributive (True e) where
-  distribute = True . distribute . fmap getTrue
-
-instance Pos a => Polarized P (True e a)
-
-type (✓) = True
-
-infixr 9 ✓

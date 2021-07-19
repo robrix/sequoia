@@ -2,12 +2,12 @@ module Sequoia.Calculus.True
 ( -- * True
   TrueIntro(..)
   -- * Connectives
-, module Sequoia.Connective.Assertion
+, module Sequoia.Connective.True
 ) where
 
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Core
-import Sequoia.Connective.Assertion (True(..))
+import Sequoia.Connective.True
 import Sequoia.Polarity
 
 -- True
