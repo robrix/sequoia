@@ -247,7 +247,7 @@ poppedL2
   =>         (_Γ -|s e r|- _Δ ->         _Γ' -|s e r|- _Δ')
   -- ------------------------------------------------------
   -> (a < b < _Γ -|s e r|- _Δ -> a < b < _Γ' -|s e r|- _Δ')
-poppedL2 = poppedL . poppedL
+poppedL2 = poppedΓ (assocL . fmap unconsΓ . unconsΓ) (\ (a, b) _Γ -> a <| b <| _Γ)
 
 poppedR2
   :: Contextual s
