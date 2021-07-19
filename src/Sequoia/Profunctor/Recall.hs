@@ -7,6 +7,7 @@ import Data.Coerce
 import Data.Distributive
 import Data.Functor.Rep
 import Data.Profunctor
+import Data.Profunctor.Sieve
 
 newtype Recall e a b = Recall { runRecall :: e -> b }
   deriving (Applicative, Functor, Monad, Representable)
@@ -30,3 +31,6 @@ instance Choice (Recall e) where
 
 instance Closed (Recall e) where
   closed = Recall . (const .) . runRecall
+
+instance Sieve (Recall e) ((->) e) where
+  sieve = const . runRecall
