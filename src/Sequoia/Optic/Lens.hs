@@ -1,6 +1,7 @@
 module Sequoia.Optic.Lens
 ( -- * Lenses
   Lens
+, Lens'
 , lens
 , _fst
 , _snd
@@ -12,6 +13,8 @@ import Sequoia.Bijection
 -- Lenses
 
 type Lens s t a b = forall p . Strong p => Optic p s t a b
+
+type Lens' s a = Lens s s a a
 
 lens :: (s -> a) -> (s -> b -> t) -> Lens s t a b
 lens prj inj = dimap (\ s -> (prj s, s)) (\ (b, s) -> inj s b) . first'
