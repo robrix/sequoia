@@ -83,6 +83,7 @@ library
     Sequoia.Calculus.Negate
     Sequoia.Calculus.Negation
     Sequoia.Calculus.Not
+    Sequoia.Calculus.NotUntrue
     Sequoia.Calculus.Nu
     Sequoia.Calculus.One
     Sequoia.Calculus.Par
