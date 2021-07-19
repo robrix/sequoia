@@ -28,13 +28,13 @@ import           Control.Category ((<<<))
 import qualified Control.Category as Cat
 import           Control.Monad (ap)
 import           Data.Profunctor
-import           Sequoia.Bijection
 import           Sequoia.Calculus.Context
 import           Sequoia.Continuation as K
 import           Sequoia.Functor.K
 import           Sequoia.Functor.V
 import           Sequoia.Optic.Getter
 import           Sequoia.Optic.Iso
+import           Sequoia.Optic.Review
 import           Sequoia.Value as V
 
 -- Signals

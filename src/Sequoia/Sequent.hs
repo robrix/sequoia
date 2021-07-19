@@ -14,7 +14,6 @@ import qualified Control.Category as Cat
 import           Control.Monad.Trans.Class
 import           Data.Profunctor
 import           Prelude hiding (init)
-import           Sequoia.Bijection
 import           Sequoia.Calculus.Additive
 import           Sequoia.Calculus.Assertion
 import           Sequoia.Calculus.Context
@@ -37,6 +36,7 @@ import           Sequoia.Disjunction
 import           Sequoia.Functor.K
 import           Sequoia.Functor.V
 import           Sequoia.Optic.Getter
+import           Sequoia.Optic.Review
 import           Sequoia.Profunctor.ControlPassing as ControlPassing hiding ((>>>))
 import           Sequoia.Value
 

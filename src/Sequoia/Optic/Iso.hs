@@ -58,6 +58,7 @@ import           Data.Profunctor.Sieve
 import           Data.Tuple (swap)
 import           Sequoia.Bijection
 import           Sequoia.Optic.Getter
+import           Sequoia.Optic.Review
 import           Sequoia.Profunctor.Coexponential
 
 -- Isos
