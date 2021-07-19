@@ -232,7 +232,7 @@ poppedL
   => (    _Γ -|s e r|- _Δ ->     _Γ' -|s e r|- _Δ')
   -- ----------------------------------------------
   -> (a < _Γ -|s e r|- _Δ -> a < _Γ' -|s e r|- _Δ')
-poppedL f p = popL (f . pushL p)
+poppedL = poppedΓ unconsΓ (<|)
 
 poppedR
   :: Contextual s
