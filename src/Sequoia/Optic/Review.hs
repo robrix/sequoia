@@ -15,7 +15,7 @@ import Sequoia.Bijection
 
 type Review s t a b = forall p . (Bifunctor p, Profunctor p) => Optic p s t a b
 
-type Review' s a = forall p . (Bifunctor p, Profunctor p) => Optic p s s a a
+type Review' s a = Review s s a a
 
 
 -- Construction
