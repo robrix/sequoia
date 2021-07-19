@@ -33,6 +33,7 @@ import           Sequoia.Calculus.Context
 import           Sequoia.Continuation as K
 import           Sequoia.Functor.K
 import           Sequoia.Functor.V
+import           Sequoia.Optic.Getter
 import           Sequoia.Optic.Iso
 import           Sequoia.Value as V
 

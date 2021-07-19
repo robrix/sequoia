@@ -7,7 +7,9 @@ module Sequoia.Optic.Getter
   -- * Construction
 , to
   -- * Elimination
+, views
 , view
+, (~>)
 ) where
 
 import Data.Profunctor
@@ -30,5 +32,13 @@ to f = lmap f . rphantom
 
 -- Elimination
 
+views :: Optic (Forget r) s t a b -> (a -> r) -> (s -> r)
+views b = runForget . b . Forget
+
 view :: Optic (Forget a) s t a b -> (s -> a)
 view = (`views` id)
+
+(~>) :: s -> Optic (Forget a) s t a b -> a
+s ~> o = views o id s
+
+infixl 8 ~>

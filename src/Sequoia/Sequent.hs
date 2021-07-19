@@ -36,6 +36,7 @@ import           Sequoia.Continuation as K
 import           Sequoia.Disjunction
 import           Sequoia.Functor.K
 import           Sequoia.Functor.V
+import           Sequoia.Optic.Getter
 import           Sequoia.Profunctor.ControlPassing as ControlPassing hiding ((>>>))
 import           Sequoia.Value
 

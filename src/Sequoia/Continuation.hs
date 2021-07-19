@@ -66,6 +66,7 @@ import Data.Profunctor
 import Sequoia.Bijection
 import Sequoia.Disjunction
 import Sequoia.Functor.K
+import Sequoia.Optic.Getter
 import Sequoia.Optic.Iso
 
 -- Continuations

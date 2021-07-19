@@ -3,15 +3,12 @@ module Sequoia.Bijection
   Optic
 , Optic'
   -- ** Elimination
-, views
 , reviews
 , (<~)
-, (~>)
 , over
 , dimap2
 ) where
 
-import Data.Profunctor
 import Sequoia.Profunctor.Recall
 
 -- Bijections
@@ -23,17 +20,9 @@ type Optic' p s a = (a `p` a) -> (s `p` s)
 
 -- Elimination
 
-views   :: Optic (Forget r) s t a b -> (a -> r) -> (s -> r)
-views   b = runForget . b . Forget
-
 reviews :: Optic (Recall e) s t a b -> (e -> b) -> (e -> t)
 reviews b = runRecall . b . Recall
 
-
-(~>) :: s -> Optic (Forget a) s t a b -> a
-s ~> o = views o id s
-
-infixl 8 ~>
 
 (<~) :: Optic (Recall b) s t a b -> (b -> t)
 o <~ b = reviews o id b
