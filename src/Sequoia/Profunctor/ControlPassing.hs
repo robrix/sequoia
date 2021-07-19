@@ -4,7 +4,6 @@
 module Sequoia.Profunctor.ControlPassing
 ( -- * Control-passing profunctor
   CP(..)
-, CS(..)
   -- ** Mixfix notation
 , type (--|)
 , type (|->)
@@ -66,7 +65,6 @@ module Sequoia.Profunctor.ControlPassing
 , CoMCP(..)
 ) where
 
-import           Control.Arrow ((&&&))
 import           Control.Category ((<<<), (>>>))
 import qualified Control.Category as Cat
 import           Data.Kind (Type)
@@ -79,6 +77,7 @@ import           Sequoia.Disjunction
 import           Sequoia.Functor.K
 import           Sequoia.Functor.V
 import           Sequoia.Profunctor.Applicative
+import           Sequoia.Profunctor.Coexponential
 import           Sequoia.Value as V
 
 -- Control-passing profunctor
@@ -124,16 +123,6 @@ instance Env2 CP where
   env2 f = inCP (\ v k -> env (runCP v k . f))
 
 
-data CS e r a b = CS { getV :: V e a, getK :: K r b }
-
-instance Confunctor (CS e r) where
-  conmap f g (CS a k) = CS (f <$> a) (contramap g k)
-
-instance ControlStoring CS where
-  inCS = uncurry CS
-  exCS = getV &&& getK
-
-
 -- Mixfix notation
 
 type l --|(r :: Type -> Type -> Type) = r l
@@ -153,12 +142,12 @@ class (forall e r . Cat.Category (f e r), forall e r . Profunctor (f e r)) => Co
   exCP :: f e r a b -> V e a -> K r b -> Control e r
 
 
-_ControlStoring :: (ControlStoring p, ControlStoring p') => Optic Iso (p e r a b) (p' e' r' a' b') (V e a, K r b) (V e' a', K r' b')
+_ControlStoring :: (ControlStoring p, ControlStoring p') => Optic Iso (p e r a b) (p' e' r' a' b') (Coexp e r b a) (Coexp e' r' b' a')
 _ControlStoring = exCS <-> inCS
 
 class (forall e r . Confunctor (f e r)) => ControlStoring f where
-  inCS :: (V e a, K r b) -> f e r a b
-  exCS :: f e r a b -> (V e a, K r b)
+  inCS :: Coexp e r b a -> f e r a b
+  exCS :: f e r a b -> Coexp e r b a
 
 
 -- Construction
@@ -182,20 +171,20 @@ runCP :: ControlPassing f => V e a -> K r b -> a --|f e r|-> b -> Control e r
 runCP v k f = exCP f v k
 
 elimCP :: (ControlPassing f, ControlStoring s) => a --|f e r|-> b -> s e r a b -> Control e r
-elimCP f = uncurry (exCP f) . exCS
+elimCP f = (exCP f <$> V . coexpIn <*> K . coexpOut) . exCS
 
 
 argCS_ :: ControlStoring s => Optic Lens (s e r a b) (s e' r a' b) (V e a) (V e' a')
-argCS_ = lens argCS (\ s v -> inCS (v, contCS s))
+argCS_ = lens argCS (\ s v -> inCS (Coexp (runV v) (runK (contCS s))))
 
 argCS :: ControlStoring s => s e r a b -> V e a
-argCS = fst . exCS
+argCS = V . coexpIn . exCS
 
 contCS_ :: ControlStoring s => Optic Lens (s e r a b) (s e r' a b') (K r b) (K r' b')
-contCS_ = lens contCS (\ s k -> inCS (argCS s, k))
+contCS_ = lens contCS (\ s k -> inCS (Coexp (runV (argCS s)) (runK k)))
 
 contCS :: ControlStoring s => s e r a b -> K r b
-contCS = snd . exCS
+contCS = K . coexpOut . exCS
 
 
 -- Computation

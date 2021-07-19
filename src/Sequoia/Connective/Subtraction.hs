@@ -17,6 +17,7 @@ import Sequoia.Continuation as K
 import Sequoia.Functor.K
 import Sequoia.Functor.V
 import Sequoia.Polarity
+import Sequoia.Profunctor.Coexponential
 import Sequoia.Profunctor.ControlPassing
 import Sequoia.Value as V
 
@@ -29,8 +30,8 @@ instance Confunctor (Sub e r) where
   conmap f g (Sub a k) = Sub (f <$> a) (contramap g k)
 
 instance ControlStoring Sub where
-  inCS = uncurry Sub
-  exCS = subA &&& subK
+  inCS (Coexp a b) = Sub (V a) (K b)
+  exCS = Coexp <$> runV . subA <*> runK . subK
 
 instance (Pos a, Neg b) => Polarized P (Sub e r a b) where
 
