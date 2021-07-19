@@ -5,6 +5,9 @@ module Sequoia.Profunctor.Coexponential
 , idCoexp
   -- * Elimination
 , runCoexp
+  -- * Optics
+, recall_
+, forget_
 ) where
 
 import Data.Functor.Contravariant
@@ -31,3 +34,17 @@ idCoexp = Coexp (V id) (K id)
 
 runCoexp :: Coexp e r b a -> (a -> b) -> (e -> r)
 runCoexp (Coexp a b) = (runK b .) . (. runV a)
+
+
+-- Optics
+
+type Lens s t a b = (forall p . Strong p => p a b -> p s t)
+
+recall_ :: Lens (Coexp e r a b) (Coexp e' r a b') (V e b) (V e' b')
+recall_ = lens recall (\ s recall -> s{ recall })
+
+forget_ :: Lens (Coexp e r a b) (Coexp e r' a' b) (K r a) (K r' a')
+forget_ = lens forget (\ s forget -> s{ forget })
+
+lens :: (s -> a) -> (s -> b -> t) -> Lens s t a b
+lens prj inj = dimap (\ s -> (prj s, s)) (\ (b, s) -> inj s b) . first'
