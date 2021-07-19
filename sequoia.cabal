@@ -116,6 +116,7 @@ library
     Sequoia.Connective.Negate
     Sequoia.Connective.Negation
     Sequoia.Connective.Not
+    Sequoia.Connective.NotUntrue
     Sequoia.Connective.Nu
     Sequoia.Connective.One
     Sequoia.Connective.Par
