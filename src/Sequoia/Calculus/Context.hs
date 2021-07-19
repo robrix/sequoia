@@ -119,6 +119,16 @@ instance Monad ((>) a) where
 (|>) :: K.Representable k => k os -> k o -> k (os > o)
 (|>) = (<••>)
 
+-- | Split a '>'-context into its initial and last parts.
+--
+-- This is left- and right-inverse to 'unsnocΔ':
+--
+-- @
+-- 'uncurry' ('|>') . 'unsnocΔ' = id
+-- @
+-- @
+-- 'unsnocΔ' . 'uncurry' ('|>') = id
+-- @
 unsnocΔ :: K.Representable k => k (a > b) -> (k a, k b)
 unsnocΔ k = (inlK k, inrK k)
 
