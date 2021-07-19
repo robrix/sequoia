@@ -10,6 +10,7 @@ module Sequoia.Conjunction
 , assocL
 , assocR
 , distConjA
+, distConjRep
   -- * Generalizations
 , coerceConj
 , swapConj
@@ -44,6 +45,7 @@ module Sequoia.Conjunction
 import Control.Applicative (liftA2)
 import Control.Category (Category, (>>>))
 import Data.Functor.Contravariant
+import Data.Functor.Rep as Co
 import Data.Profunctor
 import Sequoia.Optic.Lens
 import Sequoia.Profunctor.Diagonal
@@ -95,6 +97,9 @@ assocR = exl . exl &&& exr . exl &&& exr
 
 distConjA :: (Applicative f, Conj c) => (f a `c` f b) -> f (a `c` b)
 distConjA = uncurryConj (liftA2 (>--<))
+
+distConjRep :: (Co.Representable f, Conj c) => (f a `c` f b) -> f (a `c` b)
+distConjRep = uncurryConj (\ a b -> tabulate (\ c -> index a c >--< index b c))
 
 
 -- Generalizations
