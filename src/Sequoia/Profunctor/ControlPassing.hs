@@ -145,7 +145,7 @@ infixr 5 |->
 
 -- Control-passing profunctor abstraction
 
-_ControlPassing :: ControlPassing f => f e r a b <-> (V e a -> K r b -> Control e r)
+_ControlPassing :: (ControlPassing f, ControlPassing f') => Optic Iso (f e r a b) (f' e' r' a' b') (V e a -> K r b -> Control e r) (V e' a' -> K r' b' -> Control e' r')
 _ControlPassing = exCP <-> inCP
 
 class (forall e r . Cat.Category (f e r), forall e r . Profunctor (f e r)) => ControlPassing f where
