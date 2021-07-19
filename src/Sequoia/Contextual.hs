@@ -41,6 +41,7 @@ module Sequoia.Contextual
 , mapL2
 , mapR2
 , traverseΓ
+, traverseΔ
   -- ** Lifting
 , liftL
 , liftR
@@ -438,6 +439,14 @@ traverseΓ
   -- -----------------------
   ->       _Γ' -|s e r|- _Δ
 traverseΓ f s = popΓ (\ _Γ' -> let (x, _Γ) = f _Γ' in pushΓ (s x) _Γ)
+
+traverseΔ
+  :: Contextual s
+  => (K r _Δ' -> (K r _Δ, y))
+  -> (y -> _Γ -|s e r|- _Δ)
+  -- ----------------------
+  ->       _Γ -|s e r|- _Δ'
+traverseΔ f s = popΔ (\ _Δ' -> let (_Δ, y) = f _Δ' in pushΔ (s y) _Δ)
 
 
 -- Lifting
