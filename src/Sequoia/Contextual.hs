@@ -469,7 +469,7 @@ traverseΓ
   -> (x -> _Γ  -|s e r|- _Δ)
   -- -----------------------
   ->       _Γ' -|s e r|- _Δ
-traverseΓ f s = popΓ (\ _Γ' -> let (x, _Γ) = f _Γ' in pushΓ (s x) _Γ)
+traverseΓ f = traverseΓΔ f (,()) . (const .)
 
 traverseΔ
   :: Contextual s
