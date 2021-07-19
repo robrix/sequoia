@@ -102,6 +102,10 @@ instance Calculus.Control Seq where
 
 -- Assertion
 
+instance NotUntrueIntro Seq where
+  notUntrueL s = inCP (\ v k -> val (\ a -> liftRes (\ run -> res (runNotUntrue a (\ a -> run (exCP s (inV0 a <| exrF v) k))))) (exlF v))
+  notUntrueR s = mapR notUntrue s
+
 instance TrueIntro Seq where
   trueL = mapΓL (>>= getTrue)
   trueR = mapΔR (contramap inV0)
