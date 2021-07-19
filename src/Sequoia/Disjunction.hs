@@ -41,7 +41,6 @@ import Control.Category (Category, (>>>))
 import Data.Functor.Contravariant
 import Data.Functor.Contravariant.Rep as K
 import Data.Profunctor
-import Sequoia.Bijection
 import Sequoia.Optic.Lens
 import Sequoia.Optic.Prism
 import Sequoia.Profunctor.Diagonal
@@ -66,10 +65,10 @@ _inr :: Disj d => Prism (a `d` b) (a `d` b') b b'
 _inr = prism inr (inl . inl <--> inr)
 
 _inlK :: (Disj d, K.Representable k) => Lens (k (a `d` b)) (k (a' `d` b)) (k a) (k a')
-_inlK = lens inlK (dimap2 index index tabulate (flip (<-->)) . inrK)
+_inlK = lens inlK (\ ab a' -> tabulate (index a' <--> index ab . inr))
 
 _inrK :: (Disj d, K.Representable k) => Lens (k (a `d` b)) (k (a `d` b')) (k b) (k b')
-_inrK = lens inrK (dimap2 index index tabulate (<-->) . inlK)
+_inrK = lens inrK (\ ab a' -> tabulate (index ab . inl <--> index a'))
 
 exlD :: Disj d => a `d` b -> Maybe a
 exlD = Just <--> const Nothing

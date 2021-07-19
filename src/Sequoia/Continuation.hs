@@ -63,7 +63,6 @@ import Control.Applicative (liftA2)
 import Data.Functor.Contravariant
 import Data.Functor.Contravariant.Rep
 import Data.Profunctor
-import Sequoia.Bijection
 import Sequoia.Disjunction
 import Sequoia.Functor.K
 import Sequoia.Optic.Getter
@@ -94,7 +93,7 @@ inK1' :: Representable k => (a -> (b -> KRep k)) -> (a -> k b)
 inK1' = fmap inK
 
 inK2 :: Representable k => (KFn k a -> KFn k b -> KFn k c) -> (k a -> k b -> k c)
-inK2 = dimap2 exK exK inK
+inK2 f a b = inK (exK a `f` exK b)
 
 
 -- | Negate a unary function by translating it to operate on continuations.
@@ -115,7 +114,7 @@ exK1 :: Representable k => (k a -> k b) -> (KFn k a -> KFn k b)
 exK1 = under _K
 
 exK2 :: Representable k => (k a -> k b -> k c) -> (KFn k a -> KFn k b -> KFn k c)
-exK2 = dimap2 inK inK exK
+exK2 f a b = exK (inK a `f` inK b)
 
 
 (•) :: Representable k => k a -> KFn k a
@@ -149,7 +148,7 @@ idK :: Representable k => k (KRep k)
 idK = inK id
 
 composeK :: (Representable j, Representable k) => j a -> k (KRep j) -> k a
-composeK = dimap2 exK exK inK (flip (.))
+composeK j k = inK (exK k . exK j)
 
 
 -- Composition
@@ -225,7 +224,7 @@ inDN1 :: Representable k => (ContFn k a -> ContFn k b) -> (k **a -> k **b)
 inDN1 = dimap exDN inDN
 
 inDN2 :: Representable k => (ContFn k a -> ContFn k b -> ContFn k c) -> (k **a -> k **b -> k **c)
-inDN2 = dimap2 exDN exDN inDN
+inDN2 f a b = inDN (exDN a `f` exDN b)
 
 
 -- Elimination
@@ -237,7 +236,7 @@ exDN1 :: Representable k => (k **a -> k **b) -> (ContFn k a -> ContFn k b)
 exDN1 = dimap inDN exDN
 
 exDN2 :: Representable k => (k **a -> k **b -> k **c) -> (ContFn k a -> ContFn k b -> ContFn k c)
-exDN2 = dimap2 inDN inDN exDN
+exDN2 f a b = exDN (inDN a `f` inDN b)
 
 
 -- Ambient control

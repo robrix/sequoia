@@ -38,7 +38,6 @@ module Sequoia.Value
 import Control.Applicative (liftA2)
 import Control.Monad (join)
 import Data.Functor.Rep
-import Sequoia.Bijection
 import Sequoia.Conjunction
 import Sequoia.Disjunction
 import Sequoia.Functor.V
@@ -64,7 +63,7 @@ inV1 :: Representable v => ((Rep v -> a) -> (Rep v -> b)) -> (v a -> v b)
 inV1 = over _V
 
 inV2 :: Representable v => ((Rep v -> a) -> (Rep v -> b) -> (Rep v -> c)) -> (v a -> v b -> v c)
-inV2 = dimap2 exV exV inV
+inV2 f a b = inV (exV a `f` exV b)
 
 idV :: Representable v => v (Rep v)
 idV = inV id
@@ -79,7 +78,7 @@ exV1 :: Representable v => (v a -> v b) -> ((Rep v -> a) -> (Rep v -> b))
 exV1 = under _V
 
 exV2 :: Representable v => (v a -> v b -> v c) -> ((Rep v -> a) -> (Rep v -> b) -> (Rep v -> c))
-exV2 = dimap2 inV inV exV
+exV2 f a b = exV (inV a `f` inV b)
 
 
 (∘) :: Representable v => Rep v -> v a -> a
