@@ -42,7 +42,7 @@ infixr 5 -<
 
 
 sub :: (K.Representable k, V.Representable v, Conj c) => v a `c` k b <-> a ~-Sub (V.Rep v) (K.Rep k)-< b
-sub = (uncurryConj Sub . (coerceV *** coerceK)) <-> (\ (Sub a k) -> coerceV a >--< coerceK k)
+sub = (uncurryConj Sub . (coerceV *** coerceK)) <-> coerceV . subA >---< coerceK . subK
 
 subA_ :: Optic Lens (a ~-Sub e r-< b) (a' ~-Sub e' r-< b) (V e a) (V e' a')
 subA_ = lens subA (\ s subA -> s{ subA })
