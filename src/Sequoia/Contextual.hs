@@ -40,6 +40,7 @@ module Sequoia.Contextual
 , mapR
 , mapL2
 , mapR2
+, traverseΓ
   -- ** Lifting
 , liftL
 , liftR
@@ -428,6 +429,15 @@ mapR2
   ->            _Γ -|s e r|- _Δ > c
 mapR2 f a b = mapR f (wkR' a) >>> popL (`mapR` b)
   where wkR' = popR2 . flip . const . pushR
+
+
+traverseΓ
+  :: Contextual s
+  => (V e _Γ' -> (x, V e _Γ))
+  -> (x -> _Γ  -|s e r|- _Δ)
+  -- -----------------------
+  ->       _Γ' -|s e r|- _Δ
+traverseΓ f s = popΓ (\ _Γ' -> let (x, _Γ) = f _Γ' in pushΓ (s x) _Γ)
 
 
 -- Lifting
