@@ -21,6 +21,7 @@ module Sequoia.Contextual
 , pushΓ
 , pushΔ
 , pushΓL
+, pushΔR
 , poppedL
 , poppedR
 , poppedL2
@@ -262,6 +263,13 @@ pushΓL
   -- --------------------------
   -> (V e a -> _Γ -|s e r|- _Δ)
 pushΓL s a = popΓ (pushΓ s . (a <|))
+
+pushΔR
+  :: Contextual s
+  =>           _Γ -|s e r|- _Δ > a
+  -- -----------------------------
+  -> (K r a -> _Γ -|s e r|- _Δ)
+pushΔR s a = popΔ (\ c -> pushΔ s (c |> a))
 
 
 -- | Push something onto the input context which was previously popped off it. Used with 'popL', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
