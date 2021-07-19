@@ -12,6 +12,7 @@ module Sequoia.Optic.Getter
 , (~>)
 ) where
 
+import Control.Effect.Reader
 import Data.Profunctor
 import Sequoia.Bicontravariant
 import Sequoia.Bijection
@@ -32,10 +33,10 @@ to f = lmap f . rphantom
 
 -- Elimination
 
-views :: Optic (Forget r) s t a b -> (a -> r) -> (s -> r)
-views b = runForget . b . Forget
+views :: Has (Reader s) sig m => Optic (Forget r) s t a b -> (a -> r) -> m r
+views b = asks . runForget . b . Forget
 
-view :: Optic (Forget a) s t a b -> (s -> a)
+view :: Has (Reader s) sig m => Optic (Forget a) s t a b -> m a
 view = (`views` id)
 
 (~>) :: s -> Optic (Forget a) s t a b -> a
