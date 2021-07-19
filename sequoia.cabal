@@ -150,6 +150,7 @@ library
     Sequoia.Profunctor.Diagonal
     Sequoia.Profunctor.K
     Sequoia.Profunctor.Product
+    Sequoia.Profunctor.Recall
     Sequoia.Profunctor.Sum
     Sequoia.Profunctor.V
     Sequoia.Sequent
