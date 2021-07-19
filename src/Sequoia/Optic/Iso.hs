@@ -21,6 +21,7 @@ module Sequoia.Optic.Iso
   -- * Representable
 , tabulated
 , contratabulated
+, protabulated
   -- * Adjunction
 , adjuncted
 , contraadjuncted
@@ -48,6 +49,8 @@ import qualified Data.Functor.Contravariant.Rep as Contra
 import qualified Data.Functor.Rep as Co
 import           Data.Maybe (fromMaybe)
 import           Data.Profunctor
+import qualified Data.Profunctor.Rep as Pro
+import           Data.Profunctor.Sieve
 import           Data.Tuple (swap)
 import           Sequoia.Bijection
 import           Sequoia.Profunctor.Coexponential
@@ -139,6 +142,9 @@ tabulated = Co.tabulate <-> Co.index
 
 contratabulated :: Contra.Representable f => (a -> Contra.Rep f) <-> f a
 contratabulated = Contra.tabulate <-> Contra.index
+
+protabulated :: Pro.Representable p => (a -> Pro.Rep p b) <-> a `p` b
+protabulated = Pro.tabulate <-> sieve
 
 
 -- Adjunction
