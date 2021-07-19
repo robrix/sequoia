@@ -50,10 +50,10 @@ instance Bitraversable (<) where
 -- This is left- and right-inverse to 'unconsΓ':
 --
 -- @
--- uncurry (<|) . unconsΓ = id
+-- 'uncurry' ('<|') . 'unconsΓ' = 'id'
 -- @
 -- @
--- unconsΓ . uncurry (<|) = id
+-- 'unconsΓ' . 'uncurry' ('<|') = 'id'
 -- @
 (<|) :: V.Representable v => v i -> v is -> v (i < is)
 (<|) = (>∘∘<)
@@ -63,10 +63,10 @@ instance Bitraversable (<) where
 -- This is left- and right-inverse to '<|':
 --
 -- @
--- unconsΓ . uncurry (<|) = id
+-- 'unconsΓ' . 'uncurry' ('<|') = 'id'
 -- @
 -- @
--- uncurry (<|) . unconsΓ = id
+-- 'uncurry' ('<|') . 'unconsΓ' = 'id'
 -- @
 unconsΓ :: V.Representable v => v (a < b) -> (v a, v b)
 unconsΓ v = (exlF v, exrF v)
