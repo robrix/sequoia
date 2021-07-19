@@ -127,6 +127,14 @@ popΔ
 popΔ f = swapΔ f idK
 
 
+-- | Pop something off the input context which can later be pushed. Used with 'pushΓL', this provides a generalized context restructuring facility.
+--
+-- @
+-- popΓL . pushΓL = id
+-- @
+-- @
+-- pushΓL . popΓL = id
+-- @
 popΓL
   :: Contextual s
   => (V e a -> _Γ -|s e r|- _Δ)
