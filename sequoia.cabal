@@ -147,6 +147,7 @@ library
     Sequoia.Optic.Iso
     Sequoia.Optic.Lens
     Sequoia.Optic.Prism
+    Sequoia.Optic.Review
     Sequoia.Optic.Setter
     Sequoia.Polarity
     Sequoia.Printer
