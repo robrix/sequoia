@@ -142,6 +142,7 @@ library
     Sequoia.Functor.K
     Sequoia.Functor.V
     Sequoia.Lambda
+    Sequoia.Optic.Iso
     Sequoia.Optic.Lens
     Sequoia.Optic.Prism
     Sequoia.Optic.Setter
