@@ -29,6 +29,9 @@ import Data.Void
 class Bicontravariant p where
   contrabimap :: (a' -> a) -> (b' -> b) -> a `p` b -> a' `p` b'
 
+instance Bicontravariant (Forget r) where
+  contrabimap f _ = Forget . lmap f . runForget
+
 contrafirst  :: Bicontravariant p => (a' -> a) -> a `p` b -> a' `p` b
 contrafirst  = (`contrabimap` id)
 
