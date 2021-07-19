@@ -20,7 +20,7 @@ import Sequoia.Bijection
 
 -- Getters
 
-type Getter s a = forall p . IsGetter p => Optic' p s a
+type Getter s t a b = forall p . IsGetter p => Optic p s t a b
 
 type Getter' s a = forall p . IsGetter p => Optic' p s a
 
@@ -30,7 +30,7 @@ instance (Bicontravariant p, Profunctor p) => IsGetter p
 
 -- Construction
 
-to :: (s -> a) -> Getter s a
+to :: (s -> a) -> Getter s t a b
 to f = lmap f . rphantom
 
 
