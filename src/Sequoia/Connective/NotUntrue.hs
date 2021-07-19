@@ -1,12 +1,16 @@
 module Sequoia.Connective.NotUntrue
 ( -- * NotUntrue
-  NotUntrue(..)
+  notUntrue
+, NotUntrue(..)
 , type (≁)
 ) where
 
 import Sequoia.Polarity
 
 -- NotUntrue
+
+notUntrue :: a -> NotUntrue r a
+notUntrue a = NotUntrue ($ a)
 
 newtype NotUntrue r a = NotUntrue { runNotUntrue :: (a -> r) -> r }
   deriving (Functor)
