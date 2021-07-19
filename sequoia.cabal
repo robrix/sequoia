@@ -125,6 +125,7 @@ library
     Sequoia.Connective.Sum
     Sequoia.Connective.Tensor
     Sequoia.Connective.Top
+    Sequoia.Connective.True
     Sequoia.Connective.Up
     Sequoia.Connective.With
     Sequoia.Connective.XOr
