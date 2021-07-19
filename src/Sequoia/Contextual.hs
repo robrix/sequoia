@@ -477,7 +477,7 @@ traverseΔ
   -> (y -> _Γ -|s e r|- _Δ)
   -- ----------------------
   ->       _Γ -|s e r|- _Δ'
-traverseΔ f s = popΔ (\ _Δ' -> let (_Δ, y) = f _Δ' in pushΔ (s y) _Δ)
+traverseΔ f = traverseΓΔ ((),) f . const
 
 
 -- Lifting
