@@ -392,10 +392,10 @@ lowerL k p = popR k >>> p
 
 lowerR
   :: Contextual s
-  => (                  a -> _Γ -|s e r|- _Δ)
+  => (              V e a -> _Γ -|s e r|- _Δ)
   -- ----------------------------------------
   -> (_Γ -|s e r|- _Δ > a -> _Γ -|s e r|- _Δ)
-lowerR k p = p >>> popL k
+lowerR k p = p >>> popΓ (\ _Γ -> pushΓ (k (exlF _Γ)) (exrF _Γ))
 
 
 -- Deriving
