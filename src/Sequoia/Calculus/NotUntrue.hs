@@ -1,2 +1,6 @@
 module Sequoia.Calculus.NotUntrue
-() where
+( -- * Connectives
+  module Sequoia.Connective.Assertion
+) where
+
+import Sequoia.Connective.Assertion
