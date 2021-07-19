@@ -3,7 +3,12 @@ module Sequoia.Bicontravariant
   Bicontravariant(..)
 , contrafirst
 , contrasecond
+  -- * Coercion
+, biphantom
 ) where
+
+import Data.Bifunctor
+import Data.Void
 
 -- Bicontravariant functors
 
@@ -15,3 +20,9 @@ contrafirst  = (`contrabimap` id)
 
 contrasecond :: Bicontravariant p => (b' -> b) -> a `p` b -> a `p` b'
 contrasecond = (id `contrabimap`)
+
+
+-- Coercion
+
+biphantom :: (Bifunctor p, Bicontravariant p) => p a b -> p c d
+biphantom = bimap absurd absurd . contrabimap absurd absurd
