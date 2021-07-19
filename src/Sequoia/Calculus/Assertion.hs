@@ -8,4 +8,4 @@ module Sequoia.Calculus.Assertion
 
 import Sequoia.Calculus.True
 
-type AssertionIntro s = True s
+type AssertionIntro s = TrueIntro s
