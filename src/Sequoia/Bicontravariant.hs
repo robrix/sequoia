@@ -12,6 +12,8 @@ module Sequoia.Bicontravariant
 , secondvacuous
 , contravacuous
 , contrabivacuous
+, contrafirstvacuous
+, contrasecondvacuous
 , divacuous
 , lvacuous
 , rvacuous
@@ -59,6 +61,12 @@ contravacuous = contramap absurd
 
 contrabivacuous :: Bicontravariant p => p a b -> p Void Void
 contrabivacuous = contrabimap absurd absurd
+
+contrafirstvacuous :: Bicontravariant p => p a b -> p Void b
+contrafirstvacuous = contrafirst absurd
+
+contrasecondvacuous :: Bicontravariant p => p a b -> p a Void
+contrasecondvacuous = contrasecond absurd
 
 divacuous :: Profunctor p => p a Void -> p Void b
 divacuous = dimap absurd absurd
