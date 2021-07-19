@@ -6,6 +6,7 @@ module Sequoia.Conjunction
 , _exr
 , exlrC
 , assocL
+, assocR
   -- * Generalizations
 , coerceConj
 , swapConj
@@ -78,6 +79,9 @@ exlrC h f g = h <$> f . exl <*> g . exr
 
 assocL :: Conj p => a `p` (b `p` c) -> (a `p` b) `p` c
 assocL = (exl &&& exl . exr) &&& exr . exr
+
+assocR :: Conj p => (a `p` b) `p` c -> a `p` (b `p` c)
+assocR = exl . exl &&& exr . exl &&& exr
 
 
 -- Generalizations
