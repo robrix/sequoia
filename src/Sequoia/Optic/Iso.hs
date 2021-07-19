@@ -71,7 +71,7 @@ infix 1 <->
 -- Construction
 
 (<->) :: (s -> a) -> (b -> t) -> Iso s t a b
-l <-> r = dimap l r
+(<->) = dimap
 
 
 from :: Iso s t a b -> Iso b a t s
