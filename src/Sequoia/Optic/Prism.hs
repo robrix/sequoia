@@ -1,6 +1,7 @@
 module Sequoia.Optic.Prism
 ( -- * Prisms
   Prism
+, Prism'
 , prism
 , _Left
 , _Right
@@ -12,6 +13,8 @@ import Sequoia.Bijection
 -- Prisms
 
 type Prism s t a b = forall p . Choice p => Optic p s t a b
+
+type Prism' s a = Prism s s a a
 
 prism :: (b -> t) -> (s -> Either t a) -> Prism s t a b
 prism inj prj = dimap prj (either id inj) . right'
