@@ -27,3 +27,6 @@ instance Costrong (Recall e) where
 instance Choice (Recall e) where
   left'  = Recall . (Left  .) . runRecall
   right' = Recall . (Right .) . runRecall
+
+instance Closed (Recall e) where
+  closed = Recall . (const .) . runRecall
