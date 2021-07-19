@@ -5,6 +5,7 @@ module Sequoia.Connective.Subtraction
 , type (-<)
 , sub
 , subA_
+, subK_
 ) where
 
 import Data.Functor.Contravariant
@@ -45,3 +46,6 @@ sub = (uncurryConj Sub . (coerceV *** coerceK)) <-> (\ (Sub a k) -> coerceV a >-
 
 subA_ :: Optic Lens (a ~-Sub e r-< b) (a' ~-Sub e' r-< b) (V e a) (V e' a')
 subA_ = lens subA (\ s subA -> s{ subA })
+
+subK_ :: Optic Lens (a ~-Sub e r-< b) (a ~-Sub e r'-< b') (K r b) (K r' b')
+subK_ = lens subK (\ s subK -> s{ subK })
