@@ -10,6 +10,9 @@ module Sequoia.Bicontravariant
 , bivacuous
 , contravacuous
 , contrabivacuous
+, divacuous
+, lvacuous
+, rvacuous
 ) where
 
 import Data.Bifunctor
@@ -48,3 +51,12 @@ contravacuous = contramap absurd
 
 contrabivacuous :: Bicontravariant p => p a b -> p Void Void
 contrabivacuous = contrabimap absurd absurd
+
+divacuous :: Profunctor p => p a Void -> p Void b
+divacuous = dimap absurd absurd
+
+lvacuous :: Profunctor p => p a b -> p Void b
+lvacuous = lmap absurd
+
+rvacuous :: Profunctor p => p a Void -> p a b
+rvacuous = rmap absurd
