@@ -107,6 +107,15 @@ instance Monad ((>) a) where
 -- | Discrimination of continuations in '>'.
 --
 -- @¬A ✕ ¬B -> ¬(A + B)@
+--
+-- This is left- and right-inverse to 'unsnocΔ':
+--
+-- @
+-- 'uncurry' ('|>') . 'unsnocΔ' = id
+-- @
+-- @
+-- 'unsnocΔ' . 'uncurry' ('|>') = id
+-- @
 (|>) :: K.Representable k => k os -> k o -> k (os > o)
 (|>) = (<••>)
 
