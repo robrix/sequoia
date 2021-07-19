@@ -5,6 +5,7 @@ module Sequoia.Profunctor.Recall
 
 import Data.Coerce
 import Data.Distributive
+import Data.Functor.Const
 import Data.Functor.Rep
 import Data.Profunctor
 import Data.Profunctor.Sieve
@@ -34,3 +35,6 @@ instance Closed (Recall e) where
 
 instance Sieve (Recall e) ((->) e) where
   sieve = const . runRecall
+
+instance Cosieve (Recall e) (Const e) where
+  cosieve = (. getConst) . runRecall
