@@ -1,6 +1,7 @@
 module Sequoia.Optic.Setter
 ( -- * Setters
   Setter
+, Setter'
 , sets
 , set
 ) where
@@ -11,6 +12,8 @@ import Sequoia.Bijection
 -- Setters
 
 type Setter s t a b = forall p . Mapping p => Optic p s t a b
+
+type Setter' s a = Setter s s a a
 
 sets :: ((a -> b) -> (s -> t)) -> Setter s t a b
 sets = roam
