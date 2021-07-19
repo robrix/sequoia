@@ -69,6 +69,7 @@ import Sequoia.Functor.K
 import Sequoia.Optic.Getter
 import Sequoia.Optic.Iso
 import Sequoia.Optic.Review
+import Sequoia.Optic.Setter
 
 -- Continuations
 

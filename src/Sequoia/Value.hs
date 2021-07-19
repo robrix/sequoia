@@ -43,6 +43,7 @@ import Sequoia.Conjunction
 import Sequoia.Disjunction
 import Sequoia.Functor.V
 import Sequoia.Optic.Iso
+import Sequoia.Optic.Setter
 
 -- Values
 
