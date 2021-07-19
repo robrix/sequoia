@@ -1,6 +1,9 @@
+{-# LANGUAGE MonoLocalBinds #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Optic.Getter
 ( -- * Getters
   Getter
+, IsGetter
   -- * Construction
 , to
   -- * Elimination
@@ -13,7 +16,10 @@ import Sequoia.Bijection
 
 -- Getters
 
-type Getter s a = forall p . (Bicontravariant p, Profunctor p) => Optic' p s a
+type Getter s a = forall p . IsGetter p => Optic' p s a
+
+class    (Bicontravariant p, Profunctor p) => IsGetter p
+instance (Bicontravariant p, Profunctor p) => IsGetter p
 
 
 -- Construction
