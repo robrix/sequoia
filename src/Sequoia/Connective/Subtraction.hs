@@ -11,13 +11,13 @@ import Data.Functor.Contravariant
 import Data.Kind (Type)
 import Sequoia.Bijection
 import Sequoia.Confunctor
-import Sequoia.Connective.Assertion as Assertion
 import Sequoia.Connective.Negate
 import Sequoia.Connective.Tensor
 import Sequoia.Functor.K
 import Sequoia.Functor.V
 import Sequoia.Polarity
 import Sequoia.Profunctor.ControlPassing
+import Sequoia.Value as V
 
 -- Subtraction
 
@@ -40,5 +40,5 @@ infixr 6 ~-
 infixr 5 -<
 
 
-sub :: True e a ⊗ r -b <-> a ~-Sub e r-< b
-sub = (\ (a :⊗ k) -> Sub (getTrue a) (getNegate k)) <-> (\ (Sub a k) -> Assertion.True a :⊗ Negate k)
+sub :: V.Representable v => v a ⊗ r -b <-> a ~-Sub (V.Rep v) r-< b
+sub = (\ (a :⊗ k) -> Sub (coerceV a) (getNegate k)) <-> (\ (Sub a k) -> coerceV a :⊗ Negate k)
