@@ -8,8 +8,6 @@ module Sequoia.Bijection
 , (~>)
 , over
 , dimap2
-  -- ** Composition
-, idB
 ) where
 
 import Data.Profunctor
@@ -46,9 +44,3 @@ over f = f
 
 dimap2 :: (a' -> a) -> (b' -> b) -> (c -> c') -> (a -> b -> c) -> (a' -> b' -> c')
 dimap2 l1 l2 r f a1 a2 = r (f (l1 a1) (l2 a2))
-
-
--- Composition
-
-idB :: Optic p s s s s
-idB = id
