@@ -11,6 +11,7 @@ module Sequoia.Conjunction
 , assocR
 , distConjA
 , distConjRep
+, undistConjF
   -- * Generalizations
 , coerceConj
 , swapConj
@@ -100,6 +101,9 @@ distConjA = uncurryConj (liftA2 (>--<))
 
 distConjRep :: (Co.Representable f, Conj c) => (f a `c` f b) -> f (a `c` b)
 distConjRep = uncurryConj (\ a b -> tabulate (\ c -> index a c >--< index b c))
+
+undistConjF :: (Functor f, Conj c) => f (a `c` b) -> (f a `c` f b)
+undistConjF = fmap exl &&& fmap exr
 
 
 -- Generalizations
