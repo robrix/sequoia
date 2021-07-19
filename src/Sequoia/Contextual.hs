@@ -285,7 +285,7 @@ pushL
   =>  a  < _Γ -|s e r|- _Δ
   -- ----------------------
   -> (a -> _Γ -|s e r|- _Δ)
-pushL s a = popΓ (\ c -> pushΓ s (inV0 a <| c))
+pushL s = pushΓL s . inV0
 
 -- | Push something onto the output context which was previously popped off it. Used with 'popR', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
 --
