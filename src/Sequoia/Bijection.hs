@@ -56,10 +56,6 @@ module Sequoia.Bijection
 , prism
 , _Left
 , _Right
-  -- * Setters
-, Setter
-, sets
-, set
 ) where
 
 import           Control.Applicative (Alternative)
@@ -273,14 +269,3 @@ _Left = prism Left (either Right (Left . Right))
 
 _Right :: Prism (Either a b) (Either a b') b b'
 _Right = prism Right (either (Left . Left) Right)
-
-
--- Setters
-
-type Setter s t a b = forall p . Mapping p => Optic p s t a b
-
-sets :: ((a -> b) -> (s -> t)) -> Setter s t a b
-sets = roam
-
-set :: Setter s t a b -> b -> s -> t
-set o = over o . const
