@@ -3,11 +3,11 @@ module Sequoia.Calculus.Context
 ( -- * Γ
   type (<)(..)
 , (<|)
-, splitΓ
+, unconsΓ
   -- * Δ
 , type (>)(..)
 , (|>)
-, splitΔ
+, unsnocΔ
   -- * Mixfix syntax
 , type (|-)
 , type (-|)
@@ -47,13 +47,13 @@ instance Bitraversable (<) where
 
 -- | Prepend a value onto a '<'-context.
 --
--- This is left- and right-inverse to 'splitΓ':
+-- This is left- and right-inverse to 'unconsΓ':
 --
 -- @
--- uncurry (<|) . splitΓ = id
+-- uncurry (<|) . unconsΓ = id
 -- @
 -- @
--- splitΓ . uncurry (<|) = id
+-- unconsΓ . uncurry (<|) = id
 -- @
 (<|) :: V.Representable v => v i -> v is -> v (i < is)
 (<|) = (>∘∘<)
@@ -63,13 +63,13 @@ instance Bitraversable (<) where
 -- This is left- and right-inverse to '<|':
 --
 -- @
--- splitΓ . uncurry (<|) = id
+-- unconsΓ . uncurry (<|) = id
 -- @
 -- @
--- uncurry (<|) . splitΓ = id
+-- uncurry (<|) . unconsΓ = id
 -- @
-splitΓ :: V.Representable v => v (a < b) -> (v a, v b)
-splitΓ v = (exlF v, exrF v)
+unconsΓ :: V.Representable v => v (a < b) -> (v a, v b)
+unconsΓ v = (exlF v, exrF v)
 
 
 -- Δ
@@ -110,8 +110,8 @@ instance Monad ((>) a) where
 (|>) :: K.Representable k => k os -> k o -> k (os > o)
 (|>) = (<••>)
 
-splitΔ :: K.Representable k => k (a > b) -> (k a, k b)
-splitΔ k = (inlK k, inrK k)
+unsnocΔ :: K.Representable k => k (a > b) -> (k a, k b)
+unsnocΔ k = (inlK k, inrK k)
 
 
 -- Mixfix syntax
