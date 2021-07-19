@@ -153,7 +153,7 @@ class (forall e r . Cat.Category (f e r), forall e r . Profunctor (f e r)) => Co
   exCP :: f e r a b -> V e a -> K r b -> Control e r
 
 
-_ControlStoring :: ControlStoring p => p e r a b <-> (V e a, K r b)
+_ControlStoring :: (ControlStoring p, ControlStoring p') => Optic Iso (p e r a b) (p' e' r' a' b') (V e a, K r b) (V e' a', K r' b')
 _ControlStoring = exCS <-> inCS
 
 class (forall e r . Confunctor (f e r)) => ControlStoring f where
