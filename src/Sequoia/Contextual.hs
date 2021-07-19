@@ -273,6 +273,14 @@ pushΔ
 pushΔ = swapΔ . const
 
 
+-- | Push something onto the input context which was previously popped off it. Used with 'popΓL', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
+--
+-- @
+-- popΓL . pushΓL = id
+-- @
+-- @
+-- pushΓL . popΓL = id
+-- @
 pushΓL
   :: Contextual s
   =>      a  < _Γ -|s e r|- _Δ
