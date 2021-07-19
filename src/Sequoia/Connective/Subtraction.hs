@@ -11,8 +11,8 @@ import Data.Functor.Contravariant
 import Data.Kind (Type)
 import Sequoia.Bijection
 import Sequoia.Confunctor
-import Sequoia.Connective.Negate
 import Sequoia.Connective.Tensor
+import Sequoia.Continuation as K
 import Sequoia.Functor.K
 import Sequoia.Functor.V
 import Sequoia.Polarity
@@ -40,5 +40,5 @@ infixr 6 ~-
 infixr 5 -<
 
 
-sub :: V.Representable v => v a ⊗ r -b <-> a ~-Sub (V.Rep v) r-< b
-sub = (\ (a :⊗ k) -> Sub (coerceV a) (getNegate k)) <-> (\ (Sub a k) -> coerceV a :⊗ Negate k)
+sub :: (K.Representable k, V.Representable v) => v a ⊗ k b <-> a ~-Sub (V.Rep v) (K.Rep k)-< b
+sub = (\ (a :⊗ k) -> Sub (coerceV a) (coerceK k)) <-> (\ (Sub a k) -> coerceV a :⊗ coerceK k)
