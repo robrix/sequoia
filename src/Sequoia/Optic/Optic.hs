@@ -1,10 +1,10 @@
-module Sequoia.Bijection
-( -- * Bijections
+module Sequoia.Optic.Optic
+( -- * Optics
   Optic
 , Optic'
 ) where
 
--- Bijections
+-- Optics
 
 type Optic p s t a b = (a `p` b) -> (s `p` t)
 

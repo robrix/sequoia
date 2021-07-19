@@ -8,7 +8,7 @@ module Sequoia.Optic.Lens
 ) where
 
 import Data.Profunctor
-import Sequoia.Bijection
+import Sequoia.Optic.Optic
 
 -- Lenses
 

@@ -8,7 +8,7 @@ module Sequoia.Optic.Prism
 ) where
 
 import Data.Profunctor
-import Sequoia.Bijection
+import Sequoia.Optic.Optic
 
 -- Prisms
 

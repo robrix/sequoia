@@ -16,7 +16,7 @@ module Sequoia.Optic.Getter
 import Control.Effect.Reader
 import Data.Profunctor
 import Sequoia.Bicontravariant
-import Sequoia.Bijection
+import Sequoia.Optic.Optic
 
 -- Getters
 

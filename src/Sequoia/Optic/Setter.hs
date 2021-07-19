@@ -10,7 +10,7 @@ module Sequoia.Optic.Setter
 ) where
 
 import Data.Profunctor.Mapping
-import Sequoia.Bijection
+import Sequoia.Optic.Optic
 
 -- Setters
 

@@ -12,7 +12,7 @@ module Sequoia.Optic.Review
 import Data.Bifunctor
 import Data.Profunctor
 import Sequoia.Bicontravariant (lphantom)
-import Sequoia.Bijection
+import Sequoia.Optic.Optic
 import Sequoia.Profunctor.Recall
 
 -- Reviews
