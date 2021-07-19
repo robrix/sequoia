@@ -142,6 +142,14 @@ popΓL
   ->      a  < _Γ -|s e r|- _Δ
 popΓL f = popΓ (pushΓ . f . exlF <*> exrF)
 
+-- | Pop something off the output context which can later be pushed. Used with 'pushΔR', this provides a generalized context restructuring facility.
+--
+-- @
+-- popΔR . pushΔR = id
+-- @
+-- @
+-- pushΔR . popΔR = id
+-- @
 popΔR
   :: Contextual s
   => (K r a -> _Γ -|s e r|- _Δ)
