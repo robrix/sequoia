@@ -1,6 +1,8 @@
 module Sequoia.Profunctor.Coexponential
 ( -- * Coexponential profunctor
   Coexp(..)
+  -- * Construction
+, idCoexp
   -- * Elimination
 , runCoexp
 ) where
@@ -9,6 +11,12 @@ module Sequoia.Profunctor.Coexponential
 
 data Coexp e r b a = Coexp { coexpA :: e -> a, coexpB :: b -> r }
   deriving (Functor)
+
+
+-- Construction
+
+idCoexp :: Coexp b a a b
+idCoexp = Coexp id id
 
 
 -- Elimination
