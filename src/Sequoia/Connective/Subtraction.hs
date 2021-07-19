@@ -6,12 +6,11 @@ module Sequoia.Connective.Subtraction
 , sub
 ) where
 
-import Control.Arrow ((&&&))
 import Data.Functor.Contravariant
 import Data.Kind (Type)
 import Sequoia.Bijection
 import Sequoia.Confunctor
-import Sequoia.Connective.Tensor
+import Sequoia.Conjunction
 import Sequoia.Continuation as K
 import Sequoia.Functor.K
 import Sequoia.Functor.V
@@ -40,5 +39,5 @@ infixr 6 ~-
 infixr 5 -<
 
 
-sub :: (K.Representable k, V.Representable v) => v a ⊗ k b <-> a ~-Sub (V.Rep v) (K.Rep k)-< b
-sub = (\ (a :⊗ k) -> Sub (coerceV a) (coerceK k)) <-> (\ (Sub a k) -> coerceV a :⊗ coerceK k)
+sub :: (K.Representable k, V.Representable v, Conj c) => v a `c` k b <-> a ~-Sub (V.Rep v) (K.Rep k)-< b
+sub = (uncurryConj Sub . (coerceV *** coerceK)) <-> (\ (Sub a k) -> coerceV a >--< coerceK k)
