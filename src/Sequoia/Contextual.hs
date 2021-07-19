@@ -57,6 +57,7 @@ module Sequoia.Contextual
 ) where
 
 import Control.Monad (join)
+import Data.Bifunctor (first)
 import Data.Profunctor
 import Prelude hiding (init)
 import Sequoia.Calculus.Context
@@ -254,7 +255,7 @@ poppedR2
   => (_Γ -|s e r|- _Δ         -> _Γ' -|s e r|- _Δ')
   -- ------------------------------------------------------
   -> (_Γ -|s e r|- _Δ > a > b -> _Γ' -|s e r|- _Δ' > a > b)
-poppedR2 = poppedR . poppedR
+poppedR2 = poppedΔ (assocR . first unsnocΔ . unsnocΔ) (\ _Δ (b, a) -> _Δ |> b |> a)
 
 
 -- Pushing
