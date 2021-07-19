@@ -175,13 +175,13 @@ elimCP f = (exCP f <$> recall <*> forget) . exCS
 
 
 argCS_ :: ControlStoring s => Lens (s e r a b) (s e' r a' b) (V e a) (V e' a')
-argCS_ = lens argCS (\ s v -> inCS (Coexp v (contCS s)))
+argCS_ = _ControlStoring.recall_
 
 argCS :: ControlStoring s => s e r a b -> V e a
 argCS = recall . exCS
 
 contCS_ :: ControlStoring s => Lens (s e r a b) (s e r' a b') (K r b) (K r' b')
-contCS_ = lens contCS (\ s k -> inCS (Coexp (argCS s) k))
+contCS_ = _ControlStoring.forget_
 
 contCS :: ControlStoring s => s e r a b -> K r b
 contCS = forget . exCS
