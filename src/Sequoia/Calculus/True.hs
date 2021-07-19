@@ -13,13 +13,13 @@ import Sequoia.Polarity
 -- True
 
 class Core s => TrueIntro s where
-  yesL
+  trueL
     :: Pos a
     =>        a < _Γ -|s e r|- _Δ
     -- --------------------------
     -> True e a < _Γ -|s e r|- _Δ
 
-  yesR
+  trueR
     :: Pos a
     => _Γ -|s e r|- _Δ > a
     -- --------------------------

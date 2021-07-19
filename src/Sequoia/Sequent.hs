@@ -103,8 +103,8 @@ instance Calculus.Control Seq where
 -- Assertion
 
 instance TrueIntro Seq where
-  yesL = mapΓL (>>= getTrue)
-  yesR = mapΔR (contramap inV0)
+  trueL = mapΓL (>>= getTrue)
+  trueR = mapΔR (contramap inV0)
 
 
 -- Negation
@@ -180,8 +180,8 @@ instance FunctionIntro Seq where
   funR = lowerLR liftR . wkR'
 
 instance SubtractionIntro Seq where
-  subL f = mapL (sub <~) (tensorL (wkL' (yesL f) >>> poppedL2 negateL init))
-  subR a b = mapR (~> sub) (yesR a ⊢⊗ negateR b)
+  subL f = mapL (sub <~) (tensorL (wkL' (trueL f) >>> poppedL2 negateL init))
+  subR a b = mapR (~> sub) (trueR a ⊢⊗ negateR b)
 
 
 -- Quantification
