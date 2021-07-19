@@ -369,13 +369,13 @@ mapR2 f a b = mapR f (wkR' a) >>> popL (`mapR` b)
 liftL
   :: Contextual s
   => K r a
-  -- -------------------
-  -> a < _Γ -|s e r|- _Δ
+  -- -----------------------
+  ->     a < _Γ -|s e r|- _Δ
 liftL = pushR init
 
 liftR
   :: Contextual s
-  => a
+  =>                   a
   -- -------------------
   -> _Γ -|s e r|- _Δ > a
 liftR = pushL init
@@ -385,14 +385,14 @@ liftR = pushL init
 
 lowerL
   :: Contextual s
-  => (K r a               -> _Γ -|s e r|- _Δ)
-  -- ----------------------------------------
-  -> (a < _Γ -|s e r|- _Δ -> _Γ -|s e r|- _Δ)
+  => (K r a                   -> _Γ -|s e r|- _Δ)
+  -- --------------------------------------------
+  -> (    a < _Γ -|s e r|- _Δ -> _Γ -|s e r|- _Δ)
 lowerL k p = popR k >>> p
 
 lowerR
   :: Contextual s
-  => (a                   -> _Γ -|s e r|- _Δ)
+  => (                  a -> _Γ -|s e r|- _Δ)
   -- ----------------------------------------
   -> (_Γ -|s e r|- _Δ > a -> _Γ -|s e r|- _Δ)
 lowerR k p = p >>> popL k
