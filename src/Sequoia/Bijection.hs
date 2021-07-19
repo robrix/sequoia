@@ -67,6 +67,7 @@ module Sequoia.Bijection
   -- * Setters
 , Setter
 , sets
+, set
 ) where
 
 import           Control.Applicative (Alternative)
@@ -298,3 +299,6 @@ instance Mapping p => Setter p
 
 sets :: ((a -> b) -> (s -> t)) -> Optic Setter s t a b
 sets f = Optic (roam f)
+
+set :: Optic Setter s t a b -> b -> s -> t
+set (Optic f) = f . const
