@@ -7,6 +7,7 @@ import           Data.Functor.Const
 import           Data.Profunctor
 import qualified Data.Profunctor.Rep as Pro
 import           Data.Profunctor.Sieve
+import           Sequoia.Bicontravariant
 
 newtype K r a b = K { runK :: a -> r }
   deriving (Functor)
@@ -28,3 +29,6 @@ instance Sieve (K f) (Const f) where
 instance Pro.Representable (K f) where
   type Rep (K f) = Const f
   tabulate = K . fmap getConst
+
+instance Bicontravariant (K r) where
+  contrabimap f _ = K . lmap f . runK
