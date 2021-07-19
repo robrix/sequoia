@@ -155,7 +155,7 @@ popL
   => (a -> _Γ -|s e r|- _Δ)
   -- ----------------------
   ->  a  < _Γ -|s e r|- _Δ
-popL f = popΓ (\ c -> val2 (\ a -> pushΓ (f a) (exrF c)) (exlF c))
+popL = popΓL . val2
 
 -- | Pop something off the output context which can later be pushed. Used with 'pushR', this provides a generalized context restructuring facility.
 --
