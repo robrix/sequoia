@@ -82,6 +82,7 @@ import qualified Data.Functor.Rep as Co
 import           Data.Maybe (fromMaybe)
 import           Data.Profunctor
 import           Data.Tuple (swap)
+import           Sequoia.Profunctor.Coexponential
 import           Sequoia.Profunctor.Recall
 
 -- Bijections
@@ -114,8 +115,8 @@ o <~ b = reviews o id b
 infixr 8 <~
 
 
-under :: (c (Recall b), c (Forget a)) => Optic c s t a b -> (t -> s) -> (b -> a)
-under b = dimap (b <~) (~> b)
+under :: c (Coexp b a) => Optic c s t a b -> (t -> s) -> (b -> a)
+under = runCoexp . (`runOptic` idCoexp)
 
 over :: c (->) => Optic c s t a b -> (a -> b) -> (s -> t)
 over (Optic f) = f
