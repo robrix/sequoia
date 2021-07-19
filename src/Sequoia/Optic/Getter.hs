@@ -36,13 +36,13 @@ to f = lmap f . rphantom
 
 -- Elimination
 
-views :: Has (Reader s) sig m => Optic (Forget r) s t a b -> (a -> r) -> m r
+views :: Has (Reader s) sig m => Getter s t a b -> (a -> r) -> m r
 views b = asks . runForget . b . Forget
 
-view :: Has (Reader s) sig m => Optic (Forget a) s t a b -> m a
+view :: Has (Reader s) sig m => Getter s t a b -> m a
 view = (`views` id)
 
-(~>) :: s -> Optic (Forget a) s t a b -> a
-(~>) = flip view
+(~>) :: s -> Getter s t a b -> a
+s ~> o = view o s
 
 infixl 8 ~>
