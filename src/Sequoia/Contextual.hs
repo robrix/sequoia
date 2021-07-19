@@ -170,7 +170,7 @@ popR
   => (K r a -> _Γ -|s e r|- _Δ)
   -- -----------------------------
   ->           _Γ -|s e r|- _Δ > a
-popR f = popΔ (\ c -> pushΔ (f (inrK c)) (inlK c))
+popR = popΔR
 
 
 popL2
