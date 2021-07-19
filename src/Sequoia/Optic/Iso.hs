@@ -1,6 +1,7 @@
 module Sequoia.Optic.Iso
 ( -- * Isos
   Iso
+, Iso'
 , type (<->)
   -- * Construction
 , (<->)
@@ -62,8 +63,10 @@ import           Sequoia.Profunctor.Coexponential
 
 type Iso s t a b = forall p . Profunctor p => Optic p s t a b
 
+type Iso' s a = Iso s s a a
 
-type a <-> b = Iso a a b b
+
+type a <-> b = Iso' a b
 
 infix 1 <->
 
