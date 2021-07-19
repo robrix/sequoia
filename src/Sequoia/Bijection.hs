@@ -247,7 +247,7 @@ rmapping b = rmap (~> b) <-> rmap (b <~)
 
 -- Isos
 
-class Profunctor p => Iso p
+class    Profunctor p => Iso p
 instance Profunctor p => Iso p
 
 (<->) :: (s -> a) -> (b -> t) -> Optic Iso s t a b
@@ -256,8 +256,8 @@ l <-> r = Optic (dimap l r)
 
 -- Lenses
 
-class Strong p => Lens p
-instance Strong p => Lens p
+class    (Strong p, Iso p) => Lens p
+instance (Strong p, Iso p) => Lens p
 
 lens :: (s -> a) -> (s -> b -> t) -> Optic Lens s t a b
 lens prj inj = Optic (dimap (\ s -> (prj s, s)) (\ (b, s) -> inj s b) . first')
@@ -272,8 +272,8 @@ _snd = lens snd (\ ~(a, _) b' -> (a, b'))
 
 -- Prisms
 
-class Choice p => Prism p
-instance Choice p => Prism p
+class    (Choice p, Iso p) => Prism p
+instance (Choice p, Iso p) => Prism p
 
 prism :: (b -> t) -> (s -> Either t a) -> Optic Prism s t a b
 prism inj prj = Optic (dimap prj (either id inj) . right')
