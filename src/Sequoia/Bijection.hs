@@ -64,6 +64,8 @@ module Sequoia.Bijection
 , prism
 , _Left
 , _Right
+  -- * Setters
+, Setter
 ) where
 
 import           Control.Applicative (Alternative)
@@ -286,3 +288,9 @@ _Left = prism Left (either Right (Left . Right))
 
 _Right :: Optic Prism (Either a b) (Either a b') b b'
 _Right = prism Right (either (Left . Left) Right)
+
+
+-- Setters
+
+class    Mapping p => Setter p
+instance Mapping p => Setter p
