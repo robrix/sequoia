@@ -58,6 +58,16 @@ instance Bitraversable (<) where
 (<|) :: V.Representable v => v i -> v is -> v (i < is)
 (<|) = (>∘∘<)
 
+-- | Split a '<'-context into its head and tail.
+--
+-- This is left- and right-inverse to '<|':
+--
+-- @
+-- splitΓ . uncurry (<|) = id
+-- @
+-- @
+-- uncurry (<|) . splitΓ = id
+-- @
 splitΓ :: V.Representable v => v (a < b) -> (v a, v b)
 splitΓ v = (exlF v, exrF v)
 
