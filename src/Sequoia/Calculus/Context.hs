@@ -7,6 +7,7 @@ module Sequoia.Calculus.Context
   -- * Δ
 , type (>)(..)
 , (|>)
+, splitΔ
   -- * Mixfix syntax
 , type (|-)
 , type (-|)
@@ -88,6 +89,9 @@ instance Monad ((>) a) where
 -- @¬A ✕ ¬B -> ¬(A + B)@
 (|>) :: K.Representable k => k os -> k o -> k (os > o)
 (|>) = (<••>)
+
+splitΔ :: K.Representable k => k (a > b) -> (k a, k b)
+splitΔ k = (inlK k, inrK k)
 
 
 -- Mixfix syntax
