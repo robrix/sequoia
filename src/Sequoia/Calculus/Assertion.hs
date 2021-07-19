@@ -10,4 +10,4 @@ module Sequoia.Calculus.Assertion
 import Sequoia.Calculus.NotUntrue
 import Sequoia.Calculus.True
 
-type AssertionIntro s = TrueIntro s
+type AssertionIntro s = (NotUntrueIntro s, TrueIntro s)
