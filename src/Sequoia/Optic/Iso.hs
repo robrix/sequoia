@@ -18,9 +18,11 @@ module Sequoia.Optic.Iso
 , coerced
 , coercedFrom
 , coercedTo
-  -- * Representable
+  -- * Representable (covariant)
 , tabulated
+  -- * Representable (contravariant)
 , contratabulated
+  -- * Representable (profunctorial)
 , protabulated
   -- * Adjunction
 , adjuncted
@@ -135,13 +137,19 @@ coercedFrom :: Coercible a b => (b -> a) -> a <-> b
 coercedFrom = (coerce <->)
 
 
--- Representable
+-- Representable (covariant)
 
 tabulated :: Co.Representable f => (Co.Rep f -> a) <-> f a
 tabulated = Co.tabulate <-> Co.index
 
+
+-- Representable (contravariant)
+
 contratabulated :: Contra.Representable f => (a -> Contra.Rep f) <-> f a
 contratabulated = Contra.tabulate <-> Contra.index
+
+
+-- Representable (profunctorial)
 
 protabulated :: Pro.Representable p => (a -> Pro.Rep p b) <-> a `p` b
 protabulated = Pro.tabulate <-> sieve
