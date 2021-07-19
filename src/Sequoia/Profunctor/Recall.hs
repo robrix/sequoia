@@ -6,12 +6,12 @@ module Sequoia.Profunctor.Recall
 import Data.Coerce
 import Data.Distributive
 import Data.Functor.Const
-import Data.Functor.Rep
+import Data.Functor.Rep as Co
 import Data.Profunctor
 import Data.Profunctor.Sieve
 
 newtype Recall e a b = Recall { runRecall :: e -> b }
-  deriving (Applicative, Functor, Monad, Representable)
+  deriving (Applicative, Functor, Monad, Co.Representable)
 
 instance Distributive (Recall s a) where
   distribute = distributeRep
