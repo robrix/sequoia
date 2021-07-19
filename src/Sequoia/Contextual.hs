@@ -288,6 +288,14 @@ pushΓL
   -> (V e a -> _Γ -|s e r|- _Δ)
 pushΓL s a = popΓ (pushΓ s . (a <|))
 
+-- | Push something onto the output context which was previously popped off it. Used with 'popΔR', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
+--
+-- @
+-- popΔR . pushΔR = id
+-- @
+-- @
+-- pushΔR . popΔR = id
+-- @
 pushΔR
   :: Contextual s
   =>           _Γ -|s e r|- _Δ > a
