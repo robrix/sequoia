@@ -18,3 +18,9 @@ class Core s => NotUntrueIntro s where
     =>    a < _Γ -|s e r|- _Δ
     -- ----------------------
     -> r ≁a < _Γ -|s e r|- _Δ
+
+  notUntrueR
+    :: Neg a
+    => _Γ -|s e r|- _Δ > a
+    -- ----------------------
+    -> _Γ -|s e r|- _Δ > r ≁a
