@@ -159,7 +159,7 @@ inCP' f = inCP (\ a b -> b •∘ (f <$> a))
 -- Elimination
 
 evalCP :: ControlPassing f => e --|f e r|-> r -> (e -> r)
-evalCP f = getControl (exCP f (inV id) idK)
+evalCP f = getControl (exCP f idV idK)
 
 appCP :: ControlPassing f => a --|f e r|-> b -> V e (V e a -> K r **b)
 appCP f = inV (\ e a -> inK (\ b -> getControl (exCP f a b) e))
