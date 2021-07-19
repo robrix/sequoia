@@ -311,4 +311,4 @@ sets :: ((a -> b) -> (s -> t)) -> Optic Setter s t a b
 sets f = Optic (roam f)
 
 set :: Optic Setter s t a b -> b -> s -> t
-set (Optic f) = f . const
+set o = over o . const
