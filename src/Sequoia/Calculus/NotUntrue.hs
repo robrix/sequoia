@@ -2,12 +2,12 @@ module Sequoia.Calculus.NotUntrue
 ( -- * NotUntrue
   NotUntrueIntro(..)
   -- * Connectives
-, module Sequoia.Connective.Assertion
+, module Sequoia.Connective.NotUntrue
 ) where
 
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Core
-import Sequoia.Connective.Assertion
+import Sequoia.Connective.NotUntrue
 import Sequoia.Polarity
 
 -- NotUntrue
