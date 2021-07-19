@@ -300,7 +300,7 @@ pushR
   =>           _Γ -|s e r|- _Δ > a
   -- -----------------------------
   -> (K r a -> _Γ -|s e r|- _Δ)
-pushR s a = popΔ (\ c -> pushΔ s (c |> a))
+pushR = pushΔR
 
 
 pushL2
