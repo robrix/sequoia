@@ -42,6 +42,7 @@ import Data.Functor.Contravariant
 import Data.Functor.Contravariant.Rep as K
 import Data.Profunctor
 import Sequoia.Bijection
+import Sequoia.Optic.Prism
 import Sequoia.Profunctor.Diagonal
 
 -- Disjunction

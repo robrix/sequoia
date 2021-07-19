@@ -51,11 +51,6 @@ module Sequoia.Bijection
 , lens
 , _fst
 , _snd
-  -- * Prisms
-, Prism
-, prism
-, _Left
-, _Right
 ) where
 
 import           Control.Applicative (Alternative)
@@ -254,18 +249,3 @@ _fst = lens fst (\ ~(_, b) a' -> (a', b))
 
 _snd :: Lens (a, b) (a, b') b b'
 _snd = lens snd (\ ~(a, _) b' -> (a, b'))
-
-
--- Prisms
-
-type Prism s t a b = forall p . Choice p => Optic p s t a b
-
-prism :: (b -> t) -> (s -> Either t a) -> Prism s t a b
-prism inj prj = dimap prj (either id inj) . right'
-
-
-_Left :: Prism (Either a b) (Either a' b) a a'
-_Left = prism Left (either Right (Left . Right))
-
-_Right :: Prism (Either a b) (Either a b') b b'
-_Right = prism Right (either (Left . Left) Right)
