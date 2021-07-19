@@ -6,6 +6,7 @@ module Sequoia.Bicontravariant
   -- * Coercion
 , biphantom
 , lphantom
+, rphantom
 ) where
 
 import Data.Bifunctor
@@ -31,3 +32,6 @@ biphantom = bimap absurd absurd . contrabimap absurd absurd
 
 lphantom :: (Profunctor p, Bifunctor p) => p a b -> p c b
 lphantom = first absurd . lmap absurd
+
+rphantom :: (Profunctor p, Bicontravariant p) => p a b -> p a c
+rphantom = rmap absurd . contrasecond absurd
