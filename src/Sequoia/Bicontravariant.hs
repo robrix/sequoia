@@ -39,13 +39,13 @@ contrasecond = (id `contrabimap`)
 -- Coercion
 
 biphantom :: (Bifunctor p, Bicontravariant p) => p a b -> p c d
-biphantom = bimap absurd absurd . contrabimap absurd absurd
+biphantom = bivacuous . contrabivacuous
 
 lphantom :: (Profunctor p, Bifunctor p) => p a b -> p c b
-lphantom = first absurd . lmap absurd
+lphantom = firstvacuous . lvacuous
 
 rphantom :: (Profunctor p, Bicontravariant p) => p a b -> p a c
-rphantom = rmap absurd . contrasecond absurd
+rphantom = rvacuous . contrasecondvacuous
 
 bivacuous :: Bifunctor p => p Void Void -> p a b
 bivacuous = bimap absurd absurd
