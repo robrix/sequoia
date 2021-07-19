@@ -104,7 +104,7 @@ select p a = a <$ guard (p a)
 
 -- Elimination
 
-under :: Optic (Coexp b a) s t a b -> (t -> s) -> (b -> a)
+under :: Iso s t a b -> (t -> s) -> (b -> a)
 under = runCoexp . ($ idCoexp)
 
 
