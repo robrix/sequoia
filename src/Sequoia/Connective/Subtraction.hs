@@ -10,12 +10,12 @@ module Sequoia.Connective.Subtraction
 
 import Data.Functor.Contravariant
 import Data.Kind (Type)
-import Sequoia.Bijection
 import Sequoia.Confunctor
 import Sequoia.Conjunction
 import Sequoia.Continuation as K
 import Sequoia.Functor.K
 import Sequoia.Functor.V
+import Sequoia.Optic.Iso
 import Sequoia.Optic.Lens
 import Sequoia.Polarity
 import Sequoia.Profunctor.Coexponential

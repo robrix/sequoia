@@ -7,7 +7,6 @@ module Sequoia.Connective.Implicative
 , module Sequoia.Connective.Subtraction
 ) where
 
-import Sequoia.Bijection
 import Sequoia.Connective.Function
 import Sequoia.Connective.Not
 import Sequoia.Connective.Par
@@ -16,6 +15,7 @@ import Sequoia.Continuation
 import Sequoia.Disjunction
 import Sequoia.Functor.K
 import Sequoia.Functor.V
+import Sequoia.Optic.Iso
 import Sequoia.Profunctor.ControlPassing
 import Sequoia.Value
 

@@ -70,12 +70,12 @@ import qualified Control.Category as Cat
 import           Data.Kind (Type)
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
-import           Sequoia.Bijection
 import           Sequoia.Confunctor
 import           Sequoia.Continuation as K
 import           Sequoia.Disjunction
 import           Sequoia.Functor.K
 import           Sequoia.Functor.V
+import           Sequoia.Optic.Iso
 import           Sequoia.Optic.Lens
 import           Sequoia.Profunctor.Applicative
 import           Sequoia.Profunctor.Coexponential
