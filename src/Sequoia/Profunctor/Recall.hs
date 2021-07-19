@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Profunctor.Recall
 ( Recall(..)
@@ -8,6 +9,7 @@ import Data.Distributive
 import Data.Functor.Const
 import Data.Functor.Rep as Co
 import Data.Profunctor
+import Data.Profunctor.Rep as Pro
 import Data.Profunctor.Sieve
 
 newtype Recall e a b = Recall { runRecall :: e -> b }
@@ -38,3 +40,7 @@ instance Sieve (Recall e) ((->) e) where
 
 instance Cosieve (Recall e) (Const e) where
   cosieve = (. getConst) . runRecall
+
+instance Pro.Corepresentable (Recall e) where
+  type Corep (Recall e) = Const e
+  cotabulate = Recall . (. Const)
