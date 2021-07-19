@@ -3,6 +3,7 @@ module Sequoia.Calculus.Context
 ( -- * Γ
   type (<)(..)
 , (<|)
+, splitΓ
   -- * Δ
 , type (>)(..)
 , (|>)
@@ -45,6 +46,9 @@ instance Bitraversable (<) where
 
 (<|) :: V.Representable v => v i -> v is -> v (i < is)
 (<|) = (>∘∘<)
+
+splitΓ :: V.Representable v => v (a < b) -> (v a, v b)
+splitΓ v = (exlF v, exrF v)
 
 
 -- Δ
