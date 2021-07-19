@@ -8,6 +8,7 @@ module Sequoia.Bijection
 ( -- * Bijections
   type (<->)
 , Optic(..)
+, OpticF
   -- ** Elimination
 , views
 , reviews
@@ -92,7 +93,9 @@ type a <-> b = Optic Iso a a b b
 infix 1 <->
 
 
-newtype Optic c s t a b = Optic { runOptic :: forall p . c p => (a `p` b) -> (s `p` t) }
+newtype Optic c s t a b = Optic { runOptic :: OpticF c s t a b }
+
+type OpticF c s t a b = forall p . c p => (a `p` b) -> (s `p` t)
 
 
 -- Elimination
