@@ -9,6 +9,7 @@ module Sequoia.Conjunction
 , exlrC
 , assocL
 , assocR
+, distConjA
   -- * Generalizations
 , coerceConj
 , swapConj
@@ -90,6 +91,10 @@ assocL = (exl &&& exl . exr) &&& exr . exr
 
 assocR :: Conj p => (a `p` b) `p` c -> a `p` (b `p` c)
 assocR = exl . exl &&& exr . exl &&& exr
+
+
+distConjA :: (Applicative f, Conj c) => (f a `c` f b) -> f (a `c` b)
+distConjA = uncurryConj (liftA2 (>--<))
 
 
 -- Generalizations
