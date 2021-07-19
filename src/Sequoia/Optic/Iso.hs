@@ -22,8 +22,9 @@ module Sequoia.Optic.Iso
 , tabulated
   -- * Representable (contravariant)
 , contratabulated
-  -- * Representable (profunctorial)
+  -- * (Co-)representable (profunctorial)
 , protabulated
+, cotabulated
   -- * Adjunction
 , adjuncted
 , contraadjuncted
@@ -149,10 +150,13 @@ contratabulated :: Contra.Representable f => (a -> Contra.Rep f) <-> f a
 contratabulated = Contra.tabulate <-> Contra.index
 
 
--- Representable (profunctorial)
+-- (Co-)representable (profunctorial)
 
 protabulated :: Pro.Representable p => (a -> Pro.Rep p b) <-> a `p` b
 protabulated = Pro.tabulate <-> sieve
+
+cotabulated :: Pro.Corepresentable p => (Pro.Corep p a -> b) <-> a `p` b
+cotabulated = Pro.cotabulate <-> cosieve
 
 
 -- Adjunction
