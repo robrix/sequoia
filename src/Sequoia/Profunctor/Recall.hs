@@ -1,2 +1,5 @@
 module Sequoia.Profunctor.Recall
-() where
+( Recall(..)
+) where
+
+newtype Recall e a b = Recall { runRecall :: e -> b }
