@@ -124,6 +124,10 @@ instance Coapply (CP e r) where
 instance Env2 CP where
   env2 f = inCP (\ v k -> env (runCP v k . f))
 
+instance Res2 CP where
+  res2 = inCP . const . const . res
+  liftRes2 f = liftRunCP (\ run -> liftRes (dimap (. run) run f))
+
 
 -- Mixfix notation
 
