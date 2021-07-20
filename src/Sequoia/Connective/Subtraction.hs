@@ -28,8 +28,8 @@ newtype Sub e r a b = Sub { getSub :: Coexp e r b a }
   deriving Confunctor via Flip (Coexp e r)
 
 instance Coexponential Sub where
-  inCS = Sub
-  exCS = getSub
+  inCoexp = Sub
+  exCoexp = getSub
 
 instance (Pos a, Neg b) => Polarized P (Sub e r a b) where
 
