@@ -20,6 +20,8 @@ module Sequoia.Optic.Iso
 , auf
 , xplat
 , xplatf
+, ala
+, alaf
   -- * Coercion
 , coerced
 , coercedFrom
@@ -134,6 +136,12 @@ xplat o = au (from o)
 
 xplatf :: (Functor f, Functor g) => Iso s t a b -> ((f a -> g b) -> (f s -> g t))
 xplatf o = auf (from o)
+
+ala :: (Functor f, Coercible s a, Coercible b t) => (a -> s) -> ((b -> t) -> f s) -> f a
+ala _ f = coerce <$> f coerce
+
+alaf :: (Functor f, Functor g, Coercible s a, Coercible b t) => (a -> s) -> ((f t -> g s) -> (f b -> g a))
+alaf _ f b = coerce <$> f (coerce <$> b)
 
 
 -- Coercion
