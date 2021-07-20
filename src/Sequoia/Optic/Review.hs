@@ -38,6 +38,6 @@ review :: Optic (Recall b) s t a b -> (b -> t)
 review o = reviews o id
 
 (<~) :: Optic (Recall b) s t a b -> (b -> t)
-o <~ b = reviews o id b
+(<~) = review
 
 infixr 8 <~
