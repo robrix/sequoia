@@ -3,13 +3,18 @@ module Sequoia.Functor.Sink
   Snk(..)
   -- * Computation
 , mapSnkK
+, mapSnkV
 ) where
 
 import Data.Functor.Contravariant
+import Data.Profunctor
 import Sequoia.Disjunction
 import Sequoia.Functor.Applicative
 import Sequoia.Functor.K
 import Sequoia.Functor.V
+import Sequoia.Optic.Getter
+import Sequoia.Optic.Iso
+import Sequoia.Optic.Review
 import Sequoia.Profunctor.Context
 import Sequoia.Value
 
@@ -28,3 +33,6 @@ instance Contrapply (Snk e r) where
 
 mapSnkK :: (forall x . K r x -> K r' x) -> (Snk e r a -> Snk e r' a)
 mapSnkK f = Snk . fmap (mapCK f) . runSnk
+
+mapSnkV :: (forall x . V e x <-> V e' x) -> (Snk e r a -> Snk e' r a)
+mapSnkV b = Snk . dimap (review b) (mapCV (view b)) . runSnk
