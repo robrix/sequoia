@@ -150,6 +150,7 @@ library
     Sequoia.Optic.Prism
     Sequoia.Optic.Review
     Sequoia.Optic.Setter
+    Sequoia.Optic.Traversal
     Sequoia.Polarity
     Sequoia.Printer
     Sequoia.Profunctor.Adjunction
