@@ -3,6 +3,7 @@ module Sequoia.Connective.Subtraction
   Sub(..)
 , type (~-)
 , type (-<)
+  -- * Optics
 , sub
 , subA_
 , subK_
@@ -39,6 +40,8 @@ type s-< b = s b
 infixr 6 ~-
 infixr 5 -<
 
+
+-- Optics
 
 sub :: (K.Representable k, V.Representable v, Conj c) => a ~-Sub (V.Rep v) (K.Rep k)-< b <-> v a `c` k b
 sub = _Coexponential.coercedConj.bimappingConj coercedV coercedK
