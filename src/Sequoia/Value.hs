@@ -19,6 +19,7 @@ module Sequoia.Value
   -- * Coercion
 , _V
 , coerceVWith
+, coercedV
 , coerceV
 , coerceV1
 , coerceV2
@@ -97,6 +98,9 @@ _V = exV <-> inV
 
 coerceVWith :: (Representable v1, Representable v2) => ((Rep v1 -> a) -> (Rep v2 -> b)) -> (v1 a -> v2 b)
 coerceVWith = over _V
+
+coercedV :: (Representable v1, Representable v2, Representable v1', Representable v2', Rep v1 ~ Rep v2, Rep v1' ~ Rep v2') => Iso (v1 a) (v1' a') (v2 a) (v2' a')
+coercedV = coerceV <-> coerceV
 
 coerceV :: (Representable v1, Representable v2, Rep v1 ~ Rep v2) => (v1 a -> v2 a)
 coerceV = inV . exV

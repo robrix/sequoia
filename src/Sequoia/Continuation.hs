@@ -23,6 +23,7 @@ module Sequoia.Continuation
   -- ** Coercion
 , _K
 , coerceKWith
+, coercedK
 , coerceK
 , coerceK1
 , coerceK2
@@ -135,6 +136,9 @@ _K = exK <-> inK
 
 coerceKWith :: (Representable k1, Representable k2) => (KFn k1 a -> KFn k2 b) -> (k1 a -> k2 b)
 coerceKWith = over _K
+
+coercedK :: (Representable k1, Representable k2, Representable k1', Representable k2', Rep k1 ~ Rep k2, Rep k1' ~ Rep k2') => Iso (k1 a) (k1' a') (k2 a) (k2' a')
+coercedK = coerceK <-> coerceK
 
 coerceK :: (Representable k1, Representable k2, Rep k1 ~ Rep k2) => (k1 a -> k2 a)
 coerceK = inK . exK
