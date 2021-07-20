@@ -1,9 +1,7 @@
 {-# LANGUAGE TypeFamilies #-}
 module Sequoia.Signal
 ( -- * Signals
-  Sol(..)
-, mapKSol
-, mapVSol
+  C(..)
 , Src(..)
 , mapKSrc
 , mapVSrc
@@ -35,32 +33,28 @@ import           Sequoia.Functor.V
 import           Sequoia.Optic.Getter
 import           Sequoia.Optic.Iso
 import           Sequoia.Optic.Review
+import           Sequoia.Profunctor.Context
 import           Sequoia.Value as V
 
 -- Signals
 
-(•∘) :: K r a -> V e a -> Sol e r
-k •∘ a = Sol (\ e -> k • e ∘ a)
+(•∘) :: K r a -> V e a -> C e r
+k •∘ a = C (\ e -> k • e ∘ a)
 
 infix 7 •∘
 
-withEnv :: (e -> Sol e r) -> Sol e r
-withEnv f = Sol (runSol =<< f)
-
-liftSolWithK :: ((Sol e r -> r) -> Sol e r) -> Sol e r
-liftSolWithK f = withEnv (f . flip runSol)
+liftSolWithK :: ((C e r -> r) -> C e r) -> C e r
+liftSolWithK f = env (f . flip runC)
 
 
-newtype Sol e r     = Sol { runSol :: e -> r }
+mapKSol :: (forall x . K r x -> K r' x) -> (C e r -> C e r')
+mapKSol f (C r) = C (under _K f r)
 
-mapKSol :: (forall x . K r x -> K r' x) -> (Sol e r -> Sol e r')
-mapKSol f (Sol r) = Sol (under _K f r)
-
-mapVSol :: (forall x . V e x -> V e' x) -> (Sol e r -> Sol e' r)
-mapVSol f (Sol r) = Sol (under _V f r)
+mapVSol :: (forall x . V e x -> V e' x) -> (C e r -> C e' r)
+mapVSol f (C r) = C (under _V f r)
 
 
-newtype Src e r   b = Src { runSrc :: K r b -> Sol e r }
+newtype Src e r   b = Src { runSrc :: K r b -> C e r }
 
 instance Functor (Src e r) where
   fmap f (Src r) = Src (lmap (contramap f) r)
@@ -72,7 +66,7 @@ mapVSrc :: (forall x . V e x -> V e' x) -> (Src e r b -> Src e' r b)
 mapVSrc f = Src . rmap (mapVSol f) . runSrc
 
 
-newtype Snk e r a   = Snk { runSnk :: V e a -> Sol e r }
+newtype Snk e r a   = Snk { runSnk :: V e a -> C e r }
 
 instance Contravariant (Snk e r) where
   contramap f = Snk . lmap (fmap f) . runSnk
@@ -84,7 +78,7 @@ mapVSnk :: (forall x . V e x <-> V e' x) -> (Snk e r a -> Snk e' r a)
 mapVSnk b = Snk . dimap (review b) (mapVSol (view b)) . runSnk
 
 
-newtype Sig e r a b = Sig { runSig :: V e a -> K r b -> Sol e r }
+newtype Sig e r a b = Sig { runSig :: V e a -> K r b -> C e r }
 
 instance Cat.Category (Sig e r) where
   id = Sig (flip (•∘))
@@ -113,14 +107,14 @@ mapVSig b = Sig . dimap (review b) (rmap (mapVSol (view b))) . runSig
 -- Conversions
 
 solSrc
-  ::      Sol e r
+  ::      C e r
             <->
           Src e r |- r
 solSrc = Src . const <-> ($ idK) . runSrc
 
 
 solSnk
-  ::      Sol e r
+  ::      C e r
             <->
      e -| Snk e r
 solSnk = Snk . const <-> ($ idV) . runSnk
@@ -147,19 +141,19 @@ composeSigSnk sig snk = review snkSig (view snkSig snk <<< sig)
 
 
 solSig
-  ::      Sol e r
+  ::      C e r
             <->
      e -| Sig e r |- r
 solSig = Sig . const . const <-> ($ idK) . ($ idV) . runSig
 
 
-composeSrcSnk :: Src e r a -> Snk e r a -> Sol e r
+composeSrcSnk :: Src e r a -> Snk e r a -> C e r
 composeSrcSnk src snk = review solSig (snk^.snkSig <<< view srcSig src)
 
 
 {-
        o
-  Sol ---> Src
+  C ---> Src
    │        │
  i │        │ i
    ↓        ↓
