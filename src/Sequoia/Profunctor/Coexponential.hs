@@ -3,7 +3,7 @@ module Sequoia.Profunctor.Coexponential
   Coexp(..)
   -- * Construction
 , idCoexp
-, toCoexp
+, coexp
   -- * Elimination
 , runCoexp
 , withCoexp
@@ -22,7 +22,7 @@ data Coexp e r a b = Coexp { recall :: V e b, forget :: K r a }
   deriving (Functor)
 
 instance Profunctor (Coexp e r) where
-  dimap g h c = withCoexp c (\ r f -> toCoexp (h . r) (f . g))
+  dimap g h c = withCoexp c (\ r f -> coexp (h . r) (f . g))
 
 
 -- Construction
@@ -30,8 +30,8 @@ instance Profunctor (Coexp e r) where
 idCoexp :: Coexp b a a b
 idCoexp = Coexp (V id) (K id)
 
-toCoexp :: (e -> a) -> (b -> r) -> Coexp e r b a
-toCoexp r f = Coexp (V r) (K f)
+coexp :: (e -> a) -> (b -> r) -> Coexp e r b a
+coexp r f = Coexp (V r) (K f)
 
 
 -- Elimination
