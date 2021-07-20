@@ -65,7 +65,6 @@ library
   import: common
   exposed-modules:
     Sequoia.Bicontravariant
-    Sequoia.Calculus
     Sequoia.Calculus.Additive
     Sequoia.Calculus.Assertion
     Sequoia.Calculus.Bottom
