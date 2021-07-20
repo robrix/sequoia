@@ -198,10 +198,10 @@ contraadjuncted = Contra.leftAdjunct <-> Contra.rightAdjunct
 
 -- Functor
 
-fmapping :: Functor f => (a <-> a') -> f a <-> f a'
+fmapping :: (Functor f, Functor g) => Iso s t a b -> Iso (f s) (g t) (f a) (g b)
 fmapping a = fmap (view a) <-> fmap (review a)
 
-contramapping :: Contravariant f => (a <-> a') -> f a <-> f a'
+contramapping :: (Contravariant f, Contravariant g) => Iso s t a b -> Iso (f t) (g s) (f b) (g a)
 contramapping a = contramap (review a) <-> contramap (view a)
 
 
