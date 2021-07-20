@@ -15,6 +15,7 @@ import           Sequoia.Continuation
 import           Sequoia.Functor.K
 import           Sequoia.Functor.V
 import           Sequoia.Polarity
+import           Sequoia.Profunctor.Context
 import           Sequoia.Profunctor.ControlPassing
 
 -- Implication
@@ -25,7 +26,7 @@ appFun = appCP
 appFun2 :: (a ~~Fun e r~> b ~~Fun e r~> c) -> V e (V e a -> V e b -> K r **c)
 appFun2 = appCP2
 
-newtype Fun e r a b = Fun { getFun :: V e a -> K r b -> Control e r }
+newtype Fun e r a b = Fun { getFun :: V e a -> K r b -> C e r }
   deriving (ControlPassing) via CP
   deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via CP e r
   deriving (Functor) via CP e r a

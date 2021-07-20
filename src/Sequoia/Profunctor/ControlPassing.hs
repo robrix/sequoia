@@ -52,7 +52,6 @@ module Sequoia.Profunctor.ControlPassing
   -- * Control context
 , (•∘)
 , localEnv
-, Control(..)
 , inPrd
 , producer
 , joinl
@@ -79,11 +78,12 @@ import           Sequoia.Optic.Iso
 import           Sequoia.Optic.Lens
 import           Sequoia.Profunctor.Applicative
 import           Sequoia.Profunctor.Coexponential
+import           Sequoia.Profunctor.Context
 import           Sequoia.Value as V
 
 -- Control-passing profunctor
 
-newtype CP e r a b = CP { getCP :: V e a -> K r b -> Control e r }
+newtype CP e r a b = CP { getCP :: V e a -> K r b -> C e r }
 
 instance ControlPassing CP where
   inCP = CP
@@ -135,12 +135,12 @@ infixr 5 |->
 
 -- Control-passing profunctor abstraction
 
-_ControlPassing :: (ControlPassing f, ControlPassing f') => Iso (f e r a b) (f' e' r' a' b') (V e a -> K r b -> Control e r) (V e' a' -> K r' b' -> Control e' r')
+_ControlPassing :: (ControlPassing f, ControlPassing f') => Iso (f e r a b) (f' e' r' a' b') (V e a -> K r b -> C e r) (V e' a' -> K r' b' -> C e' r')
 _ControlPassing = exCP <-> inCP
 
 class (forall e r . Cat.Category (f e r), forall e r . Profunctor (f e r)) => ControlPassing f where
-  inCP :: (V e a -> K r b -> Control e r) -> f e r a b
-  exCP :: f e r a b -> V e a -> K r b -> Control e r
+  inCP :: (V e a -> K r b -> C e r) -> f e r a b
+  exCP :: f e r a b -> V e a -> K r b -> C e r
 
 
 _ControlStoring :: (ControlStoring p, ControlStoring p') => Iso (p e r a b) (p' e' r' a' b') (Coexp e r b a) (Coexp e' r' b' a')
@@ -160,18 +160,18 @@ inCP' f = inCP (\ a b -> b •∘ (f <$> a))
 -- Elimination
 
 evalCP :: ControlPassing f => e --|f e r|-> r -> (e -> r)
-evalCP f = getControl (exCP f idV idK)
+evalCP f = runC (exCP f idV idK)
 
 appCP :: ControlPassing f => a --|f e r|-> b -> V e (V e a -> K r **b)
-appCP f = inV (\ e a -> inK (\ b -> getControl (exCP f a b) e))
+appCP f = inV (\ e a -> inK (\ b -> runC (exCP f a b) e))
 
 appCP2 :: ControlPassing f => a --|f e r|-> b --|f e r|-> c -> V e (V e a -> V e b -> K r **c)
-appCP2 f = inV (\ e a b -> inK (\ c -> getControl (exCP f a (inK (\ g -> getControl (exCP g b c) e))) e))
+appCP2 f = inV (\ e a b -> inK (\ c -> runC (exCP f a (inK (\ g -> runC (exCP g b c) e))) e))
 
-runCP :: ControlPassing f => V e a -> K r b -> a --|f e r|-> b -> Control e r
+runCP :: ControlPassing f => V e a -> K r b -> a --|f e r|-> b -> C e r
 runCP v k f = exCP f v k
 
-elimCP :: (ControlPassing f, ControlStoring s) => a --|f e r|-> b -> s e r a b -> Control e r
+elimCP :: (ControlPassing f, ControlStoring s) => a --|f e r|-> b -> s e r a b -> C e r
 elimCP f = (exCP f <$> recall <*> forget) . exCS
 
 
@@ -271,18 +271,7 @@ localEnv :: ControlPassing c => (e -> e') -> c e' r s t -> c e r s t
 localEnv f c = inCP (\ v k -> val (\ v -> lmap f (exCP c (inV0 v) k)) v)
 
 
-newtype Control e r = Control { getControl :: e -> r }
-  deriving (Cat.Category, Profunctor)
-
-instance Env Control where
-  env f = Control (getControl =<< f)
-
-instance Res Control where
-  res = Control . const
-  liftRes f = Control (\ e -> let run = (`getControl` e) in run (f run))
-
-
-inPrd :: ControlPassing f => (K r a -> Control e r) -> f e r e|-> a
+inPrd :: ControlPassing f => (K r a -> C e r) -> f e r e|-> a
 inPrd = inCP . const
 
 producer :: (ControlPassing f, V.Representable v, V.Rep v ~ e) => v a -> f e r e|-> a
@@ -292,7 +281,7 @@ joinl :: ControlPassing f => f e r e|-> f e r a b -> f e r a b
 joinl p = inCP (\ a b -> cont (\ _K -> exCP p idV (_K (\ f -> exCP f a b))))
 
 
-inCns :: ControlPassing f => (V e a -> Control e r) -> a --|f e r|-> r
+inCns :: ControlPassing f => (V e a -> C e r) -> a --|f e r|-> r
 inCns = inCP . fmap const
 
 consumer :: (ControlPassing f, K.Representable k, K.Rep k ~ r) => k a -> a --|f e r|-> r
@@ -324,9 +313,9 @@ instance (Res c, p ~ (->)) => Res (O p a c) where
   liftRes f = O (\ k -> let run = (`runO` k) in liftRes (run . f . (. run)))
 
 
-newtype MCP e r a b = MCP { runMCP :: I (->) a (O (->) b Control) e r }
+newtype MCP e r a b = MCP { runMCP :: I (->) a (O (->) b C) e r }
 
 instance Env2 MCP where
   env2 f = MCP (env (runMCP . f))
 
-newtype CoMCP e r a b = CoMCP { runCoMCP :: I (,) a (O (,) b Control) e r }
+newtype CoMCP e r a b = CoMCP { runCoMCP :: I (,) a (O (,) b C) e r }

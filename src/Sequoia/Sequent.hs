@@ -37,6 +37,7 @@ import           Sequoia.Functor.K
 import           Sequoia.Functor.V
 import           Sequoia.Optic.Getter
 import           Sequoia.Optic.Review
+import           Sequoia.Profunctor.Context
 import           Sequoia.Profunctor.ControlPassing as ControlPassing hiding ((>>>))
 import           Sequoia.Value
 
@@ -48,7 +49,7 @@ evalSeq = evalCP
 runSeq :: Seq e r _Γ _Δ -> ((e -> _Γ) -> (_Δ -> r) -> (e -> r))
 runSeq s f g = evalSeq (dimap f g s)
 
-newtype Seq e r _Γ _Δ = Seq { getSeq :: V e _Γ -> K r _Δ -> ControlPassing.Control e r }
+newtype Seq e r _Γ _Δ = Seq { getSeq :: V e _Γ -> K r _Δ -> C e r }
   deriving (Applicative, Functor, Monad) via (CP e r _Γ)
   deriving (Cat.Category, Choice, Profunctor, Strong) via (CP e r)
   deriving (ControlPassing, Env2) via CP
@@ -70,7 +71,7 @@ newtype SeqT e r _Γ m _Δ = SeqT { getSeqT :: Seq e (m r) _Γ _Δ }
   deriving (Applicative, Functor, Monad)
 
 instance MonadTrans (SeqT r s _Γ) where
-  lift m = SeqT (inCP (const (Control . const . (m >>=) . (•))))
+  lift m = SeqT (inCP (const (C . const . (m >>=) . (•))))
 
 
 -- Core rules
@@ -97,7 +98,7 @@ instance Contextual Seq where
 -- Control
 
 instance Calculus.Control Seq where
-  reset s = inCP (\ _Γ _Δ -> Control (exK _Δ . getControl (exCP s _Γ idK)))
+  reset s = inCP (\ _Γ _Δ -> C (exK _Δ . runC (exCP s _Γ idK)))
   shift s = inCP (\ _Γ _Δ -> exCP s (inV0 (inrK _Δ) <| _Γ) (inlK _Δ |> idK))
 
 

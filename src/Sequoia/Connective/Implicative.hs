@@ -16,10 +16,11 @@ import Sequoia.Disjunction
 import Sequoia.Functor.K
 import Sequoia.Functor.V
 import Sequoia.Optic.Iso
+import Sequoia.Profunctor.Context
 import Sequoia.Profunctor.ControlPassing
 import Sequoia.Value
 
-elimFun :: a ~~Fun e r~> b -> a ~-Sub e r-< b -> Control e r
+elimFun :: a ~~Fun e r~> b -> a ~-Sub e r-< b -> C e r
 elimFun f = exCP f <$> subA <*> subK
 
 funPar1 :: K r (V e (r ¬a ⅋ b)) <-> K r (V e (a ~~Fun e r~> b))
@@ -33,7 +34,7 @@ funPar2
   <-> inK1 (\ k p -> k (inK ((p •) . (mkPar (inrK (contramap inV0 p)) =<<))))
 
 mkPar :: K r b -> a ~~Fun e r~> b -> V e (r ¬a ⅋ b)
-mkPar p f = V (\ e -> inl (inK (\ a -> getControl (exCP f (inV0 a) p) e)))
+mkPar p f = V (\ e -> inl (inK (\ a -> runC (exCP f (inV0 a) p) e)))
 
 mkFun :: r ¬a ⅋ b -> a ~~Fun e r~> b
 mkFun p = inCP (\ a b -> ((•∘ a) <--> (b ••)) p)
