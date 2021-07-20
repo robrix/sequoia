@@ -4,6 +4,7 @@ module Sequoia.Profunctor.Recall
 ( Recall(..)
 ) where
 
+import Data.Bifunctor
 import Data.Coerce
 import Data.Distributive
 import Data.Functor.Const
@@ -18,6 +19,9 @@ newtype Recall e a b = Recall { runRecall :: e -> b }
 instance Distributive (Recall e a) where
   distribute = distributeRep
   collect = collectRep
+
+instance Bifunctor (Recall e) where
+  bimap _ g = Recall . fmap g . runRecall
 
 instance Profunctor (Recall e) where
   dimap _ g = Recall . fmap g . runRecall
