@@ -21,7 +21,6 @@ import Sequoia.Optic.Lens
 import Sequoia.Optic.Setter
 import Sequoia.Polarity
 import Sequoia.Profunctor.Coexponential
-import Sequoia.Profunctor.Exponential
 import Sequoia.Value as V
 
 -- Subtraction

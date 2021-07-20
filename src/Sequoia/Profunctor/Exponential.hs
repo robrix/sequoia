@@ -10,8 +10,6 @@ module Sequoia.Profunctor.Exponential
   -- ** Exponential profunctor abstraction
 , _Exponential
 , Exponential(..)
-, _Coexponential
-, Coexponential(..)
   -- ** Construction
 , inCP'
   -- ** Elimination
@@ -70,7 +68,6 @@ import qualified Control.Category as Cat
 import           Data.Kind (Type)
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
-import           Sequoia.Confunctor
 import           Sequoia.Continuation as K
 import           Sequoia.Disjunction
 import           Sequoia.Functor.K
@@ -146,14 +143,6 @@ _Exponential = exCP <-> inCP
 class (forall e r . Cat.Category (f e r), forall e r . Profunctor (f e r)) => Exponential f where
   inCP :: (V e a -> K r b -> C e r) -> f e r a b
   exCP :: f e r a b -> V e a -> K r b -> C e r
-
-
-_Coexponential :: (Coexponential p, Coexponential p') => Iso (p e r a b) (p' e' r' a' b') (Coexp e r b a) (Coexp e' r' b' a')
-_Coexponential = exCS <-> inCS
-
-class (forall e r . Confunctor (f e r)) => Coexponential f where
-  inCS :: Coexp e r b a -> f e r a b
-  exCS :: f e r a b -> Coexp e r b a
 
 
 -- Construction

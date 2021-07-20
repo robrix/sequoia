@@ -1,6 +1,10 @@
+{-# LANGUAGE QuantifiedConstraints #-}
 module Sequoia.Profunctor.Coexponential
 ( -- * Coexponential profunctor
   Coexp(..)
+  -- * Coexponential profunctor abstraction
+, _Coexponential
+, Coexponential(..)
   -- * Construction
 , idCoexp
 , coexp
@@ -13,8 +17,10 @@ module Sequoia.Profunctor.Coexponential
 ) where
 
 import Data.Profunctor
+import Sequoia.Confunctor
 import Sequoia.Functor.K
 import Sequoia.Functor.V
+import Sequoia.Optic.Optic
 
 -- Coexponential profunctor
 
@@ -23,6 +29,16 @@ data Coexp e r a b = Coexp { recall :: V e b, forget :: K r a }
 
 instance Profunctor (Coexp e r) where
   dimap g h c = withCoexp c (\ r f -> coexp (h . r) (f . g))
+
+
+-- Coexponential profunctor abstraction
+
+_Coexponential :: (Coexponential f, Coexponential f', Profunctor p) => Optic p (f e r a b) (f' e' r' a' b') (Coexp e r b a) (Coexp e' r' b' a')
+_Coexponential = exCS `dimap` inCS
+
+class (forall e r . Confunctor (f e r)) => Coexponential f where
+  inCS :: Coexp e r b a -> f e r a b
+  exCS :: f e r a b -> Coexp e r b a
 
 
 -- Construction
