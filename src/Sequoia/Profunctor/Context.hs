@@ -12,6 +12,7 @@ import Data.Profunctor
 import Data.Profunctor.Rep as Pro
 import Data.Profunctor.Sieve
 import Data.Profunctor.Traversing
+import Sequoia.Continuation
 import Sequoia.Value
 
 newtype C e r = C { runC :: e -> r }
@@ -37,3 +38,7 @@ instance Pro.Corepresentable C where
 
 instance Env C where
   env = C . (runC =<<)
+
+instance Res C where
+  res = C . const
+  liftRes f = C (\ e -> runC (f (`runC` e)) e)
