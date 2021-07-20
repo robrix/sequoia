@@ -39,6 +39,10 @@ module Sequoia.Conjunction
 , exrL
 , exlR
 , exrR
+  -- * Optics
+, bimappingConj
+, firstingConj
+, secondingConj
 ) where
 
 -- Conjunction
@@ -48,7 +52,10 @@ import Control.Category (Category, (>>>))
 import Data.Functor.Contravariant
 import Data.Functor.Rep as Co
 import Data.Profunctor
+import Sequoia.Optic.Getter
+import Sequoia.Optic.Iso
 import Sequoia.Optic.Lens
+import Sequoia.Optic.Review
 import Sequoia.Profunctor.Diagonal
 
 class Conj c where
@@ -185,3 +192,15 @@ exlR :: (Profunctor p, Conj c) => p l (a `c` b) -> p l a
 exrR :: (Profunctor p, Conj c) => p l (a `c` b) -> p l b
 exlR = rmap exl
 exrR = rmap exr
+
+
+-- Optics
+
+bimappingConj :: (Conj p, Conj q) => Iso s t a b -> Iso s' t' a' b' -> Iso (p s s') (q t t') (p a a') (q b b')
+bimappingConj a b = bimapConj (view a) (view b) <-> bimapConj (review a) (review b)
+
+firstingConj :: (Conj p, Conj q) => Iso s t a b -> Iso (p s x) (q t y) (p a x) (q b y)
+firstingConj a = firstConj (view a) <-> firstConj (review a)
+
+secondingConj :: (Conj p, Conj q) => Iso s t a b -> Iso (p x s) (q y t) (p x a) (q y b)
+secondingConj b = secondConj (view b) <-> secondConj (review b)
