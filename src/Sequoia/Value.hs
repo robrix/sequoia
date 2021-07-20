@@ -32,6 +32,7 @@ module Sequoia.Value
 , Env(..)
 , val
 , Env1(..)
+, val1
 , Env2(..)
 , val2
 ) where
@@ -152,6 +153,9 @@ val f v = env (f . exV v)
 
 class Env1 c where
   env1 :: (e -> c e r a) -> c e r a
+
+val1 :: (Env1 c, Representable v) => (a -> c (Rep v) r a) -> (v a -> c (Rep v) r a)
+val1 f v = env1 (f . exV v)
 
 
 class Env2 c where
