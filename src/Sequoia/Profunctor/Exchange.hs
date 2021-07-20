@@ -3,3 +3,4 @@ module Sequoia.Profunctor.Exchange
 ) where
 
 data Exchange a b s t = Exchange (s -> a) (b -> t)
+  deriving (Functor)
