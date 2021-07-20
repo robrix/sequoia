@@ -14,6 +14,7 @@ import Sequoia.Functor.V
 import Sequoia.Optic.Getter
 import Sequoia.Optic.Iso
 import Sequoia.Optic.Review
+import Sequoia.Optic.Setter
 import Sequoia.Profunctor.Context
 import Sequoia.Value
 
@@ -25,7 +26,7 @@ _Src = runSrc <-> Src
 newtype Src e r b = Src { runSrc :: K r b -> C e r }
 
 instance Functor (Src e r) where
-  fmap f = Src . (. contramap f) . runSrc
+  fmap f = over _Src (. contramap f)
 
 instance Applicative (Src e r) where
   pure = Src . fmap res . flip runK
@@ -45,7 +46,7 @@ instance Res1 Src where
 -- Computation
 
 mapSrcK :: (forall x . K r x <-> K r' x) -> (Src e r b -> Src e r' b)
-mapSrcK b = Src . dimap (review b) (mapCK (view b)) . runSrc
+mapSrcK b = over _Src (dimap (review b) (mapCK (view b)))
 
 mapSrcV :: (forall x . V e x -> V e' x) -> (Src e r b -> Src e' r b)
-mapSrcV f = Src . fmap (mapCV f) . runSrc
+mapSrcV f = over _Src (fmap (mapCV f))
