@@ -118,7 +118,7 @@ composeSrcSnk src snk = review solSig (snk^.snkSig <<< view srcSig src)
 
 {-
        o
-  C ---> Src
+   C  ---> Src
    │        │
  i │        │ i
    ↓        ↓
