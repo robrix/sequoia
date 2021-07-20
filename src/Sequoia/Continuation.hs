@@ -58,6 +58,7 @@ module Sequoia.Continuation
 , cont
 , (••)
 , Res1(..)
+, cont1
 ) where
 
 import Control.Applicative (liftA2)
@@ -262,3 +263,6 @@ infix 7 ••
 class Res1 c where
   res1 :: r -> c e r a
   liftRes1 :: ((c e r a -> r) -> c e r a) -> c e r a
+
+cont1 :: (Res1 c, Representable k) => (((a -> c e (Rep k) a) -> k a) -> c e (Rep k) a) -> c e (Rep k) a
+cont1 f = liftRes1 (\ run -> f (inK . (run .)))
