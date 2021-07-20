@@ -40,6 +40,7 @@ module Sequoia.Conjunction
 , exlR
 , exrR
   -- * Optics
+, coercedConj
 , bimappingConj
 , firstingConj
 , secondingConj
@@ -195,6 +196,9 @@ exrR = rmap exr
 
 
 -- Optics
+
+coercedConj :: (Conj c, Conj d, Conj c', Conj d') => Iso (c a b) (c' a' b') (d a b) (d' a' b')
+coercedConj = coerceConj <-> coerceConj
 
 bimappingConj :: (Conj p, Conj q) => Iso s t a b -> Iso s' t' a' b' -> Iso (p s s') (q t t') (p a a') (q b b')
 bimappingConj a b = bimapConj (view a) (view b) <-> bimapConj (review a) (review b)
