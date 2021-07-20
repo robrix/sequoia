@@ -15,6 +15,7 @@ module Sequoia.Optic.Iso
 , non
   -- * Elimination
 , under
+, au
   -- * Coercion
 , coerced
 , coercedFrom
@@ -111,6 +112,10 @@ select p a = a <$ guard (p a)
 
 under :: Iso s t a b -> (t -> s) -> (b -> a)
 under = runCoexp . ($ idCoexp)
+
+
+au :: Functor f => Iso s t a b -> (((b -> t) -> f s) -> f a)
+au o f = view o <$> f (review o)
 
 
 -- Coercion
