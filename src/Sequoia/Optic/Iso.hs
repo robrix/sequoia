@@ -126,10 +126,10 @@ under = runCoexp . ($ idCoexp)
 
 
 au :: Functor f => Iso s t a b -> (((b -> t) -> f s) -> f a)
-au o f = view o <$> f (review o)
+au o f = withIso o (\ v r -> v <$> f r)
 
 auf :: (Functor f, Functor g) => Iso s t a b -> ((f t -> g s) -> (f b -> g a))
-auf o f b = view o <$> f (review o <$> b)
+auf o f b = withIso o (\ v r -> v <$> f (r <$> b))
 
 xplat :: Functor g => Iso s t a b -> ((s -> a) -> g b) -> g t
 xplat o = au (from o)
