@@ -18,7 +18,7 @@ import Sequoia.Functor.V
 import Sequoia.Optic.Getter ((^.))
 import Sequoia.Optic.Iso
 import Sequoia.Profunctor.Context
-import Sequoia.Profunctor.ControlPassing
+import Sequoia.Profunctor.Exponential
 import Sequoia.Value
 
 elimFun :: a ~~Fun e r~> b -> a ~-Sub e r-< b -> C e r

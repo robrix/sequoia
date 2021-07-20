@@ -15,7 +15,7 @@ import           Sequoia.Connective.Function
 import           Sequoia.Connective.Quantification
 import           Sequoia.Continuation
 import           Sequoia.Polarity
-import           Sequoia.Profunctor.ControlPassing
+import           Sequoia.Profunctor.Exponential
 import           Sequoia.Value
 
 -- Recursion
@@ -33,13 +33,13 @@ instance (Pos (f a), Neg a) => Polarized N (MuF e r f a) where
 mu :: ForAll r N (MuF e r f) -> Mu e r f
 mu r = Mu (dnE (mapDN getMuF (runForAll r)))
 
-foldMu :: ControlPassing d => Neg a => f a --|d e r|-> a -> Mu e r f --|d e r|-> a
+foldMu :: Exponential d => Neg a => f a --|d e r|-> a -> Mu e r f --|d e r|-> a
 foldMu alg = inCP (\ v k -> val (\ (Mu f) -> exCP f (inV0 (Down (coerceCP alg))) k) v)
 
-unfoldMu :: (Traversable f, ControlPassing d) => a --|d e r|-> f a -> a --|d e r|-> Mu e r f
+unfoldMu :: (Traversable f, Exponential d) => a --|d e r|-> f a -> a --|d e r|-> Mu e r f
 unfoldMu coalg = inCP' (\ a -> Mu (inCP (\ v k -> val (\ (Down alg) -> exCP (refoldCat alg (coerceCP coalg)) (inV0 a) k) v)))
 
-refoldMu :: (Traversable f, ControlPassing d, Neg b) => f b --|d e r|-> b -> a --|d e r|-> f a -> a --|d e r|-> b
+refoldMu :: (Traversable f, Exponential d, Neg b) => f b --|d e r|-> b -> a --|d e r|-> f a -> a --|d e r|-> b
 refoldMu f g = foldMu f Cat.<<< unfoldMu g
 
 

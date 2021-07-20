@@ -39,7 +39,7 @@ import           Sequoia.Functor.V
 import           Sequoia.Optic.Getter
 import           Sequoia.Optic.Review
 import           Sequoia.Profunctor.Context
-import           Sequoia.Profunctor.ControlPassing as ControlPassing hiding ((>>>))
+import           Sequoia.Profunctor.Exponential as Exponential hiding ((>>>))
 import           Sequoia.Value
 
 -- Sequents
@@ -53,13 +53,13 @@ runSeq s f g = evalSeq (dimap f g s)
 newtype Seq e r _Γ _Δ = Seq { getSeq :: V e _Γ -> K r _Δ -> C e r }
   deriving (Applicative, Functor, Monad) via (CP e r _Γ)
   deriving (Cat.Category, Choice, Profunctor, Strong) via (CP e r)
-  deriving (ControlPassing, Env2) via CP
+  deriving (Env2, Exponential) via CP
 
 
-liftLR :: ControlPassing d => d e r a b -> Seq e r (a < _Γ) (_Δ > b)
+liftLR :: Exponential d => d e r a b -> Seq e r (a < _Γ) (_Δ > b)
 liftLR = dimap exl inr . coerceCP
 
-lowerLR :: ControlPassing d => (d e r a b -> _Γ -|Seq e r|- _Δ) -> a < _Γ -|Seq e r|- _Δ > b -> _Γ -|Seq e r|- _Δ
+lowerLR :: Exponential d => (d e r a b -> _Γ -|Seq e r|- _Δ) -> a < _Γ -|Seq e r|- _Δ > b -> _Γ -|Seq e r|- _Δ
 lowerLR f p = inCP (\ _Γ _Δ -> exCP (f (inCP (\ a b -> exCP p (a <| _Γ) (_Δ |> b)))) _Γ _Δ)
 
 

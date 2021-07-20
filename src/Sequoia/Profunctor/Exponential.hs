@@ -1,15 +1,15 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE TypeFamilies #-}
-module Sequoia.Profunctor.ControlPassing
-( -- * Control-passing profunctor
+module Sequoia.Profunctor.Exponential
+( -- * Exponential profunctor
   CP(..)
   -- ** Mixfix notation
 , type (--|)
 , type (|->)
-  -- ** Control-passing profunctor abstraction
-, _ControlPassing
-, ControlPassing(..)
+  -- ** Exponential profunctor abstraction
+, _Exponential
+, Exponential(..)
 , _ControlStoring
 , ControlStoring(..)
   -- ** Construction
@@ -82,11 +82,11 @@ import           Sequoia.Profunctor.Coexponential
 import           Sequoia.Profunctor.Context
 import           Sequoia.Value as V
 
--- Control-passing profunctor
+-- Exponential profunctor
 
 newtype CP e r a b = CP { getCP :: V e a -> K r b -> C e r }
 
-instance ControlPassing CP where
+instance Exponential CP where
   inCP = CP
   exCP = getCP
 
@@ -138,12 +138,12 @@ infixr 6 --|
 infixr 5 |->
 
 
--- Control-passing profunctor abstraction
+-- Exponential profunctor abstraction
 
-_ControlPassing :: (ControlPassing f, ControlPassing f') => Iso (f e r a b) (f' e' r' a' b') (V e a -> K r b -> C e r) (V e' a' -> K r' b' -> C e' r')
-_ControlPassing = exCP <-> inCP
+_Exponential :: (Exponential f, Exponential f') => Iso (f e r a b) (f' e' r' a' b') (V e a -> K r b -> C e r) (V e' a' -> K r' b' -> C e' r')
+_Exponential = exCP <-> inCP
 
-class (forall e r . Cat.Category (f e r), forall e r . Profunctor (f e r)) => ControlPassing f where
+class (forall e r . Cat.Category (f e r), forall e r . Profunctor (f e r)) => Exponential f where
   inCP :: (V e a -> K r b -> C e r) -> f e r a b
   exCP :: f e r a b -> V e a -> K r b -> C e r
 
@@ -158,25 +158,25 @@ class (forall e r . Confunctor (f e r)) => ControlStoring f where
 
 -- Construction
 
-inCP' :: ControlPassing f => (a -> b) -> a --|f e r|-> b
+inCP' :: Exponential f => (a -> b) -> a --|f e r|-> b
 inCP' f = inCP (\ a b -> b •∘ (f <$> a))
 
 
 -- Elimination
 
-evalCP :: ControlPassing f => e --|f e r|-> r -> (e -> r)
+evalCP :: Exponential f => e --|f e r|-> r -> (e -> r)
 evalCP f = runC (exCP f idV idK)
 
-appCP :: ControlPassing f => a --|f e r|-> b -> V e (V e a -> K r **b)
+appCP :: Exponential f => a --|f e r|-> b -> V e (V e a -> K r **b)
 appCP f = inV (\ e a -> inK (\ b -> runC (exCP f a b) e))
 
-appCP2 :: ControlPassing f => a --|f e r|-> b --|f e r|-> c -> V e (V e a -> V e b -> K r **c)
+appCP2 :: Exponential f => a --|f e r|-> b --|f e r|-> c -> V e (V e a -> V e b -> K r **c)
 appCP2 f = inV (\ e a b -> inK (\ c -> runC (exCP f a (inK (\ g -> runC (exCP g b c) e))) e))
 
-runCP :: ControlPassing f => V e a -> K r b -> a --|f e r|-> b -> C e r
+runCP :: Exponential f => V e a -> K r b -> a --|f e r|-> b -> C e r
 runCP v k f = exCP f v k
 
-elimCP :: (ControlPassing f, ControlStoring s) => a --|f e r|-> b -> s e r a b -> C e r
+elimCP :: (Exponential f, ControlStoring s) => a --|f e r|-> b -> s e r a b -> C e r
 elimCP f = (exCP f <$> recall <*> forget) . exCS
 
 
@@ -195,76 +195,76 @@ contCS = forget . exCS
 
 -- Computation
 
-(↑) :: ControlPassing f => a --|f e r|-> b -> V e a -> f e r e|-> b
+(↑) :: Exponential f => a --|f e r|-> b -> V e a -> f e r e|-> b
 f ↑ a = f <<< producer a
 
 infixl 7 ↑
 
-(↓) :: ControlPassing f => K r b -> a --|f e r|-> b -> a --|f e r|-> r
+(↓) :: Exponential f => K r b -> a --|f e r|-> b -> a --|f e r|-> r
 k ↓ f = consumer k <<< f
 
 infixl 8 ↓
 
-dnE :: ControlPassing f => K r **(a --|f e r|-> b) -> a --|f e r|-> b
+dnE :: Exponential f => K r **(a --|f e r|-> b) -> a --|f e r|-> b
 dnE k = inCP (\ a b -> cont (\ _K -> k •• _K (\ f -> exCP f a b)))
 
-coerceCP :: (ControlPassing c, ControlPassing d) => c e r a b -> d e r a b
+coerceCP :: (Exponential c, Exponential d) => c e r a b -> d e r a b
 coerceCP = inCP . exCP
 
 
-liftRunCP :: ControlPassing f => ((f e r a b -> C e r) -> C e r) -> f e r a b
+liftRunCP :: Exponential f => ((f e r a b -> C e r) -> C e r) -> f e r a b
 liftRunCP f = inCP (fmap f . runCP)
 
 
-dimapVK :: ControlPassing f => (V e a' -> V e a) -> (K r b' -> K r b) -> (a --|f e r|-> b -> a' --|f e r|-> b')
+dimapVK :: Exponential f => (V e a' -> V e a) -> (K r b' -> K r b) -> (a --|f e r|-> b -> a' --|f e r|-> b')
 dimapVK f g = inCP . dimap f (lmap g) . exCP
 
-lmapV :: ControlPassing f => (V e a' -> V e a) -> (a --|f e r|-> b -> a' --|f e r|-> b)
+lmapV :: Exponential f => (V e a' -> V e a) -> (a --|f e r|-> b -> a' --|f e r|-> b)
 lmapV = (`dimapVK` id)
 
-rmapK :: ControlPassing f => (K r b' -> K r b) -> (a --|f e r|-> b -> a --|f e r|-> b')
+rmapK :: Exponential f => (K r b' -> K r b) -> (a --|f e r|-> b -> a --|f e r|-> b')
 rmapK = (id `dimapVK`)
 
 
 -- Defaults
 
-dimapCP :: ControlPassing f => (a' -> a) -> (b -> b') -> a --|f e r|-> b -> a' --|f e r|-> b'
+dimapCP :: Exponential f => (a' -> a) -> (b -> b') -> a --|f e r|-> b -> a' --|f e r|-> b'
 dimapCP f g = dimapVK (fmap f) (contramap g)
 
-lmapCP :: ControlPassing f => (a' -> a) -> a --|f e r|-> b -> a' --|f e r|-> b
+lmapCP :: Exponential f => (a' -> a) -> a --|f e r|-> b -> a' --|f e r|-> b
 lmapCP = lmapV . fmap
 
-rmapCP :: ControlPassing f => (b -> b') -> a --|f e r|-> b -> a --|f e r|-> b'
+rmapCP :: Exponential f => (b -> b') -> a --|f e r|-> b -> a --|f e r|-> b'
 rmapCP = rmapK . contramap
 
-firstCP  :: ControlPassing f => a --|f e r|-> b -> (a, c) --|f e r|-> (b, c)
+firstCP  :: Exponential f => a --|f e r|-> b -> (a, c) --|f e r|-> (b, c)
 firstCP  r = inCP (\ a b -> val (\ (a, c) -> exCP r (inV0 a) (contramap (,c) b)) a)
 
-secondCP :: ControlPassing f => a --|f e r|-> b -> (c, a) --|f e r|-> (c, b)
+secondCP :: Exponential f => a --|f e r|-> b -> (c, a) --|f e r|-> (c, b)
 secondCP r = inCP (\ a b -> val (\ (c, a) -> exCP r (inV0 a) (contramap (c,) b)) a)
 
-leftCP  :: ControlPassing f => a --|f e r|-> b -> Either a c --|f e r|-> Either b c
+leftCP  :: Exponential f => a --|f e r|-> b -> Either a c --|f e r|-> Either b c
 leftCP  r = inCP (\ a b -> val (flip (exCP r) (inlK b) . inV0 <--> (inrK b ••)) a)
 
-rightCP :: ControlPassing f => a --|f e r|-> b -> Either c a --|f e r|-> Either c b
+rightCP :: Exponential f => a --|f e r|-> b -> Either c a --|f e r|-> Either c b
 rightCP r = inCP (\ a b -> val ((inlK b ••) <--> flip (exCP r) (inrK b) . inV0) a)
 
-wanderCP :: (ControlPassing f, Applicative (f e r e)) => (forall m . Applicative m => (a -> m b) -> (s -> m t)) -> a --|f e r|-> b -> s --|f e r|-> t
+wanderCP :: (Exponential f, Applicative (f e r e)) => (forall m . Applicative m => (a -> m b) -> (s -> m t)) -> a --|f e r|-> b -> s --|f e r|-> t
 wanderCP traverse r = inCP (\ s t -> val (\ s -> exCP (traverse ((r ↑) . inV0) s) idV t) s)
 
-idCP :: ControlPassing f => a --|f e r|-> a
+idCP :: Exponential f => a --|f e r|-> a
 idCP = inCP (flip (•∘))
 
-composeCP :: ControlPassing f => b --|f e r|-> c -> a --|f e r|-> b -> a --|f e r|-> c
+composeCP :: Exponential f => b --|f e r|-> c -> a --|f e r|-> b -> a --|f e r|-> c
 composeCP f g = inCP (\ a c -> cont (\ _K -> exCP g a (_K (\ b -> exCP f (inV0 b) c))))
 
-pureCP :: ControlPassing f => b -> a --|f e r|-> b
+pureCP :: Exponential f => b -> a --|f e r|-> b
 pureCP = inCP . const . flip (••)
 
-apCP :: ControlPassing f => a --|f e r|-> (b -> c) -> a --|f e r|-> b -> a --|f e r|-> c
+apCP :: Exponential f => a --|f e r|-> (b -> c) -> a --|f e r|-> b -> a --|f e r|-> c
 apCP df da = inCP (\ a b -> cont (\ _K -> exCP df a (_K (\ f -> exCP da a (contramap f b)))))
 
-bindCP :: ControlPassing f => a --|f e r|-> b -> (b -> a --|f e r|-> c) -> a --|f e r|-> c
+bindCP :: Exponential f => a --|f e r|-> b -> (b -> a --|f e r|-> c) -> a --|f e r|-> c
 bindCP m f = inCP (\ a c -> cont (\ _K -> exCP m a (_K (\ b -> exCP (f b) a c))))
 
 
@@ -275,25 +275,25 @@ k •∘ v = env (\ e -> res (k • e ∘ v))
 
 infix 7 •∘
 
-localEnv :: ControlPassing c => (e -> e') -> c e' r s t -> c e r s t
+localEnv :: Exponential c => (e -> e') -> c e' r s t -> c e r s t
 -- FIXME: this always evaluates the argument in the current scope
 localEnv f c = inCP (\ v k -> val (\ v -> lmap f (exCP c (inV0 v) k)) v)
 
 
-inPrd :: ControlPassing f => (K r a -> C e r) -> f e r e|-> a
+inPrd :: Exponential f => (K r a -> C e r) -> f e r e|-> a
 inPrd = inCP . const
 
-producer :: (ControlPassing f, V.Representable v, V.Rep v ~ e) => v a -> f e r e|-> a
+producer :: (Exponential f, V.Representable v, V.Rep v ~ e) => v a -> f e r e|-> a
 producer v = inPrd (•∘ v)
 
-joinl :: ControlPassing f => f e r e|-> f e r a b -> f e r a b
+joinl :: Exponential f => f e r e|-> f e r a b -> f e r a b
 joinl p = inCP (\ a b -> cont (\ _K -> exCP p idV (_K (\ f -> exCP f a b))))
 
 
-inCns :: ControlPassing f => (V e a -> C e r) -> a --|f e r|-> r
+inCns :: Exponential f => (V e a -> C e r) -> a --|f e r|-> r
 inCns = inCP . fmap const
 
-consumer :: (ControlPassing f, K.Representable k, K.Rep k ~ r) => k a -> a --|f e r|-> r
+consumer :: (Exponential f, K.Representable k, K.Rep k ~ r) => k a -> a --|f e r|-> r
 consumer k = inCns (k •∘)
 
 
