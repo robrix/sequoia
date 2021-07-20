@@ -3,6 +3,8 @@ module Sequoia.Profunctor.Exchange
   Exchange(..)
   -- * Construction
 , idExchange
+  -- * Elimination
+, withExchange
 ) where
 
 import Data.Profunctor
@@ -20,3 +22,9 @@ instance Profunctor (Exchange a b) where
 
 idExchange :: Exchange a b a b
 idExchange = Exchange id id
+
+
+-- Elimination
+
+withExchange :: Exchange a b s t -> (((s -> a) -> (b -> t) -> r) -> r)
+withExchange (Exchange sa bt) f = f sa bt
