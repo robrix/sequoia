@@ -1,6 +1,7 @@
 module Sequoia.Functor.Source
 ( -- * Sources
-  Src(..)
+  _Src
+, Src(..)
   -- * Computation
 , mapSrcK
 , mapSrcV
@@ -17,6 +18,9 @@ import Sequoia.Profunctor.Context
 import Sequoia.Value
 
 -- Sources
+
+_Src :: Iso (Src e r b) (Src e' r' b') (K r b -> C e r) (K r' b' -> C e' r')
+_Src = runSrc <-> Src
 
 newtype Src e r b = Src { runSrc :: K r b -> C e r }
 
