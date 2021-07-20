@@ -49,7 +49,6 @@ module Sequoia.Profunctor.Exponential
 , apCP
 , bindCP
   -- * Control context
-, localEnv
 , inPrd
 , producer
 , joinl
@@ -252,11 +251,6 @@ bindCP m f = inCP (\ a c -> cont (\ _K -> exCP m a (_K (\ b -> exCP (f b) a c)))
 
 
 -- Control context
-
-localEnv :: Exponential c => (e -> e') -> c e' r s t -> c e r s t
--- FIXME: this always evaluates the argument in the current scope
-localEnv f c = inCP (\ v k -> val (\ v -> lmap f (exCP c (inV0 v) k)) v)
-
 
 inPrd :: Exponential f => (K r a -> C e r) -> f e r e|-> a
 inPrd = inCP . const
