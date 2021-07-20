@@ -12,6 +12,9 @@ import Sequoia.Value
 
 newtype Src e r b = Src { runSrc :: K r b -> C e r }
 
+instance Functor (Src e r) where
+  fmap f = Src . (. contramap f) . runSrc
+
 instance Env1 Src where
   env1 f = Src (\ k -> env ((`runSrc` k) . f))
 
