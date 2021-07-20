@@ -224,10 +224,10 @@ poppedΔ
   :: Contextual s
   => (K r _Δ''' -> (K r _Δ'', x))
   -> (K r _Δ' -> x -> K r _Δ)
-  -> (_Γ -|s e r|- _Δ' -> _Γ' -|s e r|- _Δ'')
-  -- -----------------------------------------
-  -> (_Γ -|s e r|- _Δ  -> _Γ' -|s e r|- _Δ''')
-poppedΔ g h f p = traverseΔ g (\ x -> f (mapΔ (`h` x) p))
+  -> Setter
+    (_Γ -|s e r|- _Δ ) (_Γ' -|s e r|- _Δ''')
+    (_Γ -|s e r|- _Δ') (_Γ' -|s e r|- _Δ'')
+poppedΔ g h = roam (\ f p -> traverseΔ g (\ x -> f (mapΔ (`h` x) p)))
 
 
 poppedL
