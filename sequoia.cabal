@@ -139,6 +139,7 @@ library
     Sequoia.Functor.Cov
     Sequoia.Functor.I
     Sequoia.Functor.K
+    Sequoia.Functor.Source
     Sequoia.Functor.V
     Sequoia.Lambda
     Sequoia.Optic.Getter
