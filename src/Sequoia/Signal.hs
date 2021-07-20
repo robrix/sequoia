@@ -72,14 +72,14 @@ mapVSig b = Sig . dimap (review b) (rmap (mapCV (view b))) . runSig
 -- Conversions
 
 solSrc
-  ::      C e r
+  ::       C e r
             <->
           Src e r |- r
 solSrc = Src . const <-> ($ idK) . runSrc
 
 
 solSnk
-  ::      C e r
+  ::       C e r
             <->
      e -| Snk e r
 solSnk = Snk . const <-> ($ idV) . runSnk
@@ -106,7 +106,7 @@ composeSigSnk sig snk = review snkSig (view snkSig snk <<< sig)
 
 
 solSig
-  ::      C e r
+  ::       C e r
             <->
      e -| Sig e r |- r
 solSig = Sig . const . const <-> ($ idK) . ($ idV) . runSig
