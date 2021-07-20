@@ -207,13 +207,13 @@ contramapping a = contramap (view a) <-> contramap (review a)
 
 -- Bifunctor
 
-bimapping :: Bifunctor p => Iso s t a b -> Iso s' t' a' b' -> Iso (p s s') (p t t') (p a a') (p b b')
+bimapping :: (Bifunctor p, Bifunctor q) => Iso s t a b -> Iso s' t' a' b' -> Iso (p s s') (q t t') (p a a') (q b b')
 bimapping a b = bimap (view a) (view b) <-> bimap (review a) (review b)
 
-firsting :: Bifunctor p => Iso s t a b -> Iso (p s x) (p t y) (p a x) (p b y)
+firsting :: (Bifunctor p, Bifunctor q) => Iso s t a b -> Iso (p s x) (q t y) (p a x) (q b y)
 firsting a = first (view a) <-> first (review a)
 
-seconding :: Bifunctor p => Iso s t a b -> Iso (p x s) (p y t) (p x a) (p y b)
+seconding :: (Bifunctor p, Bifunctor q) => Iso s t a b -> Iso (p x s) (q y t) (p x a) (q y b)
 seconding b = second (view b) <-> second (review b)
 
 
