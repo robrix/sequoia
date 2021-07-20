@@ -72,6 +72,7 @@ import Sequoia.Optic.Getter
 import Sequoia.Optic.Iso
 import Sequoia.Optic.Review
 import Sequoia.Optic.Setter
+import Sequoia.Profunctor.Recall
 
 -- Continuations
 
@@ -251,6 +252,10 @@ class Res c where
 instance Res (->) where
   res = pure
   liftRes f = f =<< flip ($)
+
+instance Res (Recall e) where
+  res r = Recall (const r)
+  liftRes f = Recall (\ e -> runRecall (f (`runRecall` e)) e)
 
 cont :: (Res c, Representable k) => (((a -> c e (Rep k)) -> k a) -> c e (Rep k)) -> c e (Rep k)
 cont = liftRes . contN
