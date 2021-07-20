@@ -12,6 +12,7 @@ import Data.Profunctor
 import Data.Profunctor.Rep as Pro
 import Data.Profunctor.Sieve
 import Data.Profunctor.Traversing
+import Sequoia.Value
 
 newtype C e r = C { runC :: e -> r }
   deriving (Applicative, Cat.Category, Choice, Closed, Cochoice, Costrong, Functor, Mapping, Monad, Profunctor, Co.Representable, Strong, Traversing)
@@ -33,3 +34,6 @@ instance Pro.Representable C where
 instance Pro.Corepresentable C where
   type Corep C = Identity
   cotabulate = C . lmap Identity
+
+instance Env C where
+  env = C . (runC =<<)
