@@ -31,13 +31,13 @@ unto f = lphantom . rmap f
 
 -- Elimination
 
-reviews :: Optic (Recall e) s t a b -> (e -> b) -> (e -> t)
+reviews :: Review s t a b -> (e -> b) -> (e -> t)
 reviews b = runRecall . b . Recall
 
-review :: Optic (Recall b) s t a b -> (b -> t)
+review :: Review s t a b -> (b -> t)
 review o = reviews o id
 
-(<~) :: Optic (Recall b) s t a b -> (b -> t)
+(<~) :: Review s t a b -> (b -> t)
 (<~) = review
 
 infixr 8 <~
