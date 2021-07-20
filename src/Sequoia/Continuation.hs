@@ -254,7 +254,7 @@ instance Res (->) where
   liftRes f = f =<< flip ($)
 
 instance Res (Recall e) where
-  res r = Recall (const r)
+  res = Recall . pure
   liftRes f = Recall (\ e -> runRecall (f (`runRecall` e)) e)
 
 cont :: (Res c, Representable k) => (((a -> c e (Rep k)) -> k a) -> c e (Rep k)) -> c e (Rep k)
