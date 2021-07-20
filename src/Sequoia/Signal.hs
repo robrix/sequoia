@@ -33,7 +33,6 @@ import           Sequoia.Functor.V
 import           Sequoia.Optic.Getter
 import           Sequoia.Optic.Iso
 import           Sequoia.Optic.Review
-import           Sequoia.Optic.Setter
 import           Sequoia.Profunctor.Context
 import           Sequoia.Value as V
 
@@ -48,23 +47,16 @@ liftSolWithK :: ((C e r -> r) -> C e r) -> C e r
 liftSolWithK f = env (f . flip runC)
 
 
-mapKSol :: (forall x . K r x -> K r' x) -> (C e r -> C e r')
-mapKSol = over _C . under _K
-
-mapVSol :: (forall x . V e x -> V e' x) -> (C e r -> C e' r)
-mapVSol = over _C . under _V
-
-
 newtype Src e r   b = Src { runSrc :: K r b -> C e r }
 
 instance Functor (Src e r) where
   fmap f (Src r) = Src (lmap (contramap f) r)
 
 mapKSrc :: (forall x . K r x <-> K r' x) -> (Src e r b -> Src e r' b)
-mapKSrc b = Src . dimap (review b) (mapKSol (view b)) . runSrc
+mapKSrc b = Src . dimap (review b) (mapCK (view b)) . runSrc
 
 mapVSrc :: (forall x . V e x -> V e' x) -> (Src e r b -> Src e' r b)
-mapVSrc f = Src . rmap (mapVSol f) . runSrc
+mapVSrc f = Src . rmap (mapCV f) . runSrc
 
 
 newtype Snk e r a   = Snk { runSnk :: V e a -> C e r }
@@ -73,10 +65,10 @@ instance Contravariant (Snk e r) where
   contramap f = Snk . lmap (fmap f) . runSnk
 
 mapKSnk :: (forall x . K r x -> K r' x) -> (Snk e r a -> Snk e r' a)
-mapKSnk f = Snk . fmap (mapKSol f) . runSnk
+mapKSnk f = Snk . fmap (mapCK f) . runSnk
 
 mapVSnk :: (forall x . V e x <-> V e' x) -> (Snk e r a -> Snk e' r a)
-mapVSnk b = Snk . dimap (review b) (mapVSol (view b)) . runSnk
+mapVSnk b = Snk . dimap (review b) (mapCV (view b)) . runSnk
 
 
 newtype Sig e r a b = Sig { runSig :: V e a -> K r b -> C e r }
@@ -99,10 +91,10 @@ instance Monad (Sig e r a) where
   Sig m >>= f = Sig (\ a b -> liftSolWithK (\ go -> m a (inK (\ a' -> go (runSig (f a') a b)))))
 
 mapKSig :: (forall x . K r x <-> K r' x) -> (Sig e r a b -> Sig e r' a b)
-mapKSig b = Sig . fmap (dimap (review b) (mapKSol (view b))) . runSig
+mapKSig b = Sig . fmap (dimap (review b) (mapCK (view b))) . runSig
 
 mapVSig :: (forall x . V e x <-> V e' x) -> (Sig e r a b -> Sig e' r a b)
-mapVSig b = Sig . dimap (review b) (rmap (mapVSol (view b))) . runSig
+mapVSig b = Sig . dimap (review b) (rmap (mapCV (view b))) . runSig
 
 
 -- Conversions

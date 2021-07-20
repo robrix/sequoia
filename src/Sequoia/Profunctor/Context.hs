@@ -1,8 +1,12 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Profunctor.Context
-( _C
+( -- Context & control profunctor
+  _C
 , C(..)
+  -- Computation
+, mapCK
+, mapCV
 ) where
 
 import Control.Category as Cat (Category)
@@ -14,8 +18,13 @@ import Data.Profunctor.Rep as Pro
 import Data.Profunctor.Sieve
 import Data.Profunctor.Traversing
 import Sequoia.Continuation
+import Sequoia.Functor.K
+import Sequoia.Functor.V
 import Sequoia.Optic.Iso
+import Sequoia.Optic.Setter
 import Sequoia.Value
+
+-- Context & control profunctor
 
 _C :: Iso (C e r) (C e' r') (e -> r) (e' -> r')
 _C = runC <-> C
@@ -47,3 +56,12 @@ instance Env C where
 instance Res C where
   res = C . const
   liftRes f = C (\ e -> runC (f (`runC` e)) e)
+
+
+-- Computation
+
+mapCK :: (forall x . K r x -> K r' x) -> (C e r -> C e r')
+mapCK = over _C . under _K
+
+mapCV :: (forall x . V e x -> V e' x) -> (C e r -> C e' r)
+mapCV = over _C . under _V
