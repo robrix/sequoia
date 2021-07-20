@@ -1,6 +1,8 @@
 module Sequoia.Optic.Traversal
 ( -- * Traversals
   Traversal
+  -- * Construction
+, traversed
   -- * Elimination
 , traverseOf
 ) where
@@ -12,6 +14,12 @@ import Sequoia.Optic.Optic
 -- Traversals
 
 type Traversal s t a b = forall p . Traversing p => Optic p s t a b
+
+
+-- Construction
+
+traversed :: Traversable t => Traversal (t a) (t b) a b
+traversed = wander traverse
 
 
 -- Elimination
