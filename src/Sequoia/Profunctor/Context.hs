@@ -1,7 +1,8 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Profunctor.Context
-( C(..)
+( _C
+, C(..)
 ) where
 
 import Control.Category as Cat (Category)
@@ -13,7 +14,11 @@ import Data.Profunctor.Rep as Pro
 import Data.Profunctor.Sieve
 import Data.Profunctor.Traversing
 import Sequoia.Continuation
+import Sequoia.Optic.Iso
 import Sequoia.Value
+
+_C :: Iso (C e r) (C e' r') (e -> r) (e' -> r')
+_C = runC <-> C
 
 newtype C e r = C { runC :: e -> r }
   deriving (Applicative, Cat.Category, Choice, Closed, Cochoice, Costrong, Functor, Mapping, Monad, Profunctor, Co.Representable, Strong, Traversing)
