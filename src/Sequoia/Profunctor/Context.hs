@@ -1,17 +1,19 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Profunctor.Context
-( -- Context & control profunctor
+( -- * Context & control profunctor
   _C
 , C(..)
-  -- Computation
+  -- * Computation
 , mapCKV
 , mapCK
 , mapCV
+, (•∘)
 ) where
 
 import Control.Category as Cat (Category)
 import Data.Distributive
+import Data.Functor.Contravariant.Rep as Contra
 import Data.Functor.Identity
 import Data.Functor.Rep as Co
 import Data.Profunctor
@@ -69,3 +71,7 @@ mapCK = over _C . under _K
 
 mapCV :: (forall x . V e x -> V e' x) -> (C e r -> C e' r)
 mapCV = over _C . under _V
+
+
+(•∘) :: (Env c, Co.Representable v, Res c, Contra.Representable k) => k a -> v a -> c (Co.Rep v) (Contra.Rep k)
+k •∘ v = env (\ e -> res (k • e ∘ v))

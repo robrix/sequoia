@@ -34,11 +34,6 @@ import           Sequoia.Value as V
 
 -- Signals
 
-(•∘) :: K r a -> V e a -> C e r
-k •∘ a = C (\ e -> k • e ∘ a)
-
-infix 7 •∘
-
 liftSolWithK :: ((C e r -> r) -> C e r) -> C e r
 liftSolWithK f = env (f . flip runC)
 
@@ -56,7 +51,7 @@ instance Functor (Sig e r a) where
   fmap = rmap
 
 instance Applicative (Sig e r a) where
-  pure a = Sig (const (•∘ inV0 a))
+  pure a = Sig (const (•∘ inV0 @(V _) a))
   (<*>) = ap
 
 instance Monad (Sig e r a) where

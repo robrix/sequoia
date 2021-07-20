@@ -49,7 +49,6 @@ module Sequoia.Profunctor.Exponential
 , apCP
 , bindCP
   -- * Control context
-, (•∘)
 , localEnv
 , inPrd
 , producer
@@ -258,11 +257,6 @@ bindCP m f = inCP (\ a c -> cont (\ _K -> exCP m a (_K (\ b -> exCP (f b) a c)))
 
 
 -- Control context
-
-(•∘) :: (Env c, V.Representable v, Res c, K.Representable k) => k a -> v a -> c (V.Rep v) (K.Rep k)
-k •∘ v = env (\ e -> res (k • e ∘ v))
-
-infix 7 •∘
 
 localEnv :: Exponential c => (e -> e') -> c e' r s t -> c e r s t
 -- FIXME: this always evaluates the argument in the current scope
