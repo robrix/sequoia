@@ -5,6 +5,7 @@ module Sequoia.Profunctor.Context
   _C
 , C(..)
   -- Computation
+, mapCKV
 , mapCK
 , mapCV
 ) where
@@ -59,6 +60,9 @@ instance Res C where
 
 
 -- Computation
+
+mapCKV :: (forall x . K r x -> K r' x) -> (forall x . V e x -> V e' x) -> (C e r -> C e' r')
+mapCKV f g = over _C (under _K f . under _V g)
 
 mapCK :: (forall x . K r x -> K r' x) -> (C e r -> C e r')
 mapCK = over _C . under _K
