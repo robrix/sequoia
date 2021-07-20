@@ -26,8 +26,8 @@ type Getter s t a b = forall p . IsGetter p => Optic p s t a b
 
 type Getter' s a = forall p . IsGetter p => Optic' p s a
 
-class    (Bicontravariant p, Profunctor p) => IsGetter p
-instance (Bicontravariant p, Profunctor p) => IsGetter p
+class    (Bicontravariant p, Strong p) => IsGetter p
+instance (Bicontravariant p, Strong p) => IsGetter p
 
 
 -- Construction
