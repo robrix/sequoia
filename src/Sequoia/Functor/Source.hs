@@ -1,10 +1,17 @@
 module Sequoia.Functor.Source
 ( -- * Sources
   Src(..)
+  -- * Computation
+, mapSrcK
 ) where
 
+import Data.Profunctor
 import Sequoia.Continuation
 import Sequoia.Functor.K
+import Sequoia.Functor.V
+import Sequoia.Optic.Getter
+import Sequoia.Optic.Iso
+import Sequoia.Optic.Review
 import Sequoia.Profunctor.Context
 import Sequoia.Value
 
@@ -28,3 +35,9 @@ instance Env1 Src where
 instance Res1 Src where
   res1 = Src . const . res
   liftRes1 f = Src (\ k -> liftRes (\ run -> runSrc (f (run . (`runSrc` k))) k))
+
+
+-- Computation
+
+mapSrcK :: (forall x . K r x <-> K r' x) -> (Src e r b -> Src e r' b)
+mapSrcK b = Src . dimap (review b) (mapCK (view b)) . runSrc
