@@ -3,3 +3,4 @@ module Sequoia.Profunctor.Context
 ) where
 
 newtype C e r = C { runC :: e -> r }
+  deriving (Applicative, Functor, Monad)
