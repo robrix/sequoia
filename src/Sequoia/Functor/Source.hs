@@ -15,6 +15,10 @@ newtype Src e r b = Src { runSrc :: K r b -> C e r }
 instance Functor (Src e r) where
   fmap f = Src . (. contramap f) . runSrc
 
+instance Applicative (Src e r) where
+  pure = Src . fmap res . flip runK
+  Src f <*> Src a = Src (\ k -> cont (\ _K -> f (_K (\ f -> a (inK (exK k . f))))))
+
 instance Env1 Src where
   env1 f = Src (\ k -> env ((`runSrc` k) . f))
 
