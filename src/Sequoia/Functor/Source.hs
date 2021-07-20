@@ -3,6 +3,7 @@ module Sequoia.Functor.Source
   Src(..)
   -- * Computation
 , mapSrcK
+, mapSrcV
 ) where
 
 import Data.Profunctor
@@ -41,3 +42,6 @@ instance Res1 Src where
 
 mapSrcK :: (forall x . K r x <-> K r' x) -> (Src e r b -> Src e r' b)
 mapSrcK b = Src . dimap (review b) (mapCK (view b)) . runSrc
+
+mapSrcV :: (forall x . V e x -> V e' x) -> (Src e r b -> Src e' r b)
+mapSrcV f = Src . fmap (mapCV f) . runSrc
