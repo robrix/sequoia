@@ -168,22 +168,22 @@ coercedFrom = (coerce <->)
 
 -- Representable (covariant)
 
-tabulated :: Co.Representable f => (Co.Rep f -> a) <-> f a
+tabulated :: (Co.Representable f, Co.Representable g) => Iso (Co.Rep f -> a) (Co.Rep g -> b) (f a) (g b)
 tabulated = Co.tabulate <-> Co.index
 
 
 -- Representable (contravariant)
 
-contratabulated :: Contra.Representable f => (a -> Contra.Rep f) <-> f a
+contratabulated :: (Contra.Representable f, Contra.Representable g) => Iso (a -> Contra.Rep f) (b -> Contra.Rep g) (f a) (g b)
 contratabulated = Contra.tabulate <-> Contra.index
 
 
 -- (Co-)representable (profunctorial)
 
-protabulated :: Pro.Representable p => (a -> Pro.Rep p b) <-> a `p` b
+protabulated :: (Pro.Representable p, Pro.Representable q) => Iso (a -> Pro.Rep p b) (a' -> Pro.Rep q b') (a `p` b) (a' `q` b')
 protabulated = Pro.tabulate <-> sieve
 
-cotabulated :: Pro.Corepresentable p => (Pro.Corep p a -> b) <-> a `p` b
+cotabulated :: (Pro.Corepresentable p, Pro.Corepresentable q) => Iso (Pro.Corep p a -> b) (Pro.Corep q a' -> b') (a `p` b) (a' `q` b')
 cotabulated = Pro.cotabulate <-> cosieve
 
 
