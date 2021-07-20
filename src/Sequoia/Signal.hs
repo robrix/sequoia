@@ -2,9 +2,6 @@
 module Sequoia.Signal
 ( -- * Signals
   C(..)
-, Snk(..)
-, mapKSnk
-, mapVSnk
 , Sig(..)
 , mapKSig
 , mapVSig
@@ -26,6 +23,7 @@ import           Data.Profunctor
 import           Sequoia.Calculus.Context
 import           Sequoia.Continuation as K
 import           Sequoia.Functor.K
+import           Sequoia.Functor.Sink
 import           Sequoia.Functor.Source
 import           Sequoia.Functor.V
 import           Sequoia.Optic.Getter
@@ -43,18 +41,6 @@ infix 7 •∘
 
 liftSolWithK :: ((C e r -> r) -> C e r) -> C e r
 liftSolWithK f = env (f . flip runC)
-
-
-newtype Snk e r a   = Snk { runSnk :: V e a -> C e r }
-
-instance Contravariant (Snk e r) where
-  contramap f = Snk . lmap (fmap f) . runSnk
-
-mapKSnk :: (forall x . K r x -> K r' x) -> (Snk e r a -> Snk e r' a)
-mapKSnk f = Snk . fmap (mapCK f) . runSnk
-
-mapVSnk :: (forall x . V e x <-> V e' x) -> (Snk e r a -> Snk e' r a)
-mapVSnk b = Snk . dimap (review b) (mapCV (view b)) . runSnk
 
 
 newtype Sig e r a b = Sig { runSig :: V e a -> K r b -> C e r }
