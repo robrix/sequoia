@@ -88,7 +88,7 @@ infix 1 <->
 
 
 from :: Iso s t a b -> Iso b a t s
-from b = review b <-> view b
+from o = withIso o (flip (<->))
 
 constant :: a -> (a -> b) <-> b
 constant a = ($ a) <-> const
