@@ -68,6 +68,7 @@ import Sequoia.Continuation as K
 import Sequoia.Disjunction
 import Sequoia.Functor.K
 import Sequoia.Functor.V
+import Sequoia.Optic.Setter
 import Sequoia.Value
 
 -- Contextual
@@ -214,10 +215,10 @@ poppedΓ
   :: Contextual s
   => (V e _Γ''' -> (x, V e _Γ''))
   -> (x -> V e _Γ' -> V e _Γ)
-  -> (_Γ' -|s e r|- _Δ -> _Γ''  -|s e r|- _Δ')
-  -- -----------------------------------------
-  -> (_Γ  -|s e r|- _Δ -> _Γ''' -|s e r|- _Δ')
-poppedΓ g h f p = traverseΓ g (\ x -> f (mapΓ (h x) p))
+  -> Setter
+    (_Γ  -|s e r|- _Δ) (_Γ''' -|s e r|- _Δ')
+    (_Γ' -|s e r|- _Δ) (_Γ''  -|s e r|- _Δ')
+poppedΓ g h = roam (\ f p -> traverseΓ g (\ x -> f (mapΓ (h x) p)))
 
 poppedΔ
   :: Contextual s
