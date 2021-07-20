@@ -29,3 +29,7 @@ instance Cosieve C Identity where
 instance Pro.Representable C where
   type Rep C = Identity
   tabulate = C . fmap runIdentity
+
+instance Pro.Corepresentable C where
+  type Corep C = Identity
+  cotabulate = C . lmap Identity
