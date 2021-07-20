@@ -96,16 +96,16 @@ constant a = ($ a) <-> const
 involuted :: (a -> a) -> a <-> a
 involuted f = f <-> f
 
-flipped :: (a -> b -> c) <-> (b -> a -> c)
+flipped :: Iso (a -> b -> c) (a' -> b' -> c') (b -> a -> c) (b' -> a' -> c')
 flipped = flip <-> flip
 
-curried :: ((a, b) -> c) <-> (a -> b -> c)
+curried :: Iso ((a, b) -> c) ((a', b') -> c') (a -> b -> c) (a' -> b' -> c')
 curried = curry <-> uncurry
 
-uncurried :: (a -> b -> c) <-> ((a, b) -> c)
+uncurried :: Iso (a -> b -> c) (a' -> b' -> c') ((a, b) -> c) ((a', b') -> c')
 uncurried = uncurry <-> curry
 
-swapped :: (a, b) <-> (b, a)
+swapped :: Iso (a, b) (a', b') (b, a) (b', a')
 swapped = swap <-> swap
 
 non :: Eq a => a -> Maybe a <-> a
