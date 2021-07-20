@@ -19,6 +19,9 @@ instance Applicative (Src e r) where
   pure = Src . fmap res . flip runK
   Src f <*> Src a = Src (\ k -> cont (\ _K -> f (_K (\ f -> a (inK (exK k . f))))))
 
+instance Monad (Src e r) where
+  Src m >>= f = Src (\ k -> cont (\ _K -> m (_K ((`runSrc` k) . f))))
+
 instance Env1 Src where
   env1 f = Src (\ k -> env ((`runSrc` k) . f))
 
