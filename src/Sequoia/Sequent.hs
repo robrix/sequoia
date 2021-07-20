@@ -51,9 +51,9 @@ runSeq :: Seq e r _Γ _Δ -> ((e -> _Γ) -> (_Δ -> r) -> (e -> r))
 runSeq s f g = evalSeq (dimap f g s)
 
 newtype Seq e r _Γ _Δ = Seq { getSeq :: V e _Γ -> K r _Δ -> C e r }
-  deriving (Applicative, Functor, Monad) via (CP e r _Γ)
-  deriving (Cat.Category, Choice, Profunctor, Strong) via (CP e r)
-  deriving (Env2, Exponential) via CP
+  deriving (Applicative, Functor, Monad) via (Exp e r _Γ)
+  deriving (Cat.Category, Choice, Profunctor, Strong) via (Exp e r)
+  deriving (Env2, Exponential) via Exp
 
 
 liftLR :: Exponential d => d e r a b -> Seq e r (a < _Γ) (_Δ > b)

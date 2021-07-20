@@ -3,7 +3,7 @@
 {-# LANGUAGE TypeFamilies #-}
 module Sequoia.Profunctor.Exponential
 ( -- * Exponential profunctor
-  CP(..)
+  Exp(..)
   -- ** Mixfix notation
 , type (--|)
 , type (|->)
@@ -68,47 +68,47 @@ import           Sequoia.Value as V
 
 -- Exponential profunctor
 
-newtype CP e r a b = CP { getCP :: V e a -> K r b -> C e r }
+newtype Exp e r a b = Exp { getExp :: V e a -> K r b -> C e r }
 
-instance Exponential CP where
-  inCP = CP
-  exCP = getCP
+instance Exponential Exp where
+  inCP = Exp
+  exCP = getExp
 
-instance Profunctor (CP e r) where
+instance Profunctor (Exp e r) where
   dimap = dimapCP
 
-instance Strong (CP e r) where
+instance Strong (Exp e r) where
   first'  = firstCP
   second' = secondCP
 
-instance Choice (CP e r) where
+instance Choice (Exp e r) where
   left'  = leftCP
   right' = rightCP
 
-instance Traversing (CP e r) where
+instance Traversing (Exp e r) where
   wander = wanderCP
 
-instance Cat.Category (CP e r) where
+instance Cat.Category (Exp e r) where
   id = idCP
   (.) = composeCP
 
-instance Functor (CP e r c) where
+instance Functor (Exp e r c) where
   fmap = rmap
 
-instance Applicative (CP e r a) where
+instance Applicative (Exp e r a) where
   pure = pureCP
   (<*>) = apCP
 
-instance Monad (CP e r a) where
+instance Monad (Exp e r a) where
   (>>=) = bindCP
 
-instance Coapply (CP e r) where
-  coliftA2 f a b = CP (\ v k -> env ((flip (exCP a) k <∘∘> flip (exCP b) k) (f <$> v)))
+instance Coapply (Exp e r) where
+  coliftA2 f a b = Exp (\ v k -> env ((flip (exCP a) k <∘∘> flip (exCP b) k) (f <$> v)))
 
-instance Env2 CP where
+instance Env2 Exp where
   env2 f = inCP (\ v k -> env (runCP v k . f))
 
-instance Res2 CP where
+instance Res2 Exp where
   res2 = inCP . const . const . res
   liftRes2 f = liftRunCP (\ run -> liftRes (dimap (. run) run f))
 

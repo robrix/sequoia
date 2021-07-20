@@ -27,9 +27,9 @@ appFun2 :: (a ~~Fun e r~> b ~~Fun e r~> c) -> V e (V e a -> V e b -> K r **c)
 appFun2 = appCP2
 
 newtype Fun e r a b = Fun { getFun :: V e a -> K r b -> C e r }
-  deriving (Exponential) via CP
-  deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via CP e r
-  deriving (Functor) via CP e r a
+  deriving (Exponential) via Exp
+  deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via Exp e r
+  deriving (Functor) via Exp e r a
 
 instance (Pos a, Neg b) => Polarized N (Fun e r a b) where
 
