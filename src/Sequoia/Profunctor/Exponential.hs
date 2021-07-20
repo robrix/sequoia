@@ -48,12 +48,6 @@ module Sequoia.Profunctor.Exponential
 , pureCP
 , apCP
 , bindCP
-  -- * Control context
-, inPrd
-, producer
-, joinl
-, consumer
-, inCns
 ) where
 
 import           Control.Category ((<<<), (>>>))
@@ -178,12 +172,12 @@ contCS = forget . exCS
 -- Computation
 
 (↑) :: Exponential f => a --|f e r|-> b -> V e a -> f e r e|-> b
-f ↑ a = f <<< producer a
+f ↑ a = f <<< inCP (const (•∘ a))
 
 infixl 7 ↑
 
 (↓) :: Exponential f => K r b -> a --|f e r|-> b -> a --|f e r|-> r
-k ↓ f = consumer k <<< f
+k ↓ f = inCP (const . (k •∘)) <<< f
 
 infixl 8 ↓
 
@@ -248,22 +242,3 @@ apCP df da = inCP (\ a b -> cont (\ _K -> exCP df a (_K (\ f -> exCP da a (contr
 
 bindCP :: Exponential f => a --|f e r|-> b -> (b -> a --|f e r|-> c) -> a --|f e r|-> c
 bindCP m f = inCP (\ a c -> cont (\ _K -> exCP m a (_K (\ b -> exCP (f b) a c))))
-
-
--- Control context
-
-inPrd :: Exponential f => (K r a -> C e r) -> f e r e|-> a
-inPrd = inCP . const
-
-producer :: (Exponential f, V.Representable v, V.Rep v ~ e) => v a -> f e r e|-> a
-producer v = inPrd (•∘ v)
-
-joinl :: Exponential f => f e r e|-> f e r a b -> f e r a b
-joinl p = inCP (\ a b -> cont (\ _K -> exCP p idV (_K (\ f -> exCP f a b))))
-
-
-inCns :: Exponential f => (V e a -> C e r) -> a --|f e r|-> r
-inCns = inCP . fmap const
-
-consumer :: (Exponential f, K.Representable k, K.Rep k ~ r) => k a -> a --|f e r|-> r
-consumer k = inCns (k •∘)
