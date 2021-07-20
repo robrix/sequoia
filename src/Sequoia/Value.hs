@@ -31,6 +31,7 @@ module Sequoia.Value
   -- * Ambient environment
 , Env(..)
 , val
+, Env1(..)
 , Env2(..)
 , val2
 ) where
@@ -147,6 +148,10 @@ instance Env V where
 
 val :: (Env c, Representable v) => (a -> c (Rep v) r) -> (v a -> c (Rep v) r)
 val f v = env (f . exV v)
+
+
+class Env1 c where
+  env1 :: (e -> c e r a) -> c e r a
 
 
 class Env2 c where
