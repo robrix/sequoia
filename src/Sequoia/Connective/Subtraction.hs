@@ -41,7 +41,7 @@ infixr 5 -<
 
 
 sub :: (K.Representable k, V.Representable v, Conj c) => a ~-Sub (V.Rep v) (K.Rep k)-< b <-> v a `c` k b
-sub = _Coexponential.(coerceConj <-> coerceConj).(coerceV *** coerceK <-> coerceV *** coerceK)
+sub = _Coexponential.coercedConj.bimappingConj coercedV coercedK
 
 subA_ :: Lens (a ~-Sub e r-< b) (a' ~-Sub e' r-< b) (V e a) (V e' a')
 subA_ = _Coexponential._fst
