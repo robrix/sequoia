@@ -10,4 +10,5 @@ newtype C e r = C { runC :: e -> r }
   deriving (Applicative, Functor, Monad, Co.Representable)
 
 instance Distributive (C e) where
-  distribute r = C (\ e -> (`runC` e) <$> r)
+  distribute = distributeRep
+  collect = collectRep
