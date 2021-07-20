@@ -1,2 +1,5 @@
 module Sequoia.Profunctor.Exchange
-() where
+( Exchange(..)
+) where
+
+data Exchange a b s t = Exchange (s -> a) (b -> t)
