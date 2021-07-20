@@ -219,11 +219,11 @@ seconding b = second (view b) <-> second (review b)
 
 -- Profunctor
 
-dimapping :: Profunctor p => (a <-> a') -> (b <-> b') -> (a `p` b) <-> (a' `p` b')
-dimapping a b = dimap (review a) (view b) <-> dimap (view a) (review b)
+dimapping :: (Profunctor p, Profunctor q) => Iso s t a b -> Iso s' t' a' b' -> Iso (p a s') (q b t') (p s a') (q t b')
+dimapping a b = dimap (view a) (view b) <-> dimap (review a) (review b)
 
-lmapping :: Profunctor p => (a <-> a') -> (a `p` b) <-> (a' `p` b)
-lmapping a = lmap (review a) <-> lmap (view a)
+lmapping :: (Profunctor p, Profunctor q) => Iso s t a b -> Iso (p a x) (q b y) (p s x) (q t y)
+lmapping a = lmap (view a) <-> lmap (review a)
 
-rmapping :: Profunctor p => (b <-> b') -> (a `p` b) <-> (a `p` b')
+rmapping :: (Profunctor p, Profunctor q) => Iso s t a b -> Iso (p x s) (q y t) (p x a) (q y b)
 rmapping b = rmap (view b) <-> rmap (review b)
