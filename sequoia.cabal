@@ -158,6 +158,7 @@ library
     Sequoia.Profunctor.Context
     Sequoia.Profunctor.ControlPassing
     Sequoia.Profunctor.Diagonal
+    Sequoia.Profunctor.Exchange
     Sequoia.Profunctor.K
     Sequoia.Profunctor.Product
     Sequoia.Profunctor.Recall
