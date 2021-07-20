@@ -4,6 +4,7 @@ module Sequoia.Profunctor.Exchange
   -- * Construction
 , idExchange
   -- * Elimination
+, runExchange
 , withExchange
 ) where
 
@@ -25,6 +26,9 @@ idExchange = Exchange id id
 
 
 -- Elimination
+
+runExchange :: Exchange a b s t -> ((a -> b) -> (s -> t))
+runExchange e = withExchange e (\ sa bt -> (bt .) . (. sa))
 
 withExchange :: Exchange a b s t -> (((s -> a) -> (b -> t) -> r) -> r)
 withExchange (Exchange sa bt) f = f sa bt
