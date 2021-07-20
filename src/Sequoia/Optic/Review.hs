@@ -10,6 +10,7 @@ module Sequoia.Optic.Review
 , (<~)
 ) where
 
+import Control.Effect.Reader
 import Data.Bifunctor
 import Data.Profunctor
 import Sequoia.Bicontravariant (lphantom)
@@ -31,10 +32,10 @@ unto f = lphantom . rmap f
 
 -- Elimination
 
-reviews :: Review s t a b -> (e -> b) -> (e -> t)
-reviews b = runRecall . b . Recall
+reviews :: Has (Reader e) sig m => Review s t a b -> (e -> b) -> m t
+reviews b = asks . runRecall . b . Recall
 
-review :: Review s t a b -> (b -> t)
+review :: Has (Reader b) sig m => Review s t a b -> m t
 review o = reviews o id
 
 (<~) :: Review s t a b -> (b -> t)
