@@ -33,12 +33,12 @@ instance Profunctor (Coexp e r) where
 
 -- Coexponential profunctor abstraction
 
-_Coexponential :: (Coexponential f, Coexponential f', Profunctor p) => Optic p (f e r a b) (f' e' r' a' b') (Coexp e r b a) (Coexp e' r' b' a')
-_Coexponential = exCoexp `dimap` inCoexp
+_Coexponential :: (Coexponential f, Coexponential f', Profunctor p) => Optic p (f e r a b) (f' e' r' a' b') (V e a, K r b) (V e' a', K r' b')
+_Coexponential = exCoexp `dimap` uncurry inCoexp
 
 class (forall e r . Confunctor (f e r)) => Coexponential f where
-  inCoexp :: Coexp e r b a -> f e r a b
-  exCoexp :: f e r a b -> Coexp e r b a
+  inCoexp :: V e a -> K r b -> f e r a b
+  exCoexp :: f e r a b -> (V e a, K r b)
 
 
 -- Construction

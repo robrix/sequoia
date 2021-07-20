@@ -148,7 +148,7 @@ runExp :: Exponential f => V e a -> K r b -> a --|f e r|-> b -> C e r
 runExp v k f = exExp f v k
 
 elimExp :: (Exponential f, Coexponential s) => a --|f e r|-> b -> s e r a b -> C e r
-elimExp f = (exExp f <$> recall <*> forget) . exCoexp
+elimExp f = uncurry (exExp f) . exCoexp
 
 
 -- Computation

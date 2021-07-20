@@ -28,8 +28,8 @@ newtype Sub e r a b = Sub { getSub :: Coexp e r b a }
   deriving Confunctor via Flip (Coexp e r)
 
 instance Coexponential Sub where
-  inCoexp = Sub
-  exCoexp = getSub
+  inCoexp = fmap Sub . Coexp
+  exCoexp = (recall &&& forget) . getSub
 
 instance (Pos a, Neg b) => Polarized P (Sub e r a b) where
 
@@ -41,10 +41,10 @@ infixr 5 -<
 
 
 sub :: (K.Representable k, V.Representable v, Conj c) => a ~-Sub (V.Rep v) (K.Rep k)-< b <-> v a `c` k b
-sub = _Coexponential.(coerceV . recall >---< coerceK . forget <-> uncurryConj Coexp . (coerceV *** coerceK))
+sub = _Coexponential.(coerceV . fst >---< coerceK . snd <-> coerceConj . (coerceV *** coerceK))
 
 subA_ :: Lens (a ~-Sub e r-< b) (a' ~-Sub e' r-< b) (V e a) (V e' a')
-subA_ = _Coexponential.recall_
+subA_ = _Coexponential._fst
 
 subK_ :: Lens (a ~-Sub e r-< b) (a ~-Sub e r'-< b') (K r b) (K r' b')
-subK_ = _Coexponential.forget_
+subK_ = _Coexponential._snd
