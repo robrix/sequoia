@@ -40,6 +40,7 @@ module Sequoia.Value
 import Control.Applicative (liftA2)
 import Control.Monad (join)
 import Data.Functor.Rep
+import Data.Profunctor
 import Sequoia.Conjunction
 import Sequoia.Disjunction
 import Sequoia.Functor.V
@@ -146,6 +147,9 @@ instance Env (->) where
 
 instance Env V where
   env f = V (runV =<< f)
+
+instance Env (Forget r) where
+  env = Forget . (runForget =<<)
 
 val :: (Env c, Representable v) => (a -> c (Rep v) r) -> (v a -> c (Rep v) r)
 val f v = env (f . exV v)
