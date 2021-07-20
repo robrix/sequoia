@@ -37,7 +37,7 @@ coexp r f = Coexp (V r) (K f)
 -- Elimination
 
 runCoexp :: Coexp e r b a -> ((a -> b) -> (e -> r))
-runCoexp (Coexp a b) = (runK b .) . (. runV a)
+runCoexp c = withCoexp c (\ r f -> (f .) . (. r))
 
 withCoexp :: Coexp e r b a -> (((e -> a) -> (b -> r) -> s) -> s)
 withCoexp c f = f (runV (recall c)) (runK (forget c))
