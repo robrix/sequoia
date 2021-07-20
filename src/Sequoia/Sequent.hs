@@ -34,6 +34,7 @@ import           Sequoia.Contextual
 import           Sequoia.Continuation as K
 import           Sequoia.Disjunction
 import           Sequoia.Functor.K
+import           Sequoia.Functor.Source
 import           Sequoia.Functor.V
 import           Sequoia.Optic.Getter
 import           Sequoia.Optic.Review
@@ -105,7 +106,7 @@ instance Calculus.Control Seq where
 -- Assertion
 
 instance NotUntrueIntro Seq where
-  notUntrueL s = inCP (\ v k -> val (\ (NotUntrue a) -> cont (\ _K -> a (_K (\ a -> exCP s (inV0 a <| exrF v) k)))) (exlF v))
+  notUntrueL s = inCP (\ v k -> val (\ (NotUntrue (Src a)) -> cont (\ _K -> a (_K (\ a -> exCP s (inV0 a <| exrF v) k)))) (exlF v))
   notUntrueR s = mapR pure s
 
 instance TrueIntro Seq where
