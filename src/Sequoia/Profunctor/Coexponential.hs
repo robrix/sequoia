@@ -12,7 +12,6 @@ module Sequoia.Profunctor.Coexponential
 , forget_
 ) where
 
-import Data.Functor.Contravariant
 import Data.Profunctor
 import Sequoia.Functor.K
 import Sequoia.Functor.V
@@ -23,7 +22,7 @@ data Coexp e r a b = Coexp { recall :: V e b, forget :: K r a }
   deriving (Functor)
 
 instance Profunctor (Coexp e r) where
-  dimap f g c = Coexp (g <$> recall c) (f >$< forget c)
+  dimap g h c = withCoexp c (\ r f -> toCoexp (h . r) (f . g))
 
 
 -- Construction
