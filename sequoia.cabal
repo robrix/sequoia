@@ -153,6 +153,7 @@ library
     Sequoia.Profunctor.Adjunction
     Sequoia.Profunctor.Applicative
     Sequoia.Profunctor.Coexponential
+    Sequoia.Profunctor.Context
     Sequoia.Profunctor.ControlPassing
     Sequoia.Profunctor.Diagonal
     Sequoia.Profunctor.K
