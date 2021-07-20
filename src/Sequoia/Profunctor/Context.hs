@@ -20,3 +20,6 @@ instance Distributive (C e) where
 
 instance Sieve C Identity where
   sieve = fmap Identity . runC
+
+instance Cosieve C Identity where
+  cosieve = lmap runIdentity . runC
