@@ -11,13 +11,13 @@ module Sequoia.Profunctor.Exponential
 , _Exponential
 , Exponential(..)
   -- ** Construction
-, inCP'
+, inExp'
   -- ** Elimination
-, evalCP
-, appCP
-, appCP2
-, runCP
-, elimCP
+, evalExp
+, appExp
+, appExp2
+, runExp
+, elimExp
 , argCS_
 , argCS
 , contCS
@@ -29,25 +29,25 @@ module Sequoia.Profunctor.Exponential
 , (↑)
 , (↓)
 , dnE
-, coerceCP
-, liftRunCP
+, coerceExp
+, liftRunExp
 , dimapVK
 , lmapV
 , rmapK
   -- * Defaults
-, dimapCP
-, lmapCP
-, rmapCP
-, firstCP
-, secondCP
-, leftCP
-, rightCP
-, wanderCP
-, idCP
-, composeCP
-, pureCP
-, apCP
-, bindCP
+, dimapExp
+, lmapExp
+, rmapExp
+, firstExp
+, secondExp
+, leftExp
+, rightExp
+, wanderExp
+, idExp
+, composeExp
+, pureExp
+, apExp
+, bindExp
 ) where
 
 import           Control.Category ((<<<), (>>>))
@@ -71,46 +71,46 @@ import           Sequoia.Value as V
 newtype Exp e r a b = Exp { getExp :: V e a -> K r b -> C e r }
 
 instance Exponential Exp where
-  inCP = Exp
-  exCP = getExp
+  inExp = Exp
+  exExp = getExp
 
 instance Profunctor (Exp e r) where
-  dimap = dimapCP
+  dimap = dimapExp
 
 instance Strong (Exp e r) where
-  first'  = firstCP
-  second' = secondCP
+  first'  = firstExp
+  second' = secondExp
 
 instance Choice (Exp e r) where
-  left'  = leftCP
-  right' = rightCP
+  left'  = leftExp
+  right' = rightExp
 
 instance Traversing (Exp e r) where
-  wander = wanderCP
+  wander = wanderExp
 
 instance Cat.Category (Exp e r) where
-  id = idCP
-  (.) = composeCP
+  id = idExp
+  (.) = composeExp
 
 instance Functor (Exp e r c) where
   fmap = rmap
 
 instance Applicative (Exp e r a) where
-  pure = pureCP
-  (<*>) = apCP
+  pure = pureExp
+  (<*>) = apExp
 
 instance Monad (Exp e r a) where
-  (>>=) = bindCP
+  (>>=) = bindExp
 
 instance Coapply (Exp e r) where
-  coliftA2 f a b = Exp (\ v k -> env ((flip (exCP a) k <∘∘> flip (exCP b) k) (f <$> v)))
+  coliftA2 f a b = Exp (\ v k -> env ((flip (exExp a) k <∘∘> flip (exExp b) k) (f <$> v)))
 
 instance Env2 Exp where
-  env2 f = inCP (\ v k -> env (runCP v k . f))
+  env2 f = inExp (\ v k -> env (runExp v k . f))
 
 instance Res2 Exp where
-  res2 = inCP . const . const . res
-  liftRes2 f = liftRunCP (\ run -> liftRes (dimap (. run) run f))
+  res2 = inExp . const . const . res
+  liftRes2 f = liftRunExp (\ run -> liftRes (dimap (. run) run f))
 
 
 -- Mixfix notation
@@ -125,35 +125,35 @@ infixr 5 |->
 -- Exponential profunctor abstraction
 
 _Exponential :: (Exponential f, Exponential f') => Iso (f e r a b) (f' e' r' a' b') (V e a -> K r b -> C e r) (V e' a' -> K r' b' -> C e' r')
-_Exponential = exCP <-> inCP
+_Exponential = exExp <-> inExp
 
 class (forall e r . Cat.Category (f e r), forall e r . Profunctor (f e r)) => Exponential f where
-  inCP :: (V e a -> K r b -> C e r) -> f e r a b
-  exCP :: f e r a b -> V e a -> K r b -> C e r
+  inExp :: (V e a -> K r b -> C e r) -> f e r a b
+  exExp :: f e r a b -> V e a -> K r b -> C e r
 
 
 -- Construction
 
-inCP' :: Exponential f => (a -> b) -> a --|f e r|-> b
-inCP' f = inCP (\ a b -> b •∘ (f <$> a))
+inExp' :: Exponential f => (a -> b) -> a --|f e r|-> b
+inExp' f = inExp (\ a b -> b •∘ (f <$> a))
 
 
 -- Elimination
 
-evalCP :: Exponential f => e --|f e r|-> r -> (e -> r)
-evalCP f = runC (exCP f idV idK)
+evalExp :: Exponential f => e --|f e r|-> r -> (e -> r)
+evalExp f = runC (exExp f idV idK)
 
-appCP :: Exponential f => a --|f e r|-> b -> V e (V e a -> K r **b)
-appCP f = inV (\ e a -> inK (\ b -> runC (exCP f a b) e))
+appExp :: Exponential f => a --|f e r|-> b -> V e (V e a -> K r **b)
+appExp f = inV (\ e a -> inK (\ b -> runC (exExp f a b) e))
 
-appCP2 :: Exponential f => a --|f e r|-> b --|f e r|-> c -> V e (V e a -> V e b -> K r **c)
-appCP2 f = inV (\ e a b -> inK (\ c -> runC (exCP f a (inK (\ g -> runC (exCP g b c) e))) e))
+appExp2 :: Exponential f => a --|f e r|-> b --|f e r|-> c -> V e (V e a -> V e b -> K r **c)
+appExp2 f = inV (\ e a b -> inK (\ c -> runC (exExp f a (inK (\ g -> runC (exExp g b c) e))) e))
 
-runCP :: Exponential f => V e a -> K r b -> a --|f e r|-> b -> C e r
-runCP v k f = exCP f v k
+runExp :: Exponential f => V e a -> K r b -> a --|f e r|-> b -> C e r
+runExp v k f = exExp f v k
 
-elimCP :: (Exponential f, Coexponential s) => a --|f e r|-> b -> s e r a b -> C e r
-elimCP f = (exCP f <$> recall <*> forget) . exCS
+elimExp :: (Exponential f, Coexponential s) => a --|f e r|-> b -> s e r a b -> C e r
+elimExp f = (exExp f <$> recall <*> forget) . exCS
 
 
 argCS_ :: Coexponential s => Lens (s e r a b) (s e' r a' b) (V e a) (V e' a')
@@ -172,28 +172,28 @@ contCS = forget . exCS
 -- Computation
 
 (↑) :: Exponential f => a --|f e r|-> b -> V e a -> f e r e|-> b
-f ↑ a = f <<< inCP (const (•∘ a))
+f ↑ a = f <<< inExp (const (•∘ a))
 
 infixl 7 ↑
 
 (↓) :: Exponential f => K r b -> a --|f e r|-> b -> a --|f e r|-> r
-k ↓ f = inCP (const . (k •∘)) <<< f
+k ↓ f = inExp (const . (k •∘)) <<< f
 
 infixl 8 ↓
 
 dnE :: Exponential f => K r **(a --|f e r|-> b) -> a --|f e r|-> b
-dnE k = inCP (\ a b -> cont (\ _K -> k •• _K (\ f -> exCP f a b)))
+dnE k = inExp (\ a b -> cont (\ _K -> k •• _K (\ f -> exExp f a b)))
 
-coerceCP :: (Exponential c, Exponential d) => c e r a b -> d e r a b
-coerceCP = inCP . exCP
+coerceExp :: (Exponential c, Exponential d) => c e r a b -> d e r a b
+coerceExp = inExp . exExp
 
 
-liftRunCP :: Exponential f => ((f e r a b -> C e r) -> C e r) -> f e r a b
-liftRunCP f = inCP (fmap f . runCP)
+liftRunExp :: Exponential f => ((f e r a b -> C e r) -> C e r) -> f e r a b
+liftRunExp f = inExp (fmap f . runExp)
 
 
 dimapVK :: Exponential f => (V e a' -> V e a) -> (K r b' -> K r b) -> (a --|f e r|-> b -> a' --|f e r|-> b')
-dimapVK f g = inCP . dimap f (lmap g) . exCP
+dimapVK f g = inExp . dimap f (lmap g) . exExp
 
 lmapV :: Exponential f => (V e a' -> V e a) -> (a --|f e r|-> b -> a' --|f e r|-> b)
 lmapV = (`dimapVK` id)
@@ -204,41 +204,41 @@ rmapK = (id `dimapVK`)
 
 -- Defaults
 
-dimapCP :: Exponential f => (a' -> a) -> (b -> b') -> a --|f e r|-> b -> a' --|f e r|-> b'
-dimapCP f g = dimapVK (fmap f) (contramap g)
+dimapExp :: Exponential f => (a' -> a) -> (b -> b') -> a --|f e r|-> b -> a' --|f e r|-> b'
+dimapExp f g = dimapVK (fmap f) (contramap g)
 
-lmapCP :: Exponential f => (a' -> a) -> a --|f e r|-> b -> a' --|f e r|-> b
-lmapCP = lmapV . fmap
+lmapExp :: Exponential f => (a' -> a) -> a --|f e r|-> b -> a' --|f e r|-> b
+lmapExp = lmapV . fmap
 
-rmapCP :: Exponential f => (b -> b') -> a --|f e r|-> b -> a --|f e r|-> b'
-rmapCP = rmapK . contramap
+rmapExp :: Exponential f => (b -> b') -> a --|f e r|-> b -> a --|f e r|-> b'
+rmapExp = rmapK . contramap
 
-firstCP  :: Exponential f => a --|f e r|-> b -> (a, c) --|f e r|-> (b, c)
-firstCP  r = inCP (\ a b -> val (\ (a, c) -> exCP r (inV0 a) (contramap (,c) b)) a)
+firstExp  :: Exponential f => a --|f e r|-> b -> (a, c) --|f e r|-> (b, c)
+firstExp  r = inExp (\ a b -> val (\ (a, c) -> exExp r (inV0 a) (contramap (,c) b)) a)
 
-secondCP :: Exponential f => a --|f e r|-> b -> (c, a) --|f e r|-> (c, b)
-secondCP r = inCP (\ a b -> val (\ (c, a) -> exCP r (inV0 a) (contramap (c,) b)) a)
+secondExp :: Exponential f => a --|f e r|-> b -> (c, a) --|f e r|-> (c, b)
+secondExp r = inExp (\ a b -> val (\ (c, a) -> exExp r (inV0 a) (contramap (c,) b)) a)
 
-leftCP  :: Exponential f => a --|f e r|-> b -> Either a c --|f e r|-> Either b c
-leftCP  r = inCP (\ a b -> val (flip (exCP r) (inlK b) . inV0 <--> (inrK b ••)) a)
+leftExp  :: Exponential f => a --|f e r|-> b -> Either a c --|f e r|-> Either b c
+leftExp  r = inExp (\ a b -> val (flip (exExp r) (inlK b) . inV0 <--> (inrK b ••)) a)
 
-rightCP :: Exponential f => a --|f e r|-> b -> Either c a --|f e r|-> Either c b
-rightCP r = inCP (\ a b -> val ((inlK b ••) <--> flip (exCP r) (inrK b) . inV0) a)
+rightExp :: Exponential f => a --|f e r|-> b -> Either c a --|f e r|-> Either c b
+rightExp r = inExp (\ a b -> val ((inlK b ••) <--> flip (exExp r) (inrK b) . inV0) a)
 
-wanderCP :: (Exponential f, Applicative (f e r e)) => (forall m . Applicative m => (a -> m b) -> (s -> m t)) -> a --|f e r|-> b -> s --|f e r|-> t
-wanderCP traverse r = inCP (\ s t -> val (\ s -> exCP (traverse ((r ↑) . inV0) s) idV t) s)
+wanderExp :: (Exponential f, Applicative (f e r e)) => (forall m . Applicative m => (a -> m b) -> (s -> m t)) -> a --|f e r|-> b -> s --|f e r|-> t
+wanderExp traverse r = inExp (\ s t -> val (\ s -> exExp (traverse ((r ↑) . inV0) s) idV t) s)
 
-idCP :: Exponential f => a --|f e r|-> a
-idCP = inCP (flip (•∘))
+idExp :: Exponential f => a --|f e r|-> a
+idExp = inExp (flip (•∘))
 
-composeCP :: Exponential f => b --|f e r|-> c -> a --|f e r|-> b -> a --|f e r|-> c
-composeCP f g = inCP (\ a c -> cont (\ _K -> exCP g a (_K (\ b -> exCP f (inV0 b) c))))
+composeExp :: Exponential f => b --|f e r|-> c -> a --|f e r|-> b -> a --|f e r|-> c
+composeExp f g = inExp (\ a c -> cont (\ _K -> exExp g a (_K (\ b -> exExp f (inV0 b) c))))
 
-pureCP :: Exponential f => b -> a --|f e r|-> b
-pureCP = inCP . const . flip (••)
+pureExp :: Exponential f => b -> a --|f e r|-> b
+pureExp = inExp . const . flip (••)
 
-apCP :: Exponential f => a --|f e r|-> (b -> c) -> a --|f e r|-> b -> a --|f e r|-> c
-apCP df da = inCP (\ a b -> cont (\ _K -> exCP df a (_K (\ f -> exCP da a (contramap f b)))))
+apExp :: Exponential f => a --|f e r|-> (b -> c) -> a --|f e r|-> b -> a --|f e r|-> c
+apExp df da = inExp (\ a b -> cont (\ _K -> exExp df a (_K (\ f -> exExp da a (contramap f b)))))
 
-bindCP :: Exponential f => a --|f e r|-> b -> (b -> a --|f e r|-> c) -> a --|f e r|-> c
-bindCP m f = inCP (\ a c -> cont (\ _K -> exCP m a (_K (\ b -> exCP (f b) a c))))
+bindExp :: Exponential f => a --|f e r|-> b -> (b -> a --|f e r|-> c) -> a --|f e r|-> c
+bindExp m f = inExp (\ a c -> cont (\ _K -> exExp m a (_K (\ b -> exExp (f b) a c))))

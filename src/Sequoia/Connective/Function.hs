@@ -21,10 +21,10 @@ import           Sequoia.Profunctor.Exponential
 -- Implication
 
 appFun :: (a ~~Fun e r~> b) -> V e (V e a -> K r **b)
-appFun = appCP
+appFun = appExp
 
 appFun2 :: (a ~~Fun e r~> b ~~Fun e r~> c) -> V e (V e a -> V e b -> K r **c)
-appFun2 = appCP2
+appFun2 = appExp2
 
 newtype Fun e r a b = Fun { getFun :: V e a -> K r b -> C e r }
   deriving (Exponential) via Exp

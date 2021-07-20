@@ -45,7 +45,7 @@ import           Sequoia.Value
 -- Sequents
 
 evalSeq :: _Γ -|Seq _Γ _Δ|- _Δ -> (_Γ -> _Δ)
-evalSeq = evalCP
+evalSeq = evalExp
 
 runSeq :: Seq e r _Γ _Δ -> ((e -> _Γ) -> (_Δ -> r) -> (e -> r))
 runSeq s f g = evalSeq (dimap f g s)
@@ -57,10 +57,10 @@ newtype Seq e r _Γ _Δ = Seq { getSeq :: V e _Γ -> K r _Δ -> C e r }
 
 
 liftLR :: Exponential d => d e r a b -> Seq e r (a < _Γ) (_Δ > b)
-liftLR = dimap exl inr . coerceCP
+liftLR = dimap exl inr . coerceExp
 
 lowerLR :: Exponential d => (d e r a b -> _Γ -|Seq e r|- _Δ) -> a < _Γ -|Seq e r|- _Δ > b -> _Γ -|Seq e r|- _Δ
-lowerLR f p = inCP (\ _Γ _Δ -> exCP (f (inCP (\ a b -> exCP p (a <| _Γ) (_Δ |> b)))) _Γ _Δ)
+lowerLR f p = inExp (\ _Γ _Δ -> exExp (f (inExp (\ a b -> exExp p (a <| _Γ) (_Δ |> b)))) _Γ _Δ)
 
 
 -- Effectful sequents
@@ -72,7 +72,7 @@ newtype SeqT e r _Γ m _Δ = SeqT { getSeqT :: Seq e (m r) _Γ _Δ }
   deriving (Applicative, Functor, Monad)
 
 instance MonadTrans (SeqT r s _Γ) where
-  lift m = SeqT (inCP (const (C . const . (m >>=) . (•))))
+  lift m = SeqT (inExp (const (C . const . (m >>=) . (•))))
 
 
 -- Core rules
@@ -93,20 +93,20 @@ deriving via Contextually Seq instance Exchange Seq
 -- Contextual rules
 
 instance Contextual Seq where
-  swapΓΔ f _Γ' _Δ' = inCP (\ _Γ _Δ -> exCP (f _Γ _Δ) _Γ' _Δ')
+  swapΓΔ f _Γ' _Δ' = inExp (\ _Γ _Δ -> exExp (f _Γ _Δ) _Γ' _Δ')
 
 
 -- Control
 
 instance Calculus.Control Seq where
-  reset s = inCP (\ _Γ _Δ -> C (exK _Δ . runC (exCP s _Γ idK)))
-  shift s = inCP (\ _Γ _Δ -> exCP s (inV0 (inrK _Δ) <| _Γ) (inlK _Δ |> idK))
+  reset s = inExp (\ _Γ _Δ -> C (exK _Δ . runC (exExp s _Γ idK)))
+  shift s = inExp (\ _Γ _Δ -> exExp s (inV0 (inrK _Δ) <| _Γ) (inlK _Δ |> idK))
 
 
 -- Assertion
 
 instance NotUntrueIntro Seq where
-  notUntrueL s = inCP (\ v k -> val (\ (NotUntrue (Src a)) -> cont (\ _K -> a (_K (\ a -> exCP s (inV0 a <| exrF v) k)))) (exlF v))
+  notUntrueL s = inExp (\ v k -> val (\ (NotUntrue (Src a)) -> cont (\ _K -> a (_K (\ a -> exExp s (inV0 a <| exrF v) k)))) (exlF v))
   notUntrueR s = mapR pure s
 
 instance TrueIntro Seq where
@@ -195,7 +195,7 @@ instance SubtractionIntro Seq where
 
 instance UniversalIntro Seq where
   forAllL p = mapL (notNegate . runForAll) p
-  forAllR p = inCP (\ _Γ _Δ -> liftRes (\ run -> inrK _Δ •• ForAll (inK (\ k -> run (exCP p _Γ (inlK _Δ |> k))))))
+  forAllR p = inExp (\ _Γ _Δ -> liftRes (\ run -> inrK _Δ •• ForAll (inK (\ k -> run (exExp p _Γ (inlK _Δ |> k))))))
 
 instance ExistentialIntro Seq where
   existsL p = popL (dnE . runExists (pushL p))
