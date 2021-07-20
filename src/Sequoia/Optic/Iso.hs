@@ -17,6 +17,7 @@ module Sequoia.Optic.Iso
 , under
 , au
 , auf
+, xplat
   -- * Coercion
 , coerced
 , coercedFrom
@@ -120,6 +121,9 @@ au o f = view o <$> f (review o)
 
 auf :: (Functor f, Functor g) => Iso s t a b -> ((f t -> g s) -> (f b -> g a))
 auf o f b = view o <$> f (review o <$> b)
+
+xplat :: Functor g => Iso s t a b -> ((s -> a) -> g b) -> g t
+xplat o = au (from o)
 
 
 -- Coercion
