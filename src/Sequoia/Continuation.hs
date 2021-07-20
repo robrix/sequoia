@@ -252,7 +252,7 @@ instance Res (->) where
   liftRes f = f =<< flip ($)
 
 cont :: (Res c, Representable k) => (((a -> c e (Rep k)) -> k a) -> c e (Rep k)) -> c e (Rep k)
-cont f = liftRes (\ run -> f (inK . (run .)))
+cont = liftRes . contN
 
 (••) :: (Res c, Representable k) => k a -> a -> c e (Rep k)
 k •• v = res (k • v)
@@ -265,4 +265,8 @@ class Res1 c where
   liftRes1 :: ((c e r a -> r) -> c e r a) -> c e r a
 
 cont1 :: (Res1 c, Representable k) => (((a -> c e (Rep k) a) -> k a) -> c e (Rep k) a) -> c e (Rep k) a
-cont1 f = liftRes1 (\ run -> f (inK . (run .)))
+cont1 = liftRes1 . contN
+
+
+contN :: Representable k => (((a -> c) -> k a) -> c) -> ((c -> Rep k) -> c)
+contN f run = f (inK . (run .))
