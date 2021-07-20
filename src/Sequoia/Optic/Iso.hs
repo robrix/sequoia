@@ -138,7 +138,7 @@ xplatf o = auf (from o)
 
 -- Coercion
 
-coerced :: Coercible a b => a <-> b
+coerced :: (Coercible s a, Coercible t b) => Iso s t a b
 coerced = coerce <-> coerce
 
 -- | Build a bidi coercion, taking a constructor for the type being built both to improve type inference and as documentation.
@@ -150,7 +150,7 @@ coerced = coerce <-> coerce
 -- @
 --
 -- produces a bijection of type @A '<->' B@.
-coercedTo   :: Coercible a b => (a -> b) -> a <-> b
+coercedTo   :: Coercible t b => (s -> a) -> Iso s t a b
 coercedTo   = (<-> coerce)
 
 -- | Build a bidi coercion, taking a constructor for the type being eliminated both to improve type inference and as documentation.
@@ -162,7 +162,7 @@ coercedTo   = (<-> coerce)
 -- @
 --
 -- produces a bijection of type @A '<->' B@.
-coercedFrom :: Coercible a b => (b -> a) -> a <-> b
+coercedFrom :: Coercible s a => (b -> t) -> Iso s t a b
 coercedFrom = (coerce <->)
 
 
