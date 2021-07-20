@@ -13,6 +13,7 @@ module Sequoia.Sequent
 import qualified Control.Category as Cat
 import           Control.Monad.Trans.Class
 import           Data.Profunctor
+import           Data.Profunctor.Traversing
 import           Prelude hiding (init)
 import           Sequoia.Calculus.Additive
 import           Sequoia.Calculus.Assertion
@@ -52,7 +53,7 @@ runSeq s f g = evalSeq (dimap f g s)
 
 newtype Seq e r _Γ _Δ = Seq { getSeq :: V e _Γ -> K r _Δ -> C e r }
   deriving (Applicative, Functor, Monad) via (Exp e r _Γ)
-  deriving (Cat.Category, Choice, Profunctor, Strong) via (Exp e r)
+  deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via (Exp e r)
   deriving (Env2, Exponential) via Exp
 
 
