@@ -208,8 +208,8 @@ coerceCP :: (ControlPassing c, ControlPassing d) => c e r a b -> d e r a b
 coerceCP = inCP . exCP
 
 
-liftRunCP :: ControlPassing f => ((f e r a b -> C e r) -> f e r a b) -> f e r a b
-liftRunCP f = inCP (\ v k -> runCP v k (f (runCP v k)))
+liftRunCP :: ControlPassing f => ((f e r a b -> C e r) -> C e r) -> f e r a b
+liftRunCP f = inCP (fmap f . runCP)
 
 
 dimapVK :: ControlPassing f => (V e a' -> V e a) -> (K r b' -> K r b) -> (a --|f e r|-> b -> a' --|f e r|-> b')
