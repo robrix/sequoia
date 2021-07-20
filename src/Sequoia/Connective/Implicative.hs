@@ -15,13 +15,14 @@ import Sequoia.Continuation
 import Sequoia.Disjunction
 import Sequoia.Functor.K
 import Sequoia.Functor.V
+import Sequoia.Optic.Getter ((^.))
 import Sequoia.Optic.Iso
 import Sequoia.Profunctor.Context
 import Sequoia.Profunctor.ControlPassing
 import Sequoia.Value
 
 elimFun :: a ~~Fun e r~> b -> a ~-Sub e r-< b -> C e r
-elimFun f = exCP f <$> subA <*> subK
+elimFun f s = exCP f (s^.subA_) (s^.subK_)
 
 funPar1 :: K r (V e (r ¬a ⅋ b)) <-> K r (V e (a ~~Fun e r~> b))
 funPar1
