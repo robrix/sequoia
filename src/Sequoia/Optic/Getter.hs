@@ -11,9 +11,11 @@ module Sequoia.Optic.Getter
 , views
 , view
 , (~>)
+, use
 ) where
 
 import Control.Effect.Reader
+import Control.Effect.State
 import Data.Profunctor
 import Sequoia.Bicontravariant
 import Sequoia.Optic.Optic
@@ -46,3 +48,7 @@ view = (`views` id)
 s ~> o = view o s
 
 infixl 8 ~>
+
+
+use :: Has (State s) sig m => Getter s t a b -> m a
+use o = gets (~> o)
