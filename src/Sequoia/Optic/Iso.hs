@@ -189,10 +189,10 @@ cotabulated = Pro.cotabulate <-> cosieve
 
 -- Adjunction
 
-adjuncted :: Co.Adjunction f u => (f a -> b) <-> (a -> u b)
+adjuncted :: (Co.Adjunction f u, Co.Adjunction f' u') => Iso (f a -> b) (f' a' -> b') (a -> u b) (a' -> u' b')
 adjuncted = Co.leftAdjunct <-> Co.rightAdjunct
 
-contraadjuncted :: Contra.Adjunction f u => (a -> f b) <-> (b -> u a)
+contraadjuncted :: (Contra.Adjunction f u, Contra.Adjunction f' u') => Iso (a -> f b) (a' -> f' b') (b -> u a) (b' -> u' a')
 contraadjuncted = Contra.leftAdjunct <-> Contra.rightAdjunct
 
 
