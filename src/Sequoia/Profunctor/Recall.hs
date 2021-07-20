@@ -15,7 +15,7 @@ import Data.Profunctor.Sieve
 newtype Recall e a b = Recall { runRecall :: e -> b }
   deriving (Applicative, Functor, Monad, Co.Representable)
 
-instance Distributive (Recall s a) where
+instance Distributive (Recall e a) where
   distribute = distributeRep
   collect = collectRep
 
