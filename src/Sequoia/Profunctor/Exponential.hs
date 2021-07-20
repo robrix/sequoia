@@ -10,8 +10,8 @@ module Sequoia.Profunctor.Exponential
   -- ** Exponential profunctor abstraction
 , _Exponential
 , Exponential(..)
-, _ControlStoring
-, ControlStoring(..)
+, _Coexponential
+, Coexponential(..)
   -- ** Construction
 , inCP'
   -- ** Elimination
@@ -148,10 +148,10 @@ class (forall e r . Cat.Category (f e r), forall e r . Profunctor (f e r)) => Ex
   exCP :: f e r a b -> V e a -> K r b -> C e r
 
 
-_ControlStoring :: (ControlStoring p, ControlStoring p') => Iso (p e r a b) (p' e' r' a' b') (Coexp e r b a) (Coexp e' r' b' a')
-_ControlStoring = exCS <-> inCS
+_Coexponential :: (Coexponential p, Coexponential p') => Iso (p e r a b) (p' e' r' a' b') (Coexp e r b a) (Coexp e' r' b' a')
+_Coexponential = exCS <-> inCS
 
-class (forall e r . Confunctor (f e r)) => ControlStoring f where
+class (forall e r . Confunctor (f e r)) => Coexponential f where
   inCS :: Coexp e r b a -> f e r a b
   exCS :: f e r a b -> Coexp e r b a
 
@@ -176,20 +176,20 @@ appCP2 f = inV (\ e a b -> inK (\ c -> runC (exCP f a (inK (\ g -> runC (exCP g 
 runCP :: Exponential f => V e a -> K r b -> a --|f e r|-> b -> C e r
 runCP v k f = exCP f v k
 
-elimCP :: (Exponential f, ControlStoring s) => a --|f e r|-> b -> s e r a b -> C e r
+elimCP :: (Exponential f, Coexponential s) => a --|f e r|-> b -> s e r a b -> C e r
 elimCP f = (exCP f <$> recall <*> forget) . exCS
 
 
-argCS_ :: ControlStoring s => Lens (s e r a b) (s e' r a' b) (V e a) (V e' a')
-argCS_ = _ControlStoring.recall_
+argCS_ :: Coexponential s => Lens (s e r a b) (s e' r a' b) (V e a) (V e' a')
+argCS_ = _Coexponential.recall_
 
-argCS :: ControlStoring s => s e r a b -> V e a
+argCS :: Coexponential s => s e r a b -> V e a
 argCS = recall . exCS
 
-contCS_ :: ControlStoring s => Lens (s e r a b) (s e r' a b') (K r b) (K r' b')
-contCS_ = _ControlStoring.forget_
+contCS_ :: Coexponential s => Lens (s e r a b) (s e r' a b') (K r b) (K r' b')
+contCS_ = _Coexponential.forget_
 
-contCS :: ControlStoring s => s e r a b -> K r b
+contCS :: Coexponential s => s e r a b -> K r b
 contCS = forget . exCS
 
 

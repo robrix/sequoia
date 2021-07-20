@@ -30,9 +30,9 @@ newtype Sub e r a b = Sub { getSub :: Coexp e r b a }
   deriving Contravariant via Confunctorially (Sub e r) a
 
 instance Confunctor (Sub e r) where
-  conmap f g = over _ControlStoring (dimap g f)
+  conmap f g = over _Coexponential (dimap g f)
 
-instance ControlStoring Sub where
+instance Coexponential Sub where
   inCS = Sub
   exCS = getSub
 
@@ -46,10 +46,10 @@ infixr 5 -<
 
 
 sub :: (K.Representable k, V.Representable v, Conj c) => a ~-Sub (V.Rep v) (K.Rep k)-< b <-> v a `c` k b
-sub = _ControlStoring.(coerceV . recall >---< coerceK . forget <-> uncurryConj Coexp . (coerceV *** coerceK))
+sub = _Coexponential.(coerceV . recall >---< coerceK . forget <-> uncurryConj Coexp . (coerceV *** coerceK))
 
 subA_ :: Lens (a ~-Sub e r-< b) (a' ~-Sub e' r-< b) (V e a) (V e' a')
-subA_ = _ControlStoring.recall_
+subA_ = _Coexponential.recall_
 
 subK_ :: Lens (a ~-Sub e r-< b) (a ~-Sub e r'-< b') (K r b) (K r' b')
-subK_ = _ControlStoring.forget_
+subK_ = _Coexponential.forget_
