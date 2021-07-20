@@ -5,6 +5,8 @@ module Sequoia.Functor.Source
   -- * Computation
 , mapSrcK
 , mapSrcV
+  -- * Optics
+, _SrcExp
 ) where
 
 import Data.Profunctor
@@ -16,6 +18,7 @@ import Sequoia.Optic.Iso
 import Sequoia.Optic.Review
 import Sequoia.Optic.Setter
 import Sequoia.Profunctor.Context
+import Sequoia.Profunctor.Exponential
 import Sequoia.Value
 
 -- Sources
@@ -50,3 +53,9 @@ mapSrcK b = over _Src (dimap (review b) (mapCK (view b)))
 
 mapSrcV :: (forall x . V e x -> V e' x) -> (Src e r b -> Src e' r b)
 mapSrcV f = over _Src (fmap (mapCV f))
+
+
+-- Optics
+
+_SrcExp :: (Exponential f, Exponential f') => Iso (Src e r b) (Src e' r' b') (f e r e b) (f' e' r' e' b')
+_SrcExp = _Src.from (constant idV).from _Exponential
