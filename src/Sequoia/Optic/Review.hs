@@ -6,6 +6,7 @@ module Sequoia.Optic.Review
 , unto
   -- ** Elimination
 , reviews
+, review
 , (<~)
 ) where
 
@@ -32,6 +33,9 @@ unto f = lphantom . rmap f
 
 reviews :: Optic (Recall e) s t a b -> (e -> b) -> (e -> t)
 reviews b = runRecall . b . Recall
+
+review :: Optic (Recall b) s t a b -> (b -> t)
+review o = reviews o id
 
 (<~) :: Optic (Recall b) s t a b -> (b -> t)
 o <~ b = reviews o id b
