@@ -1,6 +1,7 @@
 module Sequoia.Functor.Sink
 ( -- * Sinks
-  Snk(..)
+  _Snk
+, Snk(..)
   -- * Computation
 , mapSnkK
 , mapSnkV
@@ -19,6 +20,9 @@ import Sequoia.Profunctor.Context
 import Sequoia.Value
 
 -- Sinks
+
+_Snk :: Iso (Snk e r a) (Snk e' r' a') (V e a -> C e r) (V e' a' -> C e' r')
+_Snk = runSnk <-> Snk
 
 newtype Snk e r a = Snk { runSnk :: V e a -> C e r }
 
