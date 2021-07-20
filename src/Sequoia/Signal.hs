@@ -33,6 +33,7 @@ import           Sequoia.Functor.V
 import           Sequoia.Optic.Getter
 import           Sequoia.Optic.Iso
 import           Sequoia.Optic.Review
+import           Sequoia.Optic.Setter
 import           Sequoia.Profunctor.Context
 import           Sequoia.Value as V
 
@@ -48,10 +49,10 @@ liftSolWithK f = env (f . flip runC)
 
 
 mapKSol :: (forall x . K r x -> K r' x) -> (C e r -> C e r')
-mapKSol f (C r) = C (under _K f r)
+mapKSol = over _C . under _K
 
 mapVSol :: (forall x . V e x -> V e' x) -> (C e r -> C e' r)
-mapVSol f (C r) = C (under _V f r)
+mapVSol = over _C . under _V
 
 
 newtype Src e r   b = Src { runSrc :: K r b -> C e r }
