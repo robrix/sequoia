@@ -14,6 +14,7 @@ module Sequoia.Optic.Iso
 , swapped
 , non
   -- * Elimination
+, withIso
 , under
 , au
 , auf
@@ -64,6 +65,7 @@ import           Sequoia.Optic.Getter
 import           Sequoia.Optic.Optic
 import           Sequoia.Optic.Review
 import           Sequoia.Profunctor.Coexponential
+import           Sequoia.Profunctor.Exchange
 
 -- Isos
 
@@ -112,6 +114,10 @@ select p a = a <$ guard (p a)
 
 
 -- Elimination
+
+withIso :: Iso s t a b -> (((s -> a) -> (b -> t) -> r) -> r)
+withIso = withExchange . ($ idExchange)
+
 
 under :: Iso s t a b -> (t -> s) -> (b -> a)
 under = runCoexp . ($ idCoexp)
