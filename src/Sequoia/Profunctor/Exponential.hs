@@ -18,10 +18,6 @@ module Sequoia.Profunctor.Exponential
 , appExp2
 , runExp
 , elimExp
-, argCS_
-, argCS
-, contCS
-, contCS_
   -- ** Composition
 , (<<<)
 , (>>>)
@@ -60,7 +56,6 @@ import           Sequoia.Disjunction
 import           Sequoia.Functor.K
 import           Sequoia.Functor.V
 import           Sequoia.Optic.Iso
-import           Sequoia.Optic.Lens
 import           Sequoia.Profunctor.Applicative
 import           Sequoia.Profunctor.Coexponential
 import           Sequoia.Profunctor.Context
@@ -154,19 +149,6 @@ runExp v k f = exExp f v k
 
 elimExp :: (Exponential f, Coexponential s) => a --|f e r|-> b -> s e r a b -> C e r
 elimExp f = (exExp f <$> recall <*> forget) . exCS
-
-
-argCS_ :: Coexponential s => Lens (s e r a b) (s e' r a' b) (V e a) (V e' a')
-argCS_ = _Coexponential.recall_
-
-argCS :: Coexponential s => s e r a b -> V e a
-argCS = recall . exCS
-
-contCS_ :: Coexponential s => Lens (s e r a b) (s e r' a b') (K r b) (K r' b')
-contCS_ = _Coexponential.forget_
-
-contCS :: Coexponential s => s e r a b -> K r b
-contCS = forget . exCS
 
 
 -- Computation
