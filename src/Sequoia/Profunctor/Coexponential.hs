@@ -28,7 +28,7 @@ instance Profunctor (Coexp e r) where
 -- Construction
 
 idCoexp :: Coexp b a a b
-idCoexp = Coexp (V id) (K id)
+idCoexp = coexp id id
 
 coexp :: (e -> a) -> (b -> r) -> Coexp e r b a
 coexp r f = Coexp (V r) (K f)
