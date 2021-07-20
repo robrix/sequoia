@@ -209,7 +209,7 @@ mapDN :: Representable k => (a -> b) -> (k **a -> k **b)
 mapDN f = inK1 (lmap (contramap f))
 
 hoistDN :: Representable j => (forall x . j x <-> k x) -> (j **a -> k **a)
-hoistDN b = (~> b) . contramap (b <~)
+hoistDN b = (^. b) . contramap (review b)
 
 
 -- Construction

@@ -185,8 +185,8 @@ instance FunctionIntro Seq where
   funR = lowerLR (liftR . inV0) . wkR'
 
 instance SubtractionIntro Seq where
-  subL f = mapL (sub <~) (tensorL (wkL' (trueL f) >>> poppedL2 negateL init))
-  subR a b = mapR (~> sub) (trueR a ⊢⊗ negateR b)
+  subL f = mapL (review sub) (tensorL (wkL' (trueL f) >>> poppedL2 negateL init))
+  subR a b = mapR (^.sub) (trueR a ⊢⊗ negateR b)
 
 
 -- Quantification

@@ -66,7 +66,7 @@ instance Functor (Src e r) where
   fmap f (Src r) = Src (lmap (contramap f) r)
 
 mapKSrc :: (forall x . K r x <-> K r' x) -> (Src e r b -> Src e r' b)
-mapKSrc b = Src . dimap (b <~) (mapKSol (~> b)) . runSrc
+mapKSrc b = Src . dimap (review b) (mapKSol (view b)) . runSrc
 
 mapVSrc :: (forall x . V e x -> V e' x) -> (Src e r b -> Src e' r b)
 mapVSrc f = Src . rmap (mapVSol f) . runSrc
@@ -81,7 +81,7 @@ mapKSnk :: (forall x . K r x -> K r' x) -> (Snk e r a -> Snk e r' a)
 mapKSnk f = Snk . fmap (mapKSol f) . runSnk
 
 mapVSnk :: (forall x . V e x <-> V e' x) -> (Snk e r a -> Snk e' r a)
-mapVSnk b = Snk . dimap (b <~) (mapVSol (~> b)) . runSnk
+mapVSnk b = Snk . dimap (review b) (mapVSol (view b)) . runSnk
 
 
 newtype Sig e r a b = Sig { runSig :: V e a -> K r b -> Sol e r }
@@ -104,10 +104,10 @@ instance Monad (Sig e r a) where
   Sig m >>= f = Sig (\ a b -> liftSolWithK (\ go -> m a (inK (\ a' -> go (runSig (f a') a b)))))
 
 mapKSig :: (forall x . K r x <-> K r' x) -> (Sig e r a b -> Sig e r' a b)
-mapKSig b = Sig . fmap (dimap (b <~) (mapKSol (~> b))) . runSig
+mapKSig b = Sig . fmap (dimap (review b) (mapKSol (view b))) . runSig
 
 mapVSig :: (forall x . V e x <-> V e' x) -> (Sig e r a b -> Sig e' r a b)
-mapVSig b = Sig . dimap (b <~) (rmap (mapVSol (~> b))) . runSig
+mapVSig b = Sig . dimap (review b) (rmap (mapVSol (view b))) . runSig
 
 
 -- Conversions
@@ -133,7 +133,7 @@ srcSig
 srcSig = Sig . const . runSrc <-> Src . ($ idV) . runSig
 
 composeSrcSig :: Src e r a -> Sig e r a b -> Src e r b
-composeSrcSig src sig = srcSig <~ (sig <<< src ~> srcSig)
+composeSrcSig src sig = review srcSig (sig <<< view srcSig src)
 
 
 snkSig
@@ -143,7 +143,7 @@ snkSig
 snkSig = Sig . fmap const . runSnk <-> Snk . fmap ($ idK) . runSig
 
 composeSigSnk :: Sig e r a b -> Snk e r b -> Snk e r a
-composeSigSnk sig snk = snkSig <~ (snk ~> snkSig <<< sig)
+composeSigSnk sig snk = review snkSig (view snkSig snk <<< sig)
 
 
 solSig
@@ -154,7 +154,7 @@ solSig = Sig . const . const <-> ($ idK) . ($ idV) . runSig
 
 
 composeSrcSnk :: Src e r a -> Snk e r a -> Sol e r
-composeSrcSnk src snk = solSig <~ (snk ~> snkSig <<< src ~> srcSig)
+composeSrcSnk src snk = review solSig (snk^.snkSig <<< view srcSig src)
 
 
 {-

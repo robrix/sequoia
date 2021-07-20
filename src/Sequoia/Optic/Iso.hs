@@ -80,7 +80,7 @@ infix 1 <->
 
 
 from :: Iso s t a b -> Iso b a t s
-from b = (b <~) <-> (~> b)
+from b = review b <-> view b
 
 constant :: a -> (a -> b) <-> b
 constant a = ($ a) <-> const
@@ -176,31 +176,31 @@ contraadjuncted = Contra.leftAdjunct <-> Contra.rightAdjunct
 -- Functor
 
 fmapping :: Functor f => (a <-> a') -> f a <-> f a'
-fmapping a = fmap (~> a) <-> fmap (a <~)
+fmapping a = fmap (view a) <-> fmap (review a)
 
 contramapping :: Contravariant f => (a <-> a') -> f a <-> f a'
-contramapping a = contramap (a <~) <-> contramap (~> a)
+contramapping a = contramap (review a) <-> contramap (view a)
 
 
 -- Bifunctor
 
 bimapping :: Bifunctor p => (a <-> a') -> (b <-> b') -> (a `p` b) <-> (a' `p` b')
-bimapping a b = bimap (~> a) (~> b) <-> bimap (a <~) (b <~)
+bimapping a b = bimap (view a) (view b) <-> bimap (review a) (review b)
 
 firsting :: Bifunctor p => (a <-> a') -> (a `p` b) <-> (a' `p` b)
-firsting a = first (~> a) <-> first (a <~)
+firsting a = first (view a) <-> first (review a)
 
 seconding :: Bifunctor p => (b <-> b') -> (a `p` b) <-> (a `p` b')
-seconding b = second (~> b) <-> second (b <~)
+seconding b = second (view b) <-> second (review b)
 
 
 -- Profunctor
 
 dimapping :: Profunctor p => (a <-> a') -> (b <-> b') -> (a `p` b) <-> (a' `p` b')
-dimapping a b = dimap (a <~) (~> b) <-> dimap (~> a) (b <~)
+dimapping a b = dimap (review a) (view b) <-> dimap (view a) (review b)
 
 lmapping :: Profunctor p => (a <-> a') -> (a `p` b) <-> (a' `p` b)
-lmapping a = lmap (a <~) <-> lmap (~> a)
+lmapping a = lmap (review a) <-> lmap (view a)
 
 rmapping :: Profunctor p => (b <-> b') -> (a `p` b) <-> (a `p` b')
-rmapping b = rmap (~> b) <-> rmap (b <~)
+rmapping b = rmap (view b) <-> rmap (review b)

@@ -7,7 +7,7 @@ module Sequoia.Optic.Review
   -- ** Elimination
 , reviews
 , review
-, (<~)
+, (#)
 ) where
 
 import Control.Effect.Reader
@@ -38,7 +38,7 @@ reviews b = asks . runRecall . b . Recall
 review :: Has (Reader b) sig m => Review s t a b -> m t
 review o = reviews o id
 
-(<~) :: Review s t a b -> (b -> t)
-(<~) = review
+(#) :: Review s t a b -> (b -> t)
+(#) = review
 
-infixr 8 <~
+infixr 8 #
