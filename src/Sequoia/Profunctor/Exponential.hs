@@ -55,11 +55,6 @@ module Sequoia.Profunctor.Exponential
 , joinl
 , consumer
 , inCns
-  -- * Modular computations
-, I(..)
-, O(..)
-, MCP(..)
-, CoMCP(..)
 ) where
 
 import           Control.Category ((<<<), (>>>))
@@ -278,36 +273,3 @@ inCns = inCP . fmap const
 
 consumer :: (Exponential f, K.Representable k, K.Rep k ~ r) => k a -> a --|f e r|-> r
 consumer k = inCns (k •∘)
-
-
--- Modular computations
-
-newtype I p a c e r = I { runI :: V e a `p` c e r }
-
-instance (forall x . Functor (c x), forall x . Functor (p x)) => Functor (I p a c e) where
-  fmap f = I . fmap (fmap f) . runI
-
-instance (Env c, p ~ (->)) => Env (I p a c) where
-  env f = I (\ v -> env ((`runI` v) . f))
-
-instance (Res c, p ~ (->)) => Res (I p a c) where
-  res r = I (const (res r))
-  liftRes f = I (\ v -> let run = (`runI` v) in liftRes (run . f . (. run)))
-
-
-newtype O p b c e r = O { runO :: K r b `p` c e r }
-
-instance (Env c, p ~ (->)) => Env (O p a c) where
-  env f = O (\ k -> env ((`runO` k) . f))
-
-instance (Res c, p ~ (->)) => Res (O p a c) where
-  res r = O (const (res r))
-  liftRes f = O (\ k -> let run = (`runO` k) in liftRes (run . f . (. run)))
-
-
-newtype MCP e r a b = MCP { runMCP :: I (->) a (O (->) b C) e r }
-
-instance Env2 MCP where
-  env2 f = MCP (env (runMCP . f))
-
-newtype CoMCP e r a b = CoMCP { runCoMCP :: I (,) a (O (,) b C) e r }
