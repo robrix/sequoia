@@ -82,10 +82,10 @@ coerceCoexp = uncurry inCoexp . exCoexp
 type Lens s t a b = (forall p . Strong p => p a b -> p s t)
 
 recall_ :: Lens (Coexp e r a b) (Coexp e' r a b') (V e b) (V e' b')
-recall_ = lens recall (\ s recall -> s{ recall })
+recall_ = lens recall (\ s recall -> withCoexp s (\ _ forget -> coexpVK recall (K forget)))
 
 forget_ :: Lens (Coexp e r a b) (Coexp e r' a' b) (K r a) (K r' a')
-forget_ = lens forget (\ s forget -> s{ forget })
+forget_ = lens forget (\ s forget -> withCoexp s (\ recall _ -> coexpVK (V recall) forget))
 
 lens :: (s -> a) -> (s -> b -> t) -> Lens s t a b
 lens prj inj = dimap (\ s -> (prj s, s)) (\ (b, s) -> inj s b) . first'
