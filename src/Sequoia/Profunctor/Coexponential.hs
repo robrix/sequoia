@@ -54,7 +54,7 @@ instance Coexponential Coexp where
 -- Construction
 
 idCoexp :: Coexp b a a b
-idCoexp = Coexp (V id) (K id)
+idCoexp = coexp (V id) (K id)
 
 coexp :: (V.Representable v, K.Representable k) => v a -> k b -> Coexp (V.Rep v) (K.Rep k) b a
 coexp v k = Coexp (V.tabulate (V.index v)) (K.tabulate (K.index k))
