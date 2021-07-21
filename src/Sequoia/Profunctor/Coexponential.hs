@@ -8,7 +8,7 @@ module Sequoia.Profunctor.Coexponential
   -- * Construction
 , idCoexp
 , coexpFn
-, coexpVK
+, coexp
   -- * Elimination
 , runCoexp
 , withCoexp
@@ -59,8 +59,8 @@ idCoexp = coexpFn id id
 coexpFn :: (e -> a) -> (b -> r) -> Coexp e r b a
 coexpFn r f = Coexp (V r) (K f)
 
-coexpVK :: (V.Representable v, K.Representable k) => v a -> k b -> Coexp (V.Rep v) (K.Rep k) b a
-coexpVK v k = coexpFn (V.index v) (K.index k)
+coexp :: (V.Representable v, K.Representable k) => v a -> k b -> Coexp (V.Rep v) (K.Rep k) b a
+coexp v k = coexpFn (V.index v) (K.index k)
 
 
 -- Elimination
@@ -86,10 +86,10 @@ coerceCoexp = uncurry inCoexp . exCoexp
 type Lens s t a b = (forall p . Strong p => p a b -> p s t)
 
 recall_ :: Lens (Coexp e r a b) (Coexp e' r a b') (V e b) (V e' b')
-recall_ = lens recall (\ s recall -> withCoexp s (\ _ forget -> coexpVK recall forget))
+recall_ = lens recall (\ s recall -> withCoexp s (\ _ forget -> coexp recall forget))
 
 forget_ :: Lens (Coexp e r a b) (Coexp e r' a' b) (K r a) (K r' a')
-forget_ = lens forget (\ s forget -> withCoexp s (\ recall _ -> coexpVK recall forget))
+forget_ = lens forget (\ s forget -> withCoexp s (\ recall _ -> coexp recall forget))
 
 lens :: (s -> a) -> (s -> b -> t) -> Lens s t a b
 lens prj inj = dimap (\ s -> (prj s, s)) (\ (b, s) -> inj s b) . first'
