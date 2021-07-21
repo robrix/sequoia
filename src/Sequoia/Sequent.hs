@@ -60,7 +60,10 @@ liftLR :: Exponential d => d e r a b -> Seq e r (a < _Γ) (_Δ > b)
 liftLR = dimap exl inr . coerceExp
 
 lowerLR :: Exponential d => (d e r a b -> _Γ -|Seq e r|- _Δ) -> a < _Γ -|Seq e r|- _Δ > b -> _Γ -|Seq e r|- _Δ
-lowerLR f p = inExp (\ (Coexp _Γ _Δ) -> exExp (f (inExp (\ (Coexp a b) -> exExp p (Coexp (a <| _Γ) (_Δ |> b))))) (Coexp _Γ _Δ))
+lowerLR f p = inExp (\ c -> exExp (f (inExp (exExp p . extendContexts c))) c)
+
+extendContexts :: Coexp e r _Δ _Γ -> Coexp e r b a -> Coexp e r (_Δ > b) (a < _Γ)
+extendContexts (Coexp _Γ _Δ) (Coexp a b) = Coexp (a <| _Γ) (_Δ |> b)
 
 
 -- Effectful sequents
