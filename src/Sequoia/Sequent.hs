@@ -192,7 +192,7 @@ instance FunctionIntro Seq where
 
 instance SubtractionIntro Seq where
   subL f = popL (\ s -> liftR (s^.subA_) >>> f >>> liftL (s^.subK_))
-  subR a b = wkR' a >>> popΓL (\ a -> lowerL (liftR . inV0 . Sub . Coexp a) (wkR b))
+  subR a b = wkR' a >>> popΓL (\ a -> lowerL (liftR . inV0 . inCoexp a) (wkR b))
 
 
 -- Quantification
