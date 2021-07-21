@@ -1,15 +1,20 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Connective.True
 ( -- * True
-  True(..)
+  true
+, True(..)
 , type (✓)
 ) where
 
 import Prelude hiding (True)
+import Sequoia.Continuation
 import Sequoia.Functor.K
 import Sequoia.Polarity
 
 -- True
+
+true :: a -> True r a
+true = (`True` idK)
 
 data True r a = True { trueA :: a, trueK :: K r r }
   deriving (Functor)
