@@ -6,6 +6,7 @@ module Sequoia.Optic.Setter
 , sets
   -- * Elimination
 , over
+, (%~)
 , set
 , (.~)
 ) where
@@ -28,8 +29,13 @@ sets = roam
 
 -- Elimination
 
-over :: Setter s t a b -> (a -> b) -> (s -> t)
+over, (%~) :: Setter s t a b -> (a -> b) -> (s -> t)
 over f = f
+
+(%~) = over
+
+infixr 4 %~
+
 
 set, (.~) :: Setter s t a b -> b -> s -> t
 set o = over o . const
