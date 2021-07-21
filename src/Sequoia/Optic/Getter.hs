@@ -10,6 +10,7 @@ module Sequoia.Optic.Getter
   -- * Elimination
 , views
 , view
+, view'
 , (^.)
 , use
 ) where
@@ -43,6 +44,9 @@ views b = asks . runForget . b . Forget
 
 view :: Has (Reader s) sig m => Getter s t a b -> m a
 view = (`views` id)
+
+view' :: Getter s t a b -> (s -> a)
+view' = view
 
 (^.) :: s -> Getter s t a b -> a
 s ^. o = view o s
