@@ -29,7 +29,7 @@ funPar1
   =   (\ k -> K (runK k . (mkPar (inrK (contramap inV0 k)) =<<)))
   <-> (\ k -> K (runK k . fmap mkFun))
 
-funPar2 :: K r **V e (r ¬a ⅋ b) <-> K r **V e (a ~~Fun e r~> b)
+funPar2 :: K r (K r (V e (r ¬a ⅋ b))) <-> K r (K r (V e (a ~~Fun e r~> b)))
 funPar2
   =   contramap (\ f -> K ((f •) . fmap mkFun))
   <-> contramap (\ p -> K ((p •) . (mkPar (inrK (contramap inV0 p)) =<<)))

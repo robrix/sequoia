@@ -20,8 +20,6 @@ module Sequoia.Continuation
   -- ** Composition
 , (<••>)
 , (<•••>)
-  -- * Double negation
-, type (**)
   -- * Ambient control
 , Res(..)
 , cont
@@ -96,15 +94,6 @@ infix 3 <••>
 (<•••>) = liftA2 (<••>)
 
 infix 3 <•••>
-
-
--- Double negation
-
-type k **a = k (k a)
-
-infixl 9 **
-
-
 
 
 -- Ambient control

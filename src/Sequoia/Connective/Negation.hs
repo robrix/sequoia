@@ -61,10 +61,10 @@ infixr 9 -
 
 -- Negative double negation
 
-notNegate :: K r **a -> r ¬-a
+notNegate :: K r (K r a) -> r ¬-a
 notNegate = Not . contramap getNegate
 
-getNotNegate :: r ¬-a -> K r **a
+getNotNegate :: r ¬-a -> K r (K r a)
 getNotNegate = contramap Negate . getNot
 
 
@@ -75,10 +75,10 @@ infixr 9 ¬-
 
 -- Positive double negation
 
-negateNot :: K r **a -> r -¬a
+negateNot :: K r (K r a) -> r -¬a
 negateNot = Negate . contramap getNot
 
-getNegateNot :: r -¬a -> K r **a
+getNegateNot :: r -¬a -> K r (K r a)
 getNegateNot = contramap Not . getNegate
 
 

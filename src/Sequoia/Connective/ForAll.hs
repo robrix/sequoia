@@ -3,12 +3,11 @@ module Sequoia.Connective.ForAll
   ForAll(..)
 ) where
 
-import Sequoia.Continuation
 import Sequoia.Functor.K
 import Sequoia.Polarity
 
 -- Universal quantification
 
-newtype ForAll r p f = ForAll { runForAll :: forall x . Polarized p x => K r **f x }
+newtype ForAll r p f = ForAll { runForAll :: forall x . Polarized p x => K r (K r (f x)) }
 
 instance Polarized N (ForAll r p f)

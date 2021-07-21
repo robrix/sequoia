@@ -68,16 +68,16 @@ shiftP = shift . notLK'
 
 dneNK
   :: Contextual s
-  => K r **a < _Γ -|s e r|- _Δ
-  -- -------------------------
-  ->   r ¬-a < _Γ -|s e r|- _Δ
+  => K r (K r a) < _Γ -|s e r|- _Δ
+  -- -----------------------------
+  ->      r ¬-a  < _Γ -|s e r|- _Δ
 dneNK = mapL (fmap getNotNegate)
 
 dniNK
   :: Contextual s
-  => _Γ -|s e r|- _Δ > K r **a
-  -- -------------------------
-  -> _Γ -|s e r|- _Δ >   r ¬-a
+  => _Γ -|s e r|- _Δ > K r (K r a)
+  -- -----------------------------
+  -> _Γ -|s e r|- _Δ >      r ¬-a
 dniNK = mapR (contramap notNegate)
 
 
