@@ -10,18 +10,14 @@ module Sequoia.Contextual
 , popΓΔ
 , popΓ
 , popΔ
-, popΓL
-, popΔR
 , popL
 , popR
   -- ** Pushing
-, pushL
-, pushR
 , pushΓΔ
 , pushΓ
 , pushΔ
-, pushΓL
-, pushΔR
+, pushL
+, pushR
 , poppedL
 , poppedR
 , poppedΓ
@@ -136,37 +132,6 @@ popΔ
 popΔ f = swapΔ f idK
 
 
--- | Pop something off the input context which can later be pushed. Used with 'pushΓL', this provides a generalized context restructuring facility.
---
--- @
--- popΓL . pushΓL = id
--- @
--- @
--- pushΓL . popΓL = id
--- @
-popΓL
-  :: Contextual s
-  => (V e a -> _Γ -|s e r|- _Δ)
-  -- --------------------------
-  ->      a  < _Γ -|s e r|- _Δ
-popΓL f = popΓ (pushΓ . f . exlF <*> exrF)
-
--- | Pop something off the output context which can later be pushed. Used with 'pushΔR', this provides a generalized context restructuring facility.
---
--- @
--- popΔR . pushΔR = id
--- @
--- @
--- pushΔR . popΔR = id
--- @
-popΔR
-  :: Contextual s
-  => (K r a -> _Γ -|s e r|- _Δ)
-  -- -----------------------------
-  ->           _Γ -|s e r|- _Δ > a
-popΔR f = popΔ (pushΔ . f . inrK <*> inlK)
-
-
 -- | Pop something off the input context which can later be pushed. Used with 'pushL', this provides a generalized context restructuring facility.
 --
 -- @
@@ -180,7 +145,7 @@ popL
   => (V e a -> _Γ -|s e r|- _Δ)
   -- --------------------------
   ->      a  < _Γ -|s e r|- _Δ
-popL = popΓL
+popL f = popΓ (pushΓ . f . exlF <*> exrF)
 
 -- | Pop something off the output context which can later be pushed. Used with 'pushR', this provides a generalized context restructuring facility.
 --
@@ -195,7 +160,7 @@ popR
   => (K r a -> _Γ -|s e r|- _Δ)
   -- -----------------------------
   ->           _Γ -|s e r|- _Δ > a
-popR = popΔR
+popR f = popΔ (pushΔ . f . inrK <*> inlK)
 
 
 popL2
@@ -301,37 +266,6 @@ pushΔ
 pushΔ = swapΔ . const
 
 
--- | Push something onto the input context which was previously popped off it. Used with 'popΓL', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
---
--- @
--- popΓL . pushΓL = id
--- @
--- @
--- pushΓL . popΓL = id
--- @
-pushΓL
-  :: Contextual s
-  =>      a  < _Γ -|s e r|- _Δ
-  -- --------------------------
-  -> (V e a -> _Γ -|s e r|- _Δ)
-pushΓL s a = popΓ (pushΓ s . (a <|))
-
--- | Push something onto the output context which was previously popped off it. Used with 'popΔR', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
---
--- @
--- popΔR . pushΔR = id
--- @
--- @
--- pushΔR . popΔR = id
--- @
-pushΔR
-  :: Contextual s
-  =>           _Γ -|s e r|- _Δ > a
-  -- -----------------------------
-  -> (K r a -> _Γ -|s e r|- _Δ)
-pushΔR s a = popΔ (\ c -> pushΔ s (c |> a))
-
-
 -- | Push something onto the input context which was previously popped off it. Used with 'popL', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
 --
 -- @
@@ -342,10 +276,10 @@ pushΔR s a = popΔ (\ c -> pushΔ s (c |> a))
 -- @
 pushL
   :: Contextual s
-  =>     a  < _Γ -|s e r|- _Δ
-  -- ------------------------
-  -> V e a -> _Γ -|s e r|- _Δ
-pushL = pushΓL
+  =>      a  < _Γ -|s e r|- _Δ
+  -- --------------------------
+  -> (V e a -> _Γ -|s e r|- _Δ)
+pushL s a = popΓ (pushΓ s . (a <|))
 
 -- | Push something onto the output context which was previously popped off it. Used with 'popR', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
 --
@@ -360,7 +294,7 @@ pushR
   =>           _Γ -|s e r|- _Δ > a
   -- -----------------------------
   -> (K r a -> _Γ -|s e r|- _Δ)
-pushR = pushΔR
+pushR s a = popΔ (\ c -> pushΔ s (c |> a))
 
 
 pushL2
