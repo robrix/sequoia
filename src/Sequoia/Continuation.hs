@@ -7,7 +7,6 @@ module Sequoia.Continuation
 , KRep
 , KFn
 , Contravariant(..)
-, Representable(..)
   -- ** Construction
 , inK
 , negK2
