@@ -37,4 +37,4 @@ subL'
   => b >-Sub e r-~ a < _Γ -|s e r|- _Δ
   -- -------------------------------------
   ->               a < _Γ -|s e r|- _Δ > b
-subL' p = subR init init >>> wkR (wkL' p)
+subL' p = init ⊢>- init >>> wkR (wkL' p)
