@@ -28,7 +28,7 @@ sets = roam
 
 -- Elimination
 
-over :: Optic (->) s t a b -> (a -> b) -> (s -> t)
+over :: Setter s t a b -> (a -> b) -> (s -> t)
 over f = f
 
 set, (.~) :: Setter s t a b -> b -> s -> t
