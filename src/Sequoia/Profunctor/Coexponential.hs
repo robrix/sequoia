@@ -8,6 +8,7 @@ module Sequoia.Profunctor.Coexponential
   -- * Construction
 , idCoexp
 , coexp
+, coexpVK
   -- * Elimination
 , runCoexp
 , withCoexp
@@ -54,6 +55,9 @@ idCoexp = coexp id id
 
 coexp :: (e -> a) -> (b -> r) -> Coexp e r b a
 coexp r f = Coexp (V r) (K f)
+
+coexpVK :: V e a -> K r b -> Coexp e r b a
+coexpVK = Coexp
 
 
 -- Elimination
