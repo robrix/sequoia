@@ -7,7 +7,6 @@ module Sequoia.Profunctor.Coexponential
 , Coexponential(..)
   -- * Construction
 , idCoexp
-, coexpFn
 , coexp
   -- * Elimination
 , runCoexp
@@ -21,6 +20,7 @@ module Sequoia.Profunctor.Coexponential
 ) where
 
 import Control.Arrow ((&&&))
+import Data.Functor.Contravariant
 import Data.Functor.Contravariant.Rep as K
 import Data.Functor.Rep as V
 import Data.Profunctor
@@ -34,7 +34,7 @@ data Coexp e r a b = Coexp { recall :: V e b, forget :: K r a }
   deriving (Functor)
 
 instance Profunctor (Coexp e r) where
-  dimap g h c = withCoexp c (\ r f -> coexpFn (h . runV r) (runK f . g))
+  dimap g h c = withCoexp c (\ r f -> coexp (fmap h r) (contramap g f))
 
 
 -- Coexponential profunctor abstraction
@@ -54,13 +54,10 @@ instance Coexponential Coexp where
 -- Construction
 
 idCoexp :: Coexp b a a b
-idCoexp = coexpFn id id
-
-coexpFn :: (e -> a) -> (b -> r) -> Coexp e r b a
-coexpFn r f = Coexp (V r) (K f)
+idCoexp = Coexp (V id) (K id)
 
 coexp :: (V.Representable v, K.Representable k) => v a -> k b -> Coexp (V.Rep v) (K.Rep k) b a
-coexp v k = coexpFn (V.index v) (K.index k)
+coexp v k = Coexp (V.tabulate (V.index v)) (K.tabulate (K.index k))
 
 
 -- Elimination
