@@ -102,8 +102,8 @@ inK2 f a b = inK (exK a `f` exK b)
 
 
 -- | Negate a unary function by translating it to operate on continuations.
-negK :: Representable k => (a -> b) -> (k b -> k a)
-negK = inK1 . flip (.)
+negK :: Contravariant k => (a -> b) -> (k b -> k a)
+negK = contramap
 
 -- | Negate a binary function by translating it to operate on continuations.
 negK2 :: Representable k => (a -> b -> c) -> (k (k c -> k b) -> k a)
