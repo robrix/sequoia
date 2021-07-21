@@ -14,7 +14,6 @@ module Sequoia.Continuation
 , inK1'
 , negK2
   -- ** Elimination
-, exK
 , (•)
   -- ** Coercion
 , _K
@@ -70,7 +69,7 @@ inK1' :: Representable k => (a -> (b -> KRep k)) -> (a -> k b)
 inK1' = fmap inK
 
 inK2 :: Representable k => (KFn k a -> KFn k b -> KFn k c) -> (k a -> k b -> k c)
-inK2 f a b = inK (exK a `f` exK b)
+inK2 f a b = inK ((a •) `f` (b •))
 
 
 -- | Negate a binary function by translating it to operate on continuations.
@@ -80,8 +79,7 @@ negK2 = contramap . (contramap .)
 
 -- Elimination
 
-exK, (•) :: Representable k => k a -> KFn k a
-exK = index
+(•) :: Representable k => k a -> KFn k a
 (•) = index
 
 infixl 7 •
@@ -134,16 +132,16 @@ mapDN f = inK1 (lmap (contramap f))
 -- Construction
 
 liftDN :: Representable k => a -> k **a
-liftDN = inK . flip exK
+liftDN = inK . flip (•)
 
 inDN :: Representable k => ContFn k a -> k **a
-inDN = inK . lmap exK
+inDN = inK . lmap (•)
 
 
 -- Elimination
 
 exDN :: Representable k => k **a -> ContFn k a
-exDN = lmap inK . exK
+exDN = lmap inK . (•)
 
 
 -- Ambient control

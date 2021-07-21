@@ -145,10 +145,10 @@ evalExp :: Exponential f => e --|f e r|-> r -> (e -> r)
 evalExp f = runC (exExp f idV idK)
 
 appExp :: Exponential f => a --|f e r|-> b -> V e (V e a -> K r **b)
-appExp f = inV (\ e a -> inK (\ b -> runC (exExp f a b) e))
+appExp f = V (\ e a -> K (\ b -> runC (exExp f a b) e))
 
 appExp2 :: Exponential f => a --|f e r|-> b --|f e r|-> c -> V e (V e a -> V e b -> K r **c)
-appExp2 f = inV (\ e a b -> inK (\ c -> runC (exExp f a (K (\ g -> runC (exExp g b c) e))) e))
+appExp2 f = V (\ e a b -> K (\ c -> runC (exExp f a (K (\ g -> runC (exExp g b c) e))) e))
 
 runExp :: Exponential f => V e a -> K r b -> a --|f e r|-> b -> C e r
 runExp v k f = exExp f v k

@@ -25,7 +25,7 @@ elimFun = elimExp
 
 funPar1 :: K r (V e (r ¬a ⅋ b)) <-> K r (V e (a ~~Fun e r~> b))
 funPar1
-  =   inK1' (\ k -> exK k . (mkPar (inrK (contramap inV0 k)) =<<))
+  =   inK1' (\ k -> runK k . (mkPar (inrK (contramap inV0 k)) =<<))
   <-> inK1 (. fmap mkFun)
 
 funPar2 :: K r **V e (r ¬a ⅋ b) <-> K r **V e (a ~~Fun e r~> b)
