@@ -14,6 +14,8 @@ module Sequoia.Optic.Iso
 , swapped
 , non
 , pairing
+, pairWithFst
+, pairWithSnd
   -- * Elimination
 , withIso
 , under
@@ -118,6 +120,12 @@ select p a = a <$ guard (p a)
 
 pairing :: Iso s1 t1 a1 b1 -> Iso s2 t2 a2 b2 -> Iso (s1, s2) (t1, t2) (a1, a2) (b1, b2)
 pairing a b = (view a *** view b) <-> (review a *** review b)
+
+pairWithFst :: y -> Iso (x, a) (y, b) a b
+pairWithFst y = snd <-> (y,)
+
+pairWithSnd :: y -> Iso (a, x) (b, y) a b
+pairWithSnd y = fst <-> (,y)
 
 
 -- Elimination
