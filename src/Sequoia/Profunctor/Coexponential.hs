@@ -71,7 +71,7 @@ runCoexp :: Coexp e r b a -> ((a -> b) -> (e -> r))
 runCoexp c = withCoexp c (\ r f -> (f .) . (. r))
 
 withCoexp :: Coexp e r b a -> (((e -> a) -> (b -> r) -> s) -> s)
-withCoexp c f = f (runV (recall c)) (runK (forget c))
+withCoexp c f = withCoexpVK c (\ v k -> f (runV v) (runK k))
 
 withCoexpVK :: Coexp e r b a -> ((V e a -> K r b -> s) -> s)
 withCoexpVK c f = f (recall c) (forget c)
