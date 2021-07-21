@@ -58,6 +58,7 @@ module Sequoia.Contextual
 
 import Control.Monad (join)
 import Data.Bifunctor (first)
+import Data.Function
 import Data.Profunctor
 import Prelude hiding (init)
 import Sequoia.Calculus.Context
@@ -86,13 +87,13 @@ swapΓ
   :: Contextual s
   => (V e _Γ  -> _Γ' -|s e r|- _Δ)
   -> (V e _Γ' -> _Γ  -|s e r|- _Δ)
-swapΓ f _Γ' = popΓΔ (\ (Coexp _Γ _Δ) -> pushΓΔ (f _Γ) (Coexp _Γ' _Δ))
+swapΓ f _Γ' = popΓΔ (\ c -> pushΓΔ (f (recall c)) (c & recall_ .~ _Γ'))
 
 swapΔ
   :: Contextual s
   => (K r _Δ  -> _Γ -|s e r|- _Δ')
   -> (K r _Δ' -> _Γ -|s e r|- _Δ)
-swapΔ f _Δ' = popΓΔ (\ (Coexp _Γ _Δ) -> pushΓΔ (f _Δ) (Coexp _Γ _Δ'))
+swapΔ f _Δ' = popΓΔ (\ c -> pushΓΔ (f (forget c)) (c & forget_ .~ _Δ'))
 
 
 -- Popping
