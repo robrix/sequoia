@@ -68,7 +68,7 @@ coexpVK v k = coexp (V.index v) (K.index k)
 -- Elimination
 
 runCoexp :: Coexp e r b a -> ((a -> b) -> (e -> r))
-runCoexp c = withCoexp c (\ r f -> (f .) . (. r))
+runCoexp c = withCoexpVK c (\ r f -> (runK f .) . (. runV r))
 
 withCoexp :: Coexp e r b a -> (((e -> a) -> (b -> r) -> s) -> s)
 withCoexp c f = withCoexpVK c (\ v k -> f (runV v) (runK k))
