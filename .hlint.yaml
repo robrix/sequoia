@@ -18,10 +18,6 @@
 # - functions:
 #   - {name: unsafePerformIO, within: []} # unsafePerformIO can only appear in no modules
 
-- error: {name: Use synonym, lhs: "inC (inK1 f)", rhs: "inC1 f"}
-- error: {name: Use synonym, lhs: "inC (\ k -> inK f)", rhs: "inC1 (\ k -> f)"}
-- error: {name: Use synonym, lhs: "k •<< inl", rhs: "inlC k"}
-- error: {name: Use synonym, lhs: "k •<< inr", rhs: "inrC k"}
 - error: {name: Use synonym, lhs: "inV id", rhs: "idV"}
 - error: {name: Use synonym, lhs: "inK id", rhs: "idK"}
 # - error: {name: Use higher-order synonym, lhs: "inK . \ k f -> b", rhs: "inK1 (\ k f -> b)"}

@@ -38,7 +38,7 @@ newtype Sig e r a b = Sig { runSig :: V e a -> K r b -> C e r }
 
 instance Cat.Category (Sig e r) where
   id = Sig (flip (•∘))
-  Sig f . Sig g = Sig (\ a c -> liftRes (\ go -> g a (inK (go . (`f` c) . inV0))))
+  Sig f . Sig g = Sig (\ a c -> liftRes (\ go -> g a (K (go . (`f` c) . inV0))))
 
 instance Profunctor (Sig e r) where
   dimap f g = Sig . dimap (fmap f) (lmap (contramap g)) . runSig
@@ -51,7 +51,7 @@ instance Applicative (Sig e r a) where
   (<*>) = ap
 
 instance Monad (Sig e r a) where
-  Sig m >>= f = Sig (\ a b -> liftRes (\ go -> m a (inK (\ a' -> go (runSig (f a') a b)))))
+  Sig m >>= f = Sig (\ a b -> liftRes (\ go -> m a (K (\ a' -> go (runSig (f a') a b)))))
 
 mapKSig :: (forall x . K r x <-> K r' x) -> (Sig e r a b -> Sig e r' a b)
 mapKSig b = Sig . fmap (dimap (review b) (mapCK (view b))) . runSig

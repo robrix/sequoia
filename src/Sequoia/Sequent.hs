@@ -134,7 +134,7 @@ instance TopIntro Seq where
   topR = pure (inr Top)
 
 instance ZeroIntro Seq where
-  zeroL = liftL (inK absurdP)
+  zeroL = liftL (K absurdP)
 
 instance WithIntro Seq where
   withL1 p = popL (pushL p . exlF)
@@ -150,7 +150,7 @@ instance SumIntro Seq where
 -- Multiplicative
 
 instance BottomIntro Seq where
-  botL = liftL (inK absurdN)
+  botL = liftL (K absurdN)
   botR = wkR
 
 instance OneIntro Seq where
@@ -198,7 +198,7 @@ instance SubtractionIntro Seq where
 
 instance UniversalIntro Seq where
   forAllL p = mapL (fmap (notNegate . runForAll)) p
-  forAllR p = inExp (\ _Γ _Δ -> liftRes (\ run -> inrK _Δ •• ForAll (inK (\ k -> run (exExp p _Γ (inlK _Δ |> k))))))
+  forAllR p = inExp (\ _Γ _Δ -> liftRes (\ run -> inrK _Δ •• ForAll (K (\ k -> run (exExp p _Γ (inlK _Δ |> k))))))
 
 instance ExistentialIntro Seq where
   existsL p = popL (val2 (dnE . runExists (pushL p . inV0)))

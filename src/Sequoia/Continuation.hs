@@ -10,8 +10,6 @@ module Sequoia.Continuation
 , Representable(..)
   -- ** Construction
 , inK
-, inK1
-, inK1'
 , negK2
   -- ** Elimination
 , (•)
@@ -64,9 +62,6 @@ inK = tabulate
 
 inK1 :: Representable k => (KFn k a -> KFn k b) -> (k a -> k b)
 inK1 = over _K
-
-inK1' :: Representable k => (a -> (b -> KRep k)) -> (a -> k b)
-inK1' = fmap inK
 
 inK2 :: Representable k => (KFn k a -> KFn k b -> KFn k c) -> (k a -> k b -> k c)
 inK2 f a b = inK ((a •) `f` (b •))

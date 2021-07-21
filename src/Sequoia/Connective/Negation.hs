@@ -29,10 +29,10 @@ newtype Not r a = Not { getNot :: K r a }
 instance Pos a => Polarized N (Not r a) where
 
 instance Adjunction (Negate r) (Not r) where
-  unit   a = inK (• a)
-  counit a = inK (• a)
-  leftAdjunct  f a = inK ((• a) . f)
-  rightAdjunct f a = inK ((• a) . f)
+  unit   a = Not    (K (• a))
+  counit a = Negate (K (• a))
+  leftAdjunct  f a = Not    (K ((• a) . f))
+  rightAdjunct f a = Negate (K ((• a) . f))
 
 
 type (¬) = Not
@@ -48,10 +48,10 @@ newtype Negate r a = Negate { getNegate :: K r a }
 instance Neg a => Polarized P (Negate r a) where
 
 instance Adjunction (Not r) (Negate r) where
-  unit   a = inK (• a)
-  counit a = inK (• a)
-  leftAdjunct  f a = inK ((• a) . f)
-  rightAdjunct f a = inK ((• a) . f)
+  unit   a = Negate (K (• a))
+  counit a = Not    (K (• a))
+  leftAdjunct  f a = Negate (K ((• a) . f))
+  rightAdjunct f a = Not    (K ((• a) . f))
 
 
 type (-) = Negate
