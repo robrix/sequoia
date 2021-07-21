@@ -105,10 +105,10 @@ instance Monad (Exp e r a) where
   (>>=) = bindExp
 
 instance Coapply (Exp e r) where
-  coliftA2 f a b = Exp (\ (Coexp v k) -> env ((exExp a . (`Coexp` k) <∘∘> exExp b . (`Coexp` k)) (f <$> v)))
+  coliftA2 f a b = Exp (unCoexp (\ v k -> env ((exExp a . (`coexp` k) <∘∘> exExp b . (`coexp` k)) (f <$> v))))
 
 instance Env2 Exp where
-  env2 f = inExp (\ (Coexp v k) -> env (runExp v k . f))
+  env2 f = inExp (unCoexp (\ v k -> env (runExp v k . f)))
 
 instance Res2 Exp where
   res2 = inExp . const . res
@@ -137,7 +137,7 @@ class (forall e r . Cat.Category (f e r), forall e r . Profunctor (f e r)) => Ex
 -- Construction
 
 inExp' :: Exponential f => (a -> b) -> a --|f e r|-> b
-inExp' f = inExp (\ (Coexp a b) -> b •∘ (f <$> a))
+inExp' f = inExp (unCoexp (\ a b -> b •∘ (f <$> a)))
 
 
 -- Elimination
@@ -146,16 +146,16 @@ evalExp :: Exponential f => e --|f e r|-> r -> (e -> r)
 evalExp f = runC (exExp f idCoexp)
 
 appExp :: Exponential f => a --|f e r|-> b -> V e (V e a -> K r **b)
-appExp f = inV (\ e a -> inK (\ b -> runC (exExp f (Coexp a b)) e))
+appExp f = inV (\ e a -> inK (\ b -> runC (exExp f (coexp a b)) e))
 
 appExp2 :: Exponential f => a --|f e r|-> b --|f e r|-> c -> V e (V e a -> V e b -> K r **c)
-appExp2 f = inV (\ e a b -> inK (\ c -> runC (exExp f (Coexp a (inK (\ g -> runC (exExp g (Coexp b c)) e)))) e))
+appExp2 f = inV (\ e a b -> inK (\ c -> runC (exExp f (coexp a (K (\ g -> runC (exExp g (coexp b c)) e)))) e))
 
 runExp :: Exponential f => V e a -> K r b -> a --|f e r|-> b -> C e r
-runExp v k f = exExp f (Coexp v k)
+runExp v k f = exExp f (coexp v k)
 
 elimExp :: (Exponential f, Coexponential s) => a --|f e r|-> b -> s e r b a -> C e r
-elimExp f = exExp f . uncurry Coexp . exCoexp
+elimExp f = exExp f . coerceCoexp
 
 
 -- Computation
@@ -178,7 +178,7 @@ coerceExp = inExp . exExp
 
 
 liftRunExp :: Exponential f => ((f e r a b -> C e r) -> C e r) -> f e r a b
-liftRunExp f = inExp (\ (Coexp v k) -> f (runExp v k))
+liftRunExp f = inExp (unCoexp (\ v k -> f (runExp v k)))
 
 
 dimapVK :: Exponential f => (V e a' -> V e a) -> (K r b' -> K r b) -> (a --|f e r|-> b -> a' --|f e r|-> b')
@@ -206,19 +206,19 @@ rmapExp = rmapK . contramap
 -- Strong
 
 firstExp  :: Exponential f => a --|f e r|-> b -> (a, c) --|f e r|-> (b, c)
-firstExp  r = inExp (\ (Coexp a b) -> val (\ (a, c) -> exExp r (Coexp (inV0 a) (contramap (,c) b))) a)
+firstExp  r = inExp (unCoexp (\ a b -> val (\ (a, c) -> exExp r (coexp (inV0 a) (contramap (,c) b))) a))
 
 secondExp :: Exponential f => a --|f e r|-> b -> (c, a) --|f e r|-> (c, b)
-secondExp r = inExp (\ (Coexp a b) -> val (\ (c, a) -> exExp r (Coexp (inV0 a) (contramap (c,) b))) a)
+secondExp r = inExp (unCoexp (\ a b -> val (\ (c, a) -> exExp r (coexp (inV0 a) (contramap (c,) b))) a))
 
 
 -- Choice
 
 leftExp  :: Exponential f => a --|f e r|-> b -> Either a c --|f e r|-> Either b c
-leftExp  r = inExp (\ (Coexp a b) -> val (exExp r . (`Coexp` inlK b) . inV0 <--> (inrK b ••)) a)
+leftExp  r = inExp (unCoexp (\ a b -> val (exExp r . (`coexp` inlK b) . inV0 <--> (inrK b ••)) a))
 
 rightExp :: Exponential f => a --|f e r|-> b -> Either c a --|f e r|-> Either c b
-rightExp r = inExp (\ (Coexp a b) -> val ((inlK b ••) <--> exExp r . (`Coexp` inrK b) . inV0) a)
+rightExp r = inExp (unCoexp (\ a b -> val ((inlK b ••) <--> exExp r . (`coexp` inrK b) . inV0) a))
 
 
 -- Traversing
@@ -233,7 +233,7 @@ idExp :: Exponential f => a --|f e r|-> a
 idExp = inExp (\ (Coexp v k) -> k •∘ v)
 
 composeExp :: Exponential f => b --|f e r|-> c -> a --|f e r|-> b -> a --|f e r|-> c
-composeExp f g = inExp (\ (Coexp a c) -> cont (\ _K -> exExp g (Coexp a (_K (\ b -> exExp f (Coexp (inV0 b) c))))))
+composeExp f g = inExp (unCoexp (\ a c -> cont (\ _K -> exExp g (coexp a (_K (\ b -> exExp f (coexp (inV0 b) c)))))))
 
 
 -- Applicative
@@ -242,7 +242,7 @@ pureExp :: Exponential f => b -> a --|f e r|-> b
 pureExp = inExp . (. forget) . flip (••)
 
 apExp :: Exponential f => a --|f e r|-> (b -> c) -> a --|f e r|-> b -> a --|f e r|-> c
-apExp df da = inExp (\ (Coexp a b) -> cont (\ _K -> exExp df (Coexp a (_K (\ f -> exExp da (Coexp a (contramap f b)))))))
+apExp df da = inExp (unCoexp (\ a b -> cont (\ _K -> exExp df (coexp a (_K (\ f -> exExp da (coexp a (contramap f b))))))))
 
 
 -- Monad

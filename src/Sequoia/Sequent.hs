@@ -64,7 +64,7 @@ lowerLR :: Exponential d => (d e r a b -> _Γ -|Seq e r|- _Δ) -> a < _Γ -|Seq 
 lowerLR f p = inExp (\ c -> exExp (f (inExp (exExp p . extendContexts c))) c)
 
 extendContexts :: Coexp e r _Δ _Γ -> Coexp e r b a -> Coexp e r (_Δ > b) (a < _Γ)
-extendContexts (Coexp _Γ _Δ) (Coexp a b) = Coexp (a <| _Γ) (_Δ |> b)
+extendContexts = unCoexp (\ _Γ _Δ -> unCoexp (\ a b -> coexp (a <| _Γ) (_Δ |> b)))
 
 
 -- Effectful sequents
@@ -103,8 +103,8 @@ instance Contextual Seq where
 -- Control
 
 instance Calculus.Control Seq where
-  reset s = inExp (\ (Coexp _Γ _Δ) -> C (exK _Δ . runC (exExp s (Coexp _Γ idK))))
-  shift s = inExp (\ (Coexp _Γ _Δ) -> exExp s (Coexp (inV0 (inrK _Δ) <| _Γ) (inlK _Δ |> idK)))
+  reset s = inExp (unCoexp (\ _Γ _Δ -> C (exK _Δ . runC (exExp s (coexp _Γ idK)))))
+  shift s = inExp (unCoexp (\ _Γ _Δ -> exExp s (coexp (inV0 (inrK _Δ) <| _Γ) (inlK _Δ |> idK))))
 
 
 -- Assertion
@@ -199,7 +199,7 @@ instance SubtractionIntro Seq where
 
 instance UniversalIntro Seq where
   forAllL p = mapL (fmap (notNegate . runForAll)) p
-  forAllR p = inExp (\ (Coexp _Γ _Δ) -> liftRes (\ run -> inrK _Δ •• ForAll (inK (\ k -> run (exExp p (Coexp _Γ (inlK _Δ |> k)))))))
+  forAllR p = inExp (unCoexp (\ _Γ _Δ -> liftRes (\ run -> inrK _Δ •• ForAll (inK (\ k -> run (exExp p (coexp _Γ (inlK _Δ |> k))))))))
 
 instance ExistentialIntro Seq where
   existsL p = popL (val2 (dnE . runExists (pushL p . inV0)))
