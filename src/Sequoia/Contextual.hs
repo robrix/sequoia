@@ -376,11 +376,11 @@ mapR = rmap . fmap
 
 mapL2
  :: Contextual s
- => (c -> Either b a)
+ => (V e c -> Either (V e b) (V e a))
  -> a < _Γ -|s e r|- _Δ   ->   b < _Γ -|s e r|- _Δ
  -- ----------------------------------------------
  ->            c < _Γ -|s e r|- _Δ
-mapL2 f a b = popL (env2 . (pushL b <∘∘> pushL a) . fmap f)
+mapL2 f a b = popL ((pushL b <--> pushL a) . f)
 
 mapR2
   :: Contextual s
