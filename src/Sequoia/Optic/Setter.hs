@@ -7,6 +7,7 @@ module Sequoia.Optic.Setter
   -- * Elimination
 , over
 , set
+, (.~)
 ) where
 
 import Data.Profunctor.Mapping
@@ -30,5 +31,9 @@ sets = roam
 over :: Optic (->) s t a b -> (a -> b) -> (s -> t)
 over f = f
 
-set :: Setter s t a b -> b -> s -> t
+set, (.~) :: Setter s t a b -> b -> s -> t
 set o = over o . const
+
+(.~) = set
+
+infixr 4 .~
