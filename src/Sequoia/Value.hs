@@ -8,24 +8,12 @@ module Sequoia.Value
   -- * Construction
 , inV0
 , inV
-, inV1
-, inV2
 , idV
   -- * Elimination
-, exV
-, exV1
-, exV2
 , (∘)
   -- * Coercion
 , _V
-, coerceVWith
-, coercedV
-, coerceV
-, coerceV1
-, coerceV2
   -- * Computation
-, liftV2
-, mapVRep
 , (>∘∘<)
 , (>∘∘∘<)
 , (<∘∘>)
@@ -46,7 +34,6 @@ import Sequoia.Conjunction
 import Sequoia.Disjunction
 import Sequoia.Functor.V
 import Sequoia.Optic.Iso
-import Sequoia.Optic.Setter
 
 -- Values
 
@@ -63,9 +50,6 @@ inV0 = inV . const
 inV :: Representable v => (Rep v -> a) -> v a
 inV = tabulate
 
-inV1 :: Representable v => ((Rep v -> a) -> (Rep v -> b)) -> (v a -> v b)
-inV1 = over _V
-
 inV2 :: Representable v => ((Rep v -> a) -> (Rep v -> b) -> (Rep v -> c)) -> (v a -> v b -> v c)
 inV2 f a b = inV (exV a `f` exV b)
 
@@ -77,12 +61,6 @@ idV = inV id
 
 exV :: Representable v => v a -> (Rep v -> a)
 exV = index
-
-exV1 :: Representable v => (v a -> v b) -> ((Rep v -> a) -> (Rep v -> b))
-exV1 = under _V
-
-exV2 :: Representable v => (v a -> v b -> v c) -> ((Rep v -> a) -> (Rep v -> b) -> (Rep v -> c))
-exV2 f a b = exV (inV a `f` inV b)
 
 
 (∘) :: Representable v => Rep v -> v a -> a
@@ -96,30 +74,8 @@ infixr 8 ∘
 _V :: (Representable v, Representable v') => Iso (v a) (v' a') (Rep v -> a) (Rep v' -> a')
 _V = exV <-> inV
 
-coerceVWith :: (Representable v1, Representable v2) => ((Rep v1 -> a) -> (Rep v2 -> b)) -> (v1 a -> v2 b)
-coerceVWith = over _V
-
-coercedV :: (Representable v1, Representable v2, Representable v1', Representable v2', Rep v1 ~ Rep v2, Rep v1' ~ Rep v2') => Iso (v1 a) (v1' a') (v2 a) (v2' a')
-coercedV = coerceV <-> coerceV
-
-coerceV :: (Representable v1, Representable v2, Rep v1 ~ Rep v2) => (v1 a -> v2 a)
-coerceV = inV . exV
-
-coerceV1 :: (Representable v1, Representable v2, Rep v1 ~ Rep v2) => (v1 a -> v1 b) -> (v2 a -> v2 b)
-coerceV1 = inV1 . exV1
-
-coerceV2 :: (Representable v1, Representable v2, Rep v1 ~ Rep v2) => (v1 a -> v1 b -> v1 c) -> (v2 a -> v2 b -> v2 c)
-coerceV2 = inV2 . exV2
-
 
 -- Computation
-
-liftV2 :: Representable v => (a -> b -> c) -> v a -> v b -> v c
-liftV2 f = inV2 (liftA2 f)
-
-mapVRep :: (Representable v, Representable v') => (Rep v' -> Rep v) -> v a -> v' a
-mapVRep f = over _V (. f)
-
 
 (>∘∘<) :: (Conj d, Representable v) => v b -> v c -> v (b `d` c)
 (>∘∘<) = inV2 (>---<)
