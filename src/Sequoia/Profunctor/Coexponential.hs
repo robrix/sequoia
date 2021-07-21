@@ -59,7 +59,7 @@ coexp :: (e -> a) -> (b -> r) -> Coexp e r b a
 coexp r f = Coexp (V r) (K f)
 
 coexpVK :: (V.Representable v, K.Representable k) => v a -> k b -> Coexp (V.Rep v) (K.Rep k) b a
-coexpVK v k = Coexp (V.tabulate (V.index v)) (K.tabulate (K.index k))
+coexpVK v k = coexp (V.index v) (K.index k)
 
 
 -- Elimination
