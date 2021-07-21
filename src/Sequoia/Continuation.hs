@@ -106,8 +106,8 @@ negK :: Contravariant k => (a -> b) -> (k b -> k a)
 negK = contramap
 
 -- | Negate a binary function by translating it to operate on continuations.
-negK2 :: Representable k => (a -> b -> c) -> (k (k c -> k b) -> k a)
-negK2 = negK . (negK .)
+negK2 :: Contravariant k => (a -> b -> c) -> (k (k c -> k b) -> k a)
+negK2 = contramap . (contramap .)
 
 
 -- Elimination
