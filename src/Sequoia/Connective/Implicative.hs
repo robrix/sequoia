@@ -35,7 +35,7 @@ funPar2
   <-> inK1 (\ k p -> k (inK ((p •) . (mkPar (inrK (contramap inV0 p)) =<<))))
 
 mkPar :: K r b -> a ~~Fun e r~> b -> V e (r ¬a ⅋ b)
-mkPar p f = V (\ e -> inl (inK (\ a -> runC (exExp f (Coexp (inV0 a) p)) e)))
+mkPar p f = V (\ e -> inl (inK (\ a -> runC (exExp f (coexp (inV0 a) p)) e)))
 
 mkFun :: r ¬a ⅋ b -> a ~~Fun e r~> b
-mkFun p = inExp (\ (Coexp a b) -> ((•∘ a) <--> (b ••)) p)
+mkFun p = inExp (unCoexp (\ a b -> ((•∘ a) <--> (b ••)) p))

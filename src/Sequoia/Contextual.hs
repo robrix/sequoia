@@ -319,7 +319,7 @@ mapΓΔ
   -> _Γ  -|s e r|- _Δ
   -- -----------------
   -> _Γ' -|s e r|- _Δ'
-mapΓΔ f g p = popΓΔ (\ (Coexp _Γ _Δ) -> pushΓΔ p (Coexp (f _Γ) (g _Δ)))
+mapΓΔ f g p = popΓΔ (unCoexp (\ _Γ _Δ -> pushΓΔ p (coexp (f _Γ) (g _Δ))))
 
 mapΓ
   :: Contextual s
@@ -380,7 +380,7 @@ traverseΓΔ
   -> (x -> y -> _Γ  -|s e r|- _Δ)
   -- ----------------------------
   -> _Γ' -|s e r|- _Δ'
-traverseΓΔ f g s = popΓΔ (\ (Coexp _Γ' _Δ') -> let (x, _Γ) = f _Γ' ; (_Δ, y) = g _Δ' in pushΓΔ (s x y) (Coexp _Γ _Δ))
+traverseΓΔ f g s = popΓΔ (unCoexp (\ _Γ' _Δ' -> let (x, _Γ) = f _Γ' ; (_Δ, y) = g _Δ' in pushΓΔ (s x y) (coexp _Γ _Δ)))
 
 traverseΓ
   :: Contextual s
