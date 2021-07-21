@@ -153,7 +153,7 @@ instance Res (Recall e) where
   res = Recall . pure
   liftRes f = Recall (\ e -> runRecall (f (`runRecall` e)) e)
 
-cont :: (Res c, Representable k) => (((a -> c e (Rep k)) -> k a) -> c e (Rep k)) -> c e (Rep k)
+cont :: Res c => (((a -> c e r) -> K r a) -> c e r) -> c e r
 cont = liftRes . contN
 
 (••) :: (Res c, Representable k) => k a -> a -> c e (Rep k)
@@ -166,7 +166,7 @@ class Res1 c where
   res1 :: r -> c e r a
   liftRes1 :: ((c e r a -> r) -> c e r a) -> c e r a
 
-cont1 :: (Res1 c, Representable k) => (((a -> c e (Rep k) a) -> k a) -> c e (Rep k) a) -> c e (Rep k) a
+cont1 :: Res1 c => (((a -> c e r a) -> K r a) -> c e r a) -> c e r a
 cont1 = liftRes1 . contN
 
 
@@ -175,5 +175,5 @@ class Res2 c where
   liftRes2 :: ((c e r a b -> r) -> c e r a b) -> c e r a b
 
 
-contN :: Representable k => (((a -> c) -> k a) -> c) -> ((c -> Rep k) -> c)
+contN :: (((a -> c) -> K r a) -> c) -> ((c -> r) -> c)
 contN f run = f (inK . (run .))
