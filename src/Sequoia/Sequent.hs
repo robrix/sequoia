@@ -34,9 +34,7 @@ import           Sequoia.Conjunction
 import           Sequoia.Contextual
 import           Sequoia.Continuation as K
 import           Sequoia.Disjunction
-import           Sequoia.Functor.K
 import           Sequoia.Functor.Source
-import           Sequoia.Functor.V
 import           Sequoia.Optic.Getter
 import           Sequoia.Optic.Review
 import           Sequoia.Profunctor.Coexponential
@@ -52,7 +50,7 @@ evalSeq = evalExp
 runSeq :: Seq e r _Γ _Δ -> ((e -> _Γ) -> (_Δ -> r) -> (e -> r))
 runSeq s f g = evalSeq (dimap f g s)
 
-newtype Seq e r _Γ _Δ = Seq { getSeq :: V e _Γ -> K r _Δ -> C e r }
+newtype Seq e r _Γ _Δ = Seq { getSeq :: Coexp e r _Δ _Γ -> C e r }
   deriving (Applicative, Functor, Monad) via (Exp e r _Γ)
   deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via (Exp e r)
   deriving (Env2, Exponential) via Exp
@@ -62,7 +60,7 @@ liftLR :: Exponential d => d e r a b -> Seq e r (a < _Γ) (_Δ > b)
 liftLR = dimap exl inr . coerceExp
 
 lowerLR :: Exponential d => (d e r a b -> _Γ -|Seq e r|- _Δ) -> a < _Γ -|Seq e r|- _Δ > b -> _Γ -|Seq e r|- _Δ
-lowerLR f p = inExp (\ _Γ _Δ -> exExp (f (inExp (\ a b -> exExp p (a <| _Γ) (_Δ |> b)))) _Γ _Δ)
+lowerLR f p = inExp (\ (Coexp _Γ _Δ) -> exExp (f (inExp (\ (Coexp a b) -> exExp p (Coexp (a <| _Γ) (_Δ |> b))))) (Coexp _Γ _Δ))
 
 
 -- Effectful sequents
@@ -74,7 +72,7 @@ newtype SeqT e r _Γ m _Δ = SeqT { getSeqT :: Seq e (m r) _Γ _Δ }
   deriving (Applicative, Functor, Monad)
 
 instance MonadTrans (SeqT r s _Γ) where
-  lift m = SeqT (inExp (const (C . const . (m >>=) . (•))))
+  lift m = SeqT (inExp (C . const . (m >>=) . (•) . forget))
 
 
 -- Core rules
@@ -95,14 +93,14 @@ deriving via Contextually Seq instance Exchange Seq
 -- Contextual rules
 
 instance Contextual Seq where
-  swapΓΔ f (Coexp _Γ' _Δ') = inExp (\ _Γ _Δ -> exExp (f (Coexp _Γ _Δ)) _Γ' _Δ')
+  swapΓΔ f c' = inExp (\ c -> exExp (f c) c')
 
 
 -- Control
 
 instance Calculus.Control Seq where
-  reset s = inExp (\ _Γ _Δ -> C (exK _Δ . runC (exExp s _Γ idK)))
-  shift s = inExp (\ _Γ _Δ -> exExp s (inV0 (inrK _Δ) <| _Γ) (inlK _Δ |> idK))
+  reset s = inExp (\ (Coexp _Γ _Δ) -> C (exK _Δ . runC (exExp s (Coexp _Γ idK))))
+  shift s = inExp (\ (Coexp _Γ _Δ) -> exExp s (Coexp (inV0 (inrK _Δ) <| _Γ) (inlK _Δ |> idK)))
 
 
 -- Assertion
@@ -197,7 +195,7 @@ instance SubtractionIntro Seq where
 
 instance UniversalIntro Seq where
   forAllL p = mapL (notNegate . runForAll) p
-  forAllR p = inExp (\ _Γ _Δ -> liftRes (\ run -> inrK _Δ •• ForAll (inK (\ k -> run (exExp p _Γ (inlK _Δ |> k))))))
+  forAllR p = inExp (\ (Coexp _Γ _Δ) -> liftRes (\ run -> inrK _Δ •• ForAll (inK (\ k -> run (exExp p (Coexp _Γ (inlK _Δ |> k)))))))
 
 instance ExistentialIntro Seq where
   existsL p = popL (dnE . runExists (pushL p))

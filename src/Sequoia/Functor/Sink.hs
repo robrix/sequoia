@@ -20,6 +20,7 @@ import Sequoia.Optic.Getter
 import Sequoia.Optic.Iso
 import Sequoia.Optic.Review
 import Sequoia.Optic.Setter
+import Sequoia.Profunctor.Coexponential
 import Sequoia.Profunctor.Context
 import Sequoia.Profunctor.Exponential
 import Sequoia.Value
@@ -50,4 +51,4 @@ mapSnkV b = over _Snk (dimap (review b) (mapCV (view b)))
 -- Optics
 
 _SnkExp :: (Exponential f, Exponential f') => Iso (Snk e r a) (Snk e' r' a') (f e r a r) (f' e' r' a' r')
-_SnkExp = _Snk.from (_Exponential.rmapping (constant idK))
+_SnkExp = _Snk.lmapping (_Coexp.pairWithSnd idK).from _Exponential

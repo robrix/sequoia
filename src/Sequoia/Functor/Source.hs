@@ -17,6 +17,7 @@ import Sequoia.Optic.Getter
 import Sequoia.Optic.Iso
 import Sequoia.Optic.Review
 import Sequoia.Optic.Setter
+import Sequoia.Profunctor.Coexponential
 import Sequoia.Profunctor.Context
 import Sequoia.Profunctor.Exponential
 import Sequoia.Value
@@ -58,4 +59,4 @@ mapSrcV f = over _Src (fmap (mapCV f))
 -- Optics
 
 _SrcExp :: (Exponential f, Exponential f') => Iso (Src e r b) (Src e' r' b') (f e r e b) (f' e' r' e' b')
-_SrcExp = _Src.from (_Exponential.constant idV)
+_SrcExp = _Src.lmapping (_Coexp.pairWithFst idV).from _Exponential
