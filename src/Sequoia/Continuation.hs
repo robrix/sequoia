@@ -4,7 +4,6 @@
 module Sequoia.Continuation
 ( -- * Continuations
   Continuation
-, KRep
 , KFn
 , Contravariant(..)
   -- ** Construction
@@ -39,8 +38,7 @@ import Sequoia.Profunctor.Recall
 
 class Representable k => Continuation r k | k -> r
 
-type KRep k = Rep k
-type KFn k a = a -> KRep k
+type KFn k a = a -> Rep k
 
 
 instance Continuation r (K r)
