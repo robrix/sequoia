@@ -37,13 +37,13 @@ import Sequoia.Profunctor.Recall
 
 -- Continuations
 
-class Representable k => Continuation k
+class Representable k => Continuation r k | k -> r
 
 type KRep k = Rep k
 type KFn k a = a -> KRep k
 
 
-instance Continuation (K r)
+instance Continuation r (K r)
 
 
 -- Construction
