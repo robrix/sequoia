@@ -82,7 +82,7 @@ instance MonadTrans (SeqT r s _Γ) where
 -- Core rules
 
 instance Core Seq where
-  f >>> g = f >>= pure <--> pushL g
+  f >>> g = f >>= pure <--> pushL g . inV0
 
   init = dimap exl inr Cat.id
 
@@ -110,7 +110,7 @@ instance Calculus.Control Seq where
 -- Assertion
 
 instance NotUntrueIntro Seq where
-  notUntrueL e a = popL (\ (NotUntrue r) -> e >>> liftLR @Exp (r ^. _SrcExp @_ @Exp) >>> wkL' a)
+  notUntrueL e a = popL (val2 (\ (NotUntrue r) -> e >>> liftLR @Exp (r ^. _SrcExp @_ @Exp) >>> wkL' a))
   notUntrueR s = mapR (\ f -> NotUntrue (_SrcExp @Fun # f)) (funR s)
 
 instance TrueIntro Seq where
@@ -138,12 +138,12 @@ instance ZeroIntro Seq where
   zeroL = liftL (inK absurdP)
 
 instance WithIntro Seq where
-  withL1 p = popL (pushL p . exl)
-  withL2 p = popL (pushL p . exr)
+  withL1 p = popL (pushL p . exlF)
+  withL2 p = popL (pushL p . exrF)
   withR = mapR2 inlr
 
 instance SumIntro Seq where
-  sumL a b = popL (pushL a <--> pushL b)
+  sumL a b = popL (env2 . (pushL a <∘∘> pushL b))
   sumR1 = mapR inl
   sumR2 = mapR inr
 
@@ -159,11 +159,11 @@ instance OneIntro Seq where
   oneR = liftR (inV0 One)
 
 instance ParIntro Seq where
-  parL a b = popL (pushL a <--> pushL b)
+  parL a b = popL (env2 . (pushL a <∘∘> pushL b))
   parR = fmap ((>>= inr . inl) <--> inr . inr)
 
 instance TensorIntro Seq where
-  tensorL p = popL (pushL2 p . exl <*> exr)
+  tensorL p = popL (pushL2 p . exlF <*> exrF)
   tensorR = mapR2 inlr
 
 
@@ -187,11 +187,11 @@ instance XOrIntro Seq where
 -- Implication
 
 instance FunctionIntro Seq where
-  funL a b = popL (\ f -> a >>> liftLR f >>> wkL' b)
+  funL a b = popL (val2 (\ f -> a >>> liftLR f >>> wkL' b))
   funR = lowerLR (liftR . inV0) . wkR'
 
 instance SubtractionIntro Seq where
-  subL f = popL (\ s -> liftR (s^.subA_) >>> f >>> liftL (s^.subK_))
+  subL f = popL (val2 (\ s -> liftR (s^.subA_) >>> f >>> liftL (s^.subK_)))
   subR a b = wkR' a >>> popΓL (\ a -> lowerL (liftR . inV0 . inCoexp a) (wkR b))
 
 
@@ -202,7 +202,7 @@ instance UniversalIntro Seq where
   forAllR p = inExp (\ (Coexp _Γ _Δ) -> liftRes (\ run -> inrK _Δ •• ForAll (inK (\ k -> run (exExp p (Coexp _Γ (inlK _Δ |> k)))))))
 
 instance ExistentialIntro Seq where
-  existsL p = popL (dnE . runExists (pushL p))
+  existsL p = popL (val2 (dnE . runExists (pushL p . inV0)))
   existsR p = mapR (Exists . liftDN) p
 
 

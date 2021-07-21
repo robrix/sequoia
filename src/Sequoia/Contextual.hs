@@ -177,10 +177,10 @@ popΔR f = popΔ (pushΔ . f . inrK <*> inlK)
 -- @
 popL
   :: Contextual s
-  => (a -> _Γ -|s e r|- _Δ)
-  -- ----------------------
-  ->  a  < _Γ -|s e r|- _Δ
-popL = popΓL . val2
+  => (V e a -> _Γ -|s e r|- _Δ)
+  -- --------------------------
+  ->      a  < _Γ -|s e r|- _Δ
+popL = popΓL
 
 -- | Pop something off the output context which can later be pushed. Used with 'pushR', this provides a generalized context restructuring facility.
 --
@@ -200,9 +200,9 @@ popR = popΔR
 
 popL2
   :: Contextual s
-  => (a -> b -> _Γ -|s e r|- _Δ)
-  -- ---------------------------
-  ->  a  < b  < _Γ -|s e r|- _Δ
+  => (V e a -> V e b -> _Γ -|s e r|- _Δ)
+  -- -----------------------------------
+  ->      a      < b  < _Γ -|s e r|- _Δ
 popL2 f = popL (popL . f)
 
 popR2
@@ -342,10 +342,10 @@ pushΔR s a = popΔ (\ c -> pushΔ s (c |> a))
 -- @
 pushL
   :: Contextual s
-  =>  a  < _Γ -|s e r|- _Δ
-  -- ----------------------
-  -> (a -> _Γ -|s e r|- _Δ)
-pushL s = pushΓL s . inV0
+  =>     a  < _Γ -|s e r|- _Δ
+  -- ------------------------
+  -> V e a -> _Γ -|s e r|- _Δ
+pushL = pushΓL
 
 -- | Push something onto the output context which was previously popped off it. Used with 'popR', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
 --
@@ -365,8 +365,8 @@ pushR = pushΔR
 
 pushL2
   :: Contextual s
-  => a < b < _Γ -|s e r|- _Δ -> a -> b
-  -- ---------------------------------
+  => a < b < _Γ -|s e r|- _Δ -> V e a -> V e b
+  -- -----------------------------------------
   ->         _Γ -|s e r|- _Δ
 pushL2 p = pushL . pushL p
 
@@ -446,7 +446,7 @@ mapL2
  -> a < _Γ -|s e r|- _Δ   ->   b < _Γ -|s e r|- _Δ
  -- ----------------------------------------------
  ->            c < _Γ -|s e r|- _Δ
-mapL2 f a b = popL ((pushL b <--> pushL a) . f)
+mapL2 f a b = popL (env2 . (pushL b <∘∘> pushL a) . fmap f)
 
 mapR2
   :: Contextual s
@@ -454,7 +454,7 @@ mapR2
   -> _Γ -|s e r|- _Δ > a   ->   _Γ -|s e r|- _Δ > b
   -- ----------------------------------------------
   ->            _Γ -|s e r|- _Δ > c
-mapR2 f a b = mapR f (wkR' a) >>> popL (`mapR` b)
+mapR2 f a b = mapR f (wkR' a) >>> popL (val2 (`mapR` b))
   where wkR' = popR2 . flip . const . pushR
 
 

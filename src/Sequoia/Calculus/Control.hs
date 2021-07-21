@@ -76,14 +76,14 @@ kL
   =>         _Γ -|s e r|- _Δ > a
   -- ---------------------------
   -> K r a < _Γ -|s e r|- _Δ
-kL = popL . pushR
+kL = popL . val2 . pushR
 
 kR
   :: (Contextual s, Weaken s)
   => a < _Γ -|s e r|- _Δ
   -- ---------------------------
   ->     _Γ -|s e r|- _Δ > K r a
-kR s = lowerL (pushL init) (wkR s)
+kR s = lowerL (pushL init . inV0) (wkR s)
 
 kL'
   :: (Contextual s, Weaken s)
