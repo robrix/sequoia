@@ -111,11 +111,11 @@ instance Calculus.Control Seq where
 
 instance NotUntrueIntro Seq where
   notUntrueL e a = popL (val2 (\ (NotUntrue r) -> e >>> liftLR @Exp (r ^. _SrcExp @_ @Exp) >>> wkL' a))
-  notUntrueR s = mapR (\ f -> NotUntrue (_SrcExp @Fun # f)) (funR s)
+  notUntrueR s = mapR (contramap (\ f -> NotUntrue (_SrcExp @Fun # f))) (funR s)
 
 instance TrueIntro Seq where
-  trueL = mapL trueA
-  trueR = mapR true
+  trueL = mapL (fmap trueA)
+  trueR = mapR (contramap true)
 
 
 -- Negation
@@ -140,12 +140,12 @@ instance ZeroIntro Seq where
 instance WithIntro Seq where
   withL1 p = popL (pushL p . exlF)
   withL2 p = popL (pushL p . exrF)
-  withR = mapR2 inlr
+  withR = mapR2 (negK2 inlr)
 
 instance SumIntro Seq where
   sumL a b = popL (env2 . (pushL a <∘∘> pushL b))
-  sumR1 = mapR inl
-  sumR2 = mapR inr
+  sumR1 = mapR (contramap inl)
+  sumR2 = mapR (contramap inr)
 
 
 -- Multiplicative
@@ -164,24 +164,24 @@ instance ParIntro Seq where
 
 instance TensorIntro Seq where
   tensorL p = popL (pushL2 p . exlF <*> exrF)
-  tensorR = mapR2 inlr
+  tensorR = mapR2 (negK2 inlr)
 
 
 -- Logical biconditional/exclusive disjunction
 
 instance IffIntro Seq where
-  iffL1 s1 s2 = mapL getIff (withL1 (downR s1 ->⊢ s2))
+  iffL1 s1 s2 = mapL (fmap getIff) (withL1 (downR s1 ->⊢ s2))
 
-  iffL2 s1 s2 = mapL getIff (withL2 (downR s1 ->⊢ s2))
+  iffL2 s1 s2 = mapL (fmap getIff) (withL2 (downR s1 ->⊢ s2))
 
-  iffR s1 s2 = mapR Iff (funR (downL s1) ⊢& funR (downL s2))
+  iffR s1 s2 = mapR (contramap Iff) (funR (downL s1) ⊢& funR (downL s2))
 
 instance XOrIntro Seq where
-  xorL s1 s2 = mapL getXOr (subL (upR s1) ⊕⊢ subL (upR s2))
+  xorL s1 s2 = mapL (fmap getXOr) (subL (upR s1) ⊕⊢ subL (upR s2))
 
-  xorR1 s1 s2 = mapR XOr (sumR1 (s1 ⊢>- upL s2))
+  xorR1 s1 s2 = mapR (contramap XOr) (sumR1 (s1 ⊢>- upL s2))
 
-  xorR2 s1 s2 = mapR XOr (sumR2 (s1 ⊢>- upL s2))
+  xorR2 s1 s2 = mapR (contramap XOr) (sumR2 (s1 ⊢>- upL s2))
 
 
 -- Implication
@@ -198,31 +198,31 @@ instance SubtractionIntro Seq where
 -- Quantification
 
 instance UniversalIntro Seq where
-  forAllL p = mapL (notNegate . runForAll) p
+  forAllL p = mapL (fmap (notNegate . runForAll)) p
   forAllR p = inExp (\ (Coexp _Γ _Δ) -> liftRes (\ run -> inrK _Δ •• ForAll (inK (\ k -> run (exExp p (Coexp _Γ (inlK _Δ |> k)))))))
 
 instance ExistentialIntro Seq where
   existsL p = popL (val2 (dnE . runExists (pushL p . inV0)))
-  existsR p = mapR (Exists . liftDN) p
+  existsR p = mapR (contramap (Exists . liftDN)) p
 
 
 -- Recursion
 
 instance NuIntro Seq where
-  nuL = mapL runNu
-  nuR s = wkR' s >>> existsL (mapL nu init)
+  nuL = mapL (fmap runNu)
+  nuR s = wkR' s >>> existsL (mapL (fmap nu) init)
 
 instance MuIntro Seq where
-  muL f k = wkL (downR f) >>> exL (mapL getMu (funL init (wkL' k)))
-  muR = mapR mu
+  muL f k = wkL (downR f) >>> exL (mapL (fmap getMu) (funL init (wkL' k)))
+  muR = mapR (contramap mu)
 
 
 -- Polarity shifts
 
 instance UpIntro Seq where
-  upL   = mapL getUp
-  upR   = mapR Up
+  upL   = mapL (fmap getUp)
+  upR   = mapR (contramap Up)
 
 instance DownIntro Seq where
-  downL = mapL getDown
-  downR = mapR Down
+  downL = mapL (fmap getDown)
+  downR = mapR (contramap Down)

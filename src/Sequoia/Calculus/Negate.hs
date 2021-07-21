@@ -71,14 +71,14 @@ dnePK
   => K r **a < _Γ -|s e r|- _Δ
   -- -------------------------
   ->   r -¬a < _Γ -|s e r|- _Δ
-dnePK = mapL getNegateNot
+dnePK = mapL (fmap getNegateNot)
 
 dniPK
   :: Contextual s
   => _Γ -|s e r|- _Δ > K r **a
   -- -------------------------
   -> _Γ -|s e r|- _Δ >   r -¬a
-dniPK = mapR negateNot
+dniPK = mapR (contramap negateNot)
 
 
 negateLK
@@ -86,14 +86,14 @@ negateLK
   => K r  a < _Γ -|s e r|- _Δ
   -- ------------------------
   ->   r -a < _Γ -|s e r|- _Δ
-negateLK = mapL getNegate
+negateLK = mapL (fmap getNegate)
 
 negateRK
   :: Contextual s
   => _Γ -|s e r|- _Δ > K r  a
   -- ------------------------
   -> _Γ -|s e r|- _Δ >   r -a
-negateRK = mapR Negate
+negateRK = mapR (contramap Negate)
 
 
 negateLK'
@@ -101,11 +101,11 @@ negateLK'
   =>   r -a < _Γ -|s e r|- _Δ
   -- ------------------------
   -> K r  a < _Γ -|s e r|- _Δ
-negateLK' = mapL Negate
+negateLK' = mapL (fmap Negate)
 
 negateRK'
   :: Contextual s
   => _Γ -|s e r|- _Δ >   r -a
   -- ------------------------
   -> _Γ -|s e r|- _Δ > K r  a
-negateRK' = mapR getNegate
+negateRK' = mapR (contramap getNegate)

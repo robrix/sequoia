@@ -32,8 +32,6 @@ module Sequoia.Contextual
 , mapΓΔ
 , mapΓ
 , mapΔ
-, mapΓL
-, mapΔR
 , mapL
 , mapR
 , mapL2
@@ -340,38 +338,21 @@ mapΔ
 mapΔ = (id `mapΓΔ`)
 
 
-mapΓL
+mapL
   :: Contextual s
   => (V e a' -> V e a)
   -> a  < _Γ -|s e r|- _Δ
   -- --------------------
   -> a' < _Γ -|s e r|- _Δ
-mapΓL f = mapΓ (f . exlF >∘∘∘< exrF)
+mapL f = mapΓ (f . exlF >∘∘∘< exrF)
 
-mapΔR
+mapR
   :: Contextual s
   => (K r a' -> K r a)
   -> _Γ -|s e r|- _Δ > a
   -- --------------------
   -> _Γ -|s e r|- _Δ > a'
-mapΔR f = mapΔ (inlK <•••> f . inrK)
-
-
-mapL
-  :: Profunctor p
-  => (a' -> a)
-  -> a  < _Γ -|p|- _Δ
-  -- ----------------
-  -> a' < _Γ -|p|- _Δ
-mapL = lmap . firstConj
-
-mapR
-  :: Profunctor p
-  => (a -> a')
-  -> _Γ -|p|- _Δ > a
-  -- ----------------
-  -> _Γ -|p|- _Δ > a'
-mapR = rmap . fmap
+mapR f = mapΔ (inlK <•••> f . inrK)
 
 
 mapL2
@@ -384,7 +365,7 @@ mapL2 f a b = popL ((pushL b <--> pushL a) . f)
 
 mapR2
   :: Contextual s
-  => (a -> b -> c)
+  => (K r (K r c -> K r b) -> K r a)
   -> _Γ -|s e r|- _Δ > a   ->   _Γ -|s e r|- _Δ > b
   -- ----------------------------------------------
   ->            _Γ -|s e r|- _Δ > c

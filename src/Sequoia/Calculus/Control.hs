@@ -14,6 +14,7 @@ module Sequoia.Calculus.Control
 ) where
 
 import Control.Monad (join)
+import Data.Functor.Contravariant
 import Prelude hiding (init)
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Core
@@ -30,7 +31,7 @@ vL
   =>     a < _Γ -|s e r|- _Δ
   -- -----------------------
   -> V e a < _Γ -|s e r|- _Δ
-vL = mapΓL join
+vL = mapL join
 
 vR
   :: Contextual s
@@ -38,7 +39,7 @@ vR
   -- -----------------------
   -> _Γ -|s e r|- _Δ > V e a
 -- FIXME: this should preserve extant dependency on the env
-vR = mapR inV0
+vR = mapR (contramap inV0)
 
 vL'
   :: (Contextual s, Exchange s, Weaken s)
