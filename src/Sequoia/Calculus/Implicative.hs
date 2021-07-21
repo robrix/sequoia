@@ -24,11 +24,11 @@ funLSub
   =>                   _Γ -|s e r|- _Δ > b >-Sub e r-~ a
   -- ---------------------------------------------------
   -> a ~~Fun e r~> b < _Γ -|s e r|- _Δ
-funLSub s = wkL s >>> subL (exL (funL init init))
+funLSub s = wkL s >>> subL (exL (init ->⊢ init))
 
 subLFun
   :: (Weaken s, Exchange s, FunctionIntro s, SubtractionIntro s, Pos a, Neg b)
   =>                   _Γ -|s e r|- _Δ > a ~~Fun e r~> b
   -- ---------------------------------------------------
   -> b >-Sub e r-~ a < _Γ -|s e r|- _Δ
-subLFun s = wkL s >>> funL (subL (wkR init)) (exL (subL (wkL init)))
+subLFun s = wkL s >>> subL (wkR init) ->⊢ exL (subL (wkL init))
