@@ -10,7 +10,6 @@ module Sequoia.Connective.Subtraction
 
 import Data.Kind (Type)
 import Data.Profunctor
-import Sequoia.Conjunction
 import Sequoia.Functor.K
 import Sequoia.Functor.V
 import Sequoia.Optic.Iso
@@ -24,8 +23,8 @@ newtype Sub e r b a = Sub { getSub :: Coexp e r b a }
   deriving (Functor, Profunctor)
 
 instance Coexponential Sub where
-  inCoexp = fmap Sub . coexp
-  exCoexp = (recall &&& forget) . getSub
+  inCoexp = Sub
+  exCoexp = getSub
 
 instance (Pos a, Neg b) => Polarized P (Sub e r b a) where
 

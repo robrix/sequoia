@@ -20,7 +20,6 @@ module Sequoia.Profunctor.Coexponential
 , forget_
 ) where
 
-import Control.Arrow ((&&&))
 import Data.Functor.Contravariant
 import Data.Profunctor
 import Sequoia.Functor.K
@@ -38,16 +37,16 @@ instance Profunctor (Coexp e r) where
 
 -- Coexponential profunctor abstraction
 
-_Coexponential :: (Coexponential f, Coexponential f', Profunctor p) => Optic p (f e r a b) (f' e' r' a' b') (V e b, K r a) (V e' b', K r' a')
-_Coexponential = exCoexp `dimap` uncurry inCoexp
+_Coexponential :: (Coexponential f, Coexponential f', Profunctor p) => Optic p (f e r a b) (f' e' r' a' b') (Coexp e r a b) (Coexp e' r' a' b')
+_Coexponential = exCoexp `dimap` inCoexp
 
 class (forall e r . Profunctor (f e r)) => Coexponential f where
-  inCoexp :: V e b -> K r a -> f e r a b
-  exCoexp :: f e r a b -> (V e b, K r a)
+  inCoexp :: Coexp e r a b -> f e r a b
+  exCoexp :: f e r a b -> Coexp e r a b
 
 instance Coexponential Coexp where
-  inCoexp = coexp
-  exCoexp = recall &&& forget
+  inCoexp = id
+  exCoexp = id
 
 
 -- Construction
@@ -77,7 +76,7 @@ unCoexp = flip withCoexp
 -- Coercion
 
 coerceCoexp :: (Coexponential c1, Coexponential c2) => c1 e r a b -> c2 e r a b
-coerceCoexp = uncurry inCoexp . exCoexp
+coerceCoexp = inCoexp . exCoexp
 
 
 -- Optics
