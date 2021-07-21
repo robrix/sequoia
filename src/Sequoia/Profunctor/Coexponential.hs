@@ -13,7 +13,6 @@ module Sequoia.Profunctor.Coexponential
 , runCoexp
 , withCoexp
 , withCoexpVK
-, unCoexp
 , unCoexpVK
   -- * Coercion
 , coerceCoexp
@@ -75,9 +74,6 @@ withCoexp c f = withCoexpVK c (\ v k -> f (runV v) (runK k))
 
 withCoexpVK :: Coexp e r b a -> ((V e a -> K r b -> s) -> s)
 withCoexpVK c f = f (recall c) (forget c)
-
-unCoexp :: ((e -> a) -> (b -> r) -> s) -> Coexp e r b a -> s
-unCoexp = flip withCoexp
 
 unCoexpVK :: (V e a -> K r b -> s) -> Coexp e r b a -> s
 unCoexpVK = flip withCoexpVK
