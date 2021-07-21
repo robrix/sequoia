@@ -21,8 +21,6 @@ module Sequoia.Profunctor.Coexponential
 
 import Control.Arrow ((&&&))
 import Data.Functor.Contravariant
-import Data.Functor.Contravariant.Rep as K
-import Data.Functor.Rep as V
 import Data.Profunctor
 import Sequoia.Functor.K
 import Sequoia.Functor.V
@@ -56,8 +54,8 @@ instance Coexponential Coexp where
 idCoexp :: Coexp b a a b
 idCoexp = coexp (V id) (K id)
 
-coexp :: (V.Representable v, K.Representable k) => v a -> k b -> Coexp (V.Rep v) (K.Rep k) b a
-coexp v k = Coexp (V.tabulate (V.index v)) (K.tabulate (K.index k))
+coexp :: V e a -> K r b -> Coexp e r b a
+coexp = Coexp
 
 
 -- Elimination
