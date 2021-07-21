@@ -29,7 +29,7 @@ import           Sequoia.Calculus.Nu
 import           Sequoia.Calculus.Quantification
 import           Sequoia.Calculus.Shift
 import           Sequoia.Calculus.Structural
-import           Sequoia.Calculus.True as True
+import           Sequoia.Calculus.True
 import           Sequoia.Calculus.XOr
 import           Sequoia.Conjunction
 import           Sequoia.Contextual
@@ -115,7 +115,7 @@ instance NotUntrueIntro Seq where
 
 instance TrueIntro Seq where
   trueL = mapL trueA
-  trueR = mapR (`True.True` idK)
+  trueR = mapR true
 
 
 -- Negation
