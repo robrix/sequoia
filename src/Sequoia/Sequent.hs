@@ -139,7 +139,7 @@ instance ZeroIntro Seq where
 instance WithIntro Seq where
   withL1 p = popL (pushL p . exlF)
   withL2 p = popL (pushL p . exrF)
-  withR = mapR2 (negK2 inlr)
+  withR = mapR2 (contramap (contramap . inlr))
 
 instance SumIntro Seq where
   sumL a b = popL (env2 . (pushL a <∘∘> pushL b))
@@ -163,7 +163,7 @@ instance ParIntro Seq where
 
 instance TensorIntro Seq where
   tensorL p = popL (pushL2 p . exlF <*> exrF)
-  tensorR = mapR2 (negK2 inlr)
+  tensorR = mapR2 (contramap (contramap . inlr))
 
 
 -- Logical biconditional/exclusive disjunction

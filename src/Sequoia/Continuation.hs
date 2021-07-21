@@ -9,7 +9,6 @@ module Sequoia.Continuation
 , Contravariant(..)
   -- ** Construction
 , inK
-, negK2
   -- ** Elimination
 , (•)
   -- ** Coercion
@@ -52,13 +51,8 @@ instance Continuation (K r)
 inK :: Representable k => KFn k a ->       k a
 inK = tabulate
 
-inK2 :: Representable k => (KFn k a -> KFn k b -> KFn k c) -> (k a -> k b -> k c)
+inK2 :: (KFn (K r) a -> KFn (K r) b -> KFn (K r) c) -> (K r a -> K r b -> K r c)
 inK2 f a b = inK ((a •) `f` (b •))
-
-
--- | Negate a binary function by translating it to operate on continuations.
-negK2 :: Contravariant k => (a -> b -> c) -> (k (k c -> k b) -> k a)
-negK2 = contramap . (contramap .)
 
 
 -- Elimination
@@ -71,25 +65,25 @@ infixl 7 •
 
 -- Coercion
 
-_K :: (Representable k, Representable k') => Iso (k a) (k' a') (KFn k a) (KFn k' a')
+_K :: Iso (K r a) (K r' a') (KFn (K r) a) (KFn (K r') a')
 _K = from contratabulated
 
 
 -- Category
 
-idK :: Representable k => k (KRep k)
+idK :: K r r
 idK = inK id
 
 
 -- Composition
 
-(<••>) :: (Disj d, Representable k) => k a -> k b -> k (a `d` b)
+(<••>) :: Disj d => K r a -> K r b -> K r (a `d` b)
 (<••>) = inK2 (<-->)
 
 infix 3 <••>
 
 
-(<•••>) :: (Disj d, Representable k) => (e -> k a) -> (e -> k b) -> (e -> k (a `d` b))
+(<•••>) :: Disj d => (e -> K r a) -> (e -> K r b) -> (e -> K r (a `d` b))
 (<•••>) = liftA2 (<••>)
 
 infix 3 <•••>
