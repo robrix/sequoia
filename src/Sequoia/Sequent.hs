@@ -202,7 +202,7 @@ instance UniversalIntro Seq where
 
 instance ExistentialIntro Seq where
   existsL p = popL (val2 (dnE . runExists (pushL p . inV0)))
-  existsR p = mapR (contramap (Exists . liftDN)) p
+  existsR p = mapR (contramap (Exists . K . flip runK)) p
 
 
 -- Recursion

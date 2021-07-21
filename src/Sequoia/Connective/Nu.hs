@@ -11,7 +11,7 @@ import Sequoia.Connective.Down
 import Sequoia.Connective.Function
 import Sequoia.Connective.Quantification
 import Sequoia.Connective.Tensor
-import Sequoia.Continuation as K
+import Sequoia.Functor.K
 import Sequoia.Polarity
 
 -- Corecursion
@@ -28,4 +28,4 @@ nu :: Pos x => NuF e r f x -> Nu e r f
 nu r = Nu (getNuF r)
 
 runNu :: Nu e r f -> Exists r P (NuF e r f)
-runNu (Nu r) = Exists (liftDN (NuF r))
+runNu (Nu r) = Exists (K (`runK` NuF r))

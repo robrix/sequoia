@@ -22,9 +22,6 @@ module Sequoia.Continuation
 , (<•••>)
   -- * Double negation
 , type (**)
-, mapDN
-  -- ** Construction
-, liftDN
   -- * Ambient control
 , Res(..)
 , cont
@@ -37,11 +34,9 @@ module Sequoia.Continuation
 import Control.Applicative (liftA2)
 import Data.Functor.Contravariant
 import Data.Functor.Contravariant.Rep
-import Data.Profunctor
 import Sequoia.Disjunction
 import Sequoia.Functor.K
 import Sequoia.Optic.Iso
-import Sequoia.Optic.Setter
 import Sequoia.Profunctor.Recall
 
 -- Continuations
@@ -59,9 +54,6 @@ instance Continuation (K r)
 
 inK :: Representable k => KFn k a ->       k a
 inK = tabulate
-
-inK1 :: Representable k => (KFn k a -> KFn k b) -> (k a -> k b)
-inK1 = over _K
 
 inK2 :: Representable k => (KFn k a -> KFn k b -> KFn k c) -> (k a -> k b -> k c)
 inK2 f a b = inK ((a •) `f` (b •))
@@ -113,30 +105,6 @@ type k **a = k (k a)
 infixl 9 **
 
 
-type ContFn k a = KFn k (KFn k a)
-
-
-_DN :: (Representable k, Representable k') => Iso (ContFn k a) (ContFn k' a') (k **a) (k' **a')
-_DN = inDN <-> exDN
-
-
-mapDN :: Representable k => (a -> b) -> (k **a -> k **b)
-mapDN f = inK1 (lmap (contramap f))
-
-
--- Construction
-
-liftDN :: Representable k => a -> k **a
-liftDN = inK . flip (•)
-
-inDN :: Representable k => ContFn k a -> k **a
-inDN = inK . lmap (•)
-
-
--- Elimination
-
-exDN :: Representable k => k **a -> ContFn k a
-exDN = lmap inK . (•)
 
 
 -- Ambient control
