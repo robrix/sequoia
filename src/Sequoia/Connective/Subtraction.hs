@@ -4,7 +4,6 @@ module Sequoia.Connective.Subtraction
 , type (>-)
 , type (-~)
   -- * Optics
-, sub
 , subA_
 , subK_
 ) where
@@ -12,14 +11,12 @@ module Sequoia.Connective.Subtraction
 import Data.Kind (Type)
 import Data.Profunctor
 import Sequoia.Conjunction
-import Sequoia.Continuation as K
 import Sequoia.Functor.K
 import Sequoia.Functor.V
 import Sequoia.Optic.Iso
 import Sequoia.Optic.Lens
 import Sequoia.Polarity
 import Sequoia.Profunctor.Coexponential
-import Sequoia.Value as V
 
 -- Subtraction
 
@@ -40,9 +37,6 @@ infixr 5 -~
 
 
 -- Optics
-
-sub :: (K.Representable k, V.Representable v, Conj c) => a >-Sub (V.Rep v) (K.Rep k)-~ b <-> v b `c` k a
-sub = _Coexponential.coercedConj.bimappingConj coercedV coercedK
 
 subA_ :: Lens (b >-Sub e r-~ a) (b >-Sub e' r-~ a') (V e a) (V e' a')
 subA_ = coercedFrom Sub .recall_
