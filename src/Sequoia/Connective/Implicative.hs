@@ -16,13 +16,12 @@ import Sequoia.Disjunction
 import Sequoia.Functor.K
 import Sequoia.Functor.V
 import Sequoia.Optic.Iso
-import Sequoia.Profunctor.Coexponential
 import Sequoia.Profunctor.Context
 import Sequoia.Profunctor.Exponential
 import Sequoia.Value
 
 elimFun :: a ~~Fun e r~> b -> b >-Sub e r-~ a -> C e r
-elimFun f = exExp f . getSub
+elimFun = elimExp
 
 funPar1 :: K r (V e (r ¬a ⅋ b)) <-> K r (V e (a ~~Fun e r~> b))
 funPar1
@@ -35,7 +34,7 @@ funPar2
   <-> inK1 (\ k p -> k (inK ((p •) . (mkPar (inrK (contramap inV0 p)) =<<))))
 
 mkPar :: K r b -> a ~~Fun e r~> b -> V e (r ¬a ⅋ b)
-mkPar p f = V (\ e -> inl (inK (\ a -> runC (exExp f (coexp (inV0 a) p)) e)))
+mkPar p f = V (\ e -> inl (inK (\ a -> runC (exExp f (inV0 a) p) e)))
 
 mkFun :: r ¬a ⅋ b -> a ~~Fun e r~> b
-mkFun p = inExp (unCoexp (\ a b -> ((•∘ a) <--> (b ••)) p))
+mkFun p = inExp (\ a b -> ((•∘ a) <--> (b ••)) p)

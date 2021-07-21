@@ -15,7 +15,6 @@ import           Sequoia.Continuation
 import           Sequoia.Functor.K
 import           Sequoia.Functor.V
 import           Sequoia.Polarity
-import           Sequoia.Profunctor.Coexponential
 import           Sequoia.Profunctor.Context
 import           Sequoia.Profunctor.Exponential
 
@@ -27,7 +26,7 @@ appFun = appExp
 appFun2 :: (a ~~Fun e r~> b ~~Fun e r~> c) -> V e (V e a -> V e b -> K r **c)
 appFun2 = appExp2
 
-newtype Fun e r a b = Fun { getFun :: Coexp e r b a -> C e r }
+newtype Fun e r a b = Fun { getFun :: V e a -> K r b -> C e r }
   deriving (Exponential) via Exp
   deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via Exp e r
   deriving (Functor) via Exp e r a
