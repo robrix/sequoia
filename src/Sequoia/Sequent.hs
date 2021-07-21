@@ -16,7 +16,6 @@ import           Data.Profunctor
 import           Data.Profunctor.Traversing
 import           Prelude hiding (init)
 import           Sequoia.Calculus.Additive
-import           Sequoia.Calculus.Assertion
 import           Sequoia.Calculus.Context
 import           Sequoia.Calculus.Control as Calculus
 import           Sequoia.Calculus.Core
@@ -25,10 +24,12 @@ import           Sequoia.Calculus.Implicative
 import           Sequoia.Calculus.Mu
 import           Sequoia.Calculus.Multiplicative
 import           Sequoia.Calculus.Negation
+import           Sequoia.Calculus.NotUntrue
 import           Sequoia.Calculus.Nu
 import           Sequoia.Calculus.Quantification
 import           Sequoia.Calculus.Shift
 import           Sequoia.Calculus.Structural
+import           Sequoia.Calculus.True as True
 import           Sequoia.Calculus.XOr
 import           Sequoia.Conjunction
 import           Sequoia.Contextual
@@ -113,8 +114,8 @@ instance NotUntrueIntro Seq where
   notUntrueR s = mapR (\ f -> NotUntrue (_SrcExp @Fun # f)) (funR s)
 
 instance TrueIntro Seq where
-  trueL = mapΓL (>>= getTrue)
-  trueR = mapΔR (contramap inV0)
+  trueL = mapL trueA
+  trueR = mapR (`True.True` idK)
 
 
 -- Negation
@@ -190,8 +191,8 @@ instance FunctionIntro Seq where
   funR = lowerLR (liftR . inV0) . wkR'
 
 instance SubtractionIntro Seq where
-  subL f = mapL (view sub) (tensorL (wkL' (trueL f) >>> poppedL2 negateL init))
-  subR a b = mapR (sub #) (trueR a ⊢⊗ negateR b)
+  subL f = popL (\ s -> liftR (s^.subA_) >>> f >>> liftL (s^.subK_))
+  subR a b = wkR' a >>> popΓL (\ a -> lowerL (liftR . inV0 . Sub . Coexp a) (wkR b))
 
 
 -- Quantification

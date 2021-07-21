@@ -17,10 +17,10 @@ class Core s => TrueIntro s where
     :: Pos a
     =>        a < _Γ -|s e r|- _Δ
     -- --------------------------
-    -> True e a < _Γ -|s e r|- _Δ
+    -> True r a < _Γ -|s e r|- _Δ
 
   trueR
     :: Pos a
     => _Γ -|s e r|- _Δ > a
     -- --------------------------
-    -> _Γ -|s e r|- _Δ > True e a
+    -> _Γ -|s e r|- _Δ > True r a
