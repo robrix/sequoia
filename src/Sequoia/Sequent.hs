@@ -39,6 +39,7 @@ import           Sequoia.Functor.Source
 import           Sequoia.Functor.V
 import           Sequoia.Optic.Getter
 import           Sequoia.Optic.Review
+import           Sequoia.Profunctor.Coexponential
 import           Sequoia.Profunctor.Context
 import           Sequoia.Profunctor.Exponential as Exponential hiding ((>>>))
 import           Sequoia.Value
@@ -94,7 +95,7 @@ deriving via Contextually Seq instance Exchange Seq
 -- Contextual rules
 
 instance Contextual Seq where
-  swapΓΔ f _Γ' _Δ' = inExp (\ _Γ _Δ -> exExp (f _Γ _Δ) _Γ' _Δ')
+  swapΓΔ f (Coexp _Γ' _Δ') = inExp (\ _Γ _Δ -> exExp (f (Coexp _Γ _Δ)) _Γ' _Δ')
 
 
 -- Control

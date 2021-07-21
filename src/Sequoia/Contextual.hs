@@ -69,14 +69,15 @@ import Sequoia.Disjunction
 import Sequoia.Functor.K
 import Sequoia.Functor.V
 import Sequoia.Optic.Setter
+import Sequoia.Profunctor.Coexponential
 import Sequoia.Value
 
 -- Contextual
 
 class (Core s, Env2 s, forall e r . Profunctor (s e r)) => Contextual s where
   swapΓΔ
-    :: (V e _Γ  -> K r _Δ  -> _Γ' -|s e r|- _Δ')
-    -> (V e _Γ' -> K r _Δ' -> _Γ  -|s e r|- _Δ)
+    :: (Coexp e r _Δ  _Γ  -> _Γ' -|s e r|- _Δ')
+    -> (Coexp e r _Δ' _Γ' -> _Γ  -|s e r|- _Δ )
 
 
 -- Swapping
@@ -85,23 +86,23 @@ swapΓ
   :: Contextual s
   => (V e _Γ  -> _Γ' -|s e r|- _Δ)
   -> (V e _Γ' -> _Γ  -|s e r|- _Δ)
-swapΓ f _Γ' = popΓΔ (\ _Γ _Δ -> pushΓΔ (f _Γ) _Γ' _Δ)
+swapΓ f _Γ' = popΓΔ (\ (Coexp _Γ _Δ) -> pushΓΔ (f _Γ) (Coexp _Γ' _Δ))
 
 swapΔ
   :: Contextual s
   => (K r _Δ  -> _Γ -|s e r|- _Δ')
   -> (K r _Δ' -> _Γ -|s e r|- _Δ)
-swapΔ f _Δ' = popΓΔ (\ _Γ _Δ -> pushΓΔ (f _Δ) _Γ _Δ')
+swapΔ f _Δ' = popΓΔ (\ (Coexp _Γ _Δ) -> pushΓΔ (f _Δ) (Coexp _Γ _Δ'))
 
 
 -- Popping
 
 popΓΔ
   :: Contextual s
-  => (V e _Γ -> K r _Δ -> e -|s e r|- r)
-  -- -----------------------------------
-  ->                     _Γ -|s e r|- _Δ
-popΓΔ f = swapΓΔ f idV idK
+  => (Coexp e r _Δ _Γ -> e -|s e r|- r)
+  -- ----------------------------------
+  ->                    _Γ -|s e r|- _Δ
+popΓΔ f = swapΓΔ f idCoexp
 
 -- | Pop something off the input context which can later be pushed. Used with 'pushΓ', this provides a generalized context restructuring facility.
 --
@@ -263,10 +264,10 @@ poppedR2 = poppedΔ (assocR . first unsnocΔ . unsnocΔ) (\ _Δ (b, a) -> _Δ |>
 
 pushΓΔ
   :: Contextual s
-  =>                     _Γ -|s e r|- _Δ
-  -- -----------------------------------
-  -> (V e _Γ -> K r _Δ -> e -|s e r|- r)
-pushΓΔ = swapΓΔ . const . const
+  =>                    _Γ -|s e r|- _Δ
+  -- ----------------------------------
+  -> (Coexp e r _Δ _Γ -> e -|s e r|- r)
+pushΓΔ = swapΓΔ . const
 
 -- | Push something onto the input context which was previously popped off it. Used with 'popΓ', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
 --
@@ -385,7 +386,7 @@ mapΓΔ
   -> _Γ  -|s e r|- _Δ
   -- -----------------
   -> _Γ' -|s e r|- _Δ'
-mapΓΔ f g p = popΓΔ (\ _Γ _Δ -> pushΓΔ p (f _Γ) (g _Δ))
+mapΓΔ f g p = popΓΔ (\ (Coexp _Γ _Δ) -> pushΓΔ p (Coexp (f _Γ) (g _Δ)))
 
 mapΓ
   :: Contextual s
@@ -463,7 +464,7 @@ traverseΓΔ
   -> (x -> y -> _Γ  -|s e r|- _Δ)
   -- ----------------------------
   -> _Γ' -|s e r|- _Δ'
-traverseΓΔ f g s = popΓΔ (\ _Γ' _Δ' -> let (x, _Γ) = f _Γ' ; (_Δ, y) = g _Δ' in pushΓΔ (s x y) _Γ _Δ)
+traverseΓΔ f g s = popΓΔ (\ (Coexp _Γ' _Δ') -> let (x, _Γ) = f _Γ' ; (_Δ, y) = g _Δ' in pushΓΔ (s x y) (Coexp _Γ _Δ))
 
 traverseΓ
   :: Contextual s
