@@ -21,6 +21,7 @@ import Data.Bitraversable
 import Sequoia.Conjunction
 import Sequoia.Continuation as K
 import Sequoia.Disjunction
+import Sequoia.Functor.K
 import Sequoia.Value as V
 
 -- Γ
@@ -116,7 +117,7 @@ instance Monad ((>) a) where
 -- @
 -- 'unsnocΔ' . 'uncurry' ('|>') = id
 -- @
-(|>) :: K.Representable k => k os -> k o -> k (os > o)
+(|>) :: K r os -> K r o -> K r (os > o)
 (|>) = (<••>)
 
 -- | Split a '>'-context into its initial and last parts.
@@ -129,7 +130,7 @@ instance Monad ((>) a) where
 -- @
 -- 'unsnocΔ' . 'uncurry' ('|>') = id
 -- @
-unsnocΔ :: K.Representable k => k (a > b) -> (k a, k b)
+unsnocΔ :: K r (a > b) -> (K r a, K r b)
 unsnocΔ k = (inlK k, inrK k)
 
 
