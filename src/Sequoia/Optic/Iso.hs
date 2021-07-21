@@ -13,6 +13,7 @@ module Sequoia.Optic.Iso
 , uncurried
 , swapped
 , non
+, pairing
   -- * Elimination
 , withIso
 , under
@@ -50,6 +51,7 @@ module Sequoia.Optic.Iso
 ) where
 
 import           Control.Applicative (Alternative)
+import           Control.Arrow ((***))
 import           Control.Monad (guard)
 import           Data.Bifunctor
 import           Data.Coerce
@@ -113,6 +115,9 @@ non a = fromMaybe a <-> select (/= a)
 
 select :: Alternative f => (a -> Bool) -> (a -> f a)
 select p a = a <$ guard (p a)
+
+pairing :: Iso s1 t1 a1 b1 -> Iso s2 t2 a2 b2 -> Iso (s1, s2) (t1, t2) (a1, a2) (b1, b2)
+pairing a b = (view a *** view b) <-> (review a *** review b)
 
 
 -- Elimination
