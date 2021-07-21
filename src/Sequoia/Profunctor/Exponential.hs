@@ -154,7 +154,7 @@ appExp2 f = inV (\ e a b -> inK (\ c -> runC (exExp f (Coexp a (inK (\ g -> runC
 runExp :: Exponential f => V e a -> K r b -> a --|f e r|-> b -> C e r
 runExp v k f = exExp f (Coexp v k)
 
-elimExp :: (Exponential f, Coexponential s) => a --|f e r|-> b -> s e r a b -> C e r
+elimExp :: (Exponential f, Coexponential s) => a --|f e r|-> b -> s e r b a -> C e r
 elimExp f = exExp f . uncurry Coexp . exCoexp
 
 

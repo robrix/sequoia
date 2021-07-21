@@ -1,8 +1,7 @@
 {-# LANGUAGE QuantifiedConstraints #-}
 module Sequoia.Profunctor.Coexponential
 ( -- * Coexponential profunctor
-  _Coexp
-, Coexp(..)
+  Coexp(..)
   -- * Coexponential profunctor abstraction
 , _Coexponential
 , Coexponential(..)
@@ -21,17 +20,11 @@ module Sequoia.Profunctor.Coexponential
 
 import Control.Arrow ((&&&))
 import Data.Profunctor
-import Sequoia.Confunctor
 import Sequoia.Functor.K
 import Sequoia.Functor.V
 import Sequoia.Optic.Optic
 
 -- Coexponential profunctor
-
-type Iso s t a b = (forall p . Profunctor p => p a b -> p s t)
-
-_Coexp :: Iso (Coexp e r a b) (Coexp e' r' a' b') (V e b, K r a) (V e' b', K r' a')
-_Coexp = dimap (recall &&& forget) (uncurry Coexp)
 
 data Coexp e r a b = Coexp { recall :: V e b, forget :: K r a }
   deriving (Functor)
@@ -42,12 +35,16 @@ instance Profunctor (Coexp e r) where
 
 -- Coexponential profunctor abstraction
 
-_Coexponential :: (Coexponential f, Coexponential f', Profunctor p) => Optic p (f e r a b) (f' e' r' a' b') (V e a, K r b) (V e' a', K r' b')
+_Coexponential :: (Coexponential f, Coexponential f', Profunctor p) => Optic p (f e r a b) (f' e' r' a' b') (V e b, K r a) (V e' b', K r' a')
 _Coexponential = exCoexp `dimap` uncurry inCoexp
 
-class (forall e r . Confunctor (f e r)) => Coexponential f where
-  inCoexp :: V e a -> K r b -> f e r a b
-  exCoexp :: f e r a b -> (V e a, K r b)
+class (forall e r . Profunctor (f e r)) => Coexponential f where
+  inCoexp :: V e b -> K r a -> f e r a b
+  exCoexp :: f e r a b -> (V e b, K r a)
+
+instance Coexponential Coexp where
+  inCoexp = Coexp
+  exCoexp = recall &&& forget
 
 
 -- Construction

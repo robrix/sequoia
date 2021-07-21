@@ -178,9 +178,9 @@ instance IffIntro Seq where
 instance XOrIntro Seq where
   xorL s1 s2 = mapL getXOr (subL (upR s1) ⊕⊢ subL (upR s2))
 
-  xorR1 s1 s2 = mapR XOr (sumR1 (s1 ⊢-< upL s2))
+  xorR1 s1 s2 = mapR XOr (sumR1 (s1 ⊢>- upL s2))
 
-  xorR2 s1 s2 = mapR XOr (sumR2 (s1 ⊢-< upL s2))
+  xorR2 s1 s2 = mapR XOr (sumR2 (s1 ⊢>- upL s2))
 
 
 -- Implication

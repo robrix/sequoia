@@ -21,7 +21,7 @@ import Sequoia.Profunctor.Context
 import Sequoia.Profunctor.Exponential
 import Sequoia.Value
 
-elimFun :: a ~~Fun e r~> b -> a ~-Sub e r-< b -> C e r
+elimFun :: a ~~Fun e r~> b -> b >-Sub e r-~ a -> C e r
 elimFun f = exExp f . getSub
 
 funPar1 :: K r (V e (r ¬a ⅋ b)) <-> K r (V e (a ~~Fun e r~> b))
