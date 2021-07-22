@@ -13,6 +13,8 @@ module Sequoia.Profunctor.Continuation
 , Res(..)
 , cont
 , (••)
+  -- * Double negation
+, type (••)
 ) where
 
 import Control.Applicative (liftA2)
@@ -89,3 +91,8 @@ cont f = liftRes (\ run -> f (K . (run .)))
 k •• v = res (k • v)
 
 infix 7 ••
+
+
+-- Double negation
+
+type a ••r = a • r • r
