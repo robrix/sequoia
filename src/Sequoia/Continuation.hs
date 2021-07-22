@@ -4,7 +4,6 @@
 module Sequoia.Continuation
 ( -- * Continuations
   Continuation
-, KFn
 , Contravariant(..)
   -- ** Construction
 , inK
@@ -38,24 +37,21 @@ import Sequoia.Profunctor.Recall
 
 class Representable k => Continuation r k | k -> r
 
-type KFn r a = a -> r
-
-
 instance Continuation r (K r)
 
 
 -- Construction
 
-inK :: Representable k => KFn (Rep k) a ->       k a
+inK :: Representable k => (a -> Rep k) -> k a
 inK = tabulate
 
-inK2 :: (KFn r a -> KFn r b -> KFn r c) -> (K r a -> K r b -> K r c)
+inK2 :: ((a -> r) -> (b -> r) -> (c -> r)) -> (K r a -> K r b -> K r c)
 inK2 f a b = inK ((a •) `f` (b •))
 
 
 -- Elimination
 
-(•) :: Representable k => k a -> KFn (Rep k) a
+(•) :: Representable k => k a -> (a -> Rep k)
 (•) = index
 
 infixl 7 •
@@ -63,7 +59,7 @@ infixl 7 •
 
 -- Coercion
 
-_K :: Iso (K r a) (K r' a') (KFn r a) (KFn r' a')
+_K :: Iso (K r a) (K r' a') (a -> r) (a' -> r')
 _K = from contratabulated
 
 
