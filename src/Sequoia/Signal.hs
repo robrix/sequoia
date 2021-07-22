@@ -45,7 +45,7 @@ instance Functor (Sig e r a) where
   fmap = rmap
 
 instance Applicative (Sig e r a) where
-  pure a = Sig (const (•∘ inV0 @(V _) a))
+  pure a = Sig (const (•∘ inV0 a))
   (<*>) = ap
 
 instance Monad (Sig e r a) where

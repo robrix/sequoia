@@ -24,7 +24,7 @@ import Control.Applicative (liftA2)
 import Data.Functor.Rep
 import Sequoia.Conjunction
 import Sequoia.Disjunction
-import Sequoia.Profunctor.Value (Env(..), V(..), _V, idV, val)
+import Sequoia.Profunctor.Value (Env(..), V(..), _V, idV, inV0, val)
 
 -- Values
 
@@ -32,9 +32,6 @@ class Representable v => Value v
 
 
 -- Construction
-
-inV0 :: Representable v => a -> v a
-inV0 = inV . const
 
 inV :: Representable v => (Rep v -> a) -> v a
 inV = tabulate
@@ -59,4 +56,4 @@ infix 3 >∘∘∘<
 infix 3 <∘∘>
 
 bitraverseDisjV :: Disj d => V e (a `d` b) -> e -> V e a `d` V e b
-bitraverseDisjV = fmap (bimapDisj inV0 inV0) . (∘)
+bitraverseDisjV = fmap (bimapDisj pure pure) . (∘)
