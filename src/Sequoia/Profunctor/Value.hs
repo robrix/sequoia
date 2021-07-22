@@ -54,11 +54,8 @@ class Env e c | c -> e where
 instance Env e (e -> a) where
   env = join
 
-instance Env e (Forget r e b) where
-  env = Forget . (runForget =<<)
-
-instance Env e (Recall e a b) where
-  env = Recall . (runRecall =<<)
+deriving instance Env e (Forget r e b)
+deriving instance Env e (Recall e a b)
 
 val :: Env e c => (a -> c) -> (V e a -> c)
 val f v = env (f . (v ∘))
