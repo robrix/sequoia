@@ -71,13 +71,13 @@ inK = K
 -- Coercion
 
 _K :: Iso (K r a) (K r' a') (a -> r) (a' -> r')
-_K = from contratabulated
+_K = coerced
 
 
 -- Category
 
 idK :: K r r
-idK = inK id
+idK = K id
 
 
 -- Composition
@@ -97,7 +97,7 @@ infix 3 <•••>
 -- Ambient control
 
 cont :: Res r c => (((a -> c) -> K r a) -> c) -> c
-cont f = liftRes (\ run -> f (inK . (run .)))
+cont f = liftRes (\ run -> f (K . (run .)))
 
 (••) :: Res r c => K r a -> a -> c
 k •• v = res (k • v)
