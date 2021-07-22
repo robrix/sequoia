@@ -8,11 +8,16 @@ module Sequoia.Profunctor.Value
 , idV
   -- * Coercion
 , _V
+  -- * Computation
+, (>∘∘<)
+, (>∘∘∘<)
+, (<∘∘>)
   -- * Ambient environment
 , Env(..)
 , val
 ) where
 
+import Control.Applicative (liftA2)
 import Control.Category (Category)
 import Control.Monad (join)
 import Data.Distributive
@@ -22,6 +27,8 @@ import Data.Profunctor
 import Data.Profunctor.Rep as Pro
 import Data.Profunctor.Sieve
 import Data.Profunctor.Traversing
+import Sequoia.Conjunction
+import Sequoia.Disjunction
 import Sequoia.Optic.Iso
 import Sequoia.Profunctor.Recall
 
@@ -54,6 +61,28 @@ idV = V id
 
 _V :: Iso (V e a) (V e' a') (e -> a) (e' -> a')
 _V = coerced
+
+
+-- Computation
+
+(>∘∘<) :: Conj d => V e b -> V e c -> V e (b `d` c)
+a >∘∘< b = V ((a ∘) >---< (b ∘))
+
+infix 3 >∘∘<
+
+(>∘∘∘<) :: Conj d => (a -> V e b) -> (a -> V e c) -> (a -> V e (b `d` c))
+(>∘∘∘<) = liftA2 (>∘∘<)
+
+infix 3 >∘∘∘<
+
+
+(<∘∘>) :: Disj d => (V e a -> r) -> (V e b -> r) -> (V e (a `d` b) -> e -> r)
+(l <∘∘> r) ab = (l <--> r) . bitraverseDisjV ab
+
+infix 3 <∘∘>
+
+bitraverseDisjV :: Disj d => V e (a `d` b) -> e -> V e a `d` V e b
+bitraverseDisjV = fmap (bimapDisj pure pure) . (∘)
 
 
 -- Ambient environment
