@@ -134,7 +134,7 @@ inExpC :: e ==> r -> e --|Exp e r|-> r
 inExpC (C c) = inExpFn (\ v k -> k . c . v)
 
 inExpFn :: ((e -> a) -> (b -> r) -> (e -> r)) -> Exp e r a b
-inExpFn = inExp . coerce
+inExpFn = coerce
 
 
 -- Elimination
