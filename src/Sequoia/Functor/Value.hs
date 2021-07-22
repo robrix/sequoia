@@ -10,8 +10,6 @@ module Sequoia.Functor.Value
 , inV0
 , inV
 , idV
-  -- * Elimination
-, (∘)
   -- * Coercion
 , _V
   -- * Computation
@@ -28,7 +26,7 @@ import Data.Functor.Rep
 import Sequoia.Conjunction
 import Sequoia.Disjunction
 import Sequoia.Optic.Iso
-import Sequoia.Profunctor.Value (Env(..), V(V), val)
+import Sequoia.Profunctor.Value (Env(..), V(..), val)
 
 -- Values
 
@@ -52,11 +50,8 @@ idV = inV id
 
 -- Elimination
 
-exV, (∘) :: Representable v => v a -> (Rep v -> a)
+exV :: Representable v => v a -> (Rep v -> a)
 exV = index
-(∘) = index
-
-infixr 8 ∘
 
 
 -- Coercion
