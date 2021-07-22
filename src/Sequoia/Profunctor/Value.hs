@@ -4,7 +4,7 @@ module Sequoia.Profunctor.Value
 ( -- * Value profunctor
   V(..)
   -- * Elimination
-, (∘)
+, runV
   -- * Coercion
 , _V
   -- * Ambient environment
@@ -26,7 +26,7 @@ import Sequoia.Profunctor.Recall
 
 -- Value profunctor
 
-newtype V e a = V { runV :: e -> a }
+newtype V e a = V { (∘) :: e -> a }
   deriving (Applicative, Category, Choice, Closed, Cochoice, Pro.Corepresentable, Costrong, Env e, Functor, Mapping, Monad, Profunctor, Co.Representable, Pro.Representable, Strong, Traversing)
 
 instance Distributive (V e) where
@@ -42,8 +42,8 @@ instance Cosieve V Identity where
 
 -- Elimination
 
-(∘) :: V e a -> e -> a
-(∘) = runV
+runV :: V e a -> e -> a
+runV = runV
 
 infix 8 ∘
 
