@@ -121,8 +121,8 @@ class (forall e r . Cat.Category (f e r), forall e r . Profunctor (f e r)) => Ex
 
 -- Construction
 
-inExp' :: Exponential f => (a -> b) -> a --|f e r|-> b
-inExp' f = inExp (flip (•∘) . fmap f)
+inExp' :: (a -> b) -> a --|Exp e r|-> b
+inExp' f = Exp (flip (•∘) . fmap f)
 
 
 -- Elimination
