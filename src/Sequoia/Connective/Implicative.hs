@@ -36,4 +36,4 @@ mkPar :: K r b -> a ~~Fun e r~> b -> V e (r ¬a ⅋ b)
 mkPar p f = V (\ e -> inl (Not (K (\ a -> runC (exExp f (inV0 a) p) e))))
 
 mkFun :: r ¬a ⅋ b -> a ~~Fun e r~> b
-mkFun p = inExp (\ a b -> ((•∘ a) <--> (b ••)) p)
+mkFun p = inExp (\ a b -> ((•∘ a) . getNot <--> (b ••)) p)
