@@ -158,14 +158,14 @@ library
     Sequoia.Profunctor.Applicative
     Sequoia.Profunctor.Coexponential
     Sequoia.Profunctor.Context
+    Sequoia.Profunctor.Continuation
     Sequoia.Profunctor.Diagonal
     Sequoia.Profunctor.Exchange
     Sequoia.Profunctor.Exponential
-    Sequoia.Profunctor.K
     Sequoia.Profunctor.Product
     Sequoia.Profunctor.Recall
     Sequoia.Profunctor.Sum
-    Sequoia.Profunctor.V
+    Sequoia.Profunctor.Value
     Sequoia.Sequent
     Sequoia.Signal
 

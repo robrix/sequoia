@@ -1,5 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-}
-module Sequoia.Profunctor.K
+module Sequoia.Profunctor.Continuation
 ( K(..)
 ) where
 

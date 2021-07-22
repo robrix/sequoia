@@ -1,5 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-}
-module Sequoia.Profunctor.V
+module Sequoia.Profunctor.Value
 ( V(..)
 ) where
 
