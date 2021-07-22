@@ -7,6 +7,7 @@ module Sequoia.Optic.Iso
 , (<->)
 , from
 , constant
+, constantFrom
 , involuted
 , flipped
 , curried
@@ -95,6 +96,9 @@ from o = withIso o (flip (<->))
 
 constant :: a -> Iso (a -> b) (a' -> b') b b'
 constant a = ($ a) <-> const
+
+constantFrom :: a -> (b' -> a' -> b') -> Iso (a -> b) (a' -> b') b b'
+constantFrom = (<->) . flip ($)
 
 involuted :: (a -> a) -> a <-> a
 involuted f = f <-> f
