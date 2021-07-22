@@ -63,6 +63,10 @@ instance Res r (a -> r) where
   res = pure
   liftRes f = f =<< flip ($)
 
+instance Res r (Forget r a b) where
+  res = Forget . const
+  liftRes f = Forget (\ a -> runForget (f (`runForget` a)) a)
+
 instance Res r (Recall e a r) where
   res = Recall . pure
   liftRes f = Recall (\ e -> runRecall (f (`runRecall` e)) e)
