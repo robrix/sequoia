@@ -3,8 +3,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Functor.Continuation
 ( -- * Continuations
-  Continuation
-, K(..)
+  K(..)
   -- ** Coercion
 , _K
   -- ** Composition
@@ -29,9 +28,6 @@ import Sequoia.Profunctor.Continuation (Res(..))
 
 -- Continuations
 
-class Representable k => Continuation r k | k -> r
-
-
 newtype K r a = K { (•) :: a -> r }
   deriving (Monoid, Semigroup)
   deriving (Contravariant) via Flip (->) r
@@ -53,8 +49,6 @@ instance Contrapply (K r) where
   contrap (K a) (K b) = K (either a b)
 
 instance Contrapplicative (K r)
-
-instance Continuation r (K r)
 
 
 -- Coercion
