@@ -70,7 +70,6 @@ import           Data.Tuple (swap)
 import           Sequoia.Optic.Getter
 import           Sequoia.Optic.Optic
 import           Sequoia.Optic.Review
-import           Sequoia.Profunctor.Coexponential
 import           Sequoia.Profunctor.Exchange
 
 -- Isos
@@ -134,8 +133,13 @@ withIso :: Iso s t a b -> (((s -> a) -> (b -> t) -> r) -> r)
 withIso = withExchange . ($ idExchange)
 
 
+newtype Under a b s t = Under { withUnder :: forall x . ((b -> t) -> (s -> a) -> x) -> x }
+
+instance Profunctor (Under a b) where
+  dimap g h c = withUnder c (\ r f -> Under (\ k -> k (h . r) (f . g)))
+
 under :: Iso s t a b -> (t -> s) -> (b -> a)
-under = runCoexp . ($ idCoexp)
+under i = withUnder (i (Under (\ k -> k id id))) (\ r f -> (f .) . (. r))
 
 
 au :: Functor f => Iso s t a b -> (((b -> t) -> f s) -> f a)
