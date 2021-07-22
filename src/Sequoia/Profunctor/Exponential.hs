@@ -12,6 +12,7 @@ module Sequoia.Profunctor.Exponential
   -- ** Construction
 , inExp
 , inExp'
+, inExpV
   -- ** Elimination
 , exExp
 , evalExp
@@ -113,6 +114,9 @@ inExp = Exp
 
 inExp' :: (a -> b) -> a --|Exp e r|-> b
 inExp' f = Exp (flip (•∘) . fmap f)
+
+inExpV :: e ∘ a -> e --|Exp e r|-> a
+inExpV a = Exp (\ v k -> k •∘ (a <<< v))
 
 
 -- Elimination
