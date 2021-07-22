@@ -3,7 +3,6 @@ module Sequoia.Profunctor.Coexponential
 ( -- * Coexponential profunctor
   Coexp(..)
   -- * Coexponential profunctor abstraction
-, _Coexponential
 , Coexponential(..)
   -- * Construction
 , idCoexp
@@ -19,7 +18,6 @@ module Sequoia.Profunctor.Coexponential
 ) where
 
 import Data.Profunctor
-import Sequoia.Optic.Iso
 import Sequoia.Optic.Lens
 import Sequoia.Profunctor.Continuation
 import Sequoia.Profunctor.Value
@@ -34,9 +32,6 @@ instance Profunctor (Coexp e r) where
 
 
 -- Coexponential profunctor abstraction
-
-_Coexponential :: (Coexponential f, Coexponential f') => Iso (f e r a b) (f' e' r' a' b') (Coexp e r a b) (Coexp e' r' a' b')
-_Coexponential = exCoexp `dimap` inCoexp
 
 class (forall e r . Profunctor (f e r)) => Coexponential f where
   inCoexp :: Coexp e r a b -> f e r a b
