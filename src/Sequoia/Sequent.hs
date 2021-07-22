@@ -55,7 +55,6 @@ newtype Seq e r _Γ _Δ = Seq { getSeq :: Exp e r _Γ _Δ }
   deriving (Env e, Res r) via (Exp e r _Γ _Δ)
   deriving (Applicative, Functor, Monad) via (Exp e r _Γ)
   deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via (Exp e r)
-  deriving (Exponential) via Exp
 
 
 liftLR :: Exp e r a b -> Seq e r (a < _Γ) (_Δ > b)

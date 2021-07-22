@@ -9,8 +9,6 @@ module Sequoia.Profunctor.Exponential
   -- ** Mixfix notation
 , type (--|)
 , type (|->)
-  -- ** Exponential profunctor abstraction
-, Exponential(..)
   -- ** Construction
 , inExp'
   -- ** Elimination
@@ -45,10 +43,6 @@ _Exp :: Iso (Exp e r a b) (Exp e' r' a' b') (e ∘ a -> b • r -> e ==> r) (e'
 _Exp = coerced
 
 newtype Exp e r a b = Exp { getExp :: e ∘ a -> b • r -> e ==> r }
-
-instance Exponential Exp where
-  inExp = Exp
-  exExp = getExp
 
 instance Profunctor (Exp e r) where
   dimap f g = Exp . dimap (fmap f) (lmap (lmap g)) . getExp
@@ -109,13 +103,6 @@ type l|-> r = l r
 
 infixr 6 --|
 infixr 5 |->
-
-
--- Exponential profunctor abstraction
-
-class (forall e r . Cat.Category (f e r), forall e r . Profunctor (f e r)) => Exponential f where
-  inExp :: (e ∘ a -> b • r -> e ==> r) -> f e r a b
-  exExp :: f e r a b -> (e ∘ a -> b • r -> e ==> r)
 
 
 -- Construction
