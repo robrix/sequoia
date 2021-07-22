@@ -50,6 +50,8 @@ module Sequoia.Profunctor.Exponential
 , bindExp
   -- * Arrow
 , arrExp
+  -- * ArrowApply
+, applyExp
 ) where
 
 import           Control.Arrow
@@ -57,6 +59,7 @@ import qualified Control.Category as Cat
 import           Data.Kind (Type)
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
+import           Sequoia.Conjunction
 import           Sequoia.Disjunction
 import           Sequoia.Optic.Iso
 import           Sequoia.Profunctor.Applicative
@@ -112,6 +115,9 @@ instance Arrow (Exp e r) where
 instance ArrowChoice (Exp e r) where
   left = leftExp
   right = rightExp
+
+instance ArrowApply (Exp e r) where
+  app = applyExp
 
 instance Env e (Exp e r a b) where
   env f = inExp (\ v k -> env (runExp v k . f))
@@ -251,3 +257,8 @@ bindExp m f = inExp (\ v k -> cont (\ _K -> exExp m v (_K (\ b -> exExp (f b) v 
 
 arrExp :: Exponential f => (a -> b) -> a --|f e r|-> b
 arrExp = inExp'
+
+-- ArrowApply
+
+applyExp :: Exponential f => (a --|f e r|-> b, a) --|f e r|-> b
+applyExp = inExp (\ v k -> val (runExp (exrF v) k) (exlF v))
