@@ -37,8 +37,6 @@ module Sequoia.Profunctor.Exponential
   -- * Choice
 , leftExp
 , rightExp
-  -- * Traversing
-, wanderExp
 ) where
 
 import           Control.Arrow
@@ -78,7 +76,7 @@ instance Choice (Exp e r) where
   right' = rightExp
 
 instance Traversing (Exp e r) where
-  wander = wanderExp
+  wander traverse r = Exp (\ v k -> val (\ s -> getExp (traverse (((r <<<) . Exp . const . flip (•∘)) . inV0) s) (V id) k) v)
 
 instance Cat.Category (Exp e r) where
   id = Exp (flip (•∘))
@@ -205,9 +203,3 @@ leftExp  r = inExp (\ a b -> val (flip (exExp r) (inlK b) . inV0 <--> (inrK b �
 
 rightExp :: Exponential f => a --|f e r|-> b -> Either c a --|f e r|-> Either c b
 rightExp r = inExp (\ a b -> val ((inlK b ••) <--> flip (exExp r) (inrK b) . inV0) a)
-
-
--- Traversing
-
-wanderExp :: (Exponential f, Applicative (f e r e)) => (forall m . Applicative m => (a -> m b) -> (s -> m t)) -> a --|f e r|-> b -> s --|f e r|-> t
-wanderExp traverse r = inExp (\ v k -> val (\ s -> exExp (traverse (((r <<<) . inExp . const . flip (•∘)) . inV0) s) (V id) k) v)
