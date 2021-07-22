@@ -38,10 +38,10 @@ mu r = Mu (dnE (over _K (lmap (lmap getMuF)) (runForAll r)))
 foldMu :: Exponential d => Neg a => f a --|d e r|-> a -> Mu e r f --|d e r|-> a
 foldMu alg = inExp (\ v k -> val (\ (Mu f) -> exExp f (inV0 (Down (coerceExp alg))) k) v)
 
-unfoldMu :: (Traversable f, Exponential d) => a --|d e r|-> f a -> a --|d e r|-> Mu e r f
+unfoldMu :: Traversable f => a --|Exp e r|-> f a -> a --|Exp e r|-> Mu e r f
 unfoldMu coalg = inExp' (\ a -> Mu (inExp (\ v k -> val (\ (Down alg) -> exExp (refoldCat alg (coerceExp coalg)) (inV0 a) k) v)))
 
-refoldMu :: (Traversable f, Exponential d, Neg b) => f b --|d e r|-> b -> a --|d e r|-> f a -> a --|d e r|-> b
+refoldMu :: (Traversable f, Neg b) => f b --|Exp e r|-> b -> a --|Exp e r|-> f a -> a --|Exp e r|-> b
 refoldMu f g = foldMu f Cat.<<< unfoldMu g
 
 
