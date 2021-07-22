@@ -24,7 +24,7 @@ import Sequoia.Profunctor.Value
 -- Sources
 
 _Src :: Iso (Src e r b) (Src e' r' b') (b • r -> e ==> r) (b' • r' -> e' ==> r')
-_Src = runSrc <-> Src
+_Src = coerced
 
 newtype Src e r b = Src { runSrc :: b • r -> e ==> r }
 

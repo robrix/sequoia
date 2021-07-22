@@ -25,7 +25,7 @@ import Sequoia.Profunctor.Value
 -- Sinks
 
 _Snk :: Iso (Snk e r a) (Snk e' r' a') (e ∘ a -> e ==> r) (e' ∘ a' -> e' ==> r')
-_Snk = runSnk <-> Snk
+_Snk = coerced
 
 newtype Snk e r a = Snk { runSnk :: e ∘ a -> e ==> r }
 
