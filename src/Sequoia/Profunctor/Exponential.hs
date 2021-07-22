@@ -24,6 +24,7 @@ module Sequoia.Profunctor.Exponential
 , appExp2
 , runExp
 , elimExp
+, exExpFn
   -- ** Composition
 , (<<<)
 , (>>>)
@@ -155,6 +156,9 @@ runExp v k f = exExp f v k
 
 elimExp :: a --|Exp e r|-> b -> Coexp e r b a -> e ==> r
 elimExp f = unCoexp (exExp f)
+
+exExpFn :: Exp e r a b -> ((e -> a) -> (b -> r) -> (e -> r))
+exExpFn = coerce . exExp
 
 
 -- Computation
