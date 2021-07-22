@@ -24,7 +24,6 @@ module Sequoia.Profunctor.Exponential
   -- ** Computation
 , dnE
 , coerceExp
-, liftRunExp
 , dimapVK
 , lmapV
 , rmapK
@@ -129,7 +128,7 @@ instance Env e (Exp e r a b) where
 
 instance Res r (Exp e r a b) where
   res = inExp . const . const . res
-  liftRes f = liftRunExp (\ run -> liftRes (dimap (. run) run f))
+  liftRes f = Exp (\ v k -> let run = runExp v k in liftRes (dimap (. run) run f))
 
 
 -- Mixfix notation
@@ -179,10 +178,6 @@ dnE k = inExp (\ v k' -> cont (\ _K -> k •• _K (\ f -> exExp f v k')))
 
 coerceExp :: (Exponential c, Exponential d) => c e r a b -> d e r a b
 coerceExp = inExp . exExp
-
-
-liftRunExp :: Exponential f => ((f e r a b -> e ==> r) -> e ==> r) -> f e r a b
-liftRunExp f = inExp (\ v k -> f (runExp v k))
 
 
 dimapVK :: Exponential f => (e ∘ a' -> e ∘ a) -> (b' • r -> b • r) -> (a --|f e r|-> b -> a' --|f e r|-> b')
