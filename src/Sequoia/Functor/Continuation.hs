@@ -32,7 +32,7 @@ import Sequoia.Confunctor
 import Sequoia.Disjunction
 import Sequoia.Functor.Applicative
 import Sequoia.Optic.Iso
-import Sequoia.Profunctor.Recall
+import Sequoia.Profunctor.Continuation (Res(..))
 
 -- Continuations
 
@@ -103,18 +103,6 @@ infix 3 <•••>
 
 
 -- Ambient control
-
-class Res r c | c -> r where
-  res :: r -> c
-  liftRes :: ((c -> r) -> c) -> c
-
-instance Res r (a -> r) where
-  res = pure
-  liftRes f = f =<< flip ($)
-
-instance Res r (Recall e a r) where
-  res = Recall . pure
-  liftRes f = Recall (\ e -> runRecall (f (`runRecall` e)) e)
 
 cont :: Res r c => (((a -> c) -> K r a) -> c) -> c
 cont f = liftRes (\ run -> f (inK . (run .)))
