@@ -1,34 +1,26 @@
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Profunctor.K
 ( K(..)
 ) where
 
-import           Data.Functor.Const
-import           Data.Profunctor
-import qualified Data.Profunctor.Rep as Pro
-import           Data.Profunctor.Sieve
-import           Sequoia.Bicontravariant
+import Data.Distributive
+import Data.Functor.Identity
+import Data.Functor.Rep as Co
+import Data.Profunctor
+import Data.Profunctor.Rep as Pro
+import Data.Profunctor.Sieve
+import Data.Profunctor.Traversing
 
-newtype K r a b = K { runK :: a -> r }
-  deriving (Functor)
+newtype K a r = K { runK :: a -> r }
+  deriving (Applicative, Choice, Closed, Cochoice, Pro.Corepresentable, Costrong, Functor, Mapping, Monad, Profunctor, Co.Representable, Pro.Representable, Strong, Traversing)
 
-instance Profunctor (K f) where
-  dimap f _ = K . lmap f . runK
+instance Distributive (K r) where
+  distribute = distributeRep
+  collect = collectRep
 
-instance Strong (K f) where
-  first'  = K . lmap fst . runK
-  second' = K . lmap snd . runK
+instance Sieve K Identity where
+  sieve = rmap Identity . runK
 
-instance Cochoice (K f) where
-  unleft  = K . lmap Left  . runK
-  unright = K . lmap Right . runK
-
-instance Sieve (K f) (Const f) where
-  sieve = fmap Const . runK
-
-instance Pro.Representable (K f) where
-  type Rep (K f) = Const f
-  tabulate = K . fmap getConst
-
-instance Bicontravariant (K r) where
-  contrabimap f _ = K . lmap f . runK
+instance Cosieve K Identity where
+  cosieve = lmap runIdentity . runK
