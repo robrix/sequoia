@@ -51,7 +51,7 @@ evalSeq = evalExp
 runSeq :: Seq e r _Γ _Δ -> ((e -> _Γ) -> (_Δ -> r) -> (e -> r))
 runSeq s f g = evalSeq (dimap f g s)
 
-newtype Seq e r _Γ _Δ = Seq { getSeq :: Fun e r _Γ _Δ }
+newtype Seq e r _Γ _Δ = Seq { getSeq :: Exp e r _Γ _Δ }
   deriving (Env e, Res r) via (Exp e r _Γ _Δ)
   deriving (Applicative, Functor, Monad) via (Exp e r _Γ)
   deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via (Exp e r)
