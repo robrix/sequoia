@@ -1,8 +1,6 @@
 module Sequoia.Connective.Function
 ( -- * Implication
-  appFun
-, appFun2
-, Fun(..)
+  Fun(..)
 , type (~~)
 , type (~>)
 ) where
@@ -12,17 +10,9 @@ import           Data.Kind (Type)
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
 import           Sequoia.Polarity
-import           Sequoia.Profunctor.Continuation
 import           Sequoia.Profunctor.Exponential
-import           Sequoia.Profunctor.Value
 
 -- Implication
-
-appFun :: (a ~~Fun e r~> b) -> e ∘ (e ∘ a -> b • r • r)
-appFun = appExp
-
-appFun2 :: (a ~~Fun e r~> b ~~Fun e r~> c) -> e ∘ (e ∘ a -> e ∘ b -> c • r • r)
-appFun2 = appExp2
 
 newtype Fun e r a b = Fun { getFun :: Exp e r a b }
   deriving (Exponential) via Exp
