@@ -46,7 +46,7 @@ import           Sequoia.Profunctor.Value
 -- Sequents
 
 evalSeq :: _Γ -|Seq _Γ _Δ|- _Δ -> (_Γ -> _Δ)
-evalSeq = evalExp
+evalSeq = evalExp . getSeq
 
 runSeq :: Seq e r _Γ _Δ -> ((e -> _Γ) -> (_Δ -> r) -> (e -> r))
 runSeq s f g = evalSeq (dimap f g s)
