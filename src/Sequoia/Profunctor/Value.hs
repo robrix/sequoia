@@ -4,6 +4,7 @@ module Sequoia.Profunctor.Value
   V(..)
 ) where
 
+import Control.Category (Category)
 import Data.Distributive
 import Data.Functor.Identity
 import Data.Functor.Rep as Co
@@ -15,7 +16,7 @@ import Data.Profunctor.Traversing
 -- Value profunctor
 
 newtype V e a = V { (∘) :: e -> a }
-  deriving (Applicative, Choice, Closed, Cochoice, Pro.Corepresentable, Costrong, Functor, Mapping, Monad, Profunctor, Co.Representable, Pro.Representable, Strong, Traversing)
+  deriving (Applicative, Category, Choice, Closed, Cochoice, Pro.Corepresentable, Costrong, Functor, Mapping, Monad, Profunctor, Co.Representable, Pro.Representable, Strong, Traversing)
 
 infix 8 ∘
 

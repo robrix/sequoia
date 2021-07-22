@@ -4,6 +4,7 @@ module Sequoia.Profunctor.Continuation
   K(..)
 ) where
 
+import Control.Category (Category)
 import Data.Distributive
 import Data.Functor.Identity
 import Data.Functor.Rep as Co
@@ -15,7 +16,7 @@ import Data.Profunctor.Traversing
 -- Continuation profunctor
 
 newtype K a r = K { (•) :: a -> r }
-  deriving (Applicative, Choice, Closed, Cochoice, Pro.Corepresentable, Costrong, Functor, Mapping, Monad, Profunctor, Co.Representable, Pro.Representable, Strong, Traversing)
+  deriving (Applicative, Category, Choice, Closed, Cochoice, Pro.Corepresentable, Costrong, Functor, Mapping, Monad, Profunctor, Co.Representable, Pro.Representable, Strong, Traversing)
 
 infixl 7 •
 
