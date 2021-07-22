@@ -36,6 +36,8 @@ import Sequoia.Profunctor.Recall
 newtype V e a = V { (∘) :: e -> a }
   deriving (Applicative, Category, Choice, Closed, Cochoice, Pro.Corepresentable, Costrong, Env e, Functor, Mapping, Monad, Profunctor, Co.Representable, Pro.Representable, Strong, Traversing)
 
+infixl 8 ∘
+
 instance Distributive (V e) where
   distribute = distributeRep
   collect = collectRep
