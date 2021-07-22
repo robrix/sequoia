@@ -68,7 +68,7 @@ forget :: Coexp e r a b -> K r a
 forget = unCoexp (const id)
 
 runCoexp :: Coexp e r b a -> ((a -> b) -> (e -> r))
-runCoexp c = withCoexp c (\ r f -> (runK f .) . (. runV r))
+runCoexp c = withCoexp c (\ r f -> ((f •) .) . (. (r ∘)))
 
 unCoexp :: (V e a -> K r b -> s) -> Coexp e r b a -> s
 unCoexp = flip withCoexp

@@ -5,7 +5,6 @@ module Sequoia.Functor.Value
 ( -- * Values
   Value
 , V(..)
-, runV
 , Representable(..)
   -- * Construction
 , inV0
@@ -29,7 +28,7 @@ import Data.Functor.Rep
 import Sequoia.Conjunction
 import Sequoia.Disjunction
 import Sequoia.Optic.Iso
-import Sequoia.Profunctor.Value (Env(..), V(V), runV, val)
+import Sequoia.Profunctor.Value (Env(..), V(V), val)
 
 -- Values
 
