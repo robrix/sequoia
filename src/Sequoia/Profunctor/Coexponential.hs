@@ -52,7 +52,7 @@ withCoexp :: Coexp e r a b -> (e ∘ b -> a • r -> s) -> s
 withCoexp c = getCoexp c . coerce
 
 runCoexp :: Coexp e r b a -> ((a -> b) -> (e -> r))
-runCoexp c = withCoexp c (\ r f -> ((f •) .) . (. (r ∘)))
+runCoexp c = getCoexp c (\ r f -> (f .) . (. r))
 
 unCoexp :: (e ∘ a -> b • r -> s) -> Coexp e r b a -> s
 unCoexp = flip withCoexp
