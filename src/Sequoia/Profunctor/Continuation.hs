@@ -8,12 +8,14 @@ module Sequoia.Profunctor.Continuation
   -- * Composition
 , idK
 , (<••>)
+, (<•••>)
   -- * Ambient control
 , Res(..)
 , cont
 , (••)
 ) where
 
+import Control.Applicative (liftA2)
 import Control.Category (Category)
 import Data.Distributive
 import Data.Functor.Identity
@@ -60,6 +62,11 @@ idK = K id
 a <••> b = K ((a •) <--> (b •))
 
 infix 3 <••>
+
+(<•••>) :: Disj d => (e -> K a r) -> (e -> K b r) -> (e -> K (a `d` b) r)
+(<•••>) = liftA2 (<••>)
+
+infix 3 <•••>
 
 
 -- Ambient control
