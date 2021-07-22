@@ -109,7 +109,7 @@ infix 3 >∘∘∘<
 infix 3 <∘∘>
 
 bitraverseDisjV :: (Disj d, Representable v) => v (a `d` b) -> Rep v -> v a `d` v b
-bitraverseDisjV = fmap (bimapDisj inV0 inV0) .  (∘)
+bitraverseDisjV = fmap (bimapDisj inV0 inV0) . (∘)
 
 
 -- Ambient environment
