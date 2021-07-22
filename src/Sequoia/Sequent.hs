@@ -58,10 +58,10 @@ newtype Seq e r _Γ _Δ = Seq { getSeq :: Fun e r _Γ _Δ }
   deriving (Exponential) via Exp
 
 
-liftLR :: Exponential d => d e r a b -> Seq e r (a < _Γ) (_Δ > b)
+liftLR :: Exp e r a b -> Seq e r (a < _Γ) (_Δ > b)
 liftLR = dimap exl inr . coerceExp
 
-lowerLR :: Exponential d => (d e r a b -> _Γ -|Seq e r|- _Δ) -> a < _Γ -|Seq e r|- _Δ > b -> _Γ -|Seq e r|- _Δ
+lowerLR :: (Exp e r a b -> _Γ -|Seq e r|- _Δ) -> a < _Γ -|Seq e r|- _Δ > b -> _Γ -|Seq e r|- _Δ
 lowerLR f p = inExp (\ _Γ _Δ -> exExp (f (inExp (\ a b -> exExp p (a <| _Γ) (_Δ |> b)))) _Γ _Δ)
 
 
@@ -108,7 +108,7 @@ instance Calculus.Control Seq where
 -- Assertion
 
 instance NotUntrueIntro Seq where
-  notUntrueL e a = popL (val (\ (NotUntrue r) -> e >>> liftLR @Exp (r ^. _SrcExp) >>> wkL' a))
+  notUntrueL e a = popL (val (\ (NotUntrue r) -> e >>> liftLR (r ^. _SrcExp) >>> wkL' a))
   notUntrueR s = mapR (lmap (\ f -> NotUntrue (_SrcExp # getFun f))) (funR s)
 
 instance TrueIntro Seq where
@@ -185,8 +185,8 @@ instance XOrIntro Seq where
 -- Implication
 
 instance FunctionIntro Seq where
-  funL a b = popL (val (\ f -> a >>> liftLR f >>> wkL' b))
-  funR = lowerLR (liftR . inV0) . wkR'
+  funL a b = popL (val (\ f -> a >>> liftLR (getFun f) >>> wkL' b))
+  funR = lowerLR (liftR . inV0 . Fun) . wkR'
 
 instance SubtractionIntro Seq where
   subL f = popL (val (\ s -> liftR (s^.subA_) >>> f >>> liftL (s^.subK_)))
