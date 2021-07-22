@@ -34,9 +34,6 @@ module Sequoia.Profunctor.Exponential
   -- * Strong
 , firstExp
 , secondExp
-  -- * Choice
-, leftExp
-, rightExp
 ) where
 
 import           Control.Arrow
@@ -72,8 +69,8 @@ instance Strong (Exp e r) where
   second' = secondExp
 
 instance Choice (Exp e r) where
-  left'  = leftExp
-  right' = rightExp
+  left'  r = Exp (\ a b -> val (flip (getExp r) (inlK b) . inV0 <--> (inrK b ••)) a)
+  right' r = Exp (\ a b -> val ((inlK b ••) <--> flip (getExp r) (inrK b) . inV0) a)
 
 instance Traversing (Exp e r) where
   wander traverse r = Exp (\ v k -> val (\ s -> getExp (traverse (((r <<<) . Exp . const . flip (•∘)) . inV0) s) (V id) k) v)
@@ -102,8 +99,8 @@ instance Arrow (Exp e r) where
   second = secondExp
 
 instance ArrowChoice (Exp e r) where
-  left = leftExp
-  right = rightExp
+  left  = left'
+  right = right'
 
 instance ArrowApply (Exp e r) where
   app = Exp (\ v k -> val (runExp (exrF v) k) (exlF v))
@@ -194,12 +191,3 @@ firstExp  r = inExp (\ a b -> val (\ (a, c) -> exExp r (inV0 a) (lmap (,c) b)) a
 
 secondExp :: Exponential f => a --|f e r|-> b -> (c, a) --|f e r|-> (c, b)
 secondExp r = inExp (\ a b -> val (\ (c, a) -> exExp r (inV0 a) (lmap (c,) b)) a)
-
-
--- Choice
-
-leftExp  :: Exponential f => a --|f e r|-> b -> Either a c --|f e r|-> Either b c
-leftExp  r = inExp (\ a b -> val (flip (exExp r) (inlK b) . inV0 <--> (inrK b ••)) a)
-
-rightExp :: Exponential f => a --|f e r|-> b -> Either c a --|f e r|-> Either c b
-rightExp r = inExp (\ a b -> val ((inlK b ••) <--> flip (exExp r) (inrK b) . inV0) a)
