@@ -16,6 +16,7 @@ module Sequoia.Profunctor.Exponential
 , inExpK
 , inExpVK
 , inExpC
+, inExpFn
   -- ** Elimination
 , exExp
 , evalExp
@@ -32,6 +33,7 @@ module Sequoia.Profunctor.Exponential
 
 import           Control.Arrow
 import qualified Control.Category as Cat
+import           Data.Coerce
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
 import           Sequoia.Conjunction
@@ -128,7 +130,10 @@ inExpVK :: e ∘ a -> a • r -> e --|Exp e r|-> r
 inExpVK ea ar = inExpC (ar •∘ ea)
 
 inExpC :: e ==> r -> e --|Exp e r|-> r
-inExpC c = Exp (\ v k -> C ((k •) . (c <==) . (v ∘)))
+inExpC (C c) = inExpFn (\ v k -> k . c . v)
+
+inExpFn :: ((e -> a) -> (b -> r) -> (e -> r)) -> Exp e r a b
+inExpFn = inExp . coerce
 
 
 -- Elimination
