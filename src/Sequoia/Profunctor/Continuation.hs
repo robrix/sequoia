@@ -3,6 +3,7 @@ module Sequoia.Profunctor.Continuation
 ( -- * Continuation profunctor
   K(..)
   -- * Composition
+, idK
 , (<••>)
 ) where
 
@@ -35,6 +36,10 @@ instance Cosieve K Identity where
 
 
 -- Composition
+
+idK :: K a a
+idK = K id
+
 
 (<••>) :: Disj d => K a r -> K b r -> K (a `d` b) r
 a <••> b = K ((a •) <--> (b •))
