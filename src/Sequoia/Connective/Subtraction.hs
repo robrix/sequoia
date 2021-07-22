@@ -37,7 +37,7 @@ infixr 5 -~
 
 -- Optics
 
-subA_ :: Lens (b >-Sub e r-~ a) (b >-Sub e' r-~ a') (V e a) (V e' a')
+subA_ :: Lens (b >-Sub e r-~ a) (b >-Sub e' r-~ a') (e ∘ a) (e' ∘ a')
 subA_ = coercedFrom Sub .recall_
 
 subK_ :: Lens (b >-Sub e r-~ a) (b' >-Sub e r'-~ a) (b • r) (b' • r')

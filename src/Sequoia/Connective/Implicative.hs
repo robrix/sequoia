@@ -22,17 +22,17 @@ import Sequoia.Profunctor.Value
 elimFun :: a ~~Fun e r~> b -> b >-Sub e r-~ a -> C e r
 elimFun = elimExp
 
-funPar1 :: V e (r ¬a ⅋ b) • r <-> V e (a ~~Fun e r~> b) • r
+funPar1 :: e ∘ (r ¬a ⅋ b) • r <-> e ∘ (a ~~Fun e r~> b) • r
 funPar1
   =   (\ k -> K ((k •) . (mkPar (inrK (lmap inV0 k)) =<<)))
   <-> (\ k -> K ((k •) . fmap mkFun))
 
-funPar2 :: V e (r ¬a ⅋ b) • r • r <-> V e (a ~~Fun e r~> b) • r • r
+funPar2 :: e ∘ (r ¬a ⅋ b) • r • r <-> e ∘ (a ~~Fun e r~> b) • r • r
 funPar2
   =   lmap (\ f -> K ((f •) . fmap mkFun))
   <-> lmap (\ p -> K ((p •) . (mkPar (inrK (lmap inV0 p)) =<<)))
 
-mkPar :: b • r -> a ~~Fun e r~> b -> V e (r ¬a ⅋ b)
+mkPar :: b • r -> a ~~Fun e r~> b -> e ∘ (r ¬a ⅋ b)
 mkPar p f = V (\ e -> inl (Not (K (\ a -> runC (exExp f (inV0 a) p) e))))
 
 mkFun :: r ¬a ⅋ b -> a ~~Fun e r~> b

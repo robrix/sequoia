@@ -77,8 +77,8 @@ class (Core s, forall e r a b . Env e (s e r a b), forall e r . Profunctor (s e 
 
 swapΓ
   :: Contextual s
-  => (V e _Γ  -> _Γ' -|s e r|- _Δ)
-  -> (V e _Γ' -> _Γ  -|s e r|- _Δ)
+  => (e ∘ _Γ  -> _Γ' -|s e r|- _Δ)
+  -> (e ∘ _Γ' -> _Γ  -|s e r|- _Δ)
 swapΓ f _Γ' = popΓΔ (\ c -> pushΓΔ (f (recall c)) (c & recall_ .~ _Γ'))
 
 swapΔ
@@ -107,7 +107,7 @@ popΓΔ f = swapΓΔ f idCoexp
 -- @
 popΓ
   :: Contextual s
-  => (V e _Γ -> e -|s e r|- _Δ)
+  => (e ∘ _Γ -> e -|s e r|- _Δ)
   -- --------------------------
   ->      _Γ      -|s e r|- _Δ
 popΓ f = swapΓ f (V id)
@@ -138,7 +138,7 @@ popΔ f = swapΔ f (K id)
 -- @
 popL
   :: Contextual s
-  => (V e a -> _Γ -|s e r|- _Δ)
+  => (e ∘ a -> _Γ -|s e r|- _Δ)
   -- --------------------------
   ->      a  < _Γ -|s e r|- _Δ
 popL f = popΓ (pushΓ . f . exlF <*> exrF)
@@ -161,7 +161,7 @@ popR f = popΔ (pushΔ . f . inrK <*> inlK)
 
 popL2
   :: Contextual s
-  => (V e a -> V e b -> _Γ -|s e r|- _Δ)
+  => (e ∘ a -> e ∘ b -> _Γ -|s e r|- _Δ)
   -- -----------------------------------
   ->      a      < b  < _Γ -|s e r|- _Δ
 popL2 f = popL (popL . f)
@@ -176,8 +176,8 @@ popR2 f = popR (popR . f)
 
 poppedΓ
   :: Contextual s
-  => (V e _Γ''' -> (x, V e _Γ''))
-  -> (x -> V e _Γ' -> V e _Γ)
+  => (e ∘ _Γ''' -> (x, e ∘ _Γ''))
+  -> (x -> e ∘ _Γ' -> e ∘ _Γ)
   -> Setter
     (_Γ  -|s e r|- _Δ) (_Γ''' -|s e r|- _Δ')
     (_Γ' -|s e r|- _Δ) (_Γ''  -|s e r|- _Δ')
@@ -243,7 +243,7 @@ pushΓ
   :: Contextual s
   =>      _Γ      -|s e r|- _Δ
   -- --------------------------
-  -> (V e _Γ -> e -|s e r|- _Δ)
+  -> (e ∘ _Γ -> e -|s e r|- _Δ)
 pushΓ = swapΓ . const
 
 -- | Push something onto the output context which was previously popped off it. Used with 'popΔ', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
@@ -274,7 +274,7 @@ pushL
   :: Contextual s
   =>      a  < _Γ -|s e r|- _Δ
   -- --------------------------
-  -> (V e a -> _Γ -|s e r|- _Δ)
+  -> (e ∘ a -> _Γ -|s e r|- _Δ)
 pushL s a = popΓ (pushΓ s . (a <|))
 
 -- | Push something onto the output context which was previously popped off it. Used with 'popR', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
@@ -295,7 +295,7 @@ pushR s a = popΔ (\ c -> pushΔ s (c |> a))
 
 pushL2
   :: Contextual s
-  => a < b < _Γ -|s e r|- _Δ -> V e a -> V e b
+  => a < b < _Γ -|s e r|- _Δ -> e ∘ a -> e ∘ b
   -- -----------------------------------------
   ->         _Γ -|s e r|- _Δ
 pushL2 p = pushL . pushL p
@@ -312,7 +312,7 @@ pushR2 p = pushR . pushR p
 
 mapΓΔ
   :: Contextual s
-  => (V e _Γ' -> V e _Γ)
+  => (e ∘ _Γ' -> e ∘ _Γ)
   -> (_Δ' • r -> _Δ • r)
   -> _Γ  -|s e r|- _Δ
   -- -----------------
@@ -321,7 +321,7 @@ mapΓΔ f g p = popΓΔ (unCoexp (\ _Γ _Δ -> pushΓΔ p (coexp (f _Γ) (g _Δ)
 
 mapΓ
   :: Contextual s
-  => (V e _Γ' -> V e _Γ)
+  => (e ∘ _Γ' -> e ∘ _Γ)
   -> _Γ  -|s e r|- _Δ
   -- ----------------
   -> _Γ' -|s e r|- _Δ
@@ -338,7 +338,7 @@ mapΔ = (id `mapΓΔ`)
 
 mapL
   :: Contextual s
-  => (V e a' -> V e a)
+  => (e ∘ a' -> e ∘ a)
   -> a  < _Γ -|s e r|- _Δ
   -- --------------------
   -> a' < _Γ -|s e r|- _Δ
@@ -355,7 +355,7 @@ mapR f = mapΔ (inlK <•••> f . inrK)
 
 mapL2
  :: Contextual s
- => (V e c -> Either (V e b) (V e a))
+ => (e ∘ c -> Either (e ∘ b) (e ∘ a))
  -> a < _Γ -|s e r|- _Δ   ->   b < _Γ -|s e r|- _Δ
  -- ----------------------------------------------
  ->            c < _Γ -|s e r|- _Δ
@@ -373,7 +373,7 @@ mapR2 f a b = mapR f (wkR' a) >>> popL (val (`mapR` b))
 
 traverseΓΔ
   :: Contextual s
-  => (V e _Γ' -> (x, V e _Γ))
+  => (e ∘ _Γ' -> (x, e ∘ _Γ))
   -> (_Δ' • r -> (_Δ • r, y))
   -> (x -> y -> _Γ  -|s e r|- _Δ)
   -- ----------------------------
@@ -382,7 +382,7 @@ traverseΓΔ f g s = popΓΔ (unCoexp (\ _Γ' _Δ' -> let (x, _Γ) = f _Γ' ; (_
 
 traverseΓ
   :: Contextual s
-  => (V e _Γ' -> (x, V e _Γ))
+  => (e ∘ _Γ' -> (x, e ∘ _Γ))
   -> (x -> _Γ  -|s e r|- _Δ)
   -- -----------------------
   ->       _Γ' -|s e r|- _Δ
@@ -408,7 +408,7 @@ liftL = pushR init
 
 liftR
   :: Contextual s
-  =>               V e a
+  =>               e ∘ a
   -- -------------------
   -> _Γ -|s e r|- _Δ > a
 liftR v = popΓ (\ _Γ -> pushΓ init (v <| _Γ))
@@ -425,7 +425,7 @@ lowerL k p = popR k >>> p
 
 lowerR
   :: Contextual s
-  => (              V e a -> _Γ -|s e r|- _Δ)
+  => (              e ∘ a -> _Γ -|s e r|- _Δ)
   -- ----------------------------------------
   -> (_Γ -|s e r|- _Δ > a -> _Γ -|s e r|- _Δ)
 lowerR k p = p >>> popΓ (\ _Γ -> pushΓ (k (exlF _Γ)) (exrF _Γ))

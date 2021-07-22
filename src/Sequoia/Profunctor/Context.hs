@@ -53,15 +53,15 @@ instance Pro.Corepresentable C where
 
 -- Computation
 
-mapCKV :: (forall x . x • r -> x • r') -> (forall x . V e x -> V e' x) -> (C e r -> C e' r')
+mapCKV :: (forall x . x • r -> x • r') -> (forall x . e ∘ x -> e' ∘ x) -> (C e r -> C e' r')
 mapCKV f g = over _C (under _K f . under _V g)
 
 mapCK :: (forall x . x • r -> x • r') -> (C e r -> C e r')
 mapCK = over _C . under _K
 
-mapCV :: (forall x . V e x -> V e' x) -> (C e r -> C e' r)
+mapCV :: (forall x . e ∘ x -> e' ∘ x) -> (C e r -> C e' r)
 mapCV = over _C . under _V
 
 
-(•∘) :: (Env e c, Res r c) => a • r -> V e a -> c
+(•∘) :: (Env e c, Res r c) => a • r -> e ∘ a -> c
 k •∘ v = env (\ e -> res (k • v ∘ e))

@@ -29,27 +29,27 @@ vL
   :: Contextual s
   =>     a < _Γ -|s e r|- _Δ
   -- -----------------------
-  -> V e a < _Γ -|s e r|- _Δ
+  -> e ∘ a < _Γ -|s e r|- _Δ
 vL = mapL join
 
 vR
   :: Contextual s
   => _Γ -|s e r|- _Δ >     a
   -- -----------------------
-  -> _Γ -|s e r|- _Δ > V e a
+  -> _Γ -|s e r|- _Δ > e ∘ a
 -- FIXME: this should preserve extant dependency on the env
 vR = mapR (lmap inV0)
 
 vL'
   :: (Contextual s, Exchange s, Weaken s)
-  => V e a < _Γ -|s e r|- _Δ
+  => e ∘ a < _Γ -|s e r|- _Δ
   -- -----------------------
   ->     a < _Γ -|s e r|- _Δ
 vL' s = vR init >>> wkL' s
 
 vR'
   :: (Contextual s, Exchange s, Weaken s)
-  => _Γ -|s e r|- _Δ > V e a
+  => _Γ -|s e r|- _Δ > e ∘ a
   -- -----------------------
   -> _Γ -|s e r|- _Δ >     a
 vR' s = wkR' s >>> vL init

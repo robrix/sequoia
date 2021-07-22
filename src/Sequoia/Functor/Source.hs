@@ -49,7 +49,7 @@ instance Res r (Src e r b) where
 mapSrcK :: (forall x . x • r <-> x • r') -> (Src e r b -> Src e r' b)
 mapSrcK b = over _Src (dimap (review b) (mapCK (view b)))
 
-mapSrcV :: (forall x . V e x -> V e' x) -> (Src e r b -> Src e' r b)
+mapSrcV :: (forall x . e ∘ x -> e' ∘ x) -> (Src e r b -> Src e' r b)
 mapSrcV f = over _Src (fmap (mapCV f))
 
 
