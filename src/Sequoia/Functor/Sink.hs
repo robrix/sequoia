@@ -2,6 +2,8 @@ module Sequoia.Functor.Sink
 ( -- * Sinks
   _Snk
 , Snk(..)
+  -- * Construction
+, (↓)
   -- * Computation
 , mapSnkK
 , mapSnkV
@@ -34,6 +36,12 @@ instance Contravariant (Snk e r) where
 
 instance Contrapply (Snk e r) where
   contraliftA2 f a b = Snk (val ((runSnk a . inV0 <--> runSnk b . inV0) . f))
+
+
+-- Construction
+
+(↓) :: b • r -> a --|Exp e r|-> b -> a --|Snk e r
+k ↓ f = Snk (flip (getExp f) k)
 
 
 -- Computation
