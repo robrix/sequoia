@@ -64,8 +64,8 @@ instance Continuation r (K r)
 
 -- Construction
 
-inK :: Representable k => (a -> Rep k) -> k a
-inK = tabulate
+inK :: (a -> r) -> K r a
+inK = K
 
 
 -- Elimination
