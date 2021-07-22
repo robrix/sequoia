@@ -24,13 +24,11 @@ module Sequoia.Functor.Value
 ) where
 
 import Control.Applicative (liftA2)
-import Control.Monad (join)
 import Data.Functor.Rep
-import Data.Profunctor
 import Sequoia.Conjunction
 import Sequoia.Disjunction
 import Sequoia.Optic.Iso
-import Sequoia.Profunctor.Value (V(..))
+import Sequoia.Profunctor.Value (Env(..), V(..), val)
 
 -- Values
 
@@ -87,20 +85,3 @@ infix 3 <∘∘>
 
 bitraverseDisjV :: (Disj d, Representable v) => v (a `d` b) -> Rep v -> v a `d` v b
 bitraverseDisjV = fmap (bimapDisj inV0 inV0) . (∘)
-
-
--- Ambient environment
-
-class Env e c | c -> e where
-  env :: (e -> c) -> c
-
-instance Env e (e -> r) where
-  env = join
-
-instance Env e (V e a) where
-  env f = V (runV =<< f)
-
-deriving instance Env e (Forget r e a)
-
-val :: (Env (Rep v) c, Representable v) => (a -> c) -> (v a -> c)
-val f v = env (f . exV v)
