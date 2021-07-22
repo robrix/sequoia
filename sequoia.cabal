@@ -140,7 +140,6 @@ library
     Sequoia.Functor.I
     Sequoia.Functor.Sink
     Sequoia.Functor.Source
-    Sequoia.Functor.Value
     Sequoia.Lambda
     Sequoia.Optic.Getter
     Sequoia.Optic.Iso

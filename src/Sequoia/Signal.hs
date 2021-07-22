@@ -24,11 +24,11 @@ import           Sequoia.Calculus.Context
 import           Sequoia.Functor.Continuation as K
 import           Sequoia.Functor.Sink
 import           Sequoia.Functor.Source
-import           Sequoia.Functor.Value as V
 import           Sequoia.Optic.Getter
 import           Sequoia.Optic.Iso
 import           Sequoia.Optic.Review
 import           Sequoia.Profunctor.Context
+import           Sequoia.Profunctor.Value as V
 
 -- Signals
 

@@ -15,7 +15,7 @@ import           Sequoia.Connective.Down
 import           Sequoia.Connective.Function
 import           Sequoia.Connective.Quantification
 import           Sequoia.Functor.Continuation
-import           Sequoia.Functor.Value
+import           Sequoia.Profunctor.Value
 import           Sequoia.Optic.Setter
 import           Sequoia.Polarity
 import           Sequoia.Profunctor.Exponential

@@ -61,9 +61,9 @@ import Sequoia.Calculus.Structural
 import Sequoia.Conjunction
 import Sequoia.Disjunction
 import Sequoia.Functor.Continuation as K
-import Sequoia.Functor.Value
 import Sequoia.Optic.Setter
 import Sequoia.Profunctor.Coexponential
+import Sequoia.Profunctor.Value
 
 -- Contextual
 

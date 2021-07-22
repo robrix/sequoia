@@ -59,11 +59,11 @@ import           Data.Profunctor
 import           Data.Profunctor.Traversing
 import           Sequoia.Disjunction
 import           Sequoia.Functor.Continuation as K
-import           Sequoia.Functor.Value as V
 import           Sequoia.Optic.Iso
 import           Sequoia.Profunctor.Applicative
 import           Sequoia.Profunctor.Coexponential
 import           Sequoia.Profunctor.Context
+import           Sequoia.Profunctor.Value as V
 
 -- Exponential profunctor
 

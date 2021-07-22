@@ -36,12 +36,12 @@ import           Sequoia.Contextual
 import           Sequoia.Disjunction
 import           Sequoia.Functor.Continuation as K
 import           Sequoia.Functor.Source
-import           Sequoia.Functor.Value
 import           Sequoia.Optic.Getter
 import           Sequoia.Optic.Review
 import           Sequoia.Profunctor.Coexponential
 import           Sequoia.Profunctor.Context
 import           Sequoia.Profunctor.Exponential as Exponential hiding ((>>>))
+import           Sequoia.Profunctor.Value
 
 -- Sequents
 

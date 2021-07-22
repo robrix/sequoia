@@ -21,7 +21,7 @@ import Sequoia.Calculus.Core
 import Sequoia.Calculus.Structural
 import Sequoia.Contextual
 import Sequoia.Functor.Continuation
-import Sequoia.Functor.Value
+import Sequoia.Profunctor.Value
 
 -- Values
 

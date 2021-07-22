@@ -12,10 +12,10 @@ import           Data.Kind (Type)
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
 import           Sequoia.Functor.Continuation
-import           Sequoia.Functor.Value
 import           Sequoia.Polarity
 import           Sequoia.Profunctor.Context
 import           Sequoia.Profunctor.Exponential
+import           Sequoia.Profunctor.Value
 
 -- Implication
 

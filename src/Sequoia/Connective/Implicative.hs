@@ -14,10 +14,10 @@ import Sequoia.Connective.Par
 import Sequoia.Connective.Subtraction
 import Sequoia.Disjunction
 import Sequoia.Functor.Continuation
-import Sequoia.Functor.Value
 import Sequoia.Optic.Iso
 import Sequoia.Profunctor.Context
 import Sequoia.Profunctor.Exponential
+import Sequoia.Profunctor.Value
 
 elimFun :: a ~~Fun e r~> b -> b >-Sub e r-~ a -> C e r
 elimFun = elimExp

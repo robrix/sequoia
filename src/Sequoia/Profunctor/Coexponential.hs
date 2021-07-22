@@ -23,9 +23,9 @@ module Sequoia.Profunctor.Coexponential
 import Data.Functor.Contravariant
 import Data.Profunctor
 import Sequoia.Functor.Continuation
-import Sequoia.Functor.Value
 import Sequoia.Optic.Iso
 import Sequoia.Optic.Lens
+import Sequoia.Profunctor.Value
 
 -- Coexponential profunctor
 

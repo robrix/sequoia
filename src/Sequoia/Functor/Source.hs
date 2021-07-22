@@ -11,13 +11,13 @@ module Sequoia.Functor.Source
 
 import Data.Profunctor
 import Sequoia.Functor.Continuation
-import Sequoia.Functor.Value
 import Sequoia.Optic.Getter
 import Sequoia.Optic.Iso
 import Sequoia.Optic.Review
 import Sequoia.Optic.Setter
 import Sequoia.Profunctor.Context
 import Sequoia.Profunctor.Exponential
+import Sequoia.Profunctor.Value
 
 -- Sources
 
