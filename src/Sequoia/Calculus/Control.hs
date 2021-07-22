@@ -1,6 +1,8 @@
 module Sequoia.Calculus.Control
-( -- * Values
-  vL
+( -- * Local environments
+  Environment(..)
+  -- * Values
+, vL
 , vR
 , vL'
 , vR'
@@ -22,6 +24,14 @@ import Sequoia.Calculus.Structural
 import Sequoia.Contextual
 import Sequoia.Profunctor.Continuation
 import Sequoia.Profunctor.Value
+
+-- Local environments
+
+class Environment s where
+  environment
+    -- -------------------
+    :: _Γ -|s e r|- _Δ > e
+
 
 -- Values
 
