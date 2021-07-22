@@ -24,7 +24,8 @@ import Data.Functor.Contravariant
 import Data.Profunctor
 import Sequoia.Functor.K
 import Sequoia.Functor.V
-import Sequoia.Optic.Optic
+import Sequoia.Optic.Iso
+import Sequoia.Optic.Lens
 
 -- Coexponential profunctor
 
@@ -37,7 +38,7 @@ instance Profunctor (Coexp e r) where
 
 -- Coexponential profunctor abstraction
 
-_Coexponential :: (Coexponential f, Coexponential f', Profunctor p) => Optic p (f e r a b) (f' e' r' a' b') (Coexp e r a b) (Coexp e' r' a' b')
+_Coexponential :: (Coexponential f, Coexponential f') => Iso (f e r a b) (f' e' r' a' b') (Coexp e r a b) (Coexp e' r' a' b')
 _Coexponential = exCoexp `dimap` inCoexp
 
 class (forall e r . Profunctor (f e r)) => Coexponential f where
@@ -81,13 +82,8 @@ coerceCoexp = inCoexp . exCoexp
 
 -- Optics
 
-type Lens s t a b = (forall p . Strong p => p a b -> p s t)
-
 recall_ :: Lens (Coexp e r a b) (Coexp e' r a b') (V e b) (V e' b')
 recall_ = lens recall (\ s recall -> withCoexp s (\ _ forget -> coexp recall forget))
 
 forget_ :: Lens (Coexp e r a b) (Coexp e r' a' b) (K r a) (K r' a')
 forget_ = lens forget (\ s forget -> withCoexp s (\ recall _ -> coexp recall forget))
-
-lens :: (s -> a) -> (s -> b -> t) -> Lens s t a b
-lens prj inj = dimap (\ s -> (prj s, s)) (\ (b, s) -> inj s b) . first'
