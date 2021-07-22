@@ -44,10 +44,6 @@ class (forall e r . Profunctor (f e r)) => Coexponential f where
   inCoexp :: Coexp e r a b -> f e r a b
   exCoexp :: f e r a b -> Coexp e r a b
 
-instance Coexponential Coexp where
-  inCoexp = id
-  exCoexp = id
-
 
 -- Construction
 
