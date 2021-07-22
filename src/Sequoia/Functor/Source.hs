@@ -30,8 +30,8 @@ instance Functor (Src e r) where
   fmap f = over _Src (. contramap f)
 
 instance Applicative (Src e r) where
-  pure = Src . fmap res . flip runK
-  Src f <*> Src a = Src (\ k -> cont (\ _K -> f (_K (\ f -> a (K (runK k . f))))))
+  pure = Src . fmap res . flip (•)
+  Src f <*> Src a = Src (\ k -> cont (\ _K -> f (_K (\ f -> a (K ((k •) . f))))))
 
 instance Monad (Src e r) where
   Src m >>= f = Src (\ k -> cont (\ _K -> m (_K ((`runSrc` k) . f))))

@@ -13,7 +13,7 @@ import Sequoia.Profunctor.Context
 -- NotUntrue
 
 notUntrue :: (e -> a) -> NotUntrue e r a
-notUntrue f = NotUntrue (Src (C . (. f) . runK))
+notUntrue f = NotUntrue (Src (C . (. f) . (•)))
 
 newtype NotUntrue e r a = NotUntrue { runNotUntrue :: Src e r a }
   deriving (Applicative, Functor, Monad)

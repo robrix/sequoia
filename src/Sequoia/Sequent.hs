@@ -74,7 +74,7 @@ newtype SeqT e r _Γ m _Δ = SeqT { getSeqT :: Seq e (m r) _Γ _Δ }
   deriving (Applicative, Functor, Monad)
 
 instance MonadTrans (SeqT r s _Γ) where
-  lift m = SeqT (inExp (\ _ k -> C (const (m >>= runK k))))
+  lift m = SeqT (inExp (\ _ k -> C (const (m >>= (k •)))))
 
 
 -- Core rules
@@ -101,7 +101,7 @@ instance Contextual Seq where
 -- Control
 
 instance Calculus.Control Seq where
-  reset s = inExp (\ _Γ _Δ -> C (runK _Δ . runC (exExp s _Γ idK)))
+  reset s = inExp (\ _Γ _Δ -> C ((_Δ •) . runC (exExp s _Γ idK)))
   shift s = inExp (\ _Γ _Δ -> exExp s (inV0 (inrK _Δ) <| _Γ) (inlK _Δ |> idK))
 
 
@@ -201,7 +201,7 @@ instance UniversalIntro Seq where
 
 instance ExistentialIntro Seq where
   existsL p = popL (val (dnE . runExists (pushL p . inV0)))
-  existsR p = mapR (contramap (Exists . K . flip runK)) p
+  existsR p = mapR (contramap (Exists . K . flip (•))) p
 
 
 -- Recursion

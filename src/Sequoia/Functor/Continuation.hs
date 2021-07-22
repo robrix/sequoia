@@ -8,8 +8,6 @@ module Sequoia.Functor.Continuation
 , Contravariant(..)
   -- ** Construction
 , inK
-  -- ** Elimination
-, (•)
   -- ** Coercion
 , _K
   -- ** Category
@@ -39,19 +37,21 @@ import Sequoia.Profunctor.Continuation (Res(..))
 class Representable k => Continuation r k | k -> r
 
 
-newtype K r a = K { runK :: a -> r }
+newtype K r a = K { (•) :: a -> r }
   deriving (Monoid, Semigroup)
   deriving (Contravariant) via Flip (->) r
   deriving (Confunctor, Contrachoice, Contraclosed, Contracochoice, Contracosieve Identity, Contracostrong, Contracorepresentable, Contrarepresentable, Contrasieve Identity, Contrastrong) via Flip (->)
 
+infixl 7 •
+
 instance Representable (K r) where
   type Rep (K r) = r
   tabulate = K
-  index = runK
+  index = (•)
 
 instance Adjunction (K r) (K r) where
-  leftAdjunct  f a = K ((`runK` a) . f)
-  rightAdjunct f b = K ((`runK` b) . f)
+  leftAdjunct  f a = K ((• a) . f)
+  rightAdjunct f b = K ((• b) . f)
 
 instance Contrapply (K r) where
   contraliftA2 f (K a) (K b) = K (either a b . f)
@@ -66,14 +66,6 @@ instance Continuation r (K r)
 
 inK :: (a -> r) -> K r a
 inK = K
-
-
--- Elimination
-
-(•) :: K r a -> (a -> r)
-(•) = runK
-
-infixl 7 •
 
 
 -- Coercion
@@ -91,7 +83,7 @@ idK = inK id
 -- Composition
 
 (<••>) :: Disj d => K r a -> K r b -> K r (a `d` b)
-a <••> b = K (runK a <--> runK b)
+a <••> b = K ((a •) <--> (b •))
 
 infix 3 <••>
 

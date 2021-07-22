@@ -28,4 +28,4 @@ nu :: Pos x => NuF e r f x -> Nu e r f
 nu r = Nu (getNuF r)
 
 runNu :: Nu e r f -> Exists r P (NuF e r f)
-runNu (Nu r) = Exists (K (`runK` NuF r))
+runNu (Nu r) = Exists (K (• NuF r))
