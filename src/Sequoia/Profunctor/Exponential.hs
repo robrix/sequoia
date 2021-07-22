@@ -143,7 +143,7 @@ exExp :: Exp e r a b -> (e ∘ a -> b • r -> e ==> r)
 exExp (Exp f) = f
 
 evalExp :: e --|Exp e r|-> r -> (e -> r)
-evalExp f = (exExp f (V id) (K id) <==)
+evalExp f = exExpFn f id id
 
 appExp :: a --|Exp e r|-> b -> e ∘ (e ∘ a -> b • r • r)
 appExp f = V (\ e a -> K (\ b -> exExp f a b <== e))
