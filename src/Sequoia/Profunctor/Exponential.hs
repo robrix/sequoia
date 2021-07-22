@@ -156,7 +156,7 @@ inExp' f = inExp (flip (•∘) . fmap f)
 -- Elimination
 
 evalExp :: e --|Exp e r|-> r -> (e -> r)
-evalExp f = (exExp f (V id) (K id) <==)
+evalExp f = (getExp f (V id) (K id) <==)
 
 appExp :: Exponential f => a --|f e r|-> b -> e ∘ (e ∘ a -> b • r • r)
 appExp f = V (\ e a -> K (\ b -> exExp f a b <== e))
