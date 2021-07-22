@@ -9,7 +9,6 @@ module Sequoia.Profunctor.Exponential
 , type (--|)
 , type (|->)
   -- ** Exponential profunctor abstraction
-, _Exponential
 , Exponential(..)
   -- ** Construction
 , inExp'
@@ -143,9 +142,6 @@ infixr 5 |->
 
 
 -- Exponential profunctor abstraction
-
-_Exponential :: (Exponential f, Exponential f') => Iso (f e r a b) (f' e' r' a' b') (e ∘ a -> b • r -> e ==> r) (e' ∘ a' -> b' • r' -> e' ==> r')
-_Exponential = exExp <-> inExp
 
 class (forall e r . Cat.Category (f e r), forall e r . Profunctor (f e r)) => Exponential f where
   inExp :: (e ∘ a -> b • r -> e ==> r) -> f e r a b
