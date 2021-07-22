@@ -48,9 +48,11 @@ module Sequoia.Profunctor.Exponential
 , apExp
   -- * Monad
 , bindExp
+  -- * Arrow
+, arrExp
 ) where
 
-import           Control.Category ((<<<), (>>>))
+import           Control.Arrow
 import qualified Control.Category as Cat
 import           Data.Kind (Type)
 import           Data.Profunctor
@@ -101,6 +103,11 @@ instance Monad (Exp e r a) where
 
 instance Coapply (Exp e r) where
   coliftA2 f a b = Exp (\ v k -> env ((flip (exExp a) k <∘∘> flip (exExp b) k) (f <$> v)))
+
+instance Arrow (Exp e r) where
+  arr = arrExp
+  first = firstExp
+  second = secondExp
 
 instance Env e (Exp e r a b) where
   env f = inExp (\ v k -> env (runExp v k . f))
@@ -234,3 +241,9 @@ apExp df da = inExp (\ a b -> cont (\ _K -> exExp df a (_K (\ f -> exExp da a (l
 
 bindExp :: Exponential f => a --|f e r|-> b -> (b -> a --|f e r|-> c) -> a --|f e r|-> c
 bindExp m f = inExp (\ v k -> cont (\ _K -> exExp m v (_K (\ b -> exExp (f b) v k))))
+
+
+-- Arrow
+
+arrExp :: Exponential f => (a -> b) -> a --|f e r|-> b
+arrExp = inExp'
