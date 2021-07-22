@@ -72,4 +72,4 @@ mapCV = over _C . under _V
 
 
 (•∘) :: (Env c, Co.Representable v, Res c, Contra.Representable k) => k a -> v a -> c (Co.Rep v) (Contra.Rep k)
-k •∘ v = env (\ e -> res (k • e ∘ v))
+k •∘ v = env (\ e -> res (k • v ∘ e))

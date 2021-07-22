@@ -77,12 +77,9 @@ idV = inV id
 
 -- Elimination
 
-exV :: Representable v => v a -> (Rep v -> a)
+exV, (∘) :: Representable v => v a -> (Rep v -> a)
 exV = index
-
-
-(∘) :: Representable v => Rep v -> v a -> a
-(∘) = flip exV
+(∘) = index
 
 infixr 8 ∘
 
@@ -112,7 +109,7 @@ infix 3 >∘∘∘<
 infix 3 <∘∘>
 
 bitraverseDisjV :: (Disj d, Representable v) => v (a `d` b) -> Rep v -> v a `d` v b
-bitraverseDisjV d e = bimapDisj inV0 inV0 (e ∘ d)
+bitraverseDisjV = fmap (bimapDisj inV0 inV0) .  (∘)
 
 
 -- Ambient environment
