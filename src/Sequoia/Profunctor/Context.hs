@@ -13,7 +13,6 @@ module Sequoia.Profunctor.Context
 
 import Control.Category as Cat (Category)
 import Data.Distributive
-import Data.Functor.Contravariant.Rep as Contra
 import Data.Functor.Identity
 import Data.Functor.Rep as Co
 import Data.Profunctor
@@ -64,5 +63,5 @@ mapCV :: (forall x . V e x -> V e' x) -> (C e r -> C e' r)
 mapCV = over _C . under _V
 
 
-(•∘) :: (Env e c, Res (Contra.Rep k) c, Contra.Representable k) => k a -> V e a -> c
+(•∘) :: (Env e c, Res r c) => K r a -> V e a -> c
 k •∘ v = env (\ e -> res (k • v ∘ e))
