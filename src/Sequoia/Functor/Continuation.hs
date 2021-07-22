@@ -67,9 +67,6 @@ instance Continuation r (K r)
 inK :: Representable k => (a -> Rep k) -> k a
 inK = tabulate
 
-inK2 :: ((a -> r) -> (b -> r) -> (c -> r)) -> (K r a -> K r b -> K r c)
-inK2 f a b = K (runK a `f` runK b)
-
 
 -- Elimination
 
@@ -94,7 +91,7 @@ idK = inK id
 -- Composition
 
 (<••>) :: Disj d => K r a -> K r b -> K r (a `d` b)
-(<••>) = inK2 (<-->)
+a <••> b = K (runK a <--> runK b)
 
 infix 3 <••>
 
