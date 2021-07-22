@@ -62,12 +62,12 @@ _V = exV <-> inV
 
 -- Computation
 
-(>∘∘<) :: (Conj d, Representable v) => v b -> v c -> v (b `d` c)
+(>∘∘<) :: Conj d => V e b -> V e c -> V e (b `d` c)
 (>∘∘<) = inV2 (>---<)
 
 infix 3 >∘∘<
 
-(>∘∘∘<) :: (Conj d, Representable v) => (a -> v b) -> (a -> v c) -> (a -> v (b `d` c))
+(>∘∘∘<) :: Conj d => (a -> V e b) -> (a -> V e c) -> (a -> V e (b `d` c))
 (>∘∘∘<) = liftA2 (>∘∘<)
 
 infix 3 >∘∘∘<
