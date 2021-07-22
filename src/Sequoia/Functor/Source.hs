@@ -48,7 +48,7 @@ instance Res r (Src e r b) where
 
 -- Construction
 
-(↑) :: Exponential f => f e r a b -> e ∘ a -> Src e r|-> b
+(↑) :: a --|Exp e r|-> b -> e ∘ a -> Src e r|-> b
 f ↑ v = Src (exExp f v)
 
 
