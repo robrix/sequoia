@@ -15,6 +15,7 @@ module Sequoia.Profunctor.Exponential
 , inExpV
 , inExpK
 , inExpVK
+, inExpC
   -- ** Elimination
 , exExp
 , evalExp
@@ -124,7 +125,10 @@ inExpK :: a • r -> a --|Exp e r|-> r
 inExpK a = Exp (\ v k -> (k <<< a) •∘ v)
 
 inExpVK :: e ∘ a -> a • r -> e --|Exp e r|-> r
-inExpVK ea ar = Exp (\ v k -> (k <<< ar) •∘ (ea <<< v))
+inExpVK ea ar = inExpC (ar •∘ ea)
+
+inExpC :: e ==> r -> e --|Exp e r|-> r
+inExpC c = Exp (\ v k -> C ((k •) . (c <==) . (v ∘)))
 
 
 -- Elimination
