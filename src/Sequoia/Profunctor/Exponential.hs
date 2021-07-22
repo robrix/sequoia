@@ -27,10 +27,6 @@ module Sequoia.Profunctor.Exponential
 , dimapVK
 , lmapV
 , rmapK
-  -- * Profunctor
-, dimapExp
-, lmapExp
-, rmapExp
 ) where
 
 import           Control.Arrow
@@ -59,7 +55,9 @@ instance Exponential Exp where
   exExp = getExp
 
 instance Profunctor (Exp e r) where
-  dimap = dimapExp
+  dimap f g = dimapVK (fmap f) (lmap g)
+  lmap = lmapV . fmap
+  rmap = rmapK . lmap
 
 instance Strong (Exp e r) where
   first'  r = Exp (\ a b -> val (\ (a, c) -> getExp r (inV0 a) (lmap (,c) b)) a)
@@ -167,15 +165,3 @@ lmapV = (`dimapVK` id)
 
 rmapK :: Exponential f => (b' • r -> b • r) -> (a --|f e r|-> b -> a --|f e r|-> b')
 rmapK = (id `dimapVK`)
-
-
--- Profunctor
-
-dimapExp :: Exponential f => (a' -> a) -> (b -> b') -> a --|f e r|-> b -> a' --|f e r|-> b'
-dimapExp f g = dimapVK (fmap f) (lmap g)
-
-lmapExp :: Exponential f => (a' -> a) -> a --|f e r|-> b -> a' --|f e r|-> b
-lmapExp = lmapV . fmap
-
-rmapExp :: Exponential f => (b -> b') -> a --|f e r|-> b -> a --|f e r|-> b'
-rmapExp = rmapK . lmap
