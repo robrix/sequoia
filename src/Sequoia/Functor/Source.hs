@@ -4,6 +4,8 @@ module Sequoia.Functor.Source
 , Src(..)
   -- * Construction
 , (↑)
+  -- * Elimination
+, exSrcFn
   -- * Computation
 , mapSrcK
 , mapSrcV
@@ -11,6 +13,7 @@ module Sequoia.Functor.Source
 , _SrcExp
 ) where
 
+import Data.Coerce
 import Data.Profunctor
 import Sequoia.Optic.Getter
 import Sequoia.Optic.Iso
@@ -50,6 +53,12 @@ instance Res r (Src e r b) where
 
 (↑) :: a --|Exp e r|-> b -> e ∘ a -> Src e r|-> b
 f ↑ v = Src (exExp f v)
+
+
+-- Elimination
+
+exSrcFn :: Src e r b -> ((b -> r) -> (e -> r))
+exSrcFn = coerce . runSrc
 
 
 -- Computation
