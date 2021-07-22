@@ -41,7 +41,7 @@ instance Contrapply (Snk e r) where
 -- Construction
 
 (↓) :: b • r -> a --|Exp e r|-> b -> a --|Snk e r
-k ↓ f = Snk (flip (getExp f) k)
+k ↓ f = Snk (flip (exExp f) k)
 
 
 -- Computation
