@@ -6,7 +6,6 @@ module Sequoia.Functor.Value
   V(..)
   -- * Construction
 , inV0
-, inV
 , idV
   -- * Coercion
 , _V
@@ -20,8 +19,3 @@ module Sequoia.Functor.Value
 ) where
 
 import Sequoia.Profunctor.Value (Env(..), V(..), _V, idV, inV0, val, (<∘∘>), (>∘∘<), (>∘∘∘<))
-
--- Construction
-
-inV :: (e -> a) -> V e a
-inV = V
