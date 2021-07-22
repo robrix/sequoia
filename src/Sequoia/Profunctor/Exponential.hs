@@ -163,8 +163,8 @@ appExp2 f = V (\ e a b -> K (\ c -> exExp f a (K (\ g -> exExp g b c <== e)) <==
 runExp :: e ∘ a -> b • r -> a --|Exp e r|-> b -> e ==> r
 runExp v k f = exExp f v k
 
-elimExp :: Exponential f => a --|f e r|-> b -> Coexp e r b a -> e ==> r
-elimExp f = unCoexp (exExp f)
+elimExp :: a --|Exp e r|-> b -> Coexp e r b a -> e ==> r
+elimExp f = unCoexp (getExp f)
 
 
 -- Computation
