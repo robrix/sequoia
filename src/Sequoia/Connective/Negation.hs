@@ -3,9 +3,11 @@ module Sequoia.Connective.Negation
 ( -- * Not
   Not(..)
 , type (¬)
+, (•¬)
   -- * Negate
 , Negate(..)
 , type (-)
+, (•-)
   -- * Negative double negation
 , notNegate
 , getNotNegate
@@ -29,15 +31,21 @@ newtype Not r a = Not { getNot :: K r a }
 instance Pos a => Polarized N (Not r a) where
 
 instance Adjunction (Negate r) (Not r) where
-  unit   a = Not    (K (• a))
-  counit a = Negate (K (• a))
-  leftAdjunct  f a = Not    (K ((• a) . f))
-  rightAdjunct f a = Negate (K ((• a) . f))
+  unit   a = Not    (K (•- a))
+  counit a = Negate (K (•¬ a))
+  leftAdjunct  f a = Not    (K ((•- a) . f))
+  rightAdjunct f a = Negate (K ((•¬ a) . f))
 
 
 type (¬) = Not
 
 infixr 9 ¬
+
+
+(•¬) :: Not r a -> (a -> r)
+(•¬) = (•) . getNot
+
+infixl 7 •¬
 
 
 -- Negate
@@ -48,15 +56,21 @@ newtype Negate r a = Negate { getNegate :: K r a }
 instance Neg a => Polarized P (Negate r a) where
 
 instance Adjunction (Not r) (Negate r) where
-  unit   a = Negate (K (• a))
-  counit a = Not    (K (• a))
-  leftAdjunct  f a = Negate (K ((• a) . f))
-  rightAdjunct f a = Not    (K ((• a) . f))
+  unit   a = Negate (K (•¬ a))
+  counit a = Not    (K (•- a))
+  leftAdjunct  f a = Negate (K ((•¬ a) . f))
+  rightAdjunct f a = Not    (K ((•- a) . f))
 
 
 type (-) = Negate
 
 infixr 9 -
+
+
+(•-) :: Negate r a -> (a -> r)
+(•-) = (•) . getNegate
+
+infixl 7 •-
 
 
 -- Negative double negation
