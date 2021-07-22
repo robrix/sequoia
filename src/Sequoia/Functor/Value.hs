@@ -25,17 +25,20 @@ module Sequoia.Functor.Value
 , Env2(..)
 , val2
   -- * Value functor
-, module Sequoia.Functor.V
+, V(..)
 ) where
 
-import Control.Applicative (liftA2)
-import Control.Monad (join)
-import Data.Functor.Rep
-import Data.Profunctor
-import Sequoia.Conjunction
-import Sequoia.Disjunction
-import Sequoia.Functor.V
-import Sequoia.Optic.Iso
+import           Control.Applicative (liftA2)
+import           Control.Monad (join)
+import           Data.Distributive
+import           Data.Functor.Identity
+import           Data.Functor.Rep
+import           Data.Profunctor
+import qualified Data.Profunctor.Rep as Pro
+import           Data.Profunctor.Sieve
+import           Sequoia.Conjunction
+import           Sequoia.Disjunction
+import           Sequoia.Optic.Iso
 
 -- Values
 
@@ -129,3 +132,19 @@ class Env2 c where
 
 val2 :: (Env2 c, Representable v) => (a -> c (Rep v) r i o) -> (v a -> c (Rep v) r i o)
 val2 f v = env2 (f . exV v)
+
+
+-- Value functor
+
+newtype V s a = V { runV :: s -> a }
+  deriving (Applicative, Choice, Closed, Cochoice, Costrong, Functor, Monad, Monoid, Profunctor, Representable, Pro.Representable, Semigroup, Strong)
+
+instance Distributive (V s) where
+  distribute = distributeRep
+  collect = collectRep
+
+instance Sieve V Identity where
+  sieve = sieve . runV
+
+instance Cosieve V Identity where
+  cosieve = cosieve . runV

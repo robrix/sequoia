@@ -138,10 +138,8 @@ library
     Sequoia.Functor.Continuation
     Sequoia.Functor.Cov
     Sequoia.Functor.I
-    Sequoia.Functor.K
     Sequoia.Functor.Sink
     Sequoia.Functor.Source
-    Sequoia.Functor.V
     Sequoia.Functor.Value
     Sequoia.Lambda
     Sequoia.Optic.Getter
