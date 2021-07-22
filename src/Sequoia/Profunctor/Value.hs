@@ -2,6 +2,8 @@
 module Sequoia.Profunctor.Value
 ( -- * Value profunctor
   V(..)
+  -- * Coercion
+, _V
 ) where
 
 import Control.Category (Category)
@@ -12,6 +14,7 @@ import Data.Profunctor
 import Data.Profunctor.Rep as Pro
 import Data.Profunctor.Sieve
 import Data.Profunctor.Traversing
+import Sequoia.Optic.Iso
 
 -- Value profunctor
 
@@ -29,3 +32,9 @@ instance Sieve V Identity where
 
 instance Cosieve V Identity where
   cosieve = lmap runIdentity . (∘)
+
+
+-- Coercion
+
+_V :: Iso (V e a) (V e' a') (e -> a) (e' -> a')
+_V = coerced
