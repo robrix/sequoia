@@ -22,8 +22,6 @@ module Sequoia.Profunctor.Exponential
 , (<<<)
 , (>>>)
   -- ** Computation
-, (↑)
-, (↓)
 , dnE
 , coerceExp
 , liftRunExp
@@ -156,16 +154,6 @@ elimExp f = unCoexp (exExp f) . coerceCoexp
 
 
 -- Computation
-
-(↑) :: Exponential f => a --|f e r|-> b -> V e a -> f e r e|-> b
-f ↑ a = f <<< inExp (const (•∘ a))
-
-infixl 7 ↑
-
-(↓) :: Exponential f => K b r -> a --|f e r|-> b -> a --|f e r|-> r
-k ↓ f = inExp (const . (k •∘)) <<< f
-
-infixl 8 ↓
 
 dnE :: Exponential f => K (K (a --|f e r|-> b) r) r -> a --|f e r|-> b
 dnE k = inExp (\ v k' -> cont (\ _K -> k •• _K (\ f -> exExp f v k')))
