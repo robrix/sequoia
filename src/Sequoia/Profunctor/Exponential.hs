@@ -160,7 +160,7 @@ appExp f = V (\ e a -> K (\ b -> exExp f a b <== e))
 appExp2 :: Exponential f => a --|f e r|-> b --|f e r|-> c -> e ∘ (e ∘ a -> e ∘ b -> c • r • r)
 appExp2 f = V (\ e a b -> K (\ c -> exExp f a (K (\ g -> exExp g b c <== e)) <== e))
 
-runExp :: Exponential f => e ∘ a -> b • r -> a --|f e r|-> b -> e ==> r
+runExp :: e ∘ a -> b • r -> a --|Exp e r|-> b -> e ==> r
 runExp v k f = exExp f v k
 
 elimExp :: Exponential f => a --|f e r|-> b -> Coexp e r b a -> e ==> r
