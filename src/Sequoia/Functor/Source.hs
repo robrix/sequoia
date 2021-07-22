@@ -49,7 +49,7 @@ instance Res r (Src e r b) where
 -- Construction
 
 (↑) :: a --|Exp e r|-> b -> e ∘ a -> Src e r|-> b
-f ↑ v = Src (exExp f v)
+f ↑ v = Src (getExp f v)
 
 
 -- Computation
