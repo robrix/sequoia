@@ -25,7 +25,7 @@ import Control.Applicative (liftA2)
 import Data.Functor.Rep
 import Sequoia.Conjunction
 import Sequoia.Disjunction
-import Sequoia.Profunctor.Value (Env(..), V(..), _V, val)
+import Sequoia.Profunctor.Value (Env(..), V(..), _V, idV, val)
 
 -- Values
 
@@ -39,9 +39,6 @@ inV0 = inV . const
 
 inV :: Representable v => (Rep v -> a) -> v a
 inV = tabulate
-
-idV :: Representable v => v (Rep v)
-idV = inV id
 
 
 -- Computation
