@@ -69,7 +69,6 @@ instance Applicative (Exp e r a) where
   pure = Exp . const . flip (••)
   df <*> da = Exp (\ a b -> cont (\ _K -> getExp df a (_K (\ f -> getExp da a (lmap f b)))))
 
-
 instance Monad (Exp e r a) where
   m >>= f = Exp (\ v k -> cont (\ _K -> getExp m v (_K (\ b -> getExp (f b) v k))))
 
