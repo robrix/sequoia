@@ -44,8 +44,6 @@ module Sequoia.Profunctor.Exponential
 , apExp
   -- * Coapply
 , coliftA2Exp
-  -- * Monad
-, bindExp
 ) where
 
 import           Control.Arrow
@@ -99,7 +97,7 @@ instance Applicative (Exp e r a) where
   (<*>) = apExp
 
 instance Monad (Exp e r a) where
-  (>>=) = bindExp
+  m >>= f = Exp (\ v k -> cont (\ _K -> getExp m v (_K (\ b -> getExp (f b) v k))))
 
 instance Coapply (Exp e r) where
   coliftA2 = coliftA2Exp
@@ -232,9 +230,3 @@ apExp df da = inExp (\ a b -> cont (\ _K -> exExp df a (_K (\ f -> exExp da a (l
 
 coliftA2Exp :: (Disj d, Exponential f) => (c -> a `d` b) -> a --|f e r|-> s -> b --|f e r|-> s -> c --|f e r|-> s
 coliftA2Exp f a b = inExp (\ v k -> env ((flip (exExp a) k <∘∘> flip (exExp b) k) (f <$> v)))
-
-
--- Monad
-
-bindExp :: Exponential f => a --|f e r|-> b -> (b -> a --|f e r|-> c) -> a --|f e r|-> c
-bindExp m f = inExp (\ v k -> cont (\ _K -> exExp m v (_K (\ b -> exExp (f b) v k))))
