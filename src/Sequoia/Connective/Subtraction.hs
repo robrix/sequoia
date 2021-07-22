@@ -40,5 +40,5 @@ infixr 5 -~
 subA_ :: Lens (b >-Sub e r-~ a) (b >-Sub e' r-~ a') (V e a) (V e' a')
 subA_ = coercedFrom Sub .recall_
 
-subK_ :: Lens (b >-Sub e r-~ a) (b' >-Sub e r'-~ a) (K b r) (K b' r')
+subK_ :: Lens (b >-Sub e r-~ a) (b' >-Sub e r'-~ a) (b • r) (b' • r')
 subK_ = coercedFrom Sub .forget_

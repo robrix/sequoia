@@ -83,8 +83,8 @@ swapΓ f _Γ' = popΓΔ (\ c -> pushΓΔ (f (recall c)) (c & recall_ .~ _Γ'))
 
 swapΔ
   :: Contextual s
-  => (K _Δ  r -> _Γ -|s e r|- _Δ')
-  -> (K _Δ' r -> _Γ -|s e r|- _Δ)
+  => (_Δ  • r -> _Γ -|s e r|- _Δ')
+  -> (_Δ' • r -> _Γ -|s e r|- _Δ)
 swapΔ f _Δ' = popΓΔ (\ c -> pushΓΔ (f (forget c)) (c & forget_ .~ _Δ'))
 
 
@@ -122,7 +122,7 @@ popΓ f = swapΓ f (V id)
 -- @
 popΔ
   :: Contextual s
-  => (K _Δ r -> _Γ -|s e r|- r)
+  => (_Δ • r -> _Γ -|s e r|- r)
   -- --------------------------
   ->            _Γ -|s e r|- _Δ
 popΔ f = swapΔ f (K id)
@@ -153,7 +153,7 @@ popL f = popΓ (pushΓ . f . exlF <*> exrF)
 -- @
 popR
   :: Contextual s
-  => (K a r -> _Γ -|s e r|- _Δ)
+  => (a • r -> _Γ -|s e r|- _Δ)
   -- -----------------------------
   ->           _Γ -|s e r|- _Δ > a
 popR f = popΔ (pushΔ . f . inrK <*> inlK)
@@ -168,7 +168,7 @@ popL2 f = popL (popL . f)
 
 popR2
   :: Contextual s
-  => (K a r -> K b r -> _Γ -|s e r|- _Δ)
+  => (a • r -> b • r -> _Γ -|s e r|- _Δ)
   -- ------------------------------------------
   ->                    _Γ -|s e r|- _Δ > b > a
 popR2 f = popR (popR . f)
@@ -185,8 +185,8 @@ poppedΓ g h = roam (\ f p -> traverseΓ g (\ x -> f (mapΓ (h x) p)))
 
 poppedΔ
   :: Contextual s
-  => (K _Δ''' r -> (K _Δ'' r, x))
-  -> (K _Δ' r -> x -> K _Δ r)
+  => (_Δ''' • r -> (_Δ'' • r, x))
+  -> (_Δ' • r -> x -> _Δ • r)
   -> Setter
     (_Γ -|s e r|- _Δ ) (_Γ' -|s e r|- _Δ''')
     (_Γ -|s e r|- _Δ') (_Γ' -|s e r|- _Δ'')
@@ -258,7 +258,7 @@ pushΔ
   :: Contextual s
   =>            _Γ -|s e r|- _Δ
   -- ---------------------------
-  -> (K _Δ r -> _Γ -|s e r|-  r)
+  -> (_Δ • r -> _Γ -|s e r|-  r)
 pushΔ = swapΔ . const
 
 
@@ -289,7 +289,7 @@ pushR
   :: Contextual s
   =>           _Γ -|s e r|- _Δ > a
   -- -----------------------------
-  -> (K a r -> _Γ -|s e r|- _Δ)
+  -> (a • r -> _Γ -|s e r|- _Δ)
 pushR s a = popΔ (\ c -> pushΔ s (c |> a))
 
 
@@ -302,7 +302,7 @@ pushL2 p = pushL . pushL p
 
 pushR2
   :: Contextual s
-  => _Γ -|s e r|- _Δ > b > a -> K a r -> K b r
+  => _Γ -|s e r|- _Δ > b > a -> a • r -> b • r
   -- -----------------------------------------
   -> _Γ -|s e r|- _Δ
 pushR2 p = pushR . pushR p
@@ -313,7 +313,7 @@ pushR2 p = pushR . pushR p
 mapΓΔ
   :: Contextual s
   => (V e _Γ' -> V e _Γ)
-  -> (K _Δ' r -> K _Δ r)
+  -> (_Δ' • r -> _Δ • r)
   -> _Γ  -|s e r|- _Δ
   -- -----------------
   -> _Γ' -|s e r|- _Δ'
@@ -329,7 +329,7 @@ mapΓ = (`mapΓΔ` id)
 
 mapΔ
   :: Contextual s
-  => (K _Δ' r -> K _Δ r)
+  => (_Δ' • r -> _Δ • r)
   -> _Γ -|s e r|- _Δ
   -- ----------------
   -> _Γ -|s e r|- _Δ'
@@ -346,7 +346,7 @@ mapL f = mapΓ (f . exlF >∘∘∘< exrF)
 
 mapR
   :: Contextual s
-  => (K a' r -> K a r)
+  => (a' • r -> a • r)
   -> _Γ -|s e r|- _Δ > a
   -- --------------------
   -> _Γ -|s e r|- _Δ > a'
@@ -363,7 +363,7 @@ mapL2 f a b = popL ((pushL b <--> pushL a) . f)
 
 mapR2
   :: Contextual s
-  => (K (K c r -> K b r) r -> K a r)
+  => ((c • r -> b • r) • r -> a • r)
   -> _Γ -|s e r|- _Δ > a   ->   _Γ -|s e r|- _Δ > b
   -- ----------------------------------------------
   ->            _Γ -|s e r|- _Δ > c
@@ -374,7 +374,7 @@ mapR2 f a b = mapR f (wkR' a) >>> popL (val (`mapR` b))
 traverseΓΔ
   :: Contextual s
   => (V e _Γ' -> (x, V e _Γ))
-  -> (K _Δ' r -> (K _Δ r, y))
+  -> (_Δ' • r -> (_Δ • r, y))
   -> (x -> y -> _Γ  -|s e r|- _Δ)
   -- ----------------------------
   -> _Γ' -|s e r|- _Δ'
@@ -390,7 +390,7 @@ traverseΓ f = traverseΓΔ f (,()) . (const .)
 
 traverseΔ
   :: Contextual s
-  => (K _Δ' r -> (K _Δ r, y))
+  => (_Δ' • r -> (_Δ • r, y))
   -> (y -> _Γ -|s e r|- _Δ)
   -- ----------------------
   ->       _Γ -|s e r|- _Δ'
@@ -401,7 +401,7 @@ traverseΔ f = traverseΓΔ ((),) f . const
 
 liftL
   :: Contextual s
-  => K a r
+  => a • r
   -- -----------------------
   ->     a < _Γ -|s e r|- _Δ
 liftL = pushR init
@@ -418,7 +418,7 @@ liftR v = popΓ (\ _Γ -> pushΓ init (v <| _Γ))
 
 lowerL
   :: Contextual s
-  => (K a r                   -> _Γ -|s e r|- _Δ)
+  => (a • r                   -> _Γ -|s e r|- _Δ)
   -- --------------------------------------------
   -> (    a < _Γ -|s e r|- _Δ -> _Γ -|s e r|- _Δ)
 lowerL k p = popR k >>> p

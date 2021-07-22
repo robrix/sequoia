@@ -68,29 +68,29 @@ shiftN = shift . negateLK'
 
 dnePK
   :: Contextual s
-  => K (K a r) r < _Γ -|s e r|- _Δ
-  -- -----------------------------
-  ->       r -¬a < _Γ -|s e r|- _Δ
+  => a • r • r < _Γ -|s e r|- _Δ
+  -- ---------------------------
+  ->     r -¬a < _Γ -|s e r|- _Δ
 dnePK = mapL (fmap getNegateNot)
 
 dniPK
   :: Contextual s
-  => _Γ -|s e r|- _Δ > K (K a r) r
-  -- -----------------------------
+  => _Γ -|s e r|- _Δ > a • r • r
+  -- ---------------------------
   -> _Γ -|s e r|- _Δ > r -¬a
 dniPK = mapR (lmap negateNot)
 
 
 negateLK
   :: Contextual s
-  => K a r < _Γ -|s e r|- _Δ
+  => a • r < _Γ -|s e r|- _Δ
   -- -----------------------
   ->  r -a < _Γ -|s e r|- _Δ
 negateLK = mapL (fmap getNegate)
 
 negateRK
   :: Contextual s
-  => _Γ -|s e r|- _Δ > K a r
+  => _Γ -|s e r|- _Δ > a • r
   -- -----------------------
   -> _Γ -|s e r|- _Δ > r -a
 negateRK = mapR (lmap Negate)
@@ -100,12 +100,12 @@ negateLK'
   :: Contextual s
   =>  r -a < _Γ -|s e r|- _Δ
   -- -----------------------
-  -> K a r < _Γ -|s e r|- _Δ
+  -> a • r < _Γ -|s e r|- _Δ
 negateLK' = mapL (fmap Negate)
 
 negateRK'
   :: Contextual s
   => _Γ -|s e r|- _Δ > r -a
   -- -----------------------
-  -> _Γ -|s e r|- _Δ > K a r
+  -> _Γ -|s e r|- _Δ > a • r
 negateRK' = mapR (lmap getNegate)

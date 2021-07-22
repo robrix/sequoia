@@ -27,7 +27,7 @@ import Sequoia.Profunctor.Continuation
 
 -- Not
 
-newtype Not r a = Not { getNot :: K a r }
+newtype Not r a = Not { getNot :: a • r }
 
 instance Contravariant (Not r) where
   contramap f = Not . lmap f . getNot
@@ -59,7 +59,7 @@ infixl 7 •¬
 
 -- Negate
 
-newtype Negate r a = Negate { getNegate :: K a r }
+newtype Negate r a = Negate { getNegate :: a • r }
 
 instance Contravariant (Negate r) where
   contramap f = Negate . lmap f . getNegate
@@ -91,10 +91,10 @@ infixl 7 •-
 
 -- Negative double negation
 
-notNegate :: K (K a r) r -> r ¬-a
+notNegate :: a • r • r -> r ¬-a
 notNegate = Not . lmap getNegate
 
-getNotNegate :: r ¬-a -> K (K a r) r
+getNotNegate :: r ¬-a -> a • r • r
 getNotNegate = lmap Negate . getNot
 
 
@@ -105,10 +105,10 @@ infixr 9 ¬-
 
 -- Positive double negation
 
-negateNot :: K (K a r) r -> r -¬a
+negateNot :: a • r • r -> r -¬a
 negateNot = Negate . lmap getNot
 
-getNegateNot :: r -¬a -> K (K a r) r
+getNegateNot :: r -¬a -> a • r • r
 getNegateNot = lmap Not . getNegate
 
 

@@ -10,9 +10,9 @@ import Sequoia.Profunctor.Continuation
 
 -- Universal quantification
 
-data Exists r p f = forall x . Polarized p x => Exists (K (K (f x) r) r)
+data Exists r p f = forall x . Polarized p x => Exists (f x • r • r)
 
 instance Polarized P (Exists r p f)
 
-runExists :: (forall x . Polarized p x => f x -> a) -> Exists r p f -> K (K a r) r
+runExists :: (forall x . Polarized p x => f x -> a) -> Exists r p f -> a • r • r
 runExists f (Exists r) = K (\ k -> r • K ((k •) . f))

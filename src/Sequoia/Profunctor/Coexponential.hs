@@ -28,7 +28,7 @@ import Sequoia.Profunctor.Value
 
 -- Coexponential profunctor
 
-newtype Coexp e r a b = Coexp { withCoexp :: forall s . (V e b -> K a r -> s) -> s }
+newtype Coexp e r a b = Coexp { withCoexp :: forall s . (V e b -> a • r -> s) -> s }
   deriving (Functor)
 
 instance Profunctor (Coexp e r) where
@@ -54,7 +54,7 @@ instance Coexponential Coexp where
 idCoexp :: Coexp b a a b
 idCoexp = coexp (V id) (K id)
 
-coexp :: V e a -> K b r -> Coexp e r b a
+coexp :: V e a -> b • r -> Coexp e r b a
 coexp v k = Coexp (\ f -> f v k)
 
 
@@ -63,13 +63,13 @@ coexp v k = Coexp (\ f -> f v k)
 recall :: Coexp e r a b -> V e b
 recall = unCoexp const
 
-forget :: Coexp e r a b -> K a r
+forget :: Coexp e r a b -> a • r
 forget = unCoexp (const id)
 
 runCoexp :: Coexp e r b a -> ((a -> b) -> (e -> r))
 runCoexp c = withCoexp c (\ r f -> ((f •) .) . (. (r ∘)))
 
-unCoexp :: (V e a -> K b r -> s) -> Coexp e r b a -> s
+unCoexp :: (V e a -> b • r -> s) -> Coexp e r b a -> s
 unCoexp = flip withCoexp
 
 
@@ -84,5 +84,5 @@ coerceCoexp = inCoexp . exCoexp
 recall_ :: Lens (Coexp e r a b) (Coexp e' r a b') (V e b) (V e' b')
 recall_ = lens recall (\ s recall -> withCoexp s (\ _ forget -> coexp recall forget))
 
-forget_ :: Lens (Coexp e r a b) (Coexp e r' a' b) (K a r) (K a' r')
+forget_ :: Lens (Coexp e r a b) (Coexp e r' a' b) (a • r) (a' • r')
 forget_ = lens forget (\ s forget -> withCoexp s (\ recall _ -> coexp recall forget))

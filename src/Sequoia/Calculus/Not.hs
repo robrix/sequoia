@@ -68,29 +68,29 @@ shiftP = shift . notLK'
 
 dneNK
   :: Contextual s
-  => K (K a r) r < _Γ -|s e r|- _Δ
-  -- -----------------------------
-  ->      r ¬-a  < _Γ -|s e r|- _Δ
+  => a • r • r < _Γ -|s e r|- _Δ
+  -- ---------------------------
+  ->    r ¬-a  < _Γ -|s e r|- _Δ
 dneNK = mapL (fmap getNotNegate)
 
 dniNK
   :: Contextual s
-  => _Γ -|s e r|- _Δ > K (K a r) r
-  -- -----------------------------
-  -> _Γ -|s e r|- _Δ >      r ¬-a
+  => _Γ -|s e r|- _Δ > a • r • r
+  -- ---------------------------
+  -> _Γ -|s e r|- _Δ > r ¬-a
 dniNK = mapR (lmap notNegate)
 
 
 notLK
   :: Contextual s
-  => K a r < _Γ -|s e r|- _Δ
+  => a • r < _Γ -|s e r|- _Δ
   -- -----------------------
   ->  r ¬a < _Γ -|s e r|- _Δ
 notLK = mapL (fmap getNot)
 
 notRK
   :: Contextual s
-  => _Γ -|s e r|- _Δ > K a r
+  => _Γ -|s e r|- _Δ > a • r
   -- -----------------------
   -> _Γ -|s e r|- _Δ > r ¬a
 notRK = mapR (lmap Not)
@@ -100,12 +100,12 @@ notLK'
   :: Contextual s
   =>  r ¬a < _Γ -|s e r|- _Δ
   -- -----------------------
-  -> K a r < _Γ -|s e r|- _Δ
+  -> a • r < _Γ -|s e r|- _Δ
 notLK' = mapL (fmap Not)
 
 notRK'
   :: Contextual s
   => _Γ -|s e r|- _Δ >  r ¬a
   -- -----------------------
-  -> _Γ -|s e r|- _Δ > K a r
+  -> _Γ -|s e r|- _Δ > a • r
 notRK' = mapR (lmap getNot)

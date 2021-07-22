@@ -64,7 +64,7 @@ class Control s where
     -> _Γ -|s e r |- _Δ
 
   shift
-    :: K a r < _Γ -|s e r|- _Δ > r
+    :: a • r < _Γ -|s e r|- _Δ > r
     -- ---------------------------
     ->         _Γ -|s e r|- _Δ > a
 
@@ -75,26 +75,26 @@ kL
   :: Contextual s
   =>         _Γ -|s e r|- _Δ > a
   -- ---------------------------
-  -> K a r < _Γ -|s e r|- _Δ
+  -> a • r < _Γ -|s e r|- _Δ
 kL = popL . val . pushR
 
 kR
   :: (Contextual s, Weaken s)
   => a < _Γ -|s e r|- _Δ
   -- ---------------------------
-  ->     _Γ -|s e r|- _Δ > K a r
+  ->     _Γ -|s e r|- _Δ > a • r
 kR s = lowerL (pushL init . inV0) (wkR s)
 
 kL'
   :: (Contextual s, Weaken s)
-  => K a r < _Γ -|s e r|- _Δ
+  => a • r < _Γ -|s e r|- _Δ
   -- ---------------------------
   ->         _Γ -|s e r|- _Δ > a
 kL' s = kR init >>> wkR s
 
 kR'
   :: (Contextual s, Weaken s)
-  =>     _Γ -|s e r|- _Δ > K a r
+  =>     _Γ -|s e r|- _Δ > a • r
   -- ---------------------------
   -> a < _Γ -|s e r|- _Δ
 kR' s = wkL s >>> kL init

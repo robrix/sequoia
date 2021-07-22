@@ -38,7 +38,7 @@ instance Contrapply (Snk e r) where
 
 -- Computation
 
-mapSnkK :: (forall x . K x r -> K x r') -> (Snk e r a -> Snk e r' a)
+mapSnkK :: (forall x . x • r -> x • r') -> (Snk e r a -> Snk e r' a)
 mapSnkK f = over _Snk (fmap (mapCK f))
 
 mapSnkV :: (forall x . V e x <-> V e' x) -> (Snk e r a -> Snk e' r a)

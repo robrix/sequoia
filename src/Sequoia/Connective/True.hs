@@ -15,7 +15,7 @@ import Sequoia.Profunctor.Continuation
 true :: a -> True r a
 true = (`True` K id)
 
-data True r a = True { trueA :: a, trueK :: K r r }
+data True r a = True { trueA :: a, trueK :: r • r }
   deriving (Functor)
 
 instance Pos a => Polarized P (True e a)

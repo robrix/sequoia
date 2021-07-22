@@ -32,7 +32,7 @@ import           Sequoia.Profunctor.Value as V
 
 -- Signals
 
-newtype Sig e r a b = Sig { runSig :: V e a -> K b r -> C e r }
+newtype Sig e r a b = Sig { runSig :: V e a -> b • r -> C e r }
 
 instance Cat.Category (Sig e r) where
   id = Sig (flip (•∘))
@@ -51,7 +51,7 @@ instance Applicative (Sig e r a) where
 instance Monad (Sig e r a) where
   Sig m >>= f = Sig (\ a b -> liftRes (\ go -> m a (K (\ a' -> go (runSig (f a') a b)))))
 
-mapKSig :: (forall x . K x r <-> K x r') -> (Sig e r a b -> Sig e r' a b)
+mapKSig :: (forall x . x • r <-> x • r') -> (Sig e r a b -> Sig e r' a b)
 mapKSig b = Sig . fmap (dimap (review b) (mapCK (view b))) . runSig
 
 mapVSig :: (forall x . V e x <-> V e' x) -> (Sig e r a b -> Sig e' r a b)

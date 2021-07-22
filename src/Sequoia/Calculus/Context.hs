@@ -116,7 +116,7 @@ instance Monad ((>) a) where
 -- @
 -- 'unsnocΔ' . 'uncurry' ('|>') = id
 -- @
-(|>) :: K os r -> K o r -> K (os > o) r
+(|>) :: os • r -> o • r -> (os > o) • r
 (|>) = (<••>)
 
 -- | Split a '>'-context into its initial and last parts.
@@ -129,7 +129,7 @@ instance Monad ((>) a) where
 -- @
 -- 'unsnocΔ' . 'uncurry' ('|>') = id
 -- @
-unsnocΔ :: K (a > b) r -> (K a r, K b r)
+unsnocΔ :: (a > b) • r -> (a • r, b • r)
 unsnocΔ k = (inlK k, inrK k)
 
 

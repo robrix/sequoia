@@ -21,10 +21,10 @@ import Sequoia.Profunctor.Value
 
 -- Sources
 
-_Src :: Iso (Src e r b) (Src e' r' b') (K b r -> C e r) (K b' r' -> C e' r')
+_Src :: Iso (Src e r b) (Src e' r' b') (b • r -> C e r) (b' • r' -> C e' r')
 _Src = runSrc <-> Src
 
-newtype Src e r b = Src { runSrc :: K b r -> C e r }
+newtype Src e r b = Src { runSrc :: b • r -> C e r }
 
 instance Functor (Src e r) where
   fmap f = over _Src (. lmap f)
@@ -46,7 +46,7 @@ instance Res r (Src e r b) where
 
 -- Computation
 
-mapSrcK :: (forall x . K x r <-> K x r') -> (Src e r b -> Src e r' b)
+mapSrcK :: (forall x . x • r <-> x • r') -> (Src e r b -> Src e r' b)
 mapSrcK b = over _Src (dimap (review b) (mapCK (view b)))
 
 mapSrcV :: (forall x . V e x -> V e' x) -> (Src e r b -> Src e' r b)
