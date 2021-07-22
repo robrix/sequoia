@@ -1,7 +1,7 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Sequoia.Value
+module Sequoia.Functor.Value
 ( -- * Values
   Value
 , Representable(..)

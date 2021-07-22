@@ -22,7 +22,7 @@ import Sequoia.Calculus.Structural
 import Sequoia.Contextual
 import Sequoia.Functor.K
 import Sequoia.Functor.V
-import Sequoia.Value
+import Sequoia.Functor.Value
 
 -- Values
 

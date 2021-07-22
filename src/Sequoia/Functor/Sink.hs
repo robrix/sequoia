@@ -11,18 +11,18 @@ module Sequoia.Functor.Sink
 
 import Data.Functor.Contravariant
 import Data.Profunctor
-import Sequoia.Continuation
 import Sequoia.Disjunction
 import Sequoia.Functor.Applicative
+import Sequoia.Functor.Continuation
 import Sequoia.Functor.K
 import Sequoia.Functor.V
+import Sequoia.Functor.Value
 import Sequoia.Optic.Getter
 import Sequoia.Optic.Iso
 import Sequoia.Optic.Review
 import Sequoia.Optic.Setter
 import Sequoia.Profunctor.Context
 import Sequoia.Profunctor.Exponential
-import Sequoia.Value
 
 -- Sinks
 

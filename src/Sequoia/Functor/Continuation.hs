@@ -1,7 +1,7 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Sequoia.Continuation
+module Sequoia.Functor.Continuation
 ( -- * Continuations
   Continuation
 , Contravariant(..)

@@ -57,15 +57,15 @@ import qualified Control.Category as Cat
 import           Data.Kind (Type)
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
-import           Sequoia.Continuation as K
 import           Sequoia.Disjunction
+import           Sequoia.Functor.Continuation as K
 import           Sequoia.Functor.K
 import           Sequoia.Functor.V
+import           Sequoia.Functor.Value as V
 import           Sequoia.Optic.Iso
 import           Sequoia.Profunctor.Applicative
 import           Sequoia.Profunctor.Coexponential
 import           Sequoia.Profunctor.Context
-import           Sequoia.Value as V
 
 -- Exponential profunctor
 

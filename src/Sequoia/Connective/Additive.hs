@@ -15,8 +15,8 @@ import Sequoia.Connective.Sum
 import Sequoia.Connective.Top
 import Sequoia.Connective.With
 import Sequoia.Connective.Zero
-import Sequoia.Continuation as K
 import Sequoia.Disjunction
+import Sequoia.Functor.Continuation as K
 
 elimWith :: a & b -> r -a ⊕ r -b -> r
 elimWith = flip ((. exl) . (•) <--> (. exr) . (•))

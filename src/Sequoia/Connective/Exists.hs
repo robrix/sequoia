@@ -5,7 +5,7 @@ module Sequoia.Connective.Exists
 , runExists
 ) where
 
-import Sequoia.Continuation as K
+import Sequoia.Functor.Continuation as K
 import Sequoia.Functor.K
 import Sequoia.Polarity
 

@@ -20,12 +20,12 @@ import Data.Profunctor
 import Data.Profunctor.Rep as Pro
 import Data.Profunctor.Sieve
 import Data.Profunctor.Traversing
-import Sequoia.Continuation
+import Sequoia.Functor.Continuation
 import Sequoia.Functor.K
 import Sequoia.Functor.V
+import Sequoia.Functor.Value
 import Sequoia.Optic.Iso
 import Sequoia.Optic.Setter
-import Sequoia.Value
 
 -- Context & control profunctor
 

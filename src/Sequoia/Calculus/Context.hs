@@ -19,10 +19,10 @@ import Data.Bifoldable
 import Data.Bifunctor
 import Data.Bitraversable
 import Sequoia.Conjunction
-import Sequoia.Continuation as K
 import Sequoia.Disjunction
+import Sequoia.Functor.Continuation as K
 import Sequoia.Functor.K
-import Sequoia.Value as V
+import Sequoia.Functor.Value as V
 
 -- Γ
 

@@ -14,11 +14,11 @@ import           Data.Profunctor.Traversing
 import           Sequoia.Connective.Down
 import           Sequoia.Connective.Function
 import           Sequoia.Connective.Quantification
-import           Sequoia.Continuation
+import           Sequoia.Functor.Continuation
+import           Sequoia.Functor.Value
 import           Sequoia.Optic.Setter
 import           Sequoia.Polarity
 import           Sequoia.Profunctor.Exponential
-import           Sequoia.Value
 
 -- Recursion
 

@@ -23,7 +23,7 @@ import Sequoia.Calculus.Structural
 import Sequoia.Connective.Negation
 import Sequoia.Connective.Not
 import Sequoia.Contextual
-import Sequoia.Continuation as K
+import Sequoia.Functor.Continuation as K
 import Sequoia.Functor.K
 import Sequoia.Polarity
 
