@@ -15,10 +15,9 @@ import Sequoia.Connective.One
 import Sequoia.Connective.Par
 import Sequoia.Connective.Tensor
 import Sequoia.Disjunction
-import Sequoia.Functor.Continuation as K
 
 elimPar ::a ⅋ b -> r -a ⊗ r -b -> r
-elimPar = (. exl) . flip (•) <--> (. exr) . flip (•)
+elimPar = (. exl) . flip (•-) <--> (. exr) . flip (•-)
 
 elimTensor ::a ⊗ b -> r ¬a ⅋ r ¬b -> r
-elimTensor = flip ((. exl) . (•) <--> (. exr) . (•))
+elimTensor = flip ((. exl) . (•¬) <--> (. exr) . (•¬))

@@ -70,8 +70,8 @@ inK = K
 
 -- Elimination
 
-(•) :: Representable k => k a -> (a -> Rep k)
-(•) = index
+(•) :: K r a -> (a -> r)
+(•) = runK
 
 infixl 7 •
 
@@ -107,7 +107,7 @@ infix 3 <•••>
 cont :: Res r c => (((a -> c) -> K r a) -> c) -> c
 cont f = liftRes (\ run -> f (inK . (run .)))
 
-(••) :: (Res (Rep k) c, Representable k) => k a -> a -> c
+(••) :: Res r c => K r a -> a -> c
 k •• v = res (k • v)
 
 infix 7 ••
