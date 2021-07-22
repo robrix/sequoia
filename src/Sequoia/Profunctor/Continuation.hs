@@ -1,3 +1,4 @@
+{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Profunctor.Continuation
 ( -- * Continuation profunctor
@@ -5,6 +6,10 @@ module Sequoia.Profunctor.Continuation
   -- * Composition
 , idK
 , (<••>)
+  -- * Ambient control
+, Res(..)
+, cont
+, (••)
 ) where
 
 import Control.Category (Category)
@@ -16,11 +21,12 @@ import Data.Profunctor.Rep as Pro
 import Data.Profunctor.Sieve
 import Data.Profunctor.Traversing
 import Sequoia.Disjunction
+import Sequoia.Profunctor.Recall
 
 -- Continuation profunctor
 
 newtype K a r = K { (•) :: a -> r }
-  deriving (Applicative, Category, Choice, Closed, Cochoice, Pro.Corepresentable, Costrong, Functor, Mapping, Monad, Profunctor, Co.Representable, Pro.Representable, Strong, Traversing)
+  deriving (Applicative, Category, Choice, Closed, Cochoice, Pro.Corepresentable, Costrong, Functor, Mapping, Monad, Profunctor, Co.Representable, Pro.Representable, Res r, Strong, Traversing)
 
 infixl 7 •
 
@@ -45,3 +51,26 @@ idK = K id
 a <••> b = K ((a •) <--> (b •))
 
 infix 3 <••>
+
+
+-- Ambient control
+
+class Res r c | c -> r where
+  res :: r -> c
+  liftRes :: ((c -> r) -> c) -> c
+
+instance Res r (a -> r) where
+  res = pure
+  liftRes f = f =<< flip ($)
+
+instance Res r (Recall e a r) where
+  res = Recall . pure
+  liftRes f = Recall (\ e -> runRecall (f (`runRecall` e)) e)
+
+cont :: Res r c => (((a -> c) -> K a r) -> c) -> c
+cont f = liftRes (\ run -> f (K . (run .)))
+
+(••) :: Res r c => K a r -> a -> c
+k •• v = res (k • v)
+
+infix 7 ••
