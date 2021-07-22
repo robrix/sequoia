@@ -14,7 +14,7 @@ import Data.Profunctor.Traversing
 
 -- Value profunctor
 
-newtype V e a = V { runV :: e -> a }
+newtype V e a = V { (∘) :: e -> a }
   deriving (Applicative, Choice, Closed, Cochoice, Pro.Corepresentable, Costrong, Functor, Mapping, Monad, Profunctor, Co.Representable, Pro.Representable, Strong, Traversing)
 
 instance Distributive (V e) where
@@ -22,7 +22,7 @@ instance Distributive (V e) where
   collect = collectRep
 
 instance Sieve V Identity where
-  sieve = rmap Identity . runV
+  sieve = rmap Identity . (∘)
 
 instance Cosieve V Identity where
-  cosieve = lmap runIdentity . runV
+  cosieve = lmap runIdentity . (∘)

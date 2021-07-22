@@ -14,7 +14,7 @@ import Data.Profunctor.Traversing
 
 -- Continuation profunctor
 
-newtype K a r = K { runK :: a -> r }
+newtype K a r = K { (•) :: a -> r }
   deriving (Applicative, Choice, Closed, Cochoice, Pro.Corepresentable, Costrong, Functor, Mapping, Monad, Profunctor, Co.Representable, Pro.Representable, Strong, Traversing)
 
 instance Distributive (K r) where
@@ -22,7 +22,7 @@ instance Distributive (K r) where
   collect = collectRep
 
 instance Sieve K Identity where
-  sieve = rmap Identity . runK
+  sieve = rmap Identity . (•)
 
 instance Cosieve K Identity where
-  cosieve = lmap runIdentity . runK
+  cosieve = lmap runIdentity . (•)
