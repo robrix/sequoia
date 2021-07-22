@@ -63,7 +63,7 @@ instance Choice (Exp e r) where
   right' r = Exp (\ a b -> val ((inlK b ••) <--> flip (getExp r) (inrK b) . inV0) a)
 
 instance Traversing (Exp e r) where
-  wander traverse r = Exp (\ v k -> val (\ s -> getExp (traverse (((r <<<) . Exp . const . flip (•∘)) . inV0) s) (V id) k) v)
+  wander traverse r = Exp (\ v k -> val (\ s -> getExp (traverse ((r <<<) . pure) s) (V id) k) v)
 
 instance Cat.Category (Exp e r) where
   id = Exp (flip (•∘))
