@@ -1,6 +1,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Profunctor.Value
-( V(..)
+( -- * Value profunctor
+  V(..)
 ) where
 
 import Data.Distributive
@@ -10,6 +11,8 @@ import Data.Profunctor
 import Data.Profunctor.Rep as Pro
 import Data.Profunctor.Sieve
 import Data.Profunctor.Traversing
+
+-- Value profunctor
 
 newtype V e a = V { runV :: e -> a }
   deriving (Applicative, Choice, Closed, Cochoice, Pro.Corepresentable, Costrong, Functor, Mapping, Monad, Profunctor, Co.Representable, Pro.Representable, Strong, Traversing)

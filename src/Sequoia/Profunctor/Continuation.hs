@@ -1,6 +1,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Profunctor.Continuation
-( K(..)
+( -- * Continuation profunctor
+  K(..)
 ) where
 
 import Data.Distributive
@@ -10,6 +11,8 @@ import Data.Profunctor
 import Data.Profunctor.Rep as Pro
 import Data.Profunctor.Sieve
 import Data.Profunctor.Traversing
+
+-- Continuation profunctor
 
 newtype K a r = K { runK :: a -> r }
   deriving (Applicative, Choice, Closed, Cochoice, Pro.Corepresentable, Costrong, Functor, Mapping, Monad, Profunctor, Co.Representable, Pro.Representable, Strong, Traversing)
