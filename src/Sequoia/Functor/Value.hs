@@ -23,37 +23,18 @@ module Sequoia.Functor.Value
 , val
 ) where
 
-import           Control.Applicative (liftA2)
-import           Control.Monad (join)
-import           Data.Distributive
-import           Data.Functor.Identity
-import           Data.Functor.Rep
-import           Data.Profunctor
-import qualified Data.Profunctor.Rep as Pro
-import           Data.Profunctor.Sieve
-import           Sequoia.Conjunction
-import           Sequoia.Disjunction
-import           Sequoia.Optic.Iso
+import Control.Applicative (liftA2)
+import Control.Monad (join)
+import Data.Functor.Rep
+import Data.Profunctor
+import Sequoia.Conjunction
+import Sequoia.Disjunction
+import Sequoia.Optic.Iso
+import Sequoia.Profunctor.Value (V(..))
 
 -- Values
 
 class Representable v => Value v
-
-
-newtype V s a = V { runV :: s -> a }
-  deriving (Applicative, Choice, Closed, Cochoice, Costrong, Functor, Monad, Monoid, Profunctor, Representable, Pro.Representable, Semigroup, Strong)
-
-instance Distributive (V s) where
-  distribute = distributeRep
-  collect = collectRep
-
-instance Sieve V Identity where
-  sieve = sieve . runV
-
-instance Cosieve V Identity where
-  cosieve = cosieve . runV
-
-instance Value (V s)
 
 
 -- Construction
