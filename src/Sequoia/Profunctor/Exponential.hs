@@ -109,6 +109,10 @@ instance Arrow (Exp e r) where
   first = firstExp
   second = secondExp
 
+instance ArrowChoice (Exp e r) where
+  left = leftExp
+  right = rightExp
+
 instance Env e (Exp e r a b) where
   env f = inExp (\ v k -> env (runExp v k . f))
 
