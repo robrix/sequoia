@@ -88,8 +88,8 @@ instance Traversing (Exp e r) where
   wander = wanderExp
 
 instance Cat.Category (Exp e r) where
-  id = inExp' id
-  f . g = inExp (\ a c -> cont (\ _K -> exExp g a (_K (\ b -> exExp f (inV0 b) c))))
+  id = Exp (flip (•∘))
+  f . g = Exp (\ a c -> cont (\ _K -> getExp g a (_K (\ b -> getExp f (inV0 b) c))))
 
 instance Functor (Exp e r c) where
   fmap = rmap
