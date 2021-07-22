@@ -5,7 +5,6 @@ module Sequoia.Functor.Value
 ( -- * Values
   Value
 , V(..)
-, Representable(..)
   -- * Construction
 , inV0
 , inV
