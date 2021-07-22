@@ -2,6 +2,8 @@
 module Sequoia.Profunctor.Continuation
 ( -- * Continuation profunctor
   K(..)
+  -- * Composition
+, (<••>)
 ) where
 
 import Control.Category (Category)
@@ -12,6 +14,7 @@ import Data.Profunctor
 import Data.Profunctor.Rep as Pro
 import Data.Profunctor.Sieve
 import Data.Profunctor.Traversing
+import Sequoia.Disjunction
 
 -- Continuation profunctor
 
@@ -29,3 +32,11 @@ instance Sieve K Identity where
 
 instance Cosieve K Identity where
   cosieve = lmap runIdentity . (•)
+
+
+-- Composition
+
+(<••>) :: Disj d => K a r -> K b r -> K (a `d` b) r
+a <••> b = K ((a •) <--> (b •))
+
+infix 3 <••>
