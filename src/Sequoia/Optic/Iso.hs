@@ -95,7 +95,7 @@ from :: Iso s t a b -> Iso b a t s
 from o = withIso o (flip (<->))
 
 constant :: a -> Iso (a -> b) (a' -> b') b b'
-constant a = ($ a) <-> const
+constant = (`constantFrom` const)
 
 constantFrom :: a -> (b' -> a' -> b') -> Iso (a -> b) (a' -> b') b b'
 constantFrom = (<->) . flip ($)
