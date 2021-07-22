@@ -22,10 +22,6 @@ import Sequoia.Profunctor.Value
 newtype Sub e r b a = Sub { getSub :: Coexp e r b a }
   deriving (Functor, Profunctor)
 
-instance Coexponential Sub where
-  inCoexp = Sub
-  exCoexp = getSub
-
 instance (Pos a, Neg b) => Polarized P (Sub e r b a) where
 
 type a >-r = (r :: Type -> Type -> Type) a

@@ -20,7 +20,7 @@ import Sequoia.Profunctor.Exponential
 import Sequoia.Profunctor.Value
 
 elimFun :: a ~~Fun e r~> b -> b >-Sub e r-~ a -> e ==> r
-elimFun = elimExp
+elimFun f = elimExp f . getSub
 
 funPar1 :: e ∘ (r ¬a ⅋ b) • r <-> e ∘ (a ~~Fun e r~> b) • r
 funPar1
