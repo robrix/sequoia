@@ -101,7 +101,7 @@ instance Contextual Seq where
 -- Control
 
 instance Calculus.Control Seq where
-  reset s = inExp (\ _Γ _Δ -> C ((_Δ •) . runC (exExp s _Γ (K id))))
+  reset s = inExp (\ _Γ _Δ -> C ((_Δ •) . (exExp s _Γ (K id) <==)))
   shift s = inExp (\ _Γ _Δ -> exExp s (inV0 (inrK _Δ) <| _Γ) (inlK _Δ |> K id))
 
 

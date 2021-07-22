@@ -27,22 +27,23 @@ import Sequoia.Profunctor.Value
 -- Context & control profunctor
 
 _C :: Iso (e ==> r) (e' ==> r') (e -> r) (e' -> r')
-_C = runC <-> C
+_C = (<==) <-> C
 
-newtype e ==> r = C { runC :: e -> r }
+newtype e ==> r = C { (<==) :: e -> r }
   deriving (Applicative, Cat.Category, Choice, Closed, Cochoice, Costrong, Env e, Functor, Mapping, Monad, Profunctor, Co.Representable, Res r, Strong, Traversing)
 
 infix 6 ==>
+infixl 6 <==
 
 instance Distributive ((==>) e) where
   distribute = distributeRep
   collect = collectRep
 
 instance Sieve (==>) Identity where
-  sieve = fmap Identity . runC
+  sieve = fmap Identity . (<==)
 
 instance Cosieve (==>) Identity where
-  cosieve = lmap runIdentity . runC
+  cosieve = lmap runIdentity . (<==)
 
 instance Pro.Representable (==>) where
   type Rep (==>) = Identity

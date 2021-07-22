@@ -157,13 +157,13 @@ inExp' f = inExp (flip (•∘) . fmap f)
 -- Elimination
 
 evalExp :: Exponential f => e --|f e r|-> r -> (e -> r)
-evalExp f = runC (exExp f (V id) (K id))
+evalExp f = (exExp f (V id) (K id) <==)
 
 appExp :: Exponential f => a --|f e r|-> b -> e ∘ (e ∘ a -> b • r • r)
-appExp f = V (\ e a -> K (\ b -> runC (exExp f a b) e))
+appExp f = V (\ e a -> K (\ b -> exExp f a b <== e))
 
 appExp2 :: Exponential f => a --|f e r|-> b --|f e r|-> c -> e ∘ (e ∘ a -> e ∘ b -> c • r • r)
-appExp2 f = V (\ e a b -> K (\ c -> runC (exExp f a (K (\ g -> runC (exExp g b c) e))) e))
+appExp2 f = V (\ e a b -> K (\ c -> exExp f a (K (\ g -> exExp g b c <== e)) <== e))
 
 runExp :: Exponential f => e ∘ a -> b • r -> a --|f e r|-> b -> e ==> r
 runExp v k f = exExp f v k
