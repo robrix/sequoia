@@ -5,8 +5,6 @@ module Sequoia.Functor.Continuation
 ( -- * Continuations
   Continuation
 , K(..)
-  -- ** Construction
-, inK
   -- ** Coercion
 , _K
   -- ** Category
@@ -59,12 +57,6 @@ instance Contrapply (K r) where
 instance Contrapplicative (K r)
 
 instance Continuation r (K r)
-
-
--- Construction
-
-inK :: (a -> r) -> K r a
-inK = K
 
 
 -- Coercion
