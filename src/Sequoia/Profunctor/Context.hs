@@ -7,6 +7,7 @@ module Sequoia.Profunctor.Context
   -- * Composition
 , (•<<)
 , (>>•)
+, (∘<<)
   -- * Computation
 , mapCKV
 , mapCK
@@ -67,6 +68,12 @@ instance Pro.Corepresentable (==>) where
 (>>•) = flip (•<<)
 
 infixr 1 •<<, >>•
+
+
+(∘<<) :: d ∘ e -> e ==> r -> d ==> r
+(∘<<) = lmap . (∘)
+
+infixr 1 ∘<<
 
 
 -- Computation
