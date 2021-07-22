@@ -53,7 +53,7 @@ exV = index
 
 -- Coercion
 
-_V :: (Representable v, Representable v') => Iso (v a) (v' a') (Rep v -> a) (Rep v' -> a')
+_V :: Iso (V e a) (V e' a') (e -> a) (e' -> a')
 _V = exV <-> inV
 
 
