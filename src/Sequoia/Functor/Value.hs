@@ -25,8 +25,7 @@ import Control.Applicative (liftA2)
 import Data.Functor.Rep
 import Sequoia.Conjunction
 import Sequoia.Disjunction
-import Sequoia.Optic.Iso
-import Sequoia.Profunctor.Value (Env(..), V(..), val)
+import Sequoia.Profunctor.Value (Env(..), V(..), _V, val)
 
 -- Values
 
@@ -43,18 +42,6 @@ inV = tabulate
 
 idV :: Representable v => v (Rep v)
 idV = inV id
-
-
--- Elimination
-
-exV :: Representable v => v a -> (Rep v -> a)
-exV = index
-
-
--- Coercion
-
-_V :: Iso (V e a) (V e' a') (e -> a) (e' -> a')
-_V = exV <-> inV
 
 
 -- Computation
