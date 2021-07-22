@@ -55,7 +55,7 @@ instance Bitraversable (<) where
 -- @
 -- 'unconsΓ' . 'uncurry' ('<|') = 'id'
 -- @
-(<|) :: V.Representable v => v i -> v is -> v (i < is)
+(<|) :: V e i -> V e is -> V e (i < is)
 (<|) = (>∘∘<)
 
 -- | Split a '<'-context into its head and tail.
@@ -68,7 +68,7 @@ instance Bitraversable (<) where
 -- @
 -- 'uncurry' ('<|') . 'unconsΓ' = 'id'
 -- @
-unconsΓ :: V.Representable v => v (a < b) -> (v a, v b)
+unconsΓ :: V e (a < b) -> (V e a, V e b)
 unconsΓ v = (exlF v, exrF v)
 
 
