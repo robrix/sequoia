@@ -76,7 +76,7 @@ kL
   =>         _Γ -|s e r|- _Δ > a
   -- ---------------------------
   -> K r a < _Γ -|s e r|- _Δ
-kL = popL . val2 . pushR
+kL = popL . val . pushR
 
 kR
   :: (Contextual s, Weaken s)

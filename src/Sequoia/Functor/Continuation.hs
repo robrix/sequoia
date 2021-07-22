@@ -21,9 +21,6 @@ module Sequoia.Functor.Continuation
 , Res(..)
 , cont
 , (••)
-, Res1(..)
-, cont1
-, Res2(..)
 ) where
 
 import Control.Applicative (liftA2)
@@ -110,39 +107,22 @@ infix 3 <•••>
 
 -- Ambient control
 
-class Res c where
-  res :: r -> c e r
-  liftRes :: ((c e r -> r) -> c e r) -> c e r
+class Res r c | c -> r where
+  res :: r -> c
+  liftRes :: ((c -> r) -> c) -> c
 
-instance Res (->) where
+instance Res r (a -> r) where
   res = pure
   liftRes f = f =<< flip ($)
 
-instance Res (Recall e) where
+instance Res r (Recall e a r) where
   res = Recall . pure
   liftRes f = Recall (\ e -> runRecall (f (`runRecall` e)) e)
 
-cont :: Res c => (((a -> c e r) -> K r a) -> c e r) -> c e r
-cont = liftRes . contN
+cont :: Res r c => (((a -> c) -> K r a) -> c) -> c
+cont f = liftRes (\ run -> f (inK . (run .)))
 
-(••) :: (Res c, Representable k) => k a -> a -> c e (Rep k)
+(••) :: (Res (Rep k) c, Representable k) => k a -> a -> c
 k •• v = res (k • v)
 
 infix 7 ••
-
-
-class Res1 c where
-  res1 :: r -> c e r a
-  liftRes1 :: ((c e r a -> r) -> c e r a) -> c e r a
-
-cont1 :: Res1 c => (((a -> c e r a) -> K r a) -> c e r a) -> c e r a
-cont1 = liftRes1 . contN
-
-
-class Res2 c where
-  res2 :: r -> c e r a b
-  liftRes2 :: ((c e r a b -> r) -> c e r a b) -> c e r a b
-
-
-contN :: (((a -> c) -> K r a) -> c) -> ((c -> r) -> c)
-contN f run = f (inK . (run .))

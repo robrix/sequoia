@@ -36,12 +36,12 @@ instance Applicative (Src e r) where
 instance Monad (Src e r) where
   Src m >>= f = Src (\ k -> cont (\ _K -> m (_K ((`runSrc` k) . f))))
 
-instance Env1 Src where
-  env1 f = Src (\ k -> env ((`runSrc` k) . f))
+instance Env e (Src e r b) where
+  env f = Src (\ k -> env ((`runSrc` k) . f))
 
-instance Res1 Src where
-  res1 = Src . const . res
-  liftRes1 f = Src (\ k -> liftRes (\ run -> runSrc (f (run . (`runSrc` k))) k))
+instance Res r (Src e r b) where
+  res = Src . const . res
+  liftRes f = Src (\ k -> liftRes (\ run -> runSrc (f (run . (`runSrc` k))) k))
 
 
 -- Computation

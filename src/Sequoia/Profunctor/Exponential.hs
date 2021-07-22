@@ -104,12 +104,12 @@ instance Monad (Exp e r a) where
 instance Coapply (Exp e r) where
   coliftA2 f a b = Exp (\ v k -> env ((flip (exExp a) k <∘∘> flip (exExp b) k) (f <$> v)))
 
-instance Env2 Exp where
-  env2 f = inExp (\ v k -> env (runExp v k . f))
+instance Env e (Exp e r a b) where
+  env f = inExp (\ v k -> env (runExp v k . f))
 
-instance Res2 Exp where
-  res2 = inExp . const . const . res
-  liftRes2 f = liftRunExp (\ run -> liftRes (dimap (. run) run f))
+instance Res r (Exp e r a b) where
+  res = inExp . const . const . res
+  liftRes f = liftRunExp (\ run -> liftRes (dimap (. run) run f))
 
 
 -- Mixfix notation

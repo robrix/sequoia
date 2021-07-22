@@ -21,10 +21,6 @@ module Sequoia.Functor.Value
   -- * Ambient environment
 , Env(..)
 , val
-, Env1(..)
-, val1
-, Env2(..)
-, val2
 ) where
 
 import           Control.Applicative (liftA2)
@@ -114,31 +110,16 @@ bitraverseDisjV = fmap (bimapDisj inV0 inV0) . (∘)
 
 -- Ambient environment
 
-class Env c where
-  env :: (e -> c e r) -> c e r
+class Env e c | c -> e where
+  env :: (e -> c) -> c
 
-instance Env (->) where
+instance Env e (e -> r) where
   env = join
 
-instance Env V where
+instance Env e (V e a) where
   env f = V (runV =<< f)
 
-instance Env (Forget r) where
-  env = Forget . (runForget =<<)
+deriving instance Env e (Forget r e a)
 
-val :: (Env c, Representable v) => (a -> c (Rep v) r) -> (v a -> c (Rep v) r)
+val :: (Env (Rep v) c, Representable v) => (a -> c) -> (v a -> c)
 val f v = env (f . exV v)
-
-
-class Env1 c where
-  env1 :: (e -> c e r a) -> c e r a
-
-val1 :: (Env1 c, Representable v) => (a -> c (Rep v) r a) -> (v a -> c (Rep v) r a)
-val1 f v = env1 (f . exV v)
-
-
-class Env2 c where
-  env2 :: (e -> c e r a b) -> c e r a b
-
-val2 :: (Env2 c, Representable v) => (a -> c (Rep v) r i o) -> (v a -> c (Rep v) r i o)
-val2 f v = env2 (f . exV v)

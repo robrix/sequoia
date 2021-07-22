@@ -67,7 +67,7 @@ import Sequoia.Profunctor.Coexponential
 
 -- Contextual
 
-class (Core s, Env2 s, forall e r . Profunctor (s e r)) => Contextual s where
+class (Core s, forall e r a b . Env e (s e r a b), forall e r . Profunctor (s e r)) => Contextual s where
   swapΓΔ
     :: (Coexp e r _Δ  _Γ  -> _Γ' -|s e r|- _Δ')
     -> (Coexp e r _Δ' _Γ' -> _Γ  -|s e r|- _Δ )
@@ -367,7 +367,7 @@ mapR2
   -> _Γ -|s e r|- _Δ > a   ->   _Γ -|s e r|- _Δ > b
   -- ----------------------------------------------
   ->            _Γ -|s e r|- _Δ > c
-mapR2 f a b = mapR f (wkR' a) >>> popL (val2 (`mapR` b))
+mapR2 f a b = mapR f (wkR' a) >>> popL (val (`mapR` b))
   where wkR' = popR2 . flip . const . pushR
 
 

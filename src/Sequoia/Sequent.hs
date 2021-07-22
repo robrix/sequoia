@@ -52,9 +52,10 @@ runSeq :: Seq e r _Γ _Δ -> ((e -> _Γ) -> (_Δ -> r) -> (e -> r))
 runSeq s f g = evalSeq (dimap f g s)
 
 newtype Seq e r _Γ _Δ = Seq { getSeq :: V e _Γ -> K r _Δ -> C e r }
+  deriving (Env e, Res r) via (Exp e r _Γ _Δ)
   deriving (Applicative, Functor, Monad) via (Exp e r _Γ)
   deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via (Exp e r)
-  deriving (Env2, Exponential) via Exp
+  deriving (Exponential) via Exp
 
 
 liftLR :: Exponential d => d e r a b -> Seq e r (a < _Γ) (_Δ > b)
@@ -107,7 +108,7 @@ instance Calculus.Control Seq where
 -- Assertion
 
 instance NotUntrueIntro Seq where
-  notUntrueL e a = popL (val2 (\ (NotUntrue r) -> e >>> liftLR @Exp (r ^. _SrcExp @_ @Exp) >>> wkL' a))
+  notUntrueL e a = popL (val (\ (NotUntrue r) -> e >>> liftLR @Exp (r ^. _SrcExp @_ @Exp) >>> wkL' a))
   notUntrueR s = mapR (contramap (\ f -> NotUntrue (_SrcExp @Fun # f))) (funR s)
 
 instance TrueIntro Seq where
@@ -140,7 +141,7 @@ instance WithIntro Seq where
   withR = mapR2 (contramap (contramap . inlr))
 
 instance SumIntro Seq where
-  sumL a b = popL (env2 . (pushL a <∘∘> pushL b))
+  sumL a b = popL (env . (pushL a <∘∘> pushL b))
   sumR1 = mapR (contramap inl)
   sumR2 = mapR (contramap inr)
 
@@ -156,7 +157,7 @@ instance OneIntro Seq where
   oneR = liftR (inV0 One)
 
 instance ParIntro Seq where
-  parL a b = popL (env2 . (pushL a <∘∘> pushL b))
+  parL a b = popL (env . (pushL a <∘∘> pushL b))
   parR = fmap ((>>= inr . inl) <--> inr . inr)
 
 instance TensorIntro Seq where
@@ -184,11 +185,11 @@ instance XOrIntro Seq where
 -- Implication
 
 instance FunctionIntro Seq where
-  funL a b = popL (val2 (\ f -> a >>> liftLR f >>> wkL' b))
+  funL a b = popL (val (\ f -> a >>> liftLR f >>> wkL' b))
   funR = lowerLR (liftR . inV0) . wkR'
 
 instance SubtractionIntro Seq where
-  subL f = popL (val2 (\ s -> liftR (s^.subA_) >>> f >>> liftL (s^.subK_)))
+  subL f = popL (val (\ s -> liftR (s^.subA_) >>> f >>> liftL (s^.subK_)))
   subR a b = wkR' a >>> popL (\ a -> lowerL (liftR . inV0 . inCoexp . coexp a) (wkR b))
 
 
@@ -199,7 +200,7 @@ instance UniversalIntro Seq where
   forAllR p = inExp (\ _Γ _Δ -> liftRes (\ run -> inrK _Δ •• ForAll (K (\ k -> run (exExp p _Γ (inlK _Δ |> k))))))
 
 instance ExistentialIntro Seq where
-  existsL p = popL (val2 (dnE . runExists (pushL p . inV0)))
+  existsL p = popL (val (dnE . runExists (pushL p . inV0)))
   existsR p = mapR (contramap (Exists . K . flip runK)) p
 
 

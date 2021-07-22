@@ -31,7 +31,7 @@ _C :: Iso (C e r) (C e' r') (e -> r) (e' -> r')
 _C = runC <-> C
 
 newtype C e r = C { runC :: e -> r }
-  deriving (Applicative, Cat.Category, Choice, Closed, Cochoice, Costrong, Functor, Mapping, Monad, Profunctor, Co.Representable, Strong, Traversing)
+  deriving (Applicative, Cat.Category, Choice, Closed, Cochoice, Costrong, Env e, Functor, Mapping, Monad, Profunctor, Co.Representable, Res r, Strong, Traversing)
 
 instance Distributive (C e) where
   distribute = distributeRep
@@ -51,13 +51,6 @@ instance Pro.Corepresentable C where
   type Corep C = Identity
   cotabulate = C . lmap Identity
 
-instance Env C where
-  env = C . (runC =<<)
-
-instance Res C where
-  res = C . const
-  liftRes f = C (\ e -> runC (f (`runC` e)) e)
-
 
 -- Computation
 
@@ -71,5 +64,5 @@ mapCV :: (forall x . V e x -> V e' x) -> (C e r -> C e' r)
 mapCV = over _C . under _V
 
 
-(•∘) :: (Env c, Co.Representable v, Res c, Contra.Representable k) => k a -> v a -> c (Co.Rep v) (Contra.Rep k)
+(•∘) :: (Env (Co.Rep v) c, Co.Representable v, Res (Contra.Rep k) c, Contra.Representable k) => k a -> v a -> c
 k •∘ v = env (\ e -> res (k • v ∘ e))
