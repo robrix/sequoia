@@ -3,6 +3,8 @@
 module Sequoia.Profunctor.Continuation
 ( -- * Continuation profunctor
   K(..)
+  -- * Coercion
+, _K
   -- * Composition
 , idK
 , (<••>)
@@ -21,6 +23,7 @@ import Data.Profunctor.Rep as Pro
 import Data.Profunctor.Sieve
 import Data.Profunctor.Traversing
 import Sequoia.Disjunction
+import Sequoia.Optic.Iso
 import Sequoia.Profunctor.Recall
 
 -- Continuation profunctor
@@ -39,6 +42,12 @@ instance Sieve K Identity where
 
 instance Cosieve K Identity where
   cosieve = lmap runIdentity . (•)
+
+
+-- Coercion
+
+_K :: Iso (K a r) (K a' r') (a -> r) (a' -> r')
+_K = coerced
 
 
 -- Composition
