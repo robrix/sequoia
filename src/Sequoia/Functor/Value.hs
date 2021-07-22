@@ -41,9 +41,6 @@ inV0 = inV . const
 inV :: Representable v => (Rep v -> a) -> v a
 inV = tabulate
 
-inV2 :: Representable v => ((Rep v -> a) -> (Rep v -> b) -> (Rep v -> c)) -> (v a -> v b -> v c)
-inV2 f a b = inV (exV a `f` exV b)
-
 idV :: Representable v => v (Rep v)
 idV = inV id
 
@@ -63,7 +60,7 @@ _V = exV <-> inV
 -- Computation
 
 (>∘∘<) :: Conj d => V e b -> V e c -> V e (b `d` c)
-(>∘∘<) = inV2 (>---<)
+a >∘∘< b = inV (exV a >---< exV b)
 
 infix 3 >∘∘<
 
