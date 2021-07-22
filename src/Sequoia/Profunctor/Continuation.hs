@@ -17,6 +17,8 @@ import Data.Profunctor.Traversing
 newtype K a r = K { (•) :: a -> r }
   deriving (Applicative, Choice, Closed, Cochoice, Pro.Corepresentable, Costrong, Functor, Mapping, Monad, Profunctor, Co.Representable, Pro.Representable, Strong, Traversing)
 
+infixl 7 •
+
 instance Distributive (K r) where
   distribute = distributeRep
   collect = collectRep

@@ -17,6 +17,8 @@ import Data.Profunctor.Traversing
 newtype V e a = V { (∘) :: e -> a }
   deriving (Applicative, Choice, Closed, Cochoice, Pro.Corepresentable, Costrong, Functor, Mapping, Monad, Profunctor, Co.Representable, Pro.Representable, Strong, Traversing)
 
+infix 8 ∘
+
 instance Distributive (V e) where
   distribute = distributeRep
   collect = collectRep
