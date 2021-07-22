@@ -35,7 +35,7 @@ instance (Pos (f a), Neg a) => Polarized N (MuF e r f a) where
 mu :: ForAll r N (MuF e r f) -> Mu e r f
 mu r = Mu (Fun (dnE (over _K (lmap (lmap (getFun . getMuF))) (runForAll r))))
 
-foldMu :: Exponential d => Neg a => f a --|d e r|-> a -> Mu e r f --|d e r|-> a
+foldMu :: Neg a => f a --|Exp e r|-> a -> Mu e r f --|Exp e r|-> a
 foldMu alg = inExp (\ v k -> val (\ (Mu f) -> exExp f (inV0 (Down (coerceExp alg))) k) v)
 
 unfoldMu :: Traversable f => a --|Exp e r|-> f a -> a --|Exp e r|-> Mu e r f
