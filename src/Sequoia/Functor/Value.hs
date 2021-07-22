@@ -30,5 +30,5 @@ class Representable v => Value v
 
 -- Construction
 
-inV :: Representable v => (Rep v -> a) -> v a
+inV :: (e -> a) -> V e a
 inV = tabulate
