@@ -124,10 +124,10 @@ instance ArrowApply (Exp e r) where
   app = applyExp
 
 instance Env e (Exp e r a b) where
-  env f = inExp (\ v k -> env (runExp v k . f))
+  env f = Exp (\ v k -> env (runExp v k . f))
 
 instance Res r (Exp e r a b) where
-  res = inExp . const . const . res
+  res = Exp . const . const . res
   liftRes f = Exp (\ v k -> let run = runExp v k in liftRes (dimap (. run) run f))
 
 
