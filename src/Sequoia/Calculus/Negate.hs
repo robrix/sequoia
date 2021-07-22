@@ -15,6 +15,7 @@ module Sequoia.Calculus.Negate
 , module Sequoia.Connective.Negate
 ) where
 
+import Data.Functor.Contravariant
 import Prelude hiding (init)
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Control
