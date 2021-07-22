@@ -53,6 +53,7 @@ module Sequoia.Contextual
 import Control.Monad (join)
 import Data.Bifunctor (first)
 import Data.Function
+import Data.Functor.Contravariant
 import Data.Profunctor
 import Prelude hiding (init)
 import Sequoia.Calculus.Context

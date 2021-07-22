@@ -9,6 +9,7 @@ module Sequoia.Functor.Source
 , _SrcExp
 ) where
 
+import Data.Functor.Contravariant
 import Data.Profunctor
 import Sequoia.Functor.Continuation
 import Sequoia.Optic.Getter

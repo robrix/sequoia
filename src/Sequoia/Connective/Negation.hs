@@ -18,6 +18,7 @@ module Sequoia.Connective.Negation
 , type (-¬)
 ) where
 
+import Data.Functor.Contravariant
 import Data.Functor.Contravariant.Adjunction
 import Data.Functor.Contravariant.Rep (Representable)
 import Sequoia.Functor.Continuation

@@ -54,6 +54,7 @@ module Sequoia.Profunctor.Exponential
 
 import           Control.Category ((<<<), (>>>))
 import qualified Control.Category as Cat
+import           Data.Functor.Contravariant
 import           Data.Kind (Type)
 import           Data.Profunctor
 import           Data.Profunctor.Traversing

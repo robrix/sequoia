@@ -19,6 +19,7 @@ module Sequoia.Signal
 import           Control.Category ((<<<))
 import qualified Control.Category as Cat
 import           Control.Monad (ap)
+import           Data.Functor.Contravariant
 import           Data.Profunctor
 import           Sequoia.Calculus.Context
 import           Sequoia.Functor.Continuation as K

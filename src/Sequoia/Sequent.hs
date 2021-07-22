@@ -12,6 +12,7 @@ module Sequoia.Sequent
 
 import qualified Control.Category as Cat
 import           Control.Monad.Trans.Class
+import           Data.Functor.Contravariant
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
 import           Prelude hiding (init)

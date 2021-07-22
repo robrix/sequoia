@@ -5,7 +5,6 @@ module Sequoia.Functor.Continuation
 ( -- * Continuations
   Continuation
 , K(..)
-, Contravariant(..)
   -- ** Construction
 , inK
   -- ** Coercion
