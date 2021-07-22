@@ -78,10 +78,10 @@ infix 3 >∘∘<
 infix 3 >∘∘∘<
 
 
-(<∘∘>) :: (Disj d, Representable v) => (v a -> r) -> (v b -> r) -> (v (a `d` b) -> Rep v -> r)
+(<∘∘>) :: Disj d => (V e a -> r) -> (V e b -> r) -> (V e (a `d` b) -> e -> r)
 (l <∘∘> r) ab = (l <--> r) . bitraverseDisjV ab
 
 infix 3 <∘∘>
 
-bitraverseDisjV :: (Disj d, Representable v) => v (a `d` b) -> Rep v -> v a `d` v b
+bitraverseDisjV :: Disj d => V e (a `d` b) -> e -> V e a `d` V e b
 bitraverseDisjV = fmap (bimapDisj inV0 inV0) . (∘)
