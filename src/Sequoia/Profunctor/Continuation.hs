@@ -72,13 +72,8 @@ instance Res r (a -> r) where
   res = pure
   liftRes f = f =<< flip ($)
 
-instance Res r (Forget r a b) where
-  res = Forget . const
-  liftRes f = Forget (\ a -> runForget (f (`runForget` a)) a)
-
-instance Res r (Recall e a r) where
-  res = Recall . pure
-  liftRes f = Recall (\ e -> runRecall (f (`runRecall` e)) e)
+deriving instance Res r (Forget r a b)
+deriving instance Res r (Recall e a r)
 
 cont :: Res r c => (((a -> c) -> K a r) -> c) -> c
 cont f = liftRes (\ run -> f (K . (run .)))
