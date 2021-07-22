@@ -64,7 +64,7 @@ instance Pro.Corepresentable (==>) where
 (•<<) = rmap . (•)
 
 (>>•) :: e ==> r -> r • s -> e ==> s
-c >>• k = rmap (k •) c
+(>>•) = flip (•<<)
 
 infixr 1 •<<, >>•
 
