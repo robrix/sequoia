@@ -49,10 +49,6 @@ module Sequoia.Profunctor.Exponential
 , coliftA2Exp
   -- * Monad
 , bindExp
-  -- * Arrow
-, arrExp
-  -- * ArrowApply
-, applyExp
 ) where
 
 import           Control.Arrow
@@ -112,7 +108,7 @@ instance Coapply (Exp e r) where
   coliftA2 = coliftA2Exp
 
 instance Arrow (Exp e r) where
-  arr = arrExp
+  arr = inExp'
   first = firstExp
   second = secondExp
 
@@ -121,7 +117,7 @@ instance ArrowChoice (Exp e r) where
   right = rightExp
 
 instance ArrowApply (Exp e r) where
-  app = applyExp
+  app = Exp (\ v k -> val (runExp (exrF v) k) (exlF v))
 
 instance Env e (Exp e r a b) where
   env f = Exp (\ v k -> env (runExp v k . f))
@@ -254,14 +250,3 @@ coliftA2Exp f a b = inExp (\ v k -> env ((flip (exExp a) k <∘∘> flip (exExp 
 
 bindExp :: Exponential f => a --|f e r|-> b -> (b -> a --|f e r|-> c) -> a --|f e r|-> c
 bindExp m f = inExp (\ v k -> cont (\ _K -> exExp m v (_K (\ b -> exExp (f b) v k))))
-
-
--- Arrow
-
-arrExp :: Exponential f => (a -> b) -> a --|f e r|-> b
-arrExp = inExp'
-
--- ArrowApply
-
-applyExp :: Exponential f => (a --|f e r|-> b, a) --|f e r|-> b
-applyExp = inExp (\ v k -> val (runExp (exrF v) k) (exlF v))
