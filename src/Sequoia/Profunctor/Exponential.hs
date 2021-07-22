@@ -23,7 +23,6 @@ module Sequoia.Profunctor.Exponential
 , (>>>)
   -- ** Computation
 , dnE
-, coerceExp
 ) where
 
 import           Control.Arrow
@@ -147,6 +146,3 @@ elimExp f = unCoexp (getExp f)
 
 dnE :: ((a --|Exp e r|-> b) • r) • r -> a --|Exp e r|-> b
 dnE k = Exp (\ v k' -> cont (\ _K -> k •• _K (\ f -> getExp f v k')))
-
-coerceExp :: (Exponential c, Exponential d) => c e r a b -> d e r a b
-coerceExp = inExp . exExp

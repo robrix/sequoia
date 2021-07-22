@@ -59,7 +59,7 @@ newtype Seq e r _Γ _Δ = Seq { getSeq :: Exp e r _Γ _Δ }
 
 
 liftLR :: Exp e r a b -> Seq e r (a < _Γ) (_Δ > b)
-liftLR = dimap exl inr . coerceExp
+liftLR = dimap exl inr . Seq
 
 lowerLR :: (Exp e r a b -> _Γ -|Seq e r|- _Δ) -> a < _Γ -|Seq e r|- _Δ > b -> _Γ -|Seq e r|- _Δ
 lowerLR f p = inExp (\ _Γ _Δ -> exExp (f (inExp (\ a b -> exExp p (a <| _Γ) (_Δ |> b)))) _Γ _Δ)
