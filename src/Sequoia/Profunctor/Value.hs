@@ -3,8 +3,6 @@
 module Sequoia.Profunctor.Value
 ( -- * Value profunctor
   V(..)
-  -- * Elimination
-, runV
   -- * Coercion
 , _V
   -- * Ambient environment
@@ -38,15 +36,6 @@ instance Sieve V Identity where
 
 instance Cosieve V Identity where
   cosieve = lmap runIdentity . (∘)
-
-
--- Elimination
-
-runV :: V e a -> e -> a
-runV = runV
-
-infix 8 ∘
-
 
 
 -- Coercion
