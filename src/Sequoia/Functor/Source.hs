@@ -2,6 +2,8 @@ module Sequoia.Functor.Source
 ( -- * Sources
   _Src
 , Src(..)
+  -- * Construction
+, (↑)
   -- * Computation
 , mapSrcK
 , mapSrcV
@@ -42,6 +44,12 @@ instance Env e (Src e r b) where
 instance Res r (Src e r b) where
   res = Src . const . res
   liftRes f = Src (\ k -> liftRes (\ run -> runSrc (f (run . (`runSrc` k))) k))
+
+
+-- Construction
+
+(↑) :: Exponential f => f e r a b -> e ∘ a -> Src e r|-> b
+f ↑ v = Src (exExp f v)
 
 
 -- Computation
