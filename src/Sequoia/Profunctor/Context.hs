@@ -64,5 +64,5 @@ mapCV :: (forall x . V e x -> V e' x) -> (C e r -> C e' r)
 mapCV = over _C . under _V
 
 
-(•∘) :: (Env (Co.Rep v) c, Co.Representable v, Res (Contra.Rep k) c, Contra.Representable k) => k a -> v a -> c
+(•∘) :: (Env e c, Res (Contra.Rep k) c, Contra.Representable k) => k a -> V e a -> c
 k •∘ v = env (\ e -> res (k • v ∘ e))
