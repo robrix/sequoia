@@ -7,8 +7,6 @@ module Sequoia.Functor.Continuation
 , K(..)
   -- ** Coercion
 , _K
-  -- ** Category
-, idK
   -- ** Composition
 , (<••>)
 , (<•••>)
@@ -63,12 +61,6 @@ instance Continuation r (K r)
 
 _K :: Iso (K r a) (K r' a') (a -> r) (a' -> r')
 _K = coerced
-
-
--- Category
-
-idK :: K r r
-idK = K id
 
 
 -- Composition

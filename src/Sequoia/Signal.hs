@@ -65,21 +65,21 @@ solSrc
   ::       C e r
             <->
           Src e r |- r
-solSrc = Src . const <-> ($ idK) . runSrc
+solSrc = Src . const <-> ($ K id) . runSrc
 
 
 solSnk
   ::       C e r
             <->
      e -| Snk e r
-solSnk = Snk . const <-> ($ idV) . runSnk
+solSnk = Snk . const <-> ($ V id) . runSnk
 
 
 srcSig
   ::      Src e r |- b
             <->
      e -| Sig e r |- b
-srcSig = Sig . const . runSrc <-> Src . ($ idV) . runSig
+srcSig = Sig . const . runSrc <-> Src . ($ V id) . runSig
 
 composeSrcSig :: Src e r a -> Sig e r a b -> Src e r b
 composeSrcSig src sig = review srcSig (sig <<< view srcSig src)
@@ -89,7 +89,7 @@ snkSig
   :: a -| Snk e r
             <->
      a -| Sig e r |- r
-snkSig = Sig . fmap const . runSnk <-> Snk . fmap ($ idK) . runSig
+snkSig = Sig . fmap const . runSnk <-> Snk . fmap ($ K id) . runSig
 
 composeSigSnk :: Sig e r a b -> Snk e r b -> Snk e r a
 composeSigSnk sig snk = review snkSig (view snkSig snk <<< sig)
@@ -99,7 +99,7 @@ solSig
   ::       C e r
             <->
      e -| Sig e r |- r
-solSig = Sig . const . const <-> ($ idK) . ($ idV) . runSig
+solSig = Sig . const . const <-> ($ K id) . ($ V id) . runSig
 
 
 composeSrcSnk :: Src e r a -> Snk e r a -> C e r

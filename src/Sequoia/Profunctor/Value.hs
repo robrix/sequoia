@@ -5,7 +5,6 @@ module Sequoia.Profunctor.Value
   V(..)
   -- * Construction
 , inV0
-, idV
   -- * Coercion
 , _V
   -- * Computation
@@ -52,9 +51,6 @@ instance Cosieve V Identity where
 
 inV0 :: a -> V e a
 inV0 = pure
-
-idV :: V e e
-idV = V id
 
 
 -- Coercion

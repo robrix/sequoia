@@ -141,7 +141,7 @@ inExp' f = inExp (\ a b -> b •∘ (f <$> a))
 -- Elimination
 
 evalExp :: Exponential f => e --|f e r|-> r -> (e -> r)
-evalExp f = runC (exExp f idV idK)
+evalExp f = runC (exExp f (V id) (K id))
 
 appExp :: Exponential f => a --|f e r|-> b -> V e (V e a -> K r (K r b))
 appExp f = V (\ e a -> K (\ b -> runC (exExp f a b) e))
@@ -222,7 +222,7 @@ rightExp r = inExp (\ a b -> val ((inlK b ••) <--> flip (exExp r) (inrK b) .
 -- Traversing
 
 wanderExp :: (Exponential f, Applicative (f e r e)) => (forall m . Applicative m => (a -> m b) -> (s -> m t)) -> a --|f e r|-> b -> s --|f e r|-> t
-wanderExp traverse r = inExp (\ v k -> val (\ s -> exExp (traverse ((r ↑) . inV0) s) idV k) v)
+wanderExp traverse r = inExp (\ v k -> val (\ s -> exExp (traverse ((r ↑) . inV0) s) (V id) k) v)
 
 
 -- Category

@@ -111,7 +111,7 @@ popΓ
   => (V e _Γ -> e -|s e r|- _Δ)
   -- --------------------------
   ->      _Γ      -|s e r|- _Δ
-popΓ f = swapΓ f idV
+popΓ f = swapΓ f (V id)
 
 -- | Pop something off the output context which can later be pushed. Used with 'pushΔ', this provides a generalized context restructuring facility.
 --
@@ -126,7 +126,7 @@ popΔ
   => (K r _Δ -> _Γ -|s e r|- r)
   -- --------------------------
   ->            _Γ -|s e r|- _Δ
-popΔ f = swapΔ f idK
+popΔ f = swapΔ f (K id)
 
 
 -- | Pop something off the input context which can later be pushed. Used with 'pushL', this provides a generalized context restructuring facility.

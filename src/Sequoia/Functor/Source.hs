@@ -57,4 +57,4 @@ mapSrcV f = over _Src (fmap (mapCV f))
 -- Optics
 
 _SrcExp :: (Exponential f, Exponential f') => Iso (Src e r b) (Src e' r' b') (f e r e b) (f' e' r' e' b')
-_SrcExp = _Src.from (_Exponential.constant idV)
+_SrcExp = _Src.from (_Exponential.constant (V id))

@@ -13,7 +13,7 @@ import Sequoia.Polarity
 -- True
 
 true :: a -> True r a
-true = (`True` idK)
+true = (`True` K id)
 
 data True r a = True { trueA :: a, trueK :: K r r }
   deriving (Functor)
