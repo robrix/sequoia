@@ -62,7 +62,7 @@ liftLR :: Exp e r a b -> Seq e r (a < _Γ) (_Δ > b)
 liftLR = dimap exl inr . Seq
 
 lowerLR :: (Exp e r a b -> _Γ -|Seq e r|- _Δ) -> a < _Γ -|Seq e r|- _Δ > b -> _Γ -|Seq e r|- _Δ
-lowerLR f p = inExp (\ _Γ _Δ -> exExp (f (inExp (\ a b -> exExp p (a <| _Γ) (_Δ |> b)))) _Γ _Δ)
+lowerLR f p = Seq (Exp (\ _Γ _Δ -> exExp (f (Exp (\ a b -> exExp p (a <| _Γ) (_Δ |> b)))) _Γ _Δ))
 
 
 -- Effectful sequents
@@ -74,7 +74,7 @@ newtype SeqT e r _Γ m _Δ = SeqT { getSeqT :: Seq e (m r) _Γ _Δ }
   deriving (Applicative, Functor, Monad)
 
 instance MonadTrans (SeqT r s _Γ) where
-  lift m = SeqT (inExp (\ _ k -> C (const (m >>= (k •)))))
+  lift m = SeqT (Seq (Exp (\ _ k -> C (const (m >>= (k •))))))
 
 
 -- Core rules
@@ -95,14 +95,14 @@ deriving via Contextually Seq instance Exchange Seq
 -- Contextual rules
 
 instance Contextual Seq where
-  swapΓΔ f c' = Seq (inExp (\ v k -> elimExp (getSeq (f (coexp v k))) c'))
+  swapΓΔ f c' = Seq (Exp (\ v k -> elimExp (getSeq (f (coexp v k))) c'))
 
 
 -- Control
 
 instance Calculus.Control Seq where
-  reset s = inExp (\ _Γ _Δ -> C ((_Δ •) . (exExp s _Γ (K id) <==)))
-  shift s = inExp (\ _Γ _Δ -> exExp s (inV0 (inrK _Δ) <| _Γ) (inlK _Δ |> K id))
+  reset s = Seq (Exp (\ _Γ _Δ -> C ((_Δ •) . (exExp s _Γ (K id) <==))))
+  shift s = Seq (Exp (\ _Γ _Δ -> exExp s (inV0 (inrK _Δ) <| _Γ) (inlK _Δ |> K id)))
 
 
 -- Assertion
@@ -197,7 +197,7 @@ instance SubtractionIntro Seq where
 
 instance UniversalIntro Seq where
   forAllL p = mapL (fmap (notNegate . runForAll)) p
-  forAllR p = inExp (\ _Γ _Δ -> liftRes (\ run -> inrK _Δ •• ForAll (K (\ k -> run (exExp p _Γ (inlK _Δ |> k))))))
+  forAllR p = Seq (Exp (\ _Γ _Δ -> liftRes (\ run -> inrK _Δ •• ForAll (K (\ k -> run (exExp p _Γ (inlK _Δ |> k)))))))
 
 instance ExistentialIntro Seq where
   existsL p = popL (val (Seq . dnE . runExists (getSeq . pushL p . inV0)))
