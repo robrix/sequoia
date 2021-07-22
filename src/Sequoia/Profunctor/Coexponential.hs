@@ -8,6 +8,7 @@ module Sequoia.Profunctor.Coexponential
   -- * Elimination
 , recall
 , forget
+, withCoexp
 , runCoexp
 , unCoexp
   -- * Optics
@@ -15,6 +16,7 @@ module Sequoia.Profunctor.Coexponential
 , forget_
 ) where
 
+import Data.Coerce
 import Data.Profunctor
 import Sequoia.Optic.Lens
 import Sequoia.Profunctor.Continuation
@@ -22,7 +24,7 @@ import Sequoia.Profunctor.Value
 
 -- Coexponential profunctor
 
-newtype Coexp e r a b = Coexp { withCoexp :: forall s . (e ∘ b -> a • r -> s) -> s }
+newtype Coexp e r a b = Coexp { getCoexp :: forall s . ((e -> b) -> (a -> r) -> s) -> s }
   deriving (Functor)
 
 instance Profunctor (Coexp e r) where
@@ -35,7 +37,7 @@ idCoexp :: Coexp b a a b
 idCoexp = coexp (V id) (K id)
 
 coexp :: e ∘ a -> b • r -> Coexp e r b a
-coexp v k = Coexp (\ f -> f v k)
+coexp v k = Coexp (\ f -> f (v ∘) (k •))
 
 
 -- Elimination
@@ -45,6 +47,9 @@ recall = unCoexp const
 
 forget :: Coexp e r a b -> a • r
 forget = unCoexp (const id)
+
+withCoexp :: Coexp e r a b -> (e ∘ b -> a • r -> s) -> s
+withCoexp c = getCoexp c . coerce
 
 runCoexp :: Coexp e r b a -> ((a -> b) -> (e -> r))
 runCoexp c = withCoexp c (\ r f -> ((f •) .) . (. (r ∘)))
