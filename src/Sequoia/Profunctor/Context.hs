@@ -8,6 +8,7 @@ module Sequoia.Profunctor.Context
 , (•<<)
 , (>>•)
 , (∘<<)
+, (>>∘)
   -- * Computation
 , mapCKV
 , mapCK
@@ -73,7 +74,10 @@ infixr 1 •<<, >>•
 (∘<<) :: d ∘ e -> e ==> r -> d ==> r
 (∘<<) = lmap . (∘)
 
-infixr 1 ∘<<
+(>>∘) :: e ==> r -> d ∘ e -> d ==> r
+(>>∘) = flip (∘<<)
+
+infixr 1 ∘<<, >>∘
 
 
 -- Computation
