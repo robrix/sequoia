@@ -33,7 +33,7 @@ newtype MuF e r f a = MuF { getMuF :: Down (FAlg e r f a) ~~Fun e r~> a }
 instance (Pos (f a), Neg a) => Polarized N (MuF e r f a) where
 
 mu :: ForAll r N (MuF e r f) -> Mu e r f
-mu r = Mu (dnE (over _K (lmap (lmap getMuF)) (runForAll r)))
+mu r = Mu (Fun (dnE (over _K (lmap (lmap (getFun . getMuF))) (runForAll r))))
 
 foldMu :: Exponential d => Neg a => f a --|d e r|-> a -> Mu e r f --|d e r|-> a
 foldMu alg = inExp (\ v k -> val (\ (Mu f) -> exExp f (inV0 (Down (coerceExp alg))) k) v)

@@ -200,7 +200,7 @@ instance UniversalIntro Seq where
   forAllR p = inExp (\ _Γ _Δ -> liftRes (\ run -> inrK _Δ •• ForAll (K (\ k -> run (exExp p _Γ (inlK _Δ |> k))))))
 
 instance ExistentialIntro Seq where
-  existsL p = popL (val (dnE . runExists (pushL p . inV0)))
+  existsL p = popL (val (Seq . dnE . runExists (getSeq . pushL p . inV0)))
   existsR p = mapR (lmap (Exists . K . flip (•))) p
 
 

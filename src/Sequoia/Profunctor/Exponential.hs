@@ -145,8 +145,8 @@ elimExp f = unCoexp (getExp f)
 
 -- Computation
 
-dnE :: Exponential f => ((a --|f e r|-> b) • r) • r -> a --|f e r|-> b
-dnE k = inExp (\ v k' -> cont (\ _K -> k •• _K (\ f -> exExp f v k')))
+dnE :: ((a --|Exp e r|-> b) • r) • r -> a --|Exp e r|-> b
+dnE k = Exp (\ v k' -> cont (\ _K -> k •• _K (\ f -> getExp f v k')))
 
 coerceExp :: (Exponential c, Exponential d) => c e r a b -> d e r a b
 coerceExp = inExp . exExp
