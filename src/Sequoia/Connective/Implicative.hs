@@ -7,32 +7,32 @@ module Sequoia.Connective.Implicative
 , module Sequoia.Connective.Subtraction
 ) where
 
-import Data.Functor.Contravariant
+import Data.Profunctor
 import Sequoia.Connective.Function
 import Sequoia.Connective.Not
 import Sequoia.Connective.Par
 import Sequoia.Connective.Subtraction
 import Sequoia.Disjunction
-import Sequoia.Functor.Continuation
 import Sequoia.Optic.Iso
 import Sequoia.Profunctor.Context
+import Sequoia.Profunctor.Continuation
 import Sequoia.Profunctor.Exponential
 import Sequoia.Profunctor.Value
 
 elimFun :: a ~~Fun e r~> b -> b >-Sub e r-~ a -> C e r
 elimFun = elimExp
 
-funPar1 :: K r (V e (r ¬a ⅋ b)) <-> K r (V e (a ~~Fun e r~> b))
+funPar1 :: K (V e (r ¬a ⅋ b)) r <-> K (V e (a ~~Fun e r~> b)) r
 funPar1
-  =   (\ k -> K ((k •) . (mkPar (inrK (contramap inV0 k)) =<<)))
+  =   (\ k -> K ((k •) . (mkPar (inrK (lmap inV0 k)) =<<)))
   <-> (\ k -> K ((k •) . fmap mkFun))
 
-funPar2 :: K r (K r (V e (r ¬a ⅋ b))) <-> K r (K r (V e (a ~~Fun e r~> b)))
+funPar2 :: K (K (V e (r ¬a ⅋ b)) r) r <-> K (K (V e (a ~~Fun e r~> b)) r) r
 funPar2
-  =   contramap (\ f -> K ((f •) . fmap mkFun))
-  <-> contramap (\ p -> K ((p •) . (mkPar (inrK (contramap inV0 p)) =<<)))
+  =   lmap (\ f -> K ((f •) . fmap mkFun))
+  <-> lmap (\ p -> K ((p •) . (mkPar (inrK (lmap inV0 p)) =<<)))
 
-mkPar :: K r b -> a ~~Fun e r~> b -> V e (r ¬a ⅋ b)
+mkPar :: K b r -> a ~~Fun e r~> b -> V e (r ¬a ⅋ b)
 mkPar p f = V (\ e -> inl (Not (K (\ a -> runC (exExp f (inV0 a) p) e))))
 
 mkFun :: r ¬a ⅋ b -> a ~~Fun e r~> b

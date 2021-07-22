@@ -5,10 +5,10 @@ module Sequoia.Connective.NotUntrue
 , type (≁)
 ) where
 
-import Sequoia.Functor.Continuation
 import Sequoia.Functor.Source
 import Sequoia.Polarity
 import Sequoia.Profunctor.Context
+import Sequoia.Profunctor.Continuation
 
 -- NotUntrue
 

@@ -15,7 +15,7 @@ module Sequoia.Calculus.Not
 , module Sequoia.Connective.Not
 ) where
 
-import Data.Functor.Contravariant
+import Data.Profunctor
 import Prelude hiding (init)
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Control
@@ -24,8 +24,8 @@ import Sequoia.Calculus.Structural
 import Sequoia.Connective.Negation
 import Sequoia.Connective.Not
 import Sequoia.Contextual
-import Sequoia.Functor.Continuation as K
 import Sequoia.Polarity
+import Sequoia.Profunctor.Continuation
 
 -- Not
 
@@ -68,44 +68,44 @@ shiftP = shift . notLK'
 
 dneNK
   :: Contextual s
-  => K r (K r a) < _Γ -|s e r|- _Δ
+  => K (K a r) r < _Γ -|s e r|- _Δ
   -- -----------------------------
   ->      r ¬-a  < _Γ -|s e r|- _Δ
 dneNK = mapL (fmap getNotNegate)
 
 dniNK
   :: Contextual s
-  => _Γ -|s e r|- _Δ > K r (K r a)
+  => _Γ -|s e r|- _Δ > K (K a r) r
   -- -----------------------------
   -> _Γ -|s e r|- _Δ >      r ¬-a
-dniNK = mapR (contramap notNegate)
+dniNK = mapR (lmap notNegate)
 
 
 notLK
   :: Contextual s
-  => K r  a < _Γ -|s e r|- _Δ
-  -- ------------------------
-  ->   r ¬a < _Γ -|s e r|- _Δ
+  => K a r < _Γ -|s e r|- _Δ
+  -- -----------------------
+  ->  r ¬a < _Γ -|s e r|- _Δ
 notLK = mapL (fmap getNot)
 
 notRK
   :: Contextual s
-  => _Γ -|s e r|- _Δ > K r  a
-  -- ------------------------
-  -> _Γ -|s e r|- _Δ >   r ¬a
-notRK = mapR (contramap Not)
+  => _Γ -|s e r|- _Δ > K a r
+  -- -----------------------
+  -> _Γ -|s e r|- _Δ > r ¬a
+notRK = mapR (lmap Not)
 
 
 notLK'
   :: Contextual s
-  =>   r ¬a < _Γ -|s e r|- _Δ
-  -- ------------------------
-  -> K r  a < _Γ -|s e r|- _Δ
+  =>  r ¬a < _Γ -|s e r|- _Δ
+  -- -----------------------
+  -> K a r < _Γ -|s e r|- _Δ
 notLK' = mapL (fmap Not)
 
 notRK'
   :: Contextual s
-  => _Γ -|s e r|- _Δ >   r ¬a
-  -- ------------------------
-  -> _Γ -|s e r|- _Δ > K r  a
-notRK' = mapR (contramap getNot)
+  => _Γ -|s e r|- _Δ >  r ¬a
+  -- -----------------------
+  -> _Γ -|s e r|- _Δ > K a r
+notRK' = mapR (lmap getNot)

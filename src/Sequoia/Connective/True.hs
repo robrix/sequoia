@@ -7,8 +7,8 @@ module Sequoia.Connective.True
 ) where
 
 import Prelude hiding (True)
-import Sequoia.Functor.Continuation
 import Sequoia.Polarity
+import Sequoia.Profunctor.Continuation
 
 -- True
 

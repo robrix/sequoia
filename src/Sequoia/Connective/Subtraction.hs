@@ -10,12 +10,12 @@ module Sequoia.Connective.Subtraction
 
 import Data.Kind (Type)
 import Data.Profunctor
-import Sequoia.Functor.Continuation
-import Sequoia.Profunctor.Value
 import Sequoia.Optic.Iso
 import Sequoia.Optic.Lens
 import Sequoia.Polarity
 import Sequoia.Profunctor.Coexponential
+import Sequoia.Profunctor.Continuation
+import Sequoia.Profunctor.Value
 
 -- Subtraction
 
@@ -40,5 +40,5 @@ infixr 5 -~
 subA_ :: Lens (b >-Sub e r-~ a) (b >-Sub e' r-~ a') (V e a) (V e' a')
 subA_ = coercedFrom Sub .recall_
 
-subK_ :: Lens (b >-Sub e r-~ a) (b' >-Sub e r'-~ a) (K r b) (K r' b')
+subK_ :: Lens (b >-Sub e r-~ a) (b' >-Sub e r'-~ a) (K b r) (K b' r')
 subK_ = coercedFrom Sub .forget_

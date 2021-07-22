@@ -11,21 +11,21 @@ import qualified Control.Category as Cat
 import           Data.Kind (Type)
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
-import           Sequoia.Functor.Continuation
 import           Sequoia.Polarity
 import           Sequoia.Profunctor.Context
+import           Sequoia.Profunctor.Continuation
 import           Sequoia.Profunctor.Exponential
 import           Sequoia.Profunctor.Value
 
 -- Implication
 
-appFun :: (a ~~Fun e r~> b) -> V e (V e a -> K r (K r b))
+appFun :: (a ~~Fun e r~> b) -> V e (V e a -> K (K b r) r)
 appFun = appExp
 
-appFun2 :: (a ~~Fun e r~> b ~~Fun e r~> c) -> V e (V e a -> V e b -> K r (K r c))
+appFun2 :: (a ~~Fun e r~> b ~~Fun e r~> c) -> V e (V e a -> V e b -> K (K c r) r)
 appFun2 = appExp2
 
-newtype Fun e r a b = Fun { getFun :: V e a -> K r b -> C e r }
+newtype Fun e r a b = Fun { getFun :: V e a -> K b r -> C e r }
   deriving (Exponential) via Exp
   deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via Exp e r
   deriving (Functor) via Exp e r a

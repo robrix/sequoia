@@ -39,9 +39,9 @@ module Sequoia.Disjunction
 ) where
 
 import Control.Category (Category, (>>>))
-import Data.Functor.Contravariant
-import Data.Functor.Contravariant.Rep as K
 import Data.Profunctor
+import Data.Profunctor.Rep
+import Data.Profunctor.Sieve
 import Sequoia.Optic.Lens
 import Sequoia.Optic.Prism
 import Sequoia.Profunctor.Diagonal
@@ -65,11 +65,11 @@ _inl = prism inl (inr <--> inl . inr)
 _inr :: Disj d => Prism (a `d` b) (a `d` b') b b'
 _inr = prism inr (inl . inl <--> inr)
 
-_inlK :: (Disj d, K.Representable k) => Lens (k (a `d` b)) (k (a' `d` b)) (k a) (k a')
-_inlK = lens inlK (\ ab a' -> tabulate (index a' <--> index ab . inr))
+_inlK :: (Disj d, Representable k) => Lens (k (a `d` b) r) (k (a' `d` b) r) (k a r) (k a' r)
+_inlK = lens inlK (\ ab a' -> tabulate (sieve a' <--> sieve ab . inr))
 
-_inrK :: (Disj d, K.Representable k) => Lens (k (a `d` b)) (k (a `d` b')) (k b) (k b')
-_inrK = lens inrK (\ ab a' -> tabulate (index ab . inl <--> index a'))
+_inrK :: (Disj d, Representable k) => Lens (k (a `d` b) r) (k (a `d` b') r) (k b r) (k b' r)
+_inrK = lens inrK (\ ab a' -> tabulate (sieve ab . inl <--> sieve a'))
 
 exlD :: Disj d => a `d` b -> Maybe a
 exlD = Just <--> const Nothing
@@ -80,14 +80,14 @@ exrD = const Nothing <--> Just
 mirrorDisj :: Disj d => a `d` b -> b `d` a
 mirrorDisj = inr <--> inl
 
-cocurryDisj :: (Disj d, K.Representable k) => (c -> k (k (b `d` a))) -> ((c, k b) -> k (k a))
-cocurryDisj f (c, b) = tabulate (\ k -> index (f c) (tabulate (index b <--> index k)))
+cocurryDisj :: (Disj d, Representable k) => (c -> k (k (b `d` a) r) r) -> ((c, k b r) -> k (k a r) r)
+cocurryDisj f (c, b) = tabulate (\ k -> sieve (f c) (tabulate (sieve b <--> sieve k)))
 
-councurryDisj :: (Disj d, K.Representable k) => ((c, k b) -> k (k a)) -> (c -> k (k (b `d` a)))
-councurryDisj f c = tabulate (\ k -> index (f (c, inlK k)) (inrK k))
+councurryDisj :: (Disj d, Representable k) => ((c, k b r) -> k (k a r) r) -> (c -> k (k (b `d` a) r) r)
+councurryDisj f c = tabulate (\ k -> sieve (f (c, inlK k)) (inrK k))
 
-coapDisj :: (Disj d, K.Representable k) => c -> k (k ((c, k b) `d` b))
-coapDisj c = tabulate (\ k -> index k (inl (c, tabulate (index k . inr))))
+coapDisj :: (Disj d, Representable k) => c -> k (k ((c, k b r) `d` b) r) r
+coapDisj c = tabulate (\ k -> sieve k (inl (c, tabulate (sieve k . inr))))
 
 
 -- Generalizations
@@ -149,10 +149,10 @@ inrF :: (Functor f, Disj d) => f b -> f (a `d` b)
 inlF = fmap inl
 inrF = fmap inr
 
-inlK :: (Contravariant k, Disj d) => k (a `d` b) -> k a
-inrK :: (Contravariant k, Disj d) => k (a `d` b) -> k b
-inlK = contramap inl
-inrK = contramap inr
+inlK :: (Profunctor k, Disj d) => k (a `d` b) r -> k a r
+inrK :: (Profunctor k, Disj d) => k (a `d` b) r -> k b r
+inlK = inlL
+inrK = inrL
 
 inlL :: (Profunctor p, Disj d) => p (a `d` b) r -> p a r
 inrL :: (Profunctor p, Disj d) => p (a `d` b) r -> p b r

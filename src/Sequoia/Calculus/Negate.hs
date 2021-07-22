@@ -15,7 +15,7 @@ module Sequoia.Calculus.Negate
 , module Sequoia.Connective.Negate
 ) where
 
-import Data.Functor.Contravariant
+import Data.Profunctor
 import Prelude hiding (init)
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Control
@@ -24,8 +24,8 @@ import Sequoia.Calculus.Structural
 import Sequoia.Connective.Negate
 import Sequoia.Connective.Negation
 import Sequoia.Contextual
-import Sequoia.Functor.Continuation as K
 import Sequoia.Polarity
+import Sequoia.Profunctor.Continuation as K
 
 -- Negate
 
@@ -68,44 +68,44 @@ shiftN = shift . negateLK'
 
 dnePK
   :: Contextual s
-  => K r (K r a) < _Γ -|s e r|- _Δ
+  => K (K a r) r < _Γ -|s e r|- _Δ
   -- -----------------------------
-  ->      r -¬a  < _Γ -|s e r|- _Δ
+  ->       r -¬a < _Γ -|s e r|- _Δ
 dnePK = mapL (fmap getNegateNot)
 
 dniPK
   :: Contextual s
-  => _Γ -|s e r|- _Δ > K r (K r a)
+  => _Γ -|s e r|- _Δ > K (K a r) r
   -- -----------------------------
-  -> _Γ -|s e r|- _Δ >      r -¬a
-dniPK = mapR (contramap negateNot)
+  -> _Γ -|s e r|- _Δ > r -¬a
+dniPK = mapR (lmap negateNot)
 
 
 negateLK
   :: Contextual s
-  => K r  a < _Γ -|s e r|- _Δ
-  -- ------------------------
-  ->   r -a < _Γ -|s e r|- _Δ
+  => K a r < _Γ -|s e r|- _Δ
+  -- -----------------------
+  ->  r -a < _Γ -|s e r|- _Δ
 negateLK = mapL (fmap getNegate)
 
 negateRK
   :: Contextual s
-  => _Γ -|s e r|- _Δ > K r  a
-  -- ------------------------
-  -> _Γ -|s e r|- _Δ >   r -a
-negateRK = mapR (contramap Negate)
+  => _Γ -|s e r|- _Δ > K a r
+  -- -----------------------
+  -> _Γ -|s e r|- _Δ > r -a
+negateRK = mapR (lmap Negate)
 
 
 negateLK'
   :: Contextual s
-  =>   r -a < _Γ -|s e r|- _Δ
-  -- ------------------------
-  -> K r  a < _Γ -|s e r|- _Δ
+  =>  r -a < _Γ -|s e r|- _Δ
+  -- -----------------------
+  -> K a r < _Γ -|s e r|- _Δ
 negateLK' = mapL (fmap Negate)
 
 negateRK'
   :: Contextual s
-  => _Γ -|s e r|- _Δ >   r -a
-  -- ------------------------
-  -> _Γ -|s e r|- _Δ > K r  a
-negateRK' = mapR (contramap getNegate)
+  => _Γ -|s e r|- _Δ > r -a
+  -- -----------------------
+  -> _Γ -|s e r|- _Δ > K a r
+negateRK' = mapR (lmap getNegate)

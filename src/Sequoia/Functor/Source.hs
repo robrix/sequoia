@@ -9,26 +9,25 @@ module Sequoia.Functor.Source
 , _SrcExp
 ) where
 
-import Data.Functor.Contravariant
 import Data.Profunctor
-import Sequoia.Functor.Continuation
 import Sequoia.Optic.Getter
 import Sequoia.Optic.Iso
 import Sequoia.Optic.Review
 import Sequoia.Optic.Setter
 import Sequoia.Profunctor.Context
+import Sequoia.Profunctor.Continuation
 import Sequoia.Profunctor.Exponential
 import Sequoia.Profunctor.Value
 
 -- Sources
 
-_Src :: Iso (Src e r b) (Src e' r' b') (K r b -> C e r) (K r' b' -> C e' r')
+_Src :: Iso (Src e r b) (Src e' r' b') (K b r -> C e r) (K b' r' -> C e' r')
 _Src = runSrc <-> Src
 
-newtype Src e r b = Src { runSrc :: K r b -> C e r }
+newtype Src e r b = Src { runSrc :: K b r -> C e r }
 
 instance Functor (Src e r) where
-  fmap f = over _Src (. contramap f)
+  fmap f = over _Src (. lmap f)
 
 instance Applicative (Src e r) where
   pure = Src . fmap res . flip (•)
@@ -47,7 +46,7 @@ instance Res r (Src e r b) where
 
 -- Computation
 
-mapSrcK :: (forall x . K r x <-> K r' x) -> (Src e r b -> Src e r' b)
+mapSrcK :: (forall x . K x r <-> K x r') -> (Src e r b -> Src e r' b)
 mapSrcK b = over _Src (dimap (review b) (mapCK (view b)))
 
 mapSrcV :: (forall x . V e x -> V e' x) -> (Src e r b -> Src e' r b)

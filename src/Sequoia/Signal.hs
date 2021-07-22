@@ -19,28 +19,27 @@ module Sequoia.Signal
 import           Control.Category ((<<<))
 import qualified Control.Category as Cat
 import           Control.Monad (ap)
-import           Data.Functor.Contravariant
 import           Data.Profunctor
 import           Sequoia.Calculus.Context
-import           Sequoia.Functor.Continuation as K
 import           Sequoia.Functor.Sink
 import           Sequoia.Functor.Source
 import           Sequoia.Optic.Getter
 import           Sequoia.Optic.Iso
 import           Sequoia.Optic.Review
 import           Sequoia.Profunctor.Context
+import           Sequoia.Profunctor.Continuation as K
 import           Sequoia.Profunctor.Value as V
 
 -- Signals
 
-newtype Sig e r a b = Sig { runSig :: V e a -> K r b -> C e r }
+newtype Sig e r a b = Sig { runSig :: V e a -> K b r -> C e r }
 
 instance Cat.Category (Sig e r) where
   id = Sig (flip (•∘))
   Sig f . Sig g = Sig (\ a c -> liftRes (\ go -> g a (K (go . (`f` c) . inV0))))
 
 instance Profunctor (Sig e r) where
-  dimap f g = Sig . dimap (fmap f) (lmap (contramap g)) . runSig
+  dimap f g = Sig . dimap (fmap f) (lmap (lmap g)) . runSig
 
 instance Functor (Sig e r a) where
   fmap = rmap
@@ -52,7 +51,7 @@ instance Applicative (Sig e r a) where
 instance Monad (Sig e r a) where
   Sig m >>= f = Sig (\ a b -> liftRes (\ go -> m a (K (\ a' -> go (runSig (f a') a b)))))
 
-mapKSig :: (forall x . K r x <-> K r' x) -> (Sig e r a b -> Sig e r' a b)
+mapKSig :: (forall x . K x r <-> K x r') -> (Sig e r a b -> Sig e r' a b)
 mapKSig b = Sig . fmap (dimap (review b) (mapCK (view b))) . runSig
 
 mapVSig :: (forall x . V e x <-> V e' x) -> (Sig e r a b -> Sig e' r a b)

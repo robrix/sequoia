@@ -54,21 +54,20 @@ module Sequoia.Profunctor.Exponential
 
 import           Control.Category ((<<<), (>>>))
 import qualified Control.Category as Cat
-import           Data.Functor.Contravariant
 import           Data.Kind (Type)
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
 import           Sequoia.Disjunction
-import           Sequoia.Functor.Continuation as K
 import           Sequoia.Optic.Iso
 import           Sequoia.Profunctor.Applicative
 import           Sequoia.Profunctor.Coexponential
 import           Sequoia.Profunctor.Context
+import           Sequoia.Profunctor.Continuation as K
 import           Sequoia.Profunctor.Value as V
 
 -- Exponential profunctor
 
-newtype Exp e r a b = Exp { getExp :: V e a -> K r b -> C e r }
+newtype Exp e r a b = Exp { getExp :: V e a -> K b r -> C e r }
 
 instance Exponential Exp where
   inExp = Exp
@@ -124,12 +123,12 @@ infixr 5 |->
 
 -- Exponential profunctor abstraction
 
-_Exponential :: (Exponential f, Exponential f') => Iso (f e r a b) (f' e' r' a' b') (V e a -> K r b -> C e r) (V e' a' -> K r' b' -> C e' r')
+_Exponential :: (Exponential f, Exponential f') => Iso (f e r a b) (f' e' r' a' b') (V e a -> K b r -> C e r) (V e' a' -> K b' r' -> C e' r')
 _Exponential = exExp <-> inExp
 
 class (forall e r . Cat.Category (f e r), forall e r . Profunctor (f e r)) => Exponential f where
-  inExp :: (V e a -> K r b -> C e r) -> f e r a b
-  exExp :: f e r a b -> (V e a -> K r b -> C e r)
+  inExp :: (V e a -> K b r -> C e r) -> f e r a b
+  exExp :: f e r a b -> (V e a -> K b r -> C e r)
 
 
 -- Construction
@@ -143,13 +142,13 @@ inExp' f = inExp (\ a b -> b •∘ (f <$> a))
 evalExp :: Exponential f => e --|f e r|-> r -> (e -> r)
 evalExp f = runC (exExp f (V id) (K id))
 
-appExp :: Exponential f => a --|f e r|-> b -> V e (V e a -> K r (K r b))
+appExp :: Exponential f => a --|f e r|-> b -> V e (V e a -> K (K b r) r)
 appExp f = V (\ e a -> K (\ b -> runC (exExp f a b) e))
 
-appExp2 :: Exponential f => a --|f e r|-> b --|f e r|-> c -> V e (V e a -> V e b -> K r (K r c))
+appExp2 :: Exponential f => a --|f e r|-> b --|f e r|-> c -> V e (V e a -> V e b -> K (K c r) r)
 appExp2 f = V (\ e a b -> K (\ c -> runC (exExp f a (K (\ g -> runC (exExp g b c) e))) e))
 
-runExp :: Exponential f => V e a -> K r b -> a --|f e r|-> b -> C e r
+runExp :: Exponential f => V e a -> K b r -> a --|f e r|-> b -> C e r
 runExp v k f = exExp f v k
 
 elimExp :: (Exponential f, Coexponential s) => a --|f e r|-> b -> s e r b a -> C e r
@@ -163,12 +162,12 @@ f ↑ a = f <<< inExp (const (•∘ a))
 
 infixl 7 ↑
 
-(↓) :: Exponential f => K r b -> a --|f e r|-> b -> a --|f e r|-> r
+(↓) :: Exponential f => K b r -> a --|f e r|-> b -> a --|f e r|-> r
 k ↓ f = inExp (const . (k •∘)) <<< f
 
 infixl 8 ↓
 
-dnE :: Exponential f => K r (K r (a --|f e r|-> b)) -> a --|f e r|-> b
+dnE :: Exponential f => K (K (a --|f e r|-> b) r) r -> a --|f e r|-> b
 dnE k = inExp (\ v k' -> cont (\ _K -> k •• _K (\ f -> exExp f v k')))
 
 coerceExp :: (Exponential c, Exponential d) => c e r a b -> d e r a b
@@ -179,35 +178,35 @@ liftRunExp :: Exponential f => ((f e r a b -> C e r) -> C e r) -> f e r a b
 liftRunExp f = inExp (\ v k -> f (runExp v k))
 
 
-dimapVK :: Exponential f => (V e a' -> V e a) -> (K r b' -> K r b) -> (a --|f e r|-> b -> a' --|f e r|-> b')
+dimapVK :: Exponential f => (V e a' -> V e a) -> (K b' r -> K b r) -> (a --|f e r|-> b -> a' --|f e r|-> b')
 dimapVK f g = inExp . dimap f (lmap g) . exExp
 
 lmapV :: Exponential f => (V e a' -> V e a) -> (a --|f e r|-> b -> a' --|f e r|-> b)
 lmapV = (`dimapVK` id)
 
-rmapK :: Exponential f => (K r b' -> K r b) -> (a --|f e r|-> b -> a --|f e r|-> b')
+rmapK :: Exponential f => (K b' r -> K b r) -> (a --|f e r|-> b -> a --|f e r|-> b')
 rmapK = (id `dimapVK`)
 
 
 -- Profunctor
 
 dimapExp :: Exponential f => (a' -> a) -> (b -> b') -> a --|f e r|-> b -> a' --|f e r|-> b'
-dimapExp f g = dimapVK (fmap f) (contramap g)
+dimapExp f g = dimapVK (fmap f) (lmap g)
 
 lmapExp :: Exponential f => (a' -> a) -> a --|f e r|-> b -> a' --|f e r|-> b
 lmapExp = lmapV . fmap
 
 rmapExp :: Exponential f => (b -> b') -> a --|f e r|-> b -> a --|f e r|-> b'
-rmapExp = rmapK . contramap
+rmapExp = rmapK . lmap
 
 
 -- Strong
 
 firstExp  :: Exponential f => a --|f e r|-> b -> (a, c) --|f e r|-> (b, c)
-firstExp  r = inExp (\ a b -> val (\ (a, c) -> exExp r (inV0 a) (contramap (,c) b)) a)
+firstExp  r = inExp (\ a b -> val (\ (a, c) -> exExp r (inV0 a) (lmap (,c) b)) a)
 
 secondExp :: Exponential f => a --|f e r|-> b -> (c, a) --|f e r|-> (c, b)
-secondExp r = inExp (\ a b -> val (\ (c, a) -> exExp r (inV0 a) (contramap (c,) b)) a)
+secondExp r = inExp (\ a b -> val (\ (c, a) -> exExp r (inV0 a) (lmap (c,) b)) a)
 
 
 -- Choice
@@ -240,7 +239,7 @@ pureExp :: Exponential f => b -> a --|f e r|-> b
 pureExp = inExp . const . flip (••)
 
 apExp :: Exponential f => a --|f e r|-> (b -> c) -> a --|f e r|-> b -> a --|f e r|-> c
-apExp df da = inExp (\ a b -> cont (\ _K -> exExp df a (_K (\ f -> exExp da a (contramap f b)))))
+apExp df da = inExp (\ a b -> cont (\ _K -> exExp df a (_K (\ f -> exExp da a (lmap f b)))))
 
 
 -- Monad

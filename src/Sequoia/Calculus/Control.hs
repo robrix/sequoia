@@ -14,13 +14,13 @@ module Sequoia.Calculus.Control
 ) where
 
 import Control.Monad (join)
-import Data.Functor.Contravariant
+import Data.Profunctor
 import Prelude hiding (init)
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Core
 import Sequoia.Calculus.Structural
 import Sequoia.Contextual
-import Sequoia.Functor.Continuation
+import Sequoia.Profunctor.Continuation
 import Sequoia.Profunctor.Value
 
 -- Values
@@ -38,7 +38,7 @@ vR
   -- -----------------------
   -> _Γ -|s e r|- _Δ > V e a
 -- FIXME: this should preserve extant dependency on the env
-vR = mapR (contramap inV0)
+vR = mapR (lmap inV0)
 
 vL'
   :: (Contextual s, Exchange s, Weaken s)
@@ -64,7 +64,7 @@ class Control s where
     -> _Γ -|s e r |- _Δ
 
   shift
-    :: K r a < _Γ -|s e r|- _Δ > r
+    :: K a r < _Γ -|s e r|- _Δ > r
     -- ---------------------------
     ->         _Γ -|s e r|- _Δ > a
 
@@ -75,26 +75,26 @@ kL
   :: Contextual s
   =>         _Γ -|s e r|- _Δ > a
   -- ---------------------------
-  -> K r a < _Γ -|s e r|- _Δ
+  -> K a r < _Γ -|s e r|- _Δ
 kL = popL . val . pushR
 
 kR
   :: (Contextual s, Weaken s)
   => a < _Γ -|s e r|- _Δ
   -- ---------------------------
-  ->     _Γ -|s e r|- _Δ > K r a
+  ->     _Γ -|s e r|- _Δ > K a r
 kR s = lowerL (pushL init . inV0) (wkR s)
 
 kL'
   :: (Contextual s, Weaken s)
-  => K r a < _Γ -|s e r|- _Δ
+  => K a r < _Γ -|s e r|- _Δ
   -- ---------------------------
   ->         _Γ -|s e r|- _Δ > a
 kL' s = kR init >>> wkR s
 
 kR'
   :: (Contextual s, Weaken s)
-  =>     _Γ -|s e r|- _Δ > K r a
+  =>     _Γ -|s e r|- _Δ > K a r
   -- ---------------------------
   -> a < _Γ -|s e r|- _Δ
 kR' s = wkL s >>> kL init

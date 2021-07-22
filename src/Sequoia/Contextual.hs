@@ -53,7 +53,6 @@ module Sequoia.Contextual
 import Control.Monad (join)
 import Data.Bifunctor (first)
 import Data.Function
-import Data.Functor.Contravariant
 import Data.Profunctor
 import Prelude hiding (init)
 import Sequoia.Calculus.Context
@@ -61,9 +60,9 @@ import Sequoia.Calculus.Core
 import Sequoia.Calculus.Structural
 import Sequoia.Conjunction
 import Sequoia.Disjunction
-import Sequoia.Functor.Continuation as K
 import Sequoia.Optic.Setter
 import Sequoia.Profunctor.Coexponential
+import Sequoia.Profunctor.Continuation
 import Sequoia.Profunctor.Value
 
 -- Contextual
@@ -84,8 +83,8 @@ swapΓ f _Γ' = popΓΔ (\ c -> pushΓΔ (f (recall c)) (c & recall_ .~ _Γ'))
 
 swapΔ
   :: Contextual s
-  => (K r _Δ  -> _Γ -|s e r|- _Δ')
-  -> (K r _Δ' -> _Γ -|s e r|- _Δ)
+  => (K _Δ  r -> _Γ -|s e r|- _Δ')
+  -> (K _Δ' r -> _Γ -|s e r|- _Δ)
 swapΔ f _Δ' = popΓΔ (\ c -> pushΓΔ (f (forget c)) (c & forget_ .~ _Δ'))
 
 
@@ -123,7 +122,7 @@ popΓ f = swapΓ f (V id)
 -- @
 popΔ
   :: Contextual s
-  => (K r _Δ -> _Γ -|s e r|- r)
+  => (K _Δ r -> _Γ -|s e r|- r)
   -- --------------------------
   ->            _Γ -|s e r|- _Δ
 popΔ f = swapΔ f (K id)
@@ -154,7 +153,7 @@ popL f = popΓ (pushΓ . f . exlF <*> exrF)
 -- @
 popR
   :: Contextual s
-  => (K r a -> _Γ -|s e r|- _Δ)
+  => (K a r -> _Γ -|s e r|- _Δ)
   -- -----------------------------
   ->           _Γ -|s e r|- _Δ > a
 popR f = popΔ (pushΔ . f . inrK <*> inlK)
@@ -169,7 +168,7 @@ popL2 f = popL (popL . f)
 
 popR2
   :: Contextual s
-  => (K r a -> K r b -> _Γ -|s e r|- _Δ)
+  => (K a r -> K b r -> _Γ -|s e r|- _Δ)
   -- ------------------------------------------
   ->                    _Γ -|s e r|- _Δ > b > a
 popR2 f = popR (popR . f)
@@ -186,8 +185,8 @@ poppedΓ g h = roam (\ f p -> traverseΓ g (\ x -> f (mapΓ (h x) p)))
 
 poppedΔ
   :: Contextual s
-  => (K r _Δ''' -> (K r _Δ'', x))
-  -> (K r _Δ' -> x -> K r _Δ)
+  => (K _Δ''' r -> (K _Δ'' r, x))
+  -> (K _Δ' r -> x -> K _Δ r)
   -> Setter
     (_Γ -|s e r|- _Δ ) (_Γ' -|s e r|- _Δ''')
     (_Γ -|s e r|- _Δ') (_Γ' -|s e r|- _Δ'')
@@ -259,7 +258,7 @@ pushΔ
   :: Contextual s
   =>            _Γ -|s e r|- _Δ
   -- ---------------------------
-  -> (K r _Δ -> _Γ -|s e r|-  r)
+  -> (K _Δ r -> _Γ -|s e r|-  r)
 pushΔ = swapΔ . const
 
 
@@ -290,7 +289,7 @@ pushR
   :: Contextual s
   =>           _Γ -|s e r|- _Δ > a
   -- -----------------------------
-  -> (K r a -> _Γ -|s e r|- _Δ)
+  -> (K a r -> _Γ -|s e r|- _Δ)
 pushR s a = popΔ (\ c -> pushΔ s (c |> a))
 
 
@@ -303,7 +302,7 @@ pushL2 p = pushL . pushL p
 
 pushR2
   :: Contextual s
-  => _Γ -|s e r|- _Δ > b > a -> K r a -> K r b
+  => _Γ -|s e r|- _Δ > b > a -> K a r -> K b r
   -- -----------------------------------------
   -> _Γ -|s e r|- _Δ
 pushR2 p = pushR . pushR p
@@ -314,7 +313,7 @@ pushR2 p = pushR . pushR p
 mapΓΔ
   :: Contextual s
   => (V e _Γ' -> V e _Γ)
-  -> (K r _Δ' -> K r _Δ)
+  -> (K _Δ' r -> K _Δ r)
   -> _Γ  -|s e r|- _Δ
   -- -----------------
   -> _Γ' -|s e r|- _Δ'
@@ -330,7 +329,7 @@ mapΓ = (`mapΓΔ` id)
 
 mapΔ
   :: Contextual s
-  => (K r _Δ' -> K r _Δ)
+  => (K _Δ' r -> K _Δ r)
   -> _Γ -|s e r|- _Δ
   -- ----------------
   -> _Γ -|s e r|- _Δ'
@@ -347,7 +346,7 @@ mapL f = mapΓ (f . exlF >∘∘∘< exrF)
 
 mapR
   :: Contextual s
-  => (K r a' -> K r a)
+  => (K a' r -> K a r)
   -> _Γ -|s e r|- _Δ > a
   -- --------------------
   -> _Γ -|s e r|- _Δ > a'
@@ -364,7 +363,7 @@ mapL2 f a b = popL ((pushL b <--> pushL a) . f)
 
 mapR2
   :: Contextual s
-  => (K r (K r c -> K r b) -> K r a)
+  => (K (K c r -> K b r) r -> K a r)
   -> _Γ -|s e r|- _Δ > a   ->   _Γ -|s e r|- _Δ > b
   -- ----------------------------------------------
   ->            _Γ -|s e r|- _Δ > c
@@ -375,7 +374,7 @@ mapR2 f a b = mapR f (wkR' a) >>> popL (val (`mapR` b))
 traverseΓΔ
   :: Contextual s
   => (V e _Γ' -> (x, V e _Γ))
-  -> (K r _Δ' -> (K r _Δ, y))
+  -> (K _Δ' r -> (K _Δ r, y))
   -> (x -> y -> _Γ  -|s e r|- _Δ)
   -- ----------------------------
   -> _Γ' -|s e r|- _Δ'
@@ -391,7 +390,7 @@ traverseΓ f = traverseΓΔ f (,()) . (const .)
 
 traverseΔ
   :: Contextual s
-  => (K r _Δ' -> (K r _Δ, y))
+  => (K _Δ' r -> (K _Δ r, y))
   -> (y -> _Γ -|s e r|- _Δ)
   -- ----------------------
   ->       _Γ -|s e r|- _Δ'
@@ -402,7 +401,7 @@ traverseΔ f = traverseΓΔ ((),) f . const
 
 liftL
   :: Contextual s
-  => K r a
+  => K a r
   -- -----------------------
   ->     a < _Γ -|s e r|- _Δ
 liftL = pushR init
@@ -419,7 +418,7 @@ liftR v = popΓ (\ _Γ -> pushΓ init (v <| _Γ))
 
 lowerL
   :: Contextual s
-  => (K r a                   -> _Γ -|s e r|- _Δ)
+  => (K a r                   -> _Γ -|s e r|- _Δ)
   -- --------------------------------------------
   -> (    a < _Γ -|s e r|- _Δ -> _Γ -|s e r|- _Δ)
 lowerL k p = popR k >>> p
@@ -450,4 +449,4 @@ instance Contextual s => Exchange (Contextually s) where
   exR = Contextually . popR2 . flip . pushR2 . getContextually
 
 instance Contextual s => Profunctor (Contextually s e r) where
-  dimap f g (Contextually p) = Contextually (mapΓΔ (fmap f) (contramap g) p)
+  dimap f g (Contextually p) = Contextually (mapΓΔ (fmap f) (lmap g) p)

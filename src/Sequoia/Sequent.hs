@@ -12,7 +12,6 @@ module Sequoia.Sequent
 
 import qualified Control.Category as Cat
 import           Control.Monad.Trans.Class
-import           Data.Functor.Contravariant
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
 import           Prelude hiding (init)
@@ -35,12 +34,12 @@ import           Sequoia.Calculus.XOr
 import           Sequoia.Conjunction
 import           Sequoia.Contextual
 import           Sequoia.Disjunction
-import           Sequoia.Functor.Continuation as K
 import           Sequoia.Functor.Source
 import           Sequoia.Optic.Getter
 import           Sequoia.Optic.Review
 import           Sequoia.Profunctor.Coexponential
 import           Sequoia.Profunctor.Context
+import           Sequoia.Profunctor.Continuation as K
 import           Sequoia.Profunctor.Exponential as Exponential hiding ((>>>))
 import           Sequoia.Profunctor.Value
 
@@ -52,7 +51,7 @@ evalSeq = evalExp
 runSeq :: Seq e r _Γ _Δ -> ((e -> _Γ) -> (_Δ -> r) -> (e -> r))
 runSeq s f g = evalSeq (dimap f g s)
 
-newtype Seq e r _Γ _Δ = Seq { getSeq :: V e _Γ -> K r _Δ -> C e r }
+newtype Seq e r _Γ _Δ = Seq { getSeq :: V e _Γ -> K _Δ r -> C e r }
   deriving (Env e, Res r) via (Exp e r _Γ _Δ)
   deriving (Applicative, Functor, Monad) via (Exp e r _Γ)
   deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via (Exp e r)
@@ -110,11 +109,11 @@ instance Calculus.Control Seq where
 
 instance NotUntrueIntro Seq where
   notUntrueL e a = popL (val (\ (NotUntrue r) -> e >>> liftLR @Exp (r ^. _SrcExp @_ @Exp) >>> wkL' a))
-  notUntrueR s = mapR (contramap (\ f -> NotUntrue (_SrcExp @Fun # f))) (funR s)
+  notUntrueR s = mapR (lmap (\ f -> NotUntrue (_SrcExp @Fun # f))) (funR s)
 
 instance TrueIntro Seq where
   trueL = mapL (fmap trueA)
-  trueR = mapR (contramap true)
+  trueR = mapR (lmap true)
 
 
 -- Negation
@@ -139,12 +138,12 @@ instance ZeroIntro Seq where
 instance WithIntro Seq where
   withL1 p = popL (pushL p . exlF)
   withL2 p = popL (pushL p . exrF)
-  withR = mapR2 (contramap (contramap . inlr))
+  withR = mapR2 (lmap (lmap . inlr))
 
 instance SumIntro Seq where
   sumL a b = popL (env . (pushL a <∘∘> pushL b))
-  sumR1 = mapR (contramap inl)
-  sumR2 = mapR (contramap inr)
+  sumR1 = mapR (lmap inl)
+  sumR2 = mapR (lmap inr)
 
 
 -- Multiplicative
@@ -163,7 +162,7 @@ instance ParIntro Seq where
 
 instance TensorIntro Seq where
   tensorL p = popL (pushL2 p . exlF <*> exrF)
-  tensorR = mapR2 (contramap (contramap . inlr))
+  tensorR = mapR2 (lmap (lmap . inlr))
 
 
 -- Logical biconditional/exclusive disjunction
@@ -173,14 +172,14 @@ instance IffIntro Seq where
 
   iffL2 s1 s2 = mapL (fmap getIff) (withL2 (downR s1 ->⊢ s2))
 
-  iffR s1 s2 = mapR (contramap Iff) (funR (downL s1) ⊢& funR (downL s2))
+  iffR s1 s2 = mapR (lmap Iff) (funR (downL s1) ⊢& funR (downL s2))
 
 instance XOrIntro Seq where
   xorL s1 s2 = mapL (fmap getXOr) (subL (upR s1) ⊕⊢ subL (upR s2))
 
-  xorR1 s1 s2 = mapR (contramap XOr) (sumR1 (s1 ⊢>- upL s2))
+  xorR1 s1 s2 = mapR (lmap XOr) (sumR1 (s1 ⊢>- upL s2))
 
-  xorR2 s1 s2 = mapR (contramap XOr) (sumR2 (s1 ⊢>- upL s2))
+  xorR2 s1 s2 = mapR (lmap XOr) (sumR2 (s1 ⊢>- upL s2))
 
 
 -- Implication
@@ -202,7 +201,7 @@ instance UniversalIntro Seq where
 
 instance ExistentialIntro Seq where
   existsL p = popL (val (dnE . runExists (pushL p . inV0)))
-  existsR p = mapR (contramap (Exists . K . flip (•))) p
+  existsR p = mapR (lmap (Exists . K . flip (•))) p
 
 
 -- Recursion
@@ -213,15 +212,15 @@ instance NuIntro Seq where
 
 instance MuIntro Seq where
   muL f k = wkL (downR f) >>> exL (mapL (fmap getMu) (funL init (wkL' k)))
-  muR = mapR (contramap mu)
+  muR = mapR (lmap mu)
 
 
 -- Polarity shifts
 
 instance UpIntro Seq where
   upL   = mapL (fmap getUp)
-  upR   = mapR (contramap Up)
+  upR   = mapR (lmap Up)
 
 instance DownIntro Seq where
   downL = mapL (fmap getDown)
-  downR = mapR (contramap Down)
+  downR = mapR (lmap Down)

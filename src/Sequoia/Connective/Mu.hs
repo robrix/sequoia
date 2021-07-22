@@ -9,15 +9,14 @@ module Sequoia.Connective.Mu
 ) where
 
 import qualified Control.Category as Cat
-import           Data.Functor.Contravariant
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
 import           Sequoia.Connective.Down
 import           Sequoia.Connective.Function
 import           Sequoia.Connective.Quantification
-import           Sequoia.Functor.Continuation
 import           Sequoia.Optic.Setter
 import           Sequoia.Polarity
+import           Sequoia.Profunctor.Continuation
 import           Sequoia.Profunctor.Exponential
 import           Sequoia.Profunctor.Value
 
@@ -34,7 +33,7 @@ newtype MuF e r f a = MuF { getMuF :: Down (FAlg e r f a) ~~Fun e r~> a }
 instance (Pos (f a), Neg a) => Polarized N (MuF e r f a) where
 
 mu :: ForAll r N (MuF e r f) -> Mu e r f
-mu r = Mu (dnE (over _K (lmap (contramap getMuF)) (runForAll r)))
+mu r = Mu (dnE (over _K (lmap (lmap getMuF)) (runForAll r)))
 
 foldMu :: Exponential d => Neg a => f a --|d e r|-> a -> Mu e r f --|d e r|-> a
 foldMu alg = inExp (\ v k -> val (\ (Mu f) -> exExp f (inV0 (Down (coerceExp alg))) k) v)

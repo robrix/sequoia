@@ -1,4 +1,4 @@
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE TypeFamilies #-}
 module Sequoia.Connective.Negation
 ( -- * Not
   Not(..)
@@ -20,14 +20,22 @@ module Sequoia.Connective.Negation
 
 import Data.Functor.Contravariant
 import Data.Functor.Contravariant.Adjunction
-import Data.Functor.Contravariant.Rep (Representable)
-import Sequoia.Functor.Continuation
+import Data.Functor.Contravariant.Rep
+import Data.Profunctor
 import Sequoia.Polarity
+import Sequoia.Profunctor.Continuation
 
 -- Not
 
-newtype Not r a = Not { getNot :: K r a }
-  deriving (Contravariant, Representable)
+newtype Not r a = Not { getNot :: K a r }
+
+instance Contravariant (Not r) where
+  contramap f = Not . lmap f . getNot
+
+instance Representable (Not r) where
+  type Rep (Not r) = r
+  tabulate = Not . K
+  index = (•¬)
 
 instance Pos a => Polarized N (Not r a) where
 
@@ -51,8 +59,15 @@ infixl 7 •¬
 
 -- Negate
 
-newtype Negate r a = Negate { getNegate :: K r a }
-  deriving (Contravariant, Representable)
+newtype Negate r a = Negate { getNegate :: K a r }
+
+instance Contravariant (Negate r) where
+  contramap f = Negate . lmap f . getNegate
+
+instance Representable (Negate r) where
+  type Rep (Negate r) = r
+  tabulate = Negate . K
+  index = (•-)
 
 instance Neg a => Polarized P (Negate r a) where
 
@@ -76,11 +91,11 @@ infixl 7 •-
 
 -- Negative double negation
 
-notNegate :: K r (K r a) -> r ¬-a
-notNegate = Not . contramap getNegate
+notNegate :: K (K a r) r -> r ¬-a
+notNegate = Not . lmap getNegate
 
-getNotNegate :: r ¬-a -> K r (K r a)
-getNotNegate = contramap Negate . getNot
+getNotNegate :: r ¬-a -> K (K a r) r
+getNotNegate = lmap Negate . getNot
 
 
 type r ¬-a = r ¬(r -a)
@@ -90,11 +105,11 @@ infixr 9 ¬-
 
 -- Positive double negation
 
-negateNot :: K r (K r a) -> r -¬a
-negateNot = Negate . contramap getNot
+negateNot :: K (K a r) r -> r -¬a
+negateNot = Negate . lmap getNot
 
-getNegateNot :: r -¬a -> K r (K r a)
-getNegateNot = contramap Not . getNegate
+getNegateNot :: r -¬a -> K (K a r) r
+getNegateNot = lmap Not . getNegate
 
 
 type r -¬a = r -(r ¬a)
