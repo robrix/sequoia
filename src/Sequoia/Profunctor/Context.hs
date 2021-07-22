@@ -11,6 +11,7 @@ module Sequoia.Profunctor.Context
 , (•∘)
 ) where
 
+import Control.Arrow
 import Control.Category as Cat (Category)
 import Data.Distributive
 import Data.Functor.Identity
@@ -30,7 +31,7 @@ _C :: Iso (e ==> r) (e' ==> r') (e -> r) (e' -> r')
 _C = (<==) <-> C
 
 newtype e ==> r = C { (<==) :: e -> r }
-  deriving (Applicative, Cat.Category, Choice, Closed, Cochoice, Costrong, Env e, Functor, Mapping, Monad, Profunctor, Co.Representable, Res r, Strong, Traversing)
+  deriving (Applicative, Arrow, ArrowApply, ArrowChoice, ArrowLoop, Cat.Category, Choice, Closed, Cochoice, Costrong, Env e, Functor, Mapping, Monad, Profunctor, Co.Representable, Res r, Strong, Traversing)
 
 infix 6 ==>
 infixl 6 <==
