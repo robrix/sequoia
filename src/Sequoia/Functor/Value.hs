@@ -19,10 +19,9 @@ module Sequoia.Functor.Value
 , val
 ) where
 
-import Data.Functor.Rep
 import Sequoia.Profunctor.Value (Env(..), V(..), _V, idV, inV0, val, (<∘∘>), (>∘∘<), (>∘∘∘<))
 
 -- Construction
 
 inV :: (e -> a) -> V e a
-inV = tabulate
+inV = V
