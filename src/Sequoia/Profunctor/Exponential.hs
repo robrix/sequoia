@@ -31,9 +31,6 @@ module Sequoia.Profunctor.Exponential
 , dimapExp
 , lmapExp
 , rmapExp
-  -- * Strong
-, firstExp
-, secondExp
 ) where
 
 import           Control.Arrow
@@ -65,8 +62,8 @@ instance Profunctor (Exp e r) where
   dimap = dimapExp
 
 instance Strong (Exp e r) where
-  first'  = firstExp
-  second' = secondExp
+  first'  r = Exp (\ a b -> val (\ (a, c) -> getExp r (inV0 a) (lmap (,c) b)) a)
+  second' r = Exp (\ a b -> val (\ (c, a) -> getExp r (inV0 a) (lmap (c,) b)) a)
 
 instance Choice (Exp e r) where
   left'  r = Exp (\ a b -> val (flip (getExp r) (inlK b) . inV0 <--> (inrK b ••)) a)
@@ -95,8 +92,8 @@ instance Coapply (Exp e r) where
 
 instance Arrow (Exp e r) where
   arr = inExp'
-  first = firstExp
-  second = secondExp
+  first  = first'
+  second = second'
 
 instance ArrowChoice (Exp e r) where
   left  = left'
@@ -182,12 +179,3 @@ lmapExp = lmapV . fmap
 
 rmapExp :: Exponential f => (b -> b') -> a --|f e r|-> b -> a --|f e r|-> b'
 rmapExp = rmapK . lmap
-
-
--- Strong
-
-firstExp  :: Exponential f => a --|f e r|-> b -> (a, c) --|f e r|-> (b, c)
-firstExp  r = inExp (\ a b -> val (\ (a, c) -> exExp r (inV0 a) (lmap (,c) b)) a)
-
-secondExp :: Exponential f => a --|f e r|-> b -> (c, a) --|f e r|-> (c, b)
-secondExp r = inExp (\ a b -> val (\ (c, a) -> exExp r (inV0 a) (lmap (c,) b)) a)
