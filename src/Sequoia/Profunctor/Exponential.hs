@@ -50,19 +50,19 @@ instance Profunctor (Exp e r) where
   dimap f g = Exp . dimap (fmap f) (lmap (lmap g)) . exExp
 
 instance Strong (Exp e r) where
-  first'  r = Exp (\ a b -> val (\ (a, c) -> exExp r (inV0 a) (lmap (,c) b)) a)
-  second' r = Exp (\ a b -> val (\ (c, a) -> exExp r (inV0 a) (lmap (c,) b)) a)
+  first'  r = Exp (\ a b -> val (\ (a, c) -> exExp r (pure a) (lmap (,c) b)) a)
+  second' r = Exp (\ a b -> val (\ (c, a) -> exExp r (pure a) (lmap (c,) b)) a)
 
 instance Choice (Exp e r) where
-  left'  r = Exp (\ a b -> val (flip (exExp r) (inlK b) . inV0 <--> (inrK b ••)) a)
-  right' r = Exp (\ a b -> val ((inlK b ••) <--> flip (exExp r) (inrK b) . inV0) a)
+  left'  r = Exp (\ a b -> val (flip (exExp r) (inlK b) . pure <--> (inrK b ••)) a)
+  right' r = Exp (\ a b -> val ((inlK b ••) <--> flip (exExp r) (inrK b) . pure) a)
 
 instance Traversing (Exp e r) where
   wander traverse r = Exp (\ v k -> val (\ s -> exExp (traverse ((r <<<) . pure) s) (V id) k) v)
 
 instance Cat.Category (Exp e r) where
   id = Exp (flip (•∘))
-  f . g = Exp (\ a c -> cont (\ _K -> exExp g a (_K (\ b -> exExp f (inV0 b) c))))
+  f . g = Exp (\ a c -> cont (\ _K -> exExp g a (_K (\ b -> exExp f (pure b) c))))
 
 instance Functor (Exp e r c) where
   fmap = rmap

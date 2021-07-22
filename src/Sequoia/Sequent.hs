@@ -79,7 +79,7 @@ instance MonadTrans (SeqT r s _Γ) where
 -- Core rules
 
 instance Core Seq where
-  f >>> g = f >>= pure <--> pushL g . inV0
+  f >>> g = f >>= pure <--> pushL g . pure
 
   init = dimap exl inr Cat.id
 
@@ -101,7 +101,7 @@ instance Contextual Seq where
 
 instance Calculus.Control Seq where
   reset s = Seq (Exp (\ _Γ _Δ -> C ((_Δ •) . (exExp (getSeq s) _Γ (K id) <==))))
-  shift s = Seq (Exp (\ _Γ _Δ -> exExp (getSeq s) (inV0 (inrK _Δ) <| _Γ) (inlK _Δ |> K id)))
+  shift s = Seq (Exp (\ _Γ _Δ -> exExp (getSeq s) (pure (inrK _Δ) <| _Γ) (inlK _Δ |> K id)))
 
 
 -- Assertion
@@ -153,7 +153,7 @@ instance BottomIntro Seq where
 
 instance OneIntro Seq where
   oneL = wkL
-  oneR = liftR (inV0 One)
+  oneR = liftR (pure One)
 
 instance ParIntro Seq where
   parL a b = popL (env . (pushL a <∘∘> pushL b))
@@ -185,11 +185,11 @@ instance XOrIntro Seq where
 
 instance FunctionIntro Seq where
   funL a b = popL (val (\ f -> a >>> liftLR (getFun f) >>> wkL' b))
-  funR = lowerLR (liftR . inV0 . Fun) . wkR'
+  funR = lowerLR (liftR . pure . Fun) . wkR'
 
 instance SubtractionIntro Seq where
   subL f = popL (val (\ s -> liftR (s^.subA_) >>> f >>> liftL (s^.subK_)))
-  subR a b = wkR' a >>> popL (\ a -> lowerL (liftR . inV0 . Sub . coexp a) (wkR b))
+  subR a b = wkR' a >>> popL (\ a -> lowerL (liftR . pure . Sub . coexp a) (wkR b))
 
 
 -- Quantification
@@ -199,7 +199,7 @@ instance UniversalIntro Seq where
   forAllR p = Seq (Exp (\ _Γ _Δ -> liftRes (\ run -> inrK _Δ •• ForAll (K (\ k -> run (exExp (getSeq p) _Γ (inlK _Δ |> k)))))))
 
 instance ExistentialIntro Seq where
-  existsL p = popL (val (Seq . dnE . runExists (getSeq . pushL p . inV0)))
+  existsL p = popL (val (Seq . dnE . runExists (getSeq . pushL p . pure)))
   existsR p = mapR (lmap (Exists . K . flip (•))) p
 
 

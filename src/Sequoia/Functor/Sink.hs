@@ -35,7 +35,7 @@ instance Contravariant (Snk e r) where
   contramap f = over _Snk (. fmap f)
 
 instance Contrapply (Snk e r) where
-  contraliftA2 f a b = Snk (val ((runSnk a . inV0 <--> runSnk b . inV0) . f))
+  contraliftA2 f a b = Snk (val ((runSnk a . pure <--> runSnk b . pure) . f))
 
 
 -- Construction

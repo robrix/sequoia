@@ -35,7 +35,7 @@ newtype Sig e r a b = Sig { runSig :: e ∘ a -> b • r -> e ==> r }
 
 instance Cat.Category (Sig e r) where
   id = Sig (flip (•∘))
-  Sig f . Sig g = Sig (\ a c -> liftRes (\ go -> g a (K (go . (`f` c) . inV0))))
+  Sig f . Sig g = Sig (\ a c -> liftRes (\ go -> g a (K (go . (`f` c) . pure))))
 
 instance Profunctor (Sig e r) where
   dimap f g = Sig . dimap (fmap f) (lmap (lmap g)) . runSig
@@ -44,7 +44,7 @@ instance Functor (Sig e r a) where
   fmap = rmap
 
 instance Applicative (Sig e r a) where
-  pure a = Sig (const (•∘ inV0 a))
+  pure = Sig . const . flip (••)
   (<*>) = ap
 
 instance Monad (Sig e r a) where

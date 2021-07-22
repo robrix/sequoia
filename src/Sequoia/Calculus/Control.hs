@@ -38,7 +38,7 @@ vR
   -- -----------------------
   -> _Γ -|s e r|- _Δ > e ∘ a
 -- FIXME: this should preserve extant dependency on the env
-vR = mapR (lmap inV0)
+vR = mapR (lmap pure)
 
 vL'
   :: (Contextual s, Exchange s, Weaken s)
@@ -83,7 +83,7 @@ kR
   => a < _Γ -|s e r|- _Δ
   -- ---------------------------
   ->     _Γ -|s e r|- _Δ > a • r
-kR s = lowerL (pushL init . inV0) (wkR s)
+kR s = lowerL (pushL init . pure) (wkR s)
 
 kL'
   :: (Contextual s, Weaken s)

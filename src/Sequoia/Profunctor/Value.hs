@@ -3,8 +3,6 @@
 module Sequoia.Profunctor.Value
 ( -- * Value profunctor
   type (∘)(..)
-  -- * Construction
-, inV0
   -- * Coercion
 , _V
   -- * Computation
@@ -47,12 +45,6 @@ instance Sieve (∘) Identity where
 
 instance Cosieve (∘) Identity where
   cosieve = lmap runIdentity . (∘)
-
-
--- Construction
-
-inV0 :: a -> e ∘ a
-inV0 = pure
 
 
 -- Coercion
