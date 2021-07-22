@@ -4,6 +4,8 @@ module Sequoia.Profunctor.Context
 ( -- * Context & control profunctor
   _C
 , type (==>)(..)
+  -- * Composition
+, (•<<)
   -- * Computation
 , mapCKV
 , mapCK
@@ -53,6 +55,14 @@ instance Pro.Representable (==>) where
 instance Pro.Corepresentable (==>) where
   type Corep (==>) = Identity
   cotabulate = C . lmap Identity
+
+
+-- Composition
+
+(•<<) :: r • s -> e ==> r -> e ==> s
+k •<< c = rmap (k •) c
+
+infixr 1 •<<
 
 
 -- Computation
