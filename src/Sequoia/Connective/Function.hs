@@ -15,7 +15,6 @@ import           Sequoia.Profunctor.Exponential
 -- Implication
 
 newtype Fun e r a b = Fun { getFun :: Exp e r a b }
-  deriving (Exponential) via Exp
   deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via Exp e r
   deriving (Functor) via Exp e r a
 

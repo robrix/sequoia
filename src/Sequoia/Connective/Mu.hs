@@ -39,7 +39,7 @@ foldMu :: Neg a => f a --|Exp e r|-> a -> Mu e r f --|Exp e r|-> a
 foldMu alg = Exp (\ v k -> val (\ (Mu f) -> getExp (getFun f) (inV0 (Down (Fun alg))) k) v)
 
 unfoldMu :: Traversable f => a --|Exp e r|-> f a -> a --|Exp e r|-> Mu e r f
-unfoldMu coalg = inExp' (\ a -> Mu (inExp (\ v k -> val (\ (Down alg) -> exExp (refoldCat alg (Fun coalg)) (inV0 a) k) v)))
+unfoldMu coalg = inExp' (\ a -> Mu (Fun (Exp (\ v k -> val (\ (Down (Fun alg)) -> getExp (refoldCat alg coalg) (inV0 a) k) v))))
 
 refoldMu :: (Traversable f, Neg b) => f b --|Exp e r|-> b -> a --|Exp e r|-> f a -> a --|Exp e r|-> b
 refoldMu f g = foldMu f Cat.<<< unfoldMu g
