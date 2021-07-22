@@ -227,7 +227,7 @@ wanderExp traverse r = inExp (\ v k -> val (\ s -> exExp (traverse (((r <<<) . i
 -- Category
 
 idExp :: Exponential f => a --|f e r|-> a
-idExp = inExp (flip (•∘))
+idExp = inExp' id
 
 composeExp :: Exponential f => b --|f e r|-> c -> a --|f e r|-> b -> a --|f e r|-> c
 composeExp f g = inExp (\ a c -> cont (\ _K -> exExp g a (_K (\ b -> exExp f (inV0 b) c))))
