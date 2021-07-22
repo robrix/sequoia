@@ -48,4 +48,4 @@ mapSnkV b = over _Snk (dimap (review b) (mapCV (view b)))
 -- Optics
 
 _SnkExp :: Iso (Snk e r a) (Snk e' r' a') (Exp e r a r) (Exp e' r' a' r')
-_SnkExp = _Snk.from (_Exponential.rmapping (constant (K id)))
+_SnkExp = _Snk.from (_Exp.rmapping (constant (K id)))
