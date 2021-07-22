@@ -24,10 +24,10 @@ import Sequoia.Profunctor.Value
 
 -- Sinks
 
-_Snk :: Iso (Snk e r a) (Snk e' r' a') (e ∘ a -> C e r) (e' ∘ a' -> C e' r')
+_Snk :: Iso (Snk e r a) (Snk e' r' a') (e ∘ a -> e ==> r) (e' ∘ a' -> e' ==> r')
 _Snk = runSnk <-> Snk
 
-newtype Snk e r a = Snk { runSnk :: e ∘ a -> C e r }
+newtype Snk e r a = Snk { runSnk :: e ∘ a -> e ==> r }
 
 instance Contravariant (Snk e r) where
   contramap f = over _Snk (. fmap f)

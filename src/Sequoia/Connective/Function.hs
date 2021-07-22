@@ -25,7 +25,7 @@ appFun = appExp
 appFun2 :: (a ~~Fun e r~> b ~~Fun e r~> c) -> e ∘ (e ∘ a -> e ∘ b -> c • r • r)
 appFun2 = appExp2
 
-newtype Fun e r a b = Fun { getFun :: e ∘ a -> b • r -> C e r }
+newtype Fun e r a b = Fun { getFun :: e ∘ a -> b • r -> e ==> r }
   deriving (Exponential) via Exp
   deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via Exp e r
   deriving (Functor) via Exp e r a

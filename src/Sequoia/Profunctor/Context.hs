@@ -3,7 +3,7 @@
 module Sequoia.Profunctor.Context
 ( -- * Context & control profunctor
   _C
-, C(..)
+, type (==>)(..)
   -- * Computation
 , mapCKV
 , mapCK
@@ -26,40 +26,42 @@ import Sequoia.Profunctor.Value
 
 -- Context & control profunctor
 
-_C :: Iso (C e r) (C e' r') (e -> r) (e' -> r')
+_C :: Iso (e ==> r) (e' ==> r') (e -> r) (e' -> r')
 _C = runC <-> C
 
-newtype C e r = C { runC :: e -> r }
+newtype e ==> r = C { runC :: e -> r }
   deriving (Applicative, Cat.Category, Choice, Closed, Cochoice, Costrong, Env e, Functor, Mapping, Monad, Profunctor, Co.Representable, Res r, Strong, Traversing)
 
-instance Distributive (C e) where
+infix 6 ==>
+
+instance Distributive ((==>) e) where
   distribute = distributeRep
   collect = collectRep
 
-instance Sieve C Identity where
+instance Sieve (==>) Identity where
   sieve = fmap Identity . runC
 
-instance Cosieve C Identity where
+instance Cosieve (==>) Identity where
   cosieve = lmap runIdentity . runC
 
-instance Pro.Representable C where
-  type Rep C = Identity
+instance Pro.Representable (==>) where
+  type Rep (==>) = Identity
   tabulate = C . fmap runIdentity
 
-instance Pro.Corepresentable C where
-  type Corep C = Identity
+instance Pro.Corepresentable (==>) where
+  type Corep (==>) = Identity
   cotabulate = C . lmap Identity
 
 
 -- Computation
 
-mapCKV :: (forall x . x • r -> x • r') -> (forall x . e ∘ x -> e' ∘ x) -> (C e r -> C e' r')
+mapCKV :: (forall x . x • r -> x • r') -> (forall x . e ∘ x -> e' ∘ x) -> (e ==> r -> e' ==> r')
 mapCKV f g = over _C (under _K f . under _V g)
 
-mapCK :: (forall x . x • r -> x • r') -> (C e r -> C e r')
+mapCK :: (forall x . x • r -> x • r') -> (e ==> r -> e ==> r')
 mapCK = over _C . under _K
 
-mapCV :: (forall x . e ∘ x -> e' ∘ x) -> (C e r -> C e' r)
+mapCV :: (forall x . e ∘ x -> e' ∘ x) -> (e ==> r -> e' ==> r)
 mapCV = over _C . under _V
 
 

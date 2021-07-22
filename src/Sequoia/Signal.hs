@@ -1,8 +1,7 @@
 {-# LANGUAGE TypeFamilies #-}
 module Sequoia.Signal
 ( -- * Signals
-  C(..)
-, Sig(..)
+  Sig(..)
 , mapKSig
 , mapVSig
   -- * Conversions
@@ -32,7 +31,7 @@ import           Sequoia.Profunctor.Value as V
 
 -- Signals
 
-newtype Sig e r a b = Sig { runSig :: e ∘ a -> b • r -> C e r }
+newtype Sig e r a b = Sig { runSig :: e ∘ a -> b • r -> e ==> r }
 
 instance Cat.Category (Sig e r) where
   id = Sig (flip (•∘))
@@ -61,14 +60,14 @@ mapVSig b = Sig . dimap (review b) (rmap (mapCV (view b))) . runSig
 -- Conversions
 
 solSrc
-  ::       C e r
+  ::      e ==> r
             <->
           Src e r |- r
 solSrc = Src . const <-> ($ K id) . runSrc
 
 
 solSnk
-  ::       C e r
+  ::      e ==> r
             <->
      e -| Snk e r
 solSnk = Snk . const <-> ($ V id) . runSnk
@@ -95,13 +94,13 @@ composeSigSnk sig snk = review snkSig (view snkSig snk <<< sig)
 
 
 solSig
-  ::       C e r
+  ::      e ==> r
             <->
      e -| Sig e r |- r
 solSig = Sig . const . const <-> ($ K id) . ($ V id) . runSig
 
 
-composeSrcSnk :: Src e r a -> Snk e r a -> C e r
+composeSrcSnk :: Src e r a -> Snk e r a -> e ==> r
 composeSrcSnk src snk = review solSig (snk^.snkSig <<< view srcSig src)
 
 

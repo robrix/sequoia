@@ -21,10 +21,10 @@ import Sequoia.Profunctor.Value
 
 -- Sources
 
-_Src :: Iso (Src e r b) (Src e' r' b') (b • r -> C e r) (b' • r' -> C e' r')
+_Src :: Iso (Src e r b) (Src e' r' b') (b • r -> e ==> r) (b' • r' -> e' ==> r')
 _Src = runSrc <-> Src
 
-newtype Src e r b = Src { runSrc :: b • r -> C e r }
+newtype Src e r b = Src { runSrc :: b • r -> e ==> r }
 
 instance Functor (Src e r) where
   fmap f = over _Src (. lmap f)
