@@ -60,7 +60,7 @@ _V = exV <-> inV
 -- Computation
 
 (>∘∘<) :: Conj d => V e b -> V e c -> V e (b `d` c)
-a >∘∘< b = inV (exV a >---< exV b)
+a >∘∘< b = V ((a ∘) >---< (b ∘))
 
 infix 3 >∘∘<
 
