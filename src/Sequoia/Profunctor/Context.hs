@@ -28,7 +28,7 @@ import Sequoia.Profunctor.Value
 -- Context & control profunctor
 
 _C :: Iso (e ==> r) (e' ==> r') (e -> r) (e' -> r')
-_C = (<==) <-> C
+_C = coerced
 
 newtype e ==> r = C { (<==) :: e -> r }
   deriving (Applicative, Arrow, ArrowApply, ArrowChoice, ArrowLoop, Cat.Category, Choice, Closed, Cochoice, Costrong, Env e, Functor, Mapping, Monad, Profunctor, Co.Representable, Res r, Strong, Traversing)
