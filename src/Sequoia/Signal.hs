@@ -22,10 +22,8 @@ import           Control.Monad (ap)
 import           Data.Profunctor
 import           Sequoia.Calculus.Context
 import           Sequoia.Functor.Continuation as K
-import           Sequoia.Functor.K
 import           Sequoia.Functor.Sink
 import           Sequoia.Functor.Source
-import           Sequoia.Functor.V
 import           Sequoia.Functor.Value as V
 import           Sequoia.Optic.Getter
 import           Sequoia.Optic.Iso

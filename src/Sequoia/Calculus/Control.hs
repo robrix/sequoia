@@ -20,8 +20,7 @@ import Sequoia.Calculus.Context
 import Sequoia.Calculus.Core
 import Sequoia.Calculus.Structural
 import Sequoia.Contextual
-import Sequoia.Functor.K
-import Sequoia.Functor.V
+import Sequoia.Functor.Continuation
 import Sequoia.Functor.Value
 
 -- Values

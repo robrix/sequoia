@@ -23,6 +23,8 @@ module Sequoia.Functor.Continuation
 , Res1(..)
 , cont1
 , Res2(..)
+  -- * Continuation functor
+, module Sequoia.Functor.K
 ) where
 
 import Control.Applicative (liftA2)

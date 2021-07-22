@@ -24,7 +24,6 @@ import Sequoia.Connective.Negation
 import Sequoia.Connective.Not
 import Sequoia.Contextual
 import Sequoia.Functor.Continuation as K
-import Sequoia.Functor.K
 import Sequoia.Polarity
 
 -- Not

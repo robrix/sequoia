@@ -3,7 +3,7 @@ module Sequoia.Connective.ForAll
   ForAll(..)
 ) where
 
-import Sequoia.Functor.K
+import Sequoia.Functor.Continuation
 import Sequoia.Polarity
 
 -- Universal quantification

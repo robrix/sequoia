@@ -59,8 +59,6 @@ import           Data.Profunctor
 import           Data.Profunctor.Traversing
 import           Sequoia.Disjunction
 import           Sequoia.Functor.Continuation as K
-import           Sequoia.Functor.K
-import           Sequoia.Functor.V
 import           Sequoia.Functor.Value as V
 import           Sequoia.Optic.Iso
 import           Sequoia.Profunctor.Applicative

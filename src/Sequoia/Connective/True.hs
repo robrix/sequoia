@@ -8,7 +8,6 @@ module Sequoia.Connective.True
 
 import Prelude hiding (True)
 import Sequoia.Functor.Continuation
-import Sequoia.Functor.K
 import Sequoia.Polarity
 
 -- True

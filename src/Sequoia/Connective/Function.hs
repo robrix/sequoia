@@ -11,8 +11,8 @@ import qualified Control.Category as Cat
 import           Data.Kind (Type)
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
-import           Sequoia.Functor.K
-import           Sequoia.Functor.V
+import           Sequoia.Functor.Continuation
+import           Sequoia.Functor.Value
 import           Sequoia.Polarity
 import           Sequoia.Profunctor.Context
 import           Sequoia.Profunctor.Exponential

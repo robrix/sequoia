@@ -21,7 +21,6 @@ import Data.Bitraversable
 import Sequoia.Conjunction
 import Sequoia.Disjunction
 import Sequoia.Functor.Continuation as K
-import Sequoia.Functor.K
 import Sequoia.Functor.Value as V
 
 -- Γ

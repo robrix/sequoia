@@ -11,8 +11,6 @@ module Sequoia.Functor.Source
 
 import Data.Profunctor
 import Sequoia.Functor.Continuation
-import Sequoia.Functor.K
-import Sequoia.Functor.V
 import Sequoia.Functor.Value
 import Sequoia.Optic.Getter
 import Sequoia.Optic.Iso

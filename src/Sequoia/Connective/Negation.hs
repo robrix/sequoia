@@ -19,7 +19,6 @@ module Sequoia.Connective.Negation
 import Data.Functor.Contravariant.Adjunction
 import Data.Functor.Contravariant.Rep (Representable)
 import Sequoia.Functor.Continuation
-import Sequoia.Functor.K
 import Sequoia.Polarity
 
 -- Not

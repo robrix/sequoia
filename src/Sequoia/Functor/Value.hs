@@ -24,6 +24,8 @@ module Sequoia.Functor.Value
 , val1
 , Env2(..)
 , val2
+  -- * Value functor
+, module Sequoia.Functor.V
 ) where
 
 import Control.Applicative (liftA2)

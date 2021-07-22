@@ -10,8 +10,8 @@ module Sequoia.Connective.Subtraction
 
 import Data.Kind (Type)
 import Data.Profunctor
-import Sequoia.Functor.K
-import Sequoia.Functor.V
+import Sequoia.Functor.Continuation
+import Sequoia.Functor.Value
 import Sequoia.Optic.Iso
 import Sequoia.Optic.Lens
 import Sequoia.Polarity

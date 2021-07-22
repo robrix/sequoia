@@ -6,7 +6,6 @@ module Sequoia.Connective.Exists
 ) where
 
 import Sequoia.Functor.Continuation as K
-import Sequoia.Functor.K
 import Sequoia.Polarity
 
 -- Universal quantification

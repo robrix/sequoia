@@ -11,7 +11,7 @@ import Sequoia.Connective.Down
 import Sequoia.Connective.Function
 import Sequoia.Connective.Quantification
 import Sequoia.Connective.Tensor
-import Sequoia.Functor.K
+import Sequoia.Functor.Continuation
 import Sequoia.Polarity
 
 -- Corecursion

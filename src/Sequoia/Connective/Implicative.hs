@@ -14,8 +14,6 @@ import Sequoia.Connective.Par
 import Sequoia.Connective.Subtraction
 import Sequoia.Disjunction
 import Sequoia.Functor.Continuation
-import Sequoia.Functor.K
-import Sequoia.Functor.V
 import Sequoia.Functor.Value
 import Sequoia.Optic.Iso
 import Sequoia.Profunctor.Context
