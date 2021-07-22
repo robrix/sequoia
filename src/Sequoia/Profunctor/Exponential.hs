@@ -3,7 +3,8 @@
 {-# LANGUAGE TypeFamilies #-}
 module Sequoia.Profunctor.Exponential
 ( -- * Exponential profunctor
-  Exp(..)
+  _Exp
+, Exp(..)
   -- ** Mixfix notation
 , type (--|)
 , type (|->)
@@ -71,6 +72,9 @@ import           Sequoia.Profunctor.Continuation as K
 import           Sequoia.Profunctor.Value as V
 
 -- Exponential profunctor
+
+_Exp :: Iso (Exp e r a b) (Exp e' r' a' b') (e ∘ a -> b • r -> e ==> r) (e' ∘ a' -> b' • r' -> e' ==> r')
+_Exp = coerced
 
 newtype Exp e r a b = Exp { getExp :: e ∘ a -> b • r -> e ==> r }
 
