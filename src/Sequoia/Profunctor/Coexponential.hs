@@ -2,8 +2,6 @@
 module Sequoia.Profunctor.Coexponential
 ( -- * Coexponential profunctor
   Coexp(..)
-  -- * Coexponential profunctor abstraction
-, Coexponential(..)
   -- * Construction
 , idCoexp
 , coexp
@@ -29,13 +27,6 @@ newtype Coexp e r a b = Coexp { withCoexp :: forall s . (e ∘ b -> a • r -> 
 
 instance Profunctor (Coexp e r) where
   dimap g h c = withCoexp c (\ r f -> coexp (fmap h r) (lmap g f))
-
-
--- Coexponential profunctor abstraction
-
-class (forall e r . Profunctor (f e r)) => Coexponential f where
-  inCoexp :: Coexp e r a b -> f e r a b
-  exCoexp :: f e r a b -> Coexp e r a b
 
 
 -- Construction
