@@ -46,7 +46,7 @@ inK :: Representable k => (a -> Rep k) -> k a
 inK = tabulate
 
 inK2 :: ((a -> r) -> (b -> r) -> (c -> r)) -> (K r a -> K r b -> K r c)
-inK2 f a b = inK ((a •) `f` (b •))
+inK2 f a b = K (runK a `f` runK b)
 
 
 -- Elimination
