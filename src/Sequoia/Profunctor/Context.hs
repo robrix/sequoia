@@ -61,7 +61,7 @@ instance Pro.Corepresentable (==>) where
 -- Composition
 
 (•<<) :: r • s -> e ==> r -> e ==> s
-k •<< c = rmap (k •) c
+(•<<) = rmap . (•)
 
 (>>•) :: e ==> r -> r • s -> e ==> s
 c >>• k = rmap (k •) c
