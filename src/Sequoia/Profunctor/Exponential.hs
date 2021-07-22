@@ -39,9 +39,6 @@ module Sequoia.Profunctor.Exponential
 , rightExp
   -- * Traversing
 , wanderExp
-  -- * Applicative
-, pureExp
-, apExp
 ) where
 
 import           Control.Arrow
@@ -91,8 +88,9 @@ instance Functor (Exp e r c) where
   fmap = rmap
 
 instance Applicative (Exp e r a) where
-  pure = pureExp
-  (<*>) = apExp
+  pure = Exp . const . flip (••)
+  df <*> da = Exp (\ a b -> cont (\ _K -> getExp df a (_K (\ f -> getExp da a (lmap f b)))))
+
 
 instance Monad (Exp e r a) where
   m >>= f = Exp (\ v k -> cont (\ _K -> getExp m v (_K (\ b -> getExp (f b) v k))))
@@ -213,12 +211,3 @@ rightExp r = inExp (\ a b -> val ((inlK b ••) <--> flip (exExp r) (inrK b) .
 
 wanderExp :: (Exponential f, Applicative (f e r e)) => (forall m . Applicative m => (a -> m b) -> (s -> m t)) -> a --|f e r|-> b -> s --|f e r|-> t
 wanderExp traverse r = inExp (\ v k -> val (\ s -> exExp (traverse (((r <<<) . inExp . const . flip (•∘)) . inV0) s) (V id) k) v)
-
-
--- Applicative
-
-pureExp :: Exponential f => b -> a --|f e r|-> b
-pureExp = inExp . const . flip (••)
-
-apExp :: Exponential f => a --|f e r|-> (b -> c) -> a --|f e r|-> b -> a --|f e r|-> c
-apExp df da = inExp (\ a b -> cont (\ _K -> exExp df a (_K (\ f -> exExp da a (lmap f b)))))
