@@ -3,6 +3,7 @@ module Sequoia.Functor.Source
   _Src
 , Src(..)
   -- * Construction
+, inSrcFn
 , (↑)
   -- * Elimination
 , exSrcFn
@@ -50,6 +51,9 @@ instance Res r (Src e r b) where
 
 
 -- Construction
+
+inSrcFn :: ((b -> r) -> (e -> r)) -> Src e r b
+inSrcFn = coerce
 
 (↑) :: a --|Exp e r|-> b -> e ∘ a -> Src e r|-> b
 f ↑ v = Src (exExp f v)
