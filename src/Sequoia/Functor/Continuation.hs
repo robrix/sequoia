@@ -4,6 +4,7 @@
 module Sequoia.Functor.Continuation
 ( -- * Continuations
   Continuation
+, K(..)
 , Contravariant(..)
   -- ** Construction
 , inK
@@ -23,8 +24,6 @@ module Sequoia.Functor.Continuation
 , Res1(..)
 , cont1
 , Res2(..)
-  -- * Continuation functor
-, K(..)
 ) where
 
 import Control.Applicative (liftA2)
@@ -41,6 +40,27 @@ import Sequoia.Profunctor.Recall
 -- Continuations
 
 class Representable k => Continuation r k | k -> r
+
+
+newtype K r a = K { runK :: a -> r }
+  deriving (Monoid, Semigroup)
+  deriving (Contravariant) via Flip (->) r
+  deriving (Confunctor, Contrachoice, Contraclosed, Contracochoice, Contracosieve Identity, Contracostrong, Contracorepresentable, Contrarepresentable, Contrasieve Identity, Contrastrong) via Flip (->)
+
+instance Representable (K r) where
+  type Rep (K r) = r
+  tabulate = K
+  index = runK
+
+instance Adjunction (K r) (K r) where
+  leftAdjunct  f a = K ((`runK` a) . f)
+  rightAdjunct f b = K ((`runK` b) . f)
+
+instance Contrapply (K r) where
+  contraliftA2 f (K a) (K b) = K (either a b . f)
+  contrap (K a) (K b) = K (either a b)
+
+instance Contrapplicative (K r)
 
 instance Continuation r (K r)
 
@@ -126,26 +146,3 @@ class Res2 c where
 
 contN :: (((a -> c) -> K r a) -> c) -> ((c -> r) -> c)
 contN f run = f (inK . (run .))
-
-
--- Continuation functor
-
-newtype K r a = K { runK :: a -> r }
-  deriving (Monoid, Semigroup)
-  deriving (Contravariant) via Flip (->) r
-  deriving (Confunctor, Contrachoice, Contraclosed, Contracochoice, Contracosieve Identity, Contracostrong, Contracorepresentable, Contrarepresentable, Contrasieve Identity, Contrastrong) via Flip (->)
-
-instance Representable (K r) where
-  type Rep (K r) = r
-  tabulate = K
-  index = runK
-
-instance Adjunction (K r) (K r) where
-  leftAdjunct  f a = K ((`runK` a) . f)
-  rightAdjunct f b = K ((`runK` b) . f)
-
-instance Contrapply (K r) where
-  contraliftA2 f (K a) (K b) = K (either a b . f)
-  contrap (K a) (K b) = K (either a b)
-
-instance Contrapplicative (K r)

@@ -4,6 +4,7 @@
 module Sequoia.Functor.Value
 ( -- * Values
   Value
+, V(..)
 , Representable(..)
   -- * Construction
 , inV0
@@ -24,8 +25,6 @@ module Sequoia.Functor.Value
 , val1
 , Env2(..)
 , val2
-  -- * Value functor
-, V(..)
 ) where
 
 import           Control.Applicative (liftA2)
@@ -43,6 +42,20 @@ import           Sequoia.Optic.Iso
 -- Values
 
 class Representable v => Value v
+
+
+newtype V s a = V { runV :: s -> a }
+  deriving (Applicative, Choice, Closed, Cochoice, Costrong, Functor, Monad, Monoid, Profunctor, Representable, Pro.Representable, Semigroup, Strong)
+
+instance Distributive (V s) where
+  distribute = distributeRep
+  collect = collectRep
+
+instance Sieve V Identity where
+  sieve = sieve . runV
+
+instance Cosieve V Identity where
+  cosieve = cosieve . runV
 
 instance Value (V s)
 
@@ -132,19 +145,3 @@ class Env2 c where
 
 val2 :: (Env2 c, Representable v) => (a -> c (Rep v) r i o) -> (v a -> c (Rep v) r i o)
 val2 f v = env2 (f . exV v)
-
-
--- Value functor
-
-newtype V s a = V { runV :: s -> a }
-  deriving (Applicative, Choice, Closed, Cochoice, Costrong, Functor, Monad, Monoid, Profunctor, Representable, Pro.Representable, Semigroup, Strong)
-
-instance Distributive (V s) where
-  distribute = distributeRep
-  collect = collectRep
-
-instance Sieve V Identity where
-  sieve = sieve . runV
-
-instance Cosieve V Identity where
-  cosieve = cosieve . runV
