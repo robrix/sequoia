@@ -1,4 +1,5 @@
 {-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE TypeFamilies #-}
 module Sequoia.Profunctor.Exponential
@@ -27,7 +28,6 @@ module Sequoia.Profunctor.Exponential
 
 import           Control.Arrow
 import qualified Control.Category as Cat
-import           Data.Kind (Type)
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
 import           Sequoia.Conjunction
@@ -104,7 +104,7 @@ instance Res r (Exp e r a b) where
 
 -- Mixfix notation
 
-type l --|(r :: Type -> Type -> Type) = r l
+type l --|r = r l
 type l|-> r = l r
 
 infixr 6 --|
