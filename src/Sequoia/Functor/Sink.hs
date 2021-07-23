@@ -17,10 +17,8 @@ module Sequoia.Functor.Sink
 ) where
 
 import Data.Coerce
-import Data.Functor.Contravariant
 import Data.Profunctor
-import Sequoia.Disjunction
-import Sequoia.Functor.Applicative
+import Sequoia.Functor.Snk.Internal
 import Sequoia.Optic.Getter
 import Sequoia.Optic.Iso
 import Sequoia.Optic.Review
@@ -34,14 +32,6 @@ import Sequoia.Profunctor.Value
 
 _Snk :: Iso (Snk e r a) (Snk e' r' a') (e ∘ a -> e ==> r) (e' ∘ a' -> e' ==> r')
 _Snk = coerced
-
-newtype Snk e r a = Snk { runSnk :: e ∘ a -> e ==> r }
-
-instance Contravariant (Snk e r) where
-  contramap f = Snk . (. fmap f) . runSnk
-
-instance Contrapply (Snk e r) where
-  contraliftA2 f a b = Snk (val ((runSnk a . pure <--> runSnk b . pure) . f))
 
 
 -- Construction
