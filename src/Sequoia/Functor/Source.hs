@@ -7,7 +7,7 @@ module Sequoia.Functor.Source
 , inSrcFn
 , (↑)
   -- * Elimination
-, exSrcFn
+, runSrc
 , elimSrc
   -- * Computation
 , mapSrcK
@@ -34,18 +34,18 @@ inSrc :: ((b • r) -> (e ==> r)) -> Src e r b
 inSrc = coerce
 
 inSrcFn :: ((b -> r) -> (e -> r)) -> Src e r b
-inSrcFn = coerce
+inSrcFn = Src
 
 (↑) :: a --|Exp e r|-> b -> e ∘ a -> Src e r|-> b
-f ↑ v = Src (exExp f v)
+f ↑ v = Src (exExpFn f (v ∘))
 
 infixl 3 ↑
 
 
 -- Elimination
 
-exSrcFn :: Src e r b -> ((b -> r) -> (e -> r))
-exSrcFn = coerce . runSrc
+runSrc :: Src e r b -> ((b • r) -> (e ==> r))
+runSrc = coerce . exSrcFn
 
 -- FIXME: this takes a function instead of a Snk to avoid cyclic module imports, would be nicer to have the definitions pulled out somewhere reasonable
 elimSrc :: Src e r a -> (e ∘ a -> e ==> r) -> e ==> r
