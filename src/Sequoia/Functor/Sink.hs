@@ -4,6 +4,8 @@ module Sequoia.Functor.Sink
 , Snk(..)
   -- * Construction
 , (↓)
+  -- * Elimination
+, exSnkFn
   -- * Computation
 , mapSnkK
 , mapSnkV
@@ -11,6 +13,7 @@ module Sequoia.Functor.Sink
 , _SnkExp
 ) where
 
+import Data.Coerce
 import Data.Functor.Contravariant
 import Data.Profunctor
 import Sequoia.Disjunction
@@ -44,6 +47,12 @@ instance Contrapply (Snk e r) where
 k ↓ f = Snk (flip (exExp f) k)
 
 infixl 2 ↓
+
+
+-- Elimination
+
+exSnkFn :: Snk e r a -> ((e -> a) -> (e -> r))
+exSnkFn = coerce . runSnk
 
 
 -- Computation
