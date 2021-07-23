@@ -133,11 +133,11 @@ instance Contextual Seq where
 instance Environment Seq where
   environment = Seq (\ _Γ _Δ -> env (inrK _Δ ••))
 
-  withEnv r s = Seq (\ _Γ _Δ -> env (\ e -> _Δ |> K (_Δ ↓ s ↑ lmap (const e) _Γ <==) ↓ r ↑ _Γ))
+  withEnv r s = Seq (\ _Γ _Δ -> env (\ e -> _Δ |> toK (_Δ ↓ s ↑ lmap (const e) _Γ) ↓ r ↑ _Γ))
 
 instance Calculus.Control Seq where
-  reset s = Seq (\ _Γ _Δ -> _Δ •∘ V (K id ↓ s ↑ _Γ <==))
-  shift s = Seq (\ _Γ _Δ -> inlK _Δ |> K id ↓ s ↑ pure (inrK _Δ) <| _Γ)
+  reset s = Seq (\ _Γ _Δ -> _Δ •∘ toV (idK ↓ s ↑ _Γ))
+  shift s = Seq (\ _Γ _Δ -> inlK _Δ |> idK ↓ s ↑ pure (inrK _Δ) <| _Γ)
 
 
 -- Assertion
