@@ -1,4 +1,4 @@
-module Sequoia.Functor.Snk.Internal
+module Sequoia.Functor.Sink.Internal
 ( Snk(..)
 ) where
 

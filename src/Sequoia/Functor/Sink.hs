@@ -18,7 +18,7 @@ module Sequoia.Functor.Sink
 
 import Data.Coerce
 import Data.Profunctor
-import Sequoia.Functor.Snk.Internal
+import Sequoia.Functor.Sink.Internal
 import Sequoia.Functor.Source.Internal
 import Sequoia.Optic.Getter
 import Sequoia.Optic.Iso
