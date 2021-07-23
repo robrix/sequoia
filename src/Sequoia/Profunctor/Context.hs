@@ -34,6 +34,7 @@ import Data.Profunctor
 import Data.Profunctor.Rep as Pro
 import Data.Profunctor.Sieve
 import Data.Profunctor.Traversing
+import Sequoia.Functor.Source.Internal
 import Sequoia.Optic.Iso
 import Sequoia.Optic.Setter
 import Sequoia.Profunctor.Continuation
@@ -114,6 +115,9 @@ deriving instance Env e (e ∘ r)
 deriving instance Env e (Forget r e b)
 deriving instance Env e (Recall e a b)
 
+instance Env e (Src e r b) where
+  env f = Src (\ k -> env ((`exSrcFn` k) . f))
+
 val :: Env e c => (a -> c) -> (e ∘ a -> c)
 val f v = env (f . (v ∘))
 
@@ -127,6 +131,10 @@ class Res r c | c -> r where
 instance Res r (a -> r) where
   res = pure
   liftRes f = f =<< flip ($)
+
+instance Res r (Src e r b) where
+  res = Src . const . res
+  liftRes f = Src (\ k -> liftRes (\ run -> exSrcFn (f (run . (`exSrcFn` k))) k))
 
 deriving instance Res r (a • r)
 deriving instance Res r (Forget r a b)
