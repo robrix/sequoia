@@ -71,7 +71,7 @@ inSeqExp :: Exp e r a b -> Seq e r a b
 inSeqExp = Seq . exExp
 
 inSeqCoexp :: (Coexp e r b a -> e ==> r) -> Seq e r a b
-inSeqCoexp = inSeqExp . inExpCoexp
+inSeqCoexp = inSeqExp . expCoexp
 
 
 -- Elimination

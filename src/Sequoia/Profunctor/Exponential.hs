@@ -10,13 +10,13 @@ module Sequoia.Profunctor.Exponential
 , type (--|)
 , type (|->)
   -- ** Construction
-, inExp'
-, inExpV
-, inExpK
-, inExpVK
-, inExpC
-, inExpFn
-, inExpCoexp
+, exp'
+, expV
+, expK
+, expVK
+, expC
+, expFn
+, expCoexp
   -- ** Elimination
 , evalExp
 , appExp
@@ -84,7 +84,7 @@ instance Coapply (Exp e r) where
   coliftA2 f a b = Exp (\ v k -> env ((flip (exExp a) k <∘∘> flip (exExp b) k) (f <$> v)))
 
 instance Arrow (Exp e r) where
-  arr = inExp'
+  arr = exp'
   first  = first'
   second = second'
 
@@ -114,26 +114,26 @@ infixr 5 |->
 
 -- Construction
 
-inExp' :: (a -> b) -> a --|Exp e r|-> b
-inExp' f = Exp (flip (•∘) . fmap f)
+exp' :: (a -> b) -> a --|Exp e r|-> b
+exp' f = Exp (flip (•∘) . fmap f)
 
-inExpV :: e ∘ a -> e --|Exp e r|-> a
-inExpV a = Exp (\ v k -> k •∘ (a <<< v))
+expV :: e ∘ a -> e --|Exp e r|-> a
+expV a = Exp (\ v k -> k •∘ (a <<< v))
 
-inExpK :: a • r -> a --|Exp e r|-> r
-inExpK a = Exp (\ v k -> (k <<< a) •∘ v)
+expK :: a • r -> a --|Exp e r|-> r
+expK a = Exp (\ v k -> (k <<< a) •∘ v)
 
-inExpVK :: e ∘ a -> a • r -> e --|Exp e r|-> r
-inExpVK = fmap inExpC . flip (•∘)
+expVK :: e ∘ a -> a • r -> e --|Exp e r|-> r
+expVK = fmap expC . flip (•∘)
 
-inExpC :: e ==> r -> e --|Exp e r|-> r
-inExpC (C c) = inExpFn (\ v k -> k . c . v)
+expC :: e ==> r -> e --|Exp e r|-> r
+expC (C c) = expFn (\ v k -> k . c . v)
 
-inExpFn :: ((e -> a) -> (b -> r) -> (e -> r)) -> Exp e r a b
-inExpFn = coerce
+expFn :: ((e -> a) -> (b -> r) -> (e -> r)) -> Exp e r a b
+expFn = coerce
 
-inExpCoexp :: (Coexp e r b a -> e ==> r) -> Exp e r a b
-inExpCoexp f = Exp (fmap f . Coexp)
+expCoexp :: (Coexp e r b a -> e ==> r) -> Exp e r a b
+expCoexp f = Exp (fmap f . Coexp)
 
 
 -- Elimination
