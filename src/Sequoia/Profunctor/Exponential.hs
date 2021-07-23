@@ -128,7 +128,7 @@ inExpK :: a • r -> a --|Exp e r|-> r
 inExpK a = Exp (\ v k -> (k <<< a) •∘ v)
 
 inExpVK :: e ∘ a -> a • r -> e --|Exp e r|-> r
-inExpVK ea ar = inExpC (ar •∘ ea)
+inExpVK = fmap inExpC . flip (•∘)
 
 inExpC :: e ==> r -> e --|Exp e r|-> r
 inExpC (C c) = inExpFn (\ v k -> k . c . v)
@@ -155,7 +155,7 @@ runExp :: e ∘ a -> b • r -> a --|Exp e r|-> b -> e ==> r
 runExp v k f = exExp f v k
 
 elimExp :: a --|Exp e r|-> b -> Coexp e r b a -> e ==> r
-elimExp f = unCoexp (exExp f)
+elimExp = unCoexp . exExp
 
 exExpFn :: Exp e r a b -> ((e -> a) -> (b -> r) -> (e -> r))
 exExpFn = coerce . exExp
