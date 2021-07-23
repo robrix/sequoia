@@ -64,7 +64,7 @@ liftLR :: Exp e r a b -> Seq e r (a < _Γ) (_Δ > b)
 liftLR = dimap exl inr . inSeqExp
 
 lowerLR :: (Exp e r a b -> _Γ -|Seq e r|- _Δ) -> a < _Γ -|Seq e r|- _Δ > b -> _Γ -|Seq e r|- _Δ
-lowerLR f p = Seq (\ _Γ _Δ -> _Δ ↓ f (Exp (\ a b -> (_Δ |> b) ↓ p ↑ (a <| _Γ))) ↑ _Γ)
+lowerLR f p = Seq (\ _Γ _Δ -> _Δ ↓ f (Exp (\ a b -> _Δ |> b ↓ p ↑ a <| _Γ)) ↑ _Γ)
 
 inSeqExp :: Exp e r a b -> Seq e r a b
 inSeqExp = Seq . exExp
@@ -132,11 +132,11 @@ instance Contextual Seq where
 instance Environment Seq where
   environment = Seq (\ _Γ _Δ -> env (inrK _Δ ••))
 
-  withEnv r s = Seq (\ _Γ _Δ -> env (\ e -> (_Δ |> K (_Δ ↓ s ↑ lmap (const e) _Γ <==)) ↓ r ↑ _Γ))
+  withEnv r s = Seq (\ _Γ _Δ -> env (\ e -> _Δ |> K (_Δ ↓ s ↑ lmap (const e) _Γ <==) ↓ r ↑ _Γ))
 
 instance Calculus.Control Seq where
   reset s = Seq (\ _Γ _Δ -> _Δ •∘ V (K id ↓ s ↑ _Γ <==))
-  shift s = Seq (\ _Γ _Δ -> (inlK _Δ |> K id) ↓ s ↑ (pure (inrK _Δ) <| _Γ))
+  shift s = Seq (\ _Γ _Δ -> inlK _Δ |> K id ↓ s ↑ pure (inrK _Δ) <| _Γ)
 
 
 -- Assertion
@@ -231,7 +231,7 @@ instance SubtractionIntro Seq where
 
 instance UniversalIntro Seq where
   forAllL p = mapL (fmap (notNegate . runForAll)) p
-  forAllR p = Seq (\ _Γ _Δ -> liftRes (\ run -> inrK _Δ •• ForAll (K (\ k -> run ((inlK _Δ |> k) ↓ p ↑ _Γ)))))
+  forAllR p = Seq (\ _Γ _Δ -> liftRes (\ run -> inrK _Δ •• ForAll (K (\ k -> run (inlK _Δ |> k ↓ p ↑ _Γ)))))
 
 instance ExistentialIntro Seq where
   existsL p = popL (val (inSeqExp . dnE . runExists (getSeq . pushL p . pure)))
