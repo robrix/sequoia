@@ -5,6 +5,8 @@ module Sequoia.Profunctor.Context
 ( -- * Context & control profunctor
   _C
 , type (==>)(..)
+  -- * Elimination
+, toV
   -- * Composition
 , (•<<)
 , (>>•)
@@ -27,6 +29,7 @@ module Sequoia.Profunctor.Context
 import Control.Arrow
 import Control.Category as Cat (Category)
 import Control.Monad (join)
+import Data.Coerce (coerce)
 import Data.Distributive
 import Data.Functor.Identity
 import Data.Functor.Rep as Co
@@ -69,6 +72,12 @@ instance Pro.Representable (==>) where
 instance Pro.Corepresentable (==>) where
   type Corep (==>) = Identity
   cotabulate = C . lmap Identity
+
+
+-- Elimination
+
+toV :: e ==> r -> e ∘ r
+toV = coerce
 
 
 -- Composition
