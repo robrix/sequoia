@@ -7,7 +7,7 @@ module Sequoia.Functor.Sink
 , snkFn
 , (↓)
   -- * Elimination
-, runSnkFn
+, runSnk
 , elimSnk
   -- * Computation
 , mapSnkK
@@ -43,15 +43,15 @@ snkFn :: ((e -> a) -> (e -> r)) -> Snk e r a
 snkFn = coerce
 
 (↓) :: b • r -> a --|Exp e r|-> b -> a --|Snk e r
-k ↓ f = Snk (flip (exExp f) k)
+k ↓ f = snk (flip (exExp f) k)
 
 infixl 2 ↓
 
 
 -- Elimination
 
-runSnkFn :: Snk e r a -> ((e -> a) -> (e -> r))
-runSnkFn = coerce . runSnk
+runSnk :: Snk e r a -> (e ∘ a -> e ==> r)
+runSnk = coerce . runSnk
 
 -- FIXME: this takes a function instead of a Src to avoid cyclic module imports, would be nicer to have the definitions pulled out somewhere reasonable
 elimSnk :: Snk e r a -> (a • r -> e ==> r) -> e ==> r

@@ -4,13 +4,11 @@ module Sequoia.Functor.Snk.Internal
 
 import Data.Functor.Contravariant
 import Sequoia.Functor.Applicative
-import Sequoia.Profunctor.Context
-import Sequoia.Profunctor.Value
 
-newtype Snk e r a = Snk { runSnk :: e ∘ a -> e ==> r }
+newtype Snk e r a = Snk { runSnkFn :: (e -> a) -> (e -> r) }
 
 instance Contravariant (Snk e r) where
-  contramap f = Snk . (. fmap f) . runSnk
+  contramap f = Snk . (. fmap f) . runSnkFn
 
 instance Contrapply (Snk e r) where
-  contraliftA2 f a b = Snk (val (either (runSnk a . pure) (runSnk b . pure) . f))
+  contraliftA2 f a b = Snk (\ v -> either (runSnkFn a . pure) (runSnkFn b . pure) . f . v <*> id)
