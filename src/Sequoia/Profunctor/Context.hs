@@ -6,6 +6,7 @@ module Sequoia.Profunctor.Context
   _C
 , type (==>)(..)
   -- * Elimination
+, toK
 , toV
   -- * Composition
 , (•<<)
@@ -75,6 +76,9 @@ instance Pro.Corepresentable (==>) where
 
 
 -- Elimination
+
+toK :: e ==> r -> e • r
+toK = coerce
 
 toV :: e ==> r -> e ∘ r
 toV = coerce
