@@ -14,6 +14,7 @@ module Sequoia.Sequent
 
 import qualified Control.Category as Cat
 import           Control.Monad.Trans.Class
+import           Data.Function ((&))
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
 import           Prelude hiding (init)
@@ -36,7 +37,7 @@ import           Sequoia.Calculus.XOr
 import           Sequoia.Conjunction
 import           Sequoia.Contextual
 import           Sequoia.Disjunction
-import           Sequoia.Functor.Source
+import           Sequoia.Functor.Source hiding ((↑))
 import           Sequoia.Optic.Getter
 import           Sequoia.Optic.Review
 import           Sequoia.Profunctor.Coexponential
@@ -59,7 +60,7 @@ liftLR :: Exp e r a b -> Seq e r (a < _Γ) (_Δ > b)
 liftLR = dimap exl inr . Seq
 
 lowerLR :: (Exp e r a b -> _Γ -|Seq e r|- _Δ) -> a < _Γ -|Seq e r|- _Δ > b -> _Γ -|Seq e r|- _Δ
-lowerLR f p = Seq (Exp (\ _Γ _Δ -> exExp (getSeq (f (Exp (\ a b -> exExp (getSeq p) (a <| _Γ) (_Δ |> b))))) _Γ _Δ))
+lowerLR f p = Seq (Exp (\ _Γ _Δ -> _Δ ↓ f (Exp (\ a b -> (_Δ |> b) ↓ p ↑ (a <| _Γ))) ↑ _Γ))
 
 
 -- Elimination
@@ -69,6 +70,17 @@ evalSeq = evalExp . getSeq
 
 runSeq :: Seq e r _Γ _Δ -> ((e -> _Γ) -> (_Δ -> r) -> (e -> r))
 runSeq s f g = evalSeq (dimap f g s)
+
+
+(↑) :: a -|Seq e r|- b -> e ∘ a -> (b • r -> e ==> r)
+(↑) = exExp . getSeq
+
+infixl 8 ↑
+
+(↓) :: b • r -> (b • r -> e ==> r) -> e ==> r
+(↓) = (&)
+
+infixl 7 ↓
 
 
 -- Effectful sequents
