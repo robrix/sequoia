@@ -224,7 +224,7 @@ instance FunctionIntro Seq where
   funR = lowerLR (liftR . pure . Fun) . wkR'
 
 instance SubtractionIntro Seq where
-  subL f = popL (val (\ s -> liftR (s^.subA_) >>> f >>> liftL (s^.subK_)))
+  subL f = popL (val (\ s -> liftR (subA s) >>> f >>> liftL (subK s)))
   subR a b = wkR' a >>> popL (\ a -> lowerL (liftR . pure . Sub . Coexp a) (wkR b))
 
 
