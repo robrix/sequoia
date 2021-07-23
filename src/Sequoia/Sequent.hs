@@ -7,6 +7,7 @@ module Sequoia.Sequent
   -- * Elimination
 , evalSeq
 , runSeq
+, elimSeq
   -- * Effectful sequents
 , runSeqT
 , SeqT(..)
@@ -71,6 +72,9 @@ evalSeq = evalExp . getSeq
 runSeq :: Seq e r _Γ _Δ -> ((e -> _Γ) -> (_Δ -> r) -> (e -> r))
 runSeq s f g = evalSeq (dimap f g s)
 
+elimSeq :: a -|Seq e r|- b -> Coexp e r b a -> e ==> r
+elimSeq = unCoexp . (↑)
+
 
 (↑) :: a -|Seq e r|- b -> e ∘ a -> (b • r -> e ==> r)
 (↑) = exExp . getSeq
@@ -113,7 +117,7 @@ deriving via Contextually Seq instance Exchange Seq
 -- Contextual rules
 
 instance Contextual Seq where
-  swapΓΔ f c' = Seq (Exp (\ v k -> elimExp (getSeq (f (coexp v k))) c'))
+  swapΓΔ f c' = Seq (Exp (\ v k -> elimSeq (f (coexp v k)) c'))
 
 
 -- Control
