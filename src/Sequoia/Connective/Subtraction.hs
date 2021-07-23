@@ -5,6 +5,7 @@ module Sequoia.Connective.Subtraction
 , type (-~)
   -- * Elimination
 , subA
+, subK
   -- * Optics
 , subA_
 , subK_
@@ -38,6 +39,9 @@ infixr 5 -~
 
 subA :: b >-Sub e r-~ a -> e ∘ a
 subA = (^.subA_)
+
+subK :: b >-Sub e r-~ a -> b • r
+subK = (^.subK_)
 
 
 -- Optics
