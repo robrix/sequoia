@@ -74,7 +74,7 @@ solSnk
   ::      e ==> r
             <->
      e -| Snk e r
-solSnk = Snk . const <-> ($ V id) . runSnk
+solSnk = snk . const <-> ($ V id) . runSnk
 
 
 srcSig
