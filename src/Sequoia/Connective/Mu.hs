@@ -16,9 +16,9 @@ import           Sequoia.Connective.Function
 import           Sequoia.Connective.Quantification
 import           Sequoia.Optic.Setter
 import           Sequoia.Polarity
+import           Sequoia.Profunctor.Context
 import           Sequoia.Profunctor.Continuation
 import           Sequoia.Profunctor.Exponential
-import           Sequoia.Profunctor.Value
 
 -- Recursion
 

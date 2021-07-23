@@ -1,4 +1,3 @@
-{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Profunctor.Value
 ( -- * Value profunctor
@@ -9,14 +8,10 @@ module Sequoia.Profunctor.Value
 , (>∘∘<)
 , (>∘∘∘<)
 , (<∘∘>)
-  -- * Ambient environment
-, Env(..)
-, val
 ) where
 
 import Control.Applicative (liftA2)
 import Control.Category (Category)
-import Control.Monad (join)
 import Data.Distributive
 import Data.Functor.Identity
 import Data.Functor.Rep as Co
@@ -27,12 +22,11 @@ import Data.Profunctor.Traversing
 import Sequoia.Conjunction
 import Sequoia.Disjunction
 import Sequoia.Optic.Iso
-import Sequoia.Profunctor.Recall
 
 -- Value profunctor
 
 newtype e ∘ a = V { (∘) :: e -> a }
-  deriving (Applicative, Category, Choice, Closed, Cochoice, Pro.Corepresentable, Costrong, Env e, Functor, Mapping, Monad, Profunctor, Co.Representable, Pro.Representable, Strong, Traversing)
+  deriving (Applicative, Category, Choice, Closed, Cochoice, Pro.Corepresentable, Costrong, Functor, Mapping, Monad, Profunctor, Co.Representable, Pro.Representable, Strong, Traversing)
 
 infixl 8 ∘
 
@@ -73,18 +67,3 @@ infix 3 <∘∘>
 
 bitraverseDisjV :: Disj d => e ∘ (a `d` b) -> e -> (e ∘ a) `d` (e ∘ b)
 bitraverseDisjV = fmap (bimapDisj pure pure) . (∘)
-
-
--- Ambient environment
-
-class Env e c | c -> e where
-  env :: (e -> c) -> c
-
-instance Env e (e -> a) where
-  env = join
-
-deriving instance Env e (Forget r e b)
-deriving instance Env e (Recall e a b)
-
-val :: Env e c => (a -> c) -> (e ∘ a -> c)
-val f v = env (f . (v ∘))

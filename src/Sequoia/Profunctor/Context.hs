@@ -1,3 +1,4 @@
+{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Profunctor.Context
@@ -13,11 +14,19 @@ module Sequoia.Profunctor.Context
 , mapCKV
 , mapCK
 , mapCV
+  -- * Ambient environment
+, Env(..)
+, val
+  -- * Ambient control
+, Res(..)
+, cont
+, (••)
 , (•∘)
 ) where
 
 import Control.Arrow
 import Control.Category as Cat (Category)
+import Control.Monad (join)
 import Data.Distributive
 import Data.Functor.Identity
 import Data.Functor.Rep as Co
@@ -28,6 +37,7 @@ import Data.Profunctor.Traversing
 import Sequoia.Optic.Iso
 import Sequoia.Optic.Setter
 import Sequoia.Profunctor.Continuation
+import Sequoia.Profunctor.Recall
 import Sequoia.Profunctor.Value
 
 -- Context & control profunctor
@@ -90,6 +100,45 @@ mapCK = over _C . under _K
 
 mapCV :: (forall x . e ∘ x -> e' ∘ x) -> (e ==> r -> e' ==> r)
 mapCV = over _C . under _V
+
+
+-- Ambient environment
+
+class Env e c | c -> e where
+  env :: (e -> c) -> c
+
+instance Env e (e -> a) where
+  env = join
+
+deriving instance Env e (e ∘ r)
+deriving instance Env e (Forget r e b)
+deriving instance Env e (Recall e a b)
+
+val :: Env e c => (a -> c) -> (e ∘ a -> c)
+val f v = env (f . (v ∘))
+
+
+-- Ambient control
+
+class Res r c | c -> r where
+  res :: r -> c
+  liftRes :: ((c -> r) -> c) -> c
+
+instance Res r (a -> r) where
+  res = pure
+  liftRes f = f =<< flip ($)
+
+deriving instance Res r (a • r)
+deriving instance Res r (Forget r a b)
+deriving instance Res r (Recall e a r)
+
+cont :: Res r c => (((a -> c) -> a • r) -> c) -> c
+cont f = liftRes (\ run -> f (K . (run .)))
+
+(••) :: Res r c => a • r -> a -> c
+k •• v = res (k • v)
+
+infix 7 ••
 
 
 (•∘) :: (Env e c, Res r c) => a • r -> e ∘ a -> c

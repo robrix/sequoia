@@ -62,6 +62,7 @@ import Sequoia.Conjunction
 import Sequoia.Disjunction
 import Sequoia.Optic.Setter
 import Sequoia.Profunctor.Coexponential
+import Sequoia.Profunctor.Context
 import Sequoia.Profunctor.Continuation
 import Sequoia.Profunctor.Value
 
