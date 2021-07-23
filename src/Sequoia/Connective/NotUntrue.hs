@@ -13,7 +13,7 @@ import Sequoia.Profunctor.Continuation
 -- NotUntrue
 
 notUntrue :: (e -> a) -> NotUntrue e r a
-notUntrue f = NotUntrue (Src (C . (. f) . (•)))
+notUntrue f = NotUntrue (inSrc (C . (. f) . (•)))
 
 newtype NotUntrue e r a = NotUntrue { runNotUntrue :: Src e r a }
   deriving (Applicative, Functor, Monad)

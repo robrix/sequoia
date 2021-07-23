@@ -3,6 +3,7 @@ module Sequoia.Functor.Source
   _Src
 , Src(..)
   -- * Construction
+, inSrc
 , inSrcFn
 , (↑)
   -- * Elimination
@@ -28,6 +29,9 @@ import Sequoia.Profunctor.Exponential
 import Sequoia.Profunctor.Value
 
 -- Construction
+
+inSrc :: ((b • r) -> (e ==> r)) -> Src e r b
+inSrc = coerce
 
 inSrcFn :: ((b -> r) -> (e -> r)) -> Src e r b
 inSrcFn = coerce
