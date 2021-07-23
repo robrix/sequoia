@@ -4,6 +4,7 @@ module Sequoia.Sequent
   -- * Construction
 , liftLR
 , lowerLR
+, inSeqCoexp
   -- * Elimination
 , evalSeq
 , runSeq
@@ -63,6 +64,9 @@ liftLR = dimap exl inr . Seq
 lowerLR :: (Exp e r a b -> _Γ -|Seq e r|- _Δ) -> a < _Γ -|Seq e r|- _Δ > b -> _Γ -|Seq e r|- _Δ
 lowerLR f p = Seq (Exp (\ _Γ _Δ -> _Δ ↓ f (Exp (\ a b -> (_Δ |> b) ↓ p ↑ (a <| _Γ))) ↑ _Γ))
 
+inSeqCoexp :: (Coexp e r b a -> e ==> r) -> Seq e r a b
+inSeqCoexp = Seq . inExpCoexp
+
 
 -- Elimination
 
@@ -117,7 +121,7 @@ deriving via Contextually Seq instance Exchange Seq
 -- Contextual rules
 
 instance Contextual Seq where
-  swapΓΔ f = Seq . inExpCoexp . (. f) . flip elimSeq
+  swapΓΔ f = inSeqCoexp . (. f) . flip elimSeq
 
 
 -- Control
