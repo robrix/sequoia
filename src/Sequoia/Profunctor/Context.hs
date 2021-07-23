@@ -94,3 +94,5 @@ mapCV = over _C . under _V
 
 (•∘) :: (Env e c, Res r c) => a • r -> e ∘ a -> c
 k •∘ v = env (\ e -> res (k • v ∘ e))
+
+infix 8 •∘
