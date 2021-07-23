@@ -121,11 +121,11 @@ instance Contextual Seq where
 instance Environment Seq where
   environment = Seq (Exp (\ _Γ _Δ -> env (inrK _Δ ••)))
 
-  withEnv r s = Seq (Exp (\ _Γ _Δ -> env (\ e -> exExp (getSeq r) _Γ (_Δ |> K (exExp (getSeq s) (lmap (const e) _Γ) _Δ <==)))))
+  withEnv r s = Seq (Exp (\ _Γ _Δ -> env (\ e -> (_Δ |> K (_Δ ↓ s ↑ lmap (const e) _Γ <==)) ↓ r ↑ _Γ)))
 
 instance Calculus.Control Seq where
-  reset s = Seq (inExpFn (\ _Γ _Δ -> _Δ . exExpFn (getSeq s) _Γ id))
-  shift s = Seq (Exp (\ _Γ _Δ -> exExp (getSeq s) (pure (inrK _Δ) <| _Γ) (inlK _Δ |> K id)))
+  reset s = Seq (Exp (\ _Γ _Δ -> _Δ •∘ V (K id ↓ s ↑ _Γ <==)))
+  shift s = Seq (Exp (\ _Γ _Δ -> (inlK _Δ |> K id) ↓ s ↑ (pure (inrK _Δ) <| _Γ)))
 
 
 -- Assertion
@@ -220,7 +220,7 @@ instance SubtractionIntro Seq where
 
 instance UniversalIntro Seq where
   forAllL p = mapL (fmap (notNegate . runForAll)) p
-  forAllR p = Seq (Exp (\ _Γ _Δ -> liftRes (\ run -> inrK _Δ •• ForAll (K (\ k -> run (exExp (getSeq p) _Γ (inlK _Δ |> k)))))))
+  forAllR p = Seq (Exp (\ _Γ _Δ -> liftRes (\ run -> inrK _Δ •• ForAll (K (\ k -> run ((inlK _Δ |> k) ↓ p ↑ _Γ))))))
 
 instance ExistentialIntro Seq where
   existsL p = popL (val (Seq . dnE . runExists (getSeq . pushL p . pure)))
