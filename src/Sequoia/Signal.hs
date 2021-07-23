@@ -81,7 +81,7 @@ srcSig
   ::      Src e r |- b
             <->
      e -| Sig e r |- b
-srcSig = Sig . const . runSrc <-> Src . ($ V id) . runSig
+srcSig = _Src.from (_Sig.constantWith (V id) (flip ((.) . (∘<<))))
 
 composeSrcSig :: Src e r a -> Sig e r a b -> Src e r b
 composeSrcSig src sig = review srcSig (sig <<< view srcSig src)
