@@ -138,7 +138,7 @@ inExpFn :: ((e -> a) -> (b -> r) -> (e -> r)) -> Exp e r a b
 inExpFn = coerce
 
 inExpCoexp :: (Coexp e r b a -> e ==> r) -> Exp e r a b
-inExpCoexp f = Exp (fmap f . coexp)
+inExpCoexp f = Exp (fmap f . Coexp)
 
 
 -- Elimination
