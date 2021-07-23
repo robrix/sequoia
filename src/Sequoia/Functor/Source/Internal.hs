@@ -5,7 +5,6 @@ module Sequoia.Functor.Source.Internal
 
 import Data.Profunctor
 import Sequoia.Optic.Iso
-import Sequoia.Optic.Setter
 import Sequoia.Profunctor.Context
 import Sequoia.Profunctor.Continuation
 
@@ -15,7 +14,7 @@ _Src = coerced
 newtype Src e r b = Src { exSrcFn :: (b -> r) -> (e -> r) }
 
 instance Functor (Src e r) where
-  fmap f = over _Src (. lmap f)
+  fmap f = Src . (. lmap f) . exSrcFn
 
 instance Applicative (Src e r) where
   pure = Src . fmap res . flip ($)
