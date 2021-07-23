@@ -29,6 +29,7 @@ module Sequoia.Profunctor.Exponential
 , (>>>)
   -- ** Computation
 , dnE
+, reset
 ) where
 
 import           Control.Arrow
@@ -161,3 +162,6 @@ runExpFn = coerce . runExp
 
 dnE :: ((a --|Exp e r|-> b) • r) • r -> a --|Exp e r|-> b
 dnE k = Exp (\ v k' -> cont (\ _K -> k •• _K (\ f -> runExp f v k')))
+
+reset :: a --|Exp e b|-> b -> a --|Exp e r|-> b
+reset f = Exp (\ v k -> k •∘ toV (runExp f v idK))
