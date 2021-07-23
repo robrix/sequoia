@@ -50,10 +50,12 @@ import           Sequoia.Profunctor.Value
 
 -- Sequents
 
-newtype Seq e r _Γ _Δ = Seq { exSeq :: e ∘ _Γ -> _Δ • r -> e ==> r }
+newtype Seq e r _Γ _Δ = Seq { (↑) :: e ∘ _Γ -> _Δ • r -> e ==> r }
   deriving (Env e, Res r) via (Exp e r _Γ _Δ)
   deriving (Applicative, Functor, Monad) via (Exp e r _Γ)
   deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via (Exp e r)
+
+infixl 3 ↑
 
 
 -- Construction
@@ -83,13 +85,8 @@ elimSeq :: _Γ -|Seq e r|- _Δ -> Coexp e r _Δ _Γ -> e ==> r
 elimSeq = unCoexp . (↑)
 
 getSeq :: _Γ -|Seq e r|- _Δ -> _Γ -|Exp e r|- _Δ
-getSeq = Exp . exSeq
+getSeq = Exp . (↑)
 
-
-(↑) :: a -|Seq e r|- b -> e ∘ a -> (b • r -> e ==> r)
-(↑) = exSeq
-
-infixl 3 ↑
 
 (↓) :: b • r -> (b • r -> e ==> r) -> e ==> r
 (↓) = (&)
