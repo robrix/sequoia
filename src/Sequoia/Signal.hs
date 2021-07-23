@@ -67,7 +67,7 @@ solSrc
   ::      e ==> r
             <->
           Src e r |- r
-solSrc = inSrc . const <-> ($ K id) . runSrc
+solSrc = src . const <-> ($ K id) . runSrc
 
 
 solSnk

@@ -3,8 +3,8 @@ module Sequoia.Functor.Source
   _Src
 , Src(..)
   -- * Construction
-, inSrc
-, inSrcFn
+, src
+, srcFn
 , (↑)
   -- * Elimination
 , runSrc
@@ -36,11 +36,11 @@ _Src = coerced
 
 -- Construction
 
-inSrc :: ((b • r) -> (e ==> r)) -> Src e r b
-inSrc = coerce
+src :: ((b • r) -> (e ==> r)) -> Src e r b
+src = coerce
 
-inSrcFn :: ((b -> r) -> (e -> r)) -> Src e r b
-inSrcFn = Src
+srcFn :: ((b -> r) -> (e -> r)) -> Src e r b
+srcFn = Src
 
 (↑) :: a --|Exp e r|-> b -> e ∘ a -> Src e r|-> b
 f ↑ v = Src (exExpFn f (v ∘))
