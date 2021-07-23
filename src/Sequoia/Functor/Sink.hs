@@ -4,6 +4,7 @@ module Sequoia.Functor.Sink
 , Snk(..)
   -- * Construction
 , snk
+, snkFn
 , (↓)
   -- * Elimination
 , runSnkFn
@@ -47,6 +48,9 @@ instance Contrapply (Snk e r) where
 
 snk :: (e ∘ a -> e ==> r) -> Snk e r a
 snk = coerce
+
+snkFn :: ((e -> a) -> (e -> r)) -> Snk e r a
+snkFn = coerce
 
 (↓) :: b • r -> a --|Exp e r|-> b -> a --|Snk e r
 k ↓ f = Snk (flip (exExp f) k)
