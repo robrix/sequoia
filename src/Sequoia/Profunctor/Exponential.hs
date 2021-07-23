@@ -21,9 +21,9 @@ module Sequoia.Profunctor.Exponential
 , evalExp
 , appExp
 , appExp2
-, runExp
+, runExp'
 , elimExp
-, exExpFn
+, runExpFn
   -- ** Composition
 , (<<<)
 , (>>>)
@@ -50,38 +50,38 @@ import           Sequoia.Profunctor.Value as V
 _Exp :: Iso (Exp e r a b) (Exp e' r' a' b') (e ∘ a -> b • r -> e ==> r) (e' ∘ a' -> b' • r' -> e' ==> r')
 _Exp = coerced
 
-newtype Exp e r a b = Exp { exExp :: e ∘ a -> b • r -> e ==> r }
+newtype Exp e r a b = Exp { runExp :: e ∘ a -> b • r -> e ==> r }
 
 instance Profunctor (Exp e r) where
-  dimap f g = Exp . dimap (fmap f) (lmap (lmap g)) . exExp
+  dimap f g = Exp . dimap (fmap f) (lmap (lmap g)) . runExp
 
 instance Strong (Exp e r) where
-  first'  r = Exp (\ a b -> val (\ (a, c) -> exExp r (pure a) (lmap (,c) b)) a)
-  second' r = Exp (\ a b -> val (\ (c, a) -> exExp r (pure a) (lmap (c,) b)) a)
+  first'  r = Exp (\ a b -> val (\ (a, c) -> runExp r (pure a) (lmap (,c) b)) a)
+  second' r = Exp (\ a b -> val (\ (c, a) -> runExp r (pure a) (lmap (c,) b)) a)
 
 instance Choice (Exp e r) where
-  left'  r = Exp (\ a b -> val (flip (exExp r) (inlK b) . pure <--> (inrK b ••)) a)
-  right' r = Exp (\ a b -> val ((inlK b ••) <--> flip (exExp r) (inrK b) . pure) a)
+  left'  r = Exp (\ a b -> val (flip (runExp r) (inlK b) . pure <--> (inrK b ••)) a)
+  right' r = Exp (\ a b -> val ((inlK b ••) <--> flip (runExp r) (inrK b) . pure) a)
 
 instance Traversing (Exp e r) where
-  wander traverse r = Exp (\ v k -> val (\ s -> exExp (traverse ((r <<<) . pure) s) (V id) k) v)
+  wander traverse r = Exp (\ v k -> val (\ s -> runExp (traverse ((r <<<) . pure) s) (V id) k) v)
 
 instance Cat.Category (Exp e r) where
   id = Exp (flip (•∘))
-  f . g = Exp (\ a c -> cont (\ _K -> exExp g a (_K (\ b -> exExp f (pure b) c))))
+  f . g = Exp (\ a c -> cont (\ _K -> runExp g a (_K (\ b -> runExp f (pure b) c))))
 
 instance Functor (Exp e r c) where
   fmap = rmap
 
 instance Applicative (Exp e r a) where
   pure = Exp . const . flip (••)
-  df <*> da = Exp (\ a b -> cont (\ _K -> exExp df a (_K (\ f -> exExp da a (lmap f b)))))
+  df <*> da = Exp (\ a b -> cont (\ _K -> runExp df a (_K (\ f -> runExp da a (lmap f b)))))
 
 instance Monad (Exp e r a) where
-  m >>= f = Exp (\ v k -> cont (\ _K -> exExp m v (_K (\ b -> exExp (f b) v k))))
+  m >>= f = Exp (\ v k -> cont (\ _K -> runExp m v (_K (\ b -> runExp (f b) v k))))
 
 instance Coapply (Exp e r) where
-  coliftA2 f a b = Exp (\ v k -> env ((flip (exExp a) k <∘∘> flip (exExp b) k) (f <$> v)))
+  coliftA2 f a b = Exp (\ v k -> env ((flip (runExp a) k <∘∘> flip (runExp b) k) (f <$> v)))
 
 instance Arrow (Exp e r) where
   arr = exp'
@@ -93,14 +93,14 @@ instance ArrowChoice (Exp e r) where
   right = right'
 
 instance ArrowApply (Exp e r) where
-  app = Exp (\ v k -> val (runExp (exrF v) k) (exlF v))
+  app = Exp (\ v k -> val (runExp' (exrF v) k) (exlF v))
 
 instance Env e (Exp e r a b) where
-  env f = Exp (\ v k -> env (runExp v k . f))
+  env f = Exp (\ v k -> env (runExp' v k . f))
 
 instance Res r (Exp e r a b) where
   res = Exp . const . const . res
-  liftRes f = Exp (\ v k -> let run = runExp v k in liftRes (dimap (. run) run f))
+  liftRes f = Exp (\ v k -> let run = runExp' v k in liftRes (dimap (. run) run f))
 
 
 -- Mixfix notation
@@ -139,25 +139,25 @@ expCoexp f = Exp (fmap f . Coexp)
 -- Elimination
 
 evalExp :: e --|Exp e r|-> r -> (e -> r)
-evalExp f = exExpFn f id id
+evalExp f = runExpFn f id id
 
 appExp :: a --|Exp e r|-> b -> e ∘ (e ∘ a -> b • r • r)
-appExp f = V (\ e a -> K (\ b -> exExp f a b <== e))
+appExp f = V (\ e a -> K (\ b -> runExp f a b <== e))
 
 appExp2 :: a --|Exp e r|-> b --|Exp e r|-> c -> e ∘ (e ∘ a -> e ∘ b -> c • r • r)
-appExp2 f = V (\ e a b -> K (\ c -> exExp f a (K (\ g -> exExp g b c <== e)) <== e))
+appExp2 f = V (\ e a b -> K (\ c -> runExp f a (K (\ g -> runExp g b c <== e)) <== e))
 
-runExp :: e ∘ a -> b • r -> a --|Exp e r|-> b -> e ==> r
-runExp v k f = exExp f v k
+runExp' :: e ∘ a -> b • r -> a --|Exp e r|-> b -> e ==> r
+runExp' v k f = runExp f v k
 
 elimExp :: a --|Exp e r|-> b -> Coexp e r b a -> e ==> r
-elimExp = unCoexp . exExp
+elimExp = unCoexp . runExp
 
-exExpFn :: Exp e r a b -> ((e -> a) -> (b -> r) -> (e -> r))
-exExpFn = coerce . exExp
+runExpFn :: Exp e r a b -> ((e -> a) -> (b -> r) -> (e -> r))
+runExpFn = coerce . runExp
 
 
 -- Computation
 
 dnE :: ((a --|Exp e r|-> b) • r) • r -> a --|Exp e r|-> b
-dnE k = Exp (\ v k' -> cont (\ _K -> k •• _K (\ f -> exExp f v k')))
+dnE k = Exp (\ v k' -> cont (\ _K -> k •• _K (\ f -> runExp f v k')))

@@ -33,7 +33,7 @@ funPar2
   <-> lmap (\ p -> K ((p •) . (mkPar (inrK (lmap pure p)) =<<)))
 
 mkPar :: b • r -> a ~~Fun e r~> b -> e ∘ (r ¬a ⅋ b)
-mkPar p f = V (\ e -> inl (Not (K (\ a -> exExp (getFun f) (pure a) p <== e))))
+mkPar p f = V (\ e -> inl (Not (K (\ a -> runExp (getFun f) (pure a) p <== e))))
 
 mkFun :: r ¬a ⅋ b -> a ~~Fun e r~> b
 mkFun p = Fun (Exp (\ a b -> ((•∘ a) . getNot <--> (b ••)) p))

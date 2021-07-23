@@ -44,7 +44,7 @@ srcFn :: ((b -> r) -> (e -> r)) -> Src e r b
 srcFn = Src
 
 (↑) :: a --|Exp e r|-> b -> e ∘ a -> Src e r|-> b
-f ↑ v = Src (exExpFn f (v ∘))
+f ↑ v = Src (runExpFn f (v ∘))
 
 infixl 3 ↑
 

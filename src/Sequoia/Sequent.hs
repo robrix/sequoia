@@ -68,7 +68,7 @@ lowerLR :: (Exp e r a b -> _Γ -|Seq e r|- _Δ) -> a < _Γ -|Seq e r|- _Δ > b -
 lowerLR f p = Seq (\ _Γ _Δ -> _Δ ↓ f (Exp (\ a b -> _Δ |> b ↓ p ↑ a <| _Γ)) ↑ _Γ)
 
 inSeqExp :: Exp e r a b -> Seq e r a b
-inSeqExp = Seq . exExp
+inSeqExp = Seq . runExp
 
 inSeqCoexp :: (Coexp e r b a -> e ==> r) -> Seq e r a b
 inSeqCoexp = inSeqExp . expCoexp
