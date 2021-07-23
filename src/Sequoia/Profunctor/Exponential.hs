@@ -19,7 +19,6 @@ module Sequoia.Profunctor.Exponential
 , inExpFn
 , inExpCoexp
   -- ** Elimination
-, exExp
 , evalExp
 , appExp
 , appExp2
@@ -52,7 +51,7 @@ import           Sequoia.Profunctor.Value as V
 _Exp :: Iso (Exp e r a b) (Exp e' r' a' b') (e ∘ a -> b • r -> e ==> r) (e' ∘ a' -> b' • r' -> e' ==> r')
 _Exp = coerced
 
-newtype Exp e r a b = Exp (e ∘ a -> b • r -> e ==> r)
+newtype Exp e r a b = Exp { exExp :: e ∘ a -> b • r -> e ==> r }
 
 instance Profunctor (Exp e r) where
   dimap f g = Exp . dimap (fmap f) (lmap (lmap g)) . exExp
@@ -142,9 +141,6 @@ inExpCoexp f = Exp (fmap f . Coexp)
 
 
 -- Elimination
-
-exExp :: Exp e r a b -> (e ∘ a -> b • r -> e ==> r)
-exExp (Exp f) = f
 
 evalExp :: e --|Exp e r|-> r -> (e -> r)
 evalExp f = exExpFn f id id
