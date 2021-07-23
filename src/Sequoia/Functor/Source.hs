@@ -18,6 +18,7 @@ module Sequoia.Functor.Source
 
 import Data.Coerce
 import Data.Profunctor
+import Sequoia.Functor.Snk.Internal
 import Sequoia.Functor.Source.Internal
 import Sequoia.Optic.Getter
 import Sequoia.Optic.Iso
@@ -54,8 +55,8 @@ runSrc :: Src e r b -> ((b • r) -> (e ==> r))
 runSrc = coerce . runSrcFn
 
 -- FIXME: this takes a function instead of a Snk to avoid cyclic module imports, would be nicer to have the definitions pulled out somewhere reasonable
-elimSrc :: Src e r a -> (e ∘ a -> e ==> r) -> e ==> r
-elimSrc sr sn = cont (\ _K -> runSrc sr (_K (sn . pure)))
+elimSrc :: Src e r a -> Snk e r a -> e ==> r
+elimSrc sr sn = env (res . (runSrcFn sr . flip (runSnkFn sn . pure) <*> id))
 
 
 -- Computation
