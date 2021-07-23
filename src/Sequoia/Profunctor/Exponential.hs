@@ -168,4 +168,4 @@ reset :: a --|Exp e b|-> b -> a --|Exp e r|-> b
 reset f = Exp (\ v k -> k •∘ toV (runExp f v idK))
 
 shift :: (a • r --|Exp e r|-> r) -> e --|Exp e r|-> a
-shift f = Exp (\ v k -> v ∘<< runExp f (pure k) idK)
+shift f = Exp (\ v k -> runExp f (pure k) idK <<∘ v)

@@ -11,8 +11,8 @@ module Sequoia.Profunctor.Context
   -- * Composition
 , (•<<)
 , (>>•)
-, (∘<<)
-, (>>∘)
+, (∘>>)
+, (<<∘)
   -- * Computation
 , mapCKV
 , mapCK
@@ -95,13 +95,13 @@ toV = coerce
 infixr 1 •<<, >>•
 
 
-(∘<<) :: d ∘ e -> e ==> r -> d ==> r
-(∘<<) = lmap . (∘)
+(∘>>) :: d ∘ e -> e ==> r -> d ==> r
+(∘>>) = lmap . (∘)
 
-(>>∘) :: e ==> r -> d ∘ e -> d ==> r
-(>>∘) = flip (∘<<)
+(<<∘) :: e ==> r -> d ∘ e -> d ==> r
+(<<∘) = flip (∘>>)
 
-infixr 1 ∘<<, >>∘
+infixr 1 ∘>>, <<∘
 
 
 -- Computation
