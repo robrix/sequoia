@@ -91,7 +91,7 @@ snkSig
   :: a -| Snk e r
             <->
      a -| Sig e r |- r
-snkSig = Sig . fmap const . runSnk <-> Snk . fmap ($ K id) . runSig
+snkSig = _Snk.from (_Sig.rmapping (constantWith (K id) (>>•)))
 
 composeSigSnk :: Sig e r a b -> Snk e r b -> Snk e r a
 composeSigSnk sig snk = review snkSig (view snkSig snk <<< sig)
