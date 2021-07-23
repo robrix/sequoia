@@ -28,6 +28,12 @@ import Sequoia.Profunctor.Continuation
 import Sequoia.Profunctor.Exponential
 import Sequoia.Profunctor.Value
 
+-- Sources
+
+_Src :: Iso (Src e r b) (Src e' r' b') (b • r -> e ==> r) (b' • r' -> e' ==> r')
+_Src = coerced
+
+
 -- Construction
 
 inSrc :: ((b • r) -> (e ==> r)) -> Src e r b

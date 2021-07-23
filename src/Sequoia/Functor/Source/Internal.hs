@@ -1,15 +1,9 @@
 module Sequoia.Functor.Source.Internal
-( _Src
-, Src(..)
+( Src(..)
 ) where
 
 import Data.Profunctor
-import Sequoia.Optic.Iso
 import Sequoia.Profunctor.Context
-import Sequoia.Profunctor.Continuation
-
-_Src :: Iso (Src e r b) (Src e' r' b') (b • r -> e ==> r) (b' • r' -> e' ==> r')
-_Src = coerced
 
 newtype Src e r b = Src { exSrcFn :: (b -> r) -> (e -> r) }
 
