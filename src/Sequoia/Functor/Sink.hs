@@ -43,6 +43,8 @@ instance Contrapply (Snk e r) where
 (↓) :: b • r -> a --|Exp e r|-> b -> a --|Snk e r
 k ↓ f = Snk (flip (exExp f) k)
 
+infixl 2 ↓
+
 
 -- Computation
 

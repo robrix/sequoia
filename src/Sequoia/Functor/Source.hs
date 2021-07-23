@@ -58,6 +58,8 @@ inSrcFn = coerce
 (↑) :: a --|Exp e r|-> b -> e ∘ a -> Src e r|-> b
 f ↑ v = Src (exExp f v)
 
+infixl 3 ↑
+
 
 -- Elimination
 

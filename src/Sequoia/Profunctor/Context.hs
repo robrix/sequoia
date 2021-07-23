@@ -39,7 +39,7 @@ newtype e ==> r = C { (<==) :: e -> r }
   deriving (Applicative, Arrow, ArrowApply, ArrowChoice, ArrowLoop, Cat.Category, Choice, Closed, Cochoice, Costrong, Env e, Functor, Mapping, Monad, Profunctor, Co.Representable, Res r, Strong, Traversing)
 
 infix 6 ==>
-infixl 6 <==
+infixl 1 <==
 
 instance Distributive ((==>) e) where
   distribute = distributeRep

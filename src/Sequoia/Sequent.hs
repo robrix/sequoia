@@ -75,12 +75,12 @@ runSeq s f g = evalSeq (dimap f g s)
 (↑) :: a -|Seq e r|- b -> e ∘ a -> (b • r -> e ==> r)
 (↑) = exExp . getSeq
 
-infixl 8 ↑
+infixl 3 ↑
 
 (↓) :: b • r -> (b • r -> e ==> r) -> e ==> r
 (↓) = (&)
 
-infixl 7 ↓
+infixl 2 ↓
 
 
 -- Effectful sequents
