@@ -1,0 +1,90 @@
+{
+	"ring": {
+		"scope": "haskell",
+		"prefix": "ring",
+		"body": [
+			"∘"
+		],
+		"description": "ring operator"
+	},
+	"up": {
+		"scope": "haskell",
+		"prefix": "up",
+		"body": [
+			"↑"
+		],
+		"description": "up arrow"
+	},
+	"down": {
+		"scope": "haskell",
+		"prefix": "down",
+		"body": [
+			"↓"
+		],
+		"description": "down arrow"
+	},
+	"par": {
+		"scope": "haskell",
+		"prefix": "par",
+		"body": [
+			"⅋"
+		],
+		"description": "par operator"
+	},
+	"tensor": {
+		"scope": "haskell",
+		"prefix": "tensor",
+		"body": [
+			"⊗"
+		],
+		"description": "tensor operator"
+	},
+	"sum": {
+		"scope": "haskell",
+		"prefix": "sum",
+		"body": [
+			"⊕"
+		],
+		"description": "sum operator"
+	},
+	"turnstile": {
+		"scope": "haskell",
+		"prefix": "turnstile",
+		"body": [
+			"⊢"
+		],
+		"description": "turnstile operator"
+	},
+	"Gamma": {
+		"scope": "haskell",
+		"prefix": "Gamma",
+		"body": [
+			"Γ"
+		],
+		"description": "uppercase gamma"
+	},
+	"Delta": {
+		"scope": "haskell",
+		"prefix": "Delta",
+		"body": [
+			"Δ"
+		],
+		"description": "uppercase delta"
+	}
+	// Place your sequoia workspace snippets here. Each snippet is defined under a snippet name and has a scope, prefix, body and
+	// description. Add comma separated ids of the languages where the snippet is applicable in the scope field. If scope
+	// is left empty or omitted, the snippet gets applied to all languages. The prefix is what is
+	// used to trigger the snippet and the body will be expanded and inserted. Possible variables are:
+	// $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders.
+	// Placeholders with the same ids are connected.
+	// Example:
+	// "Print to console": {
+	// 	"scope": "javascript,typescript",
+	// 	"prefix": "log",
+	// 	"body": [
+	// 		"console.log('$1');",
+	// 		"$2"
+	// 	],
+	// 	"description": "Log output to console"
+	// }
+}
