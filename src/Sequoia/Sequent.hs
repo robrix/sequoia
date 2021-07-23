@@ -1,10 +1,12 @@
 module Sequoia.Sequent
 ( -- * Sequents
-  evalSeq
-, runSeq
-, Seq(..)
+  Seq(..)
+  -- * Construction
 , liftLR
 , lowerLR
+  -- * Elimination
+, evalSeq
+, runSeq
   -- * Effectful sequents
 , runSeqT
 , SeqT(..)
@@ -45,23 +47,28 @@ import           Sequoia.Profunctor.Value
 
 -- Sequents
 
-evalSeq :: _Γ -|Seq _Γ _Δ|- _Δ -> (_Γ -> _Δ)
-evalSeq = evalExp . getSeq
-
-runSeq :: Seq e r _Γ _Δ -> ((e -> _Γ) -> (_Δ -> r) -> (e -> r))
-runSeq s f g = evalSeq (dimap f g s)
-
 newtype Seq e r _Γ _Δ = Seq { getSeq :: Exp e r _Γ _Δ }
   deriving (Env e, Res r) via (Exp e r _Γ _Δ)
   deriving (Applicative, Functor, Monad) via (Exp e r _Γ)
   deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via (Exp e r)
 
 
+-- Construction
+
 liftLR :: Exp e r a b -> Seq e r (a < _Γ) (_Δ > b)
 liftLR = dimap exl inr . Seq
 
 lowerLR :: (Exp e r a b -> _Γ -|Seq e r|- _Δ) -> a < _Γ -|Seq e r|- _Δ > b -> _Γ -|Seq e r|- _Δ
 lowerLR f p = Seq (Exp (\ _Γ _Δ -> exExp (getSeq (f (Exp (\ a b -> exExp (getSeq p) (a <| _Γ) (_Δ |> b))))) _Γ _Δ))
+
+
+-- Elimination
+
+evalSeq :: _Γ -|Seq _Γ _Δ|- _Δ -> (_Γ -> _Δ)
+evalSeq = evalExp . getSeq
+
+runSeq :: Seq e r _Γ _Δ -> ((e -> _Γ) -> (_Δ -> r) -> (e -> r))
+runSeq s f g = evalSeq (dimap f g s)
 
 
 -- Effectful sequents
