@@ -2,6 +2,7 @@ module Sequoia.Sequent
 ( -- * Sequents
   Seq(..)
   -- * Construction
+, inSeq
 , liftLR
 , lowerLR
 , inSeqCoexp
@@ -58,11 +59,14 @@ newtype Seq e r _Γ _Δ = Seq { getSeq :: Exp e r _Γ _Δ }
 
 -- Construction
 
+inSeq :: (e ∘ a -> b • r -> e ==> r) -> Seq e r a b
+inSeq = Seq . Exp
+
 liftLR :: Exp e r a b -> Seq e r (a < _Γ) (_Δ > b)
 liftLR = dimap exl inr . Seq
 
 lowerLR :: (Exp e r a b -> _Γ -|Seq e r|- _Δ) -> a < _Γ -|Seq e r|- _Δ > b -> _Γ -|Seq e r|- _Δ
-lowerLR f p = Seq (Exp (\ _Γ _Δ -> _Δ ↓ f (Exp (\ a b -> (_Δ |> b) ↓ p ↑ (a <| _Γ))) ↑ _Γ))
+lowerLR f p = inSeq (\ _Γ _Δ -> _Δ ↓ f (Exp (\ a b -> (_Δ |> b) ↓ p ↑ (a <| _Γ))) ↑ _Γ)
 
 inSeqCoexp :: (Coexp e r b a -> e ==> r) -> Seq e r a b
 inSeqCoexp = Seq . inExpCoexp
@@ -100,7 +104,7 @@ newtype SeqT e r _Γ m _Δ = SeqT { getSeqT :: Seq e (m r) _Γ _Δ }
   deriving (Applicative, Functor, Monad)
 
 instance MonadTrans (SeqT r s _Γ) where
-  lift m = SeqT (Seq (Exp (\ _ k -> C (const (m >>= (k •))))))
+  lift m = SeqT (inSeq (\ _ k -> C (const (m >>= (k •)))))
 
 
 -- Core rules
@@ -127,13 +131,13 @@ instance Contextual Seq where
 -- Control
 
 instance Environment Seq where
-  environment = Seq (Exp (\ _Γ _Δ -> env (inrK _Δ ••)))
+  environment = inSeq (\ _Γ _Δ -> env (inrK _Δ ••))
 
-  withEnv r s = Seq (Exp (\ _Γ _Δ -> env (\ e -> (_Δ |> K (_Δ ↓ s ↑ lmap (const e) _Γ <==)) ↓ r ↑ _Γ)))
+  withEnv r s = inSeq (\ _Γ _Δ -> env (\ e -> (_Δ |> K (_Δ ↓ s ↑ lmap (const e) _Γ <==)) ↓ r ↑ _Γ))
 
 instance Calculus.Control Seq where
-  reset s = Seq (Exp (\ _Γ _Δ -> _Δ •∘ V (K id ↓ s ↑ _Γ <==)))
-  shift s = Seq (Exp (\ _Γ _Δ -> (inlK _Δ |> K id) ↓ s ↑ (pure (inrK _Δ) <| _Γ)))
+  reset s = inSeq (\ _Γ _Δ -> _Δ •∘ V (K id ↓ s ↑ _Γ <==))
+  shift s = inSeq (\ _Γ _Δ -> (inlK _Δ |> K id) ↓ s ↑ (pure (inrK _Δ) <| _Γ))
 
 
 -- Assertion
@@ -228,7 +232,7 @@ instance SubtractionIntro Seq where
 
 instance UniversalIntro Seq where
   forAllL p = mapL (fmap (notNegate . runForAll)) p
-  forAllR p = Seq (Exp (\ _Γ _Δ -> liftRes (\ run -> inrK _Δ •• ForAll (K (\ k -> run ((inlK _Δ |> k) ↓ p ↑ _Γ))))))
+  forAllR p = inSeq (\ _Γ _Δ -> liftRes (\ run -> inrK _Δ •• ForAll (K (\ k -> run ((inlK _Δ |> k) ↓ p ↑ _Γ)))))
 
 instance ExistentialIntro Seq where
   existsL p = popL (val (Seq . dnE . runExists (getSeq . pushL p . pure)))
