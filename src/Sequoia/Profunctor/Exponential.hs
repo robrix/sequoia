@@ -10,7 +10,6 @@ module Sequoia.Profunctor.Exponential
 , type (--|)
 , type (|->)
   -- ** Construction
-, inExp
 , inExp'
 , inExpV
 , inExpK
@@ -114,9 +113,6 @@ infixr 5 |->
 
 
 -- Construction
-
-inExp :: (e ∘ a -> b • r -> e ==> r) -> Exp e r a b
-inExp = Exp
 
 inExp' :: (a -> b) -> a --|Exp e r|-> b
 inExp' f = Exp (flip (•∘) . fmap f)
