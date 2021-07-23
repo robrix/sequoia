@@ -2,12 +2,10 @@ module Sequoia.Functor.Source.Internal
 ( Src(..)
 ) where
 
-import Data.Profunctor
-
 newtype Src e r b = Src { exSrcFn :: (b -> r) -> (e -> r) }
 
 instance Functor (Src e r) where
-  fmap f = Src . (. lmap f) . exSrcFn
+  fmap f = Src . (. (. f)) . exSrcFn
 
 instance Applicative (Src e r) where
   pure = Src . fmap const . flip ($)
