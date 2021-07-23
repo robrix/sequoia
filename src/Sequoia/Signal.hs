@@ -1,7 +1,8 @@
 {-# LANGUAGE TypeFamilies #-}
 module Sequoia.Signal
 ( -- * Signals
-  Sig(..)
+  _Sig
+, Sig(..)
 , mapKSig
 , mapVSig
   -- * Conversions
@@ -30,6 +31,9 @@ import           Sequoia.Profunctor.Continuation as K
 import           Sequoia.Profunctor.Value as V
 
 -- Signals
+
+_Sig :: Iso (Sig e r a b) (Sig e' r' a' b') (e ∘ a -> b • r -> e ==> r) (e' ∘ a' -> b' • r' -> e' ==> r')
+_Sig = coerced
 
 newtype Sig e r a b = Sig { runSig :: e ∘ a -> b • r -> e ==> r }
 
