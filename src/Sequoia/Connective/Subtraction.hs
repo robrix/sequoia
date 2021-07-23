@@ -3,6 +3,8 @@ module Sequoia.Connective.Subtraction
   Sub(..)
 , type (>-)
 , type (-~)
+  -- * Construction
+, sub
   -- * Elimination
 , subA
 , subK
@@ -33,6 +35,12 @@ type s-~ b = s b
 
 infixr 6 >-
 infixr 5 -~
+
+
+-- Construction
+
+sub :: e ∘ a -> b • r -> b >-Sub e r-~ a
+sub = fmap Sub . Coexp
 
 
 -- Elimination
