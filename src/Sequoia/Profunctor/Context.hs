@@ -116,7 +116,7 @@ deriving instance Env e (Forget r e b)
 deriving instance Env e (Recall e a b)
 
 instance Env e (Src e r b) where
-  env f = Src (\ k -> env ((`exSrcFn` k) . f))
+  env f = Src (\ k -> env ((`runSrcFn` k) . f))
 
 val :: Env e c => (a -> c) -> (e ∘ a -> c)
 val f v = env (f . (v ∘))
@@ -134,7 +134,7 @@ instance Res r (a -> r) where
 
 instance Res r (Src e r b) where
   res = Src . const . res
-  liftRes f = Src (\ k -> liftRes (\ run -> exSrcFn (f (run . (`exSrcFn` k))) k))
+  liftRes f = Src (\ k -> liftRes (\ run -> runSrcFn (f (run . (`runSrcFn` k))) k))
 
 deriving instance Res r (a • r)
 deriving instance Res r (Forget r a b)

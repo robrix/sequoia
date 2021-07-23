@@ -51,7 +51,7 @@ infixl 3 ↑
 -- Elimination
 
 runSrc :: Src e r b -> ((b • r) -> (e ==> r))
-runSrc = coerce . exSrcFn
+runSrc = coerce . runSrcFn
 
 -- FIXME: this takes a function instead of a Snk to avoid cyclic module imports, would be nicer to have the definitions pulled out somewhere reasonable
 elimSrc :: Src e r a -> (e ∘ a -> e ==> r) -> e ==> r
