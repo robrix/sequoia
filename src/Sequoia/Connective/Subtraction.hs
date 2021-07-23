@@ -3,6 +3,8 @@ module Sequoia.Connective.Subtraction
   Sub(..)
 , type (>-)
 , type (-~)
+  -- * Elimination
+, subA
   -- * Optics
 , subA_
 , subK_
@@ -10,6 +12,7 @@ module Sequoia.Connective.Subtraction
 
 import Data.Kind (Type)
 import Data.Profunctor
+import Sequoia.Optic.Getter
 import Sequoia.Optic.Iso
 import Sequoia.Optic.Lens
 import Sequoia.Polarity
@@ -29,6 +32,12 @@ type s-~ b = s b
 
 infixr 6 >-
 infixr 5 -~
+
+
+-- Elimination
+
+subA :: b >-Sub e r-~ a -> e ∘ a
+subA = (^.subA_)
 
 
 -- Optics
