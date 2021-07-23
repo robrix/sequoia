@@ -117,7 +117,7 @@ deriving via Contextually Seq instance Exchange Seq
 -- Contextual rules
 
 instance Contextual Seq where
-  swapΓΔ f c' = Seq (Exp (\ v k -> elimSeq (f (coexp v k)) c'))
+  swapΓΔ f = Seq . inExpCoexp . (. f) . flip elimSeq
 
 
 -- Control
