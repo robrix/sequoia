@@ -138,6 +138,7 @@ library
     Sequoia.Functor.Cov
     Sequoia.Functor.I
     Sequoia.Functor.Sink
+    Sequoia.Functor.Sink.Internal
     Sequoia.Functor.Source
     Sequoia.Functor.Source.Internal
     Sequoia.Lambda
