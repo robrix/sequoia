@@ -102,6 +102,8 @@ instance Contextual Seq where
 instance Environment Seq where
   environment = Seq (Exp (\ _Γ _Δ -> env (inrK _Δ ••)))
 
+  withEnv r s = Seq (Exp (\ _Γ _Δ -> env (\ e -> exExp (getSeq r) _Γ (_Δ |> K (exExp (getSeq s) (lmap (const e) _Γ) _Δ <==)))))
+
 instance Calculus.Control Seq where
   reset s = Seq (inExpFn (\ _Γ _Δ -> _Δ . exExpFn (getSeq s) _Γ id))
   shift s = Seq (Exp (\ _Γ _Δ -> exExp (getSeq s) (pure (inrK _Δ) <| _Γ) (inlK _Δ |> K id)))
