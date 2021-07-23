@@ -46,10 +46,34 @@
 # - ignore: {name: Use const, within: SpecialModule} # Only within certain modules
 
 
-# Define some custom infix operators
+# Iso
 - fixity: infix 1 <->
-- fixity: infixl 9 **
-- fixity: infixl 9 •
-- fixity: infixl 9 ••
+
+# Disj
 - fixity: infix 3 <-->
+
+# Conj
 - fixity: infix 4 -><-
+
+# Continuation
+- fixity: infixl 7 •
+
+# Value
+- fixity: infixl 8 ∘
+
+# Seq/Snk/Src
+- fixity: infixl 3 ↑
+- fixity: infixl 2 ↓
+
+# Control context
+- fixity: infixl 1 <==
+
+# Composition
+- fixity: infixr 1 •<<
+- fixity: infixr 1 >>•
+- fixity: infixr 1 ∘<<
+- fixity: infixr 1 >>∘
+
+# Env/Res
+- fixity: infixl 8 •∘
+- fixity: infixl 7 ••
