@@ -15,7 +15,6 @@ module Sequoia.Connective.Subtraction
 
 import Data.Kind (Type)
 import Data.Profunctor
-import Sequoia.Optic.Getter
 import Sequoia.Optic.Iso
 import Sequoia.Optic.Lens
 import Sequoia.Polarity
@@ -46,10 +45,10 @@ sub = fmap Sub . (>-)
 -- Elimination
 
 subA :: b >-Sub e r-~ a -> e ∘ a
-subA = (^.subA_)
+subA = recall.getSub
 
 subK :: b >-Sub e r-~ a -> b • r
-subK = (^.subK_)
+subK = forget.getSub
 
 
 -- Optics
