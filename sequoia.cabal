@@ -142,6 +142,7 @@ library
     Sequoia.Functor.Source
     Sequoia.Functor.Source.Internal
     Sequoia.Lambda
+    Sequoia.Monad.Run
     Sequoia.Optic.Getter
     Sequoia.Optic.Iso
     Sequoia.Optic.Lens
