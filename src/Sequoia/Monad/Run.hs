@@ -25,7 +25,7 @@ instance MonadRun Identity where
 -- Construction
 
 fn :: MonadRun m => (a -> m r) -> m (a -> r)
-fn b = withRun (\ run -> pure (run . b))
+fn = distributeRun
 
 
 -- Defaults
