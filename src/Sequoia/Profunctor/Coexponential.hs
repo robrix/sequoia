@@ -57,10 +57,10 @@ withCoexpFn c = withCoexp c . coerce
 runCoexp :: Coexp e r b a -> ((a -> b) -> (e -> r))
 runCoexp c = withCoexp c (\ r f -> ((f •) .) . (. (r ∘)))
 
-unCoexp :: (e ∘ a -> b • r -> s) -> Coexp e r b a -> s
+unCoexp :: (e ∘ b -> a • r -> s) -> Coexp e r a b -> s
 unCoexp = flip withCoexp
 
-unCoexpFn :: ((e -> a) -> (b -> r) -> s) -> Coexp e r b a -> s
+unCoexpFn :: ((e -> b) -> (a-> r) -> s) -> Coexp e r a b -> s
 unCoexpFn = flip withCoexpFn
 
 evalCoexp :: Coexp e r a a -> e ==> r
