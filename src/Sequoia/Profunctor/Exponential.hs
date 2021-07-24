@@ -22,6 +22,7 @@ module Sequoia.Profunctor.Exponential
 , evalExp
 , appExp
 , appExp2
+, runExp
 , runExp'
 , elimExp
 , runExpFn
@@ -54,7 +55,7 @@ import           Sequoia.Profunctor.Value as V
 _Exp :: Iso (Exp e r a b) (Exp e' r' a' b') (e ∘ a -> b • r -> e ==> r) (e' ∘ a' -> b' • r' -> e' ==> r')
 _Exp = coerced
 
-newtype Exp e r a b = Exp { runExp :: e ∘ a -> b • r -> e ==> r }
+newtype Exp e r a b = Exp (e ∘ a -> b • r -> e ==> r)
 
 instance Profunctor (Exp e r) where
   dimap f g = exp . dimap (fmap f) (lmap (lmap g)) . runExp
@@ -153,6 +154,9 @@ appExp f = V (\ e a -> K (\ b -> runExp f a b <== e))
 
 appExp2 :: a --|Exp e r|-> b --|Exp e r|-> c -> e ∘ (e ∘ a -> e ∘ b -> c • r • r)
 appExp2 f = V (\ e a b -> K (\ c -> runExp f a (K (\ g -> runExp g b c <== e)) <== e))
+
+runExp :: a --|Exp e r|-> b -> e ∘ a -> b • r -> e ==> r
+runExp = coerce
 
 runExp' :: e ∘ a -> b • r -> a --|Exp e r|-> b -> e ==> r
 runExp' v k f = runExp f v k
