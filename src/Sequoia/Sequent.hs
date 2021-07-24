@@ -24,7 +24,7 @@ import           Data.Coerce
 import           Data.Function ((&))
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
-import           Prelude hiding (init, seq)
+import           Prelude hiding (exp, init, seq)
 import           Sequoia.Calculus.Additive
 import           Sequoia.Calculus.Context
 import           Sequoia.Calculus.Control as Calculus
@@ -68,7 +68,7 @@ liftLR :: Exp e r a b -> Seq e r (a < _Γ) (_Δ > b)
 liftLR = dimap exl inr . seqExp
 
 lowerLR :: (Exp e r a b -> _Γ -|Seq e r|- _Δ) -> a < _Γ -|Seq e r|- _Δ > b -> _Γ -|Seq e r|- _Δ
-lowerLR f p = seq (\ _Γ _Δ -> _Δ ↓ f (Exp (\ a b -> _Δ |> b ↓ p ↑ a <| _Γ)) ↑ _Γ)
+lowerLR f p = seq (\ _Γ _Δ -> _Δ ↓ f (exp (\ a b -> _Δ |> b ↓ p ↑ a <| _Γ)) ↑ _Γ)
 
 seq :: (e ∘ _Γ -> _Δ • r -> e ==> r) -> Seq e r _Γ _Δ
 seq = Seq
@@ -95,7 +95,7 @@ elimSeq :: _Γ -|Seq e r|- _Δ -> Coexp e r _Δ _Γ -> e ==> r
 elimSeq = unCoexp . (↑)
 
 getSeq :: _Γ -|Seq e r|- _Δ -> _Γ -|Exp e r|- _Δ
-getSeq = Exp . (↑)
+getSeq = exp . (↑)
 
 
 (↓) :: b • r -> (b • r -> e ==> r) -> e ==> r
