@@ -1,7 +1,7 @@
 {-# LANGUAGE QuantifiedConstraints #-}
 module Sequoia.Profunctor.Coexponential
 ( -- * Coexponential profunctor
-  Coexp(recall, forget)
+  Coexp(recallFn, forgetFn)
   -- * Construction
 , coexp
 , coexpFn
@@ -13,6 +13,8 @@ module Sequoia.Profunctor.Coexponential
 , unCoexp
 , unCoexpFn
 , evalCoexp
+, recall
+, forget
   -- * Optics
 , recall_
 , forget_
@@ -27,7 +29,7 @@ import Sequoia.Profunctor.Value
 
 -- Coexponential profunctor
 
-data Coexp e r a b = Coexp { recall :: e ∘ b, forget :: a • r }
+data Coexp e r a b = Coexp { recallFn :: e ∘ b, forgetFn :: a • r }
   deriving (Functor)
 
 instance Profunctor (Coexp e r) where
@@ -66,11 +68,17 @@ unCoexpFn = flip withCoexpFn
 evalCoexp :: Coexp e r a a -> e ==> r
 evalCoexp c = C (\ e -> forget c • recall c ∘ e)
 
+recall :: Coexp e r a b -> e ∘ b
+recall = unCoexp const
+
+forget :: Coexp e r a b -> a • r
+forget = unCoexp (const id)
+
 
 -- Optics
 
 recall_ :: Lens (Coexp e r a b) (Coexp e' r a b') (e ∘ b) (e' ∘ b')
-recall_ = lens recall (\ s recall -> s{ recall })
+recall_ = lens recall (\ s recall -> withCoexp s (const (coexp recall)))
 
 forget_ :: Lens (Coexp e r a b) (Coexp e r' a' b) (a • r) (a' • r')
-forget_ = lens forget (\ s forget -> s{ forget })
+forget_ = lens forget (\ s forget -> withCoexp s (const . (`coexp` forget)))
