@@ -63,16 +63,16 @@ infixl 3 ↑
 -- Construction
 
 liftLR :: Exp e r a b -> Seq e r (a < _Γ) (_Δ > b)
-liftLR = dimap exl inr . inSeqExp
+liftLR = dimap exl inr . seqExp
 
 lowerLR :: (Exp e r a b -> _Γ -|Seq e r|- _Δ) -> a < _Γ -|Seq e r|- _Δ > b -> _Γ -|Seq e r|- _Δ
 lowerLR f p = Seq (\ _Γ _Δ -> _Δ ↓ f (Exp (\ a b -> _Δ |> b ↓ p ↑ a <| _Γ)) ↑ _Γ)
 
-inSeqExp :: Exp e r a b -> Seq e r a b
-inSeqExp = Seq . runExp
+seqExp :: Exp e r a b -> Seq e r a b
+seqExp = Seq . runExp
 
 inSeqCoexp :: (Coexp e r b a -> e ==> r) -> Seq e r a b
-inSeqCoexp = inSeqExp . expCoexp
+inSeqCoexp = seqExp . expCoexp
 
 seqFn :: ((e -> _Γ) -> (_Δ -> r) -> (e -> r)) -> Seq e r _Γ _Δ
 seqFn = coerce
@@ -239,7 +239,7 @@ instance UniversalIntro Seq where
   forAllR p = Seq (\ _Γ _Δ -> C (\ e -> inrK _Δ • ForAll (K (\ k -> inlK _Δ |> k ↓ p ↑ _Γ <== e))))
 
 instance ExistentialIntro Seq where
-  existsL p = popL (val (inSeqExp . dnE . runExists (getSeq . pushL p . pure)))
+  existsL p = popL (val (seqExp . dnE . runExists (getSeq . pushL p . pure)))
   existsR p = mapR (lmap (Exists . K . flip (•))) p
 
 
