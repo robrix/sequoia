@@ -150,8 +150,8 @@ expCoexp f = exp (fmap f . (>-))
 
 -- Elimination
 
-evalExp :: e --|Exp e r|-> r -> (e -> r)
-evalExp f = (idK ↓ f ↑ idV <==)
+evalExp :: MonadEnv e m => e --|Exp e r|-> r -> m r
+evalExp f = idK ↓ f ↑ idV
 
 appExp :: a --|Exp e r|-> b -> e ∘ (e ∘ a -> b • r • r)
 appExp f = V (\ e a -> K (\ b -> b ↓ f ↑ a <== e))
