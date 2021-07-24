@@ -32,6 +32,8 @@ import Sequoia.Profunctor.Value
 data Coexp e r a b = (:>-) { recallFn :: e -> b, forgetFn :: a -> r }
   deriving (Functor)
 
+infixr 6 :>-
+
 instance Profunctor (Coexp e r) where
   dimap g h = unCoexp (\ r f -> coexp (fmap h r) (lmap g f))
 
