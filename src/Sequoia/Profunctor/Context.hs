@@ -42,6 +42,7 @@ import Data.Profunctor.Rep as Pro
 import Data.Profunctor.Sieve
 import Data.Profunctor.Traversing
 import Sequoia.Functor.Source.Internal
+import Sequoia.Monad.Run
 import Sequoia.Optic.Iso
 import Sequoia.Optic.Setter
 import Sequoia.Profunctor.Continuation
@@ -54,7 +55,7 @@ _C :: Iso (e ==> r) (e' ==> r') (e -> r) (e' -> r')
 _C = coerced
 
 newtype e ==> r = C { (<==) :: e -> r }
-  deriving (Applicative, Arrow, ArrowApply, ArrowChoice, ArrowLoop, Cat.Category, Choice, Closed, Cochoice, Costrong, Functor, Mapping, Monad, MonadEnv e, Profunctor, Co.Representable, Strong, Traversing)
+  deriving (Applicative, Arrow, ArrowApply, ArrowChoice, ArrowLoop, Cat.Category, Choice, Closed, Cochoice, Costrong, Functor, Mapping, Monad, MonadEnv e, MonadRun, Profunctor, Co.Representable, Strong, Traversing)
 
 infix 6 ==>
 infixl 1 <==
