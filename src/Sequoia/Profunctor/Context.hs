@@ -52,7 +52,7 @@ _C :: Iso (e ==> r) (e' ==> r') (e -> r) (e' -> r')
 _C = coerced
 
 newtype e ==> r = C { (<==) :: e -> r }
-  deriving (Applicative, Arrow, ArrowApply, ArrowChoice, ArrowLoop, Cat.Category, Choice, Closed, Cochoice, Costrong, Env e, Functor, Mapping, Monad, Profunctor, Co.Representable, Res r, Strong, Traversing)
+  deriving (Applicative, Arrow, ArrowApply, ArrowChoice, ArrowLoop, Cat.Category, Choice, Closed, Cochoice, Costrong, Env e, Functor, Mapping, Monad, MonadEnv e, Profunctor, Co.Representable, Res r, Strong, Traversing)
 
 infix 6 ==>
 infixl 1 <==
