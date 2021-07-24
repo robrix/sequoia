@@ -6,6 +6,7 @@ module Sequoia.Monad.Run
 , fn
   -- * Defaults
 , distributeRun
+, collectRun
 ) where
 
 import Data.Functor.Identity
@@ -32,3 +33,6 @@ fn = distributeRun
 
 distributeRun :: (MonadRun f, Functor g) => g (f a) -> f (g a)
 distributeRun g = withRun (\ run -> pure (run <$> g))
+
+collectRun :: (MonadRun f, Functor g) => (a -> f b) -> g a -> f (g b)
+collectRun f g = withRun (\ run -> pure (run . f <$> g))
