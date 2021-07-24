@@ -133,7 +133,13 @@ mapCV = over _C . under _V
 -- Ambient environment
 
 class Monad m => MonadEnv e m | m -> e where
+  {-# MINIMAL askEnv | env #-}
+
+  askEnv :: m e
+  askEnv = env pure
+
   env :: (e -> m a) -> m a
+  env k = askEnv >>= k
 
 instance MonadEnv e ((->) e) where
   env = join
