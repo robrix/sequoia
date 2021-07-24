@@ -40,7 +40,7 @@ infixr 5 -~
 -- Construction
 
 sub :: e ∘ a -> b • r -> b >-Sub e r-~ a
-sub = fmap Sub . coexp
+sub = fmap Sub . (>-)
 
 
 -- Elimination

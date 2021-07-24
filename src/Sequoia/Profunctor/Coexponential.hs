@@ -3,7 +3,7 @@ module Sequoia.Profunctor.Coexponential
 ( -- * Coexponential profunctor
   Coexp(recallFn, forgetFn)
   -- * Construction
-, coexp
+, (>-)
 , coexpFn
 , idCoexp
   -- * Elimination
@@ -35,13 +35,15 @@ data Coexp e r a b = (:>-) { recallFn :: e -> b, forgetFn :: a -> r }
 infixr 6 :>-
 
 instance Profunctor (Coexp e r) where
-  dimap g h = unCoexp (\ r f -> coexp (fmap h r) (lmap g f))
+  dimap g h = unCoexp (\ r f -> fmap h r >- lmap g f)
 
 
 -- Construction
 
-coexp :: e ∘ b -> a • r -> Coexp e r a b
-coexp v k = coexpFn (v ∘) (k •)
+(>-) :: e ∘ b -> a • r -> Coexp e r a b
+v >- k = coexpFn (v ∘) (k •)
+
+infixr 6 >-
 
 coexpFn :: (e -> b) -> (a -> r) -> Coexp e r a b
 coexpFn = (:>-)
@@ -80,7 +82,7 @@ forget = unCoexp (const id)
 -- Optics
 
 recall_ :: Lens (Coexp e r a b) (Coexp e' r a b') (e ∘ b) (e' ∘ b')
-recall_ = lens recall (\ s recall -> withCoexp s (const (coexp recall)))
+recall_ = lens recall (\ s recall -> withCoexp s (const (recall >-)))
 
 forget_ :: Lens (Coexp e r a b) (Coexp e r' a' b) (a • r) (a' • r')
-forget_ = lens forget (\ s forget -> withCoexp s (const . (`coexp` forget)))
+forget_ = lens forget (\ s forget -> withCoexp s (const . (>- forget)))

@@ -135,7 +135,7 @@ expFn :: ((e -> a) -> (b -> r) -> (e -> r)) -> Exp e r a b
 expFn = coerce
 
 expCoexp :: (Coexp e r b a -> e ==> r) -> Exp e r a b
-expCoexp f = Exp (fmap f . coexp)
+expCoexp f = Exp (fmap f . (>-))
 
 
 -- Elimination
