@@ -83,7 +83,6 @@ instance Functor (Exp e r c) where
 
 instance Applicative (Exp e r a) where
   pure = exp . ckv . pure
-  -- FIXME: K, ↑, and ↓ could b actions in MonadEnv
   df <*> da = exp (\ b a -> env (\ e -> K (\ f -> lmap f b ↓ da ↑ a <== e) ↓ df ↑ a))
 
 instance Monad (Exp e r a) where
