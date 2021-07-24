@@ -14,7 +14,7 @@ module Sequoia.Profunctor.Exponential
 , exp'
 , expV
 , expK
-, expVK
+, expKV
 , expC
 , expFn
 , expCoexp
@@ -135,8 +135,8 @@ expV = exp' . (∘)
 expK :: a • r -> a --|Exp e r|-> r
 expK = exp' . (•)
 
-expVK :: e ∘ a -> a • r -> e --|Exp e r|-> r
-expVK v k = expC (k ↓↑ v)
+expKV :: a • r -> e ∘ a -> e --|Exp e r|-> r
+expKV k v = expC (k ↓↑ v)
 
 expC :: e ==> r -> e --|Exp e r|-> r
 expC = exp' . (<==)
