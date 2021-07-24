@@ -4,6 +4,7 @@ module Sequoia.Profunctor.Coexponential
   Coexp(..)
   -- * Construction
 , coexp
+, coexpFn
 , idCoexp
   -- * Elimination
 , withCoexp
@@ -34,6 +35,9 @@ instance Profunctor (Coexp e r) where
 
 coexp :: e ∘ b -> a • r -> Coexp e r a b
 coexp = Coexp
+
+coexpFn :: (e -> b) -> (a -> r) -> Coexp e r a b
+coexpFn v k = coexp (V v) (K k)
 
 idCoexp :: Coexp b a a b
 idCoexp = Coexp idV idK
