@@ -11,6 +11,7 @@ module Sequoia.Profunctor.Coexponential
 , withCoexp
 , runCoexp
 , unCoexp
+, unCoexpFn
 , evalCoexp
   -- * Optics
 , recall_
@@ -58,6 +59,9 @@ runCoexp c = withCoexp c (\ r f -> ((f •) .) . (. (r ∘)))
 
 unCoexp :: (e ∘ a -> b • r -> s) -> Coexp e r b a -> s
 unCoexp = flip withCoexp
+
+unCoexpFn :: ((e -> a) -> (b -> r) -> s) -> Coexp e r b a -> s
+unCoexpFn = flip withCoexpFn
 
 evalCoexp :: Coexp e r a a -> e ==> r
 evalCoexp c = C (\ e -> forget c • recall c ∘ e)
