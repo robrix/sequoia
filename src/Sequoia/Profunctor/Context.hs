@@ -139,6 +139,9 @@ val f v = env (f . (v ∘))
 class Monad m => MonadEnv e m | m -> e where
   menv :: (e -> m a) -> m a
 
+instance MonadEnv e ((->) e) where
+  menv = env
+
 
 -- Ambient control
 
