@@ -5,11 +5,13 @@ module Sequoia.Monad.Run
   -- * Construction
 , fn
   -- * Defaults
+, withRunWithRep
 , distributeRun
 , collectRun
 ) where
 
 import Data.Functor.Identity
+import Data.Functor.Rep
 
 -- Lowering
 
@@ -30,6 +32,9 @@ fn = distributeRun
 
 
 -- Defaults
+
+withRunWithRep :: Representable f => Rep f -> ((forall r . f r -> r) -> f a) -> f a
+withRunWithRep r b = b (`index` r)
 
 distributeRun :: (MonadRun f, Functor g) => g (f a) -> f (g a)
 distributeRun = collectRun id
