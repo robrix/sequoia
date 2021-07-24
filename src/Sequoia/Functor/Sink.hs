@@ -26,7 +26,7 @@ import Sequoia.Optic.Review
 import Sequoia.Optic.Setter
 import Sequoia.Profunctor.Context
 import Sequoia.Profunctor.Continuation
-import Sequoia.Profunctor.Exponential
+import Sequoia.Profunctor.Exponential as Exp
 import Sequoia.Profunctor.Value
 
 -- Sinks
@@ -44,7 +44,7 @@ snkFn :: ((e -> a) -> (e -> r)) -> Snk e r a
 snkFn = coerce
 
 (↓) :: b • r -> a --|Exp e r|-> b -> a --|Snk e r
-k ↓ f = snk (flip (f ↑) k)
+k ↓ f = snk (k Exp.↓ f)
 
 infixl 2 ↓
 
@@ -71,4 +71,4 @@ mapSnkV b = over _Snk (dimap (review b) (mapCV (view b)))
 -- Optics
 
 _SnkExp :: Iso (Snk e r a) (Snk e' r' a') (Exp e r a r) (Exp e' r' a' r')
-_SnkExp = _Snk.from (_Exp.rmapping (constantWith (K id) (>>•)))
+_SnkExp = _Snk.from (_Exp.constantWith (K id) (flip ((.) . (•<<))))

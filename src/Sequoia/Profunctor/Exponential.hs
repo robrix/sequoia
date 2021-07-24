@@ -55,49 +55,49 @@ import           Sequoia.Profunctor.Value as V
 
 -- Exponential profunctor
 
-_Exp :: Iso (Exp e r a b) (Exp e' r' a' b') (e ∘ a -> b • r -> e ==> r) (e' ∘ a' -> b' • r' -> e' ==> r')
+_Exp :: Iso (Exp e r a b) (Exp e' r' a' b') (b • r -> e ∘ a -> e ==> r) (b' • r' -> e' ∘ a' -> e' ==> r')
 _Exp = coerced
 
-newtype Exp e r a b = Exp ((e -> a) -> (b -> r) -> (e -> r))
+newtype Exp e r a b = Exp ((b -> r) -> (e -> a) -> (e -> r))
 
 instance Profunctor (Exp e r) where
-  dimap f g = exp . dimap (fmap f) (lmap (lmap g)) . runExp
+  dimap f g = exp . dimap (lmap g) (lmap (rmap f)) . runExp
 
 instance Strong (Exp e r) where
-  first'  r = exp (\ a b -> val (\ (a, c) -> lmap (,c) b ↓ r ↑ pure a) a)
-  second' r = exp (\ a b -> val (\ (c, a) -> lmap (c,) b ↓ r ↑ pure a) a)
+  first'  r = exp (\ b a -> val (\ (a, c) -> lmap (,c) b ↓ r ↑ pure a) a)
+  second' r = exp (\ b a -> val (\ (c, a) -> lmap (c,) b ↓ r ↑ pure a) a)
 
 instance Choice (Exp e r) where
-  left'  r = exp (\ a b -> val ((\ v -> inlK b ↓ r ↑ pure v) <--> pure . (inrK b •)) a)
-  right' r = exp (\ a b -> val (pure . (inlK b •) <--> (\ v -> inrK b ↓ r ↑ pure v)) a)
+  left'  r = exp (\ b a -> val ((\ v -> inlK b ↓ r ↑ pure v) <--> pure . (inrK b •)) a)
+  right' r = exp (\ b a -> val (pure . (inlK b •) <--> (\ v -> inrK b ↓ r ↑ pure v)) a)
 
 instance Traversing (Exp e r) where
-  wander traverse r = exp (\ v k -> val (\ s -> k ↓ traverse ((r <<<) . pure) s ↑ idV) v)
+  wander traverse r = exp (\ k v -> val (\ s -> k ↓ traverse ((r <<<) . pure) s ↑ idV) v)
 
 instance Cat.Category (Exp e r) where
-  id = exp (flip (↓↑))
-  f . g = exp (\ a c -> C (\ e -> K (\ b -> c ↓ f ↑ pure b <== e) ↓ g ↑ a <== e))
+  id = exp (↓↑)
+  f . g = exp (\ c a -> C (\ e -> K (\ b -> c ↓ f ↑ pure b <== e) ↓ g ↑ a <== e))
 
 instance Functor (Exp e r c) where
   fmap = rmap
 
 instance Applicative (Exp e r a) where
-  pure = exp . cvk . pure
+  pure = exp . ckv . pure
   -- FIXME: K, ↑, and ↓ could b actions in MonadEnv
-  df <*> da = exp (\ a b -> C (\ e -> K (\ f -> lmap f b ↓ da ↑ a <== e) ↓ df ↑ a <== e))
+  df <*> da = exp (\ b a -> C (\ e -> K (\ f -> lmap f b ↓ da ↑ a <== e) ↓ df ↑ a <== e))
 
 instance Monad (Exp e r a) where
-  m >>= f = exp (\ v k -> C (\ e -> K (\ b -> k ↓ f b ↑ v <== e) ↓ m ↑ v <== e))
+  m >>= f = exp (\ k v -> C (\ e -> K (\ b -> k ↓ f b ↑ v <== e) ↓ m ↑ v <== e))
 
 instance MonadEnv e (Exp e r a) where
-  env f = exp (\ v k -> env (\ e -> k ↓ f e ↑ v))
+  env f = exp (\ k v -> env (\ e -> k ↓ f e ↑ v))
 
 instance MonadRes r (Exp e r a) where
-  res = exp . cvk . pure
-  liftRes f = exp (\ v k -> env (\ e -> let run f = k ↓ f ↑ v in run (f ((<== e) . run))))
+  res = exp . ckv . pure
+  liftRes f = exp (\ k v -> env (\ e -> let run f = k ↓ f ↑ v in run (f ((<== e) . run))))
 
 instance Coapply (Exp e r) where
-  coliftA2 f a b = exp (\ v k -> env (((\ v -> k ↓ a ↑ v) <∘∘> (\ v -> k ↓ b ↑ v)) (f <$> v)))
+  coliftA2 f a b = exp (\ k v -> env (((\ v -> k ↓ a ↑ v) <∘∘> (\ v -> k ↓ b ↑ v)) (f <$> v)))
 
 instance Arrow (Exp e r) where
   arr = exp'
@@ -109,7 +109,7 @@ instance ArrowChoice (Exp e r) where
   right = right'
 
 instance ArrowApply (Exp e r) where
-  app = exp (\ v k -> val (runExp' (exrF v) k) (exlF v))
+  app = exp (\ k -> val . runExp' k . exrF <*> exlF)
 
 
 -- Mixfix notation
@@ -123,11 +123,11 @@ infixr 5 |->
 
 -- Construction
 
-exp :: (e ∘ a -> b • r -> e ==> r) -> Exp e r a b
+exp :: (b • r -> e ∘ a -> e ==> r) -> Exp e r a b
 exp = coerce
 
 exp' :: (a -> b) -> a --|Exp e r|-> b
-exp' = exp . cvk
+exp' = exp . ckv
 
 expV :: e ∘ a -> e --|Exp e r|-> a
 expV = exp' . (∘)
@@ -141,11 +141,11 @@ expKV = fmap expC . (↓↑)
 expC :: e ==> r -> e --|Exp e r|-> r
 expC = exp' . (<==)
 
-expFn :: ((e -> a) -> (b -> r) -> (e -> r)) -> Exp e r a b
+expFn :: ((b -> r) -> (e -> a) -> (e -> r)) -> Exp e r a b
 expFn = coerce
 
 expCoexp :: (Coexp e r b a -> e ==> r) -> Exp e r a b
-expCoexp f = exp (fmap f . (>-))
+expCoexp f = exp (fmap f . flip (>-))
 
 
 -- Elimination
@@ -159,36 +159,36 @@ appExp f = V (\ e a -> K (\ b -> b ↓ f ↑ a <== e))
 appExp2 :: a --|Exp e r|-> b --|Exp e r|-> c -> e ∘ (e ∘ a -> e ∘ b -> c • r • r)
 appExp2 f = V (\ e a b -> K (\ c -> K (\ g -> c ↓ g ↑ b <== e) ↓ f ↑ a <== e))
 
-runExp :: a --|Exp e r|-> b -> e ∘ a -> b • r -> e ==> r
+runExp :: a --|Exp e r|-> b -> b • r -> e ∘ a -> e ==> r
 runExp = coerce
 
-runExp' :: e ∘ a -> b • r -> a --|Exp e r|-> b -> e ==> r
-runExp' v k f = runExp f v k
+runExp' :: b • r -> e ∘ a -> a --|Exp e r|-> b -> e ==> r
+runExp' k v f = runExp f k v
 
 elimExp :: a --|Exp e r|-> b -> Coexp e r b a -> e ==> r
-elimExp = unCoexp . runExp
+elimExp = unCoexp . flip . runExp
 
-runExpFn :: Exp e r a b -> ((e -> a) -> (b -> r) -> (e -> r))
+runExpFn :: Exp e r a b -> ((b -> r) -> (e -> a) -> (e -> r))
 runExpFn = coerce . runExp
 
-(↑) :: MonadEnv e m => a --|Exp e r|-> b -> e ∘ a -> b • r -> m r
-(f ↑ a) k = env (\ e -> pure (runExp f a k <== e))
+(↑) :: (e ∘ a -> m r) -> e ∘ a -> m r
+(↑) = ($)
 
-infixl 3 ↑
+infixl 2 ↑
 
-(↓) :: b • r -> (b • r -> m r) -> m r
-(↓) = (&)
+(↓) :: MonadEnv e m => b • r -> a --|Exp e r|-> b -> e ∘ a -> m r
+(k ↓ f) a = env (\ e -> pure (runExp f k a <== e))
 
-infixl 2 ↓
+infixl 3 ↓
 
 
 -- Computation
 
 dnE :: ((a --|Exp e r|-> b) • r) • r -> a --|Exp e r|-> b
-dnE k = exp (\ v k' -> C (\ e -> k • K (\ f -> k' ↓ f ↑ v <== e)))
+dnE k = exp (\ k' v -> C (\ e -> k • K (\ f -> k' ↓ f ↑ v <== e)))
 
 reset :: a --|Exp e b|-> b -> a --|Exp e r|-> b
-reset f = exp (\ v k -> C (\ e -> k • (idK ↓ f ↑ v <== e)))
+reset f = exp (\ k v -> C (\ e -> k • (idK ↓ f ↑ v <== e)))
 
 shift :: (a • r --|Exp e r|-> r) -> e --|Exp e r|-> a
-shift f = exp (\ v k -> idK ↓ f ↑ pure k <<∘ v)
+shift f = exp (\ k v -> idK ↓ f ↑ pure k <<∘ v)

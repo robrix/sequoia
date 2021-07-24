@@ -44,7 +44,7 @@ srcFn :: ((b -> r) -> (e -> r)) -> Src e r b
 srcFn = Src
 
 (↑) :: a --|Exp e r|-> b -> e ∘ a -> Src e r|-> b
-f ↑ v = src (f Exp.↑ v)
+f ↑ v = src (flip (↓ f) v)
 
 infixl 3 ↑
 
@@ -71,4 +71,4 @@ mapSrcV f = over _Src (fmap (mapCV f))
 -- Optics
 
 _SrcExp :: Iso (Src e r b) (Src e' r' b') (Exp e r e b) (Exp e' r' e' b')
-_SrcExp = _Src.from (_Exp.constantWith (V id) (flip ((.) . (∘>>))))
+_SrcExp = _Src.from (_Exp.rmapping (constantWith (V id) (<<∘)))

@@ -1,6 +1,6 @@
 module Sequoia.Sequent
 ( -- * Sequents
-  Seq((↑))
+  Seq(getSeq)
   -- * Construction
 , liftLR
 , lowerLR
@@ -49,16 +49,16 @@ import           Sequoia.Optic.Review
 import           Sequoia.Profunctor.Coexponential
 import           Sequoia.Profunctor.Context
 import           Sequoia.Profunctor.Continuation as K
-import           Sequoia.Profunctor.Exponential as Exponential hiding ((>>>), (↑))
+import           Sequoia.Profunctor.Exponential as Exponential hiding ((>>>), (↓))
 import           Sequoia.Profunctor.Value
 
 -- Sequents
 
-newtype Seq e r _Γ _Δ = Seq { (↑) :: e ∘ _Γ -> _Δ • r -> e ==> r }
+newtype Seq e r _Γ _Δ = Seq { getSeq :: _Δ • r -> e ∘ _Γ -> e ==> r }
   deriving (Applicative, Functor, Monad, MonadEnv e, MonadRes r) via (Exp e r _Γ)
   deriving (Arrow, ArrowApply, ArrowChoice, Cat.Category, Choice, Profunctor, Strong, Traversing) via (Exp e r)
 
-infixl 3 ↑
+infixl 3 ↓
 
 
 -- Construction
@@ -67,9 +67,9 @@ liftLR :: Exp e r a b -> Seq e r (a < _Γ) (_Δ > b)
 liftLR = dimap exl inr . seqExp
 
 lowerLR :: (Exp e r a b -> _Γ -|Seq e r|- _Δ) -> a < _Γ -|Seq e r|- _Δ > b -> _Γ -|Seq e r|- _Δ
-lowerLR f p = seq (\ _Γ _Δ -> _Δ ↓ f (exp (\ a b -> _Δ |> b ↓ p ↑ a <| _Γ)) ↑ _Γ)
+lowerLR f p = seq (\ _Δ _Γ -> _Δ ↓ f (exp (\ b a -> _Δ |> b ↓ p ↑ a <| _Γ)) ↑ _Γ)
 
-seq :: (e ∘ _Γ -> _Δ • r -> e ==> r) -> Seq e r _Γ _Δ
+seq :: (_Δ • r -> e ∘ _Γ -> e ==> r) -> Seq e r _Γ _Δ
 seq = Seq
 
 seqExp :: Exp e r a b -> Seq e r a b
@@ -78,23 +78,23 @@ seqExp = seq . runExp
 seqCoexp :: (Coexp e r b a -> e ==> r) -> Seq e r a b
 seqCoexp = seqExp . expCoexp
 
-seqFn :: ((e -> _Γ) -> (_Δ -> r) -> (e -> r)) -> Seq e r _Γ _Δ
+seqFn :: ((_Δ -> r) -> (e -> _Γ) -> (e -> r)) -> Seq e r _Γ _Δ
 seqFn = coerce
 
 
 -- Elimination
 
 evalSeq :: _Γ -|Seq _Γ _Δ|- _Δ -> (_Γ -> _Δ)
-evalSeq = evalExp . getSeq
+evalSeq = evalExp . exp . getSeq
 
 runSeq :: Seq e r _Γ _Δ -> ((e -> _Γ) -> (_Δ -> r) -> (e -> r))
 runSeq s f g = evalSeq (dimap f g s)
 
 elimSeq :: _Γ -|Seq e r|- _Δ -> Coexp e r _Δ _Γ -> e ==> r
-elimSeq = unCoexp . (↑)
+elimSeq = unCoexp . flip . getSeq
 
-getSeq :: _Γ -|Seq e r|- _Δ -> _Γ -|Exp e r|- _Δ
-getSeq = exp . (↑)
+(↓) :: _Δ • r -> Seq e r _Γ _Δ -> e ∘ _Γ -> e ==> r
+(↓) = flip getSeq
 
 
 -- Effectful sequents
@@ -106,7 +106,7 @@ newtype SeqT e r _Γ m _Δ = SeqT { getSeqT :: Seq e (m r) _Γ _Δ }
   deriving (Applicative, Functor, Monad)
 
 instance MonadTrans (SeqT r s _Γ) where
-  lift m = SeqT (seq (\ _ k -> C (const (m >>= (k •)))))
+  lift m = SeqT (seq (\ k _ -> C (const (m >>= (k •)))))
 
 
 -- Core rules
@@ -133,13 +133,13 @@ instance Contextual Seq where
 -- Control
 
 instance Environment Seq where
-  environment = seq (\ _Γ _Δ -> C (inrK _Δ •))
+  environment = seq (\ _Δ _Γ -> C (inrK _Δ •))
 
-  withEnv r s = seq (\ _Γ _Δ -> env (\ e -> _Δ |> toK (_Δ ↓ s ↑ lmap (const e) _Γ) ↓ r ↑ _Γ))
+  withEnv r s = seq (\ _Δ _Γ -> env (\ e -> _Δ |> toK (_Δ ↓ s ↑ lmap (const e) _Γ) ↓ r ↑ _Γ))
 
 instance Calculus.Control Seq where
-  reset s = seqFn (\ _Γ _Δ -> _Δ . runSeq s _Γ id)
-  shift s = seq (\ _Γ _Δ -> inlK _Δ |> idK ↓ s ↑ pure (inrK _Δ) <| _Γ)
+  reset s = seqFn (\ _Δ _Γ -> _Δ . runSeq s _Γ id)
+  shift s = seq (\ _Δ _Γ -> inlK _Δ |> idK ↓ s ↑ pure (inrK _Δ) <| _Γ)
 
 
 -- Assertion
@@ -234,10 +234,10 @@ instance SubtractionIntro Seq where
 
 instance UniversalIntro Seq where
   forAllL p = mapL (fmap (notNegate . runForAll)) p
-  forAllR p = seq (\ _Γ _Δ -> C (\ e -> inrK _Δ • ForAll (K (\ k -> inlK _Δ |> k ↓ p ↑ _Γ <== e))))
+  forAllR p = seq (\ _Δ _Γ -> C (\ e -> inrK _Δ • ForAll (K (\ k -> inlK _Δ |> k ↓ p ↑ _Γ <== e))))
 
 instance ExistentialIntro Seq where
-  existsL p = popL (val (seqExp . dnE . runExists (getSeq . pushL p . pure)))
+  existsL p = popL (val (seqExp . dnE . runExists (exp . getSeq . pushL p . pure)))
   existsR p = mapR (lmap (Exists . K . flip (•))) p
 
 

@@ -36,7 +36,7 @@ infixr 5 ~>
 
 -- Construction
 
-fun :: (e ∘ a -> b • r -> e ==> r) -> a ~~Fun e r~> b
+fun :: (b • r -> e ∘ a -> e ==> r) -> a ~~Fun e r~> b
 fun = funExp . exp
 
 funExp :: Exp e r a b -> a ~~Fun e r~> b
