@@ -3,6 +3,7 @@ module Sequoia.Profunctor.Coexponential
 ( -- * Coexponential profunctor
   Coexp(..)
   -- * Construction
+, coexp
 , idCoexp
   -- * Elimination
 , withCoexp
@@ -30,6 +31,9 @@ instance Profunctor (Coexp e r) where
 
 
 -- Construction
+
+coexp :: e ∘ b -> a • r -> Coexp e r a b
+coexp = Coexp
 
 idCoexp :: Coexp b a a b
 idCoexp = Coexp idV idK
