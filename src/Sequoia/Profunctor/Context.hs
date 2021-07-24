@@ -6,6 +6,7 @@ module Sequoia.Profunctor.Context
   _C
 , type (==>)(..)
   -- * Construction
+, ckv
 , (↓↑)
   -- * Elimination
 , toK
@@ -78,6 +79,9 @@ instance Pro.Corepresentable (==>) where
 
 
 -- Construction
+
+ckv :: b • r -> (a -> b) -> e ∘ a -> e ==> r
+ckv k f v = C ((k •) . f . (v ∘))
 
 (↓↑) :: a • r -> e ∘ a -> e ==> r
 k ↓↑ v = C ((k •) . (v ∘))
