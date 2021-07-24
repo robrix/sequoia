@@ -7,6 +7,7 @@ module Sequoia.Profunctor.Coexponential
 , coexpFn
 , idCoexp
   -- * Elimination
+, withCoexpFn
 , withCoexp
 , runCoexp
 , unCoexp
@@ -16,6 +17,7 @@ module Sequoia.Profunctor.Coexponential
 , forget_
 ) where
 
+import Data.Coerce
 import Data.Profunctor
 import Sequoia.Optic.Lens
 import Sequoia.Profunctor.Context
@@ -47,6 +49,9 @@ idCoexp = coexpFn id id
 
 withCoexp :: Coexp e r a b -> (e ∘ b -> a • r -> s) -> s
 withCoexp c f = f (recall c) (forget c)
+
+withCoexpFn :: Coexp e r a b -> ((e -> b) -> (a -> r) -> s) -> s
+withCoexpFn c = withCoexp c . coerce
 
 runCoexp :: Coexp e r b a -> ((a -> b) -> (e -> r))
 runCoexp c = withCoexp c (\ r f -> ((f •) .) . (. (r ∘)))
