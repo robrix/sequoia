@@ -80,10 +80,10 @@ instance Functor (Exp e r c) where
 
 instance Applicative (Exp e r a) where
   pure = exp . ckv . pure
-  df <*> da = exp (\ b a -> env (\ e -> K (\ f -> lmap f b ↓ da ↑ a <== e) ↓ df ↑ a))
+  df <*> da = exp (\ b a -> cont (\ _K -> _K (\ f -> lmap f b ↓ da ↑ a) ↓ df ↑ a))
 
 instance Monad (Exp e r a) where
-  m >>= f = exp (\ k v -> env (\ e -> K (\ b -> k ↓ f b ↑ v <== e) ↓ m ↑ v))
+  m >>= f = exp (\ k v -> cont (\ _K -> _K (\ b -> k ↓ f b ↑ v) ↓ m ↑ v))
 
 instance MonadEnv e (Exp e r a) where
   env f = exp (\ k v -> env (\ e -> k ↓ f e ↑ v))
