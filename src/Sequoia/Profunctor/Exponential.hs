@@ -76,7 +76,7 @@ instance Traversing (Exp e r) where
 
 instance Cat.Category (Exp e r) where
   id = exp (↓↑)
-  f . g = exp (\ c a -> C (\ e -> K (\ b -> c ↓ f ↑ pure b <== e) ↓ g ↑ a <== e))
+  f . g = exp (\ c a -> env (\ e -> K (\ b -> c ↓ f ↑ pure b <== e) ↓ g ↑ a))
 
 instance Functor (Exp e r c) where
   fmap = rmap
@@ -84,10 +84,10 @@ instance Functor (Exp e r c) where
 instance Applicative (Exp e r a) where
   pure = exp . ckv . pure
   -- FIXME: K, ↑, and ↓ could b actions in MonadEnv
-  df <*> da = exp (\ b a -> C (\ e -> K (\ f -> lmap f b ↓ da ↑ a <== e) ↓ df ↑ a <== e))
+  df <*> da = exp (\ b a -> env (\ e -> K (\ f -> lmap f b ↓ da ↑ a <== e) ↓ df ↑ a))
 
 instance Monad (Exp e r a) where
-  m >>= f = exp (\ k v -> C (\ e -> K (\ b -> k ↓ f b ↑ v <== e) ↓ m ↑ v <== e))
+  m >>= f = exp (\ k v -> env (\ e -> K (\ b -> k ↓ f b ↑ v <== e) ↓ m ↑ v))
 
 instance MonadEnv e (Exp e r a) where
   env f = exp (\ k v -> env (\ e -> k ↓ f e ↑ v))
