@@ -11,6 +11,7 @@ module Sequoia.Sequent
   -- * Elimination
 , evalSeq
 , runSeq
+, runSeqFn
 , elimSeq
   -- * Effectful sequents
 , runSeqT
@@ -89,6 +90,9 @@ evalSeq = evalExp . exp . getSeq
 
 runSeq :: Seq e r _Γ _Δ -> ((e -> _Γ) -> (_Δ -> r) -> (e -> r))
 runSeq s f g = evalSeq (dimap f g s)
+
+runSeqFn :: Seq e r _Γ _Δ -> ((_Δ -> r) -> (e -> _Γ) -> (e -> r))
+runSeqFn = coerce
 
 elimSeq :: _Γ -|Seq e r|- _Δ -> Coexp e r _Δ _Γ -> e ==> r
 elimSeq = unCoexp . getSeq
