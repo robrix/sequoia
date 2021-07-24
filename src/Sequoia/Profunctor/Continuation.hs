@@ -7,7 +7,7 @@ module Sequoia.Profunctor.Continuation
 , inK
   -- * Coercion
 , _K
-  -- * Composition
+  -- * Computation
 , (<••>)
 , (<•••>)
   -- * Double negation
@@ -60,7 +60,7 @@ _K :: Iso (a • r) (a' • r') (a -> r) (a' -> r')
 _K = coerced
 
 
--- Composition
+-- Computation
 
 (<••>) :: Disj d => a • r -> b • r -> (a `d` b) • r
 a <••> b = K ((a •) <--> (b •))
