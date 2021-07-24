@@ -4,6 +4,7 @@ module Sequoia.Sequent
   -- * Construction
 , liftLR
 , lowerLR
+, seq
 , inSeqCoexp
 , seqFn
   -- * Elimination
@@ -22,7 +23,7 @@ import           Data.Coerce
 import           Data.Function ((&))
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
-import           Prelude hiding (init)
+import           Prelude hiding (init, seq)
 import           Sequoia.Calculus.Additive
 import           Sequoia.Calculus.Context
 import           Sequoia.Calculus.Control as Calculus
@@ -67,6 +68,9 @@ liftLR = dimap exl inr . seqExp
 
 lowerLR :: (Exp e r a b -> _Γ -|Seq e r|- _Δ) -> a < _Γ -|Seq e r|- _Δ > b -> _Γ -|Seq e r|- _Δ
 lowerLR f p = Seq (\ _Γ _Δ -> _Δ ↓ f (Exp (\ a b -> _Δ |> b ↓ p ↑ a <| _Γ)) ↑ _Γ)
+
+seq :: (e ∘ _Γ -> _Δ • r -> e ==> r) -> Seq e r _Γ _Δ
+seq = Seq
 
 seqExp :: Exp e r a b -> Seq e r a b
 seqExp = Seq . runExp
