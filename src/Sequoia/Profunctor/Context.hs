@@ -21,6 +21,7 @@ module Sequoia.Profunctor.Context
 , Env(..)
 , val
 , MonadEnv(..)
+, mval
   -- * Ambient control
 , Res(..)
 , cont
@@ -144,6 +145,9 @@ instance MonadEnv e ((->) e) where
 
 deriving instance MonadEnv e ((∘) e)
 deriving instance MonadEnv e (Recall e a)
+
+mval :: MonadEnv e m => (a -> m b) -> (e ∘ a -> m b)
+mval f v = menv (f . (v ∘))
 
 
 -- Ambient control
