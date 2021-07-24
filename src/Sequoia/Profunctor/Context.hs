@@ -186,4 +186,4 @@ infix 8 •∘
 
 class MonadRes r m | m -> r where
   mres :: r -> m ()
-  mliftRes :: ((forall x . m x -> r) -> m a) -> m a
+  mliftRes :: ((m r -> r) -> m a) -> m a
