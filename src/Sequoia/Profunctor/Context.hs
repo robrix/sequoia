@@ -18,10 +18,8 @@ module Sequoia.Profunctor.Context
 , mapCK
 , mapCV
   -- * Ambient environment
-, Env(..)
-, val
 , MonadEnv(..)
-, mval
+, val
   -- * Ambient control
 , Res(..)
 , cont
@@ -55,7 +53,7 @@ _C :: Iso (e ==> r) (e' ==> r') (e -> r) (e' -> r')
 _C = coerced
 
 newtype e ==> r = C { (<==) :: e -> r }
-  deriving (Applicative, Arrow, ArrowApply, ArrowChoice, ArrowLoop, Cat.Category, Choice, Closed, Cochoice, Costrong, Env e, Functor, Mapping, Monad, MonadEnv e, Profunctor, Co.Representable, Res r, Strong, Traversing)
+  deriving (Applicative, Arrow, ArrowApply, ArrowChoice, ArrowLoop, Cat.Category, Choice, Closed, Cochoice, Costrong, Functor, Mapping, Monad, MonadEnv e, Profunctor, Co.Representable, Res r, Strong, Traversing)
 
 infix 6 ==>
 infixl 1 <==
@@ -122,37 +120,20 @@ mapCV = over _C . under _V
 
 -- Ambient environment
 
-class Env e c | c -> e where
-  env :: (e -> c) -> c
-
-instance Env e (e -> a) where
-  env = join
-
-deriving instance Env e (e ∘ r)
-deriving instance Env e (Forget r e b)
-deriving instance Env e (Recall e a b)
-
-instance Env e (Src e r b) where
-  env f = Src (\ k -> env ((`runSrcFn` k) . f))
-
-val :: Env e c => (a -> c) -> (e ∘ a -> c)
-val f v = env (f . (v ∘))
-
-
 class Monad m => MonadEnv e m | m -> e where
-  menv :: (e -> m a) -> m a
+  env :: (e -> m a) -> m a
 
 instance MonadEnv e ((->) e) where
-  menv = env
+  env = join
 
 deriving instance MonadEnv e ((∘) e)
 deriving instance MonadEnv e (Recall e a)
 
 instance MonadEnv e (Src e r) where
-  menv f = Src (\ k -> env ((`runSrcFn` k) . f))
+  env f = Src (\ k -> env ((`runSrcFn` k) . f))
 
-mval :: MonadEnv e m => (a -> m b) -> (e ∘ a -> m b)
-mval f v = menv (f . (v ∘))
+val :: MonadEnv e m => (a -> m b) -> (e ∘ a -> m b)
+val f v = env (f . (v ∘))
 
 
 -- Ambient control
@@ -182,7 +163,7 @@ k •• v = res (k • v)
 infix 7 ••
 
 
-(•∘) :: (Env e c, Res r c) => a • r -> e ∘ a -> c
+(•∘) :: (MonadEnv e m, Res r (m r)) => a • r -> e ∘ a -> m r
 k •∘ v = env (\ e -> res (k • v ∘ e))
 
 infix 8 •∘

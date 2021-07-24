@@ -52,7 +52,7 @@ import           Sequoia.Profunctor.Value
 -- Sequents
 
 newtype Seq e r _Γ _Δ = Seq { (↑) :: e ∘ _Γ -> _Δ • r -> e ==> r }
-  deriving (Env e, Res r) via (Exp e r _Γ _Δ)
+  deriving (Res r) via (Exp e r _Γ _Δ)
   deriving (Applicative, Functor, Monad, MonadEnv e, MonadRes r) via (Exp e r _Γ)
   deriving (Arrow, ArrowApply, ArrowChoice, Cat.Category, Choice, Profunctor, Strong, Traversing) via (Exp e r)
 

@@ -83,7 +83,7 @@ instance Monad (Exp e r a) where
   m >>= f = Exp (\ v k -> cont (\ _K -> runExp m v (_K (\ b -> runExp (f b) v k))))
 
 instance MonadEnv e (Exp e r a) where
-  menv = env
+  env f = Exp (\ v k -> env (runExp' v k . f))
 
 instance MonadRes r (Exp e r a) where
   mres = res
@@ -103,9 +103,6 @@ instance ArrowChoice (Exp e r) where
 
 instance ArrowApply (Exp e r) where
   app = Exp (\ v k -> val (runExp' (exrF v) k) (exlF v))
-
-instance Env e (Exp e r a b) where
-  env f = Exp (\ v k -> env (runExp' v k . f))
 
 instance Res r (Exp e r a b) where
   res = Exp . const . const . res

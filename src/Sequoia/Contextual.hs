@@ -68,7 +68,7 @@ import Sequoia.Profunctor.Value
 
 -- Contextual
 
-class (Core s, forall e r a b . Env e (s e r a b), forall e r . Profunctor (s e r)) => Contextual s where
+class (Core s, forall e r a . MonadEnv e (s e r a), forall e r . Profunctor (s e r)) => Contextual s where
   swapΓΔ
     :: (Coexp e r _Δ  _Γ  -> _Γ' -|s e r|- _Δ')
     -> (Coexp e r _Δ' _Γ' -> _Γ  -|s e r|- _Δ )
