@@ -3,14 +3,20 @@ module Sequoia.Connective.Function
   Fun(..)
 , type (~~)
 , type (~>)
+  -- * Construction
+, fun
 ) where
 
 import qualified Control.Category as Cat
 import           Data.Kind (Type)
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
+import           Prelude hiding (exp)
 import           Sequoia.Polarity
+import           Sequoia.Profunctor.Context
+import           Sequoia.Profunctor.Continuation
 import           Sequoia.Profunctor.Exponential
+import           Sequoia.Profunctor.Value
 
 -- Implication
 
@@ -25,3 +31,9 @@ type l~> r = l r
 
 infixr 6 ~~
 infixr 5 ~>
+
+
+-- Construction
+
+fun :: (e ∘ a -> b • r -> e ==> r) -> a ~~Fun e r~> b
+fun = Fun . exp
