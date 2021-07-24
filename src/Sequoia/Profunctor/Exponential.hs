@@ -171,8 +171,8 @@ elimExp = unCoexp . runExp
 runExpFn :: Exp e r a b -> ((e -> a) -> (b -> r) -> (e -> r))
 runExpFn = coerce . runExp
 
-(↑) :: a --|Exp e r|-> b -> e ∘ a -> b • r -> e ==> r
-(↑) = coerce
+(↑) :: MonadEnv e m => a --|Exp e r|-> b -> e ∘ a -> b • r -> m r
+(f ↑ a) k = env (\ e -> pure (runExp f a k <== e))
 
 infixl 3 ↑
 
