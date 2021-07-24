@@ -56,7 +56,7 @@ runSnk = coerce . runSnk
 
 -- FIXME: this takes a function instead of a Src to avoid cyclic module imports, would be nicer to have the definitions pulled out somewhere reasonable
 elimSnk :: Snk e r a -> Src e r a -> e ==> r
-elimSnk sn sr = env (res . (runSrcFn sr . flip (runSnkFn sn . pure) <*> id))
+elimSnk sn sr = env (pure . (runSrcFn sr . flip (runSnkFn sn . pure) <*> id))
 
 
 -- Computation

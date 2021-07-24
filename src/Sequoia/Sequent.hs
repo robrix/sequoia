@@ -5,6 +5,7 @@ module Sequoia.Sequent
 , liftLR
 , lowerLR
 , inSeqCoexp
+, seqFn
   -- * Elimination
 , evalSeq
 , runSeq
@@ -17,6 +18,7 @@ module Sequoia.Sequent
 import           Control.Arrow hiding ((>>>))
 import qualified Control.Category as Cat
 import           Control.Monad.Trans.Class
+import           Data.Coerce
 import           Data.Function ((&))
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
@@ -52,7 +54,6 @@ import           Sequoia.Profunctor.Value
 -- Sequents
 
 newtype Seq e r _Γ _Δ = Seq { (↑) :: e ∘ _Γ -> _Δ • r -> e ==> r }
-  deriving (Res r) via (Exp e r _Γ _Δ)
   deriving (Applicative, Functor, Monad, MonadEnv e, MonadRes r) via (Exp e r _Γ)
   deriving (Arrow, ArrowApply, ArrowChoice, Cat.Category, Choice, Profunctor, Strong, Traversing) via (Exp e r)
 
@@ -72,6 +73,9 @@ inSeqExp = Seq . runExp
 
 inSeqCoexp :: (Coexp e r b a -> e ==> r) -> Seq e r a b
 inSeqCoexp = inSeqExp . expCoexp
+
+seqFn :: ((e -> _Γ) -> (_Δ -> r) -> (e -> r)) -> Seq e r _Γ _Δ
+seqFn = coerce
 
 
 -- Elimination
@@ -131,12 +135,12 @@ instance Contextual Seq where
 -- Control
 
 instance Environment Seq where
-  environment = Seq (\ _Γ _Δ -> env (inrK _Δ ••))
+  environment = Seq (\ _Γ _Δ -> C (inrK _Δ •))
 
   withEnv r s = Seq (\ _Γ _Δ -> env (\ e -> _Δ |> toK (_Δ ↓ s ↑ lmap (const e) _Γ) ↓ r ↑ _Γ))
 
 instance Calculus.Control Seq where
-  reset s = Seq (\ _Γ _Δ -> _Δ •∘ toV (idK ↓ s ↑ _Γ))
+  reset s = seqFn (\ _Γ _Δ e -> _Δ (runSeq s _Γ id e))
   shift s = Seq (\ _Γ _Δ -> inlK _Δ |> idK ↓ s ↑ pure (inrK _Δ) <| _Γ)
 
 
@@ -232,7 +236,7 @@ instance SubtractionIntro Seq where
 
 instance UniversalIntro Seq where
   forAllL p = mapL (fmap (notNegate . runForAll)) p
-  forAllR p = Seq (\ _Γ _Δ -> liftRes (\ run -> inrK _Δ •• ForAll (K (\ k -> run (inlK _Δ |> k ↓ p ↑ _Γ)))))
+  forAllR p = Seq (\ _Γ _Δ -> C (\ e -> inrK _Δ • ForAll (K (\ k -> inlK _Δ |> k ↓ p ↑ _Γ <== e))))
 
 instance ExistentialIntro Seq where
   existsL p = popL (val (inSeqExp . dnE . runExists (getSeq . pushL p . pure)))

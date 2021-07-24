@@ -47,7 +47,7 @@ unCoexp :: (e ∘ a -> b • r -> s) -> Coexp e r b a -> s
 unCoexp = flip withCoexp
 
 evalCoexp :: Coexp e r a a -> e ==> r
-evalCoexp = unCoexp (flip (•∘))
+evalCoexp c = C (\ e -> forget c • recall c ∘ e)
 
 
 -- Optics

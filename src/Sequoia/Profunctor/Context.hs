@@ -21,12 +21,10 @@ module Sequoia.Profunctor.Context
 , MonadEnv(..)
 , val
   -- * Ambient control
-, Res(..)
+, MonadRes(..)
 , cont
 , (••)
 , (•∘)
-, MonadRes(..)
-, mcont
 ) where
 
 import Control.Arrow
@@ -53,7 +51,7 @@ _C :: Iso (e ==> r) (e' ==> r') (e -> r) (e' -> r')
 _C = coerced
 
 newtype e ==> r = C { (<==) :: e -> r }
-  deriving (Applicative, Arrow, ArrowApply, ArrowChoice, ArrowLoop, Cat.Category, Choice, Closed, Cochoice, Costrong, Functor, Mapping, Monad, MonadEnv e, Profunctor, Co.Representable, Res r, Strong, Traversing)
+  deriving (Applicative, Arrow, ArrowApply, ArrowChoice, ArrowLoop, Cat.Category, Choice, Closed, Cochoice, Costrong, Functor, Mapping, Monad, MonadEnv e, Profunctor, Co.Representable, Strong, Traversing)
 
 infix 6 ==>
 infixl 1 <==
@@ -138,40 +136,25 @@ val f v = env (f . (v ∘))
 
 -- Ambient control
 
-class Res r c | c -> r where
-  res :: r -> c
-  liftRes :: ((c -> r) -> c) -> c
+class MonadRes r m | m -> r where
+  res :: r -> m r
+  liftRes :: ((m a -> r) -> m a) -> m a
 
-instance Res r (a -> r) where
-  res = pure
-  liftRes f = f =<< flip ($)
+instance MonadRes r (Src e r) where
+  res = Src . const . pure
+  liftRes f = Src (\ k -> env (\ e -> runSrcFn (f (($ e) . (`runSrcFn` k))) k))
 
-instance Res r (Src e r b) where
-  res = Src . const . res
-  liftRes f = Src (\ k -> liftRes (\ run -> runSrcFn (f (run . (`runSrcFn` k))) k))
-
-deriving instance Res r (a • r)
-deriving instance Res r (Forget r a b)
-deriving instance Res r (Recall e a r)
-
-cont :: Res r c => (((a -> c) -> a • r) -> c) -> c
+cont :: MonadRes r m => (((a -> m a) -> a • r) -> m a) -> m a
 cont f = liftRes (\ run -> f (K . (run .)))
 
-(••) :: Res r c => a • r -> a -> c
+
+(••) :: MonadRes r m => a • r -> a -> m r
 k •• v = res (k • v)
 
 infix 7 ••
 
 
-(•∘) :: (MonadEnv e m, Res r (m r)) => a • r -> e ∘ a -> m r
+(•∘) :: (MonadEnv e m, MonadRes r m) => a • r -> e ∘ a -> m r
 k •∘ v = env (\ e -> res (k • v ∘ e))
 
 infix 8 •∘
-
-
-class MonadRes r m | m -> r where
-  mres :: r -> m ()
-  mliftRes :: ((m a -> r) -> m a) -> m a
-
-mcont :: MonadRes r m => (((a -> m a) -> a • r) -> m a) -> m a
-mcont f = mliftRes (\ run -> f (K . (run .)))
