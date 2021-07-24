@@ -32,7 +32,7 @@ fn = distributeRun
 -- Defaults
 
 distributeRun :: (MonadRun f, Functor g) => g (f a) -> f (g a)
-distributeRun g = withRun (\ run -> pure (run <$> g))
+distributeRun = collectRun id
 
 collectRun :: (MonadRun f, Functor g) => (a -> f b) -> g a -> f (g b)
 collectRun f g = withRun (\ run -> pure (run . f <$> g))
