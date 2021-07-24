@@ -6,16 +6,15 @@ module Sequoia.Monad.Run
 , fn
 ) where
 
-import Data.Function
 import Data.Functor.Identity
 
 -- Lowering
 
 class Monad m => MonadRun m where
-  withRun :: ((m r -> r) -> m a) -> m a
+  withRun :: ((forall r . m r -> r) -> m a) -> m a
 
 instance MonadRun ((->) a) where
-  withRun b = b =<< (&)
+  withRun b a = b ($ a) a
 
 instance MonadRun Identity where
   withRun b = b runIdentity
