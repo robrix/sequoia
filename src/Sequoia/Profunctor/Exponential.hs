@@ -10,6 +10,7 @@ module Sequoia.Profunctor.Exponential
 , type (--|)
 , type (|->)
   -- ** Construction
+, exp
 , exp'
 , expV
 , expK
@@ -38,6 +39,7 @@ import qualified Control.Category as Cat
 import           Data.Coerce
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
+import           Prelude hiding (exp)
 import           Sequoia.Conjunction
 import           Sequoia.Disjunction
 import           Sequoia.Optic.Iso
@@ -115,6 +117,9 @@ infixr 5 |->
 
 
 -- Construction
+
+exp :: (e ∘ a -> b • r -> e ==> r) -> Exp e r a b
+exp = Exp
 
 exp' :: (a -> b) -> a --|Exp e r|-> b
 exp' f = Exp (\ v k -> C ((k •) . f . (v ∘)))
