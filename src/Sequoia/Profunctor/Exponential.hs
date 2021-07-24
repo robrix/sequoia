@@ -64,12 +64,12 @@ instance Profunctor (Exp e r) where
   dimap f g = exp . dimap (lmap g) (lmap (rmap f)) . runExp
 
 instance Strong (Exp e r) where
-  first'  r = exp (\ b a -> val (\ (a, c) -> lmap (,c) b ↓ r ↑ pure a) a)
-  second' r = exp (\ b a -> val (\ (c, a) -> lmap (c,) b ↓ r ↑ pure a) a)
+  first'  r = exp (\ b -> val (\ (a, c) -> lmap (,c) b ↓ r ↑ pure a))
+  second' r = exp (\ b -> val (\ (c, a) -> lmap (c,) b ↓ r ↑ pure a))
 
 instance Choice (Exp e r) where
-  left'  r = exp (\ b a -> val ((\ v -> inlK b ↓ r ↑ pure v) <--> pure . (inrK b •)) a)
-  right' r = exp (\ b a -> val (pure . (inlK b •) <--> (\ v -> inrK b ↓ r ↑ pure v)) a)
+  left'  r = exp (\ b -> val ((\ v -> inlK b ↓ r ↑ pure v) <--> pure . (inrK b •)))
+  right' r = exp (\ b -> val (pure . (inlK b •) <--> (\ v -> inrK b ↓ r ↑ pure v)))
 
 instance Traversing (Exp e r) where
   wander traverse r = exp (\ k v -> val (\ s -> k ↓ traverse ((r <<<) . pure) s ↑ idV) v)
