@@ -6,7 +6,7 @@ module Sequoia.Sequent
 , lowerLR
 , seq
 , seqExp
-, inSeqCoexp
+, seqCoexp
 , seqFn
   -- * Elimination
 , evalSeq
@@ -76,8 +76,8 @@ seq = Seq
 seqExp :: Exp e r a b -> Seq e r a b
 seqExp = Seq . runExp
 
-inSeqCoexp :: (Coexp e r b a -> e ==> r) -> Seq e r a b
-inSeqCoexp = seqExp . expCoexp
+seqCoexp :: (Coexp e r b a -> e ==> r) -> Seq e r a b
+seqCoexp = seqExp . expCoexp
 
 seqFn :: ((e -> _Γ) -> (_Δ -> r) -> (e -> r)) -> Seq e r _Γ _Δ
 seqFn = coerce
@@ -134,7 +134,7 @@ deriving via Contextually Seq instance Exchange Seq
 -- Contextual rules
 
 instance Contextual Seq where
-  swapΓΔ f = inSeqCoexp . (. f) . flip elimSeq
+  swapΓΔ f = seqCoexp . (. f) . flip elimSeq
 
 
 -- Control
