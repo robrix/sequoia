@@ -140,7 +140,7 @@ instance Environment Seq where
   withEnv r s = Seq (\ _Γ _Δ -> env (\ e -> _Δ |> toK (_Δ ↓ s ↑ lmap (const e) _Γ) ↓ r ↑ _Γ))
 
 instance Calculus.Control Seq where
-  reset s = seqFn (\ _Γ _Δ e -> _Δ (runSeq s _Γ id e))
+  reset s = seqFn (\ _Γ _Δ -> _Δ . runSeq s _Γ id)
   shift s = Seq (\ _Γ _Δ -> inlK _Δ |> idK ↓ s ↑ pure (inrK _Δ) <| _Γ)
 
 
