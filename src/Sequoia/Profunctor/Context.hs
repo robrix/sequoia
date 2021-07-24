@@ -27,7 +27,6 @@ module Sequoia.Profunctor.Context
 , val
   -- * Ambient control
 , MonadRes(..)
-, cont
 , (••)
 , (•∘)
 ) where
@@ -172,10 +171,6 @@ class MonadRes r m | m -> r where
 instance MonadRes r (Src e r) where
   res = Src . const . pure
   liftRes f = Src (\ k -> env (\ e -> runSrcFn (f (($ e) . (`runSrcFn` k))) k))
-
-cont :: MonadRes r m => (((a -> m a) -> a • r) -> m a) -> m a
-cont f = liftRes (\ run -> f (K . (run .)))
-
 
 (••) :: MonadRes r m => a • r -> a -> m r
 k •• v = res (k • v)

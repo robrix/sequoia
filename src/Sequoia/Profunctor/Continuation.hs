@@ -5,6 +5,7 @@ module Sequoia.Profunctor.Continuation
   -- * Construction
 , idK
 , inK
+, cont
   -- * Coercion
 , _K
   -- * Computation
@@ -52,6 +53,9 @@ idK = K id
 
 inK :: MonadRun m => (a -> m r) -> m (a • r)
 inK = fmap K . fn
+
+cont :: MonadRun m => ((forall b . (b -> m r) -> b • r) -> m a) -> m a
+cont f = withRun (\ run -> f (K . (run .)))
 
 
 -- Coercion
