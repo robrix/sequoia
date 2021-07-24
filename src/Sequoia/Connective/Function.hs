@@ -5,6 +5,7 @@ module Sequoia.Connective.Function
 , type (~>)
   -- * Construction
 , fun
+, funExp
 ) where
 
 import qualified Control.Category as Cat
@@ -36,4 +37,7 @@ infixr 5 ~>
 -- Construction
 
 fun :: (e ∘ a -> b • r -> e ==> r) -> a ~~Fun e r~> b
-fun = Fun . exp
+fun = funExp . exp
+
+funExp :: Exp e r a b -> a ~~Fun e r~> b
+funExp = Fun
