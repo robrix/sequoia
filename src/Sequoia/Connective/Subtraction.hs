@@ -38,7 +38,7 @@ infixr 5 -~
 
 -- Construction
 
-sub :: e ∘ a -> b • r -> b >-Sub e r-~ a
+sub :: b • r -> e ∘ a -> b >-Sub e r-~ a
 sub = fmap Sub . (>-)
 
 

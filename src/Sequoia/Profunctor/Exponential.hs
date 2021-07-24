@@ -145,7 +145,7 @@ expFn :: ((b -> r) -> (e -> a) -> (e -> r)) -> Exp e r a b
 expFn = coerce
 
 expCoexp :: (Coexp e r b a -> e ==> r) -> Exp e r a b
-expCoexp f = exp (fmap f . flip (>-))
+expCoexp f = exp (fmap f . (>-))
 
 
 -- Elimination
@@ -166,7 +166,7 @@ runExp' :: b • r -> e ∘ a -> a --|Exp e r|-> b -> e ==> r
 runExp' k v f = runExp f k v
 
 elimExp :: a --|Exp e r|-> b -> Coexp e r b a -> e ==> r
-elimExp = unCoexp . flip . runExp
+elimExp = unCoexp . runExp
 
 runExpFn :: Exp e r a b -> ((b -> r) -> (e -> a) -> (e -> r))
 runExpFn = coerce . runExp

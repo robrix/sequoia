@@ -91,7 +91,7 @@ runSeq :: Seq e r _Γ _Δ -> ((e -> _Γ) -> (_Δ -> r) -> (e -> r))
 runSeq s f g = evalSeq (dimap f g s)
 
 elimSeq :: _Γ -|Seq e r|- _Δ -> Coexp e r _Δ _Γ -> e ==> r
-elimSeq = unCoexp . flip . getSeq
+elimSeq = unCoexp . getSeq
 
 (↓) :: _Δ • r -> Seq e r _Γ _Δ -> e ∘ _Γ -> e ==> r
 (↓) = flip getSeq
@@ -227,7 +227,7 @@ instance FunctionIntro Seq where
 
 instance SubtractionIntro Seq where
   subL f = popL (val (\ s -> liftR (subA s) >>> f >>> liftL (subK s)))
-  subR a b = wkR' a >>> popL (popR . fmap (liftR . pure) . sub) >>> wkL' (wkR b)
+  subR a b = wkR' a >>> popL (popR . fmap (liftR . pure) . flip sub) >>> wkL' (wkR b)
 
 
 -- Quantification
