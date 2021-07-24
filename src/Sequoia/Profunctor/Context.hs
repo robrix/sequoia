@@ -28,6 +28,7 @@ module Sequoia.Profunctor.Context
 , (••)
 , (•∘)
 , MonadRes(..)
+, mcont
 ) where
 
 import Control.Arrow
@@ -187,3 +188,6 @@ infix 8 •∘
 class MonadRes r m | m -> r where
   mres :: r -> m ()
   mliftRes :: ((m r -> r) -> m a) -> m a
+
+mcont :: MonadRes r m => (((a -> m r) -> a • r) -> m a) -> m a
+mcont f = mliftRes (\ run -> f (K . (run .)))
