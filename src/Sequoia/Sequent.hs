@@ -89,7 +89,7 @@ evalSeq :: _Γ -|Seq _Γ _Δ|- _Δ -> (_Γ -> _Δ)
 evalSeq = evalExp . exp . getSeq
 
 runSeq :: Seq e r _Γ _Δ -> ((_Δ -> r) -> (e -> _Γ) -> (e -> r))
-runSeq s f g = evalSeq (dimap g f s)
+runSeq = coerce
 
 runSeqFn :: Seq e r _Γ _Δ -> ((_Δ -> r) -> (e -> _Γ) -> (e -> r))
 runSeqFn = coerce
