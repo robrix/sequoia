@@ -88,7 +88,7 @@ seqFn = coerce
 evalSeq :: _Γ -|Seq _Γ _Δ|- _Δ -> (_Γ -> _Δ)
 evalSeq = evalExp . exp . getSeq
 
-runSeq :: Seq e r _Γ _Δ -> ((_Δ -> r) -> (e -> _Γ) -> (e -> r))
+runSeq :: Seq e r _Γ _Δ -> (_Δ • r -> e ∘ _Γ -> e ==> r)
 runSeq = coerce
 
 runSeqFn :: Seq e r _Γ _Δ -> ((_Δ -> r) -> (e -> _Γ) -> (e -> r))
@@ -103,8 +103,8 @@ elimSeq = unCoexp . getSeq
 
 -- Effectful sequents
 
-runSeqT :: SeqT e r _Γ m _Δ -> ((_Δ -> m r) -> (e -> _Γ) -> (e -> m r))
-runSeqT = runSeq . getSeqT
+runSeqT :: SeqT e r _Γ m _Δ -> (_Δ • m r -> e ∘ _Γ -> e ==> m r)
+runSeqT = coerce
 
 newtype SeqT e r _Γ m _Δ = SeqT { getSeqT :: Seq e (m r) _Γ _Δ }
   deriving (Applicative, Functor, Monad)
