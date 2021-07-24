@@ -57,42 +57,42 @@ _Exp = coerced
 newtype Exp e r a b = Exp { runExp :: e ∘ a -> b • r -> e ==> r }
 
 instance Profunctor (Exp e r) where
-  dimap f g = Exp . dimap (fmap f) (lmap (lmap g)) . runExp
+  dimap f g = exp . dimap (fmap f) (lmap (lmap g)) . runExp
 
 instance Strong (Exp e r) where
-  first'  r = Exp (\ a b -> val (\ (a, c) -> runExp r (pure a) (lmap (,c) b)) a)
-  second' r = Exp (\ a b -> val (\ (c, a) -> runExp r (pure a) (lmap (c,) b)) a)
+  first'  r = exp (\ a b -> val (\ (a, c) -> runExp r (pure a) (lmap (,c) b)) a)
+  second' r = exp (\ a b -> val (\ (c, a) -> runExp r (pure a) (lmap (c,) b)) a)
 
 instance Choice (Exp e r) where
-  left'  r = Exp (\ a b -> val (flip (runExp r) (inlK b) . pure <--> pure . (inrK b •)) a)
-  right' r = Exp (\ a b -> val (pure . (inlK b •) <--> flip (runExp r) (inrK b) . pure) a)
+  left'  r = exp (\ a b -> val (flip (runExp r) (inlK b) . pure <--> pure . (inrK b •)) a)
+  right' r = exp (\ a b -> val (pure . (inlK b •) <--> flip (runExp r) (inrK b) . pure) a)
 
 instance Traversing (Exp e r) where
-  wander traverse r = Exp (\ v k -> val (\ s -> runExp (traverse ((r <<<) . pure) s) (V id) k) v)
+  wander traverse r = exp (\ v k -> val (\ s -> runExp (traverse ((r <<<) . pure) s) (V id) k) v)
 
 instance Cat.Category (Exp e r) where
-  id = Exp (\ v k -> C ((k •) . (v ∘)))
+  id = exp (\ v k -> C ((k •) . (v ∘)))
   f . g = expFn (\ a c e -> runExpFn g a (\ b -> runExpFn f (pure b) c e) e)
 
 instance Functor (Exp e r c) where
   fmap = rmap
 
 instance Applicative (Exp e r a) where
-  pure a = Exp (\ v k -> C ((k •) . const a . (v ∘)))
+  pure a = exp (\ v k -> C ((k •) . const a . (v ∘)))
   df <*> da = expFn (\ a b e -> runExpFn df a (\ f -> runExpFn da a (lmap f b) e) e)
 
 instance Monad (Exp e r a) where
   m >>= f = expFn (\ v k e -> runExpFn m v (\ b -> runExpFn (f b) v k e) e)
 
 instance MonadEnv e (Exp e r a) where
-  env f = Exp (\ v k -> env (runExp' v k . f))
+  env f = exp (\ v k -> env (runExp' v k . f))
 
 instance MonadRes r (Exp e r a) where
-  res = Exp . const . const . pure
-  liftRes f = Exp (\ v k -> env (\ e -> let run f = runExp f v k in run (f ((<== e) . run))))
+  res = exp . const . const . pure
+  liftRes f = exp (\ v k -> env (\ e -> let run f = runExp f v k in run (f ((<== e) . run))))
 
 instance Coapply (Exp e r) where
-  coliftA2 f a b = Exp (\ v k -> env ((flip (runExp a) k <∘∘> flip (runExp b) k) (f <$> v)))
+  coliftA2 f a b = exp (\ v k -> env ((flip (runExp a) k <∘∘> flip (runExp b) k) (f <$> v)))
 
 instance Arrow (Exp e r) where
   arr = exp'
@@ -104,7 +104,7 @@ instance ArrowChoice (Exp e r) where
   right = right'
 
 instance ArrowApply (Exp e r) where
-  app = Exp (\ v k -> val (runExp' (exrF v) k) (exlF v))
+  app = exp (\ v k -> val (runExp' (exrF v) k) (exlF v))
 
 
 -- Mixfix notation
@@ -122,7 +122,7 @@ exp :: (e ∘ a -> b • r -> e ==> r) -> Exp e r a b
 exp = Exp
 
 exp' :: (a -> b) -> a --|Exp e r|-> b
-exp' f = Exp (\ v k -> C ((k •) . f . (v ∘)))
+exp' f = exp (\ v k -> C ((k •) . f . (v ∘)))
 
 expV :: e ∘ a -> e --|Exp e r|-> a
 expV = exp' . (∘)
@@ -140,7 +140,7 @@ expFn :: ((e -> a) -> (b -> r) -> (e -> r)) -> Exp e r a b
 expFn = coerce
 
 expCoexp :: (Coexp e r b a -> e ==> r) -> Exp e r a b
-expCoexp f = Exp (fmap f . (>-))
+expCoexp f = exp (fmap f . (>-))
 
 
 -- Elimination
@@ -173,4 +173,4 @@ reset :: a --|Exp e b|-> b -> a --|Exp e r|-> b
 reset f = expFn (\ v k e -> k (runExpFn f v id e))
 
 shift :: (a • r --|Exp e r|-> r) -> e --|Exp e r|-> a
-shift f = Exp (\ v k -> runExp f (pure k) idK <<∘ v)
+shift f = exp (\ v k -> runExp f (pure k) idK <<∘ v)
