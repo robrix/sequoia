@@ -85,6 +85,10 @@ instance Monad (Exp e r a) where
 instance MonadEnv e (Exp e r a) where
   menv = env
 
+instance MonadRes r (Exp e r a) where
+  mres = res
+  mliftRes = liftRes
+
 instance Coapply (Exp e r) where
   coliftA2 f a b = Exp (\ v k -> env ((flip (runExp a) k <∘∘> flip (runExp b) k) (f <$> v)))
 
