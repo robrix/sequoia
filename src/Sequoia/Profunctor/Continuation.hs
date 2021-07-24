@@ -2,10 +2,11 @@
 module Sequoia.Profunctor.Continuation
 ( -- * Continuation profunctor
   type (•)(..)
+  -- * Construction
+, idK
   -- * Coercion
 , _K
   -- * Composition
-, idK
 , (<••>)
 , (<•••>)
   -- * Double negation
@@ -42,6 +43,12 @@ instance Cosieve (•) Identity where
   cosieve = lmap runIdentity . (•)
 
 
+-- Construction
+
+idK :: a • a
+idK = K id
+
+
 -- Coercion
 
 _K :: Iso (a • r) (a' • r') (a -> r) (a' -> r')
@@ -49,10 +56,6 @@ _K = coerced
 
 
 -- Composition
-
-idK :: a • a
-idK = K id
-
 
 (<••>) :: Disj d => a • r -> b • r -> (a `d` b) • r
 a <••> b = K ((a •) <--> (b •))
