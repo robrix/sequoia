@@ -120,16 +120,16 @@ exp' :: (a -> b) -> a --|Exp e r|-> b
 exp' f = Exp (\ v k -> C ((k •) . f . (v ∘)))
 
 expV :: e ∘ a -> e --|Exp e r|-> a
-expV a = Exp (\ v k -> C ((k •) . (a ∘) . (v ∘)))
+expV = exp' . (∘)
 
 expK :: a • r -> a --|Exp e r|-> r
-expK a = Exp (\ v k -> C ((k •) . (a •) . (v ∘)))
+expK = exp' . (•)
 
 expVK :: e ∘ a -> a • r -> e --|Exp e r|-> r
 expVK v k = expC (C ((k •) . (v ∘)))
 
 expC :: e ==> r -> e --|Exp e r|-> r
-expC (C c) = expFn (\ v k -> k . c . v)
+expC = exp' . (<==)
 
 expFn :: ((e -> a) -> (b -> r) -> (e -> r)) -> Exp e r a b
 expFn = coerce
