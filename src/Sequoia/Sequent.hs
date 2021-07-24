@@ -68,13 +68,13 @@ liftLR :: Exp e r a b -> Seq e r (a < _Γ) (_Δ > b)
 liftLR = dimap exl inr . seqExp
 
 lowerLR :: (Exp e r a b -> _Γ -|Seq e r|- _Δ) -> a < _Γ -|Seq e r|- _Δ > b -> _Γ -|Seq e r|- _Δ
-lowerLR f p = Seq (\ _Γ _Δ -> _Δ ↓ f (Exp (\ a b -> _Δ |> b ↓ p ↑ a <| _Γ)) ↑ _Γ)
+lowerLR f p = seq (\ _Γ _Δ -> _Δ ↓ f (Exp (\ a b -> _Δ |> b ↓ p ↑ a <| _Γ)) ↑ _Γ)
 
 seq :: (e ∘ _Γ -> _Δ • r -> e ==> r) -> Seq e r _Γ _Δ
 seq = Seq
 
 seqExp :: Exp e r a b -> Seq e r a b
-seqExp = Seq . runExp
+seqExp = seq . runExp
 
 seqCoexp :: (Coexp e r b a -> e ==> r) -> Seq e r a b
 seqCoexp = seqExp . expCoexp
@@ -113,7 +113,7 @@ newtype SeqT e r _Γ m _Δ = SeqT { getSeqT :: Seq e (m r) _Γ _Δ }
   deriving (Applicative, Functor, Monad)
 
 instance MonadTrans (SeqT r s _Γ) where
-  lift m = SeqT (Seq (\ _ k -> C (const (m >>= (k •)))))
+  lift m = SeqT (seq (\ _ k -> C (const (m >>= (k •)))))
 
 
 -- Core rules
@@ -140,13 +140,13 @@ instance Contextual Seq where
 -- Control
 
 instance Environment Seq where
-  environment = Seq (\ _Γ _Δ -> C (inrK _Δ •))
+  environment = seq (\ _Γ _Δ -> C (inrK _Δ •))
 
-  withEnv r s = Seq (\ _Γ _Δ -> env (\ e -> _Δ |> toK (_Δ ↓ s ↑ lmap (const e) _Γ) ↓ r ↑ _Γ))
+  withEnv r s = seq (\ _Γ _Δ -> env (\ e -> _Δ |> toK (_Δ ↓ s ↑ lmap (const e) _Γ) ↓ r ↑ _Γ))
 
 instance Calculus.Control Seq where
   reset s = seqFn (\ _Γ _Δ -> _Δ . runSeq s _Γ id)
-  shift s = Seq (\ _Γ _Δ -> inlK _Δ |> idK ↓ s ↑ pure (inrK _Δ) <| _Γ)
+  shift s = seq (\ _Γ _Δ -> inlK _Δ |> idK ↓ s ↑ pure (inrK _Δ) <| _Γ)
 
 
 -- Assertion
@@ -241,7 +241,7 @@ instance SubtractionIntro Seq where
 
 instance UniversalIntro Seq where
   forAllL p = mapL (fmap (notNegate . runForAll)) p
-  forAllR p = Seq (\ _Γ _Δ -> C (\ e -> inrK _Δ • ForAll (K (\ k -> inlK _Δ |> k ↓ p ↑ _Γ <== e))))
+  forAllR p = seq (\ _Γ _Δ -> C (\ e -> inrK _Δ • ForAll (K (\ k -> inlK _Δ |> k ↓ p ↑ _Γ <== e))))
 
 instance ExistentialIntro Seq where
   existsL p = popL (val (seqExp . dnE . runExists (getSeq . pushL p . pure)))
