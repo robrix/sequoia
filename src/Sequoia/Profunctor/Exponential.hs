@@ -136,7 +136,7 @@ expK :: a • r -> a --|Exp e r|-> r
 expK = exp' . (•)
 
 expKV :: a • r -> e ∘ a -> e --|Exp e r|-> r
-expKV k v = expC (k ↓↑ v)
+expKV = fmap expC . (↓↑)
 
 expC :: e ==> r -> e --|Exp e r|-> r
 expC = exp' . (<==)
