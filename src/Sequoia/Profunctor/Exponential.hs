@@ -176,7 +176,7 @@ runExpFn = coerce . runExp
 
 infixl 3 ↑
 
-(↓) :: b • r -> (b • r -> e ==> r) -> e ==> r
+(↓) :: b • r -> (b • r -> m r) -> m r
 (↓) = (&)
 
 infixl 2 ↓
