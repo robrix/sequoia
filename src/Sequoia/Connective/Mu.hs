@@ -11,6 +11,7 @@ module Sequoia.Connective.Mu
 import qualified Control.Category as Cat
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
+import           Prelude hiding (exp)
 import           Sequoia.Connective.Down
 import           Sequoia.Connective.Function
 import           Sequoia.Connective.Quantification
@@ -36,7 +37,7 @@ mu :: ForAll r N (MuF e r f) -> Mu e r f
 mu r = Mu (funExp (dnE (over _K (lmap (lmap (getFun . getMuF))) (runForAll r))))
 
 foldMu :: Neg a => f a --|Exp e r|-> a -> Mu e r f --|Exp e r|-> a
-foldMu alg = Exp (\ v k -> val (\ (Mu f) -> runExp (getFun f) (pure (Down (funExp alg))) k) v)
+foldMu alg = exp (\ v k -> val (\ (Mu f) -> runExp (getFun f) (pure (Down (funExp alg))) k) v)
 
 unfoldMu :: Traversable f => a --|Exp e r|-> f a -> a --|Exp e r|-> Mu e r f
 unfoldMu coalg = exp' (\ a -> Mu (fun (\ v k -> val (\ (Down alg) -> runExp (refoldCat (getFun alg) coalg) (pure a) k) v)))
