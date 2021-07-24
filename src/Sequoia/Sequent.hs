@@ -21,7 +21,6 @@ import           Control.Arrow hiding ((>>>))
 import qualified Control.Category as Cat
 import           Control.Monad.Trans.Class
 import           Data.Coerce
-import           Data.Function ((&))
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
 import           Prelude hiding (exp, init, seq)
@@ -50,7 +49,7 @@ import           Sequoia.Optic.Review
 import           Sequoia.Profunctor.Coexponential
 import           Sequoia.Profunctor.Context
 import           Sequoia.Profunctor.Continuation as K
-import           Sequoia.Profunctor.Exponential as Exponential hiding ((>>>))
+import           Sequoia.Profunctor.Exponential as Exponential hiding ((>>>), (↑))
 import           Sequoia.Profunctor.Value
 
 -- Sequents
@@ -96,12 +95,6 @@ elimSeq = unCoexp . (↑)
 
 getSeq :: _Γ -|Seq e r|- _Δ -> _Γ -|Exp e r|- _Δ
 getSeq = exp . (↑)
-
-
-(↓) :: b • r -> (b • r -> e ==> r) -> e ==> r
-(↓) = (&)
-
-infixl 2 ↓
 
 
 -- Effectful sequents

@@ -5,7 +5,7 @@ module Sequoia.Functor.Source
   -- * Construction
 , src
 , srcFn
-, (↑)
+, (Sequoia.Functor.Source.↑)
   -- * Elimination
 , runSrc
 , elimSrc
@@ -26,7 +26,7 @@ import Sequoia.Optic.Review
 import Sequoia.Optic.Setter
 import Sequoia.Profunctor.Context
 import Sequoia.Profunctor.Continuation
-import Sequoia.Profunctor.Exponential
+import Sequoia.Profunctor.Exponential as Exp
 import Sequoia.Profunctor.Value
 
 -- Sources
@@ -44,7 +44,7 @@ srcFn :: ((b -> r) -> (e -> r)) -> Src e r b
 srcFn = Src
 
 (↑) :: a --|Exp e r|-> b -> e ∘ a -> Src e r|-> b
-f ↑ v = Src (runExpFn f (v ∘))
+f ↑ v = src (f Exp.↑ v)
 
 infixl 3 ↑
 

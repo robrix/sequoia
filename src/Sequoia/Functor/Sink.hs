@@ -5,7 +5,7 @@ module Sequoia.Functor.Sink
   -- * Construction
 , snk
 , snkFn
-, (↓)
+, (Sequoia.Functor.Sink.↓)
   -- * Elimination
 , runSnk
 , elimSnk
@@ -44,7 +44,7 @@ snkFn :: ((e -> a) -> (e -> r)) -> Snk e r a
 snkFn = coerce
 
 (↓) :: b • r -> a --|Exp e r|-> b -> a --|Snk e r
-k ↓ f = snk (flip (runExp f) k)
+k ↓ f = snk (flip (f ↑) k)
 
 infixl 2 ↓
 
