@@ -28,7 +28,7 @@ data Coexp e r a b = Coexp { recall :: e ∘ b, forget :: a • r }
   deriving (Functor)
 
 instance Profunctor (Coexp e r) where
-  dimap g h (Coexp r f) = Coexp (fmap h r) (lmap g f)
+  dimap g h = unCoexp (\ r f -> coexp (fmap h r) (lmap g f))
 
 
 -- Construction
@@ -40,7 +40,7 @@ coexpFn :: (e -> b) -> (a -> r) -> Coexp e r a b
 coexpFn v k = coexp (V v) (K k)
 
 idCoexp :: Coexp b a a b
-idCoexp = Coexp idV idK
+idCoexp = coexpFn id id
 
 
 -- Elimination
