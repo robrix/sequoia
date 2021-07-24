@@ -82,6 +82,9 @@ instance Applicative (Exp e r a) where
 instance Monad (Exp e r a) where
   m >>= f = Exp (\ v k -> cont (\ _K -> runExp m v (_K (\ b -> runExp (f b) v k))))
 
+instance MonadEnv e (Exp e r a) where
+  menv = env
+
 instance Coapply (Exp e r) where
   coliftA2 f a b = Exp (\ v k -> env ((flip (runExp a) k <∘∘> flip (runExp b) k) (f <$> v)))
 
