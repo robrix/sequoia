@@ -142,6 +142,8 @@ class Monad m => MonadEnv e m | m -> e where
 instance MonadEnv e ((->) e) where
   menv = env
 
+deriving instance MonadEnv e ((∘) e)
+
 
 -- Ambient control
 
