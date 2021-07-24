@@ -32,7 +32,7 @@ instance Profunctor (Coexp e r) where
 -- Construction
 
 idCoexp :: Coexp b a a b
-idCoexp = Coexp (V id) (K id)
+idCoexp = Coexp (V id) idK
 
 
 -- Elimination
