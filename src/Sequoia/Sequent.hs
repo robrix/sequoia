@@ -5,6 +5,7 @@ module Sequoia.Sequent
 , liftLR
 , lowerLR
 , seq
+, seqExp
 , inSeqCoexp
 , seqFn
   -- * Elimination
