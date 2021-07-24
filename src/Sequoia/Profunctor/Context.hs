@@ -187,7 +187,7 @@ infix 8 •∘
 
 class MonadRes r m | m -> r where
   mres :: r -> m ()
-  mliftRes :: ((m r -> r) -> m a) -> m a
+  mliftRes :: ((m a -> r) -> m a) -> m a
 
-mcont :: MonadRes r m => (((a -> m r) -> a • r) -> m a) -> m a
+mcont :: MonadRes r m => (((a -> m a) -> a • r) -> m a) -> m a
 mcont f = mliftRes (\ run -> f (K . (run .)))
