@@ -133,7 +133,7 @@ instance Contextual Seq where
 -- Control
 
 instance Environment Seq where
-  environment = seq (\ _Δ _Γ -> C (inrK _Δ •))
+  environment = seq (\ _Δ _Γ -> fromK (inrK _Δ))
 
   withEnv r s = seq (\ _Δ _Γ -> env (\ e -> _Δ |> toK (_Δ ↓ s ↑ lmap (const e) _Γ) ↓ r ↑ _Γ))
 
@@ -234,7 +234,7 @@ instance SubtractionIntro Seq where
 
 instance UniversalIntro Seq where
   forAllL p = mapL (fmap (notNegate . runForAll)) p
-  forAllR p = seq (\ _Δ _Γ -> C (\ e -> inrK _Δ • ForAll (K (\ k -> inlK _Δ |> k ↓ p ↑ _Γ <== e))))
+  forAllR p = seq (\ _Δ _Γ -> env (\ e -> pure (inrK _Δ • ForAll (K (\ k -> inlK _Δ |> k ↓ p ↑ _Γ <== e)))))
 
 instance ExistentialIntro Seq where
   existsL p = popL (val (seqExp . dnE . runExists (exp . getSeq . pushL p . pure)))
