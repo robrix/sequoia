@@ -184,10 +184,10 @@ infixl 3 ↓
 -- Computation
 
 dnE :: ((a --|Exp e r|-> b) • r) • r -> a --|Exp e r|-> b
-dnE k = exp (\ k' v -> C (\ e -> k • K (\ f -> k' ↓ f ↑ v <== e)))
+dnE k = exp (\ k' v -> cont (\ _K -> pure (k • _K (\ f -> k' ↓ f ↑ v))))
 
 reset :: a --|Exp e b|-> b -> a --|Exp e r|-> b
-reset f = exp (\ k v -> C (\ e -> k • (idK ↓ f ↑ v <== e)))
+reset f = exp (\ k v -> env (\ e -> pure (k • (idK ↓ f ↑ v <== e))))
 
 shift :: (a • r --|Exp e r|-> r) -> e --|Exp e r|-> a
 shift f = exp (\ k v -> idK ↓ f ↑ pure k <<∘ v)

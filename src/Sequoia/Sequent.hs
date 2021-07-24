@@ -234,7 +234,7 @@ instance SubtractionIntro Seq where
 
 instance UniversalIntro Seq where
   forAllL p = mapL (fmap (notNegate . runForAll)) p
-  forAllR p = seq (\ _Δ _Γ -> env (\ e -> pure (inrK _Δ • ForAll (K (\ k -> inlK _Δ |> k ↓ p ↑ _Γ <== e)))))
+  forAllR p = seq (\ _Δ _Γ -> cont (\ _K -> pure (inrK _Δ • ForAll (_K (\ k -> inlK _Δ |> k ↓ p ↑ _Γ)))))
 
 instance ExistentialIntro Seq where
   existsL p = popL (val (seqExp . dnE . runExists (exp . getSeq . pushL p . pure)))
