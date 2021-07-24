@@ -180,7 +180,7 @@ infixl 3 ↓
 
 -- Computation
 
-dnE :: ((a --|Exp e r|-> b) • r) • r -> a --|Exp e r|-> b
+dnE :: (a --|Exp e r|-> b) • r • r -> a --|Exp e r|-> b
 dnE k = exp (\ k' v -> cont (\ _K -> pure (k • _K (\ f -> k' ↓ f ↑ v))))
 
 reset :: a --|Exp e b|-> b -> a --|Exp e r|-> b
