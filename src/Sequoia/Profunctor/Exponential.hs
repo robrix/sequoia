@@ -58,7 +58,7 @@ import           Sequoia.Profunctor.Value as V
 _Exp :: Iso (Exp e r a b) (Exp e' r' a' b') (e ∘ a -> b • r -> e ==> r) (e' ∘ a' -> b' • r' -> e' ==> r')
 _Exp = coerced
 
-newtype Exp e r a b = Exp (e ∘ a -> b • r -> e ==> r)
+newtype Exp e r a b = Exp ((e -> a) -> (b -> r) -> (e -> r))
 
 instance Profunctor (Exp e r) where
   dimap f g = exp . dimap (fmap f) (lmap (lmap g)) . runExp
@@ -124,7 +124,7 @@ infixr 5 |->
 -- Construction
 
 exp :: (e ∘ a -> b • r -> e ==> r) -> Exp e r a b
-exp = Exp
+exp = coerce
 
 exp' :: (a -> b) -> a --|Exp e r|-> b
 exp' f = exp (\ v k -> C ((k •) . f . (v ∘)))
