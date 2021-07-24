@@ -4,6 +4,7 @@ module Sequoia.Profunctor.Continuation
   type (•)(..)
   -- * Construction
 , idK
+, inK
   -- * Coercion
 , _K
   -- * Composition
@@ -23,6 +24,7 @@ import Data.Profunctor.Rep as Pro
 import Data.Profunctor.Sieve
 import Data.Profunctor.Traversing
 import Sequoia.Disjunction
+import Sequoia.Monad.Run
 import Sequoia.Optic.Iso
 
 -- Continuation profunctor
@@ -47,6 +49,9 @@ instance Cosieve (•) Identity where
 
 idK :: a • a
 idK = K id
+
+inK :: MonadRun m => (a -> m r) -> m (a • r)
+inK = fmap K . fn
 
 
 -- Coercion
