@@ -136,7 +136,7 @@ val :: Env e c => (a -> c) -> (e ∘ a -> c)
 val f v = env (f . (v ∘))
 
 
-class MonadEnv e m | m -> e where
+class Monad m => MonadEnv e m | m -> e where
   menv :: (e -> m a) -> m a
 
 
