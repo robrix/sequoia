@@ -88,8 +88,8 @@ seqFn = coerce
 evalSeq :: _Γ -|Seq _Γ _Δ|- _Δ -> (_Γ -> _Δ)
 evalSeq = evalExp . exp . getSeq
 
-runSeq :: Seq e r _Γ _Δ -> ((e -> _Γ) -> (_Δ -> r) -> (e -> r))
-runSeq s f g = evalSeq (dimap f g s)
+runSeq :: Seq e r _Γ _Δ -> ((_Δ -> r) -> (e -> _Γ) -> (e -> r))
+runSeq s f g = evalSeq (dimap g f s)
 
 runSeqFn :: Seq e r _Γ _Δ -> ((_Δ -> r) -> (e -> _Γ) -> (e -> r))
 runSeqFn = coerce
@@ -103,7 +103,7 @@ elimSeq = unCoexp . getSeq
 
 -- Effectful sequents
 
-runSeqT :: SeqT e r _Γ m _Δ -> ((e -> _Γ) -> (_Δ -> m r) -> (e -> m r))
+runSeqT :: SeqT e r _Γ m _Δ -> ((_Δ -> m r) -> (e -> _Γ) -> (e -> m r))
 runSeqT = runSeq . getSeqT
 
 newtype SeqT e r _Γ m _Δ = SeqT { getSeqT :: Seq e (m r) _Γ _Δ }
@@ -142,7 +142,7 @@ instance Environment Seq where
   withEnv r s = seq (\ _Δ _Γ -> env (\ e -> _Δ |> toK (_Δ ↓ s ↑ lmap (const e) _Γ) ↓ r ↑ _Γ))
 
 instance Calculus.Control Seq where
-  reset s = seqFn (\ _Δ _Γ -> _Δ . runSeq s _Γ id)
+  reset s = seqFn (\ _Δ _Γ -> _Δ . runSeqFn s id _Γ)
   shift s = seq (\ _Δ _Γ -> inlK _Δ |> idK ↓ s ↑ pure (inrK _Δ) <| _Γ)
 
 
