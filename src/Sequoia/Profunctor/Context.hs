@@ -5,6 +5,8 @@ module Sequoia.Profunctor.Context
 ( -- * Context & control profunctor
   _C
 , type (==>)(..)
+  -- * Construction
+, (↓↑)
   -- * Elimination
 , toK
 , toV
@@ -73,6 +75,14 @@ instance Pro.Representable (==>) where
 instance Pro.Corepresentable (==>) where
   type Corep (==>) = Identity
   cotabulate = C . lmap Identity
+
+
+-- Construction
+
+(↓↑) :: a • r -> e ∘ a -> e ==> r
+k ↓↑ v = C ((k •) . (v ∘))
+
+infix 9 ↓↑
 
 
 -- Elimination
