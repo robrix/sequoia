@@ -148,6 +148,9 @@ instance MonadEnv e ((->) e) where
 deriving instance MonadEnv e ((∘) e)
 deriving instance MonadEnv e (Recall e a)
 
+instance MonadEnv e (Src e r) where
+  menv f = Src (\ k -> env ((`runSrcFn` k) . f))
+
 mval :: MonadEnv e m => (a -> m b) -> (e ∘ a -> m b)
 mval f v = menv (f . (v ∘))
 
