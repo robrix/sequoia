@@ -1,6 +1,6 @@
 module Sequoia.Sequent
 ( -- * Sequents
-  Seq(..)
+  Seq((↑))
   -- * Construction
 , liftLR
 , lowerLR
