@@ -143,6 +143,7 @@ instance MonadEnv e ((->) e) where
   menv = env
 
 deriving instance MonadEnv e ((∘) e)
+deriving instance MonadEnv e (Recall e a)
 
 
 -- Ambient control
