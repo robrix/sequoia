@@ -1,7 +1,7 @@
 {-# LANGUAGE QuantifiedConstraints #-}
 module Sequoia.Profunctor.Coexponential
 ( -- * Coexponential profunctor
-  Coexp(..)
+  Coexp(recall, forget)
   -- * Construction
 , coexp
 , coexpFn
