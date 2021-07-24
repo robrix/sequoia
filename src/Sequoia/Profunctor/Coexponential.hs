@@ -29,7 +29,7 @@ import Sequoia.Profunctor.Value
 
 -- Coexponential profunctor
 
-data Coexp e r a b = Coexp { recallFn :: e ∘ b, forgetFn :: a • r }
+data Coexp e r a b = Coexp { recallFn :: e -> b, forgetFn :: a -> r }
   deriving (Functor)
 
 instance Profunctor (Coexp e r) where
@@ -39,10 +39,10 @@ instance Profunctor (Coexp e r) where
 -- Construction
 
 coexp :: e ∘ b -> a • r -> Coexp e r a b
-coexp = Coexp
+coexp v k = coexpFn (v ∘) (k •)
 
 coexpFn :: (e -> b) -> (a -> r) -> Coexp e r a b
-coexpFn v k = coexp (V v) (K k)
+coexpFn = Coexp
 
 idCoexp :: Coexp b a a b
 idCoexp = coexpFn id id
