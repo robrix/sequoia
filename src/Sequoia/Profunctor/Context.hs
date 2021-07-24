@@ -8,6 +8,8 @@ module Sequoia.Profunctor.Context
   -- * Construction
 , ckv
 , (↓↑)
+, fromK
+, fromV
   -- * Elimination
 , toK
 , toV
@@ -88,6 +90,12 @@ ckv f k v = C ((k •) . f . (v ∘))
 k ↓↑ v = C ((k •) . (v ∘))
 
 infix 9 ↓↑
+
+fromK :: e • r -> e ==> r
+fromK = coerce
+
+fromV :: e ∘ r -> e ==> r
+fromV = coerce
 
 
 -- Elimination
