@@ -23,12 +23,13 @@ import Data.Profunctor.Sieve
 import Data.Profunctor.Traversing
 import Sequoia.Conjunction
 import Sequoia.Disjunction
+import Sequoia.Monad.Run
 import Sequoia.Optic.Iso
 
 -- Value profunctor
 
 newtype e ∘ a = V { (∘) :: e -> a }
-  deriving (Applicative, Category, Choice, Closed, Cochoice, Pro.Corepresentable, Costrong, Functor, Mapping, Monad, Profunctor, Co.Representable, Pro.Representable, Strong, Traversing)
+  deriving (Applicative, Category, Choice, Closed, Cochoice, Pro.Corepresentable, Costrong, Functor, Mapping, Monad, MonadRun, Profunctor, Co.Representable, Pro.Representable, Strong, Traversing)
 
 infixl 8 ∘
 
