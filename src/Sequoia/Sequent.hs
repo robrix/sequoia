@@ -225,7 +225,7 @@ instance XOrIntro Seq where
 
 instance FunctionIntro Seq where
   funL a b = popL (val (\ f -> a >>> liftLR (getFun f) >>> wkL' b))
-  funR = lowerLR (liftR . pure . Fun) . wkR'
+  funR = lowerLR (liftR . pure . funExp) . wkR'
 
 instance SubtractionIntro Seq where
   subL f = popL (val (\ s -> liftR (subA s) >>> f >>> liftL (subK s)))

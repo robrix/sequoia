@@ -33,13 +33,13 @@ newtype MuF e r f a = MuF { getMuF :: Down (FAlg e r f a) ~~Fun e r~> a }
 instance (Pos (f a), Neg a) => Polarized N (MuF e r f a) where
 
 mu :: ForAll r N (MuF e r f) -> Mu e r f
-mu r = Mu (Fun (dnE (over _K (lmap (lmap (getFun . getMuF))) (runForAll r))))
+mu r = Mu (funExp (dnE (over _K (lmap (lmap (getFun . getMuF))) (runForAll r))))
 
 foldMu :: Neg a => f a --|Exp e r|-> a -> Mu e r f --|Exp e r|-> a
-foldMu alg = Exp (\ v k -> val (\ (Mu f) -> runExp (getFun f) (pure (Down (Fun alg))) k) v)
+foldMu alg = Exp (\ v k -> val (\ (Mu f) -> runExp (getFun f) (pure (Down (funExp alg))) k) v)
 
 unfoldMu :: Traversable f => a --|Exp e r|-> f a -> a --|Exp e r|-> Mu e r f
-unfoldMu coalg = exp' (\ a -> Mu (Fun (Exp (\ v k -> val (\ (Down (Fun alg)) -> runExp (refoldCat alg coalg) (pure a) k) v))))
+unfoldMu coalg = exp' (\ a -> Mu (fun (\ v k -> val (\ (Down alg) -> runExp (refoldCat (getFun alg) coalg) (pure a) k) v)))
 
 refoldMu :: (Traversable f, Neg b) => f b --|Exp e r|-> b -> a --|Exp e r|-> f a -> a --|Exp e r|-> b
 refoldMu f g = foldMu f Cat.<<< unfoldMu g

@@ -1,6 +1,6 @@
 module Sequoia.Connective.Function
 ( -- * Implication
-  Fun(..)
+  Fun(getFun)
 , type (~~)
 , type (~>)
   -- * Construction
