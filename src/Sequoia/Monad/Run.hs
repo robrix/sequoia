@@ -20,5 +20,7 @@ instance MonadRun Identity where
   withRun b = b runIdentity
 
 
+-- Construction
+
 fn :: MonadRun m => (a -> m r) -> m (a -> r)
 fn b = withRun (\ run -> pure (run . b))
