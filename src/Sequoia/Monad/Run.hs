@@ -2,6 +2,8 @@
 module Sequoia.Monad.Run
 ( -- * Lowering
   MonadRun(..)
+  -- * Construction
+, fn
 ) where
 
 import Data.Function
@@ -17,3 +19,7 @@ instance MonadRun ((->) a) where
 
 instance MonadRun Identity where
   withRun b = b runIdentity
+
+
+fn :: MonadRun m => (a -> m r) -> m (a -> r)
+fn b = withRun (\ run -> pure (run . b))
