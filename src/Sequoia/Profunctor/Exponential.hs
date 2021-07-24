@@ -75,14 +75,14 @@ instance Traversing (Exp e r) where
   wander traverse r = exp (\ v k -> val (\ s -> k ↓ traverse ((r <<<) . pure) s ↑ idV) v)
 
 instance Cat.Category (Exp e r) where
-  id = exp (\ v k -> C ((k •) . (v ∘)))
+  id = exp (flip (↓↑))
   f . g = exp (\ a c -> C (\ e -> K (\ b -> c ↓ f ↑ pure b <== e) ↓ g ↑ a <== e))
 
 instance Functor (Exp e r c) where
   fmap = rmap
 
 instance Applicative (Exp e r a) where
-  pure a = exp (\ v k -> C ((k •) . const a . (v ∘)))
+  pure = exp . cvk . pure
   -- FIXME: K, ↑, and ↓ could b actions in MonadEnv
   df <*> da = exp (\ a b -> C (\ e -> K (\ f -> lmap f b ↓ da ↑ a <== e) ↓ df ↑ a <== e))
 
@@ -93,7 +93,7 @@ instance MonadEnv e (Exp e r a) where
   env f = exp (\ v k -> env (\ e -> k ↓ f e ↑ v))
 
 instance MonadRes r (Exp e r a) where
-  res = exp . const . const . pure
+  res = exp . cvk . pure
   liftRes f = exp (\ v k -> env (\ e -> let run f = k ↓ f ↑ v in run (f ((<== e) . run))))
 
 instance Coapply (Exp e r) where
@@ -127,7 +127,7 @@ exp :: (e ∘ a -> b • r -> e ==> r) -> Exp e r a b
 exp = coerce
 
 exp' :: (a -> b) -> a --|Exp e r|-> b
-exp' f = exp (\ v k -> C ((k •) . f . (v ∘)))
+exp' = exp . cvk
 
 expV :: e ∘ a -> e --|Exp e r|-> a
 expV = exp' . (∘)
@@ -136,7 +136,7 @@ expK :: a • r -> a --|Exp e r|-> r
 expK = exp' . (•)
 
 expVK :: e ∘ a -> a • r -> e --|Exp e r|-> r
-expVK v k = expC (C ((k •) . (v ∘)))
+expVK v k = expC (k ↓↑ v)
 
 expC :: e ==> r -> e --|Exp e r|-> r
 expC = exp' . (<==)
