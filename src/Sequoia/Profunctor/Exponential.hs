@@ -93,7 +93,7 @@ instance MonadRes r (Exp e r a) where
   liftRes f = exp (\ k v -> env (\ e -> let run f = k ↓ f ↑ v in run (f ((<== e) . run))))
 
 instance Coapply (Exp e r) where
-  coliftA2 f a b = exp (\ k -> env (((\ v -> k ↓ a ↑ v) <∘∘> (\ v -> k ↓ b ↑ v)) . fmap f))
+  coliftA2 f a b = exp (\ k -> let r a v = k ↓ a ↑ v in env . (r a <∘∘> r b) . fmap f)
 
 instance Arrow (Exp e r) where
   arr = exp'
