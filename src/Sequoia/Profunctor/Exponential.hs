@@ -1,7 +1,4 @@
-{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE PolyKinds #-}
-{-# LANGUAGE QuantifiedConstraints #-}
-{-# LANGUAGE TypeFamilies #-}
 module Sequoia.Profunctor.Exponential
 ( -- * Exponential profunctor
   _Exp
