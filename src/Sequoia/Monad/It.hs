@@ -1,7 +1,6 @@
 module Sequoia.Monad.It
 ( -- * Iteratees
   It(..)
-, ItM(..)
   -- * Construction
 , rollIt
 , doneIt
@@ -24,10 +23,8 @@ module Sequoia.Monad.It
 , take
 ) where
 
-import Control.Applicative (Applicative(liftA2))
 import Control.Comonad
 import Control.Monad (ap, (<=<))
-import Control.Monad.Trans.Class
 import Prelude hiding (any, take)
 
 -- Iteratees
@@ -68,35 +65,6 @@ instance Functor m => Comonad (It r m) where
     go = \case
       i@Done{}     -> Done (f i)
       i@(Roll _ k) -> Roll (f i) (fmap go . k)
-
-
-newtype ItM r m a = ItM { getItM :: m (It r m a) }
-  deriving (Functor)
-
-instance Monad m => Applicative (ItM r m) where
-  pure = ItM . pure . pure
-  ItM f <*> ItM a = ItM (liftA2 (<*>) f a)
-
-instance Monad m => Monad (ItM r m) where
-  ItM m >>= f = ItM (m >>= go)
-    where
-    go = \case
-      Done a   -> getItM (f a)
-      Roll a k -> do
-        fa <- getItM (f a)
-        pure $ Roll (headIt fa) $ \ r -> do
-          kr' <- k r
-          case kr' of
-            Done a'    -> do
-              fa' <- getItM (f a')
-              simplifyIt fa' r
-            Roll a' k' -> do
-              fa' <- getItM (f a')
-              a'' <- indexIt fa' r
-              pure $ Roll a'' (go <=< k')
-
-instance MonadTrans (ItM r) where
-  lift m = ItM (pure <$> m)
 
 
 -- Construction
