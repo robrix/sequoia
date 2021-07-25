@@ -137,9 +137,9 @@ getLineIt = loop id
 getLinesIt :: Applicative m => It (Maybe Char) m [String]
 getLinesIt = loop []
   where
-  loop acc = getLineIt >>= check acc
-  check acc "" = pure (reverse acc)
-  check acc l  = loop (l:acc)
+  loop acc = getLineIt >>= \case
+    "" -> pure (reverse acc)
+    l  -> loop (l:acc)
 
 
 -- Enumerators
