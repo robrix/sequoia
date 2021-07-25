@@ -25,6 +25,7 @@ module Sequoia.Monad.It
 ) where
 
 import Control.Applicative (Applicative(liftA2))
+import Control.Comonad
 import Control.Monad (ap, (<=<))
 import Control.Monad.Trans.Class
 import Prelude hiding (any, take)
@@ -54,6 +55,19 @@ instance Monad m => Monad (It r m) where
       Roll a' k' -> do
         a'' <- indexIt (f a') r
         pure $ Roll a'' (pure . (f =<<) <=< k')
+
+instance Functor m => Comonad (It r m) where
+  extract = headIt
+
+  duplicate = \case
+    i@Done{}     -> Done i
+    i@(Roll _ k) -> Roll i (fmap duplicate . k)
+
+  extend f = go
+    where
+    go = \case
+      i@Done{}     -> Done (f i)
+      i@(Roll _ k) -> Roll (f i) (fmap go . k)
 
 
 newtype ItM r m a = ItM { getItM :: m (It r m a) }
