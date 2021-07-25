@@ -4,6 +4,8 @@ module Sequoia.Profunctor.Value
   type (∘)(..)
   -- * Construction
 , idV
+  -- * Elimination
+, (∘)
   -- * Coercion
 , _V
   -- * Computation
@@ -28,7 +30,7 @@ import Sequoia.Optic.Iso
 
 -- Value profunctor
 
-newtype e ∘ a = V { (∘) :: e -> a }
+newtype e ∘ a = V (e -> a)
   deriving (Applicative, Category, Choice, Closed, Cochoice, Pro.Corepresentable, Costrong, Functor, Mapping, Monad, MonadRun, Profunctor, Co.Representable, Pro.Representable, Strong, Traversing)
 
 infixl 8 ∘
@@ -48,6 +50,12 @@ instance Cosieve (∘) Identity where
 
 idV :: e ∘ e
 idV = V id
+
+
+-- Elimination
+
+(∘) :: e ∘ a -> (e -> a)
+V v ∘ e = v e
 
 
 -- Coercion
