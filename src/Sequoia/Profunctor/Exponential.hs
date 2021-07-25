@@ -29,6 +29,9 @@ module Sequoia.Profunctor.Exponential
 , (<<<)
 , (>>>)
   -- ** Computation
+, mapExpFnK
+, mapExpFnV
+, mapExpFnC
 , dnE
 , reset
 , shift
@@ -181,6 +184,16 @@ infixl 3 ↓
 
 
 -- Computation
+
+mapExpFnK :: (forall x . x • r2 -> x • r1) -> (b • r1 -> e ∘ a -> e ==> r) -> (b • r2 -> e ∘ a -> e ==> r)
+mapExpFnK = lmap
+
+mapExpFnV :: (forall x . e2 ∘ x -> e1 ∘ x) -> (b • r -> e1 ∘ a -> e ==> r) -> (b • r -> e2 ∘ a -> e ==> r)
+mapExpFnV = fmap . lmap
+
+mapExpFnC :: (e1 ==> r1 -> e2 ==> r2) -> (b • r -> e ∘ a -> e1 ==> r1) -> (b • r -> e ∘ a -> e2 ==> r2)
+mapExpFnC = rmap . rmap
+
 
 dnE :: (a --|Exp e r|-> b) • r • r -> a --|Exp e r|-> b
 dnE k = exp (\ k' v -> cont (\ _K -> pure (k • _K (\ f -> k' ↓ f ↑ v))))
