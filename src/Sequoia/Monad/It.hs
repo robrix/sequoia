@@ -79,7 +79,7 @@ evalItString = foldIt id . (&) . listToMaybe
 -- Elimination
 
 foldIt :: (a -> s) -> ((r -> s) -> s) -> It r a -> s
-foldIt p k = go where go r = getIt r p (k . fmap go)
+foldIt p k = go where go = runIt p (k . fmap go)
 
 runIt :: (a -> s) -> ((r -> It r a) -> s) -> It r a -> s
 runIt p k i = getIt i p k
