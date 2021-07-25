@@ -1,6 +1,7 @@
 module Sequoia.Monad.Trans.It
 ( -- * Iteratees
   ItT(..)
+, ItP(..)
   -- * Construction
 , itT
 , doneItT
@@ -31,6 +32,9 @@ instance Monad (ItT r m) where
 
 instance MonadTrans (ItT r) where
   lift m = ItT (const . (m >>=))
+
+
+newtype ItP m r a = ItP { getItP :: ItT r m a }
 
 
 -- Construction
