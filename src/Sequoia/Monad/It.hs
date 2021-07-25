@@ -24,7 +24,7 @@ module Sequoia.Monad.It
 , getLineIt
 , getLinesIt
   -- * Enumerators
-, Enumerator
+, Enumerator(..)
 , enumerateList
   -- * Enumeratees
 , Enumeratee
@@ -149,12 +149,12 @@ getLinesIt = loop []
 
 -- Enumerators
 
-type Enumerator i o = It i o -> It i o
+newtype Enumerator i o = Enumerator { getEnumerator :: It i o -> It i o }
 
 
 enumerateList :: [r] -> Enumerator (Maybe r) a
-enumerateList []     = id
-enumerateList (c:cs) = runIt pure (\ k -> enumerateList cs (k (Just c)))
+enumerateList []     = Enumerator id
+enumerateList (c:cs) = Enumerator (runIt pure (\ k -> getEnumerator (enumerateList cs) (k (Just c))))
 
 
 -- Enumeratees
