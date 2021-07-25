@@ -28,8 +28,8 @@ import Data.Profunctor
 
 -- Iteratees
 
--- | Böhm-Berarducci–encoded iteratee, based loosely on the one in @trifecta@.
-newtype It r a = It (forall s . (a -> s) -> ((r -> s) -> s) -> s)
+-- | Scott–encoded iteratee, based loosely on the one in @trifecta@.
+newtype It r a = It { runIt :: forall s . (a -> s) -> ((r -> It r a) -> s) -> s }
 
 instance Profunctor It where
   dimap f g = foldIt (doneIt . g) (it . lmap f)
@@ -57,7 +57,7 @@ instance Representable (It r) where
 -- Construction
 
 it :: (r -> It r a) -> It r a
-it k = It (\ p f -> f (foldIt p f . k))
+it k = It (const ($ k))
 
 doneIt :: a -> It r a
 doneIt a = It (const . ($ a))
@@ -77,8 +77,8 @@ evalItString = foldIt id . (&) . listToMaybe
 
 -- Elimination
 
-foldIt :: (a -> o) -> ((r -> o) -> o) -> It r a -> o
-foldIt p k (It r) = r p k
+foldIt :: (a -> s) -> ((r -> s) -> s) -> It r a -> s
+foldIt p k = go where go r = runIt r p (k . fmap go)
 
 headIt :: It r a -> Maybe a
 headIt = foldIt Just (const Nothing)
