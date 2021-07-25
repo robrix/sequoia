@@ -24,7 +24,6 @@ import Control.Monad (ap)
 import Data.Distributive
 import Data.Function ((&))
 import Data.Functor.Rep
-import Data.Maybe (listToMaybe)
 import Data.Profunctor
 
 -- Iteratees
@@ -73,7 +72,9 @@ tabulateIt f = it (pure . f)
 
 
 evalItString :: String -> It (Maybe Char) a -> a
-evalItString = foldIt id . (&) . listToMaybe
+evalItString str = runIt id (\ k -> case str of
+  ""   -> evalItString "" (k Nothing)
+  c:cs -> evalItString cs (k (Just c)))
 
 
 -- Elimination
