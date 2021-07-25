@@ -5,7 +5,6 @@ module Sequoia.Monad.It
 , it
 , doneIt
 , needIt
-, wantIt
   -- * Elimination
 , foldIt
 , headIt
@@ -22,10 +21,10 @@ import Data.Profunctor
 -- Iteratees
 
 -- | Böhm-Berarducci–encoded iteratee, based loosely on the one in @trifecta@.
-newtype It r a = It (forall s . (a -> s) -> (a -> (r -> s) -> s) -> s)
+newtype It r a = It (forall s . (a -> s) -> ((r -> s) -> s) -> s)
 
 instance Profunctor It where
-  dimap f g = foldIt (doneIt . g) (lmap (lmap f) . it . g)
+  dimap f g = foldIt (doneIt . g) (it . lmap f)
 
 instance Functor (It r) where
   fmap = rmap
@@ -35,42 +34,39 @@ instance Applicative (It r) where
   (<*>) = ap
 
 instance Monad (It r) where
-  m >>= f = foldIt f (it . headIt . f) m
+  m >>= f = foldIt f it m
 
 
 -- Construction
 
-it :: a -> (r -> It r a) -> It r a
-it a k = It (\ p f -> f a (foldIt p f . k))
+it :: (r -> It r a) -> It r a
+it k = It (\ p f -> f (foldIt p f . k))
 
 doneIt :: a -> It r a
 doneIt a = It (const . ($ a))
 
 
-needIt :: a -> (r -> Maybe a) -> It r a
-needIt a f = i where i = it a (maybe i pure . f)
-
-wantIt :: a -> (r -> Either a a) -> It r a
-wantIt a f = it a k where k = either (`it` k) pure . f
+needIt :: (r -> Maybe a) -> It r a
+needIt f = i where i = it (maybe i pure . f)
 
 
 -- Elimination
 
-foldIt :: (a -> o) -> (a -> (r -> o) -> o) -> It r a -> o
+foldIt :: (a -> o) -> ((r -> o) -> o) -> It r a -> o
 foldIt p k (It r) = r p k
 
-headIt :: It r a -> a
-headIt = foldIt id const
+headIt :: It r a -> Maybe a
+headIt = foldIt Just (const Nothing)
 
 tailIt :: It r a -> Maybe (r -> It r a)
-tailIt = foldIt (const Nothing) (\ a k -> Just (maybe (pure a) . (&) <*> k))
+tailIt = either (const Nothing) Just . foldIt (Left . pure) (\ k -> Right (either id . (&) <*> k))
 
 
 indexIt :: It r a -> (r -> a)
-indexIt i r = foldIt id (const ($r)) i
+indexIt = flip (foldIt id . (&))
 
 
 -- Computation
 
 simplifyIt :: It r a -> r -> It r a
-simplifyIt it r = foldIt (const it) (const ($ r)) it
+simplifyIt i r = foldIt (const i) ($ r) i
