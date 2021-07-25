@@ -28,6 +28,7 @@ module Sequoia.Monad.It
 , enumerateList
   -- * Enumeratees
 , Enumeratee
+, take
 ) where
 
 import Control.Applicative (Alternative(..))
@@ -36,7 +37,7 @@ import Data.Distributive
 import Data.Function ((&))
 import Data.Functor.Rep
 import Data.Profunctor
-import Prelude hiding (any)
+import Prelude hiding (any, take)
 
 -- Iteratees
 
@@ -166,3 +167,10 @@ enumerateList = Enumerator . go
 -- Enumeratees
 
 type Enumeratee i o a = It i a -> It o (It i a)
+
+take :: Int -> Enumeratee i i o
+take n
+  | n <= 0    = pure
+  | otherwise = \case
+    i@Done{} -> pure i
+    Roll r   -> rollIt (take (n - 1) . r)
