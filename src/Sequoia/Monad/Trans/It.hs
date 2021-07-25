@@ -7,6 +7,8 @@ module Sequoia.Monad.Trans.It
   -- * Elimination
 , runItT
 , foldItT
+  -- * Computation
+, dimapItT
 ) where
 
 import Control.Monad (ap)
@@ -47,3 +49,9 @@ runItT k r i = getItT i k r
 
 foldItT :: (a -> m s) -> ((r -> m s) -> m s) -> (ItT r m a -> m s)
 foldItT k r = go where go = runItT k (r . fmap go)
+
+
+-- Computation
+
+dimapItT :: (r' -> r) -> (a -> a') -> ItT r m a -> ItT r' m a'
+dimapItT f g = go where go i = ItT (\ k r -> runItT (k . g) (r . (go .) . (. f)) i)
