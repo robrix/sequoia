@@ -15,6 +15,7 @@ module Sequoia.Monad.It
   -- * Computation
 , simplifyIt
 , getLineIt
+, getLinesIt
 ) where
 
 import Control.Monad (ap)
@@ -97,3 +98,10 @@ getLineIt = loop id
   check acc (Just c)
     | c /= '\n' = loop (acc . (c:))
   check acc _   = pure (acc [])
+
+getLinesIt :: It (Maybe Char) [String]
+getLinesIt = loop []
+  where
+  loop acc = getLineIt >>= check acc
+  check acc "" = pure (reverse acc)
+  check acc l  = loop (l:acc)
