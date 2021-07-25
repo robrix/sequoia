@@ -7,6 +7,7 @@ module Sequoia.Monad.It
   -- * Elimination
 , foldIt
 , headIt
+, indexIt
 ) where
 
 import Control.Comonad
@@ -52,3 +53,7 @@ foldIt p k (It r) = r p k
 
 headIt :: It r a -> a
 headIt = foldIt id const
+
+
+indexIt :: It r a -> (r -> a)
+indexIt i r = foldIt id (const ($r)) i
