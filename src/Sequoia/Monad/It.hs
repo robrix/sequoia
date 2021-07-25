@@ -8,6 +8,7 @@ module Sequoia.Monad.It
 , needIt
 , tabulateIt
 , evalItString
+, enumerateString
   -- * Elimination
 , foldIt
 , runIt
@@ -75,6 +76,10 @@ evalItString :: String -> It (Maybe Char) a -> a
 evalItString str = runIt id (\ k -> case str of
   ""   -> evalItString "" (k Nothing)
   c:cs -> evalItString cs (k (Just c)))
+
+enumerateString :: String -> It (Maybe Char) a -> It (Maybe Char) a
+enumerateString ""     = id
+enumerateString (c:cs) = runIt pure (\ k -> enumerateString cs (k (Just c)))
 
 
 -- Elimination
