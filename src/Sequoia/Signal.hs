@@ -38,8 +38,8 @@ _Sig = coerced
 newtype Sig e r a b = Sig { runSig :: e ∘ a -> b • r -> e ==> r }
 
 instance Cat.Category (Sig e r) where
-  id = Sig (\ v k -> C ((k •) . (∘ v)))
-  Sig f . Sig g = Sig (\ a c -> env (\ e -> g a (K ((<== e) . (`f` c) . pure))))
+  id = Sig (flip (↓↑))
+  Sig f . Sig g = Sig (\ a c -> cont (\ _K -> g a (_K ((`f` c) . pure))))
 
 instance Profunctor (Sig e r) where
   dimap f g = Sig . dimap (fmap f) (lmap (lmap g)) . runSig
@@ -48,11 +48,11 @@ instance Functor (Sig e r a) where
   fmap = rmap
 
 instance Applicative (Sig e r a) where
-  pure a = Sig (\ v k -> C ((k •) . const a . (∘ v)))
+  pure a = Sig (flip (ckv (const a)))
   (<*>) = ap
 
 instance Monad (Sig e r a) where
-  Sig m >>= f = Sig (\ a b -> env (\ e -> m a (K (\ a' -> runSig (f a') a b <== e))))
+  Sig m >>= f = Sig (\ a b -> cont (\ _K -> m a (_K (\ a' -> runSig (f a') a b))))
 
 mapKSig :: (forall x . x • r <-> x • r') -> (Sig e r a b -> Sig e r' a b)
 mapKSig b = Sig . fmap (dimap (review b) (mapCK (view b))) . runSig
