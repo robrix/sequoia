@@ -144,6 +144,7 @@ library
     Sequoia.Lambda
     Sequoia.Monad.It
     Sequoia.Monad.Run
+    Sequoia.Monad.Trans.It
     Sequoia.Optic.Getter
     Sequoia.Optic.Iso
     Sequoia.Optic.Lens
