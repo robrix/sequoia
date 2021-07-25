@@ -13,22 +13,22 @@ import Control.Monad (ap)
 
 -- Iteratees
 
-newtype ItT r m a = ItT { getItT :: forall s . (a -> s) -> ((r -> m (ItT r m a)) -> s) -> s }
+newtype ItT r m a = ItT { getItT :: forall s . (a -> m s) -> ((r -> ItT r m a) -> m s) -> m s }
 
-instance Functor m => Functor (ItT r m) where
-  fmap f = foldItT (doneItT . f) itT
+instance Functor (ItT r m) where
+  fmap f r = ItT (\ a k -> getItT r (a . f) (k . fmap (fmap f)))
 
-instance Functor m => Applicative (ItT r m) where
+instance Applicative (ItT r m) where
   pure = doneItT
   (<*>) = ap
 
-instance Functor m => Monad (ItT r m) where
-  m >>= f = foldItT f itT m
+instance Monad (ItT r m) where
+  r >>= f = go r where go r = ItT (\ a k -> runItT (runItT a k . f) (k . fmap go) r)
 
 
 -- Construction
 
-itT :: (r -> m (ItT r m a)) -> ItT r m a
+itT :: (r -> ItT r m a) -> ItT r m a
 itT k = ItT (const ($ k))
 
 doneItT :: a -> ItT r m a
@@ -37,8 +37,8 @@ doneItT a = ItT (const . ($ a))
 
 -- Elimination
 
-runItT :: (a -> s) -> ((r -> m (ItT r m a)) -> s) -> (ItT r m a -> s)
+runItT :: (a -> m s) -> ((r -> ItT r m a) -> m s) -> (ItT r m a -> m s)
 runItT p k i = getItT i p k
 
-foldItT :: Functor m => (a -> s) -> ((r -> m s) -> s) -> (ItT r m a -> s)
-foldItT p k = go where go = runItT p (k . fmap (fmap go))
+foldItT :: (a -> m s) -> ((r -> m s) -> m s) -> (ItT r m a -> m s)
+foldItT p k = go where go = runItT p (k . fmap go)
