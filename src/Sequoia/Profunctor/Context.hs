@@ -86,7 +86,7 @@ ckv :: (a -> b) -> b • r -> e ∘ a -> e ==> r
 ckv f k v = C ((k •) . f . (∘ v))
 
 (↓↑) :: a • r -> e ∘ a -> e ==> r
-k ↓↑ v = C ((k •) . (∘ v))
+(↓↑) = ckv id
 
 infix 9 ↓↑
 
