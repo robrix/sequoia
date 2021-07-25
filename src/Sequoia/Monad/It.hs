@@ -129,9 +129,12 @@ eof = it (maybe (pure ()) (const empty))
 
 
 getLineIt :: It (Maybe Char) String
-getLineIt = "" <$ nl <|> (:) <$> any <*> getLineIt
+getLineIt = loop id
   where
-  nl = () <$ satisfy (== '\n') <|> eof
+  loop = it . check
+  check acc (Just c)
+    | c /= '\n' = loop (acc . (c:))
+  check acc _   = pure (acc [])
 
 getLinesIt :: It (Maybe Char) [String]
 getLinesIt = loop []
