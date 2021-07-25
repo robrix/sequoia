@@ -40,7 +40,7 @@ import Prelude hiding (any)
 
 -- Iteratees
 
--- | Scott–encoded iteratee, based loosely on the one in @trifecta@.
+-- | Iteratees, based loosely on the one in @trifecta@.
 newtype It r a = It { getIt :: forall s . (a -> s) -> ((r -> It r a) -> s) -> s }
 
 instance Profunctor It where
