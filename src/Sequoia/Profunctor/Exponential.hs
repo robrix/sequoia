@@ -30,6 +30,7 @@ module Sequoia.Profunctor.Exponential
 , (>>>)
   -- ** Computation
 , mapExpE
+, mapExpR
 , mapExpFnK
 , mapExpFnV
 , mapExpFnC
@@ -191,6 +192,9 @@ infixl 3 ↓
 
 mapExpE :: (forall x . e1 ∘ x <-> e2 ∘ x) -> (Exp e1 r i o -> Exp e2 r i o)
 mapExpE b = exp . mapExpFnC (over _CV (view b)) . mapExpFnV (review b) . runExp
+
+mapExpR :: (forall x . x • r2 <-> x • r1) -> (Exp e r1 i o -> Exp e r2 i o)
+mapExpR b = exp . mapExpFnC (over _CK (review b)) . mapExpFnK (view b) . runExp
 
 
 mapExpFnK :: (forall x . x • r2 -> x • r1) -> (b • r1 -> e ∘ a -> e ==> r) -> (b • r2 -> e ∘ a -> e ==> r)
