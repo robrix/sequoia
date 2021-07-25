@@ -24,8 +24,8 @@ module Sequoia.Monad.It
 , getLineIt
 , getLinesIt
   -- * Enumerators
-, enumerateList
 , Enumerator
+, enumerateList
   -- * Enumeratees
 , Enumeratee
 ) where
