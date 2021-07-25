@@ -36,28 +36,35 @@ data It m r a
   | Roll a (r -> m (It m r a))
 
 instance Functor m => Profunctor (It m) where
-  dimap f g = \case
-    Done a   -> Done (g a)
-    Roll a r -> Roll (g a) (fmap (dimap f g) . r . f)
+  dimap f g = go
+    where
+    go = \case
+      Done a   -> Done (g a)
+      Roll a r -> Roll (g a) (fmap go . r . f)
 
 instance Functor m => Functor (It m r) where
-  fmap f = \case
-    Done a   -> Done (f a)
-    Roll a r -> Roll (f a) (fmap (fmap f) . r)
+  fmap f = go
+    where
+    go = \case
+      Done a   -> Done (f a)
+      Roll a r -> Roll (f a) (fmap go . r)
 
 instance Monad m => Applicative (It m r) where
   pure = doneIt
   (<*>) = ap
 
 instance Monad m => Monad (It m r) where
-  Done a   >>= f = f a
-  Roll a k >>= f = Roll (headIt (f a)) $ \ r -> do
-    kr' <- k r
-    case kr' of
-      Done a'    -> simplifyIt (f a') r
-      Roll a' k' -> do
-        a'' <- indexIt (f a') r
-        pure $ Roll a'' (pure . (f =<<) <=< k')
+  m >>= f = go m
+    where
+    go = \case
+      Done a   -> f a
+      Roll a k -> Roll (headIt (f a)) $ \ r -> do
+        kr' <- k r
+        case kr' of
+          Done a'    -> simplifyIt (f a') r
+          Roll a' k' -> do
+            a'' <- indexIt (f a') r
+            pure $ Roll a'' (pure . go <=< k')
 
 instance Functor m => Comonad (It m r) where
   extract = headIt
