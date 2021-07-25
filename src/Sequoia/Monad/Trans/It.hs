@@ -10,6 +10,7 @@ module Sequoia.Monad.Trans.It
 ) where
 
 import Control.Monad (ap)
+import Control.Monad.Trans.Class
 
 -- Iteratees
 
@@ -24,6 +25,9 @@ instance Applicative (ItT r m) where
 
 instance Monad (ItT r m) where
   r >>= f = go r where go r = ItT (\ a k -> runItT (runItT a k . f) (k . fmap go) r)
+
+instance MonadTrans (ItT r) where
+  lift m = ItT (\ a _ -> m >>= a)
 
 
 -- Construction
