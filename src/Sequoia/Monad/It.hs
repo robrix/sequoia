@@ -8,6 +8,8 @@ module Sequoia.Monad.It
 , foldIt
 , headIt
 , indexIt
+  -- * Computation
+, simplifyIt
 ) where
 
 import Control.Comonad
@@ -57,3 +59,9 @@ headIt = foldIt id const
 
 indexIt :: It r a -> (r -> a)
 indexIt i r = foldIt id (const ($r)) i
+
+
+-- Computation
+
+simplifyIt :: It r a -> r -> It r a
+simplifyIt it r = foldIt (const it) (const ($ r)) it
