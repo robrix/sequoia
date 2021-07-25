@@ -41,7 +41,9 @@ import Prelude hiding (any)
 -- Iteratees
 
 -- | Iteratees, based loosely on the one in @trifecta@.
-newtype It r a = It { getIt :: forall s . (a -> s) -> ((r -> It r a) -> s) -> s }
+data It r a
+  = Done a
+  | Roll (r -> It r a)
 
 instance Profunctor It where
   dimap f g = foldIt (doneIt . g) (rollIt . lmap f)
@@ -73,10 +75,10 @@ instance Representable (It r) where
 -- Construction
 
 rollIt :: (r -> It r a) -> It r a
-rollIt k = It (const ($ k))
+rollIt = Roll
 
 doneIt :: a -> It r a
-doneIt a = It (const . ($ a))
+doneIt = Done
 
 
 needIt :: (r -> Maybe a) -> It r a
@@ -93,7 +95,9 @@ foldIt :: (a -> s) -> ((r -> s) -> s) -> (It r a -> s)
 foldIt p k = go where go = runIt p (k . fmap go)
 
 runIt :: (a -> s) -> ((r -> It r a) -> s) -> (It r a -> s)
-runIt p k i = getIt i p k
+runIt p k = \case
+  Done a -> p a
+  Roll r -> k r
 
 decomposeIt :: It r a -> Either a (r -> It r a)
 decomposeIt = runIt Left Right
