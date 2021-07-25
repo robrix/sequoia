@@ -25,6 +25,7 @@ module Sequoia.Monad.It
 
 import Control.Comonad
 import Control.Monad (ap, (<=<))
+import Data.Profunctor
 import Prelude hiding (any, take)
 
 -- Iteratees
@@ -33,6 +34,11 @@ import Prelude hiding (any, take)
 data It m r a
   = Done a
   | Roll a (r -> m (It m r a))
+
+instance Functor m => Profunctor (It m) where
+  dimap f g = \case
+    Done a   -> Done (g a)
+    Roll a r -> Roll (g a) (fmap (dimap f g) . r . f)
 
 instance Functor m => Functor (It m r) where
   fmap f = \case
