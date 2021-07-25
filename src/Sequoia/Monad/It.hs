@@ -18,6 +18,9 @@ newtype It r a = It (forall s . (a -> s) -> (a -> (r -> s) -> s) -> s)
 instance Profunctor It where
   dimap f g = foldIt (doneIt . g) (lmap (lmap f) . it . g)
 
+instance Functor (It r) where
+  fmap = rmap
+
 
 -- Construction
 
