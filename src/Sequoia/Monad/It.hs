@@ -153,8 +153,10 @@ newtype Enumerator i o = Enumerator { getEnumerator :: It i o -> It i o }
 
 
 enumerateList :: [r] -> Enumerator (Maybe r) a
-enumerateList []     = Enumerator id
-enumerateList (c:cs) = Enumerator (runIt pure (\ k -> getEnumerator (enumerateList cs) (k (Just c))))
+enumerateList = Enumerator . go
+  where
+  go []     = id
+  go (c:cs) = runIt pure (\ k -> go cs (k (Just c)))
 
 
 -- Enumeratees
