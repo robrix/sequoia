@@ -43,11 +43,7 @@ instance Functor m => Profunctor (It m) where
       Roll a r -> Roll (g a) (fmap go . r . f)
 
 instance Functor m => Functor (It m r) where
-  fmap f = go
-    where
-    go = \case
-      Done a   -> Done (f a)
-      Roll a r -> Roll (f a) (fmap go . r)
+  fmap = rmap
 
 instance Monad m => Applicative (It m r) where
   pure = doneIt
