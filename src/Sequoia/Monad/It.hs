@@ -1,6 +1,8 @@
 module Sequoia.Monad.It
 ( -- * Iteratees
   It(..)
+  -- * Construction
+, it
   -- * Elimination
 , foldIt
 ) where
@@ -9,6 +11,12 @@ module Sequoia.Monad.It
 
 -- | Böhm-Berarducci–encoded iteratee, based loosely on the one in @trifecta@.
 newtype It r a = It (forall s . (a -> s) -> (a -> (r -> s) -> s) -> s)
+
+
+-- Construction
+
+it :: a -> (r -> It r a) -> It r a
+it a k = It (\ p f -> f a (foldIt p f . k))
 
 
 -- Elimination
