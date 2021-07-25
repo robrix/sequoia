@@ -29,6 +29,7 @@ module Sequoia.Profunctor.Exponential
 , (<<<)
 , (>>>)
   -- ** Computation
+, mapExpV
 , mapExpFnK
 , mapExpFnV
 , mapExpFnC
@@ -46,7 +47,10 @@ import           Data.Profunctor.Traversing
 import           Prelude hiding (exp)
 import           Sequoia.Conjunction
 import           Sequoia.Disjunction
+import           Sequoia.Optic.Getter
 import           Sequoia.Optic.Iso
+import           Sequoia.Optic.Review
+import           Sequoia.Optic.Setter
 import           Sequoia.Profunctor.Applicative
 import           Sequoia.Profunctor.Coexponential
 import           Sequoia.Profunctor.Context
@@ -184,6 +188,10 @@ infixl 3 ↓
 
 
 -- Computation
+
+mapExpV :: (forall x . e1 ∘ x <-> e2 ∘ x) -> (Exp e1 r i o -> Exp e2 r i o)
+mapExpV b = exp . mapExpFnC (over _CV (view b)) . mapExpFnV (review b) . runExp
+
 
 mapExpFnK :: (forall x . x • r2 -> x • r1) -> (b • r1 -> e ∘ a -> e ==> r) -> (b • r2 -> e ∘ a -> e ==> r)
 mapExpFnK = lmap
