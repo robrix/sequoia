@@ -13,6 +13,9 @@ module Sequoia.Monad.Trans.It
 
 newtype ItT r m a = ItT { getItT :: forall s . (a -> s) -> ((r -> m (ItT r m a)) -> s) -> s }
 
+instance Functor m => Functor (ItT r m) where
+  fmap f = foldItT (doneItT . f) itT
+
 
 -- Construction
 
