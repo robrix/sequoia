@@ -9,6 +9,7 @@ module Sequoia.Monad.It
 , headIt
 ) where
 
+import Control.Monad (ap)
 import Data.Profunctor
 
 -- Iteratees
@@ -21,6 +22,13 @@ instance Profunctor It where
 
 instance Functor (It r) where
   fmap = rmap
+
+instance Applicative (It r) where
+  pure = doneIt
+  (<*>) = ap
+
+instance Monad (It r) where
+  m >>= f = foldIt f (it . headIt . f) m
 
 
 -- Construction
