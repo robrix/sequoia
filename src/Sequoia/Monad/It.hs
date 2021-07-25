@@ -15,7 +15,6 @@ module Sequoia.Monad.It
 , tailIt
 , indexIt
 , evalIt
-, evalItString
   -- * Computation
 , simplifyIt
 , getLineIt
@@ -99,12 +98,6 @@ indexIt = flip (foldIt id . (&))
 
 evalIt :: It (Maybe Char) a -> a
 evalIt = runIt id (evalIt . ($ Nothing))
-
-evalItString :: String -> It (Maybe Char) a -> a
-evalItString str = runIt id (\ k -> case str of
-  ""   -> evalItString "" (k Nothing)
-  c:cs -> evalItString cs (k (Just c)))
-
 
 
 -- Computation
