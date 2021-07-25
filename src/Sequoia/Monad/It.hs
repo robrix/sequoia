@@ -9,6 +9,7 @@ module Sequoia.Monad.It
   -- * Elimination
 , foldIt
 , headIt
+, tailIt
 , indexIt
   -- * Computation
 , simplifyIt
@@ -16,6 +17,7 @@ module Sequoia.Monad.It
 
 import Control.Comonad
 import Control.Monad (ap)
+import Data.Function ((&))
 import Data.Profunctor
 
 -- Iteratees
@@ -64,6 +66,9 @@ foldIt p k (It r) = r p k
 
 headIt :: It r a -> a
 headIt = foldIt id const
+
+tailIt :: It r a -> Maybe (r -> It r a)
+tailIt = foldIt (const Nothing) (\ a k -> Just (maybe (pure a) . (&) <*> k))
 
 
 indexIt :: It r a -> (r -> a)
