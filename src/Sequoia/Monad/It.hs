@@ -9,6 +9,7 @@ module Sequoia.Monad.It
 , headIt
 ) where
 
+import Control.Comonad
 import Control.Monad (ap)
 import Data.Profunctor
 
@@ -29,6 +30,10 @@ instance Applicative (It r) where
 
 instance Monad (It r) where
   m >>= f = foldIt f (it . headIt . f) m
+
+instance Comonad (It r) where
+  extract = headIt
+  duplicate i = foldIt (const (pure i)) (const (it i)) i
 
 
 -- Construction
