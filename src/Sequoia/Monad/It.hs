@@ -3,7 +3,7 @@ module Sequoia.Monad.It
 ( -- * Iteratees
   It(..)
   -- * Construction
-, it
+, rollIt
 , doneIt
 , needIt
 , tabulateIt
@@ -44,7 +44,7 @@ import Prelude hiding (any)
 newtype It r a = It { getIt :: forall s . (a -> s) -> ((r -> It r a) -> s) -> s }
 
 instance Profunctor It where
-  dimap f g = foldIt (doneIt . g) (it . lmap f)
+  dimap f g = foldIt (doneIt . g) (rollIt . lmap f)
 
 instance Functor (It r) where
   fmap = rmap
@@ -54,11 +54,11 @@ instance Applicative (It r) where
   (<*>) = ap
 
 instance Alternative (It r) where
-  empty = it (const empty)
-  i <|> j = runIt (const i) (\ ki -> runIt (const j) (\ kj -> it (\ r -> ki r <|> kj r)) j) i
+  empty = rollIt (const empty)
+  i <|> j = runIt (const i) (\ ki -> runIt (const j) (\ kj -> rollIt (\ r -> ki r <|> kj r)) j) i
 
 instance Monad (It r) where
-  m >>= f = foldIt f it m
+  m >>= f = foldIt f rollIt m
 
 instance Distributive (It r) where
   distribute = distributeRep
@@ -72,19 +72,19 @@ instance Representable (It r) where
 
 -- Construction
 
-it :: (r -> It r a) -> It r a
-it k = It (const ($ k))
+rollIt :: (r -> It r a) -> It r a
+rollIt k = It (const ($ k))
 
 doneIt :: a -> It r a
 doneIt a = It (const . ($ a))
 
 
 needIt :: (r -> Maybe a) -> It r a
-needIt f = i where i = it (maybe i pure . f)
+needIt f = i where i = rollIt (maybe i pure . f)
 
 
 tabulateIt :: (r -> a) -> It r a
-tabulateIt f = it (pure . f)
+tabulateIt f = rollIt (pure . f)
 
 
 -- Elimination
@@ -122,19 +122,19 @@ simplifyIt i r = foldIt (const i) ($ r) i
 -- Parsing
 
 any :: It (Maybe a) a
-any = it (maybe empty pure)
+any = rollIt (maybe empty pure)
 
 satisfy :: (a -> Bool) -> It (Maybe a) a
-satisfy p = it (maybe empty (\ c -> c <$ guard (p c)))
+satisfy p = rollIt (maybe empty (\ c -> c <$ guard (p c)))
 
 eof :: It (Maybe a) ()
-eof = it (maybe (pure ()) (const empty))
+eof = rollIt (maybe (pure ()) (const empty))
 
 
 getLineIt :: It (Maybe Char) String
 getLineIt = loop id
   where
-  loop = it . check
+  loop = rollIt . check
   check acc (Just c)
     | c /= '\n' = loop (acc . (c:))
   check acc _   = pure (acc [])
