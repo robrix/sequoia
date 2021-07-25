@@ -8,10 +8,15 @@ module Sequoia.Monad.It
 , foldIt
 ) where
 
+import Data.Profunctor
+
 -- Iteratees
 
 -- | Böhm-Berarducci–encoded iteratee, based loosely on the one in @trifecta@.
 newtype It r a = It (forall s . (a -> s) -> (a -> (r -> s) -> s) -> s)
+
+instance Profunctor It where
+  dimap f g = foldIt (doneIt . g) (lmap (lmap f) . it . g)
 
 
 -- Construction
