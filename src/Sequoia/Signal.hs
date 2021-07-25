@@ -26,6 +26,7 @@ import           Sequoia.Functor.Source
 import           Sequoia.Optic.Getter
 import           Sequoia.Optic.Iso
 import           Sequoia.Optic.Review
+import           Sequoia.Optic.Setter
 import           Sequoia.Profunctor.Context
 import           Sequoia.Profunctor.Continuation as K
 import           Sequoia.Profunctor.Value as V
@@ -55,10 +56,10 @@ instance Monad (Sig e r a) where
   Sig m >>= f = Sig (\ b a -> cont (\ _K -> m (_K (\ a' -> runSig (f a') b a)) a))
 
 mapKSig :: (forall x . x • r <-> x • r') -> (Sig e r a b -> Sig e r' a b)
-mapKSig b = Sig . dimap (review b) (fmap (mapCK (view b))) . runSig
+mapKSig b = Sig . dimap (review b) (fmap (over _CK (view b))) . runSig
 
 mapVSig :: (forall x . e ∘ x <-> e' ∘ x) -> (Sig e r a b -> Sig e' r a b)
-mapVSig b = Sig . fmap (dimap (review b) (mapCV (view b))) . runSig
+mapVSig b = Sig . fmap (dimap (review b) (over _CV (view b))) . runSig
 
 
 -- Conversions

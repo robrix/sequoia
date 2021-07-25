@@ -62,10 +62,10 @@ elimSrc sr sn = env (pure . (runSrcFn sr . flip (runSnkFn sn . pure) <*> id))
 -- Computation
 
 mapSrcK :: (forall x . x • r <-> x • r') -> (Src e r b -> Src e r' b)
-mapSrcK b = over _Src (dimap (review b) (mapCK (view b)))
+mapSrcK b = over _Src (dimap (review b) (over _CK (view b)))
 
 mapSrcV :: (forall x . e ∘ x -> e' ∘ x) -> (Src e r b -> Src e' r b)
-mapSrcV f = over _Src (fmap (mapCV f))
+mapSrcV f = over _Src (fmap (over _CV f))
 
 
 -- Optics
