@@ -27,7 +27,7 @@ module Sequoia.Monad.It
 , Enumerator(..)
 , enumerateList
   -- * Enumeratees
-, Enumeratee
+, Enumeratee(..)
 , take
 ) where
 
@@ -166,11 +166,11 @@ enumerateList = Enumerator . go
 
 -- Enumeratees
 
-type Enumeratee i o a = It i a -> It o (It i a)
+newtype Enumeratee i o a = Enumeratee { getEnumeratee :: It i a -> It o (It i a) }
 
 take :: Int -> Enumeratee i i o
 take n
-  | n <= 0    = pure
-  | otherwise = \case
+  | n <= 0    = Enumeratee pure
+  | otherwise = Enumeratee (\case
     i@Done{} -> pure i
-    Roll r   -> rollIt (take (n - 1) . r)
+    Roll r   -> rollIt (getEnumeratee (take (n - 1)) . r))
