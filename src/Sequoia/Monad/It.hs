@@ -25,7 +25,9 @@ module Sequoia.Monad.It
 
 import Control.Comonad
 import Control.Monad ((<=<))
+import Data.Functor.Identity
 import Data.Profunctor
+import Data.Profunctor.Sieve
 import Prelude hiding (any, take)
 
 -- Iteratees
@@ -49,6 +51,11 @@ instance Functor m => Costrong (It m) where
   unsecond = \case
     Done (_, b)   -> pure b
     Roll (d, b) k -> Roll b (fmap unsecond . k . (d,))
+
+instance Comonad m => Cosieve (It m) Identity where
+  cosieve = \case
+    Done a   -> const a
+    Roll _ k -> extract . extract . k . runIdentity
 
 instance Functor m => Functor (It m r) where
   fmap = rmap
