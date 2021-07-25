@@ -14,6 +14,7 @@ module Sequoia.Monad.Trans.It
 
 import Control.Monad (ap)
 import Control.Monad.Trans.Class
+import Data.Profunctor
 
 -- Iteratees
 
@@ -35,6 +36,9 @@ instance MonadTrans (ItT r) where
 
 
 newtype ItP m r a = ItP { getItP :: ItT r m a }
+
+instance Profunctor (ItP m) where
+  dimap f g (ItP i) = ItP (dimapItT f g i)
 
 
 -- Construction
