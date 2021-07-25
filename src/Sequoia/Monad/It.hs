@@ -85,12 +85,12 @@ doneIt :: a -> It m r a
 doneIt = Done
 
 
-needIt :: Monad m => a -> (r -> m (Maybe a)) -> It m r a
-needIt a f = i where i = Roll a (fmap (maybe i pure) . f)
+needIt :: Functor m => a -> (r -> m (Maybe a)) -> It m r a
+needIt a f = i where i = Roll a (fmap (maybe i Done) . f)
 
 
-tabulateIt :: Monad m => a -> (r -> a) -> It m r a
-tabulateIt a f = rollIt a (pure . pure . f)
+tabulateIt :: Applicative m => a -> (r -> a) -> It m r a
+tabulateIt a f = rollIt a (pure . Done . f)
 
 
 -- Elimination
@@ -116,7 +116,7 @@ headIt = \case
   Roll a _ -> a
 
 
-indexIt :: Monad m => It m r a -> r -> m a
+indexIt :: Applicative m => It m r a -> r -> m a
 indexIt = \case
   Done a   -> const (pure a)
   Roll _ k -> fmap headIt . k
@@ -124,7 +124,7 @@ indexIt = \case
 
 -- Computation
 
-simplifyIt :: Monad m => It m r a -> r -> m (It m r a)
+simplifyIt :: Applicative m => It m r a -> r -> m (It m r a)
 simplifyIt i r = case i of
   Done{}   -> pure i
   Roll _ k -> k r
@@ -133,12 +133,12 @@ simplifyIt i r = case i of
 -- Parsing
 
 
-getLineIt :: Monad m => It m (Maybe Char) String
+getLineIt :: Applicative m => It m (Maybe Char) String
 getLineIt = loop id
   where
   loop = rollIt "" . fmap pure . \ acc -> \case
     Just c | c /= '\n' -> loop (acc . (c:))
-    _                  -> pure (acc [])
+    _                  -> Done (acc [])
 
 getLinesIt :: Monad m => It m (Maybe Char) [String]
 getLinesIt = loop id
