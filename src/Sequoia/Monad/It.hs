@@ -14,6 +14,7 @@ module Sequoia.Monad.It
 , indexIt
   -- * Computation
 , simplifyIt
+, getLineIt
 ) where
 
 import Control.Monad (ap)
@@ -87,3 +88,12 @@ indexIt = flip (foldIt id . (&))
 
 simplifyIt :: It r a -> r -> It r a
 simplifyIt i r = foldIt (const i) ($ r) i
+
+
+getLineIt :: It (Maybe Char) String
+getLineIt = loop id
+  where
+  loop = it . check
+  check acc (Just c)
+    | c /= '\n' = loop (acc . (c:))
+  check acc _   = pure (acc [])
