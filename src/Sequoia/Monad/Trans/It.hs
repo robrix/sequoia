@@ -9,12 +9,21 @@ module Sequoia.Monad.Trans.It
 , foldItT
 ) where
 
+import Control.Monad (ap)
+
 -- Iteratees
 
 newtype ItT r m a = ItT { getItT :: forall s . (a -> s) -> ((r -> m (ItT r m a)) -> s) -> s }
 
 instance Functor m => Functor (ItT r m) where
   fmap f = foldItT (doneItT . f) itT
+
+instance Functor m => Applicative (ItT r m) where
+  pure = doneItT
+  (<*>) = ap
+
+instance Functor m => Monad (ItT r m) where
+  m >>= f = foldItT f itT m
 
 
 -- Construction
