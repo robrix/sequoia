@@ -22,7 +22,7 @@ import Data.Profunctor
 newtype ItT r m a = ItT { getItT :: forall s . (a -> m s) -> ((r -> ItT r m a) -> m s) -> m s }
 
 instance Functor (ItT r m) where
-  fmap f i = ItT (\ k r -> getItT i (k . f) (r . fmap (fmap f)))
+  fmap f = go where go i = ItT (\ k r -> getItT i (k . f) (r . fmap go))
 
 instance Applicative (ItT r m) where
   pure = doneItT
