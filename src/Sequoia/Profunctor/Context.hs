@@ -19,6 +19,7 @@ module Sequoia.Profunctor.Context
 , (∘>>)
 , (<<∘)
   -- * Computation
+, _CV
 , mapCKV
 , mapCK
 , mapCV
@@ -127,6 +128,11 @@ infixr 1 ∘>>, <<∘
 
 
 -- Computation
+
+_CV :: Iso
+  (e1 ==> r1) (e2 ==> r2)
+  (e1 ∘ r1)   (e2 ∘ r2)
+_CV = from _V >>> _C
 
 mapCKV :: (forall x . x • r -> x • r') -> (forall x . e ∘ x -> e' ∘ x) -> (e ==> r -> e' ==> r')
 mapCKV f g = over _C (under _K f . under _V g)
