@@ -52,7 +52,9 @@ import           Sequoia.Profunctor.Value as V
 
 -- Exponential profunctor
 
-_Exp :: Iso (Exp e r a b) (Exp e' r' a' b') (b • r -> e ∘ a -> e ==> r) (b' • r' -> e' ∘ a' -> e' ==> r')
+_Exp :: Iso
+  (Exp e r a b)               (Exp e' r' a' b')
+  (b • r -> e ∘ a -> e ==> r) (b' • r' -> e' ∘ a' -> e' ==> r')
 _Exp = coerced
 
 newtype Exp e r a b = Exp ((b -> r) -> (e -> a) -> (e -> r))
