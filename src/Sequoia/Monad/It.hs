@@ -10,6 +10,7 @@ module Sequoia.Monad.It
 , evalItString
   -- * Elimination
 , foldIt
+, runIt
 , headIt
 , tailIt
 , indexIt
@@ -79,6 +80,9 @@ evalItString = foldIt id . (&) . listToMaybe
 
 foldIt :: (a -> s) -> ((r -> s) -> s) -> It r a -> s
 foldIt p k = go where go r = getIt r p (k . fmap go)
+
+runIt :: (a -> s) -> ((r -> It r a) -> s) -> It r a -> s
+runIt p k i = getIt i p k
 
 headIt :: It r a -> Maybe a
 headIt = foldIt Just (const Nothing)
