@@ -24,6 +24,8 @@ module Sequoia.Monad.It
 , eof
 , getLineIt
 , getLinesIt
+  -- * Enumerators
+, Enumerator
 ) where
 
 import Control.Applicative (Alternative(..))
@@ -146,3 +148,8 @@ getLinesIt = loop []
   loop acc = getLineIt >>= check acc
   check acc "" = pure (reverse acc)
   check acc l  = loop (l:acc)
+
+
+-- Enumerators
+
+type Enumerator i o = It i o -> It i o
