@@ -14,6 +14,7 @@ module Sequoia.Monad.It
 , headIt
 , tailIt
 , indexIt
+, evalIt
 , evalItString
   -- * Computation
 , simplifyIt
@@ -95,6 +96,9 @@ tailIt = either (const Nothing) Just . foldIt (Left . pure) (\ k -> Right (eithe
 indexIt :: It r a -> (r -> a)
 indexIt = flip (foldIt id . (&))
 
+
+evalIt :: It (Maybe Char) a -> a
+evalIt = runIt id (evalIt . ($ Nothing))
 
 evalItString :: String -> It (Maybe Char) a -> a
 evalItString str = runIt id (\ k -> case str of
