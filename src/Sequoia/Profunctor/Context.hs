@@ -144,10 +144,10 @@ mapCKV :: (forall x . x • r -> x • r') -> (forall x . e ∘ x -> e' ∘ x) -
 mapCKV f g = over _C (under _K f . under _V g)
 
 mapCK :: (forall x . x • r -> x • r') -> (e ==> r -> e ==> r')
-mapCK = over _C . under _K
+mapCK = over _CK
 
 mapCV :: (forall x . e ∘ x -> e' ∘ x) -> (e ==> r -> e' ==> r)
-mapCV = over _C . under _V
+mapCV = over _CV
 
 
 -- Ambient environment
