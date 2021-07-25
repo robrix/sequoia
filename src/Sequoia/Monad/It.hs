@@ -68,6 +68,13 @@ instance Applicative m => Applicative (ItM r m) where
   pure = ItM . pure . pure
   ItM f <*> ItM a = ItM (liftA2 (<*>) f a)
 
+instance Monad m => Monad (ItM r m) where
+  ItM m >>= f = ItM (go m)
+    where
+    go m = m >>= \case
+      Done a -> getItM (f a)
+      Roll r -> pure (Roll (go . r))
+
 
 -- Construction
 
