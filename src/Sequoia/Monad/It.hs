@@ -149,7 +149,6 @@ simplifyIt i r = case i of
 
 -- Parsing
 
-
 getLineIt :: Applicative m => It m (Maybe Char) String
 getLineIt = loop id
   where
