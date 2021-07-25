@@ -126,7 +126,7 @@ exp' :: (a -> b) -> a --|Exp e r|-> b
 exp' = exp . ckv
 
 expV :: e ∘ a -> e --|Exp e r|-> a
-expV = exp' . (∘)
+expV = exp' . flip (∘)
 
 expK :: a • r -> a --|Exp e r|-> r
 expK = exp' . (•)

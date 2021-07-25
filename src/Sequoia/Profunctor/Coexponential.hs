@@ -41,7 +41,7 @@ instance Profunctor (Coexp e r) where
 -- Construction
 
 (>-) :: a • r -> e ∘ b -> Coexp e r a b
-k >- v = coexpFn (k •) (v ∘)
+k >- v = coexpFn (k •) (∘ v)
 
 infixr 6 >-
 
@@ -61,7 +61,7 @@ withCoexpFn :: Coexp e r a b -> ((a -> r) -> (e -> b) -> s) -> s
 withCoexpFn c = withCoexp c . coerce
 
 runCoexp :: Coexp e r a b -> ((b -> a) -> (e -> r))
-runCoexp c = withCoexp c (\ f r -> ((f •) .) . (. (r ∘)))
+runCoexp c = withCoexp c (\ f r -> ((f •) .) . (. (∘ r)))
 
 unCoexp :: (a • r -> e ∘ b -> s) -> Coexp e r a b -> s
 unCoexp = flip withCoexp
@@ -70,7 +70,7 @@ unCoexpFn :: ((a -> r) -> (e -> b) -> s) -> Coexp e r a b -> s
 unCoexpFn = flip withCoexpFn
 
 evalCoexp :: Coexp e r a a -> e ==> r
-evalCoexp c = C (\ e -> forget c • recall c ∘ e)
+evalCoexp c = C (\ e -> forget c • e ∘ recall c)
 
 recall :: Coexp e r a b -> e ∘ b
 recall = unCoexp (const id)

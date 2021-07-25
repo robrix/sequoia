@@ -83,10 +83,10 @@ instance Pro.Corepresentable (==>) where
 -- Construction
 
 ckv :: (a -> b) -> b • r -> e ∘ a -> e ==> r
-ckv f k v = C ((k •) . f . (v ∘))
+ckv f k v = C ((k •) . f . (∘ v))
 
 (↓↑) :: a • r -> e ∘ a -> e ==> r
-k ↓↑ v = C ((k •) . (v ∘))
+k ↓↑ v = C ((k •) . (∘ v))
 
 infix 9 ↓↑
 
@@ -118,7 +118,7 @@ infixr 1 •<<, >>•
 
 
 (∘>>) :: d ∘ e -> e ==> r -> d ==> r
-(∘>>) = lmap . (∘)
+(∘>>) = lmap . flip (∘)
 
 (<<∘) :: e ==> r -> d ∘ e -> d ==> r
 (<<∘) = flip (∘>>)
@@ -159,7 +159,7 @@ instance MonadEnv e (Src e r) where
   env f = Src (\ k -> env ((`runSrcFn` k) . f))
 
 val :: MonadEnv e m => (a -> m b) -> (e ∘ a -> m b)
-val f v = env (f . (v ∘))
+val f v = env (f . (∘ v))
 
 
 -- Ambient control
@@ -179,6 +179,6 @@ infix 7 ••
 
 
 (•∘) :: (MonadEnv e m, MonadRes r m) => a • r -> e ∘ a -> m r
-k •∘ v = env (\ e -> res (k • v ∘ e))
+k •∘ v = env (\ e -> res (k • e ∘ v))
 
 infix 8 •∘

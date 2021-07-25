@@ -36,4 +36,4 @@ mkPar :: b • r -> a ~~Fun e r~> b -> e ∘ (r ¬a ⅋ b)
 mkPar p f = V (\ e -> inl (Not (K (\ a -> p ↓ getFun f ↑ pure a <== e))))
 
 mkFun :: r ¬a ⅋ b -> a ~~Fun e r~> b
-mkFun p = fun (\ b a -> C (\ e -> ((• a ∘ e) . getNot <--> (b •)) p))
+mkFun p = fun (\ b a -> C (\ e -> ((• e ∘ a) . getNot <--> (b •)) p))

@@ -40,10 +40,10 @@ instance Distributive ((∘) e) where
   collect = collectRep
 
 instance Sieve (∘) Identity where
-  sieve = rmap Identity . (∘)
+  sieve = rmap Identity . flip (∘)
 
 instance Cosieve (∘) Identity where
-  cosieve = lmap runIdentity . (∘)
+  cosieve = lmap runIdentity . flip (∘)
 
 
 -- Construction
@@ -54,8 +54,8 @@ idV = V id
 
 -- Elimination
 
-(∘) :: e ∘ a -> (e -> a)
-V v ∘ e = v e
+(∘) :: e -> e ∘ a -> a
+e ∘ V v = v e
 
 
 -- Coercion
@@ -67,7 +67,7 @@ _V = coerced
 -- Computation
 
 (>∘∘<) :: Conj d => e ∘ b -> e ∘ c -> e ∘ (b `d` c)
-a >∘∘< b = V ((a ∘) >---< (b ∘))
+a >∘∘< b = V ((∘ a) >---< (∘ b))
 
 infix 3 >∘∘<
 
@@ -83,4 +83,4 @@ infix 3 >∘∘∘<
 infix 3 <∘∘>
 
 bitraverseDisjV :: Disj d => e ∘ (a `d` b) -> e -> (e ∘ a) `d` (e ∘ b)
-bitraverseDisjV = fmap (bimapDisj pure pure) . (∘)
+bitraverseDisjV = fmap (bimapDisj pure pure) . flip (∘)
