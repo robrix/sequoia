@@ -169,8 +169,10 @@ enumerateList = Enumerator . go
 newtype Enumeratee i o a = Enumeratee { getEnumeratee :: It i a -> It o (It i a) }
 
 take :: Int -> Enumeratee i i o
-take n
-  | n <= 0    = Enumeratee pure
-  | otherwise = Enumeratee (\case
-    i@Done{} -> pure i
-    Roll r   -> rollIt (getEnumeratee (take (n - 1)) . r))
+take = Enumeratee . go
+  where
+  go n
+    | n <= 0    = pure
+    | otherwise = \case
+      i@Done{} -> pure i
+      Roll r   -> rollIt (go (n - 1) . r)
