@@ -5,6 +5,7 @@ module Sequoia.Monad.It
 , rollIt
 , doneIt
 , needIt
+, wantIt
 , tabulateIt
   -- * Elimination
 , foldIt
@@ -104,6 +105,9 @@ doneIt = Done
 
 needIt :: Functor m => a -> (r -> m (Maybe a)) -> It m r a
 needIt a f = i where i = Roll a (fmap (maybe i Done) . f)
+
+wantIt :: Functor m => a -> (r -> m (Either a a)) -> It m r a
+wantIt a f = Roll a k where k = fmap (either Done (`Roll` k)) . f
 
 
 tabulateIt :: Applicative m => a -> (r -> a) -> It m r a
