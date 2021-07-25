@@ -42,6 +42,14 @@ instance Functor m => Profunctor (It m) where
       Done a   -> Done (g a)
       Roll a r -> Roll (g a) (fmap go . r . f)
 
+instance Functor m => Costrong (It m) where
+  unfirst = \case
+    Done (b, _)   -> pure b
+    Roll (b, d) k -> Roll b (fmap unfirst . k . (,d))
+  unsecond = \case
+    Done (_, b)   -> pure b
+    Roll (d, b) k -> Roll b (fmap unsecond . k . (d,))
+
 instance Functor m => Functor (It m r) where
   fmap = rmap
 
