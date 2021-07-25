@@ -2,6 +2,7 @@
 module Sequoia.Monad.It
 ( -- * Iteratees
   It(..)
+, ItM(..)
   -- * Construction
 , rollIt
 , doneIt
@@ -71,6 +72,10 @@ instance Representable (It r) where
   type Rep (It r) = r
   tabulate = tabulateIt
   index = indexIt
+
+
+newtype ItM r m a = ItM { getItM :: m (It r a) }
+  deriving (Functor)
 
 
 -- Construction
