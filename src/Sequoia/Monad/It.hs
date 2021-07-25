@@ -129,10 +129,9 @@ eof = rollIt (pure . maybe (pure ()) (const empty))
 getLineIt :: Applicative m => It (Maybe Char) m String
 getLineIt = loop id
   where
-  loop = rollIt . fmap pure . check
-  check acc (Just c)
-    | c /= '\n' = loop (acc . (c:))
-  check acc _   = pure (acc [])
+  loop = rollIt . fmap pure . \ acc -> \case
+    Just c | c /= '\n' -> loop (acc . (c:))
+    _                  -> pure (acc [])
 
 getLinesIt :: Applicative m => It (Maybe Char) m [String]
 getLinesIt = loop id
