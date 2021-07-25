@@ -1,4 +1,3 @@
-{-# LANGUAGE TypeFamilies #-}
 module Sequoia.Monad.It
 ( -- * Iteratees
   It(..)
@@ -11,10 +10,6 @@ module Sequoia.Monad.It
   -- * Elimination
 , foldIt
 , runIt
-, decomposeIt
-, headIt
-, tailIt
-, indexIt
 , evalIt
   -- * Computation
 , simplifyIt
@@ -33,48 +28,40 @@ module Sequoia.Monad.It
 ) where
 
 import Control.Applicative (Alternative(..), Applicative(liftA2))
-import Control.Monad (ap, guard)
-import Data.Distributive
-import Data.Function ((&))
-import Data.Functor.Rep
-import Data.Profunctor
+import Control.Monad (ap, guard, (<=<))
 import Prelude hiding (any, take)
 
 -- Iteratees
 
 -- | Iteratees, based loosely on the one in @trifecta@.
-data It r a
+data It r m a
   = Done a
-  | Roll (r -> It r a)
+  | Roll (r -> m (It r m a))
 
-instance Profunctor It where
-  dimap f g = foldIt (doneIt . g) (rollIt . lmap f)
+instance Functor m => Functor (It r m) where
+  fmap f = \case
+    Done a -> Done (f a)
+    Roll r -> Roll (fmap (fmap f) . r)
 
-instance Functor (It r) where
-  fmap f = foldIt (doneIt . f) rollIt
-
-instance Applicative (It r) where
+instance Functor m => Applicative (It r m) where
   pure = doneIt
   (<*>) = ap
 
-instance Alternative (It r) where
-  empty = rollIt (const empty)
-  i <|> j = runIt (const i) (\ ki -> runIt (const j) (\ kj -> rollIt (\ r -> ki r <|> kj r)) j) i
+instance Applicative m => Alternative (It r m) where
+  empty = rollIt (const (pure empty))
+  i@Done{} <|> _        = i
+  _        <|> j@Done{} = j
+  Roll i   <|> Roll j   = Roll (liftA2 (liftA2 (<|>)) i j)
 
-instance Monad (It r) where
-  m >>= f = foldIt f rollIt m
-
-instance Distributive (It r) where
-  distribute = distributeRep
-  collect = collectRep
-
-instance Representable (It r) where
-  type Rep (It r) = r
-  tabulate = tabulateIt
-  index = indexIt
+instance Functor m => Monad (It r m) where
+  m >>= f = go m
+    where
+    go = \case
+      Done a -> f a
+      Roll r -> Roll (fmap go . r)
 
 
-newtype ItM r m a = ItM { getItM :: m (It r a) }
+newtype ItM r m a = ItM { getItM :: m (It r m a) }
   deriving (Functor)
 
 instance Applicative m => Applicative (ItM r m) where
@@ -84,76 +71,63 @@ instance Applicative m => Applicative (ItM r m) where
 
 -- Construction
 
-rollIt :: (r -> It r a) -> It r a
+rollIt :: (r -> m (It r m a)) -> It r m a
 rollIt = Roll
 
-doneIt :: a -> It r a
+doneIt :: a -> It r m a
 doneIt = Done
 
 
-needIt :: (r -> Maybe a) -> It r a
-needIt f = i where i = rollIt (maybe i pure . f)
+needIt :: Applicative m => (r -> Maybe a) -> It r m a
+needIt f = i where i = rollIt (pure . maybe i pure . f)
 
 
-tabulateIt :: (r -> a) -> It r a
-tabulateIt f = rollIt (pure . f)
+tabulateIt :: Applicative m => (r -> a) -> It r m a
+tabulateIt f = rollIt (pure . pure . f)
 
 
 -- Elimination
 
-foldIt :: (a -> s) -> ((r -> s) -> s) -> (It r a -> s)
-foldIt p k = go where go = runIt p (k . fmap go)
+foldIt :: Monad m => (a -> m s) -> ((r -> m s) -> m s) -> (It r m a -> m s)
+foldIt p k = go where go = runIt p (k . fmap (>>= go))
 
-runIt :: (a -> s) -> ((r -> It r a) -> s) -> (It r a -> s)
+runIt :: (a -> m s) -> ((r -> m (It r m a)) -> m s) -> (It r m a -> m s)
 runIt p k = \case
   Done a -> p a
   Roll r -> k r
 
-decomposeIt :: It r a -> Either a (r -> It r a)
-decomposeIt = runIt Left Right
 
-headIt :: It r a -> Maybe a
-headIt = foldIt Just (const Nothing)
-
-tailIt :: It r a -> Maybe (r -> It r a)
-tailIt = runIt (const Nothing) Just
-
-
-indexIt :: It r a -> (r -> a)
-indexIt = flip (foldIt id . (&))
-
-
-evalIt :: It (Maybe r) a -> a
-evalIt = runIt id (evalIt . ($ Nothing))
+evalIt :: Monad m => It (Maybe r) m a -> m a
+evalIt = runIt pure (evalIt <=< ($ Nothing))
 
 
 -- Computation
 
-simplifyIt :: It r a -> r -> It r a
-simplifyIt i r = foldIt (const i) ($ r) i
+simplifyIt :: Monad m => It r m a -> r -> m (It r m a)
+simplifyIt i r = foldIt (const (pure i)) ($ r) i
 
 
 -- Parsing
 
-any :: It (Maybe a) a
-any = rollIt (maybe empty pure)
+any :: Applicative m => It (Maybe a) m a
+any = rollIt (pure . maybe empty pure)
 
-satisfy :: (a -> Bool) -> It (Maybe a) a
-satisfy p = rollIt (maybe empty (\ c -> c <$ guard (p c)))
+satisfy :: Applicative m => (a -> Bool) -> It (Maybe a) m a
+satisfy p = rollIt (pure . maybe empty (\ c -> c <$ guard (p c)))
 
-eof :: It (Maybe a) ()
-eof = rollIt (maybe (pure ()) (const empty))
+eof :: Applicative m => It (Maybe a) m ()
+eof = rollIt (pure . maybe (pure ()) (const empty))
 
 
-getLineIt :: It (Maybe Char) String
+getLineIt :: Applicative m => It (Maybe Char) m String
 getLineIt = loop id
   where
-  loop = rollIt . check
+  loop = rollIt . fmap pure . check
   check acc (Just c)
     | c /= '\n' = loop (acc . (c:))
   check acc _   = pure (acc [])
 
-getLinesIt :: It (Maybe Char) [String]
+getLinesIt :: Applicative m => It (Maybe Char) m [String]
 getLinesIt = loop []
   where
   loop acc = getLineIt >>= check acc
@@ -163,25 +137,25 @@ getLinesIt = loop []
 
 -- Enumerators
 
-newtype Enumerator i o = Enumerator { getEnumerator :: It i o -> It i o }
+newtype Enumerator i m o = Enumerator { getEnumerator :: It i m o -> m (It i m o) }
 
 
-enumerateList :: [r] -> Enumerator (Maybe r) a
+enumerateList :: Monad m => [r] -> Enumerator (Maybe r) m a
 enumerateList = Enumerator . go
   where
-  go []     = id
-  go (c:cs) = runIt pure (\ k -> go cs (k (Just c)))
+  go []     = pure
+  go (c:cs) = \ i -> runIt (const (pure i)) (\ k -> go cs =<< k (Just c)) i
 
 
 -- Enumeratees
 
-newtype Enumeratee i o a = Enumeratee { getEnumeratee :: It i a -> It o (It i a) }
+newtype Enumeratee i o m a = Enumeratee { getEnumeratee :: It i m a -> It o m (It i m a) }
 
-take :: Int -> Enumeratee i i o
+take :: Functor m => Int -> Enumeratee i i m o
 take = Enumeratee . go
   where
   go n
     | n <= 0    = pure
     | otherwise = \case
       i@Done{} -> pure i
-      Roll r   -> rollIt (go (n - 1) . r)
+      Roll r   -> rollIt (fmap (go (n - 1)) . r)
