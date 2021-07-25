@@ -17,6 +17,7 @@ module Sequoia.Monad.It
 , evalIt
   -- * Computation
 , simplifyIt
+  -- * Parsing
 , getLineIt
 , getLinesIt
 ) where
@@ -110,6 +111,8 @@ evalIt = runIt id (evalIt . ($ Nothing))
 simplifyIt :: It r a -> r -> It r a
 simplifyIt i r = foldIt (const i) ($ r) i
 
+
+-- Parsing
 
 getLineIt :: It (Maybe Char) String
 getLineIt = loop id
