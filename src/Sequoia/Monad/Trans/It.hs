@@ -14,6 +14,7 @@ import Control.Monad.Trans.Class
 
 -- Iteratees
 
+-- | Scott–encoded iteratee monad transformer, based loosely on the one in @trifecta@.
 newtype ItT r m a = ItT { getItT :: forall s . (a -> m s) -> ((r -> ItT r m a) -> m s) -> m s }
 
 instance Functor (ItT r m) where
