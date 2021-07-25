@@ -21,6 +21,7 @@ module Sequoia.Monad.It
 , getLinesIt
 ) where
 
+import Control.Applicative (Alternative(..))
 import Control.Monad (ap)
 import Data.Distributive
 import Data.Function ((&))
@@ -41,6 +42,10 @@ instance Functor (It r) where
 instance Applicative (It r) where
   pure = doneIt
   (<*>) = ap
+
+instance Alternative (It r) where
+  empty = it (const empty)
+  i <|> j = runIt (const i) (\ ki -> runIt (const j) (\ kj -> it (\ r -> ki r <|> kj r)) j) i
 
 instance Monad (It r) where
   m >>= f = foldIt f it m
