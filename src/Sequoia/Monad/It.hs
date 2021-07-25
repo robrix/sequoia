@@ -61,6 +61,9 @@ instance Functor m => Monad (It r m) where
       Done a -> f a
       Roll r -> Roll (fmap go . r)
 
+instance MonadTrans (It r) where
+  lift m = Roll (const (pure <$> m))
+
 
 newtype ItM r m a = ItM { getItM :: m (It r m a) }
   deriving (Functor)
