@@ -4,6 +4,8 @@ module Sequoia.Monad.Trans.It
   -- * Construction
 , itT
 , doneItT
+  -- * Elimination
+, runItT
 ) where
 
 -- Iteratees
@@ -18,3 +20,9 @@ itT k = ItT (const ($ k))
 
 doneItT :: a -> ItT r m a
 doneItT a = ItT (const . ($ a))
+
+
+-- Elimination
+
+runItT :: (a -> s) -> ((r -> m (ItT r m a)) -> s) -> (ItT r m a -> s)
+runItT p k i = getItT i p k
