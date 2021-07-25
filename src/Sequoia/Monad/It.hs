@@ -24,7 +24,7 @@ module Sequoia.Monad.It
 ) where
 
 import Control.Comonad
-import Control.Monad (ap, (<=<))
+import Control.Monad ((<=<))
 import Data.Profunctor
 import Prelude hiding (any, take)
 
@@ -45,9 +45,11 @@ instance Functor m => Profunctor (It m) where
 instance Functor m => Functor (It m r) where
   fmap = rmap
 
-instance Monad m => Applicative (It m r) where
+instance Functor m => Applicative (It m r) where
   pure = doneIt
-  (<*>) = ap
+  f <*> a = case f of
+    Done f   -> f <$> a
+    Roll f k -> Roll (headIt (f <$> a)) (fmap (<*> a) . k)
 
 instance Monad m => Monad (It m r) where
   m >>= f = go m
