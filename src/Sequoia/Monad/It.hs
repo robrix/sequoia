@@ -20,6 +20,7 @@ module Sequoia.Monad.It
   -- * Parsing
 , any
 , satisfy
+, eof
 , getLineIt
 , getLinesIt
 ) where
@@ -122,6 +123,9 @@ any = it (maybe empty pure)
 
 satisfy :: (a -> Bool) -> It (Maybe a) a
 satisfy p = it (maybe empty (\ c -> c <$ guard (p c)))
+
+eof :: It (Maybe a) ()
+eof = it (maybe (pure ()) (const empty))
 
 
 getLineIt :: It (Maybe Char) String
