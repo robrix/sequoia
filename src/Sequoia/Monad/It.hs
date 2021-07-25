@@ -11,6 +11,7 @@ module Sequoia.Monad.It
   -- * Elimination
 , foldIt
 , runIt
+, decomposeIt
 , headIt
 , tailIt
 , indexIt
@@ -94,6 +95,9 @@ foldIt p k = go where go = runIt p (k . fmap go)
 
 runIt :: (a -> s) -> ((r -> It r a) -> s) -> (It r a -> s)
 runIt p k i = getIt i p k
+
+decomposeIt :: It r a -> Either a (r -> It r a)
+decomposeIt = runIt Left Right
 
 headIt :: It r a -> Maybe a
 headIt = foldIt Just (const Nothing)
