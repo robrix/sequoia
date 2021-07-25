@@ -19,12 +19,13 @@ module Sequoia.Monad.It
 , simplifyIt
   -- * Parsing
 , anyChar
+, satisfy
 , getLineIt
 , getLinesIt
 ) where
 
 import Control.Applicative (Alternative(..))
-import Control.Monad (ap)
+import Control.Monad (ap, guard)
 import Data.Distributive
 import Data.Function ((&))
 import Data.Functor.Rep
@@ -117,6 +118,9 @@ simplifyIt i r = foldIt (const i) ($ r) i
 
 anyChar :: It (Maybe Char) Char
 anyChar = it (maybe empty pure)
+
+satisfy :: (Char -> Bool) -> It (Maybe Char) Char
+satisfy p = it (maybe empty (\ c -> c <$ guard (p c)))
 
 
 getLineIt :: It (Maybe Char) String
