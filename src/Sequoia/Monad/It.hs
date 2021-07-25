@@ -3,6 +3,7 @@ module Sequoia.Monad.It
   It(..)
   -- * Construction
 , it
+, doneIt
   -- * Elimination
 , foldIt
 ) where
@@ -17,6 +18,9 @@ newtype It r a = It (forall s . (a -> s) -> (a -> (r -> s) -> s) -> s)
 
 it :: a -> (r -> It r a) -> It r a
 it a k = It (\ p f -> f a (foldIt p f . k))
+
+doneIt :: a -> It r a
+doneIt a = It (const . ($ a))
 
 
 -- Elimination
