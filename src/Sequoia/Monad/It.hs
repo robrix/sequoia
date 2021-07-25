@@ -7,7 +7,7 @@ module Sequoia.Monad.It
 , doneIt
 , needIt
 , tabulateIt
-, enumerateString
+, enumerateList
   -- * Elimination
 , foldIt
 , runIt
@@ -72,9 +72,9 @@ tabulateIt :: (r -> a) -> It r a
 tabulateIt f = it (pure . f)
 
 
-enumerateString :: String -> It (Maybe Char) a -> It (Maybe Char) a
-enumerateString ""     = id
-enumerateString (c:cs) = runIt pure (\ k -> enumerateString cs (k (Just c)))
+enumerateList :: [r] -> It (Maybe r) a -> It (Maybe r) a
+enumerateList []     = id
+enumerateList (c:cs) = runIt pure (\ k -> enumerateList cs (k (Just c)))
 
 
 -- Elimination
