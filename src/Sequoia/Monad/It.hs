@@ -89,7 +89,7 @@ headIt :: It r a -> Maybe a
 headIt = foldIt Just (const Nothing)
 
 tailIt :: It r a -> Maybe (r -> It r a)
-tailIt = either (const Nothing) Just . foldIt (Left . pure) (Right . (either id . (&) <*>))
+tailIt = runIt (const Nothing) Just
 
 
 indexIt :: It r a -> (r -> a)
