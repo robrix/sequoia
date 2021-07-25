@@ -7,6 +7,7 @@ module Sequoia.Monad.It
 , doneIt
 , needIt
 , tabulateIt
+, evalItString
   -- * Elimination
 , foldIt
 , headIt
@@ -22,6 +23,7 @@ import Control.Monad (ap)
 import Data.Distributive
 import Data.Function ((&))
 import Data.Functor.Rep
+import Data.Maybe (listToMaybe)
 import Data.Profunctor
 
 -- Iteratees
@@ -67,6 +69,10 @@ needIt f = i where i = it (maybe i pure . f)
 
 tabulateIt :: (r -> a) -> It r a
 tabulateIt f = it (pure . f)
+
+
+evalItString :: String -> It (Maybe Char) a -> a
+evalItString = foldIt id . (&) . listToMaybe
 
 
 -- Elimination
