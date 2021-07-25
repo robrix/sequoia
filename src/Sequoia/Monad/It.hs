@@ -29,6 +29,7 @@ module Sequoia.Monad.It
 
 import Control.Applicative (Alternative(..), Applicative(liftA2))
 import Control.Monad (ap, guard, (<=<))
+import Control.Monad.Trans.Class
 import Prelude hiding (any, take)
 
 -- Iteratees
@@ -74,6 +75,9 @@ instance Monad m => Monad (ItM r m) where
     go m = m >>= \case
       Done a -> getItM (f a)
       Roll r -> pure (Roll (go . r))
+
+instance MonadTrans (ItM r) where
+  lift m = ItM (pure <$> m)
 
 
 -- Construction
