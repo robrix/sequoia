@@ -5,6 +5,7 @@ module Sequoia.Monad.It
 , it
 , doneIt
 , needIt
+, tabulateIt
   -- * Elimination
 , foldIt
 , headIt
@@ -48,6 +49,10 @@ doneIt a = It (const . ($ a))
 
 needIt :: (r -> Maybe a) -> It r a
 needIt f = i where i = it (maybe i pure . f)
+
+
+tabulateIt :: (r -> a) -> It r a
+tabulateIt f = it (pure . f)
 
 
 -- Elimination
