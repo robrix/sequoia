@@ -120,7 +120,7 @@ simplifyIt i r = foldIt (const i) ($ r) i
 any :: It (Maybe a) a
 any = it (maybe empty pure)
 
-satisfy :: (Char -> Bool) -> It (Maybe Char) Char
+satisfy :: (a -> Bool) -> It (Maybe a) a
 satisfy p = it (maybe empty (\ c -> c <$ guard (p c)))
 
 
