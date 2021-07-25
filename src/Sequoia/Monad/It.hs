@@ -32,7 +32,7 @@ module Sequoia.Monad.It
 , take
 ) where
 
-import Control.Applicative (Alternative(..))
+import Control.Applicative (Alternative(..), Applicative(liftA2))
 import Control.Monad (ap, guard)
 import Data.Distributive
 import Data.Function ((&))
@@ -76,6 +76,10 @@ instance Representable (It r) where
 
 newtype ItM r m a = ItM { getItM :: m (It r a) }
   deriving (Functor)
+
+instance Applicative m => Applicative (ItM r m) where
+  pure = ItM . pure . pure
+  ItM f <*> ItM a = ItM (liftA2 (<*>) f a)
 
 
 -- Construction
