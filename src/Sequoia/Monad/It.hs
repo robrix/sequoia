@@ -7,7 +7,6 @@ module Sequoia.Monad.It
 , doneIt
 , needIt
 , tabulateIt
-, enumerateList
   -- * Elimination
 , foldIt
 , runIt
@@ -25,6 +24,7 @@ module Sequoia.Monad.It
 , getLineIt
 , getLinesIt
   -- * Enumerators
+, enumerateList
 , Enumerator
 ) where
 
@@ -83,11 +83,6 @@ needIt f = i where i = it (maybe i pure . f)
 
 tabulateIt :: (r -> a) -> It r a
 tabulateIt f = it (pure . f)
-
-
-enumerateList :: [r] -> It (Maybe r) a -> It (Maybe r) a
-enumerateList []     = id
-enumerateList (c:cs) = runIt pure (\ k -> enumerateList cs (k (Just c)))
 
 
 -- Elimination
@@ -153,3 +148,8 @@ getLinesIt = loop []
 -- Enumerators
 
 type Enumerator i o = It i o -> It i o
+
+
+enumerateList :: [r] -> Enumerator (Maybe r) a
+enumerateList []     = id
+enumerateList (c:cs) = runIt pure (\ k -> enumerateList cs (k (Just c)))
