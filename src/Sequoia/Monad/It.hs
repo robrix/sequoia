@@ -18,7 +18,7 @@ module Sequoia.Monad.It
   -- * Computation
 , simplifyIt
   -- * Parsing
-, anyChar
+, any
 , satisfy
 , getLineIt
 , getLinesIt
@@ -30,6 +30,7 @@ import Data.Distributive
 import Data.Function ((&))
 import Data.Functor.Rep
 import Data.Profunctor
+import Prelude hiding (any)
 
 -- Iteratees
 
@@ -116,8 +117,8 @@ simplifyIt i r = foldIt (const i) ($ r) i
 
 -- Parsing
 
-anyChar :: It (Maybe Char) Char
-anyChar = it (maybe empty pure)
+any :: It (Maybe a) a
+any = it (maybe empty pure)
 
 satisfy :: (Char -> Bool) -> It (Maybe Char) Char
 satisfy p = it (maybe empty (\ c -> c <$ guard (p c)))
