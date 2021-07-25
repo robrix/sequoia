@@ -96,7 +96,7 @@ indexIt :: It r a -> (r -> a)
 indexIt = flip (foldIt id . (&))
 
 
-evalIt :: It (Maybe Char) a -> a
+evalIt :: It (Maybe r) a -> a
 evalIt = runIt id (evalIt . ($ Nothing))
 
 
