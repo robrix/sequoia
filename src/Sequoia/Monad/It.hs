@@ -7,7 +7,6 @@ module Sequoia.Monad.It
 , doneIt
 , needIt
 , tabulateIt
-, evalItString
 , enumerateString
   -- * Elimination
 , foldIt
@@ -15,6 +14,7 @@ module Sequoia.Monad.It
 , headIt
 , tailIt
 , indexIt
+, evalItString
   -- * Computation
 , simplifyIt
 , getLineIt
@@ -72,11 +72,6 @@ tabulateIt :: (r -> a) -> It r a
 tabulateIt f = it (pure . f)
 
 
-evalItString :: String -> It (Maybe Char) a -> a
-evalItString str = runIt id (\ k -> case str of
-  ""   -> evalItString "" (k Nothing)
-  c:cs -> evalItString cs (k (Just c)))
-
 enumerateString :: String -> It (Maybe Char) a -> It (Maybe Char) a
 enumerateString ""     = id
 enumerateString (c:cs) = runIt pure (\ k -> enumerateString cs (k (Just c)))
@@ -99,6 +94,13 @@ tailIt = either (const Nothing) Just . foldIt (Left . pure) (\ k -> Right (eithe
 
 indexIt :: It r a -> (r -> a)
 indexIt = flip (foldIt id . (&))
+
+
+evalItString :: String -> It (Maybe Char) a -> a
+evalItString str = runIt id (\ k -> case str of
+  ""   -> evalItString "" (k Nothing)
+  c:cs -> evalItString cs (k (Just c)))
+
 
 
 -- Computation
