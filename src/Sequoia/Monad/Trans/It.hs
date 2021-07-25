@@ -6,6 +6,7 @@ module Sequoia.Monad.Trans.It
 , doneItT
   -- * Elimination
 , runItT
+, foldItT
 ) where
 
 -- Iteratees
@@ -26,3 +27,6 @@ doneItT a = ItT (const . ($ a))
 
 runItT :: (a -> s) -> ((r -> m (ItT r m a)) -> s) -> (ItT r m a -> s)
 runItT p k i = getItT i p k
+
+foldItT :: Functor m => (a -> s) -> ((r -> m s) -> s) -> (ItT r m a -> s)
+foldItT p k = go where go = runItT p (k . fmap (fmap go))
