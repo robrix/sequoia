@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeFamilies #-}
 module Sequoia.Monad.It
 ( -- * Iteratees
   It(..)
@@ -16,7 +17,9 @@ module Sequoia.Monad.It
 ) where
 
 import Control.Monad (ap)
+import Data.Distributive
 import Data.Function ((&))
+import Data.Functor.Rep
 import Data.Profunctor
 
 -- Iteratees
@@ -36,6 +39,15 @@ instance Applicative (It r) where
 
 instance Monad (It r) where
   m >>= f = foldIt f it m
+
+instance Distributive (It r) where
+  distribute = distributeRep
+  collect = collectRep
+
+instance Representable (It r) where
+  type Rep (It r) = r
+  tabulate = tabulateIt
+  index = indexIt
 
 
 -- Construction
