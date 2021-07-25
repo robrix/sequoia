@@ -6,6 +6,7 @@ module Sequoia.Monad.It
 , doneIt
   -- * Elimination
 , foldIt
+, headIt
 ) where
 
 import Data.Profunctor
@@ -35,3 +36,6 @@ doneIt a = It (const . ($ a))
 
 foldIt :: (a -> o) -> (a -> (r -> o) -> o) -> It r a -> o
 foldIt p k (It r) = r p k
+
+headIt :: It r a -> a
+headIt = foldIt id const
