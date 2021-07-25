@@ -82,7 +82,7 @@ srcSig
   ::      Src e r |- b
             <->
      e -| Sig e r |- b
-srcSig = _Src.from (_Sig.rmapping (constantWith (V id) (<<∘)))
+srcSig = _Src.from (_Sig.rmapping (constantWith idV (<<∘)))
 
 composeSrcSig :: Src e r a -> Sig e r a b -> Src e r b
 composeSrcSig src sig = review srcSig (sig <<< view srcSig src)
@@ -92,7 +92,7 @@ snkSig
   :: a -| Snk e r
             <->
      a -| Sig e r |- r
-snkSig = _Snk.from (_Sig.constantWith (K id) (flip ((.) . (•<<))))
+snkSig = _Snk.from (_Sig.constantWith idK (flip ((.) . (•<<))))
 
 composeSigSnk :: Sig e r a b -> Snk e r b -> Snk e r a
 composeSigSnk sig snk = review snkSig (view snkSig snk <<< sig)

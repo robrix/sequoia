@@ -71,4 +71,4 @@ mapSnkV b = over _Snk (dimap (review b) (over _CV (view b)))
 -- Optics
 
 _SnkExp :: Iso (Snk e r a) (Snk e' r' a') (Exp e r a r) (Exp e' r' a' r')
-_SnkExp = _Snk.from (_Exp.constantWith (K id) (flip ((.) . (•<<))))
+_SnkExp = _Snk.from (_Exp.constantWith idK (flip ((.) . (•<<))))
