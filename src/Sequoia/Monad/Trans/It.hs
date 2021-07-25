@@ -27,7 +27,7 @@ instance Monad (ItT r m) where
   i >>= f = go i where go i = ItT (\ k r -> runItT (runItT k r . f) (r . fmap go) i)
 
 instance MonadTrans (ItT r) where
-  lift m = ItT (\ k _ -> m >>= k)
+  lift m = ItT (const . (m >>=))
 
 
 -- Construction
