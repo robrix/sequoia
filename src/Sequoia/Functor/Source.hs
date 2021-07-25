@@ -10,8 +10,8 @@ module Sequoia.Functor.Source
 , runSrc
 , elimSrc
   -- * Computation
-, mapSrcK
-, mapSrcV
+, mapSrcE
+, mapSrcR
   -- * Optics
 , _SrcExp
 ) where
@@ -61,11 +61,11 @@ elimSrc sr sn = env (pure . (runSrcFn sr . flip (runSnkFn sn . pure) <*> id))
 
 -- Computation
 
-mapSrcK :: (forall x . x • r <-> x • r') -> (Src e r b -> Src e r' b)
-mapSrcK b = over _Src (dimap (review b) (over _CK (view b)))
+mapSrcE :: (forall x . e ∘ x -> e' ∘ x) -> (Src e r b -> Src e' r b)
+mapSrcE f = over _Src (fmap (over _CV f))
 
-mapSrcV :: (forall x . e ∘ x -> e' ∘ x) -> (Src e r b -> Src e' r b)
-mapSrcV f = over _Src (fmap (over _CV f))
+mapSrcR :: (forall x . x • r <-> x • r') -> (Src e r b -> Src e r' b)
+mapSrcR b = over _Src (dimap (review b) (over _CK (view b)))
 
 
 -- Optics

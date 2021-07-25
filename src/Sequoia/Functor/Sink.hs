@@ -10,8 +10,8 @@ module Sequoia.Functor.Sink
 , runSnk
 , elimSnk
   -- * Computation
-, mapSnkK
-, mapSnkV
+, mapSnkE
+, mapSnkR
   -- * Optics
 , _SnkExp
 ) where
@@ -61,11 +61,11 @@ elimSnk sn sr = env (pure . (runSrcFn sr . flip (runSnkFn sn . pure) <*> id))
 
 -- Computation
 
-mapSnkK :: (forall x . x • r -> x • r') -> (Snk e r a -> Snk e r' a)
-mapSnkK f = over _Snk (fmap (over _CK f))
+mapSnkE :: (forall x . e ∘ x <-> e' ∘ x) -> (Snk e r a -> Snk e' r a)
+mapSnkE b = over _Snk (dimap (review b) (over _CV (view b)))
 
-mapSnkV :: (forall x . e ∘ x <-> e' ∘ x) -> (Snk e r a -> Snk e' r a)
-mapSnkV b = over _Snk (dimap (review b) (over _CV (view b)))
+mapSnkR :: (forall x . x • r -> x • r') -> (Snk e r a -> Snk e r' a)
+mapSnkR f = over _Snk (fmap (over _CK f))
 
 
 -- Optics
