@@ -60,7 +60,7 @@ withCoexp c f = f (forget c) (recall c)
 withCoexpFn :: Coexp e r a b -> ((a -> r) -> (e -> b) -> s) -> s
 withCoexpFn c = withCoexp c . coerce
 
-runCoexp :: Coexp e r b a -> ((a -> b) -> (e -> r))
+runCoexp :: Coexp e r a b -> ((b -> a) -> (e -> r))
 runCoexp c = withCoexp c (\ f r -> ((f •) .) . (. (r ∘)))
 
 unCoexp :: (a • r -> e ∘ b -> s) -> Coexp e r a b -> s
