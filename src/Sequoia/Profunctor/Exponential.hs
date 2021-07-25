@@ -57,7 +57,7 @@ _Exp :: Iso
   (b1 • r1 -> e1 ∘ a1 -> e1 ==> r1)   (b2 • r2 -> e2 ∘ a2 -> e2 ==> r2)
 _Exp = coerced
 
-newtype Exp e r a b = Exp ((b -> r) -> (e -> a) -> (e -> r))
+newtype Exp env res inn out = Exp ((out -> res) -> (env -> inn) -> (env -> res))
 
 instance Profunctor (Exp e r) where
   dimap f g = exp . dimap (lmap g) (lmap (rmap f)) . runExp
