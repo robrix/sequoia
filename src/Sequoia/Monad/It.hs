@@ -30,20 +30,20 @@ import Prelude hiding (any, take)
 -- Iteratees
 
 -- | Iteratees, based loosely on the one in @trifecta@.
-data It r m a
+data It m r a
   = Done a
-  | Roll a (r -> m (It r m a))
+  | Roll a (r -> m (It m r a))
 
-instance Functor m => Functor (It r m) where
+instance Functor m => Functor (It m r) where
   fmap f = \case
     Done a   -> Done (f a)
     Roll a r -> Roll (f a) (fmap (fmap f) . r)
 
-instance Monad m => Applicative (It r m) where
+instance Monad m => Applicative (It m r) where
   pure = doneIt
   (<*>) = ap
 
-instance Monad m => Monad (It r m) where
+instance Monad m => Monad (It m r) where
   Done a   >>= f = f a
   Roll a k >>= f = Roll (headIt (f a)) $ \ r -> do
     kr' <- k r
@@ -53,7 +53,7 @@ instance Monad m => Monad (It r m) where
         a'' <- indexIt (f a') r
         pure $ Roll a'' (pure . (f =<<) <=< k')
 
-instance Functor m => Comonad (It r m) where
+instance Functor m => Comonad (It m r) where
   extract = headIt
 
   duplicate = \case
@@ -69,45 +69,45 @@ instance Functor m => Comonad (It r m) where
 
 -- Construction
 
-rollIt :: a -> (r -> m (It r m a)) -> It r m a
+rollIt :: a -> (r -> m (It m r a)) -> It m r a
 rollIt = Roll
 
-doneIt :: a -> It r m a
+doneIt :: a -> It m r a
 doneIt = Done
 
 
-needIt :: Monad m => a -> (r -> m (Maybe a)) -> It r m a
+needIt :: Monad m => a -> (r -> m (Maybe a)) -> It m r a
 needIt a f = i where i = Roll a (fmap (maybe i pure) . f)
 
 
-tabulateIt :: Monad m => a -> (r -> a) -> It r m a
+tabulateIt :: Monad m => a -> (r -> a) -> It m r a
 tabulateIt a f = rollIt a (pure . pure . f)
 
 
 -- Elimination
 
-foldIt :: Monad m => (a -> m s) -> (a -> (r -> m s) -> m s) -> (It r m a -> m s)
+foldIt :: Monad m => (a -> m s) -> (a -> (r -> m s) -> m s) -> (It m r a -> m s)
 foldIt p k = go where go = runIt p (\ a -> k a . fmap (>>= go))
 
-runIt :: (a -> m s) -> (a -> (r -> m (It r m a)) -> m s) -> (It r m a -> m s)
+runIt :: (a -> m s) -> (a -> (r -> m (It m r a)) -> m s) -> (It m r a -> m s)
 runIt p k = \case
   Done a   -> p a
   Roll a r -> k a r
 
 
-evalIt :: Monad m => It (Maybe r) m a -> m a
+evalIt :: Monad m => It m (Maybe r) a -> m a
 evalIt = \case
   Done a   -> pure a
   Roll _ k -> evalIt =<< k Nothing
 
 
-headIt :: It r m a -> a
+headIt :: It m r a -> a
 headIt = \case
   Done a   -> a
   Roll a _ -> a
 
 
-indexIt :: Monad m => It r m a -> r -> m a
+indexIt :: Monad m => It m r a -> r -> m a
 indexIt = \case
   Done a   -> const (pure a)
   Roll _ k -> fmap headIt . k
@@ -115,7 +115,7 @@ indexIt = \case
 
 -- Computation
 
-simplifyIt :: Monad m => It r m a -> r -> m (It r m a)
+simplifyIt :: Monad m => It m r a -> r -> m (It m r a)
 simplifyIt i r = case i of
   Done{}   -> pure i
   Roll _ k -> k r
@@ -124,14 +124,14 @@ simplifyIt i r = case i of
 -- Parsing
 
 
-getLineIt :: Monad m => It (Maybe Char) m String
+getLineIt :: Monad m => It m (Maybe Char) String
 getLineIt = loop id
   where
   loop = rollIt "" . fmap pure . \ acc -> \case
     Just c | c /= '\n' -> loop (acc . (c:))
     _                  -> pure (acc [])
 
-getLinesIt :: Monad m => It (Maybe Char) m [String]
+getLinesIt :: Monad m => It m (Maybe Char) [String]
 getLinesIt = loop id
   where
   loop acc = getLineIt >>= \case
@@ -141,7 +141,7 @@ getLinesIt = loop id
 
 -- Enumerators
 
-newtype Enumerator i m o = Enumerator { getEnumerator :: It i m o -> m (It i m o) }
+newtype Enumerator i m o = Enumerator { getEnumerator :: It m i o -> m (It m i o) }
 
 
 enumerateList :: Monad m => [r] -> Enumerator (Maybe r) m a
@@ -153,7 +153,7 @@ enumerateList = Enumerator . go
 
 -- Enumeratees
 
-newtype Enumeratee i o m a = Enumeratee { getEnumeratee :: It i m a -> It o m (It i m a) }
+newtype Enumeratee i o m a = Enumeratee { getEnumeratee :: It m i a -> It m o (It m i a) }
 
 take :: Monad m => Int -> Enumeratee i i m o
 take = Enumeratee . go
