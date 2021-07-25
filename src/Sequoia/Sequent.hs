@@ -44,9 +44,6 @@ import           Sequoia.Calculus.XOr
 import           Sequoia.Conjunction
 import           Sequoia.Contextual
 import           Sequoia.Disjunction
-import           Sequoia.Functor.Source hiding ((↑))
-import           Sequoia.Optic.Getter
-import           Sequoia.Optic.Review
 import           Sequoia.Profunctor.Coexponential
 import           Sequoia.Profunctor.Context
 import           Sequoia.Profunctor.Continuation as K
@@ -149,8 +146,8 @@ instance Calculus.Control Seq where
 -- Assertion
 
 instance NotUntrueIntro Seq where
-  notUntrueL e a = popL (val (\ (NotUntrue r) -> e >>> liftLR (view _SrcExp r) >>> wkL' a))
-  notUntrueR s = mapR (lmap (NotUntrue . review _SrcExp . getFun)) (funR s)
+  notUntrueL a = popL (val (\ (NotUntrue r) -> liftR r >>> a))
+  notUntrueR s = lowerR (liftR . pure . NotUntrue) (wkR' s)
 
 instance TrueIntro Seq where
   trueL = mapL (fmap trueA)
