@@ -79,10 +79,10 @@ enumerateList (c:cs) = runIt pure (\ k -> enumerateList cs (k (Just c)))
 
 -- Elimination
 
-foldIt :: (a -> s) -> ((r -> s) -> s) -> It r a -> s
+foldIt :: (a -> s) -> ((r -> s) -> s) -> (It r a -> s)
 foldIt p k = go where go = runIt p (k . fmap go)
 
-runIt :: (a -> s) -> ((r -> It r a) -> s) -> It r a -> s
+runIt :: (a -> s) -> ((r -> It r a) -> s) -> (It r a -> s)
 runIt p k i = getIt i p k
 
 headIt :: It r a -> Maybe a
