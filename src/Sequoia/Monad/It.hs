@@ -26,6 +26,8 @@ module Sequoia.Monad.It
   -- * Enumerators
 , enumerateList
 , Enumerator
+  -- * Enumeratees
+, Enumeratee
 ) where
 
 import Control.Applicative (Alternative(..))
@@ -153,3 +155,8 @@ type Enumerator i o = It i o -> It i o
 enumerateList :: [r] -> Enumerator (Maybe r) a
 enumerateList []     = id
 enumerateList (c:cs) = runIt pure (\ k -> enumerateList cs (k (Just c)))
+
+
+-- Enumeratees
+
+type Enumeratee i o a = It i a -> It o (It i a)
