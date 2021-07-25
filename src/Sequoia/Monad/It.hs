@@ -4,6 +4,7 @@ module Sequoia.Monad.It
   -- * Construction
 , it
 , doneIt
+, needIt
   -- * Elimination
 , foldIt
 , headIt
@@ -46,6 +47,10 @@ it a k = It (\ p f -> f a (foldIt p f . k))
 
 doneIt :: a -> It r a
 doneIt a = It (const . ($ a))
+
+
+needIt :: a -> (r -> Maybe a) -> It r a
+needIt a f = i where i = it a (maybe i pure . f)
 
 
 -- Elimination
