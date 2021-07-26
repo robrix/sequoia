@@ -83,9 +83,9 @@ needIt f = i where i = rollIt (maybe i (maybe i doneIt . f))
 
 
 toList :: It a [a]
-toList = ($ []) <$> go id
+toList = List.toList <$> go List.nil
   where
-  go as = i where i = rollIt (maybe (pure as) (\ a -> go (as . (a:))))
+  go as = i where i = rollIt (maybe (pure as) (go . List.snoc as))
 
 repeatIt :: (b -> Maybe c) -> It a b -> It a [c]
 repeatIt rel i = loop List.nil
