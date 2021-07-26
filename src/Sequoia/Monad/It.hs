@@ -140,10 +140,7 @@ guarding p a = a <$ guard (p a)
 type Enumerator i m o = It i o -> m (It i o)
 
 enumList :: Monad m => [r] -> Enumerator r m a
-enumList = fmap pure . go
-  where
-  go []     = id
-  go (c:cs) = \ i -> runIt (const i) (go cs . ($ Just c)) i
+enumList = fmap pure . foldr (\ c cs i -> runIt (const i) (cs . ($ Just c)) i) id
 
 enumFile :: Has (Lift IO) sig m => FilePath -> Enumerator Char m a
 enumFile path = withFile' path ReadMode . flip enumHandle
