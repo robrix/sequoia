@@ -44,31 +44,19 @@ data It m r a
   | Roll (Input r -> m (It m r a))
 
 instance Functor m => Profunctor (It m) where
-  dimap f g = go
-    where
-    go = \case
-      Done a -> Done (g a)
-      Roll r -> Roll (fmap go . r . fmap f)
+  dimap f g = go where go = runIt (doneIt . g) (\ k -> rollIt (fmap go . k . fmap f))
 
 instance Functor m => Functor (It m r) where
   fmap = rmap
 
 instance Functor m => Applicative (It m r) where
   pure = Done
-  f <*> a = case f of
-    Done f -> f <$> a
-    Roll k -> Roll (fmap (<*> a) . k)
+  f <*> a = runIt (<$> a) (rollIt . (fmap (<*> a) .)) f
 
 instance Monad m => Monad (It m r) where
   m >>= f = go m
     where
-    go = \case
-      Done a   -> f a
-      Roll k -> Roll $ \ r -> do
-        kr' <- k r
-        case kr' of
-          Done a' -> simplifyIt (f a') r
-          Roll k' -> pure $ Roll (pure . go <=< k')
+    go = runIt f (\ k -> rollIt (\ r -> runIt ((`simplifyIt` r) . f) (pure . rollIt . (pure . go <=<)) =<< k r))
 
 
 -- Input
@@ -115,13 +103,13 @@ rollIt = Roll
 
 
 needIt :: Applicative m =>  (r -> m (Maybe a)) -> It m r a
-needIt f = i where i = Roll (input (pure i) (fmap (maybe i Done) . f))
+needIt f = i where i = rollIt (input (pure i) (fmap (maybe i doneIt) . f))
 
 
 toList :: Applicative m => It m a [a]
 toList = ($ []) <$> go id
   where
-  go as = i where i = Roll (pure . input (pure as) (\ a -> go (as . (a:))))
+  go as = i where i = rollIt (pure . input (pure as) (\ a -> go (as . (a:))))
 
 
 -- Elimination
@@ -136,17 +124,13 @@ runIt p k = \case
 
 
 evalIt :: Monad m => It m r a -> m a
-evalIt = \case
-  Done a -> pure a
-  Roll k -> evalIt =<< k End
+evalIt = runIt pure (evalIt <=< ($ End))
 
 
 -- Computation
 
 simplifyIt :: Applicative m => It m r a -> Input r -> m (It m r a)
-simplifyIt i r = case i of
-  Done{} -> pure i
-  Roll k -> k r
+simplifyIt i r = runIt (const (pure i)) ($ r) i
 
 
 -- Parsing
@@ -154,9 +138,9 @@ simplifyIt i r = case i of
 getLineIt :: Applicative m => It m Char String
 getLineIt = loop id
   where
-  loop = Roll . fmap pure . \ acc -> \case
+  loop = rollIt . fmap pure . \ acc -> \case
     Input c | c /= '\n' -> loop (acc . (c:))
-    _                   -> Done (acc [])
+    _                   -> doneIt (acc [])
 
 getLinesIt :: Monad m => It m Char [String]
 getLinesIt = loop id
@@ -174,15 +158,13 @@ enumerateList :: Monad m => [r] -> Enumerator r m a
 enumerateList = go
   where
   go []     = pure
-  go (c:cs) = \ i -> runIt (const (pure i)) (\ k -> go cs =<< k (Input c)) i
+  go (c:cs) = \ i -> runIt (const (pure i)) (go cs <=< ($ Input c)) i
 
 enumerateFile :: FilePath -> Enumerator Char IO a
 enumerateFile path = withFile path ReadMode . flip enumerateHandle
 
 enumerateHandle :: Handle -> Enumerator Char IO a
-enumerateHandle handle = \case
-  i@Done{} -> pure i
-  Roll k   -> allocaBytes size (loop k)
+enumerateHandle handle i = runIt (const (pure i)) (allocaBytes size . loop) i
   where
   size = 4096
   loop k p = do
@@ -201,6 +183,4 @@ take = go
   where
   go n
     | n <= 0    = pure
-    | otherwise = \case
-      i@Done{} -> pure i
-      Roll r   -> Roll (fmap (go (n - 1)) . r)
+    | otherwise = \ i -> runIt (const (pure i)) (rollIt . (fmap (go (n - 1)) .)) i
