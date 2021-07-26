@@ -31,7 +31,6 @@ module Sequoia.Monad.It
 import Control.Applicative (Alternative(..))
 import Control.Effect.Lift
 import Control.Monad ((<=<))
-import Data.Profunctor
 import Foreign.C.String
 import Foreign.Marshal.Alloc
 import Foreign.Ptr
@@ -41,21 +40,18 @@ import System.IO
 -- Iteratees
 
 -- | Iteratees, based loosely on the one in @trifecta@.
-data It m r a
+data It r m a
   = Done a
-  | Roll (Input r -> m (It m r a))
+  | Roll (Input r -> m (It r m a))
 
-instance Functor m => Profunctor (It m) where
-  dimap f g = go where go = runIt (doneIt . g) (\ k -> rollIt (fmap go . k . fmap f))
+instance Functor m => Functor (It r m) where
+  fmap f = go where go = runIt (doneIt . f) (rollIt . (fmap go .))
 
-instance Functor m => Functor (It m r) where
-  fmap = rmap
-
-instance Functor m => Applicative (It m r) where
+instance Functor m => Applicative (It r m) where
   pure = Done
   f <*> a = runIt (<$> a) (rollIt . (fmap (<*> a) .)) f
 
-instance Monad m => Monad (It m r) where
+instance Monad m => Monad (It r m) where
   m >>= f = go m
     where
     go = runIt f (\ k -> rollIt (\ r -> runIt ((`simplifyIt` r) . f) (pure . rollIt . (pure . go <=<)) =<< k r))
@@ -97,18 +93,18 @@ input e i = \case
 
 -- Construction
 
-doneIt :: a -> It m r a
+doneIt :: a -> It r m a
 doneIt = Done
 
-rollIt :: (Input r -> m (It m r a)) -> It m r a
+rollIt :: (Input r -> m (It r m a)) -> It r m a
 rollIt = Roll
 
 
-needIt :: Applicative m =>  (r -> m (Maybe a)) -> It m r a
+needIt :: Applicative m =>  (r -> m (Maybe a)) -> It r m a
 needIt f = i where i = rollIt (input (pure i) (fmap (maybe i doneIt) . f))
 
 
-toList :: Applicative m => It m a [a]
+toList :: Applicative m => It a m [a]
 toList = ($ []) <$> go id
   where
   go as = i where i = rollIt (pure . input (pure as) (\ a -> go (as . (a:))))
@@ -116,35 +112,35 @@ toList = ($ []) <$> go id
 
 -- Elimination
 
-foldIt :: Monad m => (a -> m s) -> ((Input r -> m s) -> m s) -> (It m r a -> m s)
+foldIt :: Monad m => (a -> m s) -> ((Input r -> m s) -> m s) -> (It r m a -> m s)
 foldIt p k = go where go = runIt p (k . fmap (>>= go))
 
-runIt :: (a -> s) -> ((Input r -> m (It m r a)) -> s) -> (It m r a -> s)
+runIt :: (a -> s) -> ((Input r -> m (It r m a)) -> s) -> (It r m a -> s)
 runIt p k = \case
   Done a -> p a
   Roll r -> k r
 
 
-evalIt :: Monad m => It m r a -> m a
+evalIt :: Monad m => It r m a -> m a
 evalIt = runIt pure (evalIt <=< ($ End))
 
 
 -- Computation
 
-simplifyIt :: Applicative m => It m r a -> Input r -> m (It m r a)
+simplifyIt :: Applicative m => It r m a -> Input r -> m (It r m a)
 simplifyIt i r = runIt (const (pure i)) ($ r) i
 
 
 -- Parsing
 
-getLineIt :: Applicative m => It m Char String
+getLineIt :: Applicative m => It Char m String
 getLineIt = loop id
   where
   loop = rollIt . fmap pure . \ acc -> \case
     Input c | c /= '\n' -> loop (acc . (c:))
     _                   -> doneIt (acc [])
 
-getLinesIt :: Monad m => It m Char [String]
+getLinesIt :: Monad m => It Char m [String]
 getLinesIt = loop id
   where
   loop acc = getLineIt >>= \case
@@ -154,7 +150,7 @@ getLinesIt = loop id
 
 -- Enumerators
 
-type Enumerator i m o = It m i o -> m (It m i o)
+type Enumerator i m o = It i m o -> m (It i m o)
 
 enumList :: Monad m => [r] -> Enumerator r m a
 enumList = go
@@ -184,7 +180,7 @@ withFile' path mode body = liftWith (\ hdl ctx -> withFile path mode (\ h -> hdl
 
 -- Enumeratees
 
-type Enumeratee i o m a = It m i a -> It m o (It m i a)
+type Enumeratee i o m a = It i m a -> It o m (It i m a)
 
 take :: Monad m => Int -> Enumeratee i i m o
 take = go
