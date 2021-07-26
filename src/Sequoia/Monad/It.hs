@@ -60,9 +60,7 @@ instance Applicative (It r) where
   f <*> a = runIt (<$> a) (rollIt . ((<*> a) .)) f
 
 instance Monad (It r) where
-  m >>= f = go m
-    where
-    go = runIt f (\ k -> rollIt (\ r -> runIt ((`feedIt` r) . f) (rollIt . (go .)) (k r)))
+  m >>= f = foldIt f rollIt m
 
 
 -- Input
