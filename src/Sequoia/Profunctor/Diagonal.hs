@@ -2,6 +2,7 @@ module Sequoia.Profunctor.Diagonal
 ( Diagonal(..)
 , Codiagonal(..)
 , swap
+, mirror
 ) where
 
 import Control.Arrow (Kleisli(..))
@@ -52,3 +53,7 @@ instance Applicative f => Codiagonal (Star f) where
 
 instance Comonad f => Codiagonal (Costar f) where
   dedup = Costar (dedup . extract)
+
+
+mirror :: Either a b -> Either b a
+mirror = either Right Left
