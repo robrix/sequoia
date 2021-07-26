@@ -9,13 +9,17 @@ module Sequoia.List.Diff
 ) where
 
 import Data.Foldable (Foldable(..))
-import Data.Monoid (Endo(..))
 import GHC.Exts (IsList(..))
 
 -- Difference lists
 
-newtype List a = List (Endo [a])
-  deriving (Monoid, Semigroup)
+newtype List a = List (forall r . (a -> r -> r) -> r -> r)
+
+instance Semigroup (List a) where
+  List a <> List b = List (\ cons -> a cons . b cons)
+
+instance Monoid (List a) where
+  mempty = List (const id)
 
 instance Foldable List where
   foldMap f = foldMap f . runList
@@ -23,11 +27,11 @@ instance Foldable List where
 
 instance IsList (List a) where
   type Item (List a) = a
-  fromList = List . Endo . (++)
+  fromList as = List (\ cons nil -> foldr cons nil as)
   toList = runList
 
 
 -- Elimination
 
 runList :: List a -> [a]
-runList (List l) = appEndo l []
+runList (List l) = l (:) []
