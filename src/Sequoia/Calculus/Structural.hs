@@ -7,10 +7,19 @@ module Sequoia.Calculus.Structural
 , wkR'
 , Contract(..)
 , Exchange(..)
+  -- * Profunctorial structural rules
+, weakenL
+, weakenR
+, contractL
+, contractR
+, exchangeL
+, exchangeR
 ) where
 
+import Data.Profunctor
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Core
+import Sequoia.Profunctor.Diagonal
 
 -- Structural
 
@@ -66,3 +75,26 @@ class Core s => Exchange s where
     :: _Γ -|s e r|- _Δ > a > b
     -- -----------------------
     -> _Γ -|s e r|- _Δ > b > a
+
+
+-- Profunctorial structural rules
+
+weakenL :: Profunctor p => p a b -> p (c, a) b
+weakenL = lmap snd
+
+weakenR :: Profunctor p => p a b -> p a (Either b c)
+weakenR = rmap Left
+
+
+contractL :: Profunctor p => p (a, a) b -> p a b
+contractL = lmap dup
+
+contractR :: Profunctor p => p a (Either b b) -> p a b
+contractR = rmap dedup
+
+
+exchangeL :: Profunctor p => p (a, c) b -> p (c, a) b
+exchangeL = lmap swap
+
+exchangeR :: Profunctor p => p a (Either b c) -> p a (Either c b)
+exchangeR = rmap mirror
