@@ -6,7 +6,6 @@ module Sequoia.Monad.It
 , input
   -- * Construction
 , rollIt
-, doneIt
 , needIt
 , wantIt
 , tabulateIt
@@ -72,7 +71,7 @@ instance Functor m => Functor (It m r) where
   fmap = rmap
 
 instance Functor m => Applicative (It m r) where
-  pure = doneIt
+  pure = Done
   f <*> a = case f of
     Done f   -> f <$> a
     Roll f k -> Roll (headIt (f <$> a)) (fmap (<*> a) . k)
@@ -142,9 +141,6 @@ input e i = \case
 
 rollIt :: a -> (Input r -> m (It m r a)) -> It m r a
 rollIt = Roll
-
-doneIt :: a -> It m r a
-doneIt = Done
 
 
 needIt :: Applicative m => a -> (r -> m (Maybe a)) -> It m r a
