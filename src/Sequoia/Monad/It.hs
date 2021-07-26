@@ -10,6 +10,7 @@ module Sequoia.Monad.It
 , needIt
 , wantIt
 , tabulateIt
+, toList
   -- * Elimination
 , foldIt
 , runIt
@@ -155,6 +156,12 @@ wantIt a f = Roll a k where k = input (pure (pure a)) (fmap (either Done (`Roll`
 
 tabulateIt :: Applicative m => a -> (Input r -> a) -> It m r a
 tabulateIt a f = rollIt a (pure . Done . f)
+
+
+toList :: Applicative m => It m a [a]
+toList = ($ []) <$> go id
+  where
+  go as = i where i = Roll as (input (pure i) (\ a -> pure (go (as . (a:)))))
 
 
 -- Elimination
