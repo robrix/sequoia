@@ -32,7 +32,7 @@ import           Data.Kind
 import           Data.Profunctor
 import qualified Data.Profunctor.Rep as Pro
 import           Data.Profunctor.Sieve
-import           Data.Tuple (swap)
+import           Sequoia.Profunctor.Diagonal (mirror, swap)
 
 class Confunctor p where
   {-# MINIMAL conmap | (mapl, mapr) #-}
@@ -160,16 +160,16 @@ class Confunctor p => Contracostrong p where
 class Confunctor p => Contrachoice p where
   {-# MINIMAL conleft | conright #-}
   conleft  :: p a b -> p (Either a c) (Either b c)
-  conleft  = conmap (either Right Left) (either Right Left) . conright
+  conleft  = conmap mirror mirror . conright
   conright :: p a b -> p (Either c a) (Either c b)
-  conright = conmap (either Right Left) (either Right Left) . conleft
+  conright = conmap mirror mirror . conleft
 
 class Confunctor p => Contracochoice p where
   {-# MINIMAL conunleft | conunright #-}
   conunleft  :: p (Either a c) (Either b c) -> p a b
-  conunleft  = conunright . conmap (either Right Left) (either Right Left)
+  conunleft  = conunright . conmap mirror mirror
   conunright :: p (Either c a) (Either c b) -> p a b
-  conunright = conunleft  . conmap (either Right Left) (either Right Left)
+  conunright = conunleft  . conmap mirror mirror
 
 
 -- Closed
