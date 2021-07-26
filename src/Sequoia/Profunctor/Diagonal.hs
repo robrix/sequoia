@@ -1,12 +1,14 @@
 module Sequoia.Profunctor.Diagonal
 ( Diagonal(..)
 , Codiagonal(..)
+, swap
 ) where
 
 import Control.Arrow (Kleisli(..))
 import Control.Comonad
 import Data.Profunctor
 import Data.Profunctor.Strong
+import Data.Tuple (swap)
 
 class Profunctor p => Diagonal p where
   dup :: a `p` (a, a)
