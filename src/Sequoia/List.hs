@@ -35,7 +35,7 @@ type Foldl r a = (r -> a -> r) -> r -> r
 type Foldr r a = (a -> r -> r) -> r -> r
 type FoldMap m a = (m -> m -> m) -> (a -> m) -> m -> m
 
-newtype List a = List { toFoldr :: forall r . Foldr r a }
+newtype List a = FromFoldr { toFoldr :: forall r . Foldr r a }
 
 instance Show1 List where
   liftShowsPrec _ showList _ = showList . runList
@@ -67,7 +67,7 @@ instance IsList (List a) where
 -- Construction
 
 fromFoldr :: (forall r . Foldr r a) -> List a
-fromFoldr = List
+fromFoldr = FromFoldr
 
 nil :: List a
 nil = fromFoldr (const id)
