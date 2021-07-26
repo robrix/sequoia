@@ -25,6 +25,7 @@ module Sequoia.List
 , zipWith
 , These(..)
 , these
+, align
 , alignWith
 ) where
 
@@ -135,6 +136,9 @@ these f g h = \case
   This a    -> f a
   That b    -> g b
   These a b -> h a b
+
+align :: List a -> List b -> List (These a b)
+align = alignWith id
 
 alignWith :: (These a b -> c) -> (List a -> List b -> List c)
 alignWith f as bs = fromFoldr
