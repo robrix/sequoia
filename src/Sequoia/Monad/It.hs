@@ -9,6 +9,7 @@ module Sequoia.Monad.It
 , rollIt
 , needIt
 , toList
+, repeatIt
   -- * Elimination
 , foldIt
 , runIt
@@ -114,6 +115,13 @@ toList :: It a [a]
 toList = ($ []) <$> go id
   where
   go as = i where i = rollIt (input (pure as) (\ a -> go (as . (a:))))
+
+repeatIt :: It a [b] -> It a [[b]]
+repeatIt i = loop id
+  where
+  loop acc = i >>= \case
+    [] -> pure (acc [])
+    l  -> loop (acc . (l:))
 
 
 -- Elimination
