@@ -28,14 +28,15 @@ module Sequoia.Monad.It
 , take
 ) where
 
-import Control.Applicative (Alternative(..))
-import Control.Effect.Lift
-import Data.Profunctor
-import Foreign.C.String
-import Foreign.Marshal.Alloc
-import Foreign.Ptr
-import Prelude hiding (any, take)
-import System.IO
+import           Control.Applicative (Alternative(..))
+import qualified Control.Category as Cat
+import           Control.Effect.Lift
+import           Data.Profunctor
+import           Foreign.C.String
+import           Foreign.Marshal.Alloc
+import           Foreign.Ptr
+import           Prelude hiding (any, take)
+import           System.IO
 
 -- Iteratees
 
@@ -43,6 +44,10 @@ import System.IO
 data It r a
   = Done a
   | Roll (Input r -> It r a)
+
+instance Cat.Category It where
+  id = rollIt (input Cat.id doneIt)
+  f . g = rollIt (\ a -> runIt (\ b -> runIt pure ((Cat.. g) . ($ Input b)) f) ((f Cat..) . ($ a)) g)
 
 instance Profunctor It where
   dimap f g = go where go = runIt (doneIt . g) (\ k -> rollIt (go . k . fmap f))
