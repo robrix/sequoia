@@ -3,6 +3,7 @@ module Sequoia.List
 ( -- * Efficiently concatenable lists
   List(..)
   -- * Construction
+, nil
 , list
   -- * Elimination
 , runList
@@ -29,7 +30,7 @@ instance Semigroup (List a) where
   List a <> List b = List (\ cons -> a cons . b cons)
 
 instance Monoid (List a) where
-  mempty = List (const id)
+  mempty = nil
 
 instance Foldable List where
   foldMap f = foldMap f . runList
@@ -42,6 +43,9 @@ instance IsList (List a) where
 
 
 -- Construction
+
+nil :: List a
+nil = List (const id)
 
 list :: [a] -> List a
 list as = List (\ cons nil -> foldr cons nil as)
