@@ -3,6 +3,7 @@ module Sequoia.Monad.It
   It(..)
   -- * Input
 , Input(..)
+, input
   -- * Construction
 , rollIt
 , doneIt
@@ -123,6 +124,12 @@ instance Semigroup a => Semigroup (Input a) where
 
 instance Semigroup a => Monoid (Input a) where
   mempty = End
+
+
+input :: a -> (r -> a) -> (Input r -> a)
+input e i = \case
+  End     -> e
+  Input r -> i r
 
 
 -- Construction
