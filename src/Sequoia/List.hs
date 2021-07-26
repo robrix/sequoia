@@ -3,7 +3,7 @@ module Sequoia.List
 ( -- * Efficiently concatenable lists
   List(..)
   -- * Construction
-, fromList
+, list
   -- * Elimination
 , runList
 ) where
@@ -27,8 +27,14 @@ instance Foldable List where
 
 instance IsList (List a) where
   type Item (List a) = a
-  fromList as = List (\ cons nil -> foldr cons nil as)
+  fromList = list
   toList = runList
+
+
+-- Construction
+
+list :: [a] -> List a
+list as = List (\ cons nil -> foldr cons nil as)
 
 
 -- Elimination
