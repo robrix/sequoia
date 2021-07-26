@@ -113,8 +113,10 @@ feedIt i r = runIt (const i) ($ r) i
 -- Parsing
 
 data Pos = Pos { line :: {-# UNPACK #-} !Int, col :: {-# UNPACK #-} !Int }
+  deriving (Eq, Ord, Show)
 
 data Span = Span { start :: {-# UNPACK #-} !Pos, end :: {-# UNPACK #-} !Pos }
+  deriving (Eq, Ord, Show)
 
 data Line = Line { lineContents :: String, lineEnding :: Maybe Newline }
   deriving (Eq, Ord, Show)
