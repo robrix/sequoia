@@ -120,10 +120,10 @@ toList = ($ []) <$> go id
   where
   go as = i where i = rollIt (input (pure as) (\ a -> go (as . (a:))))
 
-repeatIt :: (b -> Maybe c) -> It a b -> It a [c]
+repeatIt :: (b -> Input c) -> It a b -> It a [c]
 repeatIt rel i = loop id
   where
-  loop acc = i >>= maybe (pure (acc [])) (loop . fmap acc . (:)) . rel
+  loop acc = i >>= input (pure (acc [])) (loop . fmap acc . (:)) . rel
 
 
 -- Elimination
