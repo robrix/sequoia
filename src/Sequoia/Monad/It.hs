@@ -148,7 +148,7 @@ data Line = Line { lineContents :: String, lineEnding :: Maybe Newline }
 getLineIt :: It Char String
 getLineIt = loop id
   where
-  loop = rollIt . \ acc -> \case
+  loop acc = rollIt $ \case
     Input c | c /= '\n' -> loop (acc . (c:))
     _                   -> doneIt (acc [])
 
