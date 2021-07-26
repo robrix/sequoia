@@ -1,6 +1,6 @@
 {-# LANGUAGE TypeFamilies #-}
 module Sequoia.List
-( -- * Difference lists
+( -- * Efficiently concatenable lists
   List(..)
   -- * Construction
 , fromList
@@ -11,7 +11,7 @@ module Sequoia.List
 import Data.Foldable (Foldable(..))
 import GHC.Exts (IsList(..))
 
--- Difference lists
+-- Efficiently concatenable lists
 
 newtype List a = List (forall r . (a -> r -> r) -> r -> r)
 
