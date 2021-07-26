@@ -4,6 +4,7 @@ module Sequoia.List
   List(..)
   -- * Construction
 , nil
+, cons
 , list
   -- * Elimination
 , runList
@@ -46,6 +47,9 @@ instance IsList (List a) where
 
 nil :: List a
 nil = List (const id)
+
+cons :: a -> List a -> List a
+cons h (List t) = List (\ cons -> cons h . t cons)
 
 list :: [a] -> List a
 list as = List (\ cons nil -> foldr cons nil as)
