@@ -1,6 +1,8 @@
 module Sequoia.Monad.It
 ( -- * Iteratees
   It(..)
+  -- * Input
+, Input(..)
   -- * Construction
 , rollIt
 , doneIt
@@ -92,6 +94,12 @@ instance Functor m => Comonad (It m r) where
     go = \case
       i@Done{}     -> Done (f i)
       i@(Roll _ k) -> Roll (f i) (fmap go . k)
+
+
+-- Input
+
+data Input r = End | Input r
+  deriving (Functor)
 
 
 -- Construction
