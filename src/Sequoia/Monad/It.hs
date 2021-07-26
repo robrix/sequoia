@@ -48,7 +48,7 @@ newtype It r a = It { getIt :: forall s . (a -> s) -> ((Input r -> It r a) -> s)
 
 instance Cat.Category It where
   id = rollIt (input Cat.id doneIt)
-  f . g = rollIt (\ a -> runIt (\ b -> runIt pure ((Cat.. g) . ($ Input b)) f) ((f Cat..) . ($ a)) g)
+  f . g = rollIt (\ a -> foldIt (\ b -> foldIt pure ($ Input b) f) ($ a) g)
 
 instance Profunctor It where
   dimap f g = go where go = runIt (doneIt . g) (\ k -> rollIt (go . k . fmap f))
