@@ -53,6 +53,9 @@ instance Eq a => Eq (List a) where
 instance Ord1 List where
   liftCompare compare as bs = foldr (\ a cmp bs -> foldr (\ b _ -> compare a b <> cmp (tail bs)) GT bs) (const LT) as bs
 
+instance Ord a => Ord (List a) where
+  compare = compare1
+
 instance Show1 List where
   liftShowsPrec _ showList _ = showList . Sequoia.List.toList
 
