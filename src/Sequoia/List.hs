@@ -20,6 +20,7 @@ module Sequoia.List
 , filter
 , zip
 , zipWith
+, These(..)
 ) where
 
 import Data.Foldable (Foldable(..))
@@ -105,3 +106,10 @@ zip = zipWith (,)
 
 zipWith :: (a -> b -> c) -> (List a -> List b -> List c)
 zipWith f a b = List (\ cons nil -> foldList a (\ ha t b -> foldList b (\ hb _ -> cons (f ha hb) (t (drop 1 b))) nil) (const nil) b)
+
+
+data These a b
+  = This a
+  | That b
+  | These a b
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
