@@ -101,6 +101,11 @@ instance Functor m => Comonad (It m r) where
 data Input r = End | Input r
   deriving (Functor)
 
+instance Applicative Input where
+  pure = Input
+  End     <*> _ = End
+  Input f <*> a = f <$> a
+
 
 -- Construction
 
