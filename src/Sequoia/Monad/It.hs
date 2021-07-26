@@ -38,6 +38,7 @@ import           Foreign.C.String
 import           Foreign.Marshal.Alloc
 import           Foreign.Ptr
 import           Prelude hiding (any, take)
+import qualified Sequoia.List as List
 import           Sequoia.Span
 import           System.IO
 
@@ -113,19 +114,19 @@ feedIt i r = runIt (const i) ($ r) i
 
 -- Parsing
 
-data Line = Line { lineContents :: String, lineEnding :: Maybe Newline }
+data Line = Line { lineContents :: List.List Char, lineEnding :: Maybe Newline }
   deriving (Eq, Ord, Show)
 
 nullLine :: Line -> Bool
 nullLine = (&&) <$> null . lineContents <*> null . lineEnding
 
 getLineIt :: It Char Line
-getLineIt = loop id Nothing
+getLineIt = loop List.nil Nothing
   where
   loop acc prev = rollIt $ \case
-    Just '\n' -> doneIt (Line (acc []) (Just (if prev == Just '\r' then CRLF else LF)))
-    Just c    -> loop (acc . (c:)) (Just c)
-    Nothing   -> doneIt (Line (acc []) Nothing)
+    Just '\n' -> doneIt (Line acc (Just (if prev == Just '\r' then CRLF else LF)))
+    Just c    -> loop (List.snoc acc c) (Just c)
+    Nothing   -> doneIt (Line acc Nothing)
 
 getLinesIt :: It Char [Line]
 getLinesIt = repeatIt (guarding (not . nullLine)) getLineIt
