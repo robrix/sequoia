@@ -53,6 +53,10 @@ instance Cat.Category It where
 instance Profunctor It where
   dimap f g = go where go = foldIt (doneIt . g) (rollIt . (. fmap f))
 
+instance Choice It where
+  left'  = foldIt (pure . Left)  (\ k -> rollIt (input (k End) (either (k . Input) (pure . Right))))
+  right' = foldIt (pure . Right) (\ k -> rollIt (input (k End) (either (pure . Left) (k . Input))))
+
 instance Functor (It r) where
   fmap f = go where go = foldIt (doneIt . f) rollIt
 
