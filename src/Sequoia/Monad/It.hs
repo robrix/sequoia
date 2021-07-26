@@ -153,11 +153,7 @@ getLineIt = loop id
     _                   -> doneIt (acc [])
 
 getLinesIt :: It Char [String]
-getLinesIt = loop id
-  where
-  loop acc = getLineIt >>= \case
-    "" -> pure (acc [])
-    l  -> loop (acc . (l:))
+getLinesIt = repeatIt getLineIt
 
 
 -- Enumerators
