@@ -142,6 +142,7 @@ library
     Sequoia.Functor.Source
     Sequoia.Functor.Source.Internal
     Sequoia.Lambda
+    Sequoia.List.Diff
     Sequoia.Monad.It
     Sequoia.Monad.Run
     Sequoia.Monad.Trans.It
