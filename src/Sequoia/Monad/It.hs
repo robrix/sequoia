@@ -125,7 +125,7 @@ getLineIt = loop List.nil Nothing
   where
   loop acc prev = rollIt $ \case
     Just '\n' -> doneIt (Line acc (Just (if prev == Just '\r' then CRLF else LF)))
-    Just c    -> loop (List.snoc acc c) (Just c)
+    Just c    -> loop (acc <> List.singleton c) (Just c)
     Nothing   -> doneIt (Line acc Nothing)
 
 getLinesIt :: It Char [Line]
