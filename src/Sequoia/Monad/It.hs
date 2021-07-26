@@ -112,7 +112,7 @@ needIt f = i where i = Roll (input (pure i) (fmap (maybe i Done) . f))
 toList :: Applicative m => It m a [a]
 toList = ($ []) <$> go id
   where
-  go as = i where i = Roll (input (pure i) (\ a -> pure (go (as . (a:)))))
+  go as = i where i = Roll (pure . input (pure as) (\ a -> go (as . (a:))))
 
 
 -- Elimination
