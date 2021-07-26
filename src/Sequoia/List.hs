@@ -3,6 +3,7 @@ module Sequoia.List
 ( -- * Efficiently concatenable lists
   List(..)
   -- * Construction
+, fromFold
 , nil
 , cons
 , list
@@ -55,6 +56,9 @@ instance IsList (List a) where
 
 
 -- Construction
+
+fromFold :: (forall r . (a -> r -> r) -> r -> r) -> List a
+fromFold = List
 
 nil :: List a
 nil = List (const id)
