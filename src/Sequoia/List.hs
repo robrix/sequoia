@@ -4,7 +4,7 @@ module Sequoia.List
   Foldr
 , List(..)
   -- * Construction
-, fromFold
+, fromFoldr
 , nil
 , cons
 , list
@@ -60,8 +60,8 @@ instance IsList (List a) where
 
 -- Construction
 
-fromFold :: (forall r . Foldr r a) -> List a
-fromFold = List
+fromFoldr :: (forall r . Foldr r a) -> List a
+fromFoldr = List
 
 nil :: List a
 nil = List (const id)
