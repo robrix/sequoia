@@ -29,10 +29,12 @@ module Sequoia.Monad.It
 ) where
 
 import Control.Applicative (Alternative(..))
+import Control.Effect.Lift
 import Control.Monad ((<=<))
 import Data.Profunctor
 import Foreign.C.String
 import Foreign.Marshal.Alloc
+import Foreign.Ptr
 import Prelude hiding (any, take)
 import System.IO
 
@@ -163,15 +165,18 @@ enumList = go
 enumFile :: FilePath -> Enumerator Char IO a
 enumFile path = withFile path ReadMode . flip enumHandle
 
-enumHandle :: Handle -> Enumerator Char IO a
-enumHandle handle i = runIt (const (pure i)) (allocaBytes size . loop) i
+enumHandle :: Has (Lift IO) sig m => Handle -> Enumerator Char m a
+enumHandle handle i = runIt (const (pure i)) (allocaBytes' size . loop) i
   where
   size = 4096
   loop k p = do
-    n <- hGetBuf handle p size
-    peekCAStringLen (p, n) >>= \case
+    n <- sendIO (hGetBuf handle p size)
+    sendIO (peekCAStringLen (p, n)) >>= \case
       c:cs -> k (Input c) >>= enumList cs
       ""   -> k End
+
+allocaBytes' :: Has (Lift IO) sig m => Int -> (Ptr a -> m b) -> m b
+allocaBytes' n b = liftWith (\ hdl ctx -> allocaBytes n (\ p -> hdl (b p <$ ctx)))
 
 
 -- Enumeratees
