@@ -121,6 +121,9 @@ instance Semigroup a => Semigroup (Input a) where
   a@Input{} <> _       = a
   _         <> b       = b
 
+instance Semigroup a => Monoid (Input a) where
+  mempty = End
+
 
 -- Construction
 
