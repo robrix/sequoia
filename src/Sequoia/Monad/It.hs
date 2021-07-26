@@ -145,15 +145,19 @@ feedIt i r = runIt (const i) ($ r) i
 
 data Line = Line { lineContents :: String, lineEnding :: Maybe Newline }
 
-getLineIt :: It Char String
+nullLine :: Line -> Bool
+nullLine = (&&) <$> null . lineContents <*> null . lineEnding
+
+getLineIt :: It Char Line
 getLineIt = loop id Nothing
   where
-  loop acc _ = rollIt $ \case
-    Input c | c /= '\n' -> loop (acc . (c:)) (Just c)
-    _                   -> doneIt (acc [])
+  loop acc prev = rollIt $ \case
+    Input '\n' -> doneIt (Line (acc []) (Just (if prev == Just '\r' then CRLF else LF)))
+    Input c    -> loop (acc . (c:)) (Just c)
+    End        -> doneIt (Line (acc []) Nothing)
 
 getLinesIt :: It Char [String]
-getLinesIt = repeatIt (guarding (not . null)) getLineIt
+getLinesIt = repeatIt (fmap lineContents . guarding (not . nullLine)) getLineIt
 
 guarding :: Alternative m => (a -> Bool) -> (a -> m a)
 guarding p a = a <$ guard (p a)
