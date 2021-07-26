@@ -22,6 +22,7 @@ module Sequoia.Monad.It
   -- * Enumerators
 , Enumerator(..)
 , enumerateList
+, enumerateHandle
   -- * Enumeratees
 , Enumeratee(..)
 , take
@@ -33,7 +34,10 @@ import Control.Monad ((<=<))
 import Data.Functor.Identity
 import Data.Profunctor
 import Data.Profunctor.Sieve
+import Foreign.C.String
+import Foreign.Marshal.Alloc
 import Prelude hiding (any, take)
+import System.IO
 
 -- Iteratees
 
@@ -216,6 +220,18 @@ enumerateList = Enumerator . go
   where
   go []     = pure
   go (c:cs) = \ i -> runIt (const (pure i)) (\ _ k -> go cs =<< k (Input c)) i
+
+enumerateHandle :: Handle -> Enumerator Char IO a
+enumerateHandle handle = Enumerator $ \case
+  i@Done{} -> pure i
+  Roll _ k -> allocaBytes size (loop k)
+  where
+  size = 4096
+  loop k p = do
+    n <- hGetBuf handle p size
+    peekCAStringLen (p, n) >>= \case
+      c:cs -> k (Input c) >>= getEnumerator (enumerateList cs)
+      ""   -> k End
 
 
 -- Enumeratees
