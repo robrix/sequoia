@@ -85,6 +85,7 @@ instance Traversable List where
 instance Applicative List where
   pure = singleton
   liftA2 f a b = foldr (\ a cs -> foldr (cons . f a) cs b) nil a
+  f <*> a = foldr (\ f bs -> foldr (cons . f) bs a) nil f
 
 instance IsList (List a) where
   type Item (List a) = a
