@@ -32,6 +32,7 @@ module Sequoia.List
 ) where
 
 import Control.Applicative (liftA2)
+import Control.Monad.Zip
 import Data.Bool (bool)
 import Data.Foldable (Foldable(..))
 import Data.Functor.Classes
@@ -89,6 +90,10 @@ instance Applicative List where
 
 instance Monad List where
   l >>= f = foldr ((<>) . f) nil l
+
+instance MonadZip List where
+  mzip = zip
+  mzipWith = zipWith
 
 instance IsList (List a) where
   type Item (List a) = a
