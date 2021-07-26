@@ -77,6 +77,9 @@ instance Foldable List where
   toList = Sequoia.List.toList
   null list = toFoldr list (const (const False)) True
 
+instance Traversable List where
+  traverse f = foldr (liftA2 cons . f) (pure nil)
+
 instance IsList (List a) where
   type Item (List a) = a
   fromList = Sequoia.List.fromList
