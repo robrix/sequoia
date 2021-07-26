@@ -26,5 +26,10 @@ prop_align_length_maximum = property $ do
   length (List.align as bs) === length as `max` length bs
 
 
+prop_equality = property $ do
+  (as, bs) <- forAll ((,) <$> genList Gen.alpha <*> genList Gen.alpha)
+  (as == bs) === (toList as == toList bs)
+
+
 genList :: Gen a -> Gen (List a)
 genList = fmap fromList . Gen.list (Range.linear 0 10)
