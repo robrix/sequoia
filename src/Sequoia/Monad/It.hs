@@ -26,6 +26,7 @@ module Sequoia.Monad.It
 , take
 ) where
 
+import Control.Applicative (Alternative(..))
 import Control.Comonad
 import Control.Monad ((<=<))
 import Data.Functor.Identity
@@ -105,6 +106,11 @@ instance Applicative Input where
   pure = Input
   End     <*> _ = End
   Input f <*> a = f <$> a
+
+instance Alternative Input where
+  empty = End
+  End       <|> b = b
+  a@Input{} <|> _ = a
 
 instance Monad Input where
   End     >>= _ = End
