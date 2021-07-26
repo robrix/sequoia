@@ -21,6 +21,7 @@ module Sequoia.List
 , zip
 , zipWith
 , These(..)
+, these
 ) where
 
 import Data.Foldable (Foldable(..))
@@ -113,3 +114,9 @@ data These a b
   | That b
   | These a b
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+
+these :: (a -> r) -> (b -> r) -> (a -> b -> r) -> (These a b -> r)
+these f g h = \case
+  This a    -> f a
+  That b    -> g b
+  These a b -> h a b
