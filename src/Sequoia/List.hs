@@ -1,7 +1,8 @@
 {-# LANGUAGE TypeFamilies #-}
 module Sequoia.List
 ( -- * Efficiently concatenable lists
-  Foldr
+  Foldl
+, Foldr
 , List(..)
   -- * Construction
 , fromFoldr
@@ -27,6 +28,7 @@ import Prelude hiding (drop, dropWhile, filter, take, takeWhile, zip, zipWith)
 
 -- Efficiently concatenable lists
 
+type Foldl r a = (r -> a -> r) -> r -> r
 type Foldr r a = (a -> r -> r) -> r -> r
 
 newtype List a = List { foldList :: forall r . Foldr r a }
