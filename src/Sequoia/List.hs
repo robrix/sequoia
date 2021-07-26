@@ -12,6 +12,7 @@ module Sequoia.List
 , list
   -- * Elimination
 , Sequoia.List.toList
+, head
   -- * Computation
 , take
 , drop
@@ -27,7 +28,7 @@ module Sequoia.List
 import Data.Foldable (Foldable(..))
 import Data.Functor.Classes
 import GHC.Exts (IsList(..))
-import Prelude hiding (drop, dropWhile, filter, take, takeWhile, zip, zipWith)
+import Prelude hiding (drop, dropWhile, filter, head, take, takeWhile, zip, zipWith)
 
 -- Efficiently concatenable lists
 
@@ -83,6 +84,9 @@ list as = fromFoldr (\ cons nil -> foldr cons nil as)
 
 toList :: List a -> [a]
 toList = foldr (:) []
+
+head :: List a -> Maybe a
+head = foldr (const . Just) Nothing
 
 
 -- Computation
