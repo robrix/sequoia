@@ -20,9 +20,9 @@ module Sequoia.Monad.It
 , getLinesIt
   -- * Enumerators
 , Enumerator
-, enumerateList
-, enumerateFile
-, enumerateHandle
+, enumList
+, enumFile
+, enumHandle
   -- * Enumeratees
 , Enumeratee
 , take
@@ -154,23 +154,23 @@ getLinesIt = loop id
 
 type Enumerator i m o = It m i o -> m (It m i o)
 
-enumerateList :: Monad m => [r] -> Enumerator r m a
-enumerateList = go
+enumList :: Monad m => [r] -> Enumerator r m a
+enumList = go
   where
   go []     = pure
   go (c:cs) = \ i -> runIt (const (pure i)) (go cs <=< ($ Input c)) i
 
-enumerateFile :: FilePath -> Enumerator Char IO a
-enumerateFile path = withFile path ReadMode . flip enumerateHandle
+enumFile :: FilePath -> Enumerator Char IO a
+enumFile path = withFile path ReadMode . flip enumHandle
 
-enumerateHandle :: Handle -> Enumerator Char IO a
-enumerateHandle handle i = runIt (const (pure i)) (allocaBytes size . loop) i
+enumHandle :: Handle -> Enumerator Char IO a
+enumHandle handle i = runIt (const (pure i)) (allocaBytes size . loop) i
   where
   size = 4096
   loop k p = do
     n <- hGetBuf handle p size
     peekCAStringLen (p, n) >>= \case
-      c:cs -> k (Input c) >>= enumerateList cs
+      c:cs -> k (Input c) >>= enumList cs
       ""   -> k End
 
 
