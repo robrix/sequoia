@@ -40,6 +40,7 @@ instance Foldable List where
   foldr cons nil list = foldList list cons nil
   foldMap f list = foldList list ((<>) . f) mempty
   toList = runList
+  null list = foldList list (const (const False)) True
 
 instance IsList (List a) where
   type Item (List a) = a
