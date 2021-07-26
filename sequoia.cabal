@@ -169,6 +169,7 @@ library
     Sequoia.Profunctor.Value
     Sequoia.Sequent
     Sequoia.Signal
+    Sequoia.Span
 
   -- Modules included in this library but not exported.
   -- other-modules:
