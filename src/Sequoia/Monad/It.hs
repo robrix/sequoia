@@ -14,7 +14,7 @@ module Sequoia.Monad.It
 , runIt
 , evalIt
   -- * Computation
-, simplifyIt
+, feedIt
   -- * Parsing
 , getLineIt
 , getLinesIt
@@ -60,7 +60,7 @@ instance Applicative (It r) where
 instance Monad (It r) where
   m >>= f = go m
     where
-    go = runIt f (\ k -> rollIt (\ r -> runIt ((`simplifyIt` r) . f) (rollIt . (go .)) (k r)))
+    go = runIt f (\ k -> rollIt (\ r -> runIt ((`feedIt` r) . f) (rollIt . (go .)) (k r)))
 
 
 -- Input
@@ -131,8 +131,8 @@ evalIt = runIt pure (evalIt . ($ End))
 
 -- Computation
 
-simplifyIt :: It r a -> Input r -> It r a
-simplifyIt i r = runIt (const i) ($ r) i
+feedIt :: It r a -> Input r -> It r a
+feedIt i r = runIt (const i) ($ r) i
 
 
 -- Parsing
