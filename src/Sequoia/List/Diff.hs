@@ -8,3 +8,4 @@ import Data.Monoid (Endo(..))
 -- Difference lists
 
 newtype List a = List (Endo [a])
+  deriving (Monoid, Semigroup)
