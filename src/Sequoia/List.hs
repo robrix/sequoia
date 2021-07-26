@@ -9,6 +9,7 @@ module Sequoia.List
 , fromFoldr
 , nil
 , cons
+, singleton
 , Sequoia.List.fromList
   -- * Elimination
 , Sequoia.List.toList
@@ -97,6 +98,9 @@ nil = fromFoldr (const id)
 
 cons :: a -> List a -> List a
 cons h t = fromFoldr (\ cons -> cons h . toFoldr t cons)
+
+singleton :: a -> List a
+singleton a = cons a nil
 
 fromList :: [a] -> List a
 fromList as = fromFoldr (\ cons nil -> foldr cons nil as)
