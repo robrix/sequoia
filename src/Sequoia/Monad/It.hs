@@ -126,12 +126,10 @@ runIt p k = \case
   Roll r -> k r
 
 
-evalIt :: Monad m => It m r a -> m (Maybe a)
+evalIt :: Monad m => It m r a -> m a
 evalIt = \case
-  Done a -> pure (Just a)
-  Roll k -> k End >>= \case
-    Done a -> pure (Just a)
-    Roll _ -> pure Nothing
+  Done a -> pure a
+  Roll k -> evalIt =<< k End
 
 
 -- Computation
