@@ -31,6 +31,7 @@ module Sequoia.Monad.It
 import Control.Applicative (Alternative(..))
 import Control.Effect.Lift
 import Control.Monad ((<=<))
+import Control.Monad.Trans.Class
 import Foreign.C.String
 import Foreign.Marshal.Alloc
 import Foreign.Ptr
@@ -55,6 +56,9 @@ instance Monad m => Monad (It r m) where
   m >>= f = go m
     where
     go = runIt f (\ k -> rollIt (\ r -> runIt ((`simplifyIt` r) . f) (pure . rollIt . (pure . go <=<)) =<< k r))
+
+instance MonadTrans (It r) where
+  lift m = rollIt (const (pure <$> m))
 
 
 -- Input
