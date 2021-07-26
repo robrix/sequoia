@@ -1,7 +1,8 @@
 {-# LANGUAGE TypeFamilies #-}
 module Sequoia.List
 ( -- * Efficiently concatenable lists
-  List(..)
+  Foldr
+, List(..)
   -- * Construction
 , fromFold
 , nil
@@ -26,7 +27,9 @@ import Prelude hiding (drop, dropWhile, filter, take, takeWhile, zip, zipWith)
 
 -- Efficiently concatenable lists
 
-newtype List a = List { foldList :: forall r . (a -> r -> r) -> r -> r }
+type Foldr r a = (a -> r -> r) -> r -> r
+
+newtype List a = List { foldList :: forall r . Foldr r a }
 
 instance Show1 List where
   liftShowsPrec _ showList _ = showList . runList
@@ -57,7 +60,7 @@ instance IsList (List a) where
 
 -- Construction
 
-fromFold :: (forall r . (a -> r -> r) -> r -> r) -> List a
+fromFold :: (forall r . Foldr r a) -> List a
 fromFold = List
 
 nil :: List a
