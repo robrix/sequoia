@@ -37,6 +37,7 @@ instance Functor List where
   fmap f (List l) = List (l . (. f))
 
 instance Foldable List where
+  foldr cons nil list = foldList list cons nil
   foldMap f = foldMap f . runList
   toList = runList
 
