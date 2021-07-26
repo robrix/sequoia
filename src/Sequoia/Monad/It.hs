@@ -73,14 +73,14 @@ instance Functor m => Applicative (It m r) where
   pure = Done
   f <*> a = case f of
     Done f   -> f <$> a
-    Roll f k -> Roll (headIt (f <$> a)) (fmap (<*> a) . k)
+    Roll f k -> Roll (extract (f <$> a)) (fmap (<*> a) . k)
 
 instance Monad m => Monad (It m r) where
   m >>= f = go m
     where
     go = \case
       Done a   -> f a
-      Roll a k -> Roll (headIt (f a)) $ \ r -> do
+      Roll a k -> Roll (extract (f a)) $ \ r -> do
         kr' <- k r
         case kr' of
           Done a'    -> simplifyIt (f a') r
@@ -89,7 +89,9 @@ instance Monad m => Monad (It m r) where
             pure $ Roll a'' (pure . go <=< k')
 
 instance Functor m => Comonad (It m r) where
-  extract = headIt
+  extract = \case
+    Done a   -> a
+    Roll a _ -> a
 
   duplicate = \case
     i@Done{}     -> Done i
@@ -174,16 +176,10 @@ evalIt = \case
     Roll a _ -> pure a
 
 
-headIt :: It m r a -> a
-headIt = \case
-  Done a   -> a
-  Roll a _ -> a
-
-
 indexIt :: Applicative m => It m r a -> Input r -> m a
 indexIt = \case
   Done a   -> const (pure a)
-  Roll _ k -> fmap headIt . k
+  Roll _ k -> fmap extract . k
 
 
 -- Computation
