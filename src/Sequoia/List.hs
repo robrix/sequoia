@@ -82,6 +82,10 @@ instance Foldable List where
 instance Traversable List where
   traverse f = foldr (liftA2 cons . f) (pure nil)
 
+instance Applicative List where
+  pure = singleton
+  liftA2 f a b = foldr (\ a cs -> foldr (cons . f a) cs b) nil a
+
 instance IsList (List a) where
   type Item (List a) = a
   fromList = Sequoia.List.fromList
