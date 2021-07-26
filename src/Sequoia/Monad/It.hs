@@ -41,9 +41,7 @@ import           System.IO
 -- Iteratees
 
 -- | Iteratees, based loosely on the one in @trifecta@.
-data It r a
-  = Done a
-  | Roll (Input r -> It r a)
+newtype It r a = It { getIt :: forall s . (a -> s) -> ((Input r -> It r a) -> s) -> s }
 
 instance Cat.Category It where
   id = rollIt (input Cat.id doneIt)
@@ -56,7 +54,7 @@ instance Functor (It r) where
   fmap f = go where go = runIt (doneIt . f) (rollIt . (go .))
 
 instance Applicative (It r) where
-  pure = Done
+  pure = doneIt
   f <*> a = runIt (<$> a) (rollIt . ((<*> a) .)) f
 
 instance Monad (It r) where
@@ -102,10 +100,10 @@ input e i = \case
 -- Construction
 
 doneIt :: a -> It r a
-doneIt = Done
+doneIt a = It (\ f _ -> f a)
 
 rollIt :: (Input r -> It r a) -> It r a
-rollIt = Roll
+rollIt k = It (\ _ f -> f k)
 
 
 needIt :: (r -> Maybe a) -> It r a
@@ -124,9 +122,7 @@ foldIt :: (a -> s) -> ((Input r -> s) -> s) -> (It r a -> s)
 foldIt p k = go where go = runIt p (k . fmap go)
 
 runIt :: (a -> s) -> ((Input r -> It r a) -> s) -> (It r a -> s)
-runIt p k = \case
-  Done a -> p a
-  Roll r -> k r
+runIt p k (It i) = i p k
 
 
 evalIt :: Monad m => It r a -> m a
