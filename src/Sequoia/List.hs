@@ -82,7 +82,7 @@ list as = fromFoldr (\ cons nil -> foldr cons nil as)
 -- Elimination
 
 runList :: List a -> [a]
-runList l = toFoldr l (:) []
+runList = foldr (:) []
 
 
 -- Computation
