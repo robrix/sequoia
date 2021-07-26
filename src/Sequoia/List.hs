@@ -44,13 +44,13 @@ instance Show a => Show (List a) where
   showsPrec = showsPrec1
 
 instance Semigroup (List a) where
-  a <> b = List (\ cons -> foldList a cons . foldList b cons)
+  a <> b = fromFoldr (\ cons -> foldList a cons . foldList b cons)
 
 instance Monoid (List a) where
   mempty = nil
 
 instance Functor List where
-  fmap f l = List (foldList l . (. f))
+  fmap f l = fromFoldr (foldList l . (. f))
 
 instance Foldable List where
   foldr cons nil list = foldList list cons nil
@@ -70,13 +70,13 @@ fromFoldr :: (forall r . Foldr r a) -> List a
 fromFoldr = List
 
 nil :: List a
-nil = List (const id)
+nil = fromFoldr (const id)
 
 cons :: a -> List a -> List a
-cons h t = List (\ cons -> cons h . foldList t cons)
+cons h t = fromFoldr (\ cons -> cons h . foldList t cons)
 
 list :: [a] -> List a
-list as = List (\ cons nil -> foldr cons nil as)
+list as = fromFoldr (\ cons nil -> foldr cons nil as)
 
 
 -- Elimination
@@ -88,25 +88,25 @@ runList l = foldList l (:) []
 -- Computation
 
 take :: Int -> List a -> List a
-take n l = List (\ cons nil -> foldList l (\ h t n -> if n <= 0 then nil else cons h (t (n - 1))) (const nil) n)
+take n l = fromFoldr (\ cons nil -> foldList l (\ h t n -> if n <= 0 then nil else cons h (t (n - 1))) (const nil) n)
 
 drop :: Int -> List a -> List a
-drop n l = List (\ cons nil -> foldList l (\ h t n -> if n <= 0 then cons h (t n) else t (n - 1)) (const nil) n)
+drop n l = fromFoldr (\ cons nil -> foldList l (\ h t n -> if n <= 0 then cons h (t n) else t (n - 1)) (const nil) n)
 
 takeWhile :: (a -> Bool) -> (List a -> List a)
-takeWhile p l = List (\ cons nil -> foldList l (\ h t -> if p h then cons h t else nil) nil)
+takeWhile p l = fromFoldr (\ cons nil -> foldList l (\ h t -> if p h then cons h t else nil) nil)
 
 dropWhile :: (a -> Bool) -> (List a -> List a)
-dropWhile p l = List (\ cons nil -> foldList l (\ h t done -> if done then cons h (t done) else if p h then t done else cons h (t True)) (const nil) False)
+dropWhile p l = fromFoldr (\ cons nil -> foldList l (\ h t done -> if done then cons h (t done) else if p h then t done else cons h (t True)) (const nil) False)
 
 filter :: (a -> Bool) -> (List a -> List a)
-filter p l = List (\ cons -> foldList l (\ h t -> if p h then cons h t else t))
+filter p l = fromFoldr (\ cons -> foldList l (\ h t -> if p h then cons h t else t))
 
 zip :: List a -> List b -> List (a, b)
 zip = zipWith (,)
 
 zipWith :: (a -> b -> c) -> (List a -> List b -> List c)
-zipWith f a b = List (\ cons nil -> foldList a (\ ha t b -> foldList b (\ hb _ -> cons (f ha hb) (t (drop 1 b))) nil) (const nil) b)
+zipWith f a b = fromFoldr (\ cons nil -> foldList a (\ ha t b -> foldList b (\ hb _ -> cons (f ha hb) (t (drop 1 b))) nil) (const nil) b)
 
 
 data These a b
