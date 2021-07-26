@@ -21,5 +21,10 @@ prop_zip_length_minimum = property $ do
   length (List.zip as bs) === length as `min` length bs
 
 
+prop_align_length_maximum = property $ do
+  (as, bs) <- forAll ((,) <$> genList Gen.alpha <*> genList Gen.alpha)
+  length (List.align as bs) === length as `max` length bs
+
+
 genList :: Gen a -> Gen (List a)
 genList = fmap fromList . Gen.list (Range.linear 0 10)
