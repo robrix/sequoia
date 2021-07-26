@@ -34,13 +34,13 @@ instance Show a => Show (List a) where
   showsPrec = showsPrec1
 
 instance Semigroup (List a) where
-  List a <> List b = List (\ cons -> a cons . b cons)
+  a <> b = List (\ cons -> foldList a cons . foldList b cons)
 
 instance Monoid (List a) where
   mempty = nil
 
 instance Functor List where
-  fmap f (List l) = List (l . (. f))
+  fmap f l = List (foldList l . (. f))
 
 instance Foldable List where
   foldr cons nil list = foldList list cons nil
@@ -60,7 +60,7 @@ nil :: List a
 nil = List (const id)
 
 cons :: a -> List a -> List a
-cons h (List t) = List (\ cons -> cons h . t cons)
+cons h t = List (\ cons -> cons h . foldList t cons)
 
 list :: [a] -> List a
 list as = List (\ cons nil -> foldr cons nil as)
@@ -69,13 +69,13 @@ list as = List (\ cons nil -> foldr cons nil as)
 -- Elimination
 
 runList :: List a -> [a]
-runList (List l) = l (:) []
+runList l = foldList l (:) []
 
 
 -- Computation
 
 take :: Int -> List a -> List a
-take n (List l) = List (\ cons nil -> l (\ h t n -> if n <= 0 then nil else cons h (t (n - 1))) (const nil) n)
+take n l = List (\ cons nil -> foldList l (\ h t n -> if n <= 0 then nil else cons h (t (n - 1))) (const nil) n)
 
 drop :: Int -> List a -> List a
 drop n l = List (\ cons nil -> foldList l (\ h t n -> if n <= 0 then cons h (t n) else t (n - 1)) (const nil) n)
