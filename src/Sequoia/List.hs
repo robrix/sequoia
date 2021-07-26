@@ -9,7 +9,7 @@ module Sequoia.List
 , fromFoldr
 , nil
 , cons
-, list
+, Sequoia.List.fromList
   -- * Elimination
 , Sequoia.List.toList
 , head
@@ -62,7 +62,7 @@ instance Foldable List where
 
 instance IsList (List a) where
   type Item (List a) = a
-  fromList = list
+  fromList = Sequoia.List.fromList
   toList = Sequoia.List.toList
 
 
@@ -77,8 +77,8 @@ nil = fromFoldr (const id)
 cons :: a -> List a -> List a
 cons h t = fromFoldr (\ cons -> cons h . toFoldr t cons)
 
-list :: [a] -> List a
-list as = fromFoldr (\ cons nil -> foldr cons nil as)
+fromList :: [a] -> List a
+fromList as = fromFoldr (\ cons nil -> foldr cons nil as)
 
 
 -- Elimination
