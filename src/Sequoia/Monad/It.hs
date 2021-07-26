@@ -132,7 +132,7 @@ runIt p k (It i) = i p k
 
 
 evalIt :: Monad m => It r a -> m a
-evalIt = runIt pure (evalIt . ($ End))
+evalIt = foldIt pure ($ End)
 
 
 -- Computation
