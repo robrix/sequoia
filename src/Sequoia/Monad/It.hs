@@ -162,8 +162,8 @@ enumList = go
   go []     = pure
   go (c:cs) = \ i -> runIt (const (pure i)) (go cs <=< ($ Input c)) i
 
-enumFile :: FilePath -> Enumerator Char IO a
-enumFile path = withFile path ReadMode . flip enumHandle
+enumFile :: Has (Lift IO) sig m => FilePath -> Enumerator Char m a
+enumFile path = withFile' path ReadMode . flip enumHandle
 
 enumHandle :: Has (Lift IO) sig m => Handle -> Enumerator Char m a
 enumHandle handle i = runIt (const (pure i)) (allocaBytes' size . loop) i
@@ -177,6 +177,9 @@ enumHandle handle i = runIt (const (pure i)) (allocaBytes' size . loop) i
 
 allocaBytes' :: Has (Lift IO) sig m => Int -> (Ptr a -> m b) -> m b
 allocaBytes' n b = liftWith (\ hdl ctx -> allocaBytes n (\ p -> hdl (b p <$ ctx)))
+
+withFile' :: Has (Lift IO) sig m => FilePath -> IOMode -> (Handle -> m r) -> m r
+withFile' path mode body = liftWith (\ hdl ctx -> withFile path mode (\ h -> hdl (body h <$ ctx)))
 
 
 -- Enumeratees
