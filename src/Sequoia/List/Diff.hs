@@ -8,6 +8,7 @@ module Sequoia.List.Diff
 , runList
 ) where
 
+import Data.Foldable (Foldable(..))
 import Data.Monoid (Endo(..))
 import GHC.Exts (IsList(..))
 
@@ -15,6 +16,10 @@ import GHC.Exts (IsList(..))
 
 newtype List a = List (Endo [a])
   deriving (Monoid, Semigroup)
+
+instance Foldable List where
+  foldMap f = foldMap f . runList
+  toList = runList
 
 instance IsList (List a) where
   type Item (List a) = a
