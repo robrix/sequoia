@@ -22,6 +22,7 @@ module Sequoia.Monad.It
   -- * Enumerators
 , Enumerator(..)
 , enumerateList
+, enumerateFile
 , enumerateHandle
   -- * Enumeratees
 , Enumeratee(..)
@@ -220,6 +221,9 @@ enumerateList = Enumerator . go
   where
   go []     = pure
   go (c:cs) = \ i -> runIt (const (pure i)) (\ _ k -> go cs =<< k (Input c)) i
+
+enumerateFile :: FilePath -> Enumerator Char IO a
+enumerateFile path = Enumerator (withFile path ReadMode . flip (getEnumerator . enumerateHandle))
 
 enumerateHandle :: Handle -> Enumerator Char IO a
 enumerateHandle handle = Enumerator $ \case
