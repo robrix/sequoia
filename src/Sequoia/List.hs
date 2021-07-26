@@ -19,7 +19,7 @@ import Prelude hiding (take)
 
 -- Efficiently concatenable lists
 
-newtype List a = List (forall r . (a -> r -> r) -> r -> r)
+newtype List a = List { foldList :: forall r . (a -> r -> r) -> r -> r }
 
 instance Show1 List where
   liftShowsPrec _ showList _ = showList . runList
