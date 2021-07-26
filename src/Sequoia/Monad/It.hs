@@ -88,9 +88,9 @@ toList = ($ []) <$> go id
   go as = i where i = rollIt (maybe (pure as) (\ a -> go (as . (a:))))
 
 repeatIt :: (b -> Maybe c) -> It a b -> It a [c]
-repeatIt rel i = loop id
+repeatIt rel i = loop List.nil
   where
-  loop acc = i >>= maybe (pure (acc [])) (loop . fmap acc . (:)) . rel
+  loop acc = i >>= maybe (pure (List.toList acc)) (loop . (acc <>) . List.singleton) . rel
 
 
 -- Elimination
