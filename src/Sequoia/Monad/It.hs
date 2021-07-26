@@ -17,6 +17,7 @@ module Sequoia.Monad.It
   -- * Computation
 , feedIt
   -- * Parsing
+, LineEnding(..)
 , getLineIt
 , getLinesIt
   -- * Enumerators
@@ -141,6 +142,11 @@ feedIt i r = runIt (const i) ($ r) i
 
 
 -- Parsing
+
+data LineEnding
+  = CR
+  | LF
+  | CRLF
 
 getLineIt :: It Char String
 getLineIt = loop id
