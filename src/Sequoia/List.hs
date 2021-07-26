@@ -25,6 +25,7 @@ module Sequoia.List
 , zipWith
 , These(..)
 , these
+, alignWith
 ) where
 
 import Control.Applicative (liftA2)
@@ -134,3 +135,13 @@ these f g h = \case
   This a    -> f a
   That b    -> g b
   These a b -> h a b
+
+alignWith :: (These a b -> c) -> (List a -> List b -> List c)
+alignWith f as bs = fromFoldr
+  (\ cons nil -> foldr
+    (\ a recur bs -> foldr
+      (\ b _ -> cons (f (These a b)) (recur (tail bs)))
+      (cons (f (This a)) (recur bs))
+      bs)
+  (foldr (cons . f . That) nil)
+  as bs)
