@@ -30,8 +30,6 @@ module Sequoia.Monad.It
 
 import Control.Applicative (Alternative(..))
 import Control.Effect.Lift
-import Control.Monad ((<=<))
-import Control.Monad.Trans.Class
 import Foreign.C.String
 import Foreign.Marshal.Alloc
 import Foreign.Ptr
@@ -41,24 +39,21 @@ import System.IO
 -- Iteratees
 
 -- | Iteratees, based loosely on the one in @trifecta@.
-data It r m a
+data It r a
   = Done a
-  | Roll (Input r -> m (It r m a))
+  | Roll (Input r -> It r a)
 
-instance Functor m => Functor (It r m) where
-  fmap f = go where go = runIt (doneIt . f) (rollIt . (fmap go .))
+instance Functor (It r) where
+  fmap f = go where go = runIt (doneIt . f) (rollIt . (go .))
 
-instance Functor m => Applicative (It r m) where
+instance Applicative (It r) where
   pure = Done
-  f <*> a = runIt (<$> a) (rollIt . (fmap (<*> a) .)) f
+  f <*> a = runIt (<$> a) (rollIt . ((<*> a) .)) f
 
-instance Monad m => Monad (It r m) where
+instance Monad (It r) where
   m >>= f = go m
     where
-    go = runIt f (\ k -> rollIt (\ r -> runIt ((`simplifyIt` r) . f) (pure . rollIt . (pure . go <=<)) =<< k r))
-
-instance MonadTrans (It r) where
-  lift m = rollIt (const (pure <$> m))
+    go = runIt f (\ k -> rollIt (\ r -> runIt ((`simplifyIt` r) . f) (rollIt . (go .)) (k r)))
 
 
 -- Input
@@ -97,54 +92,54 @@ input e i = \case
 
 -- Construction
 
-doneIt :: a -> It r m a
+doneIt :: a -> It r a
 doneIt = Done
 
-rollIt :: (Input r -> m (It r m a)) -> It r m a
+rollIt :: (Input r -> It r a) -> It r a
 rollIt = Roll
 
 
-needIt :: Applicative m =>  (r -> m (Maybe a)) -> It r m a
-needIt f = i where i = rollIt (input (pure i) (fmap (maybe i doneIt) . f))
+needIt :: (r -> Maybe a) -> It r a
+needIt f = i where i = rollIt (input i (maybe i doneIt . f))
 
 
-toList :: Applicative m => It a m [a]
+toList :: It a [a]
 toList = ($ []) <$> go id
   where
-  go as = i where i = rollIt (pure . input (pure as) (\ a -> go (as . (a:))))
+  go as = i where i = rollIt (input (pure as) (\ a -> go (as . (a:))))
 
 
 -- Elimination
 
-foldIt :: Monad m => (a -> m s) -> ((Input r -> m s) -> m s) -> (It r m a -> m s)
-foldIt p k = go where go = runIt p (k . fmap (>>= go))
+foldIt :: (a -> s) -> ((Input r -> s) -> s) -> (It r a -> s)
+foldIt p k = go where go = runIt p (k . fmap go)
 
-runIt :: (a -> s) -> ((Input r -> m (It r m a)) -> s) -> (It r m a -> s)
+runIt :: (a -> s) -> ((Input r -> It r a) -> s) -> (It r a -> s)
 runIt p k = \case
   Done a -> p a
   Roll r -> k r
 
 
-evalIt :: Monad m => It r m a -> m a
-evalIt = runIt pure (evalIt <=< ($ End))
+evalIt :: Monad m => It r a -> m a
+evalIt = runIt pure (evalIt . ($ End))
 
 
 -- Computation
 
-simplifyIt :: Applicative m => It r m a -> Input r -> m (It r m a)
-simplifyIt i r = runIt (const (pure i)) ($ r) i
+simplifyIt :: It r a -> Input r -> It r a
+simplifyIt i r = runIt (const i) ($ r) i
 
 
 -- Parsing
 
-getLineIt :: Applicative m => It Char m String
+getLineIt :: It Char String
 getLineIt = loop id
   where
-  loop = rollIt . fmap pure . \ acc -> \case
+  loop = rollIt . \ acc -> \case
     Input c | c /= '\n' -> loop (acc . (c:))
     _                   -> doneIt (acc [])
 
-getLinesIt :: Monad m => It Char m [String]
+getLinesIt :: It Char [String]
 getLinesIt = loop id
   where
   loop acc = getLineIt >>= \case
@@ -154,13 +149,13 @@ getLinesIt = loop id
 
 -- Enumerators
 
-type Enumerator i m o = It i m o -> m (It i m o)
+type Enumerator i m o = It i o -> m (It i o)
 
 enumList :: Monad m => [r] -> Enumerator r m a
-enumList = go
+enumList = fmap pure . go
   where
-  go []     = pure
-  go (c:cs) = \ i -> runIt (const (pure i)) (go cs <=< ($ Input c)) i
+  go []     = id
+  go (c:cs) = \ i -> runIt (const i) (go cs . ($ Input c)) i
 
 enumFile :: Has (Lift IO) sig m => FilePath -> Enumerator Char m a
 enumFile path = withFile' path ReadMode . flip enumHandle
@@ -172,8 +167,8 @@ enumHandle handle i = runIt (const (pure i)) (allocaBytes' size . loop) i
   loop k p = do
     n <- sendIO (hGetBuf handle p size)
     sendIO (peekCAStringLen (p, n)) >>= \case
-      c:cs -> k (Input c) >>= enumList cs
-      ""   -> k End
+      c:cs -> enumList cs (k (Input c))
+      ""   -> pure (k End)
 
 allocaBytes' :: Has (Lift IO) sig m => Int -> (Ptr a -> m b) -> m b
 allocaBytes' n b = liftWith (\ hdl ctx -> allocaBytes n (\ p -> hdl (b p <$ ctx)))
@@ -184,11 +179,11 @@ withFile' path mode body = liftWith (\ hdl ctx -> withFile path mode (\ h -> hdl
 
 -- Enumeratees
 
-type Enumeratee i o m a = It i m a -> It o m (It i m a)
+type Enumeratee i o a = It i a -> It o (It i a)
 
-take :: Monad m => Int -> Enumeratee i i m o
+take :: Int -> Enumeratee i i o
 take = go
   where
   go n
     | n <= 0    = pure
-    | otherwise = \ i -> runIt (const (pure i)) (rollIt . (fmap (go (n - 1)) .)) i
+    | otherwise = \ i -> runIt (const (pure i)) (rollIt . (go (n - 1) .)) i
