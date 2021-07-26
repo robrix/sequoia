@@ -147,6 +147,7 @@ data LineEnding
   = CR
   | LF
   | CRLF
+  deriving (Bounded, Enum, Eq, Ord, Read, Show)
 
 getLineIt :: It Char String
 getLineIt = loop id
