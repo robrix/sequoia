@@ -40,27 +40,27 @@ import Prelude hiding (any, take)
 -- | Iteratees, based loosely on the one in @trifecta@.
 data It m r a
   = Done a
-  | Roll a (r -> m (It m r a))
+  | Roll a (Input r -> m (It m r a))
 
 instance Functor m => Profunctor (It m) where
   dimap f g = go
     where
     go = \case
       Done a   -> Done (g a)
-      Roll a r -> Roll (g a) (fmap go . r . f)
+      Roll a r -> Roll (g a) (fmap go . r . fmap f)
 
 instance Functor m => Costrong (It m) where
   unfirst = \case
     Done (b, _)   -> pure b
-    Roll (b, d) k -> Roll b (fmap unfirst . k . (,d))
+    Roll (b, d) k -> Roll b (fmap unfirst . k . fmap (,d))
   unsecond = \case
     Done (_, b)   -> pure b
-    Roll (d, b) k -> Roll b (fmap unsecond . k . (d,))
+    Roll (d, b) k -> Roll b (fmap unsecond . k . fmap (d,))
 
 instance Comonad m => Cosieve (It m) Identity where
   cosieve = \case
     Done a   -> const a
-    Roll _ k -> extract . extract . k . runIdentity
+    Roll _ k -> extract . extract . k . Input . runIdentity
 
 instance Functor m => Functor (It m r) where
   fmap = rmap
@@ -134,39 +134,39 @@ input e i = \case
 
 -- Construction
 
-rollIt :: a -> (r -> m (It m r a)) -> It m r a
+rollIt :: a -> (Input r -> m (It m r a)) -> It m r a
 rollIt = Roll
 
 doneIt :: a -> It m r a
 doneIt = Done
 
 
-needIt :: Functor m => a -> (r -> m (Maybe a)) -> It m r a
-needIt a f = i where i = Roll a (fmap (maybe i Done) . f)
+needIt :: Applicative m => a -> (r -> m (Maybe a)) -> It m r a
+needIt a f = i where i = Roll a (input (pure i) (fmap (maybe i Done) . f))
 
-wantIt :: Functor m => a -> (r -> m (Either a a)) -> It m r a
-wantIt a f = Roll a k where k = fmap (either Done (`Roll` k)) . f
+wantIt :: Applicative m => a -> (r -> m (Either a a)) -> It m r a
+wantIt a f = Roll a k where k = input (pure (pure a)) (fmap (either Done (`Roll` k)) . f)
 
 
-tabulateIt :: Applicative m => a -> (r -> a) -> It m r a
+tabulateIt :: Applicative m => a -> (Input r -> a) -> It m r a
 tabulateIt a f = rollIt a (pure . Done . f)
 
 
 -- Elimination
 
-foldIt :: Monad m => (a -> m s) -> (a -> (r -> m s) -> m s) -> (It m r a -> m s)
+foldIt :: Monad m => (a -> m s) -> (a -> (Input r -> m s) -> m s) -> (It m r a -> m s)
 foldIt p k = go where go = runIt p (\ a -> k a . fmap (>>= go))
 
-runIt :: (a -> m s) -> (a -> (r -> m (It m r a)) -> m s) -> (It m r a -> m s)
+runIt :: (a -> m s) -> (a -> (Input r -> m (It m r a)) -> m s) -> (It m r a -> m s)
 runIt p k = \case
   Done a   -> p a
   Roll a r -> k a r
 
 
-evalIt :: Monad m => It m (Maybe r) a -> m a
+evalIt :: Monad m => It m r a -> m a
 evalIt = \case
   Done a   -> pure a
-  Roll _ k -> evalIt =<< k Nothing
+  Roll _ k -> evalIt =<< k End
 
 
 headIt :: It m r a -> a
@@ -175,7 +175,7 @@ headIt = \case
   Roll a _ -> a
 
 
-indexIt :: Applicative m => It m r a -> r -> m a
+indexIt :: Applicative m => It m r a -> Input r -> m a
 indexIt = \case
   Done a   -> const (pure a)
   Roll _ k -> fmap headIt . k
@@ -183,7 +183,7 @@ indexIt = \case
 
 -- Computation
 
-simplifyIt :: Applicative m => It m r a -> r -> m (It m r a)
+simplifyIt :: Applicative m => It m r a -> Input r -> m (It m r a)
 simplifyIt i r = case i of
   Done{}   -> pure i
   Roll _ k -> k r
@@ -191,14 +191,14 @@ simplifyIt i r = case i of
 
 -- Parsing
 
-getLineIt :: Applicative m => It m (Maybe Char) String
+getLineIt :: Applicative m => It m Char String
 getLineIt = loop id
   where
   loop = rollIt "" . fmap pure . \ acc -> \case
-    Just c | c /= '\n' -> loop (acc . (c:))
-    _                  -> Done (acc [])
+    Input c | c /= '\n' -> loop (acc . (c:))
+    _                   -> Done (acc [])
 
-getLinesIt :: Monad m => It m (Maybe Char) [String]
+getLinesIt :: Monad m => It m Char [String]
 getLinesIt = loop id
   where
   loop acc = getLineIt >>= \case
@@ -211,11 +211,11 @@ getLinesIt = loop id
 newtype Enumerator i m o = Enumerator { getEnumerator :: It m i o -> m (It m i o) }
 
 
-enumerateList :: Monad m => [r] -> Enumerator (Maybe r) m a
+enumerateList :: Monad m => [r] -> Enumerator r m a
 enumerateList = Enumerator . go
   where
   go []     = pure
-  go (c:cs) = \ i -> runIt (const (pure i)) (\ _ k -> go cs =<< k (Just c)) i
+  go (c:cs) = \ i -> runIt (const (pure i)) (\ _ k -> go cs =<< k (Input c)) i
 
 
 -- Enumeratees
