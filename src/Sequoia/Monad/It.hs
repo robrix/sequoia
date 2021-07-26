@@ -14,6 +14,8 @@ module Sequoia.Monad.It
   -- * Computation
 , feedIt
   -- * Parsing
+, Pos(..)
+, Span(..)
 , Line(..)
 , getLineIt
 , getLinesIt
@@ -109,6 +111,10 @@ feedIt i r = runIt (const i) ($ r) i
 
 
 -- Parsing
+
+data Pos = Pos { line :: {-# UNPACK #-} !Int, col :: {-# UNPACK #-} !Int }
+
+data Span = Span { start :: {-# UNPACK #-} !Pos, end :: {-# UNPACK #-} !Pos }
 
 data Line = Line { lineContents :: String, lineEnding :: Maybe Newline }
   deriving (Eq, Ord, Show)
