@@ -26,6 +26,7 @@ module Sequoia.List
 , these
 ) where
 
+import Data.Bool (bool)
 import Data.Foldable (Foldable(..))
 import Data.Functor.Classes
 import GHC.Exts (IsList(..))
@@ -90,7 +91,7 @@ head :: List a -> Maybe a
 head = foldr (const . Just) Nothing
 
 tail :: List a -> List a
-tail = foldr (const id) nil
+tail l = foldr (\ h t -> bool (cons h (t False)) (t False)) (const nil) l True
 
 
 -- Computation
