@@ -120,7 +120,7 @@ zip :: List a -> List b -> List (a, b)
 zip = zipWith (,)
 
 zipWith :: (a -> b -> c) -> (List a -> List b -> List c)
-zipWith f a b = fromFoldr (\ cons nil -> toFoldr a (\ ha t b -> toFoldr b (\ hb _ -> cons (f ha hb) (t (drop 1 b))) nil) (const nil) b)
+zipWith f a b = fromFoldr (\ cons nil -> toFoldr a (\ ha t b -> toFoldr b (\ hb _ -> cons (f ha hb) (t (tail b))) nil) (const nil) b)
 
 
 data These a b
