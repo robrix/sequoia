@@ -129,7 +129,7 @@ toList = ($ []) <$> go id
 foldIt :: Monad m => (a -> m s) -> ((Input r -> m s) -> m s) -> (It m r a -> m s)
 foldIt p k = go where go = runIt p (k . fmap (>>= go))
 
-runIt :: (a -> m s) -> ((Input r -> m (It m r a)) -> m s) -> (It m r a -> m s)
+runIt :: (a -> s) -> ((Input r -> m (It m r a)) -> s) -> (It m r a -> s)
 runIt p k = \case
   Done a -> p a
   Roll r -> k r
