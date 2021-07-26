@@ -90,7 +90,7 @@ toList = List.toList <$> go List.nil
 repeatIt :: (b -> Maybe c) -> It a b -> It a [c]
 repeatIt rel i = loop List.nil
   where
-  loop acc = i >>= maybe (pure (List.toList acc)) (loop . (acc <>) . List.singleton) . rel
+  loop acc = i >>= maybe (pure (List.toList acc)) (loop . List.snoc acc) . rel
 
 
 -- Elimination
@@ -125,7 +125,7 @@ getLineIt = loop List.nil Nothing
   where
   loop acc prev = rollIt $ \case
     Just '\n' -> doneIt (Line acc (Just (if prev == Just '\r' then CRLF else LF)))
-    Just c    -> loop (acc <> List.singleton c) (Just c)
+    Just c    -> loop (List.snoc acc c) (Just c)
     Nothing   -> doneIt (Line acc Nothing)
 
 getLinesIt :: It Char [Line]
