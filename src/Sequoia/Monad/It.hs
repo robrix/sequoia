@@ -24,7 +24,7 @@ module Sequoia.Monad.It
 , enumerateFile
 , enumerateHandle
   -- * Enumeratees
-, Enumeratee(..)
+, Enumeratee
 , take
 ) where
 
@@ -239,10 +239,10 @@ enumerateHandle handle = \case
 
 -- Enumeratees
 
-newtype Enumeratee i o m a = Enumeratee { getEnumeratee :: It m i a -> It m o (It m i a) }
+type Enumeratee i o m a = It m i a -> It m o (It m i a)
 
 take :: Monad m => Int -> Enumeratee i i m o
-take = Enumeratee . go
+take = go
   where
   go n
     | n <= 0    = pure
