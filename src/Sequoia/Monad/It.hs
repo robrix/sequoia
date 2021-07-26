@@ -54,7 +54,7 @@ instance Profunctor It where
   dimap f g = go where go = foldIt (doneIt . g) (\ k -> rollIt (k . fmap f))
 
 instance Functor (It r) where
-  fmap f = go where go = runIt (doneIt . f) (rollIt . (go .))
+  fmap f = go where go = foldIt (doneIt . f) rollIt
 
 instance Applicative (It r) where
   pure = doneIt
