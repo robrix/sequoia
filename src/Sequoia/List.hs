@@ -21,6 +21,7 @@ module Sequoia.List
 , takeWhile
 , dropWhile
 , filter
+, reverse
 , zip
 , zipWith
 , These(..)
@@ -34,7 +35,7 @@ import Data.Bool (bool)
 import Data.Foldable (Foldable(..))
 import Data.Functor.Classes
 import GHC.Exts (IsList(..))
-import Prelude hiding (drop, dropWhile, filter, head, tail, take, takeWhile, zip, zipWith)
+import Prelude hiding (drop, dropWhile, filter, head, reverse, tail, take, takeWhile, zip, zipWith)
 
 -- Efficiently concatenable lists
 
@@ -132,6 +133,9 @@ dropWhile p l = fromFoldr (\ cons nil -> toFoldr l (\ h t done -> if done then c
 
 filter :: (a -> Bool) -> (List a -> List a)
 filter p l = fromFoldr (\ cons -> toFoldr l (\ h t -> if p h then cons h t else t))
+
+reverse :: List a -> List a
+reverse l = foldr (flip (.) . cons) id l nil
 
 zip :: List a -> List b -> List (a, b)
 zip = zipWith (,)
