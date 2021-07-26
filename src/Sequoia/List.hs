@@ -11,7 +11,7 @@ module Sequoia.List
 , cons
 , list
   -- * Elimination
-, runList
+, Sequoia.List.toList
   -- * Computation
 , take
 , drop
@@ -38,7 +38,7 @@ type FoldMap m a = (m -> m -> m) -> (a -> m) -> m -> m
 newtype List a = FromFoldr { toFoldr :: forall r . Foldr r a }
 
 instance Show1 List where
-  liftShowsPrec _ showList _ = showList . runList
+  liftShowsPrec _ showList _ = showList . Sequoia.List.toList
 
 instance Show a => Show (List a) where
   showsPrec = showsPrec1
@@ -55,13 +55,13 @@ instance Functor List where
 instance Foldable List where
   foldr cons nil list = toFoldr list cons nil
   foldMap f list = toFoldr list ((<>) . f) mempty
-  toList = runList
+  toList = Sequoia.List.toList
   null list = toFoldr list (const (const False)) True
 
 instance IsList (List a) where
   type Item (List a) = a
   fromList = list
-  toList = runList
+  toList = Sequoia.List.toList
 
 
 -- Construction
@@ -81,8 +81,8 @@ list as = fromFoldr (\ cons nil -> foldr cons nil as)
 
 -- Elimination
 
-runList :: List a -> [a]
-runList = foldr (:) []
+toList :: List a -> [a]
+toList = foldr (:) []
 
 
 -- Computation
