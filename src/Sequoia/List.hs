@@ -14,13 +14,14 @@ module Sequoia.List
 , takeWhile
 , dropWhile
 , filter
+, zip
 , zipWith
 ) where
 
 import Data.Foldable (Foldable(..))
 import Data.Functor.Classes
 import GHC.Exts (IsList(..))
-import Prelude hiding (drop, dropWhile, filter, take, takeWhile, zipWith)
+import Prelude hiding (drop, dropWhile, filter, take, takeWhile, zip, zipWith)
 
 -- Efficiently concatenable lists
 
@@ -87,6 +88,9 @@ dropWhile p l = List (\ cons nil -> foldList l (\ h t done -> if done then cons 
 
 filter :: (a -> Bool) -> (List a -> List a)
 filter p l = List (\ cons -> foldList l (\ h t -> if p h then cons h t else t))
+
+zip :: List a -> List b -> List (a, b)
+zip = zipWith (,)
 
 zipWith :: (a -> b -> c) -> (List a -> List b -> List c)
 zipWith f a b = List (\ cons nil -> foldList a (\ ha t b -> foldList b (\ hb _ -> cons (f ha hb) (t (drop 1 b))) nil) (const nil) b)
