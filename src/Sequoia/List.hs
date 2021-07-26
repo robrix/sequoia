@@ -10,12 +10,13 @@ module Sequoia.List
 , runList
   -- * Computation
 , take
+, filter
 ) where
 
 import Data.Foldable (Foldable(..))
 import Data.Functor.Classes
 import GHC.Exts (IsList(..))
-import Prelude hiding (take)
+import Prelude hiding (filter, take)
 
 -- Efficiently concatenable lists
 
@@ -70,3 +71,6 @@ runList (List l) = l (:) []
 
 take :: Int -> List a -> List a
 take n (List l) = List (\ cons nil -> l (\ h t n -> if n <= 0 then nil else cons h (t (n - 1))) (const nil) n)
+
+filter :: (a -> Bool) -> (List a -> List a)
+filter p l = List (\ cons -> foldList l (\ h t -> if p h then cons h t else t))
