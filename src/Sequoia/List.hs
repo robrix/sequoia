@@ -87,6 +87,9 @@ instance Applicative List where
   liftA2 f a b = foldr (\ a cs -> foldr (cons . f a) cs b) nil a
   f <*> a = foldr (\ f bs -> foldr (cons . f) bs a) nil f
 
+instance Monad List where
+  l >>= f = foldr ((<>) . f) nil l
+
 instance IsList (List a) where
   type Item (List a) = a
   fromList = Sequoia.List.fromList
