@@ -178,7 +178,9 @@ runIt p k = \case
 evalIt :: Monad m => It m r a -> m a
 evalIt = \case
   Done a   -> pure a
-  Roll _ k -> evalIt =<< k End
+  Roll _ k -> k End >>= \case
+    Done a   -> pure a
+    Roll a _ -> pure a
 
 
 headIt :: It m r a -> a
