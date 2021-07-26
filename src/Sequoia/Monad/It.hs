@@ -30,6 +30,7 @@ module Sequoia.Monad.It
 
 import Control.Applicative (Alternative(..))
 import Control.Effect.Lift
+import Data.Profunctor
 import Foreign.C.String
 import Foreign.Marshal.Alloc
 import Foreign.Ptr
@@ -42,6 +43,9 @@ import System.IO
 data It r a
   = Done a
   | Roll (Input r -> It r a)
+
+instance Profunctor It where
+  dimap f g = go where go = runIt (doneIt . g) (\ k -> rollIt (go . k . fmap f))
 
 instance Functor (It r) where
   fmap f = go where go = runIt (doneIt . f) (rollIt . (go .))
