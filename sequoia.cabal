@@ -198,3 +198,4 @@ test-suite test
   build-depends:
     , base
     , hedgehog ^>= 1
+    , sequoia
