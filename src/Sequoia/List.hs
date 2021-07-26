@@ -1,5 +1,5 @@
 {-# LANGUAGE TypeFamilies #-}
-module Sequoia.List.Diff
+module Sequoia.List
 ( -- * Difference lists
   List(..)
   -- * Construction
