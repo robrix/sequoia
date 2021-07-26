@@ -32,6 +32,7 @@ module Sequoia.Monad.It
 import           Control.Applicative (Alternative(..))
 import qualified Control.Category as Cat
 import           Control.Effect.Lift
+import           Control.Monad (guard)
 import           Data.Profunctor
 import           Foreign.C.String
 import           Foreign.Marshal.Alloc
@@ -116,12 +117,10 @@ toList = ($ []) <$> go id
   where
   go as = i where i = rollIt (input (pure as) (\ a -> go (as . (a:))))
 
-repeatIt :: It a [b] -> It a [[b]]
-repeatIt i = loop id
+repeatIt :: (b -> Maybe c) -> It a b -> It a [c]
+repeatIt rel i = loop id
   where
-  loop acc = i >>= \case
-    [] -> pure (acc [])
-    l  -> loop (acc . (l:))
+  loop acc = i >>= maybe (pure (acc [])) (loop . fmap acc . (:)) . rel
 
 
 -- Elimination
@@ -153,7 +152,10 @@ getLineIt = loop id
     _                   -> doneIt (acc [])
 
 getLinesIt :: It Char [String]
-getLinesIt = repeatIt getLineIt
+getLinesIt = repeatIt (guarding null) getLineIt
+
+guarding :: Alternative m => (a -> Bool) -> (a -> m a)
+guarding p a = a <$ guard (p a)
 
 
 -- Enumerators
