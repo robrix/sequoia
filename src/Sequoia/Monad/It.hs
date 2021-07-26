@@ -157,8 +157,8 @@ getLineIt = loop id Nothing
     Input c    -> loop (acc . (c:)) (Just c)
     End        -> doneIt (Line (acc []) Nothing)
 
-getLinesIt :: It Char [String]
-getLinesIt = repeatIt (fmap lineContents . guarding (not . nullLine)) getLineIt
+getLinesIt :: It Char [Line]
+getLinesIt = repeatIt (guarding (not . nullLine)) getLineIt
 
 guarding :: Alternative m => (a -> Bool) -> (a -> m a)
 guarding p a = a <$ guard (p a)
