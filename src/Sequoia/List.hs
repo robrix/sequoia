@@ -33,6 +33,9 @@ instance Semigroup (List a) where
 instance Monoid (List a) where
   mempty = nil
 
+instance Functor List where
+  fmap f (List l) = List (l . (. f))
+
 instance Foldable List where
   foldMap f = foldMap f . runList
   toList = runList
