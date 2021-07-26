@@ -152,7 +152,7 @@ getLineIt = loop id
     _                   -> doneIt (acc [])
 
 getLinesIt :: It Char [String]
-getLinesIt = repeatIt (guarding null) getLineIt
+getLinesIt = repeatIt (guarding (not . null)) getLineIt
 
 guarding :: Alternative m => (a -> Bool) -> (a -> m a)
 guarding p a = a <$ guard (p a)
