@@ -144,6 +144,7 @@ feedIt i r = runIt (const i) ($ r) i
 -- Parsing
 
 data Line = Line { lineContents :: String, lineEnding :: Maybe Newline }
+  deriving (Eq, Ord, Show)
 
 nullLine :: Line -> Bool
 nullLine = (&&) <$> null . lineContents <*> null . lineEnding
