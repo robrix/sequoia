@@ -6,11 +6,14 @@ module Sequoia.List
 , list
   -- * Elimination
 , runList
+  -- * Computation
+, take
 ) where
 
 import Data.Foldable (Foldable(..))
 import Data.Functor.Classes
 import GHC.Exts (IsList(..))
+import Prelude hiding (take)
 
 -- Efficiently concatenable lists
 
@@ -48,3 +51,9 @@ list as = List (\ cons nil -> foldr cons nil as)
 
 runList :: List a -> [a]
 runList (List l) = l (:) []
+
+
+-- Computation
+
+take :: Int -> List a -> List a
+take n (List l) = List (\ cons nil -> l (\ h t n -> if n <= 0 then nil else cons h (t (n - 1))) (const nil) n)
