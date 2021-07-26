@@ -47,6 +47,9 @@ newtype List a = FromFoldr { toFoldr :: forall r . Foldr r a }
 instance Eq1 List where
   liftEq (==) as bs = foldr (\ a isEq bs -> foldr (\ b _ -> a == b && isEq (tail bs)) False bs) null as bs
 
+instance Eq a => Eq (List a) where
+  (==) = eq1
+
 instance Show1 List where
   liftShowsPrec _ showList _ = showList . Sequoia.List.toList
 
