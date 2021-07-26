@@ -14,6 +14,7 @@ module Sequoia.List
 , Sequoia.List.toList
 , head
 , tail
+, uncons
   -- * Computation
 , take
 , drop
@@ -26,6 +27,7 @@ module Sequoia.List
 , these
 ) where
 
+import Control.Applicative (liftA2)
 import Data.Bool (bool)
 import Data.Foldable (Foldable(..))
 import Data.Functor.Classes
@@ -92,6 +94,9 @@ head = foldr (const . Just) Nothing
 
 tail :: List a -> List a
 tail l = foldr (\ h t -> bool (cons h (t False)) (t False)) (const nil) l True
+
+uncons :: List a -> Maybe (a, List a)
+uncons = liftA2 (,) <$> head <*> Just . tail
 
 
 -- Computation
