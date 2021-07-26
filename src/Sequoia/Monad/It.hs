@@ -5,6 +5,7 @@ module Sequoia.Monad.It
 , Input(..)
 , input
   -- * Construction
+, doneIt
 , needIt
 , toList
   -- * Elimination
@@ -104,6 +105,10 @@ input e i = \case
 
 
 -- Construction
+
+doneIt :: a -> It m r a
+doneIt = Done
+
 
 needIt :: Applicative m =>  (r -> m (Maybe a)) -> It m r a
 needIt f = i where i = Roll (input (pure i) (fmap (maybe i Done) . f))
