@@ -116,6 +116,11 @@ instance Monad Input where
   End     >>= _ = End
   Input a >>= f = f a
 
+instance Semigroup a => Semigroup (Input a) where
+  Input a   <> Input b = Input (a <> b)
+  a@Input{} <> _       = a
+  _         <> b       = b
+
 
 -- Construction
 
