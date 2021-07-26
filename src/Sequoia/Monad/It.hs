@@ -215,7 +215,6 @@ getLinesIt = loop id
 
 newtype Enumerator i m o = Enumerator { getEnumerator :: It m i o -> m (It m i o) }
 
-
 enumerateList :: Monad m => [r] -> Enumerator r m a
 enumerateList = Enumerator . go
   where
