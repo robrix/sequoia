@@ -31,7 +31,7 @@ module Sequoia.List
 , alignWith
 ) where
 
-import Control.Applicative (liftA2)
+import Control.Applicative (Alternative(..), liftA2)
 import Control.Monad.Zip
 import Data.Bool (bool)
 import Data.Foldable (Foldable(..))
@@ -87,6 +87,10 @@ instance Applicative List where
   pure = singleton
   liftA2 f a b = foldr (\ a cs -> foldr (cons . f a) cs b) nil a
   f <*> a = foldr (\ f bs -> foldr (cons . f) bs a) nil f
+
+instance Alternative List where
+  empty = nil
+  (<|>) = (<>)
 
 instance Monad List where
   l >>= f = foldr ((<>) . f) nil l
