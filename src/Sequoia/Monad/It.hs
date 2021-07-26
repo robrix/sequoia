@@ -146,10 +146,10 @@ feedIt i r = runIt (const i) ($ r) i
 data Line = Line { lineContents :: String, lineEnding :: Maybe Newline }
 
 getLineIt :: It Char String
-getLineIt = loop id
+getLineIt = loop id Nothing
   where
-  loop acc = rollIt $ \case
-    Input c | c /= '\n' -> loop (acc . (c:))
+  loop acc _ = rollIt $ \case
+    Input c | c /= '\n' -> loop (acc . (c:)) (Just c)
     _                   -> doneIt (acc [])
 
 getLinesIt :: It Char [String]
