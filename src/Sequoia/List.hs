@@ -9,11 +9,18 @@ module Sequoia.List
 ) where
 
 import Data.Foldable (Foldable(..))
+import Data.Functor.Classes
 import GHC.Exts (IsList(..))
 
 -- Efficiently concatenable lists
 
 newtype List a = List (forall r . (a -> r -> r) -> r -> r)
+
+instance Show1 List where
+  liftShowsPrec _ showList _ = showList . runList
+
+instance Show a => Show (List a) where
+  showsPrec = showsPrec1
 
 instance Semigroup (List a) where
   List a <> List b = List (\ cons -> a cons . b cons)
