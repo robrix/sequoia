@@ -106,6 +106,10 @@ instance Applicative Input where
   End     <*> _ = End
   Input f <*> a = f <$> a
 
+instance Monad Input where
+  End     >>= _ = End
+  Input a >>= f = f a
+
 
 -- Construction
 
