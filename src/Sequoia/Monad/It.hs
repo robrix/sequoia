@@ -5,7 +5,6 @@ module Sequoia.Monad.It
 , Input(..)
 , input
   -- * Construction
-, rollIt
 , needIt
 , wantIt
 , tabulateIt
@@ -139,10 +138,6 @@ input e i = \case
 
 -- Construction
 
-rollIt :: a -> (Input r -> m (It m r a)) -> It m r a
-rollIt = Roll
-
-
 needIt :: Applicative m => a -> (r -> m (Maybe a)) -> It m r a
 needIt a f = i where i = Roll a (input (pure i) (fmap (maybe i Done) . f))
 
@@ -151,7 +146,7 @@ wantIt a f = Roll a k where k = input (pure (pure a)) (fmap (either Done (`Roll`
 
 
 tabulateIt :: Applicative m => a -> (Input r -> a) -> It m r a
-tabulateIt a f = rollIt a (pure . Done . f)
+tabulateIt a f = Roll a (pure . Done . f)
 
 
 toList :: Applicative m => It m a [a]
@@ -204,7 +199,7 @@ simplifyIt i r = case i of
 getLineIt :: Applicative m => It m Char String
 getLineIt = loop id
   where
-  loop = rollIt "" . fmap pure . \ acc -> \case
+  loop = Roll "" . fmap pure . \ acc -> \case
     Input c | c /= '\n' -> loop (acc . (c:))
     _                   -> Done (acc [])
 
@@ -254,4 +249,4 @@ take = Enumeratee . go
     | n <= 0    = pure
     | otherwise = \case
       i@Done{} -> pure i
-      Roll a r -> rollIt (pure a) (fmap (go (n - 1)) . r)
+      Roll a r -> Roll (pure a) (fmap (go (n - 1)) . r)
