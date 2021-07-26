@@ -51,7 +51,7 @@ instance Cat.Category It where
   f . g = rollIt (\ a -> foldIt (\ b -> foldIt pure ($ Input b) f) ($ a) g)
 
 instance Profunctor It where
-  dimap f g = go where go = foldIt (doneIt . g) (\ k -> rollIt (k . fmap f))
+  dimap f g = go where go = foldIt (doneIt . g) (rollIt . (. fmap f))
 
 instance Functor (It r) where
   fmap f = go where go = foldIt (doneIt . f) rollIt
