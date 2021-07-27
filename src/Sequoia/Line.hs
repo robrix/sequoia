@@ -1,6 +1,8 @@
 module Sequoia.Line
 ( -- * Lines
   Line(..)
+  -- * Construction
+, fromChar
   -- * Elimination
 , nullLine
   -- * Line endings
@@ -14,6 +16,17 @@ import           Sequoia.Span
 
 data Line = Line { lineSpan :: Span, lineContents :: List.List Char, lineEnding :: Maybe LineEnding }
   deriving (Eq, Ord, Show)
+
+
+-- Construction
+
+fromChar :: Char -> Line
+fromChar c = Line span (List.singleton c) nl
+  where
+  (span, nl) = case c of
+    '\r' -> (Span (Pos 0 0) (Pos 1 0), Just CR)
+    '\n' -> (Span (Pos 0 0) (Pos 1 0), Just LF)
+    _    -> (Span (Pos 0 0) (Pos 0 1), Nothing)
 
 
 -- Elimination
