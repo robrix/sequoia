@@ -1,6 +1,6 @@
 {-# LANGUAGE TypeFamilies #-}
-module Sequoia.List
-( -- * Efficiently concatenable lists
+module Sequoia.Cons
+( -- * Efficiently concatenable cons lists
   Foldl
 , Foldr
 , FoldMap
@@ -11,9 +11,9 @@ module Sequoia.List
 , cons
 , snoc
 , singleton
-, Sequoia.List.fromList
+, Sequoia.Cons.fromList
   -- * Elimination
-, Sequoia.List.toList
+, Sequoia.Cons.toList
 , head
 , tail
 , uncons
@@ -41,7 +41,7 @@ import Data.Functor.Classes
 import GHC.Exts (IsList(..))
 import Prelude hiding (drop, dropWhile, filter, head, repeat, reverse, tail, take, takeWhile, zip, zipWith)
 
--- Efficiently concatenable lists
+-- Efficiently concatenable cons lists
 
 type Foldl r a = (r -> a -> r) -> r -> r
 type Foldr r a = (a -> r -> r) -> r -> r
@@ -62,7 +62,7 @@ instance Ord a => Ord (List a) where
   compare = compare1
 
 instance Show1 List where
-  liftShowsPrec _ showList _ = showList . Sequoia.List.toList
+  liftShowsPrec _ showList _ = showList . Sequoia.Cons.toList
 
 instance Show a => Show (List a) where
   showsPrec = showsPrec1
@@ -79,7 +79,7 @@ instance Functor List where
 instance Foldable List where
   foldr cons nil list = toFoldr list cons nil
   foldMap f list = toFoldr list ((<>) . f) mempty
-  toList = Sequoia.List.toList
+  toList = Sequoia.Cons.toList
   null list = toFoldr list (const (const False)) True
 
 instance Traversable List where
@@ -103,8 +103,8 @@ instance MonadZip List where
 
 instance IsList (List a) where
   type Item (List a) = a
-  fromList = Sequoia.List.fromList
-  toList = Sequoia.List.toList
+  fromList = Sequoia.Cons.fromList
+  toList = Sequoia.Cons.toList
 
 
 -- Construction

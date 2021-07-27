@@ -6,7 +6,7 @@ module Sequoia.Line
 , LineEnding(..)
 ) where
 
-import qualified Sequoia.List as List
+import qualified Sequoia.Cons as List
 import           Sequoia.Span
 
 -- Lines

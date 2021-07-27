@@ -130,6 +130,7 @@ library
     Sequoia.Connective.With
     Sequoia.Connective.XOr
     Sequoia.Connective.Zero
+    Sequoia.Cons
     Sequoia.Contextual
     Sequoia.Disjunction
     Sequoia.Functor.Applicative
@@ -143,7 +144,6 @@ library
     Sequoia.Functor.Source.Internal
     Sequoia.Lambda
     Sequoia.Line
-    Sequoia.List
     Sequoia.Monad.It
     Sequoia.Monad.Run
     Sequoia.Monad.Trans.It
@@ -195,8 +195,8 @@ test-suite test
   hs-source-dirs: test
   main-is: Test.hs
   other-modules:
+    Sequoia.Cons.Test
     Sequoia.Line.Test
-    Sequoia.List.Test
   build-depends:
     , base
     , hedgehog ^>= 1

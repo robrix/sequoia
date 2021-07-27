@@ -1,12 +1,12 @@
 {-# LANGUAGE TemplateHaskell #-}
-module Sequoia.List.Test
+module Sequoia.Cons.Test
 ( tests
 ) where
 
 import           Hedgehog
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
-import           Sequoia.List as List
+import           Sequoia.Cons as List
 
 tests :: IO Bool
 tests = checkParallel $$(discover)

@@ -42,8 +42,8 @@ import           Foreign.C.String
 import           Foreign.Marshal.Alloc
 import           Foreign.Ptr
 import           Prelude hiding (any, take)
+import qualified Sequoia.Cons as List
 import           Sequoia.Line
-import qualified Sequoia.List as List
 import           Sequoia.Span
 import           System.IO hiding (Newline(..))
 
