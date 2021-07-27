@@ -79,7 +79,7 @@ instance Monad (It r) where
 -- Construction
 
 fromGetIt :: (forall s . (a -> s) -> ((Maybe r -> It r a) -> s) -> s) -> It r a
-fromGetIt = It
+fromGetIt f = mfromGetIt (\ a k -> f a (k id))
 
 mfromGetIt :: (forall s . (a -> s) -> (forall x . (x -> It r a) -> (Maybe r -> x) -> s) -> s) -> It r a
 mfromGetIt f = It (\ a k -> f a (fmap k . fmap))
