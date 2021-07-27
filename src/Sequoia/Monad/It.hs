@@ -21,8 +21,6 @@ module Sequoia.Monad.It
   -- * Computation
 , feedIt
   -- * Parsing
-, Pos(..)
-, Span(..)
 , Line(..)
 , LineEnding(..)
 , getLineIt
