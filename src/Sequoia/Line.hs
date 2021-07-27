@@ -28,4 +28,5 @@ data LineEnding
 
 instance Semigroup LineEnding where
   CR <> LF = CRLF
-  _  <> b  = b
+  LF <> CR = CRLF
+  a  <> b  = max a b
