@@ -1,6 +1,7 @@
 module Sequoia.Line
 ( -- * Lines
   Line(..)
+  -- * Elimination
 , nullLine
   -- * Line endings
 , LineEnding(..)
@@ -13,6 +14,9 @@ import           Sequoia.Span
 
 data Line = Line { lineSpan :: Span, lineContents :: List.List Char, lineEnding :: Maybe LineEnding }
   deriving (Eq, Ord, Show)
+
+
+-- Elimination
 
 nullLine :: Line -> Bool
 nullLine = (&&) <$> null . lineContents <*> null . lineEnding
