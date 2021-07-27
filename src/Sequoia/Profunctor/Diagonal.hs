@@ -5,7 +5,7 @@ module Sequoia.Profunctor.Diagonal
 , mirror
 ) where
 
-import Control.Arrow (Kleisli(..))
+import Control.Arrow (Arrow(..), Kleisli(..))
 import Control.Comonad
 import Data.Profunctor
 import Data.Profunctor.Strong
@@ -32,6 +32,9 @@ instance Applicative f => Diagonal (Star f) where
 instance Comonad f => Diagonal (Costar f) where
   dup = Costar (dup . extract)
 
+instance Arrow p => Diagonal (WrappedArrow p) where
+  dup = WrapArrow (arr dup)
+
 
 class Profunctor p => Codiagonal p where
   dedup :: Either a a `p` a
@@ -53,6 +56,9 @@ instance Applicative f => Codiagonal (Star f) where
 
 instance Comonad f => Codiagonal (Costar f) where
   dedup = Costar (dedup . extract)
+
+instance Arrow p => Codiagonal (WrappedArrow p) where
+  dedup = WrapArrow (arr dedup)
 
 
 mirror :: Either a b -> Either b a
