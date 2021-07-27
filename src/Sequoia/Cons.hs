@@ -39,6 +39,7 @@ import Data.Bool (bool)
 import Data.Foldable (Foldable(..))
 import Data.Functor.Classes
 import Data.These
+import Data.Zip (Semialign(..), Zip(..))
 import GHC.Exts (IsList(..))
 import Prelude hiding (drop, dropWhile, filter, head, repeat, reverse, tail, take, takeWhile, zip, zipWith)
 
@@ -101,6 +102,23 @@ instance Monad List where
 instance MonadZip List where
   mzip = zip
   mzipWith = zipWith
+
+instance Semialign List where
+  align = alignWith id
+
+  alignWith f as bs = fromFoldr
+    (\ cons nil -> foldr
+      (\ a recur bs -> foldr
+        (\ b _ -> cons (f (These a b)) (recur (tail bs)))
+        (cons (f (This a)) (recur bs))
+        bs)
+    (foldr (cons . f . That) nil)
+    as bs)
+
+instance Zip List where
+  zip = zipWith (,)
+
+  zipWith f a b = fromFoldr (\ cons nil -> toFoldr a (\ ha t b -> toFoldr b (\ hb _ -> cons (f ha hb) (t (tail b))) nil) (const nil) b)
 
 instance IsList (List a) where
   type Item (List a) = a
@@ -167,24 +185,3 @@ reverse l = foldr (flip (.) . cons) id l nil
 
 repeat :: a -> List a
 repeat a = cons a (repeat a)
-
-
-zip :: List a -> List b -> List (a, b)
-zip = zipWith (,)
-
-zipWith :: (a -> b -> c) -> (List a -> List b -> List c)
-zipWith f a b = fromFoldr (\ cons nil -> toFoldr a (\ ha t b -> toFoldr b (\ hb _ -> cons (f ha hb) (t (tail b))) nil) (const nil) b)
-
-
-align :: List a -> List b -> List (These a b)
-align = alignWith id
-
-alignWith :: (These a b -> c) -> (List a -> List b -> List c)
-alignWith f as bs = fromFoldr
-  (\ cons nil -> foldr
-    (\ a recur bs -> foldr
-      (\ b _ -> cons (f (These a b)) (recur (tail bs)))
-      (cons (f (This a)) (recur bs))
-      bs)
-  (foldr (cons . f . That) nil)
-  as bs)

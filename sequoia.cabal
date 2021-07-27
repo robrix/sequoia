@@ -185,6 +185,7 @@ library
     , distributive
     , fused-effects
     , profunctors
+    , semialign
     , these
     , transformers
   hs-source-dirs:   src
