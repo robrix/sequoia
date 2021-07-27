@@ -39,7 +39,7 @@ import Data.Bool (bool)
 import Data.Foldable (Foldable(..))
 import Data.Functor.Classes
 import Data.These
-import Data.Zip (Semialign(..), Zip(..))
+import Data.Zip (Repeat(..), Semialign(..), Zip(..))
 import GHC.Exts (IsList(..))
 import Prelude hiding (drop, dropWhile, filter, head, repeat, reverse, tail, take, takeWhile, zip, zipWith)
 
@@ -120,6 +120,9 @@ instance Zip List where
 
   zipWith f a b = fromFoldr (\ cons nil -> toFoldr a (\ ha t b -> toFoldr b (\ hb _ -> cons (f ha hb) (t (tail b))) nil) (const nil) b)
 
+instance Repeat List where
+  repeat a = cons a (repeat a)
+
 instance IsList (List a) where
   type Item (List a) = a
   fromList = Sequoia.Cons.fromList
@@ -181,7 +184,3 @@ filter p l = fromFoldr (\ cons -> toFoldr l (\ h t -> if p h then cons h t else 
 
 reverse :: List a -> List a
 reverse l = foldr (flip (.) . cons) id l nil
-
-
-repeat :: a -> List a
-repeat a = cons a (repeat a)
