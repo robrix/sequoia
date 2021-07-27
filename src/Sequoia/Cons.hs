@@ -39,7 +39,7 @@ import Data.Bool (bool)
 import Data.Foldable (Foldable(..))
 import Data.Functor.Classes
 import Data.These
-import Data.Zip (Repeat(..), Semialign(..), Zip(..))
+import Data.Zip (Repeat(..), Semialign(..), Unzip(..), Zip(..))
 import GHC.Exts (IsList(..))
 import Prelude hiding (drop, dropWhile, filter, head, repeat, reverse, tail, take, takeWhile, zip, zipWith)
 
@@ -119,6 +119,10 @@ instance Zip List where
   zip = zipWith (,)
 
   zipWith f a b = fromFoldr (\ cons nil -> toFoldr a (\ ha t b -> toFoldr b (\ hb _ -> cons (f ha hb) (t (tail b))) nil) (const nil) b)
+
+instance Unzip List where
+  unzip       = (,) <$> fmap  fst      <*> fmap  snd
+  unzipWith f = (,) <$> fmap (fst . f) <*> fmap (snd . f)
 
 instance Repeat List where
   repeat a = cons a (repeat a)
