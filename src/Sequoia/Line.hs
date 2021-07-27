@@ -10,23 +10,22 @@ module Sequoia.Line
 ) where
 
 import qualified Sequoia.Cons as List
-import           Sequoia.Span
 
 -- Lines
 
-data Line = Line { lineSpan :: Span, lineContents :: List.List Char, lineEnding :: Maybe LineEnding }
+data Line = Line { lineContents :: List.List Char, lineEnding :: Maybe LineEnding }
   deriving (Eq, Ord, Show)
 
 
 -- Construction
 
 fromChar :: Char -> Line
-fromChar c = Line span (List.singleton c) nl
+fromChar c = Line (List.singleton c) nl
   where
-  (span, nl) = case c of
-    '\r' -> (Span (Pos 0 0) (Pos 1 0), Just CR)
-    '\n' -> (Span (Pos 0 0) (Pos 1 0), Just LF)
-    _    -> (Span (Pos 0 0) (Pos 0 1), Nothing)
+  nl = case c of
+    '\r' -> Just CR
+    '\n' -> Just LF
+    _    -> Nothing
 
 
 -- Elimination

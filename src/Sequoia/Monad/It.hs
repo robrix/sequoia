@@ -44,7 +44,6 @@ import           Foreign.Ptr
 import           Prelude hiding (any, take)
 import qualified Sequoia.Cons as List
 import           Sequoia.Line
-import           Sequoia.Span
 import           System.IO hiding (Newline(..))
 
 -- Iteratees
@@ -148,12 +147,12 @@ feedIt i r = runIt (const i) ($ r) i
 -- Parsing
 
 getLineIt :: It Char Line
-getLineIt = loop (Span (Pos 0 0) (Pos 0 0), List.nil) Nothing
+getLineIt = loop List.nil Nothing
   where
-  loop (span, acc) prev = rollIt $ \case
-    Just '\n' -> doneIt (Line span acc (Just (if prev == Just '\r' then CRLF else LF)))
-    Just c    -> loop (span, List.snoc acc c) (Just c)
-    Nothing   -> doneIt (Line span acc Nothing)
+  loop acc prev = rollIt $ \case
+    Just '\n' -> doneIt (Line acc (Just (if prev == Just '\r' then CRLF else LF)))
+    Just c    -> loop (List.snoc acc c) (Just c)
+    Nothing   -> doneIt (Line acc Nothing)
 
 getLinesIt :: It Char [Line]
 getLinesIt = repeatIt (guarding (not . nullLine)) getLineIt
