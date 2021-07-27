@@ -156,11 +156,11 @@ nullLine :: Line -> Bool
 nullLine = (&&) <$> null . lineContents <*> null . lineEnding
 
 getLineIt :: It Char Line
-getLineIt = loop (Span (Pos 0 0) (Pos 0 0)) List.nil Nothing
+getLineIt = loop (Span (Pos 0 0) (Pos 0 0), List.nil) Nothing
   where
-  loop span acc prev = rollIt $ \case
+  loop (span, acc) prev = rollIt $ \case
     Just '\n' -> doneIt (Line span acc (Just (if prev == Just '\r' then CRLF else LF)))
-    Just c    -> loop span (List.snoc acc c) (Just c)
+    Just c    -> loop (span, List.snoc acc c) (Just c)
     Nothing   -> doneIt (Line span acc Nothing)
 
 getLinesIt :: It Char [Line]
