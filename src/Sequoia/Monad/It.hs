@@ -126,7 +126,7 @@ mfoldIt :: (a -> s) -> (forall x . (x -> s) -> ((Maybe r -> x) -> s)) -> (It r a
 mfoldIt p k = go where go = mrunIt p (k . (go .))
 
 runIt :: (a -> s) -> ((Maybe r -> It r a) -> s) -> (It r a -> s)
-runIt p k (It i) = i p k
+runIt p k = mrunIt p (fmap k . fmap)
 
 mrunIt :: (a -> s) -> (forall x . (x -> It r a) -> (Maybe r -> x) -> s) -> (It r a -> s)
 mrunIt p k (It i) = i p (k id)
