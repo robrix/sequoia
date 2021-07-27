@@ -92,7 +92,7 @@ rollIt :: (Maybe r -> It r a) -> It r a
 rollIt = mrollIt id
 
 mrollIt :: (x -> It r a) -> (Maybe r -> x) -> It r a
-mrollIt k r = It (\ _ f -> f (k . r))
+mrollIt k r = mfromGetIt (\ _ f -> f k r)
 
 
 unfoldIt :: (s -> Either a (Maybe r -> s)) -> (s -> It r a)
