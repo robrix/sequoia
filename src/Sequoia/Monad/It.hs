@@ -114,7 +114,7 @@ foldIt :: (a -> s) -> ((Maybe r -> s) -> s) -> (It r a -> s)
 foldIt p k = go where go = mfoldIt p ((k .) . fmap)
 
 mfoldIt :: (a -> s) -> (forall x . (x -> s) -> ((Maybe r -> x) -> s)) -> (It r a -> s)
-mfoldIt p k = go where go = runIt p (k go)
+mfoldIt p k = go where go = mrunIt p (k . (go .))
 
 runIt :: (a -> s) -> ((Maybe r -> It r a) -> s) -> (It r a -> s)
 runIt p k (It i) = i p k
