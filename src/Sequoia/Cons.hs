@@ -39,7 +39,7 @@ import Data.Bifunctor (Bifunctor(..))
 import Data.Bool (bool)
 import Data.Foldable (Foldable(..))
 import Data.Functor.Classes
-import Data.Semialign (Repeat(..), Semialign(..), Unalign(..), Unzip(..), Zip(..))
+import Data.Semialign (Align(..), Repeat(..), Semialign(..), Unalign(..), Unzip(..), Zip(..))
 import Data.These
 import GHC.Exts (IsList(..))
 import Prelude hiding (drop, dropWhile, filter, head, repeat, reverse, tail, take, takeWhile, zip, zipWith)
@@ -116,6 +116,9 @@ instance Semialign List where
     (foldr (cons . f . That) nil)
     as bs)
 
+instance Align List where
+  nil = fromFoldr (const id)
+
 instance Unalign List where
   unalign = foldr (these (first . cons) (second . cons) ((. cons) . bimap . cons)) (nil, nil)
 
@@ -141,9 +144,6 @@ instance IsList (List a) where
 
 fromFoldr :: (forall r . Foldr r a) -> List a
 fromFoldr = FromFoldr
-
-nil :: List a
-nil = fromFoldr (const id)
 
 cons :: a -> List a -> List a
 cons h t = fromFoldr (\ cons -> cons h . toFoldr t cons)
