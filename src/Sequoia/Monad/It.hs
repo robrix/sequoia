@@ -80,7 +80,7 @@ doneIt :: a -> It r a
 doneIt a = It (\ f _ -> f a)
 
 rollIt :: (Maybe r -> It r a) -> It r a
-rollIt k = It (\ _ f -> f k)
+rollIt = mrollIt id
 
 mrollIt :: (x -> It r a) -> (Maybe r -> x) -> It r a
 mrollIt k r = It (\ _ f -> f (k . r))
