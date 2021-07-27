@@ -1,8 +1,6 @@
 module Sequoia.Line
 ( -- * Lines
   Line(..)
-  -- * Construction
-, fromChar
   -- * Elimination
 , nullLine
   -- * Line endings
@@ -15,17 +13,6 @@ import qualified Sequoia.Cons as List
 
 data Line = Line { lineContents :: List.List Char, lineEnding :: Maybe LineEnding }
   deriving (Eq, Ord, Show)
-
-
--- Construction
-
-fromChar :: Char -> Line
-fromChar c = Line (List.singleton c) nl
-  where
-  nl = case c of
-    '\r' -> Just CR
-    '\n' -> Just LF
-    _    -> Nothing
 
 
 -- Elimination
