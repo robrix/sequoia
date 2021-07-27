@@ -120,16 +120,21 @@ repeatIt rel i = loop List.nil
 -- Elimination
 
 foldIt :: (a -> s) -> ((Maybe r -> s) -> s) -> (It r a -> s)
-foldIt p k = go where go = mfoldIt p ((k .) . fmap)
+foldIt p k = go where go = mfoldIt p (mk k)
 
 mfoldIt :: (a -> s) -> (forall x . (x -> s) -> ((Maybe r -> x) -> s)) -> (It r a -> s)
 mfoldIt p k = go where go = mrunIt p (k . (go .))
 
 runIt :: (a -> s) -> ((Maybe r -> It r a) -> s) -> (It r a -> s)
-runIt p k = mrunIt p (fmap k . fmap)
+runIt p k = mrunIt p (mk k)
 
 mrunIt :: (a -> s) -> (forall x . (x -> It r a) -> (Maybe r -> x) -> s) -> (It r a -> s)
 mrunIt p k i = getIt i p k
+
+
+-- | Promote a continuation to a Mendler-style continuation.
+mk :: ((Maybe r -> t) -> s) -> (forall x . (x -> t) -> (Maybe r -> x) -> s)
+mk k = (k .) . (.)
 
 
 evalIt :: Monad m => It r a -> m a
