@@ -70,7 +70,7 @@ instance Functor (It r) where
 
 instance Applicative (It r) where
   pure = doneIt
-  f <*> a = foldIt (<$> a) rollIt f
+  f <*> a = mfoldIt (<$> a) mrollIt f
 
 instance Monad (It r) where
   m >>= f = foldIt f rollIt m
