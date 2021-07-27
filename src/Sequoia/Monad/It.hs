@@ -52,7 +52,7 @@ import           System.IO
 -- Iteratees
 
 -- | Iteratees, based loosely on the one in @trifecta@.
-newtype It r a = It { getIt :: forall s . (a -> s) -> ((Maybe r -> It r a) -> s) -> s }
+newtype It r a = It { getIt :: forall s . (a -> s) -> (forall x . (x -> It r a) -> (Maybe r -> x) -> s) -> s }
 
 instance Cat.Category It where
   id = rollIt (maybe Cat.id doneIt)
@@ -82,7 +82,7 @@ fromGetIt :: (forall s . (a -> s) -> ((Maybe r -> It r a) -> s) -> s) -> It r a
 fromGetIt f = mfromGetIt (\ a k -> f a (k id))
 
 mfromGetIt :: (forall s . (a -> s) -> (forall x . (x -> It r a) -> (Maybe r -> x) -> s) -> s) -> It r a
-mfromGetIt f = It (\ a k -> f a (fmap k . fmap))
+mfromGetIt = It
 
 
 doneIt :: a -> It r a
@@ -129,7 +129,7 @@ runIt :: (a -> s) -> ((Maybe r -> It r a) -> s) -> (It r a -> s)
 runIt p k = mrunIt p (fmap k . fmap)
 
 mrunIt :: (a -> s) -> (forall x . (x -> It r a) -> (Maybe r -> x) -> s) -> (It r a -> s)
-mrunIt p k (It i) = i p (k id)
+mrunIt p k (It i) = i p k
 
 
 evalIt :: Monad m => It r a -> m a
