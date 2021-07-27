@@ -149,19 +149,19 @@ feedIt i r = runIt (const i) ($ r) i
 
 -- Parsing
 
-data Line = Line { lineContents :: List.List Char, lineEnding :: Maybe Newline }
+data Line = Line { lineSpan :: Span, lineContents :: List.List Char, lineEnding :: Maybe Newline }
   deriving (Eq, Ord, Show)
 
 nullLine :: Line -> Bool
 nullLine = (&&) <$> null . lineContents <*> null . lineEnding
 
 getLineIt :: It Char Line
-getLineIt = loop List.nil Nothing
+getLineIt = loop (Span (Pos 0 0) (Pos 0 0)) List.nil Nothing
   where
-  loop acc prev = rollIt $ \case
-    Just '\n' -> doneIt (Line acc (Just (if prev == Just '\r' then CRLF else LF)))
-    Just c    -> loop (List.snoc acc c) (Just c)
-    Nothing   -> doneIt (Line acc Nothing)
+  loop span acc prev = rollIt $ \case
+    Just '\n' -> doneIt (Line span acc (Just (if prev == Just '\r' then CRLF else LF)))
+    Just c    -> loop span (List.snoc acc c) (Just c)
+    Nothing   -> doneIt (Line span acc Nothing)
 
 getLinesIt :: It Char [Line]
 getLinesIt = repeatIt (guarding (not . nullLine)) getLineIt
