@@ -38,6 +38,7 @@ import Control.Monad.Zip
 import Data.Bool (bool)
 import Data.Foldable (Foldable(..))
 import Data.Functor.Classes
+import Data.These
 import GHC.Exts (IsList(..))
 import Prelude hiding (drop, dropWhile, filter, head, repeat, reverse, tail, take, takeWhile, zip, zipWith)
 
@@ -174,18 +175,6 @@ zip = zipWith (,)
 zipWith :: (a -> b -> c) -> (List a -> List b -> List c)
 zipWith f a b = fromFoldr (\ cons nil -> toFoldr a (\ ha t b -> toFoldr b (\ hb _ -> cons (f ha hb) (t (tail b))) nil) (const nil) b)
 
-
-data These a b
-  = This a
-  | That b
-  | These a b
-  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-
-these :: (a -> r) -> (b -> r) -> (a -> b -> r) -> (These a b -> r)
-these f g h = \case
-  This a    -> f a
-  That b    -> g b
-  These a b -> h a b
 
 align :: List a -> List b -> List (These a b)
 align = alignWith id

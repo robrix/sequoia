@@ -185,6 +185,7 @@ library
     , distributive
     , fused-effects
     , profunctors
+    , these
     , transformers
   hs-source-dirs:   src
 
