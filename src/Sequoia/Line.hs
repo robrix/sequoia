@@ -25,3 +25,7 @@ data LineEnding
   | LF
   | CRLF
   deriving (Bounded, Enum, Eq, Ord, Show)
+
+instance Semigroup LineEnding where
+  CR <> LF = CRLF
+  _  <> b  = b
