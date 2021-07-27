@@ -3,6 +3,7 @@ module Sequoia.Monad.It
   It(..)
   -- * Construction
 , fromGetIt
+, mfromGetIt
 , doneIt
 , rollIt
 , mrollIt
@@ -79,6 +80,9 @@ instance Monad (It r) where
 
 fromGetIt :: (forall s . (a -> s) -> ((Maybe r -> It r a) -> s) -> s) -> It r a
 fromGetIt = It
+
+mfromGetIt :: (forall s . (a -> s) -> (forall x . (x -> It r a) -> (Maybe r -> x) -> s) -> s) -> It r a
+mfromGetIt f = It (\ a k -> f a (fmap k . fmap))
 
 
 doneIt :: a -> It r a
