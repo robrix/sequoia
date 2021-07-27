@@ -129,7 +129,7 @@ runIt :: (a -> s) -> ((Maybe r -> It r a) -> s) -> (It r a -> s)
 runIt p k = mrunIt p (fmap k . fmap)
 
 mrunIt :: (a -> s) -> (forall x . (x -> It r a) -> (Maybe r -> x) -> s) -> (It r a -> s)
-mrunIt p k (It i) = i p k
+mrunIt p k i = getIt i p k
 
 
 evalIt :: Monad m => It r a -> m a
