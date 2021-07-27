@@ -93,10 +93,10 @@ mrollIt k r = mfromGetIt (\ _ f -> f k r)
 
 
 unfoldIt :: (s -> Either a (Maybe r -> s)) -> (s -> It r a)
-unfoldIt coalg = go where go = munfoldIt ((. coalg) . fmap . (.))
+unfoldIt coalg = go where go = munfoldIt (fmap (id,) . coalg)
 
-munfoldIt :: (forall x . (s -> x) -> (s -> Either a (Maybe r -> x))) -> (s -> It r a)
-munfoldIt coalg = go where go = either doneIt rollIt . coalg go
+munfoldIt :: (s -> Either a (x -> s, Maybe r -> x)) -> (s -> It r a)
+munfoldIt coalg = go where go s = mfromGetIt (\ p k -> either p (uncurry (k . (go .))) (coalg s))
 
 
 needIt :: (r -> Maybe a) -> It r a
