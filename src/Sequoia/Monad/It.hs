@@ -66,7 +66,7 @@ instance Choice It where
   right' = foldIt (pure . Right) (\ k -> rollIt (maybe (k Nothing) (either (pure . Left) (k . Just))))
 
 instance Functor (It r) where
-  fmap f = go where go = foldIt (doneIt . f) rollIt
+  fmap f = mfoldIt (doneIt . f) mrollIt
 
 instance Applicative (It r) where
   pure = doneIt
