@@ -1,14 +1,23 @@
 module Sequoia.Span
 ( -- * Source positions
   Pos(..)
+, line_
+, col_
   -- * Source spans
 , Span(..)
 ) where
+
+import Sequoia.Optic.Lens
 
 -- Source positions
 
 data Pos = Pos { line :: {-# UNPACK #-} !Int, col :: {-# UNPACK #-} !Int }
   deriving (Eq, Ord, Show)
+
+line_, col_ :: Lens' Pos Int
+
+line_ = lens line (\ p line -> p{ line })
+col_  = lens col  (\ p col  -> p{ col  })
 
 
 -- Source spans
