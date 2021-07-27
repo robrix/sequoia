@@ -4,6 +4,7 @@ module Sequoia.Monad.It
   -- * Construction
 , doneIt
 , rollIt
+, mrollIt
 , unfoldIt
 , munfoldIt
 , needIt
@@ -79,6 +80,9 @@ doneIt a = It (\ f _ -> f a)
 
 rollIt :: (Maybe r -> It r a) -> It r a
 rollIt k = It (\ _ f -> f k)
+
+mrollIt :: (x -> It r a) -> (Maybe r -> x) -> It r a
+mrollIt k r = It (\ _ f -> f (k . r))
 
 
 unfoldIt :: (s -> Either a (Maybe r -> s)) -> (s -> It r a)
