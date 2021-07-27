@@ -5,6 +5,7 @@ module Sequoia.Monad.It
 , doneIt
 , rollIt
 , unfoldIt
+, munfoldIt
 , needIt
 , toList
 , repeatIt
@@ -82,6 +83,9 @@ rollIt k = It (\ _ f -> f k)
 
 unfoldIt :: (s -> Either a (Maybe r -> s)) -> (s -> It r a)
 unfoldIt coalg = go where go z = It (\ a k -> either a (k . fmap go) (coalg z))
+
+munfoldIt :: (forall x . (s -> x) -> (s -> Either a (Maybe r -> x))) -> (s -> It r a)
+munfoldIt coalg = go where go z = It (\ a k -> either a k (coalg go z))
 
 
 needIt :: (r -> Maybe a) -> It r a
