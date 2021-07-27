@@ -21,8 +21,6 @@ module Sequoia.Monad.It
   -- * Computation
 , feedIt
   -- * Parsing
-, Line(..)
-, LineEnding(..)
 , getLineIt
 , getLinesIt
   -- * Enumerators
@@ -44,6 +42,7 @@ import           Foreign.C.String
 import           Foreign.Marshal.Alloc
 import           Foreign.Ptr
 import           Prelude hiding (any, take)
+import           Sequoia.Line
 import qualified Sequoia.List as List
 import           Sequoia.Span
 import           System.IO hiding (Newline(..))
@@ -147,18 +146,6 @@ feedIt i r = runIt (const i) ($ r) i
 
 
 -- Parsing
-
-data Line = Line { lineSpan :: Span, lineContents :: List.List Char, lineEnding :: Maybe LineEnding }
-  deriving (Eq, Ord, Show)
-
-data LineEnding
-  = CR
-  | LF
-  | CRLF
-  deriving (Bounded, Enum, Eq, Ord, Show)
-
-nullLine :: Line -> Bool
-nullLine = (&&) <$> null . lineContents <*> null . lineEnding
 
 getLineIt :: It Char Line
 getLineIt = loop (Span (Pos 0 0) (Pos 0 0), List.nil) Nothing
