@@ -86,7 +86,7 @@ mfromGetIt f = It (\ a k -> f a (fmap k . fmap))
 
 
 doneIt :: a -> It r a
-doneIt a = It (\ f _ -> f a)
+doneIt a = fromGetIt (const . ($ a))
 
 rollIt :: (Maybe r -> It r a) -> It r a
 rollIt = mrollIt id
