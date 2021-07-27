@@ -35,11 +35,12 @@ module Sequoia.Cons
 
 import Control.Applicative (Alternative(..), liftA2)
 import Control.Monad.Zip
+import Data.Bifunctor (Bifunctor(..))
 import Data.Bool (bool)
 import Data.Foldable (Foldable(..))
 import Data.Functor.Classes
+import Data.Semialign (Repeat(..), Semialign(..), Unalign(..), Unzip(..), Zip(..))
 import Data.These
-import Data.Zip (Repeat(..), Semialign(..), Unzip(..), Zip(..))
 import GHC.Exts (IsList(..))
 import Prelude hiding (drop, dropWhile, filter, head, repeat, reverse, tail, take, takeWhile, zip, zipWith)
 
@@ -114,6 +115,9 @@ instance Semialign List where
         bs)
     (foldr (cons . f . That) nil)
     as bs)
+
+instance Unalign List where
+  unalign = foldr (these (first . cons) (second . cons) ((. cons) . bimap . cons)) (nil, nil)
 
 instance Zip List where
   zip = zipWith (,)
