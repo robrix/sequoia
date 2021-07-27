@@ -73,7 +73,7 @@ instance Applicative (It r) where
   f <*> a = mfoldIt (<$> a) mrollIt f
 
 instance Monad (It r) where
-  m >>= f = foldIt f rollIt m
+  m >>= f = mfoldIt f mrollIt m
 
 
 -- Construction
