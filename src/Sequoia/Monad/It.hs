@@ -97,7 +97,7 @@ repeatIt rel i = loop List.nil
 -- Elimination
 
 foldIt :: (a -> s) -> ((Maybe r -> s) -> s) -> (It r a -> s)
-foldIt p k = go where go = runIt p (k . fmap go)
+foldIt p k = go where go = mfoldIt p ((k .) . fmap)
 
 mfoldIt :: (a -> s) -> (forall x . (x -> s) -> ((Maybe r -> x) -> s)) -> (It r a -> s)
 mfoldIt p k = go where go = runIt p (k go)
