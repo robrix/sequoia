@@ -159,11 +159,11 @@ expCoexp f = exp (fmap f . (>-))
 evalExp :: MonadEnv e m => e --|Exp e r|-> r -> m r
 evalExp f = idK ↓ f ↑ idV
 
-appExp :: a --|Exp e r|-> b -> e ∘ (e ∘ a -> b • r • r)
-appExp f = V (\ e a -> K (\ b -> b ↓ f ↑ a <== e))
+appExp :: a --|Exp e r|-> b -> e ∘ a -> b • r -> e ==> r
+appExp = flip . runExp
 
-appExp2 :: a --|Exp e r|-> b --|Exp e r|-> c -> e ∘ (e ∘ a -> e ∘ b -> c • r • r)
-appExp2 f = V (\ e a b -> K (\ c -> K (\ g -> c ↓ g ↑ b <== e) ↓ f ↑ a <== e))
+appExp2 :: a --|Exp e r|-> b --|Exp e r|-> c -> e ∘ a -> e ∘ b -> c • r -> e ==> r
+appExp2 f a b c = cont (\ _K -> _K (\ g -> c ↓ g ↑ b) ↓ f ↑ a)
 
 runExp :: a --|Exp e r|-> b -> b • r -> e ∘ a -> e ==> r
 runExp = coerce
