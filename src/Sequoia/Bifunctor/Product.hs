@@ -5,6 +5,8 @@ module Sequoia.Bifunctor.Product
 , inP
   -- * Elimination
 , runP
+, exPl
+, exPr
 ) where
 
 import Control.Applicative (liftA2)
@@ -39,3 +41,9 @@ inP a b = P (\ f -> f a b)
 
 runP :: (a -> b -> s) -> (a × b -> s)
 runP f p = getP p f
+
+exPl :: a × b -> a
+exPl = runP const
+
+exPr :: a × b -> b
+exPr = runP (const id)
