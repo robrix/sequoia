@@ -10,6 +10,7 @@ module Sequoia.Bifunctor.Sum
 
 import Data.Bifoldable
 import Data.Bifunctor
+import Data.Bitraversable
 
 -- Sum type
 
@@ -23,6 +24,9 @@ instance Bifoldable (+) where
 
 instance Bifunctor (+) where
   bimap f g s = S (\ l r -> runS (l . f) (r . g) s)
+
+instance Bitraversable (+) where
+  bitraverse f g = runS (fmap inSl . f) (fmap inSr . g)
 
 
 -- Construction
