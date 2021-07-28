@@ -1,6 +1,9 @@
 module Sequoia.Bifunctor.Sum
 ( -- * Sum type
   type (+)(..)
+  -- * Construction
+, inSl
+, inSr
   -- * Elimination
 , runS
 ) where
@@ -20,6 +23,15 @@ instance Bifoldable (+) where
 
 instance Bifunctor (+) where
   bimap f g s = S (\ l r -> runS (l . f) (r . g) s)
+
+
+-- Construction
+
+inSl :: a -> a + b
+inSl a = S (\ l _ -> l a)
+
+inSr :: b -> a + b
+inSr b = S (\ _ r -> r b)
 
 
 -- Elimination
