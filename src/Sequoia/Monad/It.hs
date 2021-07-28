@@ -49,7 +49,7 @@ import           System.IO hiding (Newline(..))
 -- Iteratees
 
 -- | Iteratees, based loosely on the one in @trifecta@.
-newtype It r a = It { getIt :: forall s . (a -> s) -> (forall x . (x -> It r a) -> (Maybe r -> x) -> s) -> s }
+newtype It i o = It { getIt :: forall s . (o -> s) -> (forall x . (x -> It i o) -> (Maybe i -> x) -> s) -> s }
 
 instance Cat.Category It where
   id = rollIt (maybe Cat.id doneIt)
@@ -62,44 +62,44 @@ instance Choice It where
   left'  = foldIt (pure . Left)  (\ k -> rollIt (maybe (k Nothing) (either (k . Just) (pure . Right))))
   right' = foldIt (pure . Right) (\ k -> rollIt (maybe (k Nothing) (either (pure . Left) (k . Just))))
 
-instance Functor (It r) where
+instance Functor (It i) where
   fmap f = mfoldIt (doneIt . f) mrollIt
 
-instance Applicative (It r) where
+instance Applicative (It i) where
   pure = doneIt
   f <*> a = mfoldIt (<$> a) mrollIt f
 
-instance Monad (It r) where
+instance Monad (It i) where
   m >>= f = mfoldIt f mrollIt m
 
 
 -- Construction
 
-fromGetIt :: (forall s . (a -> s) -> ((Maybe r -> It r a) -> s) -> s) -> It r a
+fromGetIt :: (forall s . (o -> s) -> ((Maybe i -> It i o) -> s) -> s) -> It i o
 fromGetIt f = mfromGetIt (\ a k -> f a (k id))
 
-mfromGetIt :: (forall s . (a -> s) -> (forall x . (x -> It r a) -> (Maybe r -> x) -> s) -> s) -> It r a
+mfromGetIt :: (forall s . (o -> s) -> (forall x . (x -> It i o) -> (Maybe i -> x) -> s) -> s) -> It i o
 mfromGetIt = It
 
 
-doneIt :: a -> It r a
+doneIt :: o -> It i o
 doneIt a = fromGetIt (const . ($ a))
 
-rollIt :: (Maybe r -> It r a) -> It r a
+rollIt :: (Maybe i -> It i o) -> It i o
 rollIt = mrollIt id
 
-mrollIt :: (x -> It r a) -> (Maybe r -> x) -> It r a
+mrollIt :: (x -> It i o) -> (Maybe i -> x) -> It i o
 mrollIt k r = mfromGetIt (\ _ f -> f k r)
 
 
-unfoldIt :: (s -> Either a (Maybe r -> s)) -> (s -> It r a)
+unfoldIt :: (s -> Either o (Maybe i -> s)) -> (s -> It i o)
 unfoldIt coalg = go where go = munfoldIt (fmap (id,) . coalg)
 
-munfoldIt :: (s -> Either a (x -> s, Maybe r -> x)) -> (s -> It r a)
+munfoldIt :: (s -> Either o (x -> s, Maybe i -> x)) -> (s -> It i o)
 munfoldIt coalg = go where go s = mfromGetIt (\ p k -> either p (uncurry (k . (go .))) (coalg s))
 
 
-needIt :: (r -> Maybe a) -> It r a
+needIt :: (i -> Maybe o) -> It i o
 needIt f = i where i = rollIt (maybe i (maybe i doneIt . f))
 
 
@@ -108,7 +108,7 @@ toList = List.toList <$> go List.nil
   where
   go as = i where i = rollIt (maybe (pure as) (go . List.snoc as))
 
-repeatIt :: (b -> Maybe c) -> It a b -> It a [c]
+repeatIt :: (o -> Maybe o') -> It i o -> It i [o']
 repeatIt rel i = loop List.nil
   where
   loop acc = i >>= maybe (pure (List.toList acc)) (loop . List.snoc acc) . rel
@@ -116,31 +116,31 @@ repeatIt rel i = loop List.nil
 
 -- Elimination
 
-foldIt :: (a -> s) -> ((Maybe r -> s) -> s) -> (It r a -> s)
+foldIt :: (o -> s) -> ((Maybe i -> s) -> s) -> (It i o -> s)
 foldIt p k = go where go = mfoldIt p (mk k)
 
-mfoldIt :: (a -> s) -> (forall x . (x -> s) -> ((Maybe r -> x) -> s)) -> (It r a -> s)
+mfoldIt :: (o -> s) -> (forall x . (x -> s) -> ((Maybe i -> x) -> s)) -> (It i o -> s)
 mfoldIt p k = go where go = mrunIt p (k . (go .))
 
-runIt :: (a -> s) -> ((Maybe r -> It r a) -> s) -> (It r a -> s)
+runIt :: (o -> s) -> ((Maybe i -> It i o) -> s) -> (It i o -> s)
 runIt p k = mrunIt p (mk k)
 
-mrunIt :: (a -> s) -> (forall x . (x -> It r a) -> (Maybe r -> x) -> s) -> (It r a -> s)
+mrunIt :: (o -> s) -> (forall x . (x -> It i o) -> (Maybe i -> x) -> s) -> (It i o -> s)
 mrunIt p k i = getIt i p k
 
 
 -- | Promote a continuation to a Mendler-style continuation.
-mk :: ((Maybe r -> t) -> s) -> (forall x . (x -> t) -> (Maybe r -> x) -> s)
+mk :: ((Maybe i -> t) -> s) -> (forall x . (x -> t) -> (Maybe i -> x) -> s)
 mk k = (k .) . (.)
 
 
-evalIt :: Monad m => It r a -> m a
+evalIt :: Monad m => It i o -> m o
 evalIt = foldIt pure ($ Nothing)
 
 
 -- Computation
 
-feedIt :: It r a -> Maybe r -> It r a
+feedIt :: It i o -> Maybe i -> It i o
 feedIt i r = runIt (const i) ($ r) i
 
 
