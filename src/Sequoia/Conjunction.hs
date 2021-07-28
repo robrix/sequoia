@@ -53,6 +53,7 @@ import Control.Category (Category, (>>>))
 import Data.Functor.Contravariant
 import Data.Functor.Rep as Co
 import Data.Profunctor
+import Sequoia.Bifunctor.Product
 import Sequoia.Optic.Getter
 import Sequoia.Optic.Iso
 import Sequoia.Optic.Lens
@@ -78,6 +79,12 @@ instance Conj (,) where
   (>--<) = (,)
   exl = fst
   exr = snd
+
+instance Conj (×) where
+  a >--< b = P (\ k -> k a b)
+  exl = runP const
+  exr = runP (const id)
+
 
 inlr :: Conj c => a -> b -> a `c` b
 inlr = (>--<)
