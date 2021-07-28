@@ -6,7 +6,6 @@ module Sequoia.Bifunctor.Sum
 ) where
 
 import Data.Bifunctor
-import Sequoia.Disjunction
 
 -- Sum type
 
@@ -17,11 +16,6 @@ infixr 6 +
 
 instance Bifunctor (+) where
   bimap f g (S s) = S (\ l r -> s (l . f) (r . g) )
-
-instance Disj (+) where
-  inl a = S (\ f _ -> f a)
-  inr b = S (\ _ g -> g b)
-  (<-->) = runS
 
 
 -- Elimination

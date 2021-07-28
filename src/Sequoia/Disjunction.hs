@@ -42,6 +42,7 @@ import Control.Category (Category, (>>>))
 import Data.Profunctor
 import Data.Profunctor.Rep
 import Data.Profunctor.Sieve
+import Sequoia.Bifunctor.Sum
 import Sequoia.Optic.Lens
 import Sequoia.Optic.Prism
 import Sequoia.Profunctor.Diagonal
@@ -58,6 +59,11 @@ instance Disj Either where
   inl = Left
   inr = Right
   (<-->) = either
+
+instance Disj (+) where
+  inl a = S (\ f _ -> f a)
+  inr b = S (\ _ g -> g b)
+  (<-->) = runS
 
 _inl :: Disj d => Prism (a `d` b) (a' `d` b) a a'
 _inl = prism inl (inr <--> inl . inr)
