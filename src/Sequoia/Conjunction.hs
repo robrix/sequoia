@@ -82,8 +82,8 @@ instance Conj (,) where
 
 instance Conj (×) where
   a >--< b = P (\ k -> k a b)
-  exl = runP const
-  exr = runP (const id)
+  exl = exPl
+  exr = exPr
 
 
 inlr :: Conj c => a -> b -> a `c` b
