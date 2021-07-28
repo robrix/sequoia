@@ -7,8 +7,10 @@ module Sequoia.Bifunctor.Product
 , runP
 ) where
 
+import Control.Applicative (liftA2)
 import Data.Bifoldable
 import Data.Bifunctor
+import Data.Bitraversable
 
 -- Product type
 
@@ -22,6 +24,9 @@ instance Bifoldable (×) where
 
 instance Bifunctor (×) where
   bimap f g p = P (\ lr -> runP (\ l r -> lr (f l) (g r)) p)
+
+instance Bitraversable (×) where
+  bitraverse f g = runP (\ l r -> liftA2 inP (f l) (g r))
 
 
 -- Construction
