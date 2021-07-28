@@ -17,8 +17,6 @@ module Sequoia.Profunctor.Exponential
 , expCoexp
   -- ** Elimination
 , evalExp
-, appExp
-, appExp2
 , runExp
 , runExp'
 , elimExp
@@ -158,12 +156,6 @@ expCoexp f = exp (fmap f . (>-))
 
 evalExp :: MonadEnv e m => e --|Exp e r|-> r -> m r
 evalExp f = idK ↓ f ↑ idV
-
-appExp :: a --|Exp e r|-> b -> e ∘ a -> b • r -> e ==> r
-appExp = flip . runExp
-
-appExp2 :: a --|Exp e r|-> b --|Exp e r|-> c -> e ∘ a -> e ∘ b -> c • r -> e ==> r
-appExp2 f a b c = cont (\ _K -> _K (\ g -> c ↓ g ↑ b) ↓ f ↑ a)
 
 runExp :: a --|Exp e r|-> b -> b • r -> e ∘ a -> e ==> r
 runExp = coerce
