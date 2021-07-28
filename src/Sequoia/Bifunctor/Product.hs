@@ -1,6 +1,8 @@
 module Sequoia.Bifunctor.Product
 ( -- * Product type
   type (×)(..)
+  -- * Construction
+, inP
   -- * Elimination
 , runP
 ) where
@@ -20,6 +22,12 @@ instance Bifoldable (×) where
 
 instance Bifunctor (×) where
   bimap f g p = P (\ lr -> runP (\ l r -> lr (f l) (g r)) p)
+
+
+-- Construction
+
+inP :: a -> b -> a × b
+inP a b = P (\ f -> f a b)
 
 
 -- Elimination
