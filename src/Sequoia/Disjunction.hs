@@ -61,8 +61,8 @@ instance Disj Either where
   (<-->) = either
 
 instance Disj (+) where
-  inl a = S (\ f _ -> f a)
-  inr b = S (\ _ g -> g b)
+  inl = inSl
+  inr = inSr
   (<-->) = runS
 
 _inl :: Disj d => Prism (a `d` b) (a' `d` b) a a'
