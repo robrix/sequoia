@@ -15,7 +15,7 @@ newtype a × b = P { getP :: forall t . (a -> b -> t) -> t }
 infixr 7 ×
 
 instance Bifunctor (×) where
-  bimap f g (P p) = P (\ lr -> p (\ l r -> lr (f l) (g r)))
+  bimap f g p = P (\ lr -> runP (\ l r -> lr (f l) (g r)) p)
 
 
 -- Elimination
