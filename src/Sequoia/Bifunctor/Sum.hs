@@ -19,7 +19,7 @@ instance Bifoldable (+) where
   bifoldMap f g = runS f g
 
 instance Bifunctor (+) where
-  bimap f g (S s) = S (\ l r -> s (l . f) (r . g) )
+  bimap f g s = S (\ l r -> runS (l . f) (r . g) s)
 
 
 -- Elimination
