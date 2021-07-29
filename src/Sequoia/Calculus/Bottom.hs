@@ -14,18 +14,18 @@ import Sequoia.Connective.Bottom
 
 class Core s => BottomIntro s where
   botL
-    -- ------------------------
-    :: Bottom < _Γ -|s e r|- _Δ
+    -- --------------------------
+    :: Bottom r < _Γ -|s e r|- _Δ
 
   botR
     :: _Γ -|s e r|- _Δ
-    -- ------------------------
-    -> _Γ -|s e r|- _Δ > Bottom
+    -- --------------------------
+    -> _Γ -|s e r|- _Δ > Bottom r
 
 
 botR'
   :: BottomIntro s
-  => _Γ -|s e r|- _Δ > Bottom
-  -- ------------------------
+  => _Γ -|s e r|- _Δ > Bottom r
+  -- --------------------------
   -> _Γ -|s e r|- _Δ
 botR' = (>>> botL)

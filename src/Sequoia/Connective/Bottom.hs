@@ -8,9 +8,9 @@ import Sequoia.Polarity
 
 -- Negative falsity
 
-data Bottom
+data Bottom r
 
-instance Polarized N Bottom where
+instance Polarized N (Bottom r) where
 
-absurdN :: Bottom -> a
+absurdN :: Bottom r -> a
 absurdN = \case
