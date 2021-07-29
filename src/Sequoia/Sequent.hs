@@ -192,7 +192,7 @@ instance BottomIntro Seq where
 
 instance OneIntro Seq where
   oneL = wkL
-  oneR = liftR (pure One)
+  oneR = liftR (V One)
 
 instance ParIntro Seq where
   parL a b = popL (env . (pushL a <∘∘> pushL b))
