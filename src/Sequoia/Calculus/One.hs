@@ -14,18 +14,18 @@ import Sequoia.Connective.One
 
 class Core s => OneIntro s where
   oneL
-    ::       _Γ -|s e r|- _Δ
-    -- ---------------------
-    -> One < _Γ -|s e r|- _Δ
+    ::         _Γ -|s e r|- _Δ
+    -- -----------------------
+    -> One e < _Γ -|s e r|- _Δ
 
   oneR
-    -- ---------------------
-    :: _Γ -|s e r|- _Δ > One
+    -- -----------------------
+    :: _Γ -|s e r|- _Δ > One e
 
 
 oneL'
   :: OneIntro s
-  => One < _Γ -|s e r|- _Δ
-  -- ---------------------
-  ->       _Γ -|s e r|- _Δ
+  => One e < _Γ -|s e r|- _Δ
+  -- -----------------------
+  ->         _Γ -|s e r|- _Δ
 oneL' = (oneR >>>)

@@ -54,14 +54,14 @@ tensorL' p = init ⊢⊗ wkL init >>> popL (wkL . wkL . pushL p)
 
 tensorIdentityL
   :: (TensorIntro s, OneIntro s, Pos a)
-  -- -----------------------------
-  => One ⊗ a < _Γ -|s e r|- _Δ > a
+  -- -------------------------------
+  => One e ⊗ a < _Γ -|s e r|- _Δ > a
 tensorIdentityL = tensorL (oneL init)
 
 tensorIdentityR
   :: (TensorIntro s, OneIntro s, Pos a)
-  -- -----------------------------
-  => a < _Γ -|s e r|- _Δ > a ⊗ One
+  -- -------------------------------
+  => a < _Γ -|s e r|- _Δ > a ⊗ One e
 tensorIdentityR = init ⊢⊗ oneR
 
 tensorAssociativity

@@ -7,7 +7,7 @@ import Sequoia.Polarity
 
 -- Positive truth
 
-data One = One
+data One e = One
   deriving (Eq, Ord, Show)
 
-instance Polarized P One where
+instance Polarized P (One e) where
