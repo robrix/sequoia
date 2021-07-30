@@ -20,7 +20,7 @@ import Sequoia.Profunctor.Exponential
 import Sequoia.Profunctor.Value
 
 elimFun :: a ~~Fun e r~> b -> b >-Sub e r-~ a -> e ==> r
-elimFun f = elimExp (getFun f) . getSub
+elimFun f = elimExp (runFunExp f) . getSub
 
 funPar1 :: e ∘ (r ¬a ⅋ b) • r <-> e ∘ (a ~~Fun e r~> b) • r
 funPar1
@@ -33,7 +33,7 @@ funPar2
   <-> lmap (\ p -> K ((p •) . (mkPar (inrK (lmap pure p)) =<<)))
 
 mkPar :: b • r -> a ~~Fun e r~> b -> e ∘ (r ¬a ⅋ b)
-mkPar p f = V (\ e -> inl (Not (K (\ a -> p ↓ getFun f ↑ pure a <== e))))
+mkPar p f = V (\ e -> inl (Not (K (\ a -> p ↓ runFunExp f ↑ pure a <== e))))
 
 mkFun :: r ¬a ⅋ b -> a ~~Fun e r~> b
 mkFun p = fun (\ b a -> C (\ e -> ((• e ∘ a) . getNot <--> (b •)) p))

@@ -223,7 +223,7 @@ instance XOrIntro Seq where
 -- Implication
 
 instance FunctionIntro Seq where
-  funL a b = popL (val (\ f -> a >>> liftLR (getFun f) >>> wkL' b))
+  funL a b = popL (val (\ f -> a >>> liftLR (runFunExp f) >>> wkL' b))
   funR = lowerLR (liftR . pure . funExp) . wkR'
 
 instance SubtractionIntro Seq where

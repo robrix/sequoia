@@ -6,6 +6,8 @@ module Sequoia.Connective.Function
   -- * Construction
 , fun
 , funExp
+  -- * Elimination
+, runFunExp
 ) where
 
 import qualified Control.Category as Cat
@@ -21,7 +23,7 @@ import           Sequoia.Profunctor.Value
 
 -- Implication
 
-newtype Fun e r a b = Fun { getFun :: Exp e r a b }
+newtype Fun e r a b = Fun { getFun :: (b • r) -> (e ∘ a) -> (e ==> r) }
   deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via Exp e r
   deriving (Functor) via Exp e r a
 
@@ -37,7 +39,13 @@ infixr 5 ~>
 -- Construction
 
 fun :: (b • r -> e ∘ a -> e ==> r) -> a ~~Fun e r~> b
-fun = funExp . exp
+fun = Fun
 
 funExp :: Exp e r a b -> a ~~Fun e r~> b
-funExp = Fun
+funExp = fun . runExp
+
+
+-- Elimination
+
+runFunExp :: a ~~Fun e r~> b -> Exp e r a b
+runFunExp = exp . getFun
