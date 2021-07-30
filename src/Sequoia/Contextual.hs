@@ -4,6 +4,7 @@ module Sequoia.Contextual
 ( -- * Contextual
   Contextual(..)
   -- ** Swapping
+, swapΓΔ
 , swapΓ
 , swapΔ
   -- ** Popping
@@ -69,12 +70,19 @@ import Sequoia.Profunctor.Value
 -- Contextual
 
 class (Core s, forall e r a . MonadEnv e (s e r a), forall e r . Profunctor (s e r)) => Contextual s where
-  swapΓΔ
-    :: (Coexp e r _Δ  _Γ  -> _Γ' -|s e r|- _Δ')
-    -> (Coexp e r _Δ' _Γ' -> _Γ  -|s e r|- _Δ )
+  sequent :: (_Δ • r -> e ∘ _Γ -> e ==> r) -> _Γ -|s e r|- _Δ
+  appSequent :: _Γ -|s e r|- _Δ -> (_Δ • r -> e ∘ _Γ -> e ==> r)
+
 
 
 -- Swapping
+
+swapΓΔ
+  :: Contextual s
+  => (Coexp e r _Δ  _Γ  -> _Γ' -|s e r|- _Δ')
+  -> (Coexp e r _Δ' _Γ' -> _Γ  -|s e r|- _Δ )
+swapΓΔ f c = sequent (\ _Δ _Γ -> appSequent (f (_Δ >- _Γ)) (forget c) (recall c))
+
 
 swapΓ
   :: Contextual s
