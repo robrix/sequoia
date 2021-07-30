@@ -26,6 +26,8 @@ type (¬) = Not
 infixr 9 ¬
 
 
+-- Elimination
+
 (•¬) :: Not r a -> (a -> r)
 (•¬) = (•) . getNot
 
