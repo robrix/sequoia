@@ -1,69 +1,22 @@
 {-# LANGUAGE TypeFamilies #-}
 module Sequoia.Connective.Negation
-( -- * Not
-  Not(..)
-, type (¬)
-, (•¬)
-  -- * Negate
-, Negate(..)
-, type (-)
-, (•-)
-  -- * Negative double negation
-, notNegate
+( -- * Negative double negation
+  notNegate
 , getNotNegate
 , type (¬-)
   -- * Positive double negation
 , negateNot
 , getNegateNot
 , type (-¬)
+  -- * Connectives
+, module Sequoia.Connective.Not
+, module Sequoia.Connective.Negate
 ) where
 
-import Data.Functor.Contravariant
 import Data.Profunctor
-import Sequoia.Polarity
+import Sequoia.Connective.Negate
+import Sequoia.Connective.Not
 import Sequoia.Profunctor.Continuation
-
--- Not
-
-newtype Not r a = Not { getNot :: a • r }
-
-instance Contravariant (Not r) where
-  contramap f = Not . lmap f . getNot
-
-instance Pos a => Polarized N (Not r a) where
-
-
-type (¬) = Not
-
-infixr 9 ¬
-
-
-(•¬) :: Not r a -> (a -> r)
-(•¬) = (•) . getNot
-
-infixl 7 •¬
-
-
--- Negate
-
-newtype Negate r a = Negate { getNegate :: a • r }
-
-instance Contravariant (Negate r) where
-  contramap f = Negate . lmap f . getNegate
-
-instance Neg a => Polarized P (Negate r a) where
-
-
-type (-) = Negate
-
-infixr 9 -
-
-
-(•-) :: Negate r a -> (a -> r)
-(•-) = (•) . getNegate
-
-infixl 7 •-
-
 
 -- Negative double negation
 
