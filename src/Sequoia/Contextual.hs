@@ -435,7 +435,7 @@ lowerR k p = p >>> popΓ (\ _Γ -> pushΓ (k (exlF _Γ)) (exrF _Γ))
 -- Deriving
 
 newtype Contextually s e r _Γ _Δ = Contextually { getContextually :: _Γ -|s e r|- _Δ }
-  deriving Core
+  deriving (Core)
 
 instance Contextual s => Weaken (Contextually s) where
   wkL = Contextually . popL . const . getContextually
