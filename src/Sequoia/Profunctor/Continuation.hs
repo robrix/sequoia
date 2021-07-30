@@ -16,6 +16,7 @@ module Sequoia.Profunctor.Continuation
 , dn
   -- * Triple negation
 , type (•••)
+, tnE
 ) where
 
 import Control.Applicative (liftA2)
@@ -91,3 +92,6 @@ dn a = K (• a)
 -- Triple negation
 
 type a •••r = a • r • r • r
+
+tnE :: a ••• r -> a • r
+tnE ta = K ((ta •) . dn)
