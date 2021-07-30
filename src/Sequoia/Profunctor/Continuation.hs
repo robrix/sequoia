@@ -92,6 +92,9 @@ dn a = K (• a)
 
 newtype DN r a = DN { runDN :: a •• r }
 
+instance Functor (DN r) where
+  fmap f = DN . lmap (lmap f) . runDN
+
 
 -- Triple negation
 
