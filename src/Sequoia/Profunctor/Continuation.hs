@@ -14,6 +14,7 @@ module Sequoia.Profunctor.Continuation
   -- * Double negation
 , type (••)
 , dn
+, DN(..)
   -- * Triple negation
 , type (•••)
 , tnE
@@ -87,6 +88,9 @@ type a ••r = a • r • r
 
 dn :: a -> a •• r
 dn a = K (• a)
+
+
+newtype DN r a = DN { runDN :: a •• r }
 
 
 -- Triple negation
