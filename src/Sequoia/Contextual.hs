@@ -211,9 +211,9 @@ poppedL = poppedΓ unconsΓ (<|)
 
 poppedR
   :: Contextual s
-  => (_Γ -|s e r|- _Δ     -> _Γ' -|s e r|- _Δ')
-  -- ----------------------------------------------
-  -> (_Γ -|s e r|- _Δ > a -> _Γ' -|s e r|- _Δ' > a)
+  => Setter
+    (_Γ -|s e r|- _Δ > a) (_Γ' -|s e r|- _Δ' > a)
+    (_Γ -|s e r|- _Δ    ) (_Γ' -|s e r|- _Δ'    )
 poppedR = poppedΔ unsnocΔ (|>)
 
 poppedL2
