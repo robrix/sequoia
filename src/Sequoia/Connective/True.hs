@@ -13,7 +13,7 @@ import Sequoia.Profunctor.Continuation
 -- True
 
 true :: a -> True r a
-true = (`True` K id)
+true = (`True` idK)
 
 data True r a = True { trueA :: a, trueK :: r • r }
   deriving (Functor)
