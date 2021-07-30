@@ -95,6 +95,10 @@ newtype DN r a = DN { runDN :: a •• r }
 instance Functor (DN r) where
   fmap f = DN . lmap (lmap f) . runDN
 
+instance Applicative (DN r) where
+  pure = DN . dn
+  DN f <*> DN a = DN (K (\ k -> f • K (\ f -> a • K (\ a -> k • f a))))
+
 
 -- Triple negation
 
