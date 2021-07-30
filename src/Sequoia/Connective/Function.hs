@@ -15,6 +15,8 @@ import           Data.Kind (Type)
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
 import           Prelude hiding (exp)
+import           Sequoia.Connective.Not
+import           Sequoia.Connective.NotUntrue
 import           Sequoia.Polarity
 import           Sequoia.Profunctor.Context
 import           Sequoia.Profunctor.Continuation
@@ -23,7 +25,7 @@ import           Sequoia.Profunctor.Value
 
 -- Implication
 
-newtype Fun e r a b = Fun { getFun :: b • r -> e ∘ a -> e ==> r }
+newtype Fun e r a b = Fun { getFun :: r ¬ b -> e ≁ a -> e ==> r }
   deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via Exp e r
   deriving (Functor) via Exp e r a
 
@@ -38,14 +40,14 @@ infixr 5 ~>
 
 -- Construction
 
-fun :: (b • r -> e ∘ a -> e ==> r) -> a ~~Fun e r~> b
+fun :: (r ¬ b -> e ≁ a -> e ==> r) -> a ~~Fun e r~> b
 fun = Fun
 
 funExp :: Exp e r a b -> a ~~Fun e r~> b
-funExp = fun . runExp
+funExp = fun . dimap getNot (lmap runNotUntrue) . runExp
 
 
 -- Elimination
 
 runFunExp :: a ~~Fun e r~> b -> Exp e r a b
-runFunExp = exp . getFun
+runFunExp = exp . dimap Not (lmap NotUntrue) . getFun

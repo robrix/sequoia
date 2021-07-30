@@ -14,6 +14,8 @@ import           Data.Profunctor.Traversing
 import           Prelude hiding (exp)
 import           Sequoia.Connective.Down
 import           Sequoia.Connective.Function
+import           Sequoia.Connective.Not
+import           Sequoia.Connective.NotUntrue
 import           Sequoia.Connective.Quantification
 import           Sequoia.Optic.Setter
 import           Sequoia.Polarity
@@ -40,7 +42,7 @@ foldMu :: Neg a => f a --|Exp e r|-> a -> Mu e r f --|Exp e r|-> a
 foldMu alg = exp (\ k -> val (\ (Mu f) -> k ↓ runFunExp f ↑ pure (Down (funExp alg))))
 
 unfoldMu :: Traversable f => a --|Exp e r|-> f a -> a --|Exp e r|-> Mu e r f
-unfoldMu coalg = exp' (\ a -> Mu (fun (\ k -> val (\ (Down alg) -> k ↓ refoldCat (runFunExp alg) coalg ↑ pure a))))
+unfoldMu coalg = exp' (\ a -> Mu (fun (\ k -> val (\ (Down alg) -> getNot k ↓ refoldCat (runFunExp alg) coalg ↑ pure a) . runNotUntrue)))
 
 refoldMu :: (Traversable f, Neg b) => f b --|Exp e r|-> b -> a --|Exp e r|-> f a -> a --|Exp e r|-> b
 refoldMu f g = foldMu f Cat.<<< unfoldMu g
