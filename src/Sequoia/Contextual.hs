@@ -204,9 +204,9 @@ poppedΔ g h = roam (\ f p -> traverseΔ g (\ x -> f (mapΔ (`h` x) p)))
 
 poppedL
   :: Contextual s
-  => (    _Γ -|s e r|- _Δ ->     _Γ' -|s e r|- _Δ')
-  -- ----------------------------------------------
-  -> (a < _Γ -|s e r|- _Δ -> a < _Γ' -|s e r|- _Δ')
+  => Setter
+    (a < _Γ -|s e r|- _Δ) (a < _Γ' -|s e r|- _Δ')
+    (    _Γ -|s e r|- _Δ) (    _Γ' -|s e r|- _Δ')
 poppedL = poppedΓ unconsΓ (<|)
 
 poppedR
