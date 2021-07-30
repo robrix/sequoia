@@ -225,8 +225,9 @@ poppedL2 = poppedΓ (assocL . fmap unconsΓ . unconsΓ) (\ (a, b) _Γ -> a <| b 
 
 poppedR2
   :: Contextual s
-  => (_Γ -|s e r|- _Δ         -> _Γ' -|s e r|- _Δ')
-  -> (_Γ -|s e r|- _Δ > a > b -> _Γ' -|s e r|- _Δ' > a > b)
+  => Setter
+    (_Γ -|s e r|- _Δ > a > b) (_Γ' -|s e r|- _Δ' > a > b)
+    (_Γ -|s e r|- _Δ        ) (_Γ' -|s e r|- _Δ'        )
 poppedR2 = poppedΔ (assocR . first unsnocΔ . unsnocΔ) (\ _Δ (b, a) -> _Δ |> b |> a)
 
 
