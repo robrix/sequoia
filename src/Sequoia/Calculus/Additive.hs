@@ -26,8 +26,8 @@ type AdditiveIntro s = (TopIntro s, ZeroIntro s, WithIntro s, SumIntro s)
 
 withLSum
   :: (Weaken s, SumIntro s, WithIntro s, NegateIntro s, Neg a, Neg b)
-  =>         _Γ -|s e r|- _Δ > r -a ⊕ r -b
-  -- -------------------------------------
+  =>         _Γ -|s e r|- _Δ > Negate e r a ⊕ Negate e r b
+  -- -----------------------------------------------------
   -> a & b < _Γ -|s e r|- _Δ
 withLSum s = wkL s >>> sumL (negateL (withL1 init)) (negateL (withL2 init))
 

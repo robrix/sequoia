@@ -13,12 +13,12 @@ import Sequoia.Profunctor.Continuation
 
 -- Negate
 
-newtype Negate r a = Negate { getNegate :: a • r }
+newtype Negate e r a = Negate { getNegate :: a • r }
 
-instance Contravariant (Negate r) where
+instance Contravariant (Negate e r) where
   contramap f = Negate . lmap f . getNegate
 
-instance Neg a => Polarized P (Negate r a) where
+instance Neg a => Polarized P (Negate e r a) where
 
 
 type (-) = Negate
@@ -28,7 +28,7 @@ infixr 9 -
 
 -- Elimination
 
-(•-) :: Negate r a -> (a -> r)
+(•-) :: Negate e r a -> (a -> r)
 (•-) = (•) . getNegate
 
 infixl 7 •-

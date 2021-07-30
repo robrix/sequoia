@@ -17,7 +17,7 @@ import Sequoia.Connective.With
 import Sequoia.Connective.Zero
 import Sequoia.Disjunction
 
-elimWith :: a & b -> r -a ⊕ r -b -> r
+elimWith :: a & b -> Negate e r a ⊕ Negate e r b -> r
 elimWith = flip ((. exl) . (•-) <--> (. exr) . (•-))
 
 elimSum :: a ⊕ b -> r ¬a & r ¬b -> r

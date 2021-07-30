@@ -3,11 +3,9 @@ module Sequoia.Connective.Negation
 ( -- * Negative double negation
   notNegate
 , getNotNegate
-, type (¬-)
   -- * Positive double negation
 , negateNot
 , getNegateNot
-, type (-¬)
   -- * Connectives
 , module Sequoia.Connective.Not
 , module Sequoia.Connective.Negate
@@ -20,27 +18,17 @@ import Sequoia.Profunctor.Continuation
 
 -- Negative double negation
 
-notNegate :: a • r • r -> r ¬-a
+notNegate :: a • r • r -> Not r (Negate e r a)
 notNegate = Not . lmap getNegate
 
-getNotNegate :: r ¬-a -> a • r • r
+getNotNegate :: Not r (Negate e r a) -> a • r • r
 getNotNegate = lmap Negate . getNot
-
-
-type r ¬-a = r ¬(r -a)
-
-infixr 9 ¬-
 
 
 -- Positive double negation
 
-negateNot :: a • r • r -> r -¬a
+negateNot :: a • r • r -> Negate e r (Not r a)
 negateNot = Negate . lmap getNot
 
-getNegateNot :: r -¬a -> a • r • r
+getNegateNot :: Negate e r (Not r a) -> a • r • r
 getNegateNot = lmap Not . getNegate
-
-
-type r -¬a = r -(r ¬a)
-
-infixr 9 -¬
