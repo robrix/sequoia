@@ -2,6 +2,8 @@ module Sequoia.Connective.NotUntrue
 ( -- * NotUntrue
   NotUntrue(..)
 , type (≁)
+  -- * Elimination
+, (∘≁)
 ) where
 
 import Sequoia.Polarity
@@ -17,3 +19,11 @@ instance Neg a => Polarized P (NotUntrue e a)
 type (≁) = NotUntrue
 
 infixr 9 ≁
+
+
+-- Elimination
+
+(∘≁) :: e -> e ≁ a -> a
+(∘≁) = (. runNotUntrue) . (∘)
+
+infixl 8 ∘≁
