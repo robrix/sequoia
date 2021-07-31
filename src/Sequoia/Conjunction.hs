@@ -53,11 +53,9 @@ import Control.Category (Category, (>>>))
 import Data.Functor.Contravariant
 import Data.Functor.Rep as Co
 import Data.Profunctor
+import Fresnel.Iso
+import Fresnel.Lens
 import Sequoia.Bifunctor.Product
-import Sequoia.Optic.Getter
-import Sequoia.Optic.Iso
-import Sequoia.Optic.Lens
-import Sequoia.Optic.Review
 import Sequoia.Profunctor.Diagonal
 
 class Conj c where
@@ -205,13 +203,13 @@ exrR = rmap exr
 -- Optics
 
 coercedConj :: (Conj c, Conj d, Conj c', Conj d') => Iso (c a b) (c' a' b') (d a b) (d' a' b')
-coercedConj = coerceConj <-> coerceConj
+coercedConj = coerceConj `iso` coerceConj
 
 bimappingConj :: (Conj p, Conj q) => Iso s t a b -> Iso s' t' a' b' -> Iso (p s s') (q t t') (p a a') (q b b')
-bimappingConj a b = bimapConj (view a) (view b) <-> bimapConj (review a) (review b)
+bimappingConj a b = withIso a $ \ lsa lbt -> withIso b $ \ rsa rbt -> bimapConj lsa rsa `iso` bimapConj lbt rbt
 
 firstingConj :: (Conj p, Conj q) => Iso s t a b -> Iso (p s x) (q t y) (p a x) (q b y)
-firstingConj a = firstConj (view a) <-> firstConj (review a)
+firstingConj a = withIso a $ \ lsa lbt -> firstConj lsa `iso` firstConj lbt
 
 secondingConj :: (Conj p, Conj q) => Iso s t a b -> Iso (p x s) (q y t) (p x a) (q y b)
-secondingConj b = secondConj (view b) <-> secondConj (review b)
+secondingConj b = withIso b $ \ rsa rbt -> secondConj rsa `iso` secondConj rbt

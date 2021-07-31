@@ -23,10 +23,10 @@ import Data.Profunctor
 import Data.Profunctor.Rep as Pro
 import Data.Profunctor.Sieve
 import Data.Profunctor.Traversing
+import Fresnel.Iso
 import Sequoia.Conjunction
 import Sequoia.Disjunction
 import Sequoia.Monad.Run
-import Sequoia.Optic.Iso
 
 -- Value profunctor
 

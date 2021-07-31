@@ -9,7 +9,7 @@ module Sequoia.Span
 , end_
 ) where
 
-import Sequoia.Optic.Lens
+import Fresnel.Lens
 
 -- Source positions
 

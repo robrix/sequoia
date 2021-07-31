@@ -15,8 +15,8 @@ module Sequoia.Connective.Subtraction
 
 import Data.Kind (Type)
 import Data.Profunctor
-import Sequoia.Optic.Iso
-import Sequoia.Optic.Lens
+import Fresnel.Iso
+import Fresnel.Lens
 import Sequoia.Polarity
 import Sequoia.Profunctor.Coexponential
 import Sequoia.Profunctor.Continuation

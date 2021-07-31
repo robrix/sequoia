@@ -42,9 +42,9 @@ import Control.Category (Category, (>>>))
 import Data.Profunctor
 import Data.Profunctor.Rep
 import Data.Profunctor.Sieve
+import Fresnel.Lens
+import Fresnel.Prism
 import Sequoia.Bifunctor.Sum
-import Sequoia.Optic.Lens
-import Sequoia.Optic.Prism
 import Sequoia.Profunctor.Diagonal
 
 -- Disjunction

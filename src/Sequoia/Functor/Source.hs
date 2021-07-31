@@ -20,12 +20,12 @@ module Sequoia.Functor.Source
 
 import Data.Coerce
 import Data.Profunctor
+import Fresnel.Getter
+import Fresnel.Iso
+import Fresnel.Review
+import Fresnel.Setter
 import Sequoia.Functor.Sink.Internal
 import Sequoia.Functor.Source.Internal
-import Sequoia.Optic.Getter
-import Sequoia.Optic.Iso
-import Sequoia.Optic.Review
-import Sequoia.Optic.Setter
 import Sequoia.Profunctor.Context
 import Sequoia.Profunctor.Continuation
 import Sequoia.Profunctor.Exponential as Exp
@@ -65,7 +65,7 @@ elimSrc sr sn = env (pure . (runSrcFn sr . flip (runSnkFn sn . pure) <*> id))
 mapSrcE :: (forall x . e ∘ x -> e' ∘ x) -> (Src e r b -> Src e' r b)
 mapSrcE f = over _Src (mapSrcFnC (over _CV f))
 
-mapSrcR :: (forall x . x • r <-> x • r') -> (Src e r b -> Src e r' b)
+mapSrcR :: (forall x . Iso' (x • r) (x • r')) -> (Src e r b -> Src e r' b)
 mapSrcR b = over _Src (mapSrcFnC (over _CK (view b)) . mapSrcFnK (review b))
 
 mapSrcFnK :: (forall x . x • r2 -> x • r1) -> (b • r1 -> e ==> r) -> (b • r2 -> e ==> r)

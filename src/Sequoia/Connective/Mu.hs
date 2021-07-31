@@ -11,13 +11,13 @@ module Sequoia.Connective.Mu
 import qualified Control.Category as Cat
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
+import           Fresnel.Setter
 import           Prelude hiding (exp)
 import           Sequoia.Connective.Down
 import           Sequoia.Connective.Function
 import           Sequoia.Connective.Not
 import           Sequoia.Connective.NotUntrue
 import           Sequoia.Connective.Quantification
-import           Sequoia.Optic.Setter
 import           Sequoia.Polarity
 import           Sequoia.Profunctor.Context
 import           Sequoia.Profunctor.Continuation

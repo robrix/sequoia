@@ -55,13 +55,13 @@ import Control.Monad (join)
 import Data.Bifunctor (first)
 import Data.Function
 import Data.Profunctor
+import Fresnel.Setter
 import Prelude hiding (init)
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Core
 import Sequoia.Calculus.Structural
 import Sequoia.Conjunction
 import Sequoia.Disjunction
-import Sequoia.Optic.Setter
 import Sequoia.Profunctor.Coexponential
 import Sequoia.Profunctor.Context
 import Sequoia.Profunctor.Continuation

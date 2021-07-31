@@ -43,7 +43,7 @@ import Data.Profunctor.Sieve
 import Data.Profunctor.Traversing
 import Sequoia.Functor.Source.Internal
 import Sequoia.Monad.Run
-import Sequoia.Optic.Iso
+import Fresnel.Iso
 import Sequoia.Profunctor.Continuation
 import Sequoia.Profunctor.Recall
 import Sequoia.Profunctor.Value

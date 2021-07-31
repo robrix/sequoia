@@ -20,13 +20,12 @@ import           Control.Category ((<<<))
 import qualified Control.Category as Cat
 import           Control.Monad (ap)
 import           Data.Profunctor
+import           Fresnel.Getter
+import           Fresnel.Iso
+import           Fresnel.Review
 import           Sequoia.Calculus.Context
 import           Sequoia.Functor.Sink
 import           Sequoia.Functor.Source
-import           Sequoia.Optic.Getter
-import           Sequoia.Optic.Iso
-import           Sequoia.Optic.Review
-import           Sequoia.Optic.Setter
 import           Sequoia.Profunctor.Context
 import           Sequoia.Profunctor.Continuation as K
 import           Sequoia.Profunctor.Value as V
@@ -55,33 +54,36 @@ instance Applicative (Sig e r a) where
 instance Monad (Sig e r a) where
   Sig m >>= f = Sig (\ b a -> cont (\ _K -> m (_K (\ a' -> runSig (f a') b a)) a))
 
-mapKSig :: (forall x . x • r <-> x • r') -> (Sig e r a b -> Sig e r' a b)
-mapKSig b = Sig . dimap (review b) (fmap (over _CK (view b))) . runSig
+mapKSig :: Iso' r r' -> (Sig e r a b -> Sig e r' a b)
+mapKSig b = withIso b $ \ to from -> Sig . dimap (rmap from) (rmap (rmap to)) . runSig
 
-mapVSig :: (forall x . e ∘ x <-> e' ∘ x) -> (Sig e r a b -> Sig e' r a b)
-mapVSig b = Sig . fmap (dimap (review b) (over _CV (view b))) . runSig
+mapVSig :: Iso' e e' -> (Sig e r a b -> Sig e' r a b)
+mapVSig b = withIso b $ \ to from -> Sig . rmap (dimap (lmap to) (lmap from)) . runSig
 
 
 -- Conversions
 
 solSrc
-  ::      e ==> r
-            <->
-          Src e r |- r
-solSrc = src . const <-> ($ K id) . runSrc
+  :: Iso'
+     (     e ==> r     )
+  -- -------------------
+     (     Src e r |- r)
+solSrc = iso (src . const) (($ idK) . runSrc)
 
 
 solSnk
-  ::      e ==> r
-            <->
-     e -| Snk e r
-solSnk = snk . const <-> ($ V id) . runSnk
+  :: Iso'
+     (     e ==> r     )
+  -- -------------------
+     (e -| Snk e r     )
+solSnk = iso (snk . const) (($ idV) . runSnk)
 
 
 srcSig
-  ::      Src e r |- b
-            <->
-     e -| Sig e r |- b
+  :: Iso'
+     (     Src e r |- b)
+  -- -------------------
+     (e -| Sig e r |- b)
 srcSig = _Src.from (_Sig.rmapping (constantWith idV (<<∘)))
 
 composeSrcSig :: Src e r a -> Sig e r a b -> Src e r b
@@ -89,9 +91,10 @@ composeSrcSig src sig = review srcSig (sig <<< view srcSig src)
 
 
 snkSig
-  :: a -| Snk e r
-            <->
-     a -| Sig e r |- r
+  :: Iso'
+     (a -| Snk e r     )
+  -- -------------------
+     (a -| Sig e r |- r)
 snkSig = _Snk.from (_Sig.constantWith idK (flip ((.) . (•<<))))
 
 composeSigSnk :: Sig e r a b -> Snk e r b -> Snk e r a
@@ -99,10 +102,11 @@ composeSigSnk sig snk = review snkSig (view snkSig snk <<< sig)
 
 
 solSig
-  ::      e ==> r
-            <->
-     e -| Sig e r |- r
-solSig = Sig . const . const <-> ($ V id) . ($ K id) . runSig
+  :: Iso'
+     (     e ==> r     )
+  -- -------------------
+     (e -| Sig e r |- r)
+solSig = iso (Sig . const . const) (($ idV) . ($ idK) . runSig)
 
 
 composeSrcSnk :: Src e r a -> Snk e r a -> e ==> r
