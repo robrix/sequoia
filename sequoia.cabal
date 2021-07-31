@@ -149,14 +149,6 @@ library
     Sequoia.Monad.It
     Sequoia.Monad.Run
     Sequoia.Monad.Trans.It
-    Sequoia.Optic.Getter
-    Sequoia.Optic.Iso
-    Sequoia.Optic.Lens
-    Sequoia.Optic.Optic
-    Sequoia.Optic.Prism
-    Sequoia.Optic.Review
-    Sequoia.Optic.Setter
-    Sequoia.Optic.Traversal
     Sequoia.Polarity
     Sequoia.Printer
     Sequoia.Profunctor.Adjunction
