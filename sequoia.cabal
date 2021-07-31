@@ -185,6 +185,7 @@ library
     , base ^>=4.14.1.0
     , comonad
     , distributive
+    , fresnel
     , fused-effects
     , profunctors
     , semialign

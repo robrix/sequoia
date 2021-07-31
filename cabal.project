@@ -1,2 +1,7 @@
 packages: .
 tests: True
+
+source-repository-package
+    type: git
+    location: https://github.com/robrix/fresnel.git
+    tag: b4438e53a3395ff0b0da4c4047c79f28b04587a2
