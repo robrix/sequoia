@@ -4,7 +4,7 @@ module Sequoia.Connective.Subtraction
 , type (>-)
 , type (-~)
   -- * Elimination
-, getSub
+, runSubCoexp
   -- * Optics
 , subA_
 , subK_
@@ -39,8 +39,8 @@ infixr 5 -~
 
 -- Elimination
 
-getSub :: Sub e r b a -> Coexp e r b a
-getSub (a :-< k) = a -< k
+runSubCoexp :: Sub e r b a -> Coexp e r b a
+runSubCoexp (a :-< k) = a -< k
 
 
 -- Optics

@@ -21,7 +21,7 @@ import Sequoia.Profunctor.Exponential
 import Sequoia.Profunctor.Value
 
 elimFun :: a ~~Fun e r~> b -> b >-Sub e r-~ a -> e ==> r
-elimFun f = elimExp (runFunExp f) . getSub
+elimFun f = elimExp (runFunExp f) . runSubCoexp
 
 funPar1 :: Iso' (e ∘ (r ¬a ⅋ b) • r) (e ∘ (a ~~Fun e r~> b) • r)
 funPar1 = iso
