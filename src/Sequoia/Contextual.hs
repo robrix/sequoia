@@ -386,7 +386,7 @@ traverseΔ
     (_Δ'' • r, y) (_Δ' • r, y)
   -> ((_Δ' • r -> _Δ • r) -> _Γ -|s e r|- _Δ'')
   ->                         _Γ -|s e r|- _Δ'''
-traverseΔ f s = sequent (\ _Δ''' _Γ -> withIso f (\ sa bt -> let (_Δ, y) = sa _Δ''' in appSequent (s (bt . (,y))) _Δ _Γ))
+traverseΔ f b = traverseΓΔ (iso ((),) snd) f (const b)
 
 
 -- Lifting
