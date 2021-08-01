@@ -388,7 +388,7 @@ traverseΓ
     (x, e ∘ _Γ'') (x, e ∘ _Γ')
   -> ((e ∘ _Γ' -> e ∘ _Γ) -> _Γ''  -|s e r|- _Δ)
   ->                         _Γ''' -|s e r|- _Δ
-traverseΓ f b = traverseΓΔ f idΓ (const . b)
+traverseΓ f b = traverseΓΔ f idΔ (const . b)
 
 traverseΔ
   :: Contextual s
@@ -397,7 +397,7 @@ traverseΔ
     (_Δ'' • r, y) (_Δ' • r, y)
   -> ((_Δ' • r -> _Δ • r) -> _Γ -|s e r|- _Δ'')
   ->                         _Γ -|s e r|- _Δ'''
-traverseΔ f b = traverseΓΔ idΔ f (const b)
+traverseΔ f b = traverseΓΔ idΓ f (const b)
 
 
 -- Lifting
@@ -457,8 +457,8 @@ instance Contextual s => Profunctor (Contextually s e r) where
 
 -- Utilities
 
-idΓ :: Iso' a (a, ())
-idΓ = iso (,()) fst
+idΔ :: Iso' a (a, ())
+idΔ = iso (,()) fst
 
-idΔ :: Iso' a ((), a)
-idΔ = iso ((),) snd
+idΓ :: Iso' a ((), a)
+idΓ = iso ((),) snd
