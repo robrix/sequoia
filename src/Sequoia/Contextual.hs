@@ -3,10 +3,6 @@
 module Sequoia.Contextual
 ( -- * Contextual
   Contextual(..)
-  -- ** Swapping
-, swapΓΔ
-, swapΓ
-, swapΔ
   -- ** Popping
 , popΓΔ
 , popΓ
@@ -72,28 +68,6 @@ class (Core s, forall e r a . MonadEnv e (s e r a), forall e r . Profunctor (s e
   sequent :: (_Δ • r -> e ∘ _Γ -> e ==> r) -> _Γ -|s e r|- _Δ
   appSequent :: _Γ -|s e r|- _Δ -> (_Δ • r -> e ∘ _Γ -> e ==> r)
 
-
-
--- Swapping
-
-swapΓΔ
-  :: Contextual s
-  => (_Δ  • r -> e ∘ _Γ  -> _Γ' -|s e r|- _Δ')
-  -> (_Δ' • r -> e ∘ _Γ' -> _Γ  -|s e r|- _Δ )
-swapΓΔ f _Δ' _Γ' = sequent (\ _Δ _Γ -> appSequent (f _Δ _Γ) _Δ' _Γ')
-
-
-swapΓ
-  :: Contextual s
-  => (e ∘ _Γ  -> _Γ' -|s e r|- _Δ)
-  -> (e ∘ _Γ' -> _Γ  -|s e r|- _Δ)
-swapΓ f _Γ' = popΓΔ (\ _Δ _Γ -> pushΓΔ (f _Γ) _Δ _Γ')
-
-swapΔ
-  :: Contextual s
-  => (_Δ  • r -> _Γ -|s e r|- _Δ')
-  -> (_Δ' • r -> _Γ -|s e r|- _Δ)
-swapΔ f _Δ' = popΓΔ (\ _Δ -> pushΓΔ (f _Δ) _Δ')
 
 
 -- Popping
