@@ -5,6 +5,7 @@ module Sequoia.Connective.Negate
   -- * Construction
 , negate
   -- * Elimination
+, withNegate
 , (•-)
 ) where
 
@@ -36,6 +37,10 @@ negate = Negate
 
 
 -- Elimination
+
+withNegate :: Negate e r a -> ((e -> a • r -> x) -> x)
+withNegate (Negate e k) f = f e k
+
 
 (•-) :: Negate e r a -> (a -> r)
 (•-) = (•) . negateK
