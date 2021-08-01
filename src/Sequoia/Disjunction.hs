@@ -20,6 +20,7 @@ module Sequoia.Disjunction
 , dedupDisj
 , unleftDisj
 , unrightDisj
+, prismDisj
   -- * Defaults
 , foldMapDisj
 , traverseDisj
@@ -125,6 +126,10 @@ unleftDisj = unleft . dimap coerceDisj coerceDisj
 
 unrightDisj :: (Disj d, Cochoice p) => p (d c a) (d c b) -> p a b
 unrightDisj = unright . dimap coerceDisj coerceDisj
+
+
+prismDisj :: Disj d => (b -> t) -> (s -> t `d` a) -> Prism s t a b
+prismDisj inj = prism inj . (coerceDisj .)
 
 
 -- Defaults
