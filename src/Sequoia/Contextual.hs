@@ -76,10 +76,15 @@ class (Core s, forall e r a . MonadEnv e (s e r a), forall e r . Profunctor (s e
 
 popΓΔ
   :: Contextual s
-  => (_Δ • r -> e ∘ _Γ -> e -|s e r|- r)
-  -- -----------------------------------
-  ->                     _Γ -|s e r|- _Δ
-popΓΔ f = sequent (\ _Δ _Γ -> appSequent (f _Δ _Γ) idK idV)
+  => Iso' (_Δ • r) (_Δ' • r, y)
+  -> Iso' (e ∘ _Γ) (x, e ∘ _Γ')
+  -> (y -> x -> _Γ' -|s e r|- _Δ')
+  -- -----------------------------
+  ->            _Γ  -|s e r|- _Δ
+popΓΔ oΔ oΓ f = sequent (\ _Δ _Γ ->
+  let (_Δ', y) = view oΔ _Δ
+      (x, _Γ') = view oΓ _Γ
+  in appSequent (f y x) _Δ' _Γ')
 
 -- | Pop something off the input context which can later be pushed. Used with 'pushΓ', this provides a generalized context restructuring facility.
 --
