@@ -11,6 +11,7 @@ module Sequoia.Calculus.Context
 , type (>)(..)
 , (|>)
 , unsnocΔ
+, snocΔ
   -- * Mixfix syntax
 , type (|-)
 , type (-|)
@@ -152,6 +153,11 @@ instance Monad ((>) a) where
 -- @
 unsnocΔ :: (a > b) • r -> (a • r, b • r)
 unsnocΔ k = (inlK k, inrK k)
+
+snocΔ :: Iso
+  ((os > o) • r) ((os' > o') • r')
+  (os • r, o • r)  (os' • r', o' • r')
+snocΔ = iso unsnocΔ (uncurry (|>))
 
 
 -- Mixfix syntax
