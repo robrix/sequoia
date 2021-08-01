@@ -3,7 +3,7 @@ module Sequoia.Profunctor.Coexponential
 ( -- * Coexponential profunctor
   Coexp(recallFn, forgetFn)
   -- * Construction
-, (>-)
+, (-<)
 , coexpFn
 , idCoexp
   -- * Elimination
@@ -29,24 +29,24 @@ import Sequoia.Profunctor.Value
 
 -- Coexponential profunctor
 
-data Coexp e r a b = (:>-) { forgetFn :: a -> r, recallFn :: e -> b }
+data Coexp e r a b = (:-<) { recallFn :: e -> b, forgetFn :: a -> r }
   deriving (Functor)
 
-infixr 6 :>-
+infixr 6 :-<
 
 instance Profunctor (Coexp e r) where
-  dimap g h = unCoexp (\ f r -> lmap g f >- fmap h r)
+  dimap g h = unCoexp (\ r f -> rmap h r -< lmap g f)
 
 
 -- Construction
 
-(>-) :: a • r -> e ∘ b -> Coexp e r a b
-k >- v = coexpFn (k •) (∘ v)
+(-<) :: e ∘ b -> a • r -> Coexp e r a b
+v -< k = coexpFn (∘ v) (k •)
 
-infixr 6 >-
+infixr 6 -<
 
-coexpFn :: (a -> r) -> (e -> b) -> Coexp e r a b
-coexpFn = (:>-)
+coexpFn :: (e -> b) -> (a -> r) -> Coexp e r a b
+coexpFn = (:-<)
 
 idCoexp :: Coexp b a a b
 idCoexp = coexpFn id id
@@ -54,35 +54,35 @@ idCoexp = coexpFn id id
 
 -- Elimination
 
-withCoexp :: Coexp e r a b -> (a • r -> e ∘ b -> s) -> s
-withCoexp c f = f (forget c) (recall c)
+withCoexp :: Coexp e r a b -> (e ∘ b -> a • r -> s) -> s
+withCoexp c f = f (recall c) (forget c)
 
-withCoexpFn :: Coexp e r a b -> ((a -> r) -> (e -> b) -> s) -> s
+withCoexpFn :: Coexp e r a b -> ((e -> b) -> (a -> r) -> s) -> s
 withCoexpFn c = withCoexp c . coerce
 
 runCoexp :: Coexp e r a b -> ((b -> a) -> (e -> r))
-runCoexp c = withCoexp c (\ f r -> ((f •) .) . (. (∘ r)))
+runCoexp c = withCoexp c (\ r f -> ((f •) .) . (. (∘ r)))
 
-unCoexp :: (a • r -> e ∘ b -> s) -> Coexp e r a b -> s
+unCoexp :: (e ∘ b -> a • r -> s) -> Coexp e r a b -> s
 unCoexp = flip withCoexp
 
-unCoexpFn :: ((a -> r) -> (e -> b) -> s) -> Coexp e r a b -> s
+unCoexpFn :: ((e -> b) -> (a -> r) -> s) -> Coexp e r a b -> s
 unCoexpFn = flip withCoexpFn
 
 evalCoexp :: Coexp e r a a -> e ==> r
 evalCoexp c = C (\ e -> forget c • e ∘ recall c)
 
 recall :: Coexp e r a b -> e ∘ b
-recall = unCoexp (const id)
+recall = unCoexp const
 
 forget :: Coexp e r a b -> a • r
-forget = unCoexp const
+forget = unCoexp (const id)
 
 
 -- Optics
 
 recall_ :: Lens (Coexp e r a b) (Coexp e' r a b') (e ∘ b) (e' ∘ b')
-recall_ = lens recall (\ s recall -> withCoexp s (const . (>- recall)))
+recall_ = lens recall (\ s recall -> withCoexp s (const (recall -<)))
 
 forget_ :: Lens (Coexp e r a b) (Coexp e r' a' b) (a • r) (a' • r')
-forget_ = lens forget (\ s forget -> withCoexp s (const (forget >-)))
+forget_ = lens forget (\ s forget -> withCoexp s (const . (-< forget)))
