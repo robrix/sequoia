@@ -357,12 +357,18 @@ mapR2 f a b = mapR f (wkR' a) >>> popL (val (`mapR` b))
 
 traverseΓΔ
   :: Contextual s
-  => (e ∘ _Γ' -> (x, e ∘ _Γ))
-  -> (_Δ' • r -> (_Δ • r, y))
-  -> (x -> y -> _Γ  -|s e r|- _Δ)
-  -- ----------------------------
-  -> _Γ' -|s e r|- _Δ'
-traverseΓΔ f g s = sequent (\ _Δ' _Γ' -> let (x, _Γ) = f _Γ' ; (_Δ, y) = g _Δ' in appSequent (s x y) _Δ _Γ)
+  => Iso
+    (e ∘ _Γ''')   (e ∘ _Γ)
+    (x, e ∘ _Γ'') (x, e ∘ _Γ')
+  -> Iso
+    (_Δ''' • r)   (_Δ • r)
+    (_Δ'' • r, y) (_Δ' • r, y)
+  -> ((e ∘ _Γ' -> e ∘ _Γ) -> (_Δ' • r -> _Δ • r) -> _Γ''  -|s e r|- _Δ'')
+  ->                                                _Γ''' -|s e r|- _Δ'''
+traverseΓΔ f g s = sequent (\ _Δ' _Γ' -> withIso f (\ saΓ btΓ -> withIso g (\ saΔ btΔ ->
+  let (x, _Γ) = saΓ _Γ'
+      (_Δ, y) = saΔ _Δ'
+  in appSequent (s (btΓ . (x,)) (btΔ . (,y))) _Δ _Γ)))
 
 traverseΓ
   :: Contextual s
