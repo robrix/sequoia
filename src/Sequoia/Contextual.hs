@@ -219,10 +219,12 @@ poppedR2 = poppedΔ (snocΔ . firsting snocΔ . from assocConj)
 
 pushΓΔ
   :: Contextual s
-  =>                     _Γ -|s e r|- _Δ
-  -- -----------------------------------
-  -> (_Δ • r -> e ∘ _Γ -> e -|s e r|- r)
-pushΓΔ s _Δ _Γ = sequent (\ _Δ' _Γ' -> _Δ' •<< appSequent s _Δ _Γ <<∘ _Γ')
+  => Iso' (_Δ • r) (_Δ' • r, y)
+  -> Iso' (e ∘ _Γ) (x, e ∘ _Γ')
+  ->            _Γ  -|s e r|- _Δ
+  -- -----------------------------
+  -> (y -> x -> _Γ' -|s e r|- _Δ')
+pushΓΔ oΔ oΓ s y x = sequent (\ _Δ' _Γ' -> appSequent s (review oΔ (_Δ', y)) (review oΓ (x, _Γ')))
 
 -- | Push something onto the input context which was previously popped off it. Used with 'popΓ', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
 --
