@@ -18,17 +18,17 @@ import Sequoia.Profunctor.Continuation
 
 -- Negative double negation
 
-notNegate :: a • r • r -> Not r (Negate e r a)
-notNegate = Not . lmap getNegate
+notNegate :: a •• r -> Not r (Negate e r a)
+notNegate = Not . lmap negateK
 
-getNotNegate :: Not r (Negate e r a) -> a • r • r
-getNotNegate = lmap Negate . getNot
+getNotNegate :: e -> Not r (Negate e r a) -> a •• r
+getNotNegate e = lmap (Negate e) . getNot
 
 
 -- Positive double negation
 
-negateNot :: a • r • r -> Negate e r (Not r a)
-negateNot = Negate . lmap getNot
+negateNot :: e -> a •• r -> Negate e r (Not r a)
+negateNot e = Negate e . lmap getNot
 
-getNegateNot :: Negate e r (Not r a) -> a • r • r
-getNegateNot = lmap Not . getNegate
+getNegateNot :: Negate e r (Not r a) -> a •• r
+getNegateNot = lmap Not . negateK

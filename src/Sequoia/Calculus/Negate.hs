@@ -21,11 +21,14 @@ import Sequoia.Calculus.Context
 import Sequoia.Calculus.Control
 import Sequoia.Calculus.Core
 import Sequoia.Calculus.Structural
+import Sequoia.Conjunction
 import Sequoia.Connective.Negate
 import Sequoia.Connective.Negation
 import Sequoia.Contextual
 import Sequoia.Polarity
+import Sequoia.Profunctor.Context
 import Sequoia.Profunctor.Continuation as K
+import Sequoia.Profunctor.Value
 
 -- Negate
 
@@ -78,7 +81,7 @@ dniPK
   => _Γ -|s e r|- _Δ > a •• r
   -- --------------------------------------
   -> _Γ -|s e r|- _Δ > Negate e r (Not r a)
-dniPK = mapR (lmap negateNot)
+dniPK s = sequent (\ _Δ _Γ -> env (\ e -> appSequent s (lmap (fmap (negateNot e)) _Δ) _Γ))
 
 
 negateLK
@@ -86,14 +89,14 @@ negateLK
   =>        a • r < _Γ -|s e r|- _Δ
   -- ------------------------------
   -> Negate e r a < _Γ -|s e r|- _Δ
-negateLK = mapL (fmap getNegate)
+negateLK = mapL (fmap negateK)
 
 negateRK
   :: Contextual s
   => _Γ -|s e r|- _Δ > a • r
   -- ------------------------------
   -> _Γ -|s e r|- _Δ > Negate e r a
-negateRK = mapR (lmap Negate)
+negateRK s = sequent (\ _Δ _Γ -> env (\ e -> appSequent s (lmap (fmap (Negate e)) _Δ) _Γ))
 
 
 negateLK'
@@ -101,11 +104,11 @@ negateLK'
   => Negate e r a < _Γ -|s e r|- _Δ
   -- ------------------------------
   ->        a • r < _Γ -|s e r|- _Δ
-negateLK' = mapL (fmap Negate)
+negateLK' s = sequent (\ _Δ _Γ -> env (\ e -> appSequent s _Δ (pure (Negate e (e ∘ exlF _Γ)) >∘∘< exrF _Γ)))
 
 negateRK'
   :: Contextual s
   => _Γ -|s e r|- _Δ > Negate e r a
   -- ------------------------------
   -> _Γ -|s e r|- _Δ > a • r
-negateRK' = mapR (lmap getNegate)
+negateRK' = mapR (lmap negateK)

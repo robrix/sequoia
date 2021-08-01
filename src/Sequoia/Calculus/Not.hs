@@ -26,6 +26,7 @@ import Sequoia.Connective.Not
 import Sequoia.Contextual
 import Sequoia.Polarity
 import Sequoia.Profunctor.Continuation
+import Sequoia.Profunctor.Value
 
 -- Not
 
@@ -71,7 +72,7 @@ dneNK
   =>                a •• r < _Γ -|s e r|- _Δ
   -- ---------------------------------------
   -> Not r (Negate e r a)  < _Γ -|s e r|- _Δ
-dneNK = mapL (fmap getNotNegate)
+dneNK = mapL (\ v -> V (\ e -> getNotNegate e (e ∘ v)))
 
 dniNK
   :: Contextual s
