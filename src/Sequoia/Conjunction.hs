@@ -24,6 +24,7 @@ module Sequoia.Conjunction
 , dupConj
 , unfirstConj
 , unsecondConj
+, lensConj
   -- * Defaults
 , foldMapConj
 , traverseConj
@@ -157,6 +158,10 @@ unfirstConj = unfirst . dimap coerceConj coerceConj
 
 unsecondConj :: (Conj c, Costrong p) => p (c d a) (c d b) -> p a b
 unsecondConj = unsecond . dimap coerceConj coerceConj
+
+
+lensConj :: Conj c => (s -> a) -> (s `c` b -> t) -> Lens s t a b
+lensConj get = lens get . curryConj
 
 
 -- Defaults
