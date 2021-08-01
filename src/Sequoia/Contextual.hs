@@ -48,7 +48,6 @@ module Sequoia.Contextual
 ) where
 
 import Control.Monad (join)
-import Data.Bifunctor (first)
 import Data.Function
 import Data.Profunctor
 import Fresnel.Iso
@@ -169,12 +168,13 @@ poppedΓ g = roam (\ f p -> traverseΓ g (\ h -> f (mapΓ h p)))
 
 poppedΔ
   :: Contextual s
-  => (_Δ''' • r -> (_Δ'' • r, x))
-  -> (_Δ' • r -> x -> _Δ • r)
+  => Iso
+    (_Δ''' • r)   (_Δ • r)
+    (_Δ'' • r, y) (_Δ' • r, y)
   -> Setter
     (_Γ -|s e r|- _Δ ) (_Γ' -|s e r|- _Δ''')
     (_Γ -|s e r|- _Δ') (_Γ' -|s e r|- _Δ'')
-poppedΔ g h = roam (\ f p -> traverseΔ g (\ x -> f (mapΔ (`h` x) p)))
+poppedΔ g = roam (\ f p -> traverseΔ g (\ h -> f (mapΔ h p)))
 
 
 poppedL
@@ -189,7 +189,7 @@ poppedR
   => Setter
     (_Γ -|s e r|- _Δ > a) (_Γ' -|s e r|- _Δ' > a)
     (_Γ -|s e r|- _Δ    ) (_Γ' -|s e r|- _Δ'    )
-poppedR = poppedΔ unsnocΔ (|>)
+poppedR = poppedΔ snocΔ
 
 poppedL2
   :: Contextual s
@@ -203,7 +203,7 @@ poppedR2
   => Setter
     (_Γ -|s e r|- _Δ > a > b) (_Γ' -|s e r|- _Δ' > a > b)
     (_Γ -|s e r|- _Δ        ) (_Γ' -|s e r|- _Δ'        )
-poppedR2 = poppedΔ (assocR . first unsnocΔ . unsnocΔ) (\ _Δ (b, a) -> _Δ |> b |> a)
+poppedR2 = poppedΔ (snocΔ . firsting snocΔ . from assocConj)
 
 
 -- Pushing
@@ -375,11 +375,12 @@ traverseΓ f s = sequent (\ _Δ _Γ''' -> withIso f (\ sa bt -> let (x, _Γ) = s
 
 traverseΔ
   :: Contextual s
-  => (_Δ' • r -> (_Δ • r, y))
-  -> (y -> _Γ -|s e r|- _Δ)
-  -- ----------------------
-  ->       _Γ -|s e r|- _Δ'
-traverseΔ f = traverseΓΔ ((),) f . const
+  => Iso
+    (_Δ''' • r)   (_Δ • r)
+    (_Δ'' • r, y) (_Δ' • r, y)
+  -> ((_Δ' • r -> _Δ • r) -> _Γ -|s e r|- _Δ'')
+  ->                         _Γ -|s e r|- _Δ'''
+traverseΔ f s = sequent (\ _Δ''' _Γ -> withIso f (\ sa bt -> let (_Δ, y) = sa _Δ''' in appSequent (s (bt . (,y))) _Δ _Γ))
 
 
 -- Lifting
