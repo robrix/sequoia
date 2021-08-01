@@ -256,7 +256,7 @@ pushΔ
   ->       _Γ -|s e r|- _Δ
   -- -----------------------
   -> (y -> _Γ -|s e r|- _Δ')
-pushΔ o s y = sequent (appSequent s . review o . (,y))
+pushΔ o s y = pushΓΔ o idΓ s y ()
 
 
 -- | Push something onto the input context which was previously popped off it. Used with 'popL', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
