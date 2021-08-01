@@ -12,6 +12,7 @@ module Sequoia.Connective.Negation
 ) where
 
 import Data.Profunctor
+import Prelude hiding (negate)
 import Sequoia.Connective.Negate
 import Sequoia.Connective.Not
 import Sequoia.Profunctor.Continuation
@@ -22,13 +23,13 @@ notNegate :: a •• r -> Not r (Negate e r a)
 notNegate = Not . lmap negateK
 
 getNotNegate :: e -> Not r (Negate e r a) -> a •• r
-getNotNegate e = lmap (Negate e) . getNot
+getNotNegate e = lmap (negate e) . getNot
 
 
 -- Positive double negation
 
 negateNot :: e -> a •• r -> Negate e r (Not r a)
-negateNot e = Negate e . lmap getNot
+negateNot e = negate e . lmap getNot
 
 getNegateNot :: Negate e r (Not r a) -> a •• r
 getNegateNot = lmap Not . negateK

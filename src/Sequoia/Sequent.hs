@@ -24,7 +24,7 @@ import           Control.Monad.Trans.Class
 import           Data.Coerce
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
-import           Prelude hiding (exp, init, seq)
+import           Prelude hiding (exp, init, negate, seq)
 import           Sequoia.Calculus.Additive
 import           Sequoia.Calculus.Context
 import           Sequoia.Calculus.Control as Calculus
@@ -163,7 +163,7 @@ instance NotIntro Seq where
 
 instance NegateIntro Seq where
   negateL = negateLK . kL
-  negateR a = popR (\ k -> env (\ e -> liftR (pure (Negate e k)))) >>> wkR a
+  negateR a = popR (\ k -> env (\ e -> liftR (pure (negate e k)))) >>> wkR a
 
 
 -- Additive
