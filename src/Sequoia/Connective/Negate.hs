@@ -1,11 +1,10 @@
 module Sequoia.Connective.Negate
 ( -- * Negate
-  Negate
+  Negate(withNegate)
 , type (-)
   -- * Construction
 , negate
   -- * Elimination
-, withNegate
 , negateE
 , negateK
 , (•-)
@@ -19,10 +18,10 @@ import Sequoia.Profunctor.Continuation
 
 -- Negate
 
-data Negate e r a = Negate e (a • r)
+newtype Negate e r a = Negate { withNegate :: forall x . (e -> a • r -> x) -> x }
 
 instance Contravariant (Negate e r) where
-  contramap f (Negate e k) = Negate e (lmap f k)
+  contramap f n = withNegate n $ \ e k -> negate e (lmap f k)
 
 instance Neg a => Polarized P (Negate e r a) where
 
@@ -35,14 +34,10 @@ infixr 9 -
 -- Construction
 
 negate :: e -> a • r -> Negate e r a
-negate = Negate
+negate e k = Negate (\ f -> f e k)
 
 
 -- Elimination
-
-withNegate :: Negate e r a -> ((e -> a • r -> x) -> x)
-withNegate (Negate e k) f = f e k
-
 
 negateE :: Negate e r a -> e
 negateE n = withNegate n const
