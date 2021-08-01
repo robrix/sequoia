@@ -62,7 +62,6 @@ import Sequoia.Calculus.Core
 import Sequoia.Calculus.Structural
 import Sequoia.Conjunction
 import Sequoia.Disjunction
-import Sequoia.Profunctor.Coexponential
 import Sequoia.Profunctor.Context
 import Sequoia.Profunctor.Continuation
 import Sequoia.Profunctor.Value
@@ -79,32 +78,32 @@ class (Core s, forall e r a . MonadEnv e (s e r a), forall e r . Profunctor (s e
 
 swapΓΔ
   :: Contextual s
-  => (Coexp e r _Δ  _Γ  -> _Γ' -|s e r|- _Δ')
-  -> (Coexp e r _Δ' _Γ' -> _Γ  -|s e r|- _Δ )
-swapΓΔ f c = sequent (\ _Δ _Γ -> appSequent (f (_Δ >- _Γ)) (forget c) (recall c))
+  => (_Δ  • r -> e ∘ _Γ  -> _Γ' -|s e r|- _Δ')
+  -> (_Δ' • r -> e ∘ _Γ' -> _Γ  -|s e r|- _Δ )
+swapΓΔ f _Δ' _Γ' = sequent (\ _Δ _Γ -> appSequent (f _Δ _Γ) _Δ' _Γ')
 
 
 swapΓ
   :: Contextual s
   => (e ∘ _Γ  -> _Γ' -|s e r|- _Δ)
   -> (e ∘ _Γ' -> _Γ  -|s e r|- _Δ)
-swapΓ f _Γ' = popΓΔ (\ c -> pushΓΔ (f (recall c)) (c & recall_ .~ _Γ'))
+swapΓ f _Γ' = popΓΔ (\ _Δ _Γ -> pushΓΔ (f _Γ) _Δ _Γ')
 
 swapΔ
   :: Contextual s
   => (_Δ  • r -> _Γ -|s e r|- _Δ')
   -> (_Δ' • r -> _Γ -|s e r|- _Δ)
-swapΔ f _Δ' = popΓΔ (\ c -> pushΓΔ (f (forget c)) (c & forget_ .~ _Δ'))
+swapΔ f _Δ' = popΓΔ (\ _Δ -> pushΓΔ (f _Δ) _Δ')
 
 
 -- Popping
 
 popΓΔ
   :: Contextual s
-  => (Coexp e r _Δ _Γ -> e -|s e r|- r)
-  -- ----------------------------------
-  ->                    _Γ -|s e r|- _Δ
-popΓΔ f = swapΓΔ f idCoexp
+  => (_Δ • r -> e ∘ _Γ -> e -|s e r|- r)
+  -- -----------------------------------
+  ->                     _Γ -|s e r|- _Δ
+popΓΔ f = swapΓΔ f idK idV
 
 -- | Pop something off the input context which can later be pushed. Used with 'pushΓ', this provides a generalized context restructuring facility.
 --
@@ -235,10 +234,10 @@ poppedR2 = poppedΔ (assocR . first unsnocΔ . unsnocΔ) (\ _Δ (b, a) -> _Δ |>
 
 pushΓΔ
   :: Contextual s
-  =>                    _Γ -|s e r|- _Δ
-  -- ----------------------------------
-  -> (Coexp e r _Δ _Γ -> e -|s e r|- r)
-pushΓΔ = swapΓΔ . const
+  =>                     _Γ -|s e r|- _Δ
+  -- -----------------------------------
+  -> (_Δ • r -> e ∘ _Γ -> e -|s e r|- r)
+pushΓΔ = swapΓΔ . const . const
 
 -- | Push something onto the input context which was previously popped off it. Used with 'popΓ', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
 --
@@ -326,7 +325,7 @@ mapΓΔ
   -> _Γ  -|s e r|- _Δ
   -- -----------------
   -> _Γ' -|s e r|- _Δ'
-mapΓΔ f g p = popΓΔ (unCoexp (\ _Δ _Γ -> pushΓΔ p (g _Δ >- f _Γ)))
+mapΓΔ f g p = popΓΔ (\ _Δ _Γ -> pushΓΔ p (g _Δ) (f _Γ))
 
 mapΓ
   :: Contextual s
@@ -387,7 +386,7 @@ traverseΓΔ
   -> (x -> y -> _Γ  -|s e r|- _Δ)
   -- ----------------------------
   -> _Γ' -|s e r|- _Δ'
-traverseΓΔ f g s = popΓΔ (unCoexp (\ _Δ' _Γ' -> let (x, _Γ) = f _Γ' ; (_Δ, y) = g _Δ' in pushΓΔ (s x y) (_Δ >- _Γ)))
+traverseΓΔ f g s = popΓΔ (\ _Δ' _Γ' -> let (x, _Γ) = f _Γ' ; (_Δ, y) = g _Δ' in pushΓΔ (s x y) _Δ _Γ)
 
 traverseΓ
   :: Contextual s
