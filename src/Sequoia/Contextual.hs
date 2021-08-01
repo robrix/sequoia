@@ -103,7 +103,7 @@ popΓΔ
   => (_Δ • r -> e ∘ _Γ -> e -|s e r|- r)
   -- -----------------------------------
   ->                     _Γ -|s e r|- _Δ
-popΓΔ f = swapΓΔ f idK idV
+popΓΔ f = sequent (\ _Δ _Γ -> appSequent (f _Δ _Γ) idK idV)
 
 -- | Pop something off the input context which can later be pushed. Used with 'pushΓ', this provides a generalized context restructuring facility.
 --
@@ -118,7 +118,7 @@ popΓ
   => (e ∘ _Γ -> e -|s e r|- _Δ)
   -- --------------------------
   ->      _Γ      -|s e r|- _Δ
-popΓ f = swapΓ f (V id)
+popΓ f = sequent (\ _Δ _Γ -> appSequent (f _Γ) _Δ idV)
 
 -- | Pop something off the output context which can later be pushed. Used with 'pushΔ', this provides a generalized context restructuring facility.
 --
@@ -133,7 +133,7 @@ popΔ
   => (_Δ • r -> _Γ -|s e r|- r)
   -- --------------------------
   ->            _Γ -|s e r|- _Δ
-popΔ f = swapΔ f (K id)
+popΔ f = sequent (\ _Δ -> appSequent (f _Δ) idK)
 
 
 -- | Pop something off the input context which can later be pushed. Used with 'pushL', this provides a generalized context restructuring facility.
@@ -237,7 +237,7 @@ pushΓΔ
   =>                     _Γ -|s e r|- _Δ
   -- -----------------------------------
   -> (_Δ • r -> e ∘ _Γ -> e -|s e r|- r)
-pushΓΔ = swapΓΔ . const . const
+pushΓΔ s _Δ _Γ = sequent (\ _Δ' _Γ' -> _Δ' •<< appSequent s _Δ _Γ <<∘ _Γ')
 
 -- | Push something onto the input context which was previously popped off it. Used with 'popΓ', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
 --
@@ -252,7 +252,7 @@ pushΓ
   =>      _Γ      -|s e r|- _Δ
   -- --------------------------
   -> (e ∘ _Γ -> e -|s e r|- _Δ)
-pushΓ = swapΓ . const
+pushΓ s _Γ = sequent (\ _Δ' _Γ' -> appSequent s _Δ' _Γ <<∘ _Γ')
 
 -- | Push something onto the output context which was previously popped off it. Used with 'popΔ', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
 --
@@ -267,7 +267,7 @@ pushΔ
   =>            _Γ -|s e r|- _Δ
   -- ---------------------------
   -> (_Δ • r -> _Γ -|s e r|-  r)
-pushΔ = swapΔ . const
+pushΔ s _Δ = sequent (\ _Δ' _Γ' -> _Δ' •<< appSequent s _Δ _Γ')
 
 
 -- | Push something onto the input context which was previously popped off it. Used with 'popL', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
@@ -325,7 +325,7 @@ mapΓΔ
   -> _Γ  -|s e r|- _Δ
   -- -----------------
   -> _Γ' -|s e r|- _Δ'
-mapΓΔ f g p = popΓΔ (\ _Δ _Γ -> pushΓΔ p (g _Δ) (f _Γ))
+mapΓΔ f g p = sequent (\ _Δ _Γ -> appSequent p (g _Δ) (f _Γ))
 
 mapΓ
   :: Contextual s
@@ -386,7 +386,7 @@ traverseΓΔ
   -> (x -> y -> _Γ  -|s e r|- _Δ)
   -- ----------------------------
   -> _Γ' -|s e r|- _Δ'
-traverseΓΔ f g s = popΓΔ (\ _Δ' _Γ' -> let (x, _Γ) = f _Γ' ; (_Δ, y) = g _Δ' in pushΓΔ (s x y) _Δ _Γ)
+traverseΓΔ f g s = sequent (\ _Δ' _Γ' -> let (x, _Γ) = f _Γ' ; (_Δ, y) = g _Δ' in appSequent (s x y) _Δ _Γ)
 
 traverseΓ
   :: Contextual s
