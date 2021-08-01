@@ -100,7 +100,7 @@ popΓ
   -> (x -> _Γ' -|s e r|- _Δ)
   -- -----------------------
   ->       _Γ  -|s e r|- _Δ
-popΓ o f = sequent (\ _Δ _Γ -> let (x, _Γ') = view o _Γ in appSequent (f x) _Δ _Γ')
+popΓ o = popΓΔ idΔ o . const
 
 -- | Pop something off the output context which can later be pushed. Used with 'pushΔ', this provides a generalized context restructuring facility.
 --
