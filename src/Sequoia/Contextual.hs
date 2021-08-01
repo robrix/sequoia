@@ -100,17 +100,18 @@ popΓ o f = sequent (\ _Δ _Γ -> let (x, _Γ') = view o _Γ in appSequent (f x)
 -- | Pop something off the output context which can later be pushed. Used with 'pushΔ', this provides a generalized context restructuring facility.
 --
 -- @
--- popΔ . pushΔ = id
+-- popΔ o . pushΔ o = id
 -- @
 -- @
--- pushΔ . popΔ = id
+-- pushΔ o . popΔ o = id
 -- @
 popΔ
   :: Contextual s
-  => (_Δ • r -> _Γ -|s e r|- r)
-  -- --------------------------
-  ->            _Γ -|s e r|- _Δ
-popΔ f = sequent (\ _Δ -> appSequent (f _Δ) idK)
+  => Iso' (_Δ • r) (_Δ' • r, y)
+  -> (y -> _Γ -|s e r|- _Δ')
+  -- -----------------------
+  ->       _Γ -|s e r|- _Δ
+popΔ o f = sequent (\ _Δ -> let (_Δ', y) = view o _Δ in appSequent (f y) _Δ')
 
 
 -- | Pop something off the input context which can later be pushed. Used with 'pushL', this provides a generalized context restructuring facility.
@@ -141,7 +142,7 @@ popR
   => (a • r -> _Γ -|s e r|- _Δ)
   -- -----------------------------
   ->           _Γ -|s e r|- _Δ > a
-popR f = popΔ (pushΔ . f . inrK <*> inlK)
+popR = popΔ snocΔ
 
 
 popL2
@@ -237,17 +238,18 @@ pushΓ o s x = sequent (\ _Δ' -> appSequent s _Δ' . review o . (x,))
 -- | Push something onto the output context which was previously popped off it. Used with 'popΔ', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
 --
 -- @
--- popΔ . pushΔ = id
+-- popΔ o . pushΔ o = id
 -- @
 -- @
--- pushΔ . popΔ = id
+-- pushΔ o . popΔ o = id
 -- @
 pushΔ
   :: Contextual s
-  =>            _Γ -|s e r|- _Δ
+  => Iso' (_Δ • r) (_Δ' • r, y)
+  ->       _Γ -|s e r|- _Δ
   -- ---------------------------
-  -> (_Δ • r -> _Γ -|s e r|-  r)
-pushΔ s _Δ = sequent (\ _Δ' _Γ' -> _Δ' •<< appSequent s _Δ _Γ')
+  -> (y -> _Γ -|s e r|- _Δ')
+pushΔ o s y = sequent (appSequent s . review o . (,y))
 
 
 -- | Push something onto the input context which was previously popped off it. Used with 'popL', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
@@ -278,7 +280,7 @@ pushR
   =>           _Γ -|s e r|- _Δ > a
   -- -----------------------------
   -> (a • r -> _Γ -|s e r|- _Δ)
-pushR s a = popΔ (\ c -> pushΔ s (c |> a))
+pushR = pushΔ snocΔ
 
 
 pushL2
