@@ -5,8 +5,6 @@ module Sequoia.Calculus.Context
 , (<|)
 , unconsΓ
 , consΓ
-, lΓ
-, rΓ
   -- * Δ
 , type (>)(..)
 , (|>)
@@ -23,7 +21,6 @@ import Data.Bifoldable
 import Data.Bifunctor
 import Data.Bitraversable
 import Fresnel.Iso
-import Fresnel.Lens
 import Sequoia.Conjunction
 import Sequoia.Disjunction
 import Sequoia.Profunctor.Continuation
@@ -81,17 +78,6 @@ consΓ :: Iso
   (e ∘ (i    < is)) (e' ∘ (i'     < is'))
   (e ∘  i, e ∘ is)  (e' ∘  i', e' ∘ is')
 consΓ = iso unconsΓ (uncurry (<|))
-
-
-lΓ :: Lens
-  (e ∘ (i < is)) (e ∘ (i' < is))
-  (e ∘  i)       (e ∘  i')
-lΓ = lens exlF (\ iis i' -> first . const <$> i' <*> iis)
-
-rΓ :: Lens
-  (e ∘ (i < is)) (e ∘ (i < is'))
-  (e ∘      is)  (e ∘      is')
-rΓ = lens exrF (\ iis is' -> second . const <$> is' <*> iis)
 
 
 -- Δ
