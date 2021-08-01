@@ -3,6 +3,8 @@ module Sequoia.Connective.Subtraction
   Sub(..)
 , type (>-)
 , type (-~)
+  -- * Elimination
+, getSub
   -- * Optics
 , subA_
 , subK_
@@ -12,6 +14,7 @@ import Data.Kind (Type)
 import Data.Profunctor
 import Fresnel.Lens
 import Sequoia.Polarity
+import Sequoia.Profunctor.Coexponential
 import Sequoia.Profunctor.Continuation
 import Sequoia.Profunctor.Value
 
@@ -32,6 +35,12 @@ type s-~ b = s b
 
 infixr 6 >-
 infixr 5 -~
+
+
+-- Elimination
+
+getSub :: Sub e r b a -> Coexp e r b a
+getSub (a :-< k) = a -< k
 
 
 -- Optics
