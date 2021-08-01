@@ -5,6 +5,7 @@ module Sequoia.Calculus.Context
 , (<|)
 , unconsΓ
 , lΓ
+, rΓ
   -- * Δ
 , type (>)(..)
 , (|>)
@@ -78,6 +79,11 @@ lΓ :: Lens
   (e ∘ (i < is)) (e ∘ (i' < is))
   (e ∘  i)       (e ∘  i')
 lΓ = lens exlF (\ iis i' -> first . const <$> i' <*> iis)
+
+rΓ :: Lens
+  (e ∘ (i < is)) (e ∘ (i < is'))
+  (e ∘      is)  (e ∘      is')
+rΓ = lens exrF (\ iis is' -> second . const <$> is' <*> iis)
 
 
 -- Δ
