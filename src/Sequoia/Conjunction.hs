@@ -9,6 +9,7 @@ module Sequoia.Conjunction
 , exlrC
 , assocL
 , assocR
+, assocConj
 , distConjA
 , distConjRep
 , undistConjF
@@ -108,6 +109,11 @@ assocL = (exl &&& exl . exr) &&& exr . exr
 
 assocR :: Conj p => (a `p` b) `p` c -> a `p` (b `p` c)
 assocR = exl . exl &&& exr . exl &&& exr
+
+assocConj :: (Conj p, Conj q) => Iso
+  (a `p` (b `p` c)) (a' `q` (b' `q` c'))
+  ((a `p` b) `p` c) ((a' `q` b') `q` c')
+assocConj = iso assocL assocR
 
 
 distConjA :: (Applicative f, Conj c) => (f a `c` f b) -> f (a `c` b)
