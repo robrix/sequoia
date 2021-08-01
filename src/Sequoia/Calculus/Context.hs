@@ -4,6 +4,7 @@ module Sequoia.Calculus.Context
   type (<)(..)
 , (<|)
 , unconsΓ
+, consΓ
 , lΓ
 , rΓ
   -- * Δ
@@ -20,6 +21,7 @@ import Control.Monad (ap)
 import Data.Bifoldable
 import Data.Bifunctor
 import Data.Bitraversable
+import Fresnel.Iso
 import Fresnel.Lens
 import Sequoia.Conjunction
 import Sequoia.Disjunction
@@ -73,6 +75,11 @@ instance Bitraversable (<) where
 -- @
 unconsΓ :: e ∘ (a < b) -> (e ∘ a, e ∘ b)
 unconsΓ v = (exlF v, exrF v)
+
+consΓ :: Iso
+  (e ∘ (i    < is)) (e' ∘ (i'     < is'))
+  (e ∘  i, e ∘ is)  (e' ∘  i', e' ∘ is')
+consΓ = iso unconsΓ (uncurry (<|))
 
 
 lΓ :: Lens
