@@ -247,7 +247,7 @@ pushΔ
   :: Contextual s
   => Iso' (_Δ • r) (_Δ' • r, y)
   ->       _Γ -|s e r|- _Δ
-  -- ---------------------------
+  -- -----------------------
   -> (y -> _Γ -|s e r|- _Δ')
 pushΔ o s y = sequent (appSequent s . review o . (,y))
 
