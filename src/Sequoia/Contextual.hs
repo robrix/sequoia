@@ -50,7 +50,9 @@ module Sequoia.Contextual
 import Control.Monad (join)
 import Data.Function
 import Data.Profunctor
+import Fresnel.Getter
 import Fresnel.Iso
+import Fresnel.Review
 import Fresnel.Setter
 import Prelude hiding (init)
 import Sequoia.Calculus.Context
@@ -82,17 +84,18 @@ popΓΔ f = sequent (\ _Δ _Γ -> appSequent (f _Δ _Γ) idK idV)
 -- | Pop something off the input context which can later be pushed. Used with 'pushΓ', this provides a generalized context restructuring facility.
 --
 -- @
--- popΓ . pushΓ = id
+-- popΓ o . pushΓ o = id
 -- @
 -- @
--- pushΓ . popΓ = id
+-- pushΓ o . popΓ o = id
 -- @
 popΓ
   :: Contextual s
-  => (e ∘ _Γ -> e -|s e r|- _Δ)
-  -- --------------------------
-  ->      _Γ      -|s e r|- _Δ
-popΓ f = sequent (\ _Δ _Γ -> appSequent (f _Γ) _Δ idV)
+  => Iso' (e ∘ _Γ) (x, e ∘ _Γ')
+  -> (x -> _Γ' -|s e r|- _Δ)
+  -- -----------------------
+  ->       _Γ  -|s e r|- _Δ
+popΓ o f = sequent (\ _Δ _Γ -> let (x, _Γ') = view o _Γ in appSequent (f x) _Δ _Γ')
 
 -- | Pop something off the output context which can later be pushed. Used with 'pushΔ', this provides a generalized context restructuring facility.
 --
@@ -123,7 +126,7 @@ popL
   => (e ∘ a -> _Γ -|s e r|- _Δ)
   -- --------------------------
   ->      a  < _Γ -|s e r|- _Δ
-popL f = popΓ (pushΓ . f . exlF <*> exrF)
+popL = popΓ consΓ
 
 -- | Pop something off the output context which can later be pushed. Used with 'pushR', this provides a generalized context restructuring facility.
 --
@@ -218,17 +221,18 @@ pushΓΔ s _Δ _Γ = sequent (\ _Δ' _Γ' -> _Δ' •<< appSequent s _Δ _Γ <<�
 -- | Push something onto the input context which was previously popped off it. Used with 'popΓ', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
 --
 -- @
--- popΓ . pushΓ = id
+-- popΓ o . pushΓ o = id
 -- @
 -- @
--- pushΓ . popΓ = id
+-- pushΓ o . popΓ o = id
 -- @
 pushΓ
   :: Contextual s
-  =>      _Γ      -|s e r|- _Δ
-  -- --------------------------
-  -> (e ∘ _Γ -> e -|s e r|- _Δ)
-pushΓ s _Γ = sequent (\ _Δ' _Γ' -> appSequent s _Δ' _Γ <<∘ _Γ')
+  => Iso' (e ∘ _Γ) (x, e ∘ _Γ')
+  ->       _Γ  -|s e r|- _Δ
+  -- -----------------------
+  -> (x -> _Γ' -|s e r|- _Δ)
+pushΓ o s x = sequent (\ _Δ' _Γ' -> let _Γ = review o (x, _Γ') in appSequent s _Δ' _Γ)
 
 -- | Push something onto the output context which was previously popped off it. Used with 'popΔ', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
 --
@@ -259,7 +263,7 @@ pushL
   =>      a  < _Γ -|s e r|- _Δ
   -- --------------------------
   -> (e ∘ a -> _Γ -|s e r|- _Δ)
-pushL s a = popΓ (pushΓ s . (a <|))
+pushL = pushΓ consΓ
 
 -- | Push something onto the output context which was previously popped off it. Used with 'popR', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
 --
@@ -403,7 +407,7 @@ liftR
   =>               e ∘ a
   -- -------------------
   -> _Γ -|s e r|- _Δ > a
-liftR v = popΓ (\ _Γ -> pushΓ init (v <| _Γ))
+liftR = pushΓ consΓ init
 
 
 -- Lowering
@@ -420,7 +424,7 @@ lowerR
   => (              e ∘ a -> _Γ -|s e r|- _Δ)
   -- ----------------------------------------
   -> (_Γ -|s e r|- _Δ > a -> _Γ -|s e r|- _Δ)
-lowerR k p = p >>> popΓ (\ _Γ -> pushΓ (k (exlF _Γ)) (exrF _Γ))
+lowerR k p = p >>> popΓ consΓ k
 
 
 -- Deriving
