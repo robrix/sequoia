@@ -205,14 +205,14 @@ poppedL2
   => Setter
     (a < b < _Γ -|s e r|- _Δ) (a < b < _Γ' -|s e r|- _Δ')
     (        _Γ -|s e r|- _Δ) (        _Γ' -|s e r|- _Δ')
-poppedL2 = poppedΓ (consΓ . fmapping consΓ . assocConj)
+poppedL2 = poppedL . poppedL
 
 poppedR2
   :: Contextual s
   => Setter
     (_Γ -|s e r|- _Δ > a > b) (_Γ' -|s e r|- _Δ' > a > b)
     (_Γ -|s e r|- _Δ        ) (_Γ' -|s e r|- _Δ'        )
-poppedR2 = poppedΔ (snocΔ . firsting snocΔ . from assocConj)
+poppedR2 = poppedR . poppedR
 
 
 -- Pushing
