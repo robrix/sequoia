@@ -41,9 +41,9 @@ import Data.Profunctor
 import Data.Profunctor.Rep as Pro
 import Data.Profunctor.Sieve
 import Data.Profunctor.Traversing
+import Fresnel.Iso
 import Sequoia.Functor.Source.Internal
 import Sequoia.Monad.Run
-import Fresnel.Iso
 import Sequoia.Profunctor.Continuation
 import Sequoia.Profunctor.Recall
 import Sequoia.Profunctor.Value
