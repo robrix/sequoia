@@ -149,6 +149,8 @@ class Monad m => MonadEnv e m | m -> e where
   env k = askEnv >>= k
 
 instance MonadEnv e ((->) e) where
+  askEnv = id
+
   env = join
 
 deriving instance MonadEnv e ((∘) e)
