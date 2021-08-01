@@ -51,6 +51,7 @@ import Control.Monad (join)
 import Data.Bifunctor (first)
 import Data.Function
 import Data.Profunctor
+import Fresnel.Iso
 import Fresnel.Setter
 import Prelude hiding (init)
 import Sequoia.Calculus.Context
@@ -158,12 +159,13 @@ popR2 f = popR (popR . f)
 
 poppedΓ
   :: Contextual s
-  => (e ∘ _Γ''' -> (x, e ∘ _Γ''))
-  -> (x -> e ∘ _Γ' -> e ∘ _Γ)
+  => Iso
+    (e ∘ _Γ''')   (e ∘ _Γ)
+    (x, e ∘ _Γ'') (x, e ∘ _Γ')
   -> Setter
     (_Γ  -|s e r|- _Δ) (_Γ''' -|s e r|- _Δ')
     (_Γ' -|s e r|- _Δ) (_Γ''  -|s e r|- _Δ')
-poppedΓ g h = roam (\ f p -> traverseΓ g (\ x -> f (mapΓ (h x) p)))
+poppedΓ g = roam (\ f p -> traverseΓ g (\ h -> f (mapΓ h p)))
 
 poppedΔ
   :: Contextual s
@@ -180,7 +182,7 @@ poppedL
   => Setter
     (a < _Γ -|s e r|- _Δ) (a < _Γ' -|s e r|- _Δ')
     (    _Γ -|s e r|- _Δ) (    _Γ' -|s e r|- _Δ')
-poppedL = poppedΓ unconsΓ (<|)
+poppedL = poppedΓ consΓ
 
 poppedR
   :: Contextual s
@@ -194,7 +196,7 @@ poppedL2
   => Setter
     (a < b < _Γ -|s e r|- _Δ) (a < b < _Γ' -|s e r|- _Δ')
     (        _Γ -|s e r|- _Δ) (        _Γ' -|s e r|- _Δ')
-poppedL2 = poppedΓ (assocL . fmap unconsΓ . unconsΓ) (\ (a, b) _Γ -> a <| b <| _Γ)
+poppedL2 = poppedΓ (consΓ . fmapping consΓ . assocConj)
 
 poppedR2
   :: Contextual s
@@ -364,11 +366,12 @@ traverseΓΔ f g s = sequent (\ _Δ' _Γ' -> let (x, _Γ) = f _Γ' ; (_Δ, y) = 
 
 traverseΓ
   :: Contextual s
-  => (e ∘ _Γ' -> (x, e ∘ _Γ))
-  -> (x -> _Γ  -|s e r|- _Δ)
-  -- -----------------------
-  ->       _Γ' -|s e r|- _Δ
-traverseΓ f = traverseΓΔ f (,()) . (const .)
+  => Iso
+    (e ∘ _Γ''')   (e ∘ _Γ)
+    (x, e ∘ _Γ'') (x, e ∘ _Γ')
+  -> ((e ∘ _Γ' -> e ∘ _Γ) -> _Γ''  -|s e r|- _Δ)
+  ->                         _Γ''' -|s e r|- _Δ
+traverseΓ f s = sequent (\ _Δ _Γ''' -> withIso f (\ sa bt -> let (x, _Γ) = sa _Γ''' in appSequent (s (bt . (x,))) _Δ _Γ))
 
 traverseΔ
   :: Contextual s
