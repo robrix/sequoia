@@ -155,8 +155,8 @@ unsnocΔ :: (a > b) • r -> (a • r, b • r)
 unsnocΔ k = (inlK k, inrK k)
 
 snocΔ :: Iso
-  ((os > o) • r) ((os' > o') • r')
-  (os • r, o • r)  (os' • r', o' • r')
+  ((os > o) • r)  ((os' > o') • r')
+  (os • r, o • r) (os' • r', o' • r')
 snocΔ = iso unsnocΔ (uncurry (|>))
 
 
