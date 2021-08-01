@@ -377,7 +377,7 @@ traverseΓ
     (x, e ∘ _Γ'') (x, e ∘ _Γ')
   -> ((e ∘ _Γ' -> e ∘ _Γ) -> _Γ''  -|s e r|- _Δ)
   ->                         _Γ''' -|s e r|- _Δ
-traverseΓ f s = sequent (\ _Δ _Γ''' -> withIso f (\ sa bt -> let (x, _Γ) = sa _Γ''' in appSequent (s (bt . (x,))) _Δ _Γ))
+traverseΓ f b = traverseΓΔ f (iso (,()) fst) (const . b)
 
 traverseΔ
   :: Contextual s
