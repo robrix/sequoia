@@ -232,7 +232,7 @@ pushΓ
   ->       _Γ  -|s e r|- _Δ
   -- -----------------------
   -> (x -> _Γ' -|s e r|- _Δ)
-pushΓ o s x = sequent (\ _Δ' _Γ' -> let _Γ = review o (x, _Γ') in appSequent s _Δ' _Γ)
+pushΓ o s x = sequent (\ _Δ' -> appSequent s _Δ' . review o . (x,))
 
 -- | Push something onto the output context which was previously popped off it. Used with 'popΔ', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
 --
