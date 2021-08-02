@@ -27,7 +27,7 @@ class NExpr rep where
   withL1 :: rep e r (a & b) -> rep e r a
   withL2 :: rep e r (a & b) -> rep e r b
   withR :: rep e r a -> rep e r b -> rep e r (a & b)
-  parL :: (rep e r a -> rep e r r) -> (rep e r b -> rep e r r) -> (rep e r (Par r a b) -> rep e r r)
+  parL :: rep e r (a • r) -> rep e r (b • r) -> rep e r (Par r a b • r)
   parR :: (forall x . (rep e r a -> rep e r x) -> (rep e r b -> rep e r x) -> rep e r x) -> rep e r (Par r a b)
   funL :: rep e r a -> (rep e r b -> rep e r r) -> (rep e r (Fun r a b) -> rep e r r)
   funR :: (rep e r a -> rep e r b) -> rep e r (Fun r a b)
@@ -81,9 +81,7 @@ instance NExpr Eval where
   withL1 = fmap exl
   withL2 = fmap exr
   withR l r = inlr <$> l <*> r
-  parL f g s = do
-    s' <- s
-    Eval (\ k -> withRun (\ run -> pure (runPar s' (K (run . runEval k . f . pure)) (K (run . runEval k . g . pure)))))
+  parL f g = Eval (\ k -> C (\ e -> k • K (\ s -> runPar s (runEvalK e f) (runEvalK e g))))
   parR f = env (\ e -> pure (Par (\ g h -> evalEval (f (fmap (g •)) (fmap (h •))) <== e)))
   funL a b f = appFun <$> f <*> a <*> evalK b
   funR f = Fun <$> evalF f
