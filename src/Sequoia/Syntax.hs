@@ -84,7 +84,7 @@ instance NExpr Eval where
   withL2 = fmap (lmap exr)
   withR l r = inlr <$> l <*> r
   parL f g = Eval (\ k -> C (\ e -> k • runPar (runEvalK e f) (runEvalK e g)))
-  parR f = env (\ e -> pure (Par (\ g h -> evalEval (f (fmap (g •)) (fmap (h •))) <== e)))
+  parR f = env (\ e -> pure (Par (K (\ (g, h) -> evalEval (f (fmap (g •)) (fmap (h •))) <== e))))
   funL a b f = appFun <$> f <*> a <*> evalK b
   funR f = Fun <$> evalF f
   notL a n = (•) . getNot <$> n <*> a
@@ -112,9 +112,9 @@ instance PExpr Eval where
 
 
 runPar :: a • r -> b • r -> Par r a b • r
-runPar a b = K (\ (Par f) -> f a b)
+runPar a b = K (\ (Par f) -> f • (a, b))
 
-newtype Par r a b = Par (a • r -> b • r -> r)
+newtype Par r a b = Par ((a • r, b • r) • r)
 
 newtype Fun r a b = Fun (b • r -> a • r)
 
