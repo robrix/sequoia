@@ -27,7 +27,7 @@ instance Traversable ((⅋) f) where
 instance Disj (⅋) where
   inl l = Par (`exl` l)
   inr r = Par (`exr` r)
-  ifl <--> ifr = \ (Par par) -> par (ifl >--< ifr)
+  ifl <--> ifr = runPar (ifl >--< ifr)
 
 
 -- Elimination
