@@ -1,3 +1,4 @@
+{-# LANGUAGE FunctionalDependencies #-}
 module Sequoia.Syntax
 ( Expr(..)
 ) where
@@ -11,7 +12,7 @@ import Sequoia.Connective.Tensor
 import Sequoia.Connective.Top
 import Sequoia.Connective.With
 
-class Expr rep where
+class Expr e r rep | rep -> e r where
   top :: rep Top
   (&) :: rep a -> rep b -> rep (a & b)
   exlN :: rep (a & b) -> rep a
