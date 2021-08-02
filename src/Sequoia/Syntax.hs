@@ -40,6 +40,7 @@ class PExpr rep where
   sumR2 :: rep e r b -> rep e r (a ⊕ b)
   tensorL :: (rep e r a -> rep e r b -> rep e r o) -> (rep e r (a ⊗ b) -> rep e r o)
   tensorR :: rep e r a -> rep e r b -> rep e r (a ⊗ b)
+  subR :: rep e r a -> (rep e r b -> rep e r r) -> rep e r (Sub r a b)
   negateL :: rep e r a -> (rep e r (Negate e r a) -> rep e r r)
   negateR :: (rep e r a -> rep e r r) -> rep e r (Negate e r a)
 
@@ -87,6 +88,7 @@ instance PExpr Eval where
     a :⊗ b <- s
     f (pure a) (pure b)
   tensorR = liftA2 (:⊗)
+  subR a b = Sub <$> a <*> evalK b
   negateL a n = (•) . negateK <$> n <*> a
   negateR f = env (\ e -> Negate.negate e . K <$> evalK f)
 
@@ -102,3 +104,6 @@ evalK = fmap ($ id) . evalF
 
 evalF :: (Eval e r a -> Eval e r b) -> Eval e r ((b -> r) -> (a -> r))
 evalF f = env (\ e -> pure (\ k -> runEval k e . f . pure))
+
+
+data Sub r a b = Sub { subA :: a, subK :: b -> r }
