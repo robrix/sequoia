@@ -129,12 +129,12 @@ infixr 1 ∘>>, <<∘
 _CK :: Iso
   (e1 ==> r1) (e2 ==> r2)
   (e1 • r1)   (e2 • r2)
-_CK = from _K >>> _C
+_CK = coerced
 
 _CV :: Iso
   (e1 ==> r1) (e2 ==> r2)
   (e1 ∘ r1)   (e2 ∘ r2)
-_CV = from _V >>> _C
+_CV = coerced
 
 
 -- Ambient environment
