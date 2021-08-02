@@ -1,6 +1,7 @@
 {-# LANGUAGE FunctionalDependencies #-}
 module Sequoia.Syntax
-( Expr(..)
+( NExpr(..)
+, PExpr(..)
 ) where
 
 import Control.Applicative (liftA2)
@@ -16,7 +17,7 @@ import Sequoia.Connective.With
 import Sequoia.Profunctor.Context
 import Sequoia.Profunctor.Continuation
 
-class Expr e r rep | rep -> e r where
+class NExpr e r rep | rep -> e r where
   top :: rep Top
   (&) :: rep a -> rep b -> rep (a & b)
   exlN :: rep (a & b) -> rep a
@@ -25,6 +26,7 @@ class Expr e r rep | rep -> e r where
   exlrN :: rep (Par r a b) -> (rep a -> rep o) -> (rep b -> rep o) -> rep o
   not :: rep (a -> r) -> rep (Not r a)
 
+class PExpr e r rep | rep -> e r where
   one :: rep (One e)
   inlP :: rep a -> rep (a ⊕ b)
   inrP :: rep b -> rep (a ⊕ b)
@@ -52,7 +54,7 @@ instance Monad (Eval e r) where
 instance MonadEnv e (Eval e r) where
   env f = Eval (\ k -> runEval k <*> f)
 
-instance Expr e r (Eval e r) where
+instance NExpr e r (Eval e r) where
   top = pure Top
   l & r = inlr <$> l <*> r
   exlN = fmap exl
@@ -63,6 +65,7 @@ instance Expr e r (Eval e r) where
     Eval (\ k e -> runPar s' (runEval k e . f . pure) (runEval k e . g . pure))
   not = fmap (Not . K)
 
+instance PExpr e r (Eval e r) where
   one = Eval (. One)
   inlP = fmap InL
   inrP = fmap InR
