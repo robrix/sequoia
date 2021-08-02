@@ -27,6 +27,7 @@ class NExpr rep where
   funL :: rep e r a -> (rep e r b -> rep e r r) -> (rep e r (Fun r a b) -> rep e r r)
   funR :: (rep e r a -> rep e r b) -> rep e r (Fun r a b)
   notR :: (rep e r a -> rep e r r) -> rep e r (Not r a)
+  notL :: rep e r (Not r a) -> rep e r a -> rep e r r
 
 class PExpr rep where
   oneR :: rep e r (One e)
@@ -68,6 +69,7 @@ instance NExpr Eval where
   funL a b f = appFun <$> f <*> a <*> evalK b
   funR f = Fun <$> evalF f
   notR f = Not . K <$> evalK f
+  notL n a = (•) . getNot <$> n <*> a
 
 instance PExpr Eval where
   oneR = Eval (. One)
