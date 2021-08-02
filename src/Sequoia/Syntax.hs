@@ -14,6 +14,7 @@ import Sequoia.Connective.One
 import Sequoia.Connective.Sum
 import Sequoia.Connective.Tensor
 import Sequoia.Connective.Top
+import Sequoia.Connective.True
 import Sequoia.Connective.With
 import Sequoia.Connective.Zero
 import Sequoia.Monad.Run
@@ -43,6 +44,7 @@ class PExpr rep where
   tensorR :: rep e r a -> rep e r b -> rep e r (a ⊗ b)
   subL :: (rep e r a -> rep e r b) -> (rep e r (Sub r a b) -> rep e r r)
   subR :: rep e r a -> (rep e r b -> rep e r r) -> rep e r (Sub r a b)
+  trueR :: rep e r a -> rep e r (True r a)
   negateL :: rep e r a -> (rep e r (Negate e r a) -> rep e r r)
   negateR :: (rep e r a -> rep e r r) -> rep e r (Negate e r a)
 
@@ -102,6 +104,7 @@ instance PExpr Eval where
     s <- s
     pure (f (subK s) • subA s)
   subR a b = Sub <$> a <*> evalK b
+  trueR = fmap true
   negateL a n = (•) . negateK <$> n <*> a
   negateR f = env (\ e -> Negate.negate e <$> evalK f)
 
