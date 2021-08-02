@@ -47,35 +47,35 @@ class PExpr rep where
   negateR :: (rep e r a -> rep e r r) -> rep e r (Negate e r a)
 
 runEval :: a • r -> e -> Eval e r a -> r
-runEval k e m = getEval m k • e
+runEval k e m = getEval m k <== e
 
 evalEval :: e -> Eval e r r -> r
 evalEval = runEval idK
 
-newtype Eval e r a = Eval { getEval :: a • r -> e • r }
+newtype Eval e r a = Eval { getEval :: a • r -> e ==> r }
 
 instance Functor (Eval e r) where
   fmap f = Eval . lmap (lmap f) . getEval
 
 instance Applicative (Eval e r) where
-  pure a = Eval (constK . (• a))
+  pure a = Eval (pure . (• a))
   (<*>) = ap
 
 instance Monad (Eval e r) where
-  Eval m >>= f = Eval (\ k -> K (\ e -> m (K (runEval k e . f)) • e))
+  Eval m >>= f = Eval (\ k -> env (\ e -> m (K (runEval k e . f))))
 
 instance MonadEnv e (Eval e r) where
-  env f = Eval (\ k -> K (runEval k <*> f))
+  env f = Eval (\ k -> env (pure . (runEval k <*> f)))
 
 instance NExpr Eval where
-  bottomL b = Eval (\ _ -> K (\ e -> runEval (K absurdN) e b))
+  bottomL b = Eval (\ _ -> env (\ e -> pure (runEval (K absurdN) e b)))
   topR = pure Top
   withL1 = fmap exl
   withL2 = fmap exr
   withR l r = inlr <$> l <*> r
   parL f g s = do
     s' <- s
-    Eval (\ k -> K (\ e -> runPar s' (runEval k e . f . pure) (runEval k e . g . pure)))
+    Eval (\ k -> env (\ e -> pure (runPar s' (runEval k e . f . pure) (runEval k e . g . pure))))
   parR f = env (\ e -> pure (Par (\ g h -> evalEval e (f (fmap g) (fmap h)))))
   funL a b f = appFun <$> f <*> a <*> evalK b
   funR f = Fun <$> evalF f
@@ -84,7 +84,7 @@ instance NExpr Eval where
 
 instance PExpr Eval where
   zeroL = fmap absurdP
-  oneR = Eval (\ k -> K ((k •) . One))
+  oneR = Eval (\ k -> env (pure . (k •) . One))
   sumL f g s = s >>= f . pure <--> g . pure
   sumR1 = fmap InL
   sumR2 = fmap InR
