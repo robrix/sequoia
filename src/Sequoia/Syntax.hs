@@ -5,6 +5,7 @@ module Sequoia.Syntax
 
 import Control.Applicative (liftA2)
 import Control.Monad (ap)
+import Sequoia.Calculus.Bottom
 import Sequoia.Conjunction
 import Sequoia.Connective.Negate as Negate
 import Sequoia.Connective.Not
@@ -18,6 +19,7 @@ import Sequoia.Profunctor.Context
 import Sequoia.Profunctor.Continuation
 
 class NExpr rep where
+  bottomL :: rep e r (Bottom r) -> rep e r a
   topR :: rep e r Top
   withR :: rep e r a -> rep e r b -> rep e r (a & b)
   withL1 :: rep e r (a & b) -> rep e r a
@@ -58,6 +60,7 @@ instance MonadEnv e (Eval e r) where
   env f = Eval (\ k -> runEval k <*> f)
 
 instance NExpr Eval where
+  bottomL b = Eval (\ _ e -> runEval absurdN e b)
   topR = pure Top
   withR l r = inlr <$> l <*> r
   withL1 = fmap exl
