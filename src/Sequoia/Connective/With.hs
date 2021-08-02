@@ -4,11 +4,12 @@ module Sequoia.Connective.With
 ) where
 
 import Sequoia.Conjunction
+import Sequoia.Disjunction
 import Sequoia.Polarity
 
 -- Negative conjunction
 
-newtype a & b = With (forall r . (a -> b -> r) -> r)
+newtype a & b = With (forall r . Either (a -> r) (b -> r) -> r)
   deriving (Functor)
 
 infixr 6 &
@@ -22,6 +23,6 @@ instance Traversable ((&) f) where
   traverse = traverseConj
 
 instance Conj (&) where
-  a >--< b = With $ \ (>--<) -> a >--< b
-  exl (With run) = run const
-  exr (With run) = run (const id)
+  a >--< b = With $ ($ a) <--> ($ b)
+  exl (With run) = run (Left  id)
+  exr (With run) = run (Right id)
