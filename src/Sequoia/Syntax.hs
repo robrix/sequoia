@@ -5,6 +5,7 @@ module Sequoia.Syntax
 
 import Control.Applicative (liftA2)
 import Control.Monad (ap)
+import Data.Bifunctor
 import Data.Profunctor
 import Sequoia.Calculus.Bottom
 import Sequoia.Conjunction
@@ -115,6 +116,9 @@ runPar :: a • r -> b • r -> Par r a b • r
 runPar a b = K (\ (Par f) -> f • (a, b))
 
 newtype Par r a b = Par ((a • r, b • r) • r)
+
+instance Bifunctor (Par r) where
+  bimap f g (Par r) = Par (lmap (bimap (lmap f) (lmap g)) r)
 
 newtype Fun r a b = Fun (b • r -> a • r)
 
