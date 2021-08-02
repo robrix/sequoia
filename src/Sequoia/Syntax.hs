@@ -24,6 +24,7 @@ class NExpr rep where
   par :: (forall x . (rep e r a -> rep e r x) -> (rep e r b -> rep e r x) -> rep e r x) -> rep e r (Par r a b)
   exlrN :: rep e r (Par r a b) -> (rep e r a -> rep e r o) -> (rep e r b -> rep e r o) -> rep e r o
   lam :: (rep e r a -> rep e r b) -> rep e r (Fun r a b)
+  lamL :: rep e r a -> (rep e r b -> rep e r r) -> (rep e r (Fun r a b) -> rep e r r)
   not :: (rep e r a -> rep e r r) -> rep e r (Not r a)
 
 class PExpr rep where
@@ -64,6 +65,10 @@ instance NExpr Eval where
     s' <- s
     Eval (\ k e -> runPar s' (runEval k e . f . pure) (runEval k e . g . pure))
   lam f = env (\ e -> pure (Fun (\ b -> runEval b e . f . pure)))
+  lamL a b f = do
+    f <- f
+    a <- a
+    env (\ e -> pure (appFun f a (evalEval e . b . pure)))
   not f = env (\ e -> pure (Not (K (evalEval e . f . pure))))
 
 instance PExpr Eval where
@@ -82,3 +87,6 @@ instance PExpr Eval where
 newtype Par r a b = Par { runPar :: (a -> r) -> (b -> r) -> r }
 
 newtype Fun r a b = Fun { runFun :: (b -> r) -> (a -> r) }
+
+appFun :: Fun r a b -> a -> (b -> r) -> r
+appFun f = flip (runFun f)
