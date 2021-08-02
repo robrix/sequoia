@@ -24,8 +24,8 @@ class NExpr rep where
   exrN :: rep e r (a & b) -> rep e r b
   par :: (forall x . (rep e r a -> rep e r x) -> (rep e r b -> rep e r x) -> rep e r x) -> rep e r (Par r a b)
   exlrN :: rep e r (Par r a b) -> (rep e r a -> rep e r o) -> (rep e r b -> rep e r o) -> rep e r o
-  lam :: (rep e r a -> rep e r b) -> rep e r (Fun r a b)
-  lamL :: rep e r a -> (rep e r b -> rep e r r) -> (rep e r (Fun r a b) -> rep e r r)
+  funL :: rep e r a -> (rep e r b -> rep e r r) -> (rep e r (Fun r a b) -> rep e r r)
+  funR :: (rep e r a -> rep e r b) -> rep e r (Fun r a b)
   not :: (rep e r a -> rep e r r) -> rep e r (Not r a)
 
 class PExpr rep where
@@ -65,8 +65,8 @@ instance NExpr Eval where
   exlrN s f g = do
     s' <- s
     Eval (\ k e -> runPar s' (runEval k e . f . pure) (runEval k e . g . pure))
-  lam f = Fun <$> evalF f
-  lamL a b f = appFun <$> f <*> a <*> evalK b
+  funL a b f = appFun <$> f <*> a <*> evalK b
+  funR f = Fun <$> evalF f
   not f = Not . K <$> evalK f
 
 instance PExpr Eval where
