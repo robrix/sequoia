@@ -122,6 +122,9 @@ instance Bifunctor (Par r) where
 
 newtype Fun r a b = Fun (b • r -> a • r)
 
+instance Profunctor (Fun r) where
+  dimap f g (Fun r) = Fun (dimap (lmap g) (lmap f) r)
+
 appFun :: Fun r a b -> a -> b • r -> r
 appFun (Fun f) a b = f b • a
 
