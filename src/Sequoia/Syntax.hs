@@ -49,8 +49,8 @@ class PExpr rep where
 runEval :: a • r -> e -> Eval e r a -> r
 runEval k e m = getEval m k <== e
 
-evalEval :: e -> Eval e r r -> r
-evalEval = runEval idK
+evalEval :: Eval e r r -> e ==> r
+evalEval m = C (\ e -> runEval idK e m)
 
 newtype Eval e r a = Eval { getEval :: a • r -> e ==> r }
 
@@ -80,7 +80,7 @@ instance NExpr Eval where
   parL f g s = do
     s' <- s
     Eval (\ k -> env (\ e -> pure (runPar s' (runEval k e . f . pure) (runEval k e . g . pure))))
-  parR f = env (\ e -> pure (Par (\ g h -> evalEval e (f (fmap g) (fmap h)))))
+  parR f = env (\ e -> pure (Par (\ g h -> evalEval (f (fmap g) (fmap h)) <== e)))
   funL a b f = appFun <$> f <*> a <*> evalK b
   funR f = Fun <$> evalF f
   notL a n = (•) . getNot <$> n <*> a
