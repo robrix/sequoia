@@ -65,11 +65,8 @@ instance NExpr Eval where
     s' <- s
     Eval (\ k e -> runPar s' (runEval k e . f . pure) (runEval k e . g . pure))
   lam f = env (\ e -> pure (Fun (\ b -> runEval b e . f . pure)))
-  lamL a b f = do
-    f <- f
-    a <- a
-    env (\ e -> pure (appFun f a (evalEval e . b . pure)))
-  not f = env (\ e -> pure (Not (K (evalEval e . f . pure))))
+  lamL a b f = appFun <$> f <*> a <*> evalK b
+  not f = Not . K <$> evalK f
 
 instance PExpr Eval where
   one = Eval (. One)
@@ -82,7 +79,7 @@ instance PExpr Eval where
   extensor s f = do
     a :⊗ b <- s
     f (pure a) (pure b)
-  negate f = env (\ e -> pure (Negate.negate e (K (evalEval e . f . pure))))
+  negate f = env (\ e -> Negate.negate e . K <$> evalK f)
 
 newtype Par r a b = Par { runPar :: (a -> r) -> (b -> r) -> r }
 
@@ -90,3 +87,6 @@ newtype Fun r a b = Fun { runFun :: (b -> r) -> (a -> r) }
 
 appFun :: Fun r a b -> a -> (b -> r) -> r
 appFun f = flip (runFun f)
+
+evalK :: (Eval e r b -> Eval e r r) -> Eval e r (b -> r)
+evalK f = env (\ e -> pure (evalEval e . f . pure))
