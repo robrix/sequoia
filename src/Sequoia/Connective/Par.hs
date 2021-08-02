@@ -1,6 +1,8 @@
 module Sequoia.Connective.Par
 ( -- * Negative disjunction
   type (⅋)(..)
+  -- * Elimination
+, runPar
 ) where
 
 import Sequoia.Conjunction
@@ -26,3 +28,9 @@ instance Disj (⅋) where
   inl l = Par (`exl` l)
   inr r = Par (`exr` r)
   ifl <--> ifr = \ (Par par) -> par (ifl >--< ifr)
+
+
+-- Elimination
+
+runPar :: (a -> r, b -> r) -> (a ⅋ b -> r)
+runPar e (Par r) = r e
