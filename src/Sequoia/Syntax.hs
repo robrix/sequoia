@@ -89,7 +89,7 @@ instance NExpr Eval where
 
 instance PExpr Eval where
   zeroL = fmap absurdP
-  oneR = Eval (\ k -> env (pure . (k •) . One))
+  oneR = Eval (\ k -> C ((k •) . One))
   sumL f g = Eval (\ k -> C (\ e -> k • (K (\ a -> runEval (dn a) f <== e) <••> K (\ b -> runEval (dn b) g <== e))))
   sumR1 = fmap InL
   sumR2 = fmap InR
