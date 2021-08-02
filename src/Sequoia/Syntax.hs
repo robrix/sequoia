@@ -12,18 +12,18 @@ import Sequoia.Connective.Top
 import Sequoia.Connective.With
 
 class Expr rep where
-  intop :: rep Top
-  inwith :: rep a -> rep b -> rep (a & b)
-  exwithL :: rep (a & b) -> rep a
-  exwithR :: rep (a & b) -> rep b
-  inpar :: rep a -> rep b -> rep (a ⅋ b)
-  expar :: (rep a -> rep o) -> (rep b -> rep o) -> (rep (a ⅋ b) -> rep o)
-  innot :: rep a -> rep (Not r a)
+  top :: rep Top
+  (&) :: rep a -> rep b -> rep (a & b)
+  exlN :: rep (a & b) -> rep a
+  exrN :: rep (a & b) -> rep b
+  par :: (forall x . (rep a -> x) -> (rep b -> x) -> x) -> rep (a ⅋ b)
+  exlrN :: (rep a -> rep o) -> (rep b -> rep o) -> (rep (a ⅋ b) -> rep o)
+  not :: rep a -> rep (Not r a)
 
-  inone :: rep (One e)
-  insumL :: rep a -> rep (a ⊕ b)
-  insumR :: rep b -> rep (a ⊕ b)
-  exsum :: (rep a -> rep o) -> (rep b -> rep o) -> (rep (a ⊕ b) -> rep o)
-  intensor :: rep a -> rep b -> rep (a ⊗ b)
+  one :: rep (One e)
+  inlP :: rep a -> rep (a ⊕ b)
+  inrP :: rep b -> rep (a ⊕ b)
+  exlrP :: (rep a -> rep o) -> (rep b -> rep o) -> (rep (a ⊕ b) -> rep o)
+  (⊗) :: rep a -> rep b -> rep (a ⊗ b)
   extensor :: (rep a -> rep b -> rep o) -> (rep (a ⊗ b) -> rep o)
-  innegate :: rep a -> rep (Negate e r a)
+  negate :: rep a -> rep (Negate e r a)
