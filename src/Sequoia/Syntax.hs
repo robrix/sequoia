@@ -67,6 +67,10 @@ instance Monad (Eval e r) where
 instance MonadEnv e (Eval e r) where
   env f = Eval (\ k -> env (pure . (runEval k <*> f)))
 
+instance MonadRes r (Eval e r) where
+  res = Eval . const . pure
+  liftRes f = Eval (\ k -> C (\ e -> let run = runEval k e in run (f run)))
+
 instance NExpr Eval where
   bottomL b = Eval (\ _ -> env (\ e -> pure (runEval (K absurdN) e b)))
   topR = pure Top
