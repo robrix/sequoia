@@ -38,6 +38,7 @@ class PExpr rep where
   sumL :: (rep e r a -> rep e r o) -> (rep e r b -> rep e r o) -> (rep e r (a ⊕ b) -> rep e r o)
   tensorR :: rep e r a -> rep e r b -> rep e r (a ⊗ b)
   tensorL :: (rep e r a -> rep e r b -> rep e r o) -> (rep e r (a ⊗ b) -> rep e r o)
+  negateL :: rep e r a -> (rep e r (Negate e r a) -> rep e r r)
   negateR :: (rep e r a -> rep e r r) -> rep e r (Negate e r a)
 
 runEval :: (a -> r) -> e -> Eval e r a -> r
@@ -83,6 +84,7 @@ instance PExpr Eval where
   tensorL f s = do
     a :⊗ b <- s
     f (pure a) (pure b)
+  negateL a n = (•) . negateK <$> n <*> a
   negateR f = env (\ e -> Negate.negate e . K <$> evalK f)
 
 newtype Par r a b = Par { runPar :: (a -> r) -> (b -> r) -> r }
