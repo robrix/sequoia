@@ -32,8 +32,8 @@ instance Traversable ((&) f) where
 
 instance Conj (&) where
   a >--< b = With (dn a <••> dn b)
-  exl = runWith (inl idK)
-  exr = runWith (inr idK)
+  exl = (runWith (inl idK) •)
+  exr = (runWith (inr idK) •)
 
 instance Bifoldable (&) where
   bifoldMap = bifoldMapConj
@@ -47,5 +47,5 @@ instance Bitraversable (&) where
 
 -- Elimination
 
-runWith :: Either (a • r) (b • r) -> (a & b -> r)
-runWith e (With r) = r • e
+runWith :: Either (a • r) (b • r) -> (a & b) • r
+runWith e = K (\ (With r) -> r • e)
