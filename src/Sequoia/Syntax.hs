@@ -21,9 +21,9 @@ import Sequoia.Profunctor.Continuation
 class NExpr rep where
   bottomL :: rep e r (Bottom r) -> rep e r a
   topR :: rep e r Top
-  withR :: rep e r a -> rep e r b -> rep e r (a & b)
   withL1 :: rep e r (a & b) -> rep e r a
   withL2 :: rep e r (a & b) -> rep e r b
+  withR :: rep e r a -> rep e r b -> rep e r (a & b)
   parL :: (rep e r a -> rep e r o) -> (rep e r b -> rep e r o) -> (rep e r (Par r a b) -> rep e r o)
   parR :: (forall x . (rep e r a -> rep e r x) -> (rep e r b -> rep e r x) -> rep e r x) -> rep e r (Par r a b)
   funL :: rep e r a -> (rep e r b -> rep e r r) -> (rep e r (Fun r a b) -> rep e r r)
@@ -33,11 +33,11 @@ class NExpr rep where
 
 class PExpr rep where
   oneR :: rep e r (One e)
+  sumL :: (rep e r a -> rep e r o) -> (rep e r b -> rep e r o) -> (rep e r (a ⊕ b) -> rep e r o)
   sumR1 :: rep e r a -> rep e r (a ⊕ b)
   sumR2 :: rep e r b -> rep e r (a ⊕ b)
-  sumL :: (rep e r a -> rep e r o) -> (rep e r b -> rep e r o) -> (rep e r (a ⊕ b) -> rep e r o)
-  tensorR :: rep e r a -> rep e r b -> rep e r (a ⊗ b)
   tensorL :: (rep e r a -> rep e r b -> rep e r o) -> (rep e r (a ⊗ b) -> rep e r o)
+  tensorR :: rep e r a -> rep e r b -> rep e r (a ⊗ b)
   negateL :: rep e r a -> (rep e r (Negate e r a) -> rep e r r)
   negateR :: (rep e r a -> rep e r r) -> rep e r (Negate e r a)
 
@@ -63,9 +63,9 @@ instance MonadEnv e (Eval e r) where
 instance NExpr Eval where
   bottomL b = Eval (\ _ e -> runEval absurdN e b)
   topR = pure Top
-  withR l r = inlr <$> l <*> r
   withL1 = fmap exl
   withL2 = fmap exr
+  withR l r = inlr <$> l <*> r
   parL f g s = do
     s' <- s
     Eval (\ k e -> runPar s' (runEval k e . f . pure) (runEval k e . g . pure))
@@ -77,13 +77,13 @@ instance NExpr Eval where
 
 instance PExpr Eval where
   oneR = Eval (. One)
+  sumL f g s = s >>= f . pure <--> g . pure
   sumR1 = fmap InL
   sumR2 = fmap InR
-  sumL f g s = s >>= f . pure <--> g . pure
-  tensorR = liftA2 (:⊗)
   tensorL f s = do
     a :⊗ b <- s
     f (pure a) (pure b)
+  tensorR = liftA2 (:⊗)
   negateL a n = (•) . negateK <$> n <*> a
   negateR f = env (\ e -> Negate.negate e . K <$> evalK f)
 
