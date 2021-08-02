@@ -18,24 +18,24 @@ import Sequoia.Profunctor.Context
 import Sequoia.Profunctor.Continuation
 
 class NExpr rep where
-  top :: rep e r Top
-  (&) :: rep e r a -> rep e r b -> rep e r (a & b)
-  exlN :: rep e r (a & b) -> rep e r a
-  exrN :: rep e r (a & b) -> rep e r b
-  par :: (forall x . (rep e r a -> rep e r x) -> (rep e r b -> rep e r x) -> rep e r x) -> rep e r (Par r a b)
-  exlrN :: rep e r (Par r a b) -> (rep e r a -> rep e r o) -> (rep e r b -> rep e r o) -> rep e r o
+  topR :: rep e r Top
+  withR :: rep e r a -> rep e r b -> rep e r (a & b)
+  withL1 :: rep e r (a & b) -> rep e r a
+  withL2 :: rep e r (a & b) -> rep e r b
+  parL :: rep e r (Par r a b) -> (rep e r a -> rep e r o) -> (rep e r b -> rep e r o) -> rep e r o
+  parR :: (forall x . (rep e r a -> rep e r x) -> (rep e r b -> rep e r x) -> rep e r x) -> rep e r (Par r a b)
   funL :: rep e r a -> (rep e r b -> rep e r r) -> (rep e r (Fun r a b) -> rep e r r)
   funR :: (rep e r a -> rep e r b) -> rep e r (Fun r a b)
-  not :: (rep e r a -> rep e r r) -> rep e r (Not r a)
+  notR :: (rep e r a -> rep e r r) -> rep e r (Not r a)
 
 class PExpr rep where
-  one :: rep e r (One e)
-  inlP :: rep e r a -> rep e r (a ⊕ b)
-  inrP :: rep e r b -> rep e r (a ⊕ b)
-  exlrP :: rep e r (a ⊕ b) -> (rep e r a -> rep e r o) -> (rep e r b -> rep e r o) -> rep e r o
-  (⊗) :: rep e r a -> rep e r b -> rep e r (a ⊗ b)
-  extensor :: rep e r (a ⊗ b) -> (rep e r a -> rep e r b -> rep e r o) -> rep e r o
-  negate :: (rep e r a -> rep e r r) -> rep e r (Negate e r a)
+  oneR :: rep e r (One e)
+  sumR1 :: rep e r a -> rep e r (a ⊕ b)
+  sumR2 :: rep e r b -> rep e r (a ⊕ b)
+  sumL :: rep e r (a ⊕ b) -> (rep e r a -> rep e r o) -> (rep e r b -> rep e r o) -> rep e r o
+  tensorR :: rep e r a -> rep e r b -> rep e r (a ⊗ b)
+  tensorL :: rep e r (a ⊗ b) -> (rep e r a -> rep e r b -> rep e r o) -> rep e r o
+  negateR :: (rep e r a -> rep e r r) -> rep e r (Negate e r a)
 
 runEval :: (a -> r) -> e -> Eval e r a -> r
 runEval k e m = getEval m k e
@@ -57,28 +57,28 @@ instance MonadEnv e (Eval e r) where
   env f = Eval (\ k -> runEval k <*> f)
 
 instance NExpr Eval where
-  top = pure Top
-  l & r = inlr <$> l <*> r
-  exlN = fmap exl
-  exrN = fmap exr
-  par f = env (\ e -> pure (Par (\ g h -> evalEval e (f (fmap g) (fmap h)))))
-  exlrN s f g = do
+  topR = pure Top
+  withR l r = inlr <$> l <*> r
+  withL1 = fmap exl
+  withL2 = fmap exr
+  parL s f g = do
     s' <- s
     Eval (\ k e -> runPar s' (runEval k e . f . pure) (runEval k e . g . pure))
+  parR f = env (\ e -> pure (Par (\ g h -> evalEval e (f (fmap g) (fmap h)))))
   funL a b f = appFun <$> f <*> a <*> evalK b
   funR f = Fun <$> evalF f
-  not f = Not . K <$> evalK f
+  notR f = Not . K <$> evalK f
 
 instance PExpr Eval where
-  one = Eval (. One)
-  inlP = fmap InL
-  inrP = fmap InR
-  exlrP s f g = s >>= f . pure <--> g . pure
-  (⊗) = liftA2 (:⊗)
-  extensor s f = do
+  oneR = Eval (. One)
+  sumR1 = fmap InL
+  sumR2 = fmap InR
+  sumL s f g = s >>= f . pure <--> g . pure
+  tensorR = liftA2 (:⊗)
+  tensorL s f = do
     a :⊗ b <- s
     f (pure a) (pure b)
-  negate f = env (\ e -> Negate.negate e . K <$> evalK f)
+  negateR f = env (\ e -> Negate.negate e . K <$> evalK f)
 
 newtype Par r a b = Par { runPar :: (a -> r) -> (b -> r) -> r }
 
