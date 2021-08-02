@@ -23,6 +23,6 @@ instance Traversable ((&) f) where
   traverse = traverseConj
 
 instance Conj (&) where
-  a >--< b = With $ ($ a) <--> ($ b)
-  exl (With run) = run (Left  id)
-  exr (With run) = run (Right id)
+  a >--< b = With (($ a) <--> ($ b))
+  exl (With run) = run (inl id)
+  exr (With run) = run (inr id)
