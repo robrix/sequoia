@@ -92,7 +92,7 @@ instance NExpr Eval where
 instance PExpr Eval where
   zeroL = fmap absurdP
   oneR = Eval (\ k -> C ((k •) . One))
-  sumL f g = Eval (\ k -> C (\ e -> k • (K (\ a -> runEval (dn a) f <== e) <••> K (\ b -> runEval (dn b) g <== e))))
+  sumL f g = Eval (\ k -> C (\ e -> k • (runEvalK e f <••> runEvalK e g)))
   sumR1 = fmap InL
   sumR2 = fmap InR
   tensorL f s = do
