@@ -8,7 +8,7 @@ import Sequoia.Polarity
 
 -- Negative disjunction
 
-newtype a ⅋ b = Par { getPar :: forall r . (a -> r) -> (b -> r) -> r }
+newtype a ⅋ b = Par { getPar :: forall r . (a -> r, b -> r) -> r }
   deriving (Functor)
 
 infixr 7 ⅋
@@ -22,6 +22,6 @@ instance Traversable ((⅋) f) where
   traverse = traverseDisj
 
 instance Disj (⅋) where
-  inl l = Par $ \ ifl _ -> ifl l
-  inr r = Par $ \ _ ifr -> ifr r
-  ifl <--> ifr = \ par -> getPar par ifl ifr
+  inl l = Par $ \ k -> fst k l
+  inr r = Par $ \ k -> snd k r
+  ifl <--> ifr = \ par -> getPar par (ifl, ifr)
