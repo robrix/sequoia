@@ -3,6 +3,7 @@ module Sequoia.Connective.Par
   type (⅋)(..)
 ) where
 
+import Sequoia.Conjunction
 import Sequoia.Disjunction
 import Sequoia.Polarity
 
@@ -22,6 +23,6 @@ instance Traversable ((⅋) f) where
   traverse = traverseDisj
 
 instance Disj (⅋) where
-  inl l = Par $ \ k -> fst k l
-  inr r = Par $ \ k -> snd k r
-  ifl <--> ifr = \ (Par par) -> par (ifl, ifr)
+  inl l = Par (`exl` l)
+  inr r = Par (`exr` r)
+  ifl <--> ifr = \ (Par par) -> par (ifl >--< ifr)
