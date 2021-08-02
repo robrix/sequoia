@@ -26,8 +26,8 @@ instance Traversable ((&) f) where
 
 instance Conj (&) where
   a >--< b = With (($ a) <--> ($ b))
-  exl (With run) = run (inl id)
-  exr (With run) = run (inr id)
+  exl = runWith (inl id)
+  exr = runWith (inr id)
 
 
 -- Elimination
