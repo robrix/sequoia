@@ -17,13 +17,13 @@ class Expr rep where
   exlN :: rep (a & b) -> rep a
   exrN :: rep (a & b) -> rep b
   par :: (forall x . (rep a -> x) -> (rep b -> x) -> x) -> rep (a ⅋ b)
-  exlrN :: (rep a -> rep o) -> (rep b -> rep o) -> (rep (a ⅋ b) -> rep o)
+  exlrN :: rep (a ⅋ b) -> (rep a -> rep o) -> (rep b -> rep o) -> rep o
   not :: rep a -> rep (Not r a)
 
   one :: rep (One e)
   inlP :: rep a -> rep (a ⊕ b)
   inrP :: rep b -> rep (a ⊕ b)
-  exlrP :: (rep a -> rep o) -> (rep b -> rep o) -> (rep (a ⊕ b) -> rep o)
+  exlrP :: rep (a ⊕ b) -> (rep a -> rep o) -> (rep b -> rep o) -> rep o
   (⊗) :: rep a -> rep b -> rep (a ⊗ b)
-  extensor :: (rep a -> rep b -> rep o) -> (rep (a ⊗ b) -> rep o)
+  extensor :: rep (a ⊗ b) -> (rep a -> rep b -> rep o) -> rep o
   negate :: rep a -> rep (Negate e r a)
