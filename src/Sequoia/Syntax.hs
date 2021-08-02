@@ -17,6 +17,7 @@ import Sequoia.Connective.Top
 import Sequoia.Connective.With
 import Sequoia.Connective.Zero
 import Sequoia.Disjunction
+import Sequoia.Monad.Run
 import Sequoia.Profunctor.Context
 import Sequoia.Profunctor.Continuation
 
@@ -46,11 +47,11 @@ class PExpr rep where
   negateL :: rep e r a -> (rep e r (Negate e r a) -> rep e r r)
   negateR :: (rep e r a -> rep e r r) -> rep e r (Negate e r a)
 
-runEval :: a • r -> e -> Eval e r a -> r
-runEval k e m = getEval m k <== e
+runEval :: a • r -> Eval e r a -> e ==> r
+runEval k m = getEval m k
 
 evalEval :: Eval e r r -> e ==> r
-evalEval m = C (\ e -> runEval idK e m)
+evalEval = runEval idK
 
 newtype Eval e r a = Eval { getEval :: a • r -> e ==> r }
 
@@ -62,24 +63,24 @@ instance Applicative (Eval e r) where
   (<*>) = ap
 
 instance Monad (Eval e r) where
-  Eval m >>= f = Eval (\ k -> env (\ e -> m (K (runEval k e . f))))
+  Eval m >>= f = Eval (\ k -> withRun (\ run -> m (K (run . runEval k . f))))
 
 instance MonadEnv e (Eval e r) where
-  env f = Eval (\ k -> env (pure . (runEval k <*> f)))
+  env f = Eval (\ k -> env (runEval k . f))
 
 instance MonadRes r (Eval e r) where
   res = Eval . const . pure
-  liftRes f = Eval (\ k -> C (\ e -> let run = runEval k e in run (f run)))
+  liftRes f = Eval (\ k -> let run = runEval k in withRun (\ runC -> run (f (runC . run))))
 
 instance NExpr Eval where
-  bottomL b = Eval (\ _ -> env (\ e -> pure (runEval (K absurdN) e b)))
+  bottomL b = Eval (\ _ -> runEval (K absurdN) b)
   topR = pure Top
   withL1 = fmap exl
   withL2 = fmap exr
   withR l r = inlr <$> l <*> r
   parL f g s = do
     s' <- s
-    Eval (\ k -> env (\ e -> pure (runPar s' (runEval k e . f . pure) (runEval k e . g . pure))))
+    Eval (\ k -> withRun (\ run -> pure (runPar s' (run . runEval k . f . pure) (run . runEval k . g . pure))))
   parR f = env (\ e -> pure (Par (\ g h -> evalEval (f (fmap g) (fmap h)) <== e)))
   funL a b f = appFun <$> f <*> a <*> evalK b
   funR f = Fun <$> evalF f
@@ -115,7 +116,7 @@ evalK :: (Eval e r a -> Eval e r r) -> Eval e r (a • r)
 evalK = fmap ($ idK) . evalF
 
 evalF :: (Eval e r a -> Eval e r b) -> Eval e r (b • r -> a • r)
-evalF f = env (\ e -> pure (\ k -> K (runEval k e . f . pure)))
+evalF f = env (\ e -> pure (\ k -> K ((<== e) . runEval k . f . pure)))
 
 
 data Sub r a b = Sub { subA :: a, subK :: b • r }
