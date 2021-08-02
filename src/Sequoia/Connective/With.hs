@@ -1,6 +1,8 @@
 module Sequoia.Connective.With
 ( -- * Negative conjunction
   type (&)(..)
+  -- * Elimination
+, runWith
 ) where
 
 import Sequoia.Conjunction
@@ -26,3 +28,9 @@ instance Conj (&) where
   a >--< b = With (($ a) <--> ($ b))
   exl (With run) = run (inl id)
   exr (With run) = run (inr id)
+
+
+-- Elimination
+
+runWith :: Either (a -> r) (b -> r) -> (a & b -> r)
+runWith e (With r) = r e
