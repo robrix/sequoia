@@ -23,8 +23,8 @@ import Sequoia.Profunctor.Continuation
 class NExpr rep where
   bottomL :: rep e r (Bottom r) -> rep e r a
   topR :: rep e r Top
-  withL1 :: rep e r (a & b) -> rep e r a
-  withL2 :: rep e r (a & b) -> rep e r b
+  withL1 :: rep e r (a • r) -> rep e r ((a & b) • r)
+  withL2 :: rep e r (b • r) -> rep e r ((a & b) • r)
   withR :: rep e r a -> rep e r b -> rep e r (a & b)
   parL :: rep e r (a • r) -> rep e r (b • r) -> rep e r (Par r a b • r)
   parR :: (forall x . (rep e r a -> rep e r x) -> (rep e r b -> rep e r x) -> rep e r x) -> rep e r (Par r a b)
@@ -77,8 +77,8 @@ instance MonadRes r (Eval e r) where
 instance NExpr Eval where
   bottomL b = Eval (\ _ -> runEval (K absurdN) b)
   topR = pure Top
-  withL1 = fmap exl
-  withL2 = fmap exr
+  withL1 = fmap (lmap exl)
+  withL2 = fmap (lmap exr)
   withR l r = inlr <$> l <*> r
   parL f g = Eval (\ k -> C (\ e -> k • K (\ s -> runPar s (runEvalK e f) (runEvalK e g))))
   parR f = env (\ e -> pure (Par (\ g h -> evalEval (f (fmap (g •)) (fmap (h •))) <== e)))
