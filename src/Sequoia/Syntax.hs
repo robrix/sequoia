@@ -116,10 +116,10 @@ runPar a b = K (\ (Par f) -> f a b)
 
 newtype Par r a b = Par (a • r -> b • r -> r)
 
-newtype Fun r a b = Fun { runFun :: b • r -> a • r }
+newtype Fun r a b = Fun (b • r -> a • r)
 
 appFun :: Fun r a b -> a -> b • r -> r
-appFun f a b = runFun f b • a
+appFun (Fun f) a b = f b • a
 
 evalK :: (Eval e r a -> Eval e r r) -> Eval e r (a • r)
 evalK = fmap ($ idK) . evalF
