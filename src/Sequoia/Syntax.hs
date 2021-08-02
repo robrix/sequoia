@@ -16,7 +16,6 @@ import Sequoia.Connective.Tensor
 import Sequoia.Connective.Top
 import Sequoia.Connective.With
 import Sequoia.Connective.Zero
-import Sequoia.Disjunction
 import Sequoia.Monad.Run
 import Sequoia.Profunctor.Context
 import Sequoia.Profunctor.Continuation
@@ -37,7 +36,7 @@ class NExpr rep where
 class PExpr rep where
   zeroL :: rep e r Zero -> rep e r a
   oneR :: rep e r (One e)
-  sumL :: (rep e r a -> rep e r o) -> (rep e r b -> rep e r o) -> (rep e r (a ⊕ b) -> rep e r o)
+  sumL :: rep e r (a • r) -> rep e r (b • r) -> rep e r ((a ⊕ b) • r)
   sumR1 :: rep e r a -> rep e r (a ⊕ b)
   sumR2 :: rep e r b -> rep e r (a ⊕ b)
   tensorL :: (rep e r a -> rep e r b -> rep e r o) -> (rep e r (a ⊗ b) -> rep e r o)
@@ -91,7 +90,7 @@ instance NExpr Eval where
 instance PExpr Eval where
   zeroL = fmap absurdP
   oneR = Eval (\ k -> env (pure . (k •) . One))
-  sumL f g s = s >>= f . pure <--> g . pure
+  sumL f g = Eval (\ k -> C (\ e -> k • (K (\ a -> runEval (dn a) f <== e) <••> K (\ b -> runEval (dn b) g <== e))))
   sumR1 = fmap InL
   sumR2 = fmap InR
   tensorL f s = do
