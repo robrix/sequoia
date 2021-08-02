@@ -166,6 +166,7 @@ library
     Sequoia.Sequent
     Sequoia.Signal
     Sequoia.Span
+    Sequoia.Syntax
 
   -- Modules included in this library but not exported.
   -- other-modules:
