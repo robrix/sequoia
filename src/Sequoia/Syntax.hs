@@ -27,7 +27,7 @@ class NExpr rep where
   withL1 :: rep e r (a & b) -> rep e r a
   withL2 :: rep e r (a & b) -> rep e r b
   withR :: rep e r a -> rep e r b -> rep e r (a & b)
-  parL :: (rep e r a -> rep e r o) -> (rep e r b -> rep e r o) -> (rep e r (Par r a b) -> rep e r o)
+  parL :: (rep e r a -> rep e r r) -> (rep e r b -> rep e r r) -> (rep e r (Par r a b) -> rep e r r)
   parR :: (forall x . (rep e r a -> rep e r x) -> (rep e r b -> rep e r x) -> rep e r x) -> rep e r (Par r a b)
   funL :: rep e r a -> (rep e r b -> rep e r r) -> (rep e r (Fun r a b) -> rep e r r)
   funR :: (rep e r a -> rep e r b) -> rep e r (Fun r a b)
