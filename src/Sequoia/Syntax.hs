@@ -3,6 +3,7 @@ module Sequoia.Syntax
 ( Expr(..)
 ) where
 
+import Control.Monad (ap)
 import Sequoia.Connective.Negate
 import Sequoia.Connective.Not
 import Sequoia.Connective.One
@@ -28,3 +29,14 @@ class Expr e r rep | rep -> e r where
   (⊗) :: rep a -> rep b -> rep (a ⊗ b)
   extensor :: rep (a ⊗ b) -> (rep a -> rep b -> rep o) -> rep o
   negate :: rep a -> rep (Negate e r a)
+
+
+newtype Eval e r a = Eval { runEval :: (a -> r) -> (e -> r) }
+  deriving (Functor)
+
+instance Applicative (Eval e r) where
+  pure a = Eval (\ k _ -> k a)
+  (<*>) = ap
+
+instance Monad (Eval e r) where
+  Eval m >>= f = Eval (\ k e -> m (\ a -> runEval (f a) k e) e)
