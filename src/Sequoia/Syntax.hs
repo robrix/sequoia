@@ -2,21 +2,28 @@ module Sequoia.Syntax
 ( Expr(..)
 ) where
 
-import Sequoia.Polarity
+import Sequoia.Connective.Negate
+import Sequoia.Connective.Not
+import Sequoia.Connective.One
+import Sequoia.Connective.Par
+import Sequoia.Connective.Sum
+import Sequoia.Connective.Tensor
+import Sequoia.Connective.Top
+import Sequoia.Connective.With
 
-class Expr r where
-  intop :: r N
-  inwith :: r N -> r N -> r N
-  exwithL :: r N -> r N
-  exwithR :: r N -> r N
-  inpar :: r N -> r N -> r N
-  expar :: (r N -> r o) -> (r N -> r o) -> (r N -> r o)
-  innot :: r P -> r N
+class Expr rep where
+  intop :: rep Top
+  inwith :: rep a -> rep b -> rep (a & b)
+  exwithL :: rep (a & b) -> rep a
+  exwithR :: rep (a & b) -> rep b
+  inpar :: rep a -> rep b -> rep (a ⅋ b)
+  expar :: (rep a -> rep o) -> (rep b -> rep o) -> (rep (a ⅋ b) -> rep o)
+  innot :: rep a -> rep (Not r a)
 
-  inone :: r P
-  insumL :: r P -> r P
-  insumR :: r P -> r P
-  exsum :: (r P -> r o) -> (r P -> r o) -> (r P -> r o)
-  intensor :: r P -> r P -> r P
-  extensor :: (r P -> r P -> r o) -> (r P -> r o)
-  innegate :: r N -> r P
+  inone :: rep (One e)
+  insumL :: rep a -> rep (a ⊕ b)
+  insumR :: rep b -> rep (a ⊕ b)
+  exsum :: (rep a -> rep o) -> (rep b -> rep o) -> (rep (a ⊕ b) -> rep o)
+  intensor :: rep a -> rep b -> rep (a ⊗ b)
+  extensor :: (rep a -> rep b -> rep o) -> (rep (a ⊗ b) -> rep o)
+  innegate :: rep a -> rep (Negate e r a)
