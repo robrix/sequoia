@@ -8,11 +8,6 @@ module Sequoia.Profunctor.Context
   -- * Construction
 , ckv
 , (↓↑)
-, fromK
-, fromV
-  -- * Elimination
-, toK
-, toV
   -- * Composition
 , (•<<)
 , (>>•)
@@ -33,7 +28,6 @@ module Sequoia.Profunctor.Context
 import Control.Arrow
 import Control.Category as Cat (Category)
 import Control.Monad (join)
-import Data.Coerce (coerce)
 import Data.Distributive
 import Data.Functor.Identity
 import Data.Functor.Rep as Co
@@ -87,21 +81,6 @@ ckv f k v = C ((k •) . f . (∘ v))
 (↓↑) = ckv id
 
 infix 9 ↓↑
-
-fromK :: e • r -> e ==> r
-fromK = coerce
-
-fromV :: e ∘ r -> e ==> r
-fromV = coerce
-
-
--- Elimination
-
-toK :: e ==> r -> e • r
-toK = coerce
-
-toV :: e ==> r -> e ∘ r
-toV = coerce
 
 
 -- Composition

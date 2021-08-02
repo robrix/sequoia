@@ -24,6 +24,8 @@ import           Control.Monad.Trans.Class
 import           Data.Coerce
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
+import           Fresnel.Getter
+import           Fresnel.Review
 import           Prelude hiding (exp, init, negate, seq)
 import           Sequoia.Calculus.Additive
 import           Sequoia.Calculus.Context
@@ -135,9 +137,9 @@ instance Contextual Seq where
 -- Control
 
 instance Environment Seq where
-  environment = seq (\ _Δ _Γ -> fromK (inrK _Δ))
+  environment = seq (\ _Δ _Γ -> review _CK (inrK _Δ))
 
-  withEnv r s = seq (\ _Δ _Γ -> env (\ e -> _Δ |> toK (_Δ ↓ s ↑ lmap (const e) _Γ) ↓ r ↑ _Γ))
+  withEnv r s = seq (\ _Δ _Γ -> env (\ e -> _Δ |> view _CK (_Δ ↓ s ↑ lmap (const e) _Γ) ↓ r ↑ _Γ))
 
 instance Calculus.Control Seq where
   reset s = seqFn (\ _Δ _Γ -> _Δ . runSeqFn s id _Γ)
