@@ -1,4 +1,3 @@
-{-# LANGUAGE FunctionalDependencies #-}
 module Sequoia.Syntax
 ( NExpr(..)
 , PExpr(..)
@@ -17,23 +16,23 @@ import Sequoia.Connective.With
 import Sequoia.Profunctor.Context
 import Sequoia.Profunctor.Continuation
 
-class NExpr e r rep | rep -> e r where
-  top :: rep Top
-  (&) :: rep a -> rep b -> rep (a & b)
-  exlN :: rep (a & b) -> rep a
-  exrN :: rep (a & b) -> rep b
-  par :: (forall x . (rep a -> rep x) -> (rep b -> rep x) -> rep x) -> rep (Par r a b)
-  exlrN :: rep (Par r a b) -> (rep a -> rep o) -> (rep b -> rep o) -> rep o
-  not :: rep (a -> r) -> rep (Not r a)
+class NExpr rep where
+  top :: rep e r Top
+  (&) :: rep e r a -> rep e r b -> rep e r (a & b)
+  exlN :: rep e r (a & b) -> rep e r a
+  exrN :: rep e r (a & b) -> rep e r b
+  par :: (forall x . (rep e r a -> rep e r x) -> (rep e r b -> rep e r x) -> rep e r x) -> rep e r (Par r a b)
+  exlrN :: rep e r (Par r a b) -> (rep e r a -> rep e r o) -> (rep e r b -> rep e r o) -> rep e r o
+  not :: rep e r (a -> r) -> rep e r (Not r a)
 
-class PExpr e r rep | rep -> e r where
-  one :: rep (One e)
-  inlP :: rep a -> rep (a ⊕ b)
-  inrP :: rep b -> rep (a ⊕ b)
-  exlrP :: rep (a ⊕ b) -> (rep a -> rep o) -> (rep b -> rep o) -> rep o
-  (⊗) :: rep a -> rep b -> rep (a ⊗ b)
-  extensor :: rep (a ⊗ b) -> (rep a -> rep b -> rep o) -> rep o
-  negate :: rep (a -> r) -> rep (Negate e r a)
+class PExpr rep where
+  one :: rep e r (One e)
+  inlP :: rep e r a -> rep e r (a ⊕ b)
+  inrP :: rep e r b -> rep e r (a ⊕ b)
+  exlrP :: rep e r (a ⊕ b) -> (rep e r a -> rep e r o) -> (rep e r b -> rep e r o) -> rep e r o
+  (⊗) :: rep e r a -> rep e r b -> rep e r (a ⊗ b)
+  extensor :: rep e r (a ⊗ b) -> (rep e r a -> rep e r b -> rep e r o) -> rep e r o
+  negate :: rep e r (a -> r) -> rep e r (Negate e r a)
 
 runEval :: (a -> r) -> e -> Eval e r a -> r
 runEval k e m = getEval m k e
@@ -54,7 +53,7 @@ instance Monad (Eval e r) where
 instance MonadEnv e (Eval e r) where
   env f = Eval (\ k -> runEval k <*> f)
 
-instance NExpr e r (Eval e r) where
+instance NExpr Eval where
   top = pure Top
   l & r = inlr <$> l <*> r
   exlN = fmap exl
@@ -65,7 +64,7 @@ instance NExpr e r (Eval e r) where
     Eval (\ k e -> runPar s' (runEval k e . f . pure) (runEval k e . g . pure))
   not = fmap (Not . K)
 
-instance PExpr e r (Eval e r) where
+instance PExpr Eval where
   one = Eval (. One)
   inlP = fmap InL
   inrP = fmap InR
