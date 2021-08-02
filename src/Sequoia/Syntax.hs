@@ -24,20 +24,20 @@ class NExpr rep where
   withR :: rep e r a -> rep e r b -> rep e r (a & b)
   withL1 :: rep e r (a & b) -> rep e r a
   withL2 :: rep e r (a & b) -> rep e r b
-  parL :: rep e r (Par r a b) -> (rep e r a -> rep e r o) -> (rep e r b -> rep e r o) -> rep e r o
+  parL :: (rep e r a -> rep e r o) -> (rep e r b -> rep e r o) -> (rep e r (Par r a b) -> rep e r o)
   parR :: (forall x . (rep e r a -> rep e r x) -> (rep e r b -> rep e r x) -> rep e r x) -> rep e r (Par r a b)
   funL :: rep e r a -> (rep e r b -> rep e r r) -> (rep e r (Fun r a b) -> rep e r r)
   funR :: (rep e r a -> rep e r b) -> rep e r (Fun r a b)
-  notL :: rep e r (Not r a) -> rep e r a -> rep e r r
+  notL :: rep e r a -> (rep e r (Not r a) -> rep e r r)
   notR :: (rep e r a -> rep e r r) -> rep e r (Not r a)
 
 class PExpr rep where
   oneR :: rep e r (One e)
   sumR1 :: rep e r a -> rep e r (a ⊕ b)
   sumR2 :: rep e r b -> rep e r (a ⊕ b)
-  sumL :: rep e r (a ⊕ b) -> (rep e r a -> rep e r o) -> (rep e r b -> rep e r o) -> rep e r o
+  sumL :: (rep e r a -> rep e r o) -> (rep e r b -> rep e r o) -> (rep e r (a ⊕ b) -> rep e r o)
   tensorR :: rep e r a -> rep e r b -> rep e r (a ⊗ b)
-  tensorL :: rep e r (a ⊗ b) -> (rep e r a -> rep e r b -> rep e r o) -> rep e r o
+  tensorL :: (rep e r a -> rep e r b -> rep e r o) -> (rep e r (a ⊗ b) -> rep e r o)
   negateR :: (rep e r a -> rep e r r) -> rep e r (Negate e r a)
 
 runEval :: (a -> r) -> e -> Eval e r a -> r
@@ -65,22 +65,22 @@ instance NExpr Eval where
   withR l r = inlr <$> l <*> r
   withL1 = fmap exl
   withL2 = fmap exr
-  parL s f g = do
+  parL f g s = do
     s' <- s
     Eval (\ k e -> runPar s' (runEval k e . f . pure) (runEval k e . g . pure))
   parR f = env (\ e -> pure (Par (\ g h -> evalEval e (f (fmap g) (fmap h)))))
   funL a b f = appFun <$> f <*> a <*> evalK b
   funR f = Fun <$> evalF f
-  notL n a = (•) . getNot <$> n <*> a
+  notL a n = (•) . getNot <$> n <*> a
   notR f = Not . K <$> evalK f
 
 instance PExpr Eval where
   oneR = Eval (. One)
   sumR1 = fmap InL
   sumR2 = fmap InR
-  sumL s f g = s >>= f . pure <--> g . pure
+  sumL f g s = s >>= f . pure <--> g . pure
   tensorR = liftA2 (:⊗)
-  tensorL s f = do
+  tensorL f s = do
     a :⊗ b <- s
     f (pure a) (pure b)
   negateR f = env (\ e -> Negate.negate e . K <$> evalK f)
