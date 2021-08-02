@@ -13,6 +13,7 @@ import Sequoia.Connective.Sum
 import Sequoia.Connective.Tensor
 import Sequoia.Connective.Top
 import Sequoia.Connective.With
+import Sequoia.Disjunction
 import Sequoia.Profunctor.Context
 import Sequoia.Profunctor.Continuation
 
@@ -72,9 +73,7 @@ instance PExpr Eval where
   one = Eval (. One)
   inlP = fmap InL
   inrP = fmap InR
-  exlrP s f g = s >>= \case
-    InL a -> f (pure a)
-    InR b -> g (pure b)
+  exlrP s f g = s >>= f . pure <--> g . pure
   (⊗) = liftA2 (:⊗)
   extensor s f = do
     a :⊗ b <- s
