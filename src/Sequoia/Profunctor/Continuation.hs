@@ -4,6 +4,7 @@ module Sequoia.Profunctor.Continuation
   type (•)(..)
   -- * Construction
 , idK
+, constK
 , inK
 , cont
   -- * Coercion
@@ -55,6 +56,9 @@ instance Cosieve (•) Identity where
 
 idK :: a • a
 idK = K id
+
+constK :: r -> a • r
+constK = K . const
 
 inK :: MonadRun m => (a -> m r) -> m (a • r)
 inK = fmap K . fn
