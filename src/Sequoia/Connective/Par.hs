@@ -6,6 +6,7 @@ module Sequoia.Connective.Par
 ) where
 
 import Data.Bifoldable
+import Data.Bifunctor
 import Sequoia.Conjunction
 import Sequoia.Disjunction
 import Sequoia.Polarity
@@ -32,6 +33,9 @@ instance Disj (⅋) where
 
 instance Bifoldable (⅋) where
   bifoldMap = bifoldMapDisj
+
+instance Bifunctor (⅋) where
+  bimap = bimapDisj
 
 
 -- Elimination
