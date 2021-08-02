@@ -108,6 +108,7 @@ instance PExpr Eval where
   negateL a n = (•) . negateK <$> n <*> a
   negateR f = env (\ e -> Negate.negate e <$> evalK f)
 
+
 newtype Par r a b = Par { runPar :: a • r -> b • r -> r }
 
 newtype Fun r a b = Fun { runFun :: b • r -> a • r }
