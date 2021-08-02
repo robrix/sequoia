@@ -5,6 +5,7 @@ module Sequoia.Connective.With
 , runWith
 ) where
 
+import Data.Bifoldable
 import Sequoia.Conjunction
 import Sequoia.Disjunction
 import Sequoia.Polarity
@@ -28,6 +29,9 @@ instance Conj (&) where
   a >--< b = With (($ a) <--> ($ b))
   exl = runWith (inl id)
   exr = runWith (inr id)
+
+instance Bifoldable (&) where
+  bifoldMap = bifoldMapConj
 
 
 -- Elimination
