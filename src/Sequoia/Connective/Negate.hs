@@ -1,6 +1,6 @@
 module Sequoia.Connective.Negate
 ( -- * Negate
-  Negate(withNegate)
+  Negate(..)
 , type (-)
   -- * Construction
 , negate
