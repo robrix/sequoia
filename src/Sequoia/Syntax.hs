@@ -112,9 +112,9 @@ instance PExpr Eval where
 
 
 runPar :: a • r -> b • r -> Par r a b • r
-runPar a b = K (\ p -> getPar p a b)
+runPar a b = K (\ (Par f) -> f a b)
 
-newtype Par r a b = Par { getPar :: a • r -> b • r -> r }
+newtype Par r a b = Par (a • r -> b • r -> r)
 
 newtype Fun r a b = Fun { runFun :: b • r -> a • r }
 
