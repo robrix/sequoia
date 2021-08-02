@@ -6,7 +6,7 @@ module Sequoia.Syntax
 import Control.Applicative (liftA2)
 import Control.Monad (ap)
 import Sequoia.Conjunction
-import Sequoia.Connective.Negate
+import Sequoia.Connective.Negate as Negate
 import Sequoia.Connective.Not
 import Sequoia.Connective.One
 import Sequoia.Connective.Sum
@@ -24,7 +24,7 @@ class NExpr rep where
   par :: (forall x . (rep e r a -> rep e r x) -> (rep e r b -> rep e r x) -> rep e r x) -> rep e r (Par r a b)
   exlrN :: rep e r (Par r a b) -> (rep e r a -> rep e r o) -> (rep e r b -> rep e r o) -> rep e r o
   lam :: (rep e r a -> rep e r b) -> rep e r (Fun r a b)
-  not :: rep e r (a -> r) -> rep e r (Not r a)
+  not :: (rep e r a -> rep e r r) -> rep e r (Not r a)
 
 class PExpr rep where
   one :: rep e r (One e)
@@ -33,7 +33,7 @@ class PExpr rep where
   exlrP :: rep e r (a ⊕ b) -> (rep e r a -> rep e r o) -> (rep e r b -> rep e r o) -> rep e r o
   (⊗) :: rep e r a -> rep e r b -> rep e r (a ⊗ b)
   extensor :: rep e r (a ⊗ b) -> (rep e r a -> rep e r b -> rep e r o) -> rep e r o
-  negate :: rep e r (a -> r) -> rep e r (Negate e r a)
+  negate :: (rep e r a -> rep e r r) -> rep e r (Negate e r a)
 
 runEval :: (a -> r) -> e -> Eval e r a -> r
 runEval k e m = getEval m k e
@@ -63,8 +63,8 @@ instance NExpr Eval where
   exlrN s f g = do
     s' <- s
     Eval (\ k e -> runPar s' (runEval k e . f . pure) (runEval k e . g . pure))
-  lam f = Eval (\ k e -> k (Fun (\ b a -> runEval b e (f (pure a)))))
-  not = fmap (Not . K)
+  lam f = env (\ e -> pure (Fun (\ b -> runEval b e . f . pure)))
+  not f = env (\ e -> pure (Not (K (evalEval e . f . pure))))
 
 instance PExpr Eval where
   one = Eval (. One)
@@ -77,9 +77,7 @@ instance PExpr Eval where
   extensor s f = do
     a :⊗ b <- s
     f (pure a) (pure b)
-  negate a = do
-    a' <- a
-    Eval (\ k e -> k (Negate (\ f -> f e (K a'))))
+  negate f = env (\ e -> pure (Negate.negate e (K (evalEval e . f . pure))))
 
 newtype Par r a b = Par { runPar :: (a -> r) -> (b -> r) -> r }
 
