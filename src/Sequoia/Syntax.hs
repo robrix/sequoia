@@ -16,7 +16,7 @@ class Expr rep where
   (&) :: rep a -> rep b -> rep (a & b)
   exlN :: rep (a & b) -> rep a
   exrN :: rep (a & b) -> rep b
-  par :: (forall x . (rep a -> x) -> (rep b -> x) -> x) -> rep (a ⅋ b)
+  par :: (forall x . (rep a -> rep x) -> (rep b -> rep x) -> rep x) -> rep (a ⅋ b)
   exlrN :: rep (a ⅋ b) -> (rep a -> rep o) -> (rep b -> rep o) -> rep o
   not :: rep a -> rep (Not r a)
 
