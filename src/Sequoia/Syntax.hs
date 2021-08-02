@@ -50,6 +50,9 @@ class PExpr rep where
 runEval :: a • r -> Eval e r a -> e ==> r
 runEval k m = getEval m k
 
+runEvalK :: e -> Eval e r (a • r) -> a • r
+runEvalK e m = K (\ a -> runEval (dn a) m <== e)
+
 evalEval :: Eval e r r -> e ==> r
 evalEval = runEval idK
 
