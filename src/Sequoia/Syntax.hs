@@ -5,6 +5,7 @@ module Sequoia.Syntax
 
 import Control.Applicative (liftA2)
 import Control.Monad (ap)
+import Data.Profunctor
 import Sequoia.Calculus.Bottom
 import Sequoia.Conjunction
 import Sequoia.Connective.Negate as Negate
@@ -45,43 +46,45 @@ class PExpr rep where
   negateL :: rep e r a -> (rep e r (Negate e r a) -> rep e r r)
   negateR :: (rep e r a -> rep e r r) -> rep e r (Negate e r a)
 
-runEval :: (a -> r) -> e -> Eval e r a -> r
-runEval k e m = getEval m k e
+runEval :: a • r -> e -> Eval e r a -> r
+runEval k e m = getEval m k • e
 
 evalEval :: e -> Eval e r r -> r
-evalEval = runEval id
+evalEval = runEval idK
 
-newtype Eval e r a = Eval { getEval :: (a -> r) -> (e -> r) }
-  deriving (Functor)
+newtype Eval e r a = Eval { getEval :: a • r -> e • r }
+
+instance Functor (Eval e r) where
+  fmap f = Eval . lmap (lmap f) . getEval
 
 instance Applicative (Eval e r) where
-  pure a = Eval (\ k _ -> k a)
+  pure a = Eval (constK . (• a))
   (<*>) = ap
 
 instance Monad (Eval e r) where
-  Eval m >>= f = Eval (\ k e -> m (runEval k e . f) e)
+  Eval m >>= f = Eval (\ k -> K (\ e -> m (K (runEval k e . f)) • e))
 
 instance MonadEnv e (Eval e r) where
-  env f = Eval (\ k -> runEval k <*> f)
+  env f = Eval (\ k -> K (runEval k <*> f))
 
 instance NExpr Eval where
-  bottomL b = Eval (\ _ e -> runEval absurdN e b)
+  bottomL b = Eval (\ _ -> K (\ e -> runEval (K absurdN) e b))
   topR = pure Top
   withL1 = fmap exl
   withL2 = fmap exr
   withR l r = inlr <$> l <*> r
   parL f g s = do
     s' <- s
-    Eval (\ k e -> runPar s' (runEval k e . f . pure) (runEval k e . g . pure))
+    Eval (\ k -> K (\ e -> runPar s' (runEval k e . f . pure) (runEval k e . g . pure)))
   parR f = env (\ e -> pure (Par (\ g h -> evalEval e (f (fmap g) (fmap h)))))
   funL a b f = appFun <$> f <*> a <*> evalK b
   funR f = Fun <$> evalF f
   notL a n = (•) . getNot <$> n <*> a
-  notR f = Not . K <$> evalK f
+  notR f = Not <$> evalK f
 
 instance PExpr Eval where
   zeroL = fmap absurdP
-  oneR = Eval (. One)
+  oneR = Eval (\ k -> K ((k •) . One))
   sumL f g s = s >>= f . pure <--> g . pure
   sumR1 = fmap InL
   sumR2 = fmap InR
@@ -92,23 +95,23 @@ instance PExpr Eval where
   subL f s = do
     f <- evalF f
     s <- s
-    pure (f (subK s) (subA s))
+    pure (f (subK s) • subA s)
   subR a b = Sub <$> a <*> evalK b
   negateL a n = (•) . negateK <$> n <*> a
-  negateR f = env (\ e -> Negate.negate e . K <$> evalK f)
+  negateR f = env (\ e -> Negate.negate e <$> evalK f)
 
 newtype Par r a b = Par { runPar :: (a -> r) -> (b -> r) -> r }
 
-newtype Fun r a b = Fun { runFun :: (b -> r) -> (a -> r) }
+newtype Fun r a b = Fun { runFun :: b • r -> a • r }
 
-appFun :: Fun r a b -> a -> (b -> r) -> r
-appFun f = flip (runFun f)
+appFun :: Fun r a b -> a -> b • r -> r
+appFun f a b = runFun f b • a
 
-evalK :: (Eval e r a -> Eval e r r) -> Eval e r (a -> r)
-evalK = fmap ($ id) . evalF
+evalK :: (Eval e r a -> Eval e r r) -> Eval e r (a • r)
+evalK = fmap ($ idK) . evalF
 
-evalF :: (Eval e r a -> Eval e r b) -> Eval e r ((b -> r) -> (a -> r))
-evalF f = env (\ e -> pure (\ k -> runEval k e . f . pure))
+evalF :: (Eval e r a -> Eval e r b) -> Eval e r (b • r -> a • r)
+evalF f = env (\ e -> pure (\ k -> K (runEval k e . f . pure)))
 
 
-data Sub r a b = Sub { subA :: a, subK :: b -> r }
+data Sub r a b = Sub { subA :: a, subK :: b • r }
