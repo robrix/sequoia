@@ -64,7 +64,7 @@ instance NExpr Eval where
   exlrN s f g = do
     s' <- s
     Eval (\ k e -> runPar s' (runEval k e . f . pure) (runEval k e . g . pure))
-  lam f = env (\ e -> pure (Fun (\ b -> runEval b e . f . pure)))
+  lam f = Fun <$> evalF f
   lamL a b f = appFun <$> f <*> a <*> evalK b
   not f = Not . K <$> evalK f
 
@@ -88,5 +88,8 @@ newtype Fun r a b = Fun { runFun :: (b -> r) -> (a -> r) }
 appFun :: Fun r a b -> a -> (b -> r) -> r
 appFun f = flip (runFun f)
 
-evalK :: (Eval e r b -> Eval e r r) -> Eval e r (b -> r)
-evalK f = env (\ e -> pure (evalEval e . f . pure))
+evalK :: (Eval e r a -> Eval e r r) -> Eval e r (a -> r)
+evalK = fmap ($ id) . evalF
+
+evalF :: (Eval e r a -> Eval e r b) -> Eval e r ((b -> r) -> (a -> r))
+evalF f = env (\ e -> pure (\ k -> runEval k e . f . pure))
