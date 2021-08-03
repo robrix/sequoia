@@ -56,6 +56,7 @@ import           Sequoia.Profunctor.Applicative
 import           Sequoia.Profunctor.Coexponential
 import           Sequoia.Profunctor.Context
 import           Sequoia.Profunctor.Continuation as K
+import           Sequoia.Profunctor.Diagonal
 import           Sequoia.Profunctor.Value as V
 
 -- Exponential profunctor
@@ -80,6 +81,9 @@ instance Choice (Exp e r) where
 
 instance Traversing (Exp e r) where
   wander traverse r = exp (\ k v -> val (\ s -> k ↓ traverse ((r <<<) . pure) s ↑ idV) v)
+
+instance Diagonal (Exp e r) where
+  dup = exp' dup
 
 instance Cat.Category (Exp e r) where
   id = exp (↓↑)
