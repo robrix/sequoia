@@ -51,6 +51,7 @@ import           Fresnel.Setter
 import           Prelude hiding (exp)
 import           Sequoia.Conjunction
 import           Sequoia.Disjunction
+import           Sequoia.Monad.Run
 import           Sequoia.Profunctor.Applicative
 import           Sequoia.Profunctor.Coexponential
 import           Sequoia.Profunctor.Context

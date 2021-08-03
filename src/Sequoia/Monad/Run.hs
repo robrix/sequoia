@@ -4,6 +4,8 @@ module Sequoia.Monad.Run
   MonadRun(..)
   -- * Construction
 , fn
+, inK
+, cont
   -- * Defaults
 , withRunWithRep
 , distributeRun
@@ -12,6 +14,7 @@ module Sequoia.Monad.Run
 
 import Data.Functor.Identity
 import Data.Functor.Rep
+import Sequoia.Profunctor.Continuation
 
 -- Lowering
 
@@ -29,6 +32,12 @@ instance MonadRun Identity where
 
 fn :: MonadRun m => (a -> m r) -> m (a -> r)
 fn = distributeRun
+
+inK :: MonadRun m => (a -> m r) -> m (a • r)
+inK = fmap K . fn
+
+cont :: MonadRun m => ((forall b . (b -> m r) -> b • r) -> m a) -> m a
+cont f = withRun (\ run -> f (K . (run .)))
 
 
 -- Defaults

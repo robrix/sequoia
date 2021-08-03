@@ -46,6 +46,7 @@ import           Sequoia.Calculus.XOr
 import           Sequoia.Conjunction
 import           Sequoia.Contextual
 import           Sequoia.Disjunction
+import           Sequoia.Monad.Run
 import           Sequoia.Profunctor.Coexponential
 import           Sequoia.Profunctor.Context
 import           Sequoia.Profunctor.Continuation as K
