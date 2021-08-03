@@ -116,7 +116,7 @@ instance MonadTrans (SeqT r s _Γ) where
 -- Core rules
 
 instance Core Seq where
-  f >>> g = f >>= pure <--> pushL g . pure
+  f >>> g = f >>= pure <--> (`lmap` g) . (>--<)
 
   init = dimap exl inr Cat.id
 
