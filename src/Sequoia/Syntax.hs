@@ -47,7 +47,7 @@ class PExpr rep where
   sumR2 :: rep e r b -> rep e r (a ⊕ b)
   tensorL :: (rep e r a -> rep e r b -> rep e r r) -> rep e r ((a ⊗ b) • r)
   tensorR :: rep e r a -> rep e r b -> rep e r (a ⊗ b)
-  subL :: (rep e r a -> rep e r b) -> (rep e r (Sub r a b) -> rep e r r)
+  subL :: (rep e r a -> rep e r b) -> rep e r (Sub r a b • r)
   subR :: rep e r a -> rep e r (b • r) -> rep e r (Sub r a b)
   trueL :: rep e r (a • r) -> rep e r (True r a • r)
   trueR :: rep e r a -> rep e r (True r a)
@@ -110,10 +110,7 @@ instance PExpr Eval where
   sumR2 = fmap InR
   tensorL f = Eval (\ k -> C (\ e -> k • K (\ (a :⊗ b) -> runEval idK (f (pure a) (pure b)) <== e)))
   tensorR = liftA2 (:⊗)
-  subL f s = do
-    f <- evalF f
-    a :-< k <- s
-    pure (f k • a)
+  subL f = Eval (\ k -> C (\ e -> k • K (\ (a :-< k) -> runEval (K (\ f -> f k • a)) (evalF f) <== e)))
   subR a b = (:-<) <$> a <*> b
   trueL a = Eval (\ k -> runEval (lmap (lmap trueA) k) a)
   trueR = fmap true
