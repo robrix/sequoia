@@ -1,7 +1,10 @@
+{-# LANGUAGE FunctionalDependencies #-}
 -- | Lowering (running) “pure” monads to a value.
 module Sequoia.Monad.Run
 ( -- * Lowering
   MonadRun(..)
+  -- * CPS lowering
+, MonadRunK(..)
   -- * Construction
 , fn
 , inK
@@ -26,6 +29,12 @@ instance MonadRun ((->) a) where
 
 instance MonadRun Identity where
   withRun b = b runIdentity
+
+
+-- CPS lowering
+
+class Monad m => MonadRunK r m | m -> r where
+  withRunK :: ((forall x . x • r -> m x -> r) -> m a) -> m a
 
 
 -- Construction
