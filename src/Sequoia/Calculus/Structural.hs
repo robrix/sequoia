@@ -96,8 +96,8 @@ weakenR = rmap inl
 contractL :: Profunctor p => p (a, a) b -> p a b
 contractL = lmap dup
 
-contractR :: Profunctor p => p a (Either b b) -> p a b
-contractR = rmap dedup
+contractR :: (Profunctor p, Disj t) => p a (b `t` b) -> p a b
+contractR = rmap dedupDisj
 
 
 exchangeL :: (Profunctor p, Conj t) => p (a `t` c) b -> p (c `t` a) b
