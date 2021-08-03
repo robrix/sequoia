@@ -18,7 +18,8 @@ module Sequoia.Sequent
 , SeqT(..)
 ) where
 
-import           Control.Arrow hiding ((>>>))
+import           Control.Arrow as Arrow hiding ((>>>), (|||))
+import           Control.Category (Category(id))
 import qualified Control.Category as Cat
 import           Control.Monad.Trans.Class
 import           Data.Coerce
@@ -26,7 +27,7 @@ import           Data.Profunctor
 import           Data.Profunctor.Traversing
 import           Fresnel.Getter
 import           Fresnel.Review
-import           Prelude hiding (exp, init, negate, seq)
+import           Prelude hiding (exp, id, init, negate, seq)
 import           Sequoia.Calculus.Additive
 import           Sequoia.Calculus.Context
 import           Sequoia.Calculus.Control as Calculus
@@ -43,9 +44,9 @@ import           Sequoia.Calculus.Shift
 import           Sequoia.Calculus.Structural
 import           Sequoia.Calculus.True
 import           Sequoia.Calculus.XOr
-import           Sequoia.Conjunction
+import           Sequoia.Conjunction as Conj
 import           Sequoia.Contextual
-import           Sequoia.Disjunction
+import           Sequoia.Disjunction as Disj
 import           Sequoia.Monad.Run
 import           Sequoia.Profunctor.Coexponential
 import           Sequoia.Profunctor.Context
@@ -58,7 +59,7 @@ import           Sequoia.Profunctor.Value
 
 newtype Seq e r _Γ _Δ = Seq { getSeq :: _Δ • r -> e ∘ _Γ -> e ==> r }
   deriving (Applicative, Functor, Monad, MonadEnv e, MonadRes r) via (Exp e r _Γ)
-  deriving (Arrow, ArrowApply, ArrowChoice, Cat.Category, Choice, Codiagonal, Diagonal, Profunctor, Strong, Traversing) via (Exp e r)
+  deriving (Arrow, ArrowApply, ArrowChoice, Category, Choice, Codiagonal, Diagonal, Profunctor, Strong, Traversing) via (Exp e r)
 
 infixl 3 ↓
 
@@ -117,9 +118,9 @@ instance MonadTrans (SeqT r s _Γ) where
 -- Core rules
 
 instance Core Seq where
-  f >>> g = f >>= pure <--> (`lmap` g) . (>--<)
+  f >>> g = arr (\ _Γ -> (f Cat.>>> (id ||| lmap (>--< _Γ) g), _Γ)) Cat.>>> app
 
-  init = dimap exl inr Cat.id
+  init = dimap exl inr id
 
 
 -- Structural rules
