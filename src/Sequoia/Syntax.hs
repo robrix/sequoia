@@ -34,8 +34,8 @@ class NExpr rep where
   withR :: rep e r a -> rep e r b -> rep e r (a & b)
   parL :: rep e r (a • r) -> rep e r (b • r) -> rep e r ((a ⅋ b) • r)
   parR :: Either (rep e r a) (rep e r b) -> rep e r (a ⅋ b)
-  funL :: rep e r a -> rep e r (b • r) -> rep e r (Fun r a b • r)
-  funR :: (rep e r a -> rep e r b) -> rep e r (Fun r a b)
+  funL :: rep e r a -> rep e r (b • r) -> rep e r (Fun e r a b • r)
+  funR :: (rep e r a -> rep e r b) -> rep e r (Fun e r a b)
   notUntrueL :: rep e r (a • r) -> rep e r (NotUntrue e a • r)
   notUntrueR :: rep e r a -> rep e r (NotUntrue e a)
   notL :: rep e r a -> rep e r (Not a r • r)
@@ -117,12 +117,12 @@ instance PExpr Eval where
   negateR f = env (\ e -> Negate.negate e <$> f)
 
 
-newtype Fun r a b = Fun (b • r -> a ¬ r)
+newtype Fun e r a b = Fun (b • r -> a ¬ r)
 
-instance Profunctor (Fun r) where
+instance Profunctor (Fun e r) where
   dimap f g (Fun r) = Fun (dimap (lmap g) (lmap f) r)
 
-appFun :: Fun r a b -> a -> b • r -> r
+appFun :: Fun e r a b -> a -> b • r -> r
 appFun (Fun f) a b = f b •¬ a
 
 
