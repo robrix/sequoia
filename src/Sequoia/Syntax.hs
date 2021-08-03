@@ -110,7 +110,7 @@ instance PExpr Eval where
   tensorL f = elim (\ (a :⊗ b) -> f (pure a) (pure b))
   tensorR = liftA2 (:⊗)
   subL f = elim (\ s -> appSub s <$> evalF f)
-  subR a b = (:-<) <$> a <*> b
+  subR = liftA2 (:-<)
   trueL = fmap (lmap trueA)
   trueR = fmap true
   negateL = fmap (runElim negateK)
