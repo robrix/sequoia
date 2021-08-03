@@ -50,6 +50,7 @@ import           Sequoia.Monad.Run
 import           Sequoia.Profunctor.Coexponential
 import           Sequoia.Profunctor.Context
 import           Sequoia.Profunctor.Continuation as K
+import           Sequoia.Profunctor.Diagonal
 import           Sequoia.Profunctor.Exponential as Exponential hiding ((>>>), (↓))
 import           Sequoia.Profunctor.Value
 
@@ -57,7 +58,7 @@ import           Sequoia.Profunctor.Value
 
 newtype Seq e r _Γ _Δ = Seq { getSeq :: _Δ • r -> e ∘ _Γ -> e ==> r }
   deriving (Applicative, Functor, Monad, MonadEnv e, MonadRes r) via (Exp e r _Γ)
-  deriving (Arrow, ArrowApply, ArrowChoice, Cat.Category, Choice, Profunctor, Strong, Traversing) via (Exp e r)
+  deriving (Arrow, ArrowApply, ArrowChoice, Cat.Category, Choice, Codiagonal, Diagonal, Profunctor, Strong, Traversing) via (Exp e r)
 
 infixl 3 ↓
 
