@@ -7,6 +7,7 @@ module Sequoia.Profunctor.Diagonal
 , mirror
   -- * Defaults
 , dupArrow
+, dedupArrow
 ) where
 
 import Control.Arrow (Arrow(..), Kleisli(..))
@@ -77,3 +78,6 @@ mirror = either Right Left
 
 dupArrow :: Arrow p => a `p` (a, a)
 dupArrow = arr dup
+
+dedupArrow :: Arrow p => Either a a `p` a
+dedupArrow = arr dedup
