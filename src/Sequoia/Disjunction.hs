@@ -107,8 +107,8 @@ mirrorDisj = inr <--> inl
 cocurryDisj :: Disj d => (c -> (b `d` a) •• r) -> ((c, b • r) -> a •• r)
 cocurryDisj f (c, b) = K (\ k -> f c • K ((b •) <--> (k •)))
 
-councurryDisj :: (Disj d, Representable k) => ((c, k b r) -> k (k a r) r) -> (c -> k (k (b `d` a) r) r)
-councurryDisj f c = tabulate (\ k -> sieve (f (c, inlL k)) (inrL k))
+councurryDisj :: Disj d => ((c, b • r) -> a •• r) -> c -> (b `d` a) •• r
+councurryDisj f c = K (\ k -> f (c, inlL k) • inrL k)
 
 coapDisj :: (Disj d, Representable k) => c -> k (k ((c, k b r) `d` b) r) r
 coapDisj c = tabulate (\ k -> sieve k (inl (c, tabulate (sieve k . inr))))
