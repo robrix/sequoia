@@ -10,6 +10,9 @@ import Control.Monad (ap)
 import Data.Functor.Contravariant
 import Data.Profunctor
 import Prelude hiding (print)
+import Sequoia.Calculus.Core
+import Sequoia.Conjunction
+import Sequoia.Disjunction
 import Sequoia.Printer
 
 -- Printable sequents
@@ -37,3 +40,10 @@ appSeq s _Γ _Δ = print (runSeq s _Δ) _Γ
 
 printSeq :: _Γ -> Printer _Δ -> Printer (Seq e r _Γ _Δ)
 printSeq _Γ _Δ = Printer (\ s -> appSeq s _Γ _Δ)
+
+
+-- Core
+
+instance Core Seq where
+  l >>> r = l >>= pure <--> \ a -> lmap (a >--<) r
+  init = Seq (dimap (contramap inr) (contramap exl) id)
