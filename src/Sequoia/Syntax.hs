@@ -92,7 +92,7 @@ instance NExpr Eval where
   withL2 = fmap (lmap exr)
   withR = liftA2 inlr
   parL f g = elim (runPar (K (collect (•) f), K (collect (•) g)) •)
-  parR r = distDisjF r
+  parR r = bisequenceDisj (coerceDisj r)
   funL a b = elim (\ f -> appFun f <$> a <*> b)
   funR f = Fun . fmap Not <$> evalF f
   notUntrueL a = env (\ e -> lmap ((e ∘) . runNotUntrue) <$> a)

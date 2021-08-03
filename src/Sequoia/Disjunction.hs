@@ -13,7 +13,6 @@ module Sequoia.Disjunction
 , cocurryDisj
 , councurryDisj
 , coapDisj
-, distDisjF
   -- * Generalizations
 , coerceDisj
 , leftDisj
@@ -112,10 +111,6 @@ councurryDisj f c = K (\ k -> f (c, inlL k) • inrL k)
 
 coapDisj :: Disj d => c -> ((c, b • r) `d` b) •• r
 coapDisj c = K (\ k -> k • inl (c, inrL k))
-
-
-distDisjF :: (Disj d1, Disj d2, Functor f) => (f a `d1` f b) -> f (a `d2` b)
-distDisjF = fmap inl <--> fmap inr
 
 
 -- Generalizations
