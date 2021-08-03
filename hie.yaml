@@ -3,4 +3,4 @@ cradle:
     - path: "./src"
       component: "lib:sequoia"
     - path: "./test"
-      component: "test:test"
+      component: "test:sequoia:test"
