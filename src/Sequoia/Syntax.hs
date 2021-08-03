@@ -69,9 +69,6 @@ evalF f = env (\ e -> pure (\ k -> K ((<== e) . runEval k . f . pure)))
 elim :: (a -> Eval e r r) -> Eval e r (a • r)
 elim f = Eval (\ k -> C (\ e -> k • K (\ a -> runEval idK (f a) <== e)))
 
-distDisj :: Either (Eval e r a) (Eval e r b) -> Eval e r (Either a b)
-distDisj d = Eval (\ k -> (runEval (inlK k) <--> runEval (inrK k)) d)
-
 newtype Eval e r a = Eval { getEval :: a • r -> e ==> r }
 
 instance Functor (Eval e r) where
