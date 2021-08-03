@@ -10,7 +10,6 @@ module Sequoia.Conjunction
 , assocL
 , assocR
 , assocConj
-, distConjA
 , distConjRep
 , undistConjF
   -- * Generalizations
@@ -33,6 +32,7 @@ module Sequoia.Conjunction
 , bifoldMapConj
 , bimapConj
 , bitraverseConj
+, bisequenceConj
   -- * Lifted projections
 , exlK
 , exrK
@@ -117,9 +117,6 @@ assocConj :: (Conj p, Conj q) => Iso
 assocConj = iso assocL assocR
 
 
-distConjA :: (Applicative f, Conj c1, Conj c2) => (f a `c1` f b) -> f (a `c2` b)
-distConjA = uncurryConj (liftA2 (>--<))
-
 distConjRep :: (Co.Representable f, Conj c1, Conj c2) => (f a `c1` f b) -> f (a `c2` b)
 distConjRep = uncurryConj (\ a b -> tabulate (\ c -> index a c >--< index b c))
 
@@ -190,6 +187,9 @@ bimapConj = exlrC inlr
 
 bitraverseConj :: (Conj p, Applicative m) => (a -> m a') -> (b -> m b') -> (a `p` b -> m (a' `p` b'))
 bitraverseConj = exlrC (liftA2 inlr)
+
+bisequenceConj :: (Conj p, Applicative f) => f a `p` f b -> f (a `p` b)
+bisequenceConj = uncurryConj (liftA2 (>--<))
 
 
 -- Lifted projections
