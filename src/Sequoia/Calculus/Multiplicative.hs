@@ -34,7 +34,7 @@ parLTensor s = wkL s >>> tensorL (negateL (negateL (parL (wkR init) init)))
 
 tensorLPar
   :: (Weaken s, ParIntro s, TensorIntro s, NotIntro s, Pos a, Pos b)
-  =>         _Γ -|s e r|- _Δ > r ¬a ⅋ r ¬b
-  -- -------------------------------------
+  =>         _Γ -|s e r|- _Δ > a ¬ r ⅋ b ¬ r
+  -- ---------------------------------------
   -> a ⊗ b < _Γ -|s e r|- _Δ
 tensorLPar s = wkL s >>> parL (notL (tensorL init)) (notL (tensorL (wkL init)))

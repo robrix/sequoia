@@ -71,16 +71,16 @@ shiftN = shift . negateLK'
 
 dnePK
   :: Contextual s
-  =>               a •• r < _Γ -|s e r|- _Δ
+  =>             a •• r < _Γ -|s e r|- _Δ
   -- --------------------------------------
-  -> Negate e r (Not r a) < _Γ -|s e r|- _Δ
+  -> Negate e r (a ¬ r) < _Γ -|s e r|- _Δ
 dnePK = mapL (fmap getNegateNot)
 
 dniPK
   :: Contextual s
   => _Γ -|s e r|- _Δ > a •• r
-  -- --------------------------------------
-  -> _Γ -|s e r|- _Δ > Negate e r (Not r a)
+  -- ------------------------------------
+  -> _Γ -|s e r|- _Δ > Negate e r (a ¬ r)
 dniPK s = sequent (\ _Δ _Γ -> env (\ e -> appSequent s (lmap (fmap (negateNot e)) _Δ) _Γ))
 
 

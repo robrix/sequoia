@@ -23,18 +23,18 @@ import Sequoia.Profunctor.Value
 elimFun :: a ~~Fun e r~> b -> b >-Sub e r-~ a -> e ==> r
 elimFun f = elimExp (runFunExp f) . runSubCoexp
 
-funPar1 :: Iso' (e ∘ (r ¬a ⅋ b) • r) (e ∘ (a ~~Fun e r~> b) • r)
+funPar1 :: Iso' (e ∘ (a ¬ r ⅋ b) • r) (e ∘ (a ~~Fun e r~> b) • r)
 funPar1 = iso
   (\ k -> K ((k •) . (mkPar (inrK (lmap pure k)) =<<)))
   (\ k -> K ((k •) . fmap mkFun))
 
-funPar2 :: Iso' (e ∘ (r ¬a ⅋ b) • r • r) (e ∘ (a ~~Fun e r~> b) • r • r)
+funPar2 :: Iso' (e ∘ (a ¬ r ⅋ b) • r • r) (e ∘ (a ~~Fun e r~> b) • r • r)
 funPar2 = iso
   (lmap (\ f -> K ((f •) . fmap mkFun)))
   (lmap (\ p -> K ((p •) . (mkPar (inrK (lmap pure p)) =<<))))
 
-mkPar :: b • r -> a ~~Fun e r~> b -> e ∘ (r ¬a ⅋ b)
+mkPar :: b • r -> a ~~Fun e r~> b -> e ∘ (a ¬ r ⅋ b)
 mkPar p f = V (\ e -> inl (Not (K (\ a -> p ↓ runFunExp f ↑ pure a <== e))))
 
-mkFun :: r ¬a ⅋ b -> a ~~Fun e r~> b
+mkFun :: a ¬ r ⅋ b -> a ~~Fun e r~> b
 mkFun p = fun (\ b a -> C (\ e -> ((•¬ e ∘≁ a) <--> (b •¬)) p))

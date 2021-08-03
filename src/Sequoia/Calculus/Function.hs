@@ -60,14 +60,14 @@ funR' p = wkL (wkR' p) >>> funL2
 
 funLPar
   :: (Weaken s, Exchange s, FunctionIntro s, ParIntro s, NotIntro s, Pos a, Neg b)
-  =>        r ¬a ⅋ b < _Γ -|s e r|- _Δ
+  =>       a ¬ r ⅋ b < _Γ -|s e r|- _Δ
   -- ---------------------------------
   -> a ~~Fun e r~> b < _Γ -|s e r|- _Δ
 funLPar s = parR (exR (notR (exL (init ->⊢ init)))) >>> wkL' s
 
 funRPar
   :: (Weaken s, Exchange s, FunctionIntro s, ParIntro s, NotIntro s, Pos a, Neg b)
-  => _Γ -|s e r|- _Δ > r ¬a ⅋ b
+  => _Γ -|s e r|- _Δ > a ¬ r ⅋ b
   -- ---------------------------------
   -> _Γ -|s e r|- _Δ > a ~~Fun e r~> b
 funRPar s = wkR' s >>> funR (exL (notL init ⅋⊢ init))

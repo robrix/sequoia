@@ -25,7 +25,7 @@ import           Sequoia.Profunctor.Value
 
 -- Implication
 
-newtype Fun e r a b = Fun { getFun :: r ¬ b -> e ≁ a -> e ==> r }
+newtype Fun e r a b = Fun { getFun :: b ¬ r -> e ≁ a -> e ==> r }
   deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via Exp e r
   deriving (Functor) via Exp e r a
 
@@ -40,7 +40,7 @@ infixr 5 ~>
 
 -- Construction
 
-fun :: (r ¬ b -> e ≁ a -> e ==> r) -> a ~~Fun e r~> b
+fun :: (b ¬ r -> e ≁ a -> e ==> r) -> a ~~Fun e r~> b
 fun = Fun
 
 funExp :: Exp e r a b -> a ~~Fun e r~> b

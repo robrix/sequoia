@@ -33,52 +33,52 @@ import Sequoia.Profunctor.Value
 class Core s => NotIntro s where
   notL
     :: Pos a
-    =>        _Γ -|s e r|- _Δ > a
-    -- --------------------------
-    -> r ¬a < _Γ -|s e r|- _Δ
+    =>         _Γ -|s e r|- _Δ > a
+    -- ---------------------------
+    -> a ¬ r < _Γ -|s e r|- _Δ
 
   notR
     :: Pos a
     => a < _Γ -|s e r|- _Δ
-    -- --------------------------
-    ->     _Γ -|s e r|- _Δ > r ¬a
+    -- ---------------------------
+    ->     _Γ -|s e r|- _Δ > a ¬ r
 
 
 notL'
   :: (NotIntro s, Weaken s, Pos a)
-  => r ¬a < _Γ -|s e r|- _Δ
-  -- --------------------------
-  ->        _Γ -|s e r|- _Δ > a
+  => a ¬ r < _Γ -|s e r|- _Δ
+  -- ---------------------------
+  ->         _Γ -|s e r|- _Δ > a
 notL' p = notR init >>> wkR p
 
 notR'
   :: (NotIntro s, Weaken s, Pos a)
-  =>     _Γ -|s e r|- _Δ > r ¬a
-  -- --------------------------
+  =>     _Γ -|s e r|- _Δ > a ¬ r
+  -- ---------------------------
   -> a < _Γ -|s e r|- _Δ
 notR' p = wkL p >>> notL init
 
 
 shiftP
   :: (Control s, Contextual s)
-  => r ¬a < _Γ -|s e r|- _Δ > r
-  -- --------------------------
-  ->        _Γ -|s e r|- _Δ > a
+  => a ¬ r < _Γ -|s e r|- _Δ > r
+  -- ---------------------------
+  ->         _Γ -|s e r|- _Δ > a
 shiftP = shift . notLK'
 
 
 dneNK
   :: Contextual s
-  =>                a •• r < _Γ -|s e r|- _Δ
-  -- ---------------------------------------
-  -> Not r (Negate e r a)  < _Γ -|s e r|- _Δ
+  =>           a •• r < _Γ -|s e r|- _Δ
+  -- ----------------------------------
+  -> Negate e r a ¬ r < _Γ -|s e r|- _Δ
 dneNK = mapL (\ v -> V (\ e -> getNotNegate e (e ∘ v)))
 
 dniNK
   :: Contextual s
   => _Γ -|s e r|- _Δ > a •• r
-  -- --------------------------------------
-  -> _Γ -|s e r|- _Δ > Not r (Negate e r a)
+  -- ----------------------------------
+  -> _Γ -|s e r|- _Δ > Negate e r a ¬ r
 dniNK = mapR (lmap notNegate)
 
 
@@ -86,27 +86,27 @@ notLK
   :: Contextual s
   => a • r < _Γ -|s e r|- _Δ
   -- -----------------------
-  ->  r ¬a < _Γ -|s e r|- _Δ
+  -> a ¬ r < _Γ -|s e r|- _Δ
 notLK = mapL (fmap getNot)
 
 notRK
   :: Contextual s
   => _Γ -|s e r|- _Δ > a • r
   -- -----------------------
-  -> _Γ -|s e r|- _Δ > r ¬a
+  -> _Γ -|s e r|- _Δ > a ¬ r
 notRK = mapR (lmap Not)
 
 
 notLK'
   :: Contextual s
-  =>  r ¬a < _Γ -|s e r|- _Δ
+  => a ¬ r < _Γ -|s e r|- _Δ
   -- -----------------------
   -> a • r < _Γ -|s e r|- _Δ
 notLK' = mapL (fmap Not)
 
 notRK'
   :: Contextual s
-  => _Γ -|s e r|- _Δ >  r ¬a
+  => _Γ -|s e r|- _Δ > a ¬ r
   -- -----------------------
   -> _Γ -|s e r|- _Δ > a • r
 notRK' = mapR (lmap getNot)

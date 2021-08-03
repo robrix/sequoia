@@ -38,8 +38,8 @@ class NExpr rep where
   funR :: (rep e r a -> rep e r b) -> rep e r (Fun r a b)
   notUntrueL :: rep e r (a • r) -> rep e r (NotUntrue e a • r)
   notUntrueR :: rep e r a -> rep e r (NotUntrue e a)
-  notL :: rep e r a -> rep e r (Not r a • r)
-  notR :: rep e r (a • r) -> rep e r (Not r a)
+  notL :: rep e r a -> rep e r (Not a r • r)
+  notR :: rep e r (a • r) -> rep e r (Not a r)
 
 class PExpr rep where
   zeroL :: rep e r Zero -> rep e r a

@@ -19,5 +19,5 @@ import Sequoia.Disjunction
 elimPar :: a ⅋ b -> Negate e r a ⊗ Negate e r b -> r
 elimPar = (. exl) . flip (•-) <--> (. exr) . flip (•-)
 
-elimTensor :: a ⊗ b -> r ¬a ⅋ r ¬b -> r
+elimTensor :: a ⊗ b -> a ¬ r ⅋ b ¬ r -> r
 elimTensor = flip ((. exl) . (•¬) <--> (. exr) . (•¬))

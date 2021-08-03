@@ -22,9 +22,9 @@ import Sequoia.Polarity
 class Core s => UniversalIntro s where
   forAllL
     :: (Polarized n x, Neg (f x))
-    => Not r (Negate e r (f x)) < _Γ -|s e r|- _Δ
-    -- ------------------------------------------
-    ->         ForAll r n f     < _Γ -|s e r|- _Δ
+    => Negate e r (f x) ¬ r < _Γ -|s e r|- _Δ
+    -- --------------------------------------
+    ->     ForAll r n f     < _Γ -|s e r|- _Δ
 
   forAllR
     :: (Polarized n ==> Neg) f
