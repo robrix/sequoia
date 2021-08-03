@@ -9,6 +9,7 @@ module Sequoia.Monad.Run
 , fn
 , inK
 , cont
+, contK
   -- * Defaults
 , withRunWithRep
 , distributeRun
@@ -47,6 +48,9 @@ inK = fmap K . fn
 
 cont :: MonadRun m => ((forall b . (b -> m r) -> b • r) -> m a) -> m a
 cont f = withRun (\ run -> f (K . (run .)))
+
+contK :: MonadRunK r m => ((forall b . (b -> m r) -> b • r) -> m a) -> m a
+contK f = withRunK (\ run -> f (K . (run idK .)))
 
 
 -- Defaults
