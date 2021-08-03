@@ -48,7 +48,7 @@ class PExpr rep where
   tensorL :: (rep e r a -> rep e r b -> rep e r o) -> (rep e r (a ⊗ b) -> rep e r o)
   tensorR :: rep e r a -> rep e r b -> rep e r (a ⊗ b)
   subL :: (rep e r a -> rep e r b) -> (rep e r (Sub r a b) -> rep e r r)
-  subR :: rep e r a -> (rep e r b -> rep e r r) -> rep e r (Sub r a b)
+  subR :: rep e r a -> rep e r (b • r) -> rep e r (Sub r a b)
   trueL :: rep e r (a • r) -> rep e r (True r a • r)
   trueR :: rep e r a -> rep e r (True r a)
   negateL :: rep e r a -> rep e r (Negate e r a • r)
@@ -63,9 +63,6 @@ runEvalK e m = K (\ a -> runEval (dn a) m <== e)
 
 evalEval :: Eval e r r -> e ==> r
 evalEval = runEval idK
-
-evalK :: (Eval e r a -> Eval e r r) -> Eval e r (a • r)
-evalK = fmap ($ idK) . evalF
 
 evalF :: (Eval e r a -> Eval e r b) -> Eval e r (b • r -> a • r)
 evalF f = env (\ e -> pure (\ k -> K ((<== e) . runEval k . f . pure)))
@@ -119,7 +116,7 @@ instance PExpr Eval where
     f <- evalF f
     a :-< k <- s
     pure (f k • a)
-  subR a b = (:-<) <$> a <*> evalK b
+  subR a b = (:-<) <$> a <*> b
   trueL a = Eval (\ k -> runEval (lmap (lmap trueA) k) a)
   trueR = fmap true
   negateL = fmap (runElim negateK)
