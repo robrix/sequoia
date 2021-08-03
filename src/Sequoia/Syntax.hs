@@ -112,7 +112,7 @@ instance PExpr Eval where
   tensorR = liftA2 (:⊗)
   subL f = Eval (\ k -> C (\ e -> k • K (\ (a :-< k) -> runEval (K (\ f -> f k • a)) (evalF f) <== e)))
   subR a b = (:-<) <$> a <*> b
-  trueL a = Eval (\ k -> runEval (lmap (lmap trueA) k) a)
+  trueL = fmap (lmap trueA)
   trueR = fmap true
   negateL = fmap (runElim negateK)
   negateR f = env (\ e -> Negate.negate e <$> f)
