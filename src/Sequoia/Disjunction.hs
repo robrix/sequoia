@@ -110,8 +110,8 @@ cocurryDisj f (c, b) = K (\ k -> f c • K ((b •) <--> (k •)))
 councurryDisj :: Disj d => ((c, b • r) -> a •• r) -> c -> (b `d` a) •• r
 councurryDisj f c = K (\ k -> f (c, inlL k) • inrL k)
 
-coapDisj :: (Disj d, Representable k) => c -> k (k ((c, k b r) `d` b) r) r
-coapDisj c = tabulate (\ k -> sieve k (inl (c, tabulate (sieve k . inr))))
+coapDisj :: Disj d => c -> ((c, b • r) `d` b) •• r
+coapDisj c = K (\ k -> k • inl (c, inrL k))
 
 
 distDisjF :: (Disj d1, Disj d2, Functor f) => (f a `d1` f b) -> f (a `d2` b)
