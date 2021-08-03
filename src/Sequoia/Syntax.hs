@@ -103,7 +103,7 @@ instance NExpr Eval where
   -- FIXME: this is always scoped statically
   notUntrueR = fmap (NotUntrue . pure)
   notL = fmap (runElim getNot)
-  notR f = Not <$> f
+  notR = fmap Not
 
 instance PExpr Eval where
   zeroL = fmap absurdP
