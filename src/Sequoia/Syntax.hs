@@ -6,6 +6,7 @@ module Sequoia.Syntax
 import Control.Applicative (liftA2)
 import Control.Monad (ap)
 import Data.Bifunctor
+import Data.Distributive
 import Data.Profunctor
 import Sequoia.Calculus.Bottom
 import Sequoia.Conjunction
@@ -19,6 +20,7 @@ import Sequoia.Connective.Top
 import Sequoia.Connective.True
 import Sequoia.Connective.With
 import Sequoia.Connective.Zero
+import Sequoia.Disjunction
 import Sequoia.Monad.Run
 import Sequoia.Profunctor.Context
 import Sequoia.Profunctor.Continuation
@@ -67,6 +69,9 @@ evalEval = runEval idK
 evalF :: (Eval e r a -> Eval e r b) -> Eval e r (b • r -> a • r)
 evalF f = env (\ e -> pure (\ k -> K ((<== e) . runEval k . f . pure)))
 
+elim :: (a -> Eval e r r) -> Eval e r (a • r)
+elim f = Eval (\ k -> C (\ e -> k • K (\ a -> runEval idK (f a) <== e)))
+
 newtype Eval e r a = Eval { getEval :: a • r -> e ==> r }
 
 instance Functor (Eval e r) where
@@ -105,12 +110,12 @@ instance NExpr Eval where
 instance PExpr Eval where
   zeroL = fmap absurdP
   oneR = Eval (\ k -> C ((k •) . One))
-  sumL f g = Eval (\ k -> C (\ e -> k • (runEvalK e f <••> runEvalK e g)))
+  sumL f g = elim (collect (•) f <--> collect (•) g)
   sumR1 = fmap InL
   sumR2 = fmap InR
-  tensorL f = Eval (\ k -> C (\ e -> k • K (\ (a :⊗ b) -> runEval idK (f (pure a) (pure b)) <== e)))
+  tensorL f = elim (\ (a :⊗ b) -> f (pure a) (pure b))
   tensorR = liftA2 (:⊗)
-  subL f = Eval (\ k -> C (\ e -> k • K (\ (a :-< k) -> runEval (K (\ f -> f k • a)) (evalF f) <== e)))
+  subL f = elim (\ (a :-< k) -> (• a) . ($ k) <$> evalF f)
   subR a b = (:-<) <$> a <*> b
   trueL = fmap (lmap trueA)
   trueR = fmap true
