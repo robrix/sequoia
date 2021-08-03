@@ -13,3 +13,6 @@ newtype Seq e r _Γ _Δ = Seq { runSeq :: Printer _Δ -> Printer _Γ }
 
 instance Profunctor (Seq e r) where
   dimap f g = Seq . dimap (contramap g) (contramap f) . runSeq
+
+instance Functor (Seq e r _Γ) where
+  fmap = rmap
