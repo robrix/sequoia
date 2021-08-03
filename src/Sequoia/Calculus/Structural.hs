@@ -103,8 +103,8 @@ contractR = rmap dedup
 exchangeL :: (Profunctor p, Conj t) => p (a `t` c) b -> p (c `t` a) b
 exchangeL = lmap swapConj
 
-exchangeR :: Profunctor p => p a (Either b c) -> p a (Either c b)
-exchangeR = rmap mirror
+exchangeR :: (Profunctor p, Disj t) => p a (b `t` c) -> p a (c `t` b)
+exchangeR = rmap mirrorDisj
 
 
 -- Derivation
