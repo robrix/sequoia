@@ -36,7 +36,7 @@ class NExpr rep where
   funR :: (rep e r a -> rep e r b) -> rep e r (Fun r a b)
   notUntrueL :: rep e r (a • r) -> rep e r (NotUntrue e a • r)
   notUntrueR :: rep e r a -> rep e r (NotUntrue e a)
-  notL :: rep e r a -> (rep e r (Not r a) -> rep e r r)
+  notL :: rep e r a -> rep e r (Not r a • r)
   notR :: (rep e r a -> rep e r r) -> rep e r (Not r a)
 
 class PExpr rep where
@@ -51,7 +51,7 @@ class PExpr rep where
   subR :: rep e r a -> (rep e r b -> rep e r r) -> rep e r (Sub r a b)
   trueL :: rep e r (a • r) -> rep e r (True r a • r)
   trueR :: rep e r a -> rep e r (True r a)
-  negateL :: rep e r a -> (rep e r (Negate e r a) -> rep e r r)
+  negateL :: rep e r a -> rep e r (Negate e r a • r)
   negateR :: (rep e r a -> rep e r r) -> rep e r (Negate e r a)
 
 runEval :: a • r -> Eval e r a -> e ==> r
@@ -95,7 +95,7 @@ instance NExpr Eval where
   notUntrueL a = env (\ e -> lmap ((e ∘) . runNotUntrue) <$> a)
   -- FIXME: this is always scoped statically
   notUntrueR = fmap (NotUntrue . pure)
-  notL a n = (•) . getNot <$> n <*> a
+  notL = fmap (\ a -> K ((• a) . getNot))
   notR f = Not <$> evalK f
 
 instance PExpr Eval where
@@ -115,7 +115,7 @@ instance PExpr Eval where
   subR a b = (:-<) <$> a <*> evalK b
   trueL a = Eval (\ k -> runEval (lmap (lmap trueA) k) a)
   trueR = fmap true
-  negateL a n = (•) . negateK <$> n <*> a
+  negateL = fmap (\ a -> K ((• a) . negateK))
   negateR f = env (\ e -> Negate.negate e <$> evalK f)
 
 
