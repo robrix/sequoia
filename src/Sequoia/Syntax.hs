@@ -5,7 +5,6 @@ module Sequoia.Syntax
 
 import Control.Applicative (liftA2)
 import Control.Monad (ap)
-import Data.Bifunctor
 import Data.Distributive
 import Data.Profunctor
 import Sequoia.Calculus.Bottom
@@ -14,6 +13,7 @@ import Sequoia.Connective.Negate as Negate
 import Sequoia.Connective.Not
 import Sequoia.Connective.NotUntrue
 import Sequoia.Connective.One
+import Sequoia.Connective.Par
 import Sequoia.Connective.Sum
 import Sequoia.Connective.Tensor
 import Sequoia.Connective.Top
@@ -32,8 +32,8 @@ class NExpr rep where
   withL1 :: rep e r (a • r) -> rep e r ((a & b) • r)
   withL2 :: rep e r (b • r) -> rep e r ((a & b) • r)
   withR :: rep e r a -> rep e r b -> rep e r (a & b)
-  parL :: rep e r (a • r) -> rep e r (b • r) -> rep e r (Par a b • r)
-  parR :: Either (rep e r a) (rep e r b) -> rep e r (Par a b)
+  parL :: rep e r (a • r) -> rep e r (b • r) -> rep e r ((a ⅋ b) • r)
+  parR :: Either (rep e r a) (rep e r b) -> rep e r (a ⅋ b)
   funL :: rep e r a -> rep e r (b • r) -> rep e r (Fun r a b • r)
   funR :: (rep e r a -> rep e r b) -> rep e r (Fun r a b)
   notUntrueL :: rep e r (a • r) -> rep e r (NotUntrue e a • r)
@@ -91,7 +91,7 @@ instance NExpr Eval where
   withL1 = fmap (lmap exl)
   withL2 = fmap (lmap exr)
   withR l r = inlr <$> l <*> r
-  parL f g = elim (\ r -> getPar r • (K (collect (•) f), K (collect (•) g)))
+  parL f g = elim (runPar (K (collect (•) f), K (collect (•) g)) •)
   parR r = distDisjF r >>= \ r' -> pure (Par (K (\ (g, h) -> ((g •) <--> (h •)) r')))
   funL a b = elim (\ f -> appFun f <$> a <*> b)
   funR f = Fun <$> evalF f
@@ -115,12 +115,6 @@ instance PExpr Eval where
   trueR = fmap true
   negateL = fmap (runElim negateK)
   negateR f = env (\ e -> Negate.negate e <$> f)
-
-
-newtype Par a b = Par { getPar :: forall x . (a • x, b • x) • x }
-
-instance Bifunctor Par where
-  bimap f g (Par r) = Par (lmap (bimap (lmap f) (lmap g)) r)
 
 
 newtype Fun r a b = Fun (b • r -> a • r)
