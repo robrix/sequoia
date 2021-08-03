@@ -112,7 +112,7 @@ newtype SeqT e r _Γ m _Δ = SeqT { getSeqT :: Seq e (m r) _Γ _Δ }
   deriving (Applicative, Functor, Monad)
 
 instance MonadTrans (SeqT r s _Γ) where
-  lift m = SeqT (seq (\ k _ -> C (const (m >>= (k •)))))
+  lift m = SeqT (seq (\ k _ -> pure (m >>= (k •))))
 
 
 -- Core rules
