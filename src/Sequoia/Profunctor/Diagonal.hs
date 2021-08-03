@@ -1,6 +1,7 @@
 module Sequoia.Profunctor.Diagonal
-( -- * (Co)diagonal functors
+( -- * Diagonal functors
   Diagonal(..)
+  -- * Codiagonal functors
 , Codiagonal(..)
 , swap
 , mirror
@@ -14,7 +15,7 @@ import Data.Profunctor
 import Data.Profunctor.Strong
 import Data.Tuple (swap)
 
--- (Co)diagonal functors
+-- Diagonal functors
 
 class Profunctor p => Diagonal p where
   dup :: a `p` (a, a)
@@ -40,6 +41,8 @@ instance Comonad f => Diagonal (Costar f) where
 instance Arrow p => Diagonal (WrappedArrow p) where
   dup = WrapArrow (arr dup)
 
+
+-- Codiagonal functors
 
 class Profunctor p => Codiagonal p where
   dedup :: Either a a `p` a
