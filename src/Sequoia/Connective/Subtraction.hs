@@ -5,6 +5,7 @@ module Sequoia.Connective.Subtraction
 , type (-~)
   -- * Elimination
 , runSubCoexp
+, appSub
   -- * Optics
 , subA_
 , subK_
@@ -15,6 +16,7 @@ import Data.Profunctor
 import Fresnel.Lens
 import Sequoia.Polarity
 import Sequoia.Profunctor.Coexponential
+import Sequoia.Profunctor.Context
 import Sequoia.Profunctor.Continuation
 import Sequoia.Profunctor.Value
 
@@ -41,6 +43,9 @@ infixr 5 -~
 
 runSubCoexp :: Sub e r b a -> Coexp e r b a
 runSubCoexp (a :-< k) = a -< k
+
+appSub :: Sub e r b a -> (b • r -> a • r) -> e ==> r
+appSub (a :-< k) f = C (\ e -> f k • e ∘ a)
 
 
 -- Optics
