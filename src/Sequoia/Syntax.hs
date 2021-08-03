@@ -32,8 +32,8 @@ class NExpr rep where
   withL1 :: rep e r (a • r) -> rep e r ((a & b) • r)
   withL2 :: rep e r (b • r) -> rep e r ((a & b) • r)
   withR :: rep e r a -> rep e r b -> rep e r (a & b)
-  parL :: rep e r (a • r) -> rep e r (b • r) -> rep e r (Par r a b • r)
-  parR :: Either (rep e r a) (rep e r b) -> rep e r (Par r a b)
+  parL :: rep e r (a • r) -> rep e r (b • r) -> rep e r (Par a b • r)
+  parR :: Either (rep e r a) (rep e r b) -> rep e r (Par a b)
   funL :: rep e r a -> rep e r (b • r) -> rep e r (Fun r a b • r)
   funR :: (rep e r a -> rep e r b) -> rep e r (Fun r a b)
   notUntrueL :: rep e r (a • r) -> rep e r (NotUntrue e a • r)
@@ -59,9 +59,6 @@ class PExpr rep where
 
 runEval :: a • r -> Eval e r a -> e ==> r
 runEval k m = getEval m k
-
-runEvalK :: e -> Eval e r (a • r) -> a • r
-runEvalK e m = K (\ a -> runEval (dn a) m <== e)
 
 evalF :: (Eval e r a -> Eval e r b) -> Eval e r (b • r -> a • r)
 evalF f = env (\ e -> pure (\ k -> K ((<== e) . runEval k . f . pure)))
@@ -94,8 +91,8 @@ instance NExpr Eval where
   withL1 = fmap (lmap exl)
   withL2 = fmap (lmap exr)
   withR l r = inlr <$> l <*> r
-  parL f g = Eval (\ k -> C (\ e -> k • runPar (runEvalK e f, runEvalK e g)))
-  parR r = env (\ e -> pure (Par (K (\ (g, h) -> runEval (g <••> h) (distDisjF r) <== e))))
+  parL f g = elim (\ r -> getPar r • (K (collect (•) f), K (collect (•) g)))
+  parR r = distDisjF r >>= \ r' -> pure (Par (K (\ (g, h) -> ((g •) <--> (h •)) r')))
   funL a b = elim (\ f -> appFun f <$> a <*> b)
   funR f = Fun <$> evalF f
   notUntrueL a = env (\ e -> lmap ((e ∘) . runNotUntrue) <$> a)
@@ -120,12 +117,9 @@ instance PExpr Eval where
   negateR f = env (\ e -> Negate.negate e <$> f)
 
 
-runPar :: (a • r, b • r) -> Par r a b • r
-runPar = runElim getPar
+newtype Par a b = Par { getPar :: forall x . (a • x, b • x) • x }
 
-newtype Par r a b = Par { getPar :: (a • r, b • r) • r }
-
-instance Bifunctor (Par r) where
+instance Bifunctor Par where
   bimap f g (Par r) = Par (lmap (bimap (lmap f) (lmap g)) r)
 
 
