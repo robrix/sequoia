@@ -102,7 +102,7 @@ instance NExpr Eval where
   notUntrueL a = env (\ e -> lmap ((e ∘) . runNotUntrue) <$> a)
   -- FIXME: this is always scoped statically
   notUntrueR = fmap (NotUntrue . pure)
-  notL = fmap (\ a -> K ((• a) . getNot))
+  notL = fmap (runElim getNot)
   notR f = Not <$> evalK f
 
 instance PExpr Eval where
@@ -122,12 +122,12 @@ instance PExpr Eval where
   subR a b = (:-<) <$> a <*> evalK b
   trueL a = Eval (\ k -> runEval (lmap (lmap trueA) k) a)
   trueR = fmap true
-  negateL = fmap (\ a -> K ((• a) . negateK))
+  negateL = fmap (runElim negateK)
   negateR f = env (\ e -> Negate.negate e <$> evalK f)
 
 
 runPar :: (a • r, b • r) -> Par r a b • r
-runPar p = K ((• p) . getPar)
+runPar = runElim getPar
 
 newtype Par r a b = Par { getPar :: (a • r, b • r) • r }
 
@@ -145,3 +145,7 @@ appFun (Fun f) a b = f b • a
 
 
 data Sub r a b = a :-< (b • r)
+
+
+runElim :: (a -> b • r) -> (b -> a • r)
+runElim get = K . (. get) . flip (•)
