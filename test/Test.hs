@@ -3,11 +3,11 @@ module Main
 ) where
 
 import           Hedgehog.Main
-import qualified Sequoia.Cons.Test
-import qualified Sequoia.Line.Test
+import qualified Cons.Test
+import qualified Line.Test
 
 main :: IO ()
 main = defaultMain
-  [ Sequoia.Cons.Test.tests
-  , Sequoia.Line.Test.tests
+  [ Cons.Test.tests
+  , Line.Test.tests
   ]

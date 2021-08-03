@@ -1,5 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
-module Sequoia.Line.Test
+module Line.Test
 ( tests
 ) where
 

@@ -194,8 +194,8 @@ test-suite test
   hs-source-dirs: test
   main-is: Test.hs
   other-modules:
-    Sequoia.Cons.Test
-    Sequoia.Line.Test
+    Cons.Test
+    Line.Test
   build-depends:
     , base
     , hedgehog ^>= 1

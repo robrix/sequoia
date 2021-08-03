@@ -1,5 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
-module Sequoia.Cons.Test
+module Cons.Test
 ( tests
 ) where
 
