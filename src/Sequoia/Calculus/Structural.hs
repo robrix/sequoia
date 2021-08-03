@@ -1,4 +1,6 @@
 {-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE QuantifiedConstraints #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Calculus.Structural
 (  -- * Structural
   Structural
@@ -14,6 +16,8 @@ module Sequoia.Calculus.Structural
 , contractR
 , exchangeL
 , exchangeR
+  -- * Derivation
+, Profunctorially(..)
 ) where
 
 import Data.Profunctor
@@ -100,3 +104,16 @@ exchangeL = lmap swap
 
 exchangeR :: Profunctor p => p a (Either b c) -> p a (Either c b)
 exchangeR = rmap mirror
+
+
+-- Derivation
+
+newtype Profunctorially s e r a b = Profunctorially { runProfunctorially :: s e r a b }
+  deriving (Core, Profunctor)
+
+instance Profunctor (s e r) => Functor (Profunctorially s e r a) where
+  fmap = rmap
+
+instance (Core s, forall e r . Profunctor (s e r)) => Weaken (Profunctorially s) where
+  wkL = lmap exr
+  wkR = rmap inl
