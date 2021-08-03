@@ -94,7 +94,7 @@ instance NExpr Eval where
   parL f g = elim (runPar (K (collect (•) f), K (collect (•) g)) •)
   parR r = distDisjF r >>= \ r' -> pure (Par (K (\ (g, h) -> ((g •) <--> (h •)) r')))
   funL a b = elim (\ f -> appFun f <$> a <*> b)
-  funR f = Fun <$> evalF f
+  funR f = Fun . fmap Not <$> evalF f
   notUntrueL a = env (\ e -> lmap ((e ∘) . runNotUntrue) <$> a)
   -- FIXME: this is always scoped statically
   notUntrueR = fmap (NotUntrue . pure)
@@ -117,13 +117,13 @@ instance PExpr Eval where
   negateR f = env (\ e -> Negate.negate e <$> f)
 
 
-newtype Fun r a b = Fun (b • r -> a • r)
+newtype Fun r a b = Fun (b • r -> a ¬ r)
 
 instance Profunctor (Fun r) where
   dimap f g (Fun r) = Fun (dimap (lmap g) (lmap f) r)
 
 appFun :: Fun r a b -> a -> b • r -> r
-appFun (Fun f) a b = f b • a
+appFun (Fun f) a b = f b •¬ a
 
 
 data Sub r a b = a :-< (b • r)
