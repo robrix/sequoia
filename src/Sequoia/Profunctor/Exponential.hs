@@ -102,6 +102,9 @@ instance MonadRes r (Exp e r a) where
   res = exp . ckv . pure
   liftRes f = exp (\ k v -> env (\ e -> let run f = k ↓ f ↑ v in run (f ((<== e) . run))))
 
+instance MonadRunK r (Exp e r a) where
+  withRunK f = exp (\ k v -> withRun (\ run -> k ↓ f (\ k' m -> run (k' ↓ m ↑ v)) ↑ v))
+
 instance Coapply (Exp e r) where
   coliftA2 f a b = exp (\ k -> let r a v = k ↓ a ↑ v in env . (r a <∘∘> r b) . fmap f)
 
