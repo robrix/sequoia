@@ -167,7 +167,7 @@ elimExp :: a --|Exp e r|-> b -> Coexp e r b a -> e ==> r
 elimExp = unCoexp . flip . runExp
 
 runExpFn :: Exp e r a b -> ((b -> r) -> (e -> a) -> (e -> r))
-runExpFn = coerce . runExp
+runExpFn = coerce
 
 (↑) :: (e ∘ a -> m r) -> e ∘ a -> m r
 (↑) = ($)
