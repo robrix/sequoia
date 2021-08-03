@@ -104,8 +104,8 @@ infix 3 <•••>
 mirrorDisj :: Disj d => a `d` b -> b `d` a
 mirrorDisj = inr <--> inl
 
-cocurryDisj :: (Disj d, Representable k) => (c -> k (k (b `d` a) r) r) -> ((c, k b r) -> k (k a r) r)
-cocurryDisj f (c, b) = tabulate (\ k -> sieve (f c) (tabulate (sieve b <--> sieve k)))
+cocurryDisj :: Disj d => (c -> (b `d` a) •• r) -> ((c, b • r) -> a •• r)
+cocurryDisj f (c, b) = K (\ k -> f c • K ((b •) <--> (k •)))
 
 councurryDisj :: (Disj d, Representable k) => ((c, k b r) -> k (k a r) r) -> (c -> k (k (b `d` a) r) r)
 councurryDisj f c = tabulate (\ k -> sieve (f (c, inlL k)) (inrL k))
