@@ -112,7 +112,7 @@ instance PExpr Eval where
   sumR2 = fmap InR
   tensorL f = elim (\ (a :⊗ b) -> f (pure a) (pure b))
   tensorR = liftA2 (:⊗)
-  subL f = elim (\ (a :-< k) -> (• a) . ($ k) <$> evalF f)
+  subL f = elim (\ s -> appSub s <$> evalF f)
   subR a b = (:-<) <$> a <*> b
   trueL = fmap (lmap trueA)
   trueR = fmap true
@@ -139,6 +139,9 @@ appFun (Fun f) a b = f b • a
 
 
 data Sub r a b = a :-< (b • r)
+
+appSub :: Sub r a b -> (b • r -> a • r) -> r
+appSub (a :-< k) f = f k • a
 
 
 runElim :: (a -> b • r) -> (b -> a • r)
