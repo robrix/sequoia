@@ -10,7 +10,6 @@ module Sequoia.Connective.Negate
 , (•-)
 ) where
 
-import Data.Functor.Contravariant
 import Data.Profunctor
 import Prelude hiding (negate)
 import Sequoia.Polarity
@@ -18,12 +17,13 @@ import Sequoia.Profunctor.Continuation
 
 -- Negate
 
-newtype Negate e r a = Negate { withNegate :: forall x . (e -> a • r -> x) -> x }
+newtype Negate e a r = Negate { withNegate :: forall x . (e -> a • r -> x) -> x }
+  deriving (Functor)
 
-instance Contravariant (Negate e r) where
-  contramap f n = withNegate n $ \ e k -> negate e (lmap f k)
+instance Profunctor (Negate e) where
+  dimap f g n = withNegate n $ \ e k -> negate e (dimap f g k)
 
-instance Neg a => Polarized P (Negate e r a) where
+instance Neg a => Polarized P (Negate e a r) where
 
 
 type (-) = Negate
@@ -33,20 +33,20 @@ infixr 9 -
 
 -- Construction
 
-negate :: e -> a • r -> Negate e r a
+negate :: e -> a • r -> Negate e a r
 negate e k = Negate (\ f -> f e k)
 
 
 -- Elimination
 
-negateE :: Negate e r a -> e
+negateE :: Negate e a r -> e
 negateE n = withNegate n const
 
-negateK :: Negate e r a -> a • r
+negateK :: Negate e a r -> a • r
 negateK n = withNegate n (const id)
 
 
-(•-) :: Negate e r a -> (a -> r)
+(•-) :: Negate e a r -> (a -> r)
 (•-) = (•) . negateK
 
 infixl 7 •-

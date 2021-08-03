@@ -71,14 +71,14 @@ dneNK
   :: Contextual s
   =>           a •• r < _Γ -|s e r|- _Δ
   -- ----------------------------------
-  -> Negate e r a ¬ r < _Γ -|s e r|- _Δ
+  -> Negate e a r ¬ r < _Γ -|s e r|- _Δ
 dneNK = mapL (\ v -> V (\ e -> getNotNegate e (e ∘ v)))
 
 dniNK
   :: Contextual s
   => _Γ -|s e r|- _Δ > a •• r
   -- ----------------------------------
-  -> _Γ -|s e r|- _Δ > Negate e r a ¬ r
+  -> _Γ -|s e r|- _Δ > Negate e a r ¬ r
 dniNK = mapR (lmap notNegate)
 
 

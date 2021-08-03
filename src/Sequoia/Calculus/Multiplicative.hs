@@ -27,7 +27,7 @@ type MultiplicativeIntro s = (BottomIntro s, OneIntro s, ParIntro s, TensorIntro
 
 parLTensor
   :: (Weaken s, ParIntro s, TensorIntro s, NegateIntro s, Neg a, Neg b)
-  =>         _Γ -|s e r|- _Δ > Negate e r a ⊗ Negate e r b
+  =>         _Γ -|s e r|- _Δ > Negate e a r ⊗ Negate e b r
   -- -----------------------------------------------------
   -> a ⅋ b < _Γ -|s e r|- _Δ
 parLTensor s = wkL s >>> tensorL (negateL (negateL (parL (wkR init) init)))

@@ -53,8 +53,8 @@ class PExpr rep where
   subR :: rep e r a -> rep e r (b • r) -> rep e r (Sub r a b)
   trueL :: rep e r (a • r) -> rep e r (True r a • r)
   trueR :: rep e r a -> rep e r (True r a)
-  negateL :: rep e r a -> rep e r (Negate e r a • r)
-  negateR :: rep e r (a • r) -> rep e r (Negate e r a)
+  negateL :: rep e r a -> rep e r (Negate e a r • r)
+  negateR :: rep e r (a • r) -> rep e r (Negate e a r)
 
 
 runEval :: a • r -> Eval e r a -> e ==> r

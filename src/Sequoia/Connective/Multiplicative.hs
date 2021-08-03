@@ -16,7 +16,7 @@ import Sequoia.Connective.Par
 import Sequoia.Connective.Tensor
 import Sequoia.Disjunction
 
-elimPar :: a ⅋ b -> Negate e r a ⊗ Negate e r b -> r
+elimPar :: a ⅋ b -> Negate e a r ⊗ Negate e b r -> r
 elimPar = (. exl) . flip (•-) <--> (. exr) . flip (•-)
 
 elimTensor :: a ⊗ b -> a ¬ r ⅋ b ¬ r -> r

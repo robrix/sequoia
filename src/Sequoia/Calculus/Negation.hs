@@ -32,14 +32,14 @@ dneN
   :: (NegationIntro s, Neg a)
   =>                a < _Γ -|s e r|- _Δ
   -- ----------------------------------
-  -> Negate e r a ¬ r < _Γ -|s e r|- _Δ
+  -> Negate e a r ¬ r < _Γ -|s e r|- _Δ
 dneN = notL . negateR
 
 dniN
   :: (NegationIntro s, Neg a)
   => _Γ -|s e r|- _Δ > a
   -- ----------------------------------
-  -> _Γ -|s e r|- _Δ > Negate e r a ¬ r
+  -> _Γ -|s e r|- _Δ > Negate e a r ¬ r
 dniN = notR . negateL
 
 
@@ -49,12 +49,12 @@ dneP
   :: (NegationIntro s, Pos a)
   =>                  a < _Γ -|s e r|- _Δ
   -- ------------------------------------
-  -> Negate e r (a ¬ r) < _Γ -|s e r|- _Δ
+  -> Negate e (a ¬ r) r < _Γ -|s e r|- _Δ
 dneP = negateL . notR
 
 dniP
   :: (NegationIntro s, Pos a)
   => _Γ -|s e r|- _Δ > a
   -- ------------------------------------
-  -> _Γ -|s e r|- _Δ > Negate e r (a ¬ r)
+  -> _Γ -|s e r|- _Δ > Negate e (a ¬ r) r
 dniP = negateR . notL
