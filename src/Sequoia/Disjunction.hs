@@ -99,7 +99,7 @@ coapDisj :: (Disj d, Representable k) => c -> k (k ((c, k b r) `d` b) r) r
 coapDisj c = tabulate (\ k -> sieve k (inl (c, tabulate (sieve k . inr))))
 
 
-distDisjF :: (Disj d, Functor f) => (f a `d` f b) -> f (a `d` b)
+distDisjF :: (Disj d1, Disj d2, Functor f) => (f a `d1` f b) -> f (a `d2` b)
 distDisjF = fmap inl <--> fmap inr
 
 
