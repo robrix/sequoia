@@ -145,4 +145,4 @@ appSub (a :-< k) f = f k • a
 
 
 runElim :: (a -> b • r) -> (b -> a • r)
-runElim get = K . (. get) . flip (•)
+runElim = fmap K . flip . fmap (•)
