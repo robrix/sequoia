@@ -120,7 +120,7 @@ assocConj = iso assocL assocR
 distConjA :: (Applicative f, Conj c1, Conj c2) => (f a `c1` f b) -> f (a `c2` b)
 distConjA = uncurryConj (liftA2 (>--<))
 
-distConjRep :: (Co.Representable f, Conj c) => (f a `c` f b) -> f (a `c` b)
+distConjRep :: (Co.Representable f, Conj c1, Conj c2) => (f a `c1` f b) -> f (a `c2` b)
 distConjRep = uncurryConj (\ a b -> tabulate (\ c -> index a c >--< index b c))
 
 undistConjF :: (Functor f, Conj c) => f (a `c` b) -> (f a `c` f b)
