@@ -7,9 +7,6 @@ module Sequoia.Profunctor.Continuation
 , constK
   -- * Coercion
 , _K
-  -- * Computation
-, (<••>)
-, (<•••>)
   -- * Double negation
 , type (••)
 , dn
@@ -19,7 +16,6 @@ module Sequoia.Profunctor.Continuation
 , tnE
 ) where
 
-import Control.Applicative (liftA2)
 import Control.Category (Category)
 import Data.Distributive
 import Data.Functor.Identity
@@ -29,7 +25,6 @@ import Data.Profunctor.Rep as Pro
 import Data.Profunctor.Sieve
 import Data.Profunctor.Traversing
 import Fresnel.Iso
-import Sequoia.Disjunction
 
 -- Continuation profunctor
 
@@ -62,19 +57,6 @@ constK = K . const
 
 _K :: Iso (a • r) (a' • r') (a -> r) (a' -> r')
 _K = coerced
-
-
--- Computation
-
-(<••>) :: Disj d => a • r -> b • r -> (a `d` b) • r
-a <••> b = K ((a •) <--> (b •))
-
-infix 3 <••>
-
-(<•••>) :: Disj d => (e -> a • r) -> (e -> b • r) -> (e -> (a `d` b) • r)
-(<•••>) = liftA2 (<••>)
-
-infix 3 <•••>
 
 
 -- Double negation
