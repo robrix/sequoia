@@ -20,6 +20,7 @@ module Sequoia.Calculus.Structural
 , Profunctorially(..)
 ) where
 
+import Data.Bifunctor
 import Data.Profunctor
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Core
@@ -121,3 +122,7 @@ instance (Core s, forall e r . Profunctor (s e r)) => Weaken (Profunctorially s)
 instance (Core s, forall e r . Profunctor (s e r)) => Contract (Profunctorially s) where
   cnL = lmap (exl >---< id)
   cnR = rmap (id <--> inr)
+
+instance (Core s, forall e r . Profunctor (s e r)) => Exchange (Profunctorially s) where
+  exL = lmap (exl . exr >---< second exr)
+  exR = rmap (first inl <--> inl . inr)
