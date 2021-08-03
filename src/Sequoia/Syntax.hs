@@ -95,7 +95,7 @@ instance NExpr Eval where
   withL2 = fmap (lmap exr)
   withR l r = inlr <$> l <*> r
   parL f g = Eval (\ k -> C (\ e -> k • runPar (runEvalK e f, runEvalK e g)))
-  parR r = env (\ e -> pure (Par (K (\ (g, h) -> runEval (g <••> h) (distDisj r) <== e))))
+  parR r = env (\ e -> pure (Par (K (\ (g, h) -> runEval (g <••> h) (distDisjF r) <== e))))
   funL a b = env (\ e -> pure (K (\ f -> runEval idK (appFun f <$> a <*> b) <== e)))
   funR f = Fun <$> evalF f
   notUntrueL a = env (\ e -> lmap ((e ∘) . runNotUntrue) <$> a)
