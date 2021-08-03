@@ -138,7 +138,7 @@ instance Monad ((>) a) where
 -- 'unsnocΔ' . 'uncurry' ('|>') = id
 -- @
 unsnocΔ :: (a > b) • r -> (a • r, b • r)
-unsnocΔ k = (inlK k, inrK k)
+unsnocΔ k = (inlL k, inrL k)
 
 snocΔ :: Iso
   ((os > o) • r)  ((os' > o') • r')

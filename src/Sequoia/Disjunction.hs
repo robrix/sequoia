@@ -42,6 +42,7 @@ module Sequoia.Disjunction
 ) where
 
 import Control.Category (Category, (>>>))
+import Data.Functor.Contravariant
 import Data.Profunctor
 import Data.Profunctor.Rep
 import Data.Profunctor.Sieve
@@ -75,10 +76,10 @@ _inr :: Disj d => Prism (a `d` b) (a `d` b') b b'
 _inr = prism inr (inl . inl <--> inr)
 
 _inlK :: (Disj d, Representable k) => Lens (k (a `d` b) r) (k (a' `d` b) r) (k a r) (k a' r)
-_inlK = lens inlK (\ ab a' -> tabulate (sieve a' <--> sieve ab . inr))
+_inlK = lens inlL (\ ab a' -> tabulate (sieve a' <--> sieve ab . inr))
 
 _inrK :: (Disj d, Representable k) => Lens (k (a `d` b) r) (k (a `d` b') r) (k b r) (k b' r)
-_inrK = lens inrK (\ ab a' -> tabulate (sieve ab . inl <--> sieve a'))
+_inrK = lens inrL (\ ab a' -> tabulate (sieve ab . inl <--> sieve a'))
 
 exlD :: Disj d => a `d` b -> Maybe a
 exlD = Just <--> const Nothing
@@ -93,7 +94,7 @@ cocurryDisj :: (Disj d, Representable k) => (c -> k (k (b `d` a) r) r) -> ((c, k
 cocurryDisj f (c, b) = tabulate (\ k -> sieve (f c) (tabulate (sieve b <--> sieve k)))
 
 councurryDisj :: (Disj d, Representable k) => ((c, k b r) -> k (k a r) r) -> (c -> k (k (b `d` a) r) r)
-councurryDisj f c = tabulate (\ k -> sieve (f (c, inlK k)) (inrK k))
+councurryDisj f c = tabulate (\ k -> sieve (f (c, inlL k)) (inrL k))
 
 coapDisj :: (Disj d, Representable k) => c -> k (k ((c, k b r) `d` b) r) r
 coapDisj c = tabulate (\ k -> sieve k (inl (c, tabulate (sieve k . inr))))
@@ -169,10 +170,10 @@ inrF :: (Functor f, Disj d) => f b -> f (a `d` b)
 inlF = fmap inl
 inrF = fmap inr
 
-inlK :: (Profunctor k, Disj d) => k (a `d` b) r -> k a r
-inrK :: (Profunctor k, Disj d) => k (a `d` b) r -> k b r
-inlK = inlL
-inrK = inrL
+inlK :: (Contravariant k, Disj d) => k (a `d` b) -> k a
+inrK :: (Contravariant k, Disj d) => k (a `d` b) -> k b
+inlK = contramap inl
+inrK = contramap inr
 
 inlL :: (Profunctor p, Disj d) => p (a `d` b) r -> p a r
 inrL :: (Profunctor p, Disj d) => p (a `d` b) r -> p b r

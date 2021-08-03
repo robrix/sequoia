@@ -76,8 +76,8 @@ instance Strong (Exp e r) where
   second' r = exp (\ b -> val (\ (c, a) -> lmap (c,) b ↓ r ↑ pure a))
 
 instance Choice (Exp e r) where
-  left'  r = exp (\ b -> val ((\ v -> inlK b ↓ r ↑ pure v) <--> pure . (inrK b •)))
-  right' r = exp (\ b -> val (pure . (inlK b •) <--> (\ v -> inrK b ↓ r ↑ pure v)))
+  left'  r = exp (\ b -> val ((\ v -> inlL b ↓ r ↑ pure v) <--> pure . (inrL b •)))
+  right' r = exp (\ b -> val (pure . (inlL b •) <--> (\ v -> inrL b ↓ r ↑ pure v)))
 
 instance Traversing (Exp e r) where
   wander traverse r = exp (\ k v -> val (\ s -> k ↓ traverse ((r <<<) . pure) s ↑ idV) v)

@@ -25,13 +25,13 @@ elimFun f = elimExp (runFunExp f) . runSubCoexp
 
 funPar1 :: Iso' (e ∘ (a ¬ r ⅋ b) • r) (e ∘ (a ~~Fun e r~> b) • r)
 funPar1 = iso
-  (\ k -> K ((k •) . (mkPar (inrK (lmap pure k)) =<<)))
+  (\ k -> K ((k •) . (mkPar (inrL (lmap pure k)) =<<)))
   (\ k -> K ((k •) . fmap mkFun))
 
 funPar2 :: Iso' (e ∘ (a ¬ r ⅋ b) • r • r) (e ∘ (a ~~Fun e r~> b) • r • r)
 funPar2 = iso
   (lmap (\ f -> K ((f •) . fmap mkFun)))
-  (lmap (\ p -> K ((p •) . (mkPar (inrK (lmap pure p)) =<<))))
+  (lmap (\ p -> K ((p •) . (mkPar (inrL (lmap pure p)) =<<))))
 
 mkPar :: b • r -> a ~~Fun e r~> b -> e ∘ (a ¬ r ⅋ b)
 mkPar p f = V (\ e -> inl (Not (K (\ a -> p ↓ runFunExp f ↑ pure a <== e))))
