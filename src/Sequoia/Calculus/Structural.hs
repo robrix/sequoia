@@ -19,6 +19,8 @@ module Sequoia.Calculus.Structural
 import Data.Profunctor
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Core
+import Sequoia.Conjunction
+import Sequoia.Disjunction
 import Sequoia.Profunctor.Diagonal
 
 -- Structural
@@ -80,10 +82,10 @@ class Core s => Exchange s where
 -- Profunctorial structural rules
 
 weakenL :: Profunctor p => p a b -> p (c, a) b
-weakenL = lmap snd
+weakenL = lmap exr
 
 weakenR :: Profunctor p => p a b -> p a (Either b c)
-weakenR = rmap Left
+weakenR = rmap inl
 
 
 contractL :: Profunctor p => p (a, a) b -> p a b
