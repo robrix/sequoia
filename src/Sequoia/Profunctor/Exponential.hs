@@ -85,6 +85,9 @@ instance Traversing (Exp e r) where
 instance Diagonal (Exp e r) where
   dup = exp' dup
 
+instance Codiagonal (Exp e r) where
+  dedup = exp' dedup
+
 instance Cat.Category (Exp e r) where
   id = exp (↓↑)
   f . g = contK (\ _K -> exp (\ c a -> _K (\ b -> c ↓ f ↑ pure b) ↓ g ↑ a))
