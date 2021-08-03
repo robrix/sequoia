@@ -90,7 +90,7 @@ instance NExpr Eval where
   topR = pure Top
   withL1 = fmap (lmap exl)
   withL2 = fmap (lmap exr)
-  withR l r = inlr <$> l <*> r
+  withR = liftA2 inlr
   parL f g = elim (runPar (K (collect (•) f), K (collect (•) g)) •)
   parR r = distDisjF r
   funL a b = elim (\ f -> appFun f <$> a <*> b)
