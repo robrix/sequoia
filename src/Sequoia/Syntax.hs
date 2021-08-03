@@ -33,7 +33,7 @@ class NExpr rep where
   withL2 :: rep e r (b • r) -> rep e r ((a & b) • r)
   withR :: rep e r a -> rep e r b -> rep e r (a & b)
   parL :: rep e r (a • r) -> rep e r (b • r) -> rep e r (Par r a b • r)
-  parR :: (forall x . rep e r (a • x) -> rep e r (b • x) -> rep e r x) -> rep e r (Par r a b)
+  parR :: rep e r (Either a b) -> rep e r (Par r a b)
   funL :: rep e r a -> rep e r (b • r) -> rep e r (Fun r a b • r)
   funR :: (rep e r a -> rep e r b) -> rep e r (Fun r a b)
   notUntrueL :: rep e r (a • r) -> rep e r (NotUntrue e a • r)
@@ -62,9 +62,6 @@ runEval k m = getEval m k
 
 runEvalK :: e -> Eval e r (a • r) -> a • r
 runEvalK e m = K (\ a -> runEval (dn a) m <== e)
-
-evalEval :: Eval e r r -> e ==> r
-evalEval = runEval idK
 
 evalF :: (Eval e r a -> Eval e r b) -> Eval e r (b • r -> a • r)
 evalF f = env (\ e -> pure (\ k -> K ((<== e) . runEval k . f . pure)))
@@ -98,7 +95,7 @@ instance NExpr Eval where
   withL2 = fmap (lmap exr)
   withR l r = inlr <$> l <*> r
   parL f g = Eval (\ k -> C (\ e -> k • runPar (runEvalK e f, runEvalK e g)))
-  parR f = env (\ e -> pure (Par (K (\ (g, h) -> evalEval (f (pure g) (pure h)) <== e))))
+  parR r = env (\ e -> pure (Par (K (\ (g, h) -> runEval (g <••> h) r <== e))))
   funL a b = env (\ e -> pure (K (\ f -> runEval idK (appFun f <$> a <*> b) <== e)))
   funR f = Fun <$> evalF f
   notUntrueL a = env (\ e -> lmap ((e ∘) . runNotUntrue) <$> a)
