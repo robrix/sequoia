@@ -52,6 +52,7 @@ import Data.Profunctor.Sieve
 import Fresnel.Lens
 import Fresnel.Prism
 import Sequoia.Bifunctor.Sum
+import Sequoia.Profunctor.Context
 import Sequoia.Profunctor.Continuation
 import Sequoia.Profunctor.Diagonal
 import Sequoia.Profunctor.Value
@@ -102,8 +103,8 @@ infix 3 <••>
 
 infix 3 <•••>
 
-(<∘∘>) :: Disj d => (e ∘ a -> r) -> (e ∘ b -> r) -> (e ∘ (a `d` b) -> e -> r)
-(l <∘∘> r) ab = (l <--> r) . bisequenceDisjV ab
+(<∘∘>) :: Disj d => (e ∘ a -> r) -> (e ∘ b -> r) -> (e ∘ (a `d` b) -> e ==> r)
+(l <∘∘> r) ab = C ((l <--> r) . bisequenceDisjV ab)
 
 infix 3 <∘∘>
 

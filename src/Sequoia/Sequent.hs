@@ -185,7 +185,7 @@ instance WithIntro Seq where
   withR = mapR2 (lmap (lmap . inlr))
 
 instance SumIntro Seq where
-  sumL a b = popL (env . (pushL a <∘∘> pushL b))
+  sumL a b = popL (\ s -> env ((pushL a <∘∘> pushL b) s <==))
   sumR1 = mapR (lmap inl)
   sumR2 = mapR (lmap inr)
 
@@ -201,7 +201,7 @@ instance OneIntro Seq where
   oneR = liftR (V One)
 
 instance ParIntro Seq where
-  parL a b = popL (env . (pushL a <∘∘> pushL b))
+  parL a b = popL (\ s -> env ((pushL a <∘∘> pushL b) s <==))
   parR = fmap ((>>= inr . inl) <--> inr . inr)
 
 instance TensorIntro Seq where
