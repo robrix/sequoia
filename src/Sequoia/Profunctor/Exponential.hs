@@ -83,7 +83,7 @@ instance Traversing (Exp e r) where
 
 instance Cat.Category (Exp e r) where
   id = exp (↓↑)
-  f . g = exp (\ c a -> env (\ e -> K (\ b -> c ↓ f ↑ pure b <== e) ↓ g ↑ a))
+  f . g = contK (\ _K -> exp (\ c a -> _K (\ b -> c ↓ f ↑ pure b) ↓ g ↑ a))
 
 instance Functor (Exp e r c) where
   fmap = rmap
