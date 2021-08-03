@@ -21,6 +21,7 @@ module Sequoia.Profunctor.Exponential
 , runExp'
 , elimExp
 , runExpFn
+, runExpK
 , (↑)
 , (↓)
   -- ** Composition
@@ -168,6 +169,9 @@ elimExp = unCoexp . flip . runExp
 
 runExpFn :: Exp e r a b -> ((b -> r) -> (e -> a) -> (e -> r))
 runExpFn = coerce
+
+runExpK :: Exp e r a b -> e -> (b • r -> a • r)
+runExpK f e k = K (\ a -> runExp f k (pure a) <== e)
 
 (↑) :: (e ∘ a -> m r) -> e ∘ a -> m r
 (↑) = ($)
