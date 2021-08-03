@@ -11,7 +11,6 @@ module Sequoia.Profunctor.Value
   -- * Computation
 , (>∘∘<)
 , (>∘∘∘<)
-, (<∘∘>)
 ) where
 
 import Control.Applicative (liftA2)
@@ -25,7 +24,6 @@ import Data.Profunctor.Sieve
 import Data.Profunctor.Traversing
 import Fresnel.Iso
 import Sequoia.Conjunction
-import Sequoia.Disjunction
 import Sequoia.Monad.Run
 
 -- Value profunctor
@@ -75,12 +73,3 @@ infix 3 >∘∘<
 (>∘∘∘<) = liftA2 (>∘∘<)
 
 infix 3 >∘∘∘<
-
-
-(<∘∘>) :: Disj d => (e ∘ a -> r) -> (e ∘ b -> r) -> (e ∘ (a `d` b) -> e -> r)
-(l <∘∘> r) ab = (l <--> r) . bitraverseDisjV ab
-
-infix 3 <∘∘>
-
-bitraverseDisjV :: Disj d => e ∘ (a `d` b) -> e -> (e ∘ a) `d` (e ∘ b)
-bitraverseDisjV = fmap (bimapDisj pure pure) . flip (∘)

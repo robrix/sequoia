@@ -9,6 +9,7 @@ module Sequoia.Disjunction
 , exrD
 , (<••>)
 , (<•••>)
+, (<∘∘>)
 , mirrorDisj
 , cocurryDisj
 , councurryDisj
@@ -53,6 +54,7 @@ import Fresnel.Prism
 import Sequoia.Bifunctor.Sum
 import Sequoia.Profunctor.Continuation
 import Sequoia.Profunctor.Diagonal
+import Sequoia.Profunctor.Value
 
 -- Disjunction
 
@@ -99,6 +101,14 @@ infix 3 <••>
 (<•••>) = liftA2 (<••>)
 
 infix 3 <•••>
+
+(<∘∘>) :: Disj d => (e ∘ a -> r) -> (e ∘ b -> r) -> (e ∘ (a `d` b) -> e -> r)
+(l <∘∘> r) ab = (l <--> r) . bisequenceDisjV ab
+
+infix 3 <∘∘>
+
+bisequenceDisjV :: Disj d => e ∘ (a `d` b) -> e -> (e ∘ a) `d` (e ∘ b)
+bisequenceDisjV = fmap (bimapDisj pure pure) . flip (∘)
 
 mirrorDisj :: Disj d => a `d` b -> b `d` a
 mirrorDisj = inr <--> inl
