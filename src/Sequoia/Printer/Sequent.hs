@@ -3,6 +3,7 @@ module Sequoia.Printer.Sequent
   Seq(..)
   -- * Elimination
 , appSeq
+, printSeq
 ) where
 
 import Data.Functor.Contravariant
@@ -25,3 +26,6 @@ instance Functor (Seq e r _Γ) where
 
 appSeq :: Seq e r _Γ _Δ -> _Γ -> Printer _Δ -> Doc
 appSeq s _Γ _Δ = print (runSeq s _Δ) _Γ
+
+printSeq :: _Γ -> Printer _Δ -> Printer (Seq e r _Γ _Δ)
+printSeq _Γ _Δ = Printer (\ s -> appSeq s _Γ _Δ)
