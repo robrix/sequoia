@@ -100,8 +100,8 @@ contractR :: Profunctor p => p a (Either b b) -> p a b
 contractR = rmap dedup
 
 
-exchangeL :: Profunctor p => p (a, c) b -> p (c, a) b
-exchangeL = lmap swap
+exchangeL :: (Profunctor p, Conj t) => p (a `t` c) b -> p (c `t` a) b
+exchangeL = lmap swapConj
 
 exchangeR :: Profunctor p => p a (Either b c) -> p a (Either c b)
 exchangeR = rmap mirror
