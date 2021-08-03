@@ -117,3 +117,7 @@ instance Profunctor (s e r) => Functor (Profunctorially s e r a) where
 instance (Core s, forall e r . Profunctor (s e r)) => Weaken (Profunctorially s) where
   wkL = lmap exr
   wkR = rmap inl
+
+instance (Core s, forall e r . Profunctor (s e r)) => Contract (Profunctorially s) where
+  cnL = lmap (exl >---< id)
+  cnR = rmap (id <--> inr)
