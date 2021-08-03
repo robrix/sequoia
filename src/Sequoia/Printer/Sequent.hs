@@ -6,6 +6,7 @@ module Sequoia.Printer.Sequent
 , printSeq
 ) where
 
+import Control.Monad (ap)
 import Data.Functor.Contravariant
 import Data.Profunctor
 import Prelude hiding (print)
@@ -20,6 +21,13 @@ instance Profunctor (Seq e r) where
 
 instance Functor (Seq e r _Γ) where
   fmap = rmap
+
+instance Applicative (Seq e r _Γ) where
+  pure = Seq . contramap . const
+  (<*>) = ap
+
+instance Monad (Seq e r _Γ) where
+  Seq r >>= f = Seq (\ k -> Printer (\ _Γ -> print (r (contramap f (printSeq _Γ k))) _Γ))
 
 
 -- Elimination
