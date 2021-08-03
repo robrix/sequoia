@@ -151,6 +151,7 @@ library
     Sequoia.Monad.Trans.It
     Sequoia.Polarity
     Sequoia.Printer
+    Sequoia.Printer.Sequent
     Sequoia.Profunctor.Adjunction
     Sequoia.Profunctor.Applicative
     Sequoia.Profunctor.Coexponential
