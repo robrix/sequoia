@@ -3,6 +3,8 @@ module Sequoia.Profunctor.Diagonal
 , Codiagonal(..)
 , swap
 , mirror
+  -- * Defaults
+, dupArrow
 ) where
 
 import Control.Arrow (Arrow(..), Kleisli(..))
@@ -63,3 +65,9 @@ instance Arrow p => Codiagonal (WrappedArrow p) where
 
 mirror :: Either a b -> Either b a
 mirror = either Right Left
+
+
+-- Defaults
+
+dupArrow :: Arrow p => a `p` (a, a)
+dupArrow = arr dup
