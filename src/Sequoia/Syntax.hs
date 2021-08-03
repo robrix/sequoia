@@ -11,6 +11,7 @@ import Sequoia.Calculus.Bottom
 import Sequoia.Conjunction
 import Sequoia.Connective.Negate as Negate
 import Sequoia.Connective.Not
+import Sequoia.Connective.NotUntrue
 import Sequoia.Connective.One
 import Sequoia.Connective.Sum
 import Sequoia.Connective.Tensor
@@ -21,6 +22,7 @@ import Sequoia.Connective.Zero
 import Sequoia.Monad.Run
 import Sequoia.Profunctor.Context
 import Sequoia.Profunctor.Continuation
+import Sequoia.Profunctor.Value
 
 class NExpr rep where
   bottomL :: rep e r (Bottom r) -> rep e r a
@@ -32,6 +34,8 @@ class NExpr rep where
   parR :: (forall x . (rep e r a -> rep e r x) -> (rep e r b -> rep e r x) -> rep e r x) -> rep e r (Par r a b)
   funL :: rep e r a -> (rep e r b -> rep e r r) -> (rep e r (Fun r a b) -> rep e r r)
   funR :: (rep e r a -> rep e r b) -> rep e r (Fun r a b)
+  notUntrueL :: rep e r (a • r) -> rep e r (NotUntrue e a • r)
+  notUntrueR :: rep e r a -> rep e r (NotUntrue e a)
   notL :: rep e r a -> (rep e r (Not r a) -> rep e r r)
   notR :: (rep e r a -> rep e r r) -> rep e r (Not r a)
 
@@ -88,6 +92,9 @@ instance NExpr Eval where
   parR f = env (\ e -> pure (Par (K (\ (g, h) -> evalEval (f (fmap (g •)) (fmap (h •))) <== e))))
   funL a b f = appFun <$> f <*> a <*> evalK b
   funR f = Fun <$> evalF f
+  notUntrueL a = env (\ e -> lmap ((e ∘) . runNotUntrue) <$> a)
+  -- FIXME: this is always scoped statically
+  notUntrueR = fmap (NotUntrue . pure)
   notL a n = (•) . getNot <$> n <*> a
   notR f = Not <$> evalK f
 
