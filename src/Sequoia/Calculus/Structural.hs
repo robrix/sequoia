@@ -89,7 +89,7 @@ class Core s => Exchange s where
 weakenL :: Profunctor p => p a b -> p (c, a) b
 weakenL = lmap exr
 
-weakenR :: Profunctor p => p a b -> p a (Either b c)
+weakenR :: (Profunctor p, Disj t) => p a b -> p a (b `t` c)
 weakenR = rmap inl
 
 
