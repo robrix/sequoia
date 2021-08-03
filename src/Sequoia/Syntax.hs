@@ -54,6 +54,7 @@ class PExpr rep where
   negateL :: rep e r a -> rep e r (Negate e r a • r)
   negateR :: (rep e r a -> rep e r r) -> rep e r (Negate e r a)
 
+
 runEval :: a • r -> Eval e r a -> e ==> r
 runEval k m = getEval m k
 
@@ -62,6 +63,12 @@ runEvalK e m = K (\ a -> runEval (dn a) m <== e)
 
 evalEval :: Eval e r r -> e ==> r
 evalEval = runEval idK
+
+evalK :: (Eval e r a -> Eval e r r) -> Eval e r (a • r)
+evalK = fmap ($ idK) . evalF
+
+evalF :: (Eval e r a -> Eval e r b) -> Eval e r (b • r -> a • r)
+evalF f = env (\ e -> pure (\ k -> K ((<== e) . runEval k . f . pure)))
 
 newtype Eval e r a = Eval { getEval :: a • r -> e ==> r }
 
@@ -127,6 +134,7 @@ newtype Par r a b = Par { getPar :: (a • r, b • r) • r }
 instance Bifunctor (Par r) where
   bimap f g (Par r) = Par (lmap (bimap (lmap f) (lmap g)) r)
 
+
 newtype Fun r a b = Fun (b • r -> a • r)
 
 instance Profunctor (Fun r) where
@@ -134,12 +142,6 @@ instance Profunctor (Fun r) where
 
 appFun :: Fun r a b -> a -> b • r -> r
 appFun (Fun f) a b = f b • a
-
-evalK :: (Eval e r a -> Eval e r r) -> Eval e r (a • r)
-evalK = fmap ($ idK) . evalF
-
-evalF :: (Eval e r a -> Eval e r b) -> Eval e r (b • r -> a • r)
-evalF f = env (\ e -> pure (\ k -> K ((<== e) . runEval k . f . pure)))
 
 
 data Sub r a b = a :-< (b • r)
