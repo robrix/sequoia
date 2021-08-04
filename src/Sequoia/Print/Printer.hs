@@ -15,6 +15,7 @@ module Sequoia.Print.Printer
 , (<&)
 , liftP2
 , pair
+, liftC2
   -- * Documents
 , Doc(..)
   -- * Exponentials
@@ -106,6 +107,10 @@ pairP = printer (\ k (pa :>-- pb :>-- (a, b)) ->
   appPrint pa a (appPrint pb b . (k .) . pairD))
   where
   pairD da db = parens (da <> comma <+> db)
+
+
+liftC2 :: (c -> Either a b) -> Printer a -> Printer b -> Printer c
+liftC2 f pa pb = printer (\ k c -> either (runPrint pa k) (runPrint pb k) (f c))
 
 
 -- Documents
