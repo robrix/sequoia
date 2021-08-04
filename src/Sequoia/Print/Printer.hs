@@ -55,7 +55,7 @@ print p = (runPrint p idK •)
 -- Computation
 
 (<&>) :: Printer (a >- b) -> Printer a -> Printer b
-pf <&> pa = Printer (\ k -> K (\ b -> runPrint pf k • (pa :>- b)))
+pf <&> pa = Printer (\ k -> K (\ b -> runPrint pf k • (pa >- b)))
 
 infixl 4 <&>
 
@@ -78,7 +78,7 @@ data a >- b = Printer a :>- b
 infixr 0 >-, :>-
 
 instance Profunctor (>-) where
-  dimap f g (a :>- b) = contramap f a :>- g b
+  dimap f g (a :>- b) = contramap f a >- g b
 
 
 (>-) :: Printer a -> b -> a >- b
