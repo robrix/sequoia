@@ -15,7 +15,9 @@ module Sequoia.Printer
 import Control.Applicative (liftA2)
 import Data.Functor.Contravariant
 import Data.Monoid (Endo(..))
+import Data.Profunctor
 import Prelude hiding (print)
+import Sequoia.Profunctor.Continuation
 
 newtype Doc = Doc { getDoc :: ShowS }
   deriving (Monoid, Semigroup) via Endo String
@@ -26,25 +28,25 @@ instance Print Doc where
 
 
 printer :: (forall x . a -> Printer x) -> Printer a
-printer f = Printer (\ k a -> runPrint (f a) k a)
+printer f = Printer (\ k -> K (\ a -> runPrint (f a) k • a))
 
 print :: Printer a -> a -> Doc
-print p = runPrint p id
+print p = (runPrint p idK •)
 
-newtype Printer a = Printer { runPrint :: forall r . (Doc -> r) -> (a -> r) }
+newtype Printer a = Printer { runPrint :: forall r . Doc • r -> a • r }
 
 instance Semigroup (Printer a) where
-  p1 <> p2 = Printer (\ k a -> runPrint p1 (flip (runPrint p2) a . (k .) . mappend) a)
+  p1 <> p2 = Printer (\ k -> K (\ a -> runPrint p1 (K (\ a' -> runPrint p2 (lmap (mappend a') k) • a)) • a))
 
 instance Monoid (Printer a) where
-  mempty = Printer (\ k _ -> k mempty)
+  mempty = Printer (\ k -> K (\ _ -> k • mempty))
 
 instance Print (Printer a) where
-  char c = Printer (\ k _ -> k (char c))
-  string s = Printer (\ k _ -> k (string s))
+  char c = Printer (\ k -> K (\ _ -> k • char c))
+  string s = Printer (\ k -> K (\ _ -> k • string s))
 
 instance Contravariant Printer where
-  contramap f (Printer r) = Printer (fmap (. f) r)
+  contramap f (Printer r) = Printer (lmap f . r)
 
 
 prec :: Print (p a) => Prec -> p a -> PrecPrinter p a
