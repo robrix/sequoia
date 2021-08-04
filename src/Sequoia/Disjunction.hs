@@ -121,7 +121,7 @@ councurryDisj :: Disj d => ((c, b • r) -> a •• r) -> c -> (b `d` a) ••
 councurryDisj f c = K (\ k -> f (c, inlL k) • inrL k)
 
 coapDisj :: Disj d => c -> ((c, b • r) `d` b) •• r
-coapDisj c = K (\ k -> k • inl (c, inrL k))
+coapDisj c = K (\ k -> inlL k • (c, inrL k))
 
 
 -- Generalizations
