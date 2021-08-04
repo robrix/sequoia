@@ -55,7 +55,7 @@ instance Semigroup (Printer a) where
 instance Monoid (Printer a) where
   mempty = printer (const . ($ mempty))
 
-instance Print (Printer a) where
+instance Document (Printer a) where
   char c = printer (const . ($ char c))
   string s = printer (const . ($ string s))
 
@@ -136,7 +136,7 @@ newtype Doc = Doc { getDoc :: ShowS }
 instance Show Doc where
   showsPrec _ = getDoc
 
-instance Print Doc where
+instance Document Doc where
   char c = Doc (c:)
   string s = Doc (s<>)
 

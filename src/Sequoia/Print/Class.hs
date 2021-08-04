@@ -1,6 +1,6 @@
 module Sequoia.Print.Class
 ( -- * Pretty-printing
-  Print(..)
+  Document(..)
   -- * Combinators
 , parensIf
 ) where
@@ -9,7 +9,7 @@ import Control.Applicative (liftA2)
 
 -- Pretty-printing
 
-class Monoid p => Print p where
+class Monoid p => Document p where
   {-# MINIMAL char | string #-}
   char :: Char -> p
   char c = string [c]
@@ -61,7 +61,7 @@ class Monoid p => Print p where
   angles :: p -> p
   angles = enclose langle rangle
 
-instance Print b => Print (a -> b) where
+instance Document b => Document (a -> b) where
   char   = pure . char
   string = pure . string
 
@@ -80,6 +80,6 @@ instance Print b => Print (a -> b) where
 
 -- Combinators
 
-parensIf :: Print p => Bool -> p -> p
+parensIf :: Document p => Bool -> p -> p
 parensIf True  = parens
 parensIf False = id

@@ -26,7 +26,7 @@ instance Contravariant p => Contravariant (PrecPrinter p) where
 
 -- Construction
 
-prec :: Print (p a) => Prec -> p a -> PrecPrinter p a
+prec :: Document (p a) => Prec -> p a -> PrecPrinter p a
 prec i pr = PrecPrinter $ \ i' -> parensIf (i' > i) pr
 
 atom :: p a -> PrecPrinter p a
