@@ -15,6 +15,7 @@ module Sequoia.Print.Printer
   -- * Coexponentials
 , type (>-)(..)
 , (>-)
+, coK
 ) where
 
 import Data.Functor.Contravariant
@@ -95,3 +96,7 @@ instance Profunctor (>-) where
 
 (>-) :: Printer a -> b -> a >- b
 (>-) = (:>-)
+
+
+coK :: (a >- b) -> Printer a
+coK (k :>- _) = k
