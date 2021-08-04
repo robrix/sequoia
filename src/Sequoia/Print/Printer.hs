@@ -75,7 +75,7 @@ pf <&> pa = Printer (\ k -> K (\ b -> runPrint pf k • (pa >- b)))
 infixl 4 <&>
 
 (<&) :: Printer a -> Printer b -> Printer a
-a <& b = contrapure coconst <&> a <&> b
+a <& b = contramap coconst a <&> b
 
 infixl 4 <&
 
