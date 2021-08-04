@@ -62,6 +62,9 @@ class ProfunctorTimes p => ProfunctorOne p where
 instance ProfunctorOne (->) where
   one = const
 
+instance ProfunctorOne (-->) where
+  one a = F (\ k _ -> k a)
+
 
 -- Exponentials
 
