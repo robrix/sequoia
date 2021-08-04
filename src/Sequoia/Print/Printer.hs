@@ -38,6 +38,7 @@ module Sequoia.Print.Printer
 import Control.Monad (ap)
 import Data.Functor.Contravariant
 import Data.List (uncons)
+import Data.List.NonEmpty (nonEmpty, toList)
 import Data.Profunctor
 import Prelude hiding (print)
 import Sequoia.Disjunction
@@ -121,7 +122,7 @@ list :: Printer a -> Printer [a]
 list pa = brackets go
   where
   go = liftC2 (maybeToEither . uncons) mempty (pair <&> pa <&>
-    liftC2 (fmap (uncurry (:)) . maybeToEither . uncons) mempty (comma &> space &> go))
+    liftC2 (fmap toList . maybeToEither . nonEmpty) mempty (comma &> space &> go))
 
 maybeToEither :: Maybe a -> Either () a
 maybeToEither = maybe (Left ()) Right
