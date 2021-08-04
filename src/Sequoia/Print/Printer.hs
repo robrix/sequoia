@@ -10,6 +10,7 @@ module Sequoia.Print.Printer
   -- * Computation
 , (<#>)
 , (<&>)
+, (<&)
 , liftP2
 , pair
   -- * Documents
@@ -72,6 +73,11 @@ infixl 4 <#>
 pf <&> pa = Printer (\ k -> K (\ b -> runPrint pf k • (pa >- b)))
 
 infixl 4 <&>
+
+(<&) :: Printer a -> Printer b -> Printer a
+a <& b = contrapure coA <&> a <&> b
+
+infixl 4 <&
 
 liftP2 :: ((b >- c) >- a) -> Printer a -> Printer b -> Printer c
 liftP2 f a b = f <#> a <&> b
