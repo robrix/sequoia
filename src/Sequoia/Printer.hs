@@ -27,7 +27,7 @@ instance Print Doc where
   string s = Doc (s<>)
 
 
-printer :: (forall x . a -> Printer x) -> Printer a
+printer :: (a -> Printer a) -> Printer a
 printer f = Printer (\ k -> K (\ a -> runPrint (f a) k • a))
 
 print :: Printer a -> a -> Doc
