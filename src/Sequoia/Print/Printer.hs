@@ -33,6 +33,7 @@ import Data.Functor.Contravariant
 import Data.Monoid (Endo(..))
 import Data.Profunctor
 import Prelude hiding (print)
+import Sequoia.Disjunction
 import Sequoia.Print.Class
 import Sequoia.Profunctor.Continuation
 
@@ -121,6 +122,10 @@ newtype a --> b = F { runF :: forall r . b • r -> a • r }
 
 instance Profunctor (-->) where
   dimap f g (F r) = F (dimap (lmap g) (lmap f) r)
+
+instance Choice (-->) where
+  left'  (F r) = F (\ k -> r (inlL k) <••> inrL k)
+  right' (F r) = F (\ k -> inlL k <••> r (inrL k))
 
 instance Strong (-->) where
   first'  (F r) = inF (\ k (a, c) -> r (lmap (,c) k) • a)
