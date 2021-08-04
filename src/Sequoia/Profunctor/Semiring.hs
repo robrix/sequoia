@@ -48,7 +48,7 @@ class Profunctor p => ProfunctorCotimes p where
 
 -- Unital semirings
 
-class (ProfunctorTimes p, ProfunctorZero p) => ProfunctorOne p where
+class ProfunctorTimes p => ProfunctorOne p where
   one :: b -> p a b
 
 
