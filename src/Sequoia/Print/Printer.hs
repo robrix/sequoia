@@ -133,8 +133,8 @@ instance Monad ((-->) a) where
   F r >>= f = F (\ k -> K (\ i -> r (K (\ a -> runF (f a) k • i)) • i))
 
 
-inF :: (forall r . a -> b • r -> r) -> (a --> b)
-inF f = F (K . flip f)
+inF :: (forall r . b • r -> a -> r) -> (a --> b)
+inF f = F (K . f)
 
 
 (#) :: (a --> b) -> a -> b • r -> r
