@@ -9,7 +9,7 @@ module Sequoia.Profunctor.Semiring
   -- * Unital semirings
 , ProfunctorOne(..)
   -- * Coexponentials
-, type (>-)(..)
+, type (>--)(..)
 ) where
 
 import Data.Profunctor
@@ -41,7 +41,7 @@ instance ProfunctorTimes (->) where
 
 
 class Profunctor p => ProfunctorCotimes p where
-  (<&>) :: p (a >- c) b -> p a b -> p c b
+  (<&>) :: p (a >-- c) b -> p a b -> p c b
 
   infixl 4 <&>
 
@@ -57,10 +57,10 @@ instance ProfunctorOne (->) where
 
 -- Coexponentials
 
-data a >- b = (a -> Void) :>- b
+data a >-- b = (a -> Void) :>-- b
   deriving (Functor)
 
-infixr 0 >-, :>-
+infixr 0 >--, :>--
 
-instance Profunctor (>-) where
-  dimap f g (a :>- b) = lmap f a :>- g b
+instance Profunctor (>--) where
+  dimap f g (a :>-- b) = lmap f a :>-- g b
