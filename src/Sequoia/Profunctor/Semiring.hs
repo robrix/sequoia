@@ -17,6 +17,7 @@ module Sequoia.Profunctor.Semiring
 
 import Data.Profunctor
 import Data.Void
+import Sequoia.Profunctor.Continuation
 
 -- Semigroups
 
@@ -43,7 +44,7 @@ instance ProfunctorTimes (->) where
   f <.> a = \ x -> f x (a x)
 
 instance ProfunctorTimes (-->) where
-  f <.> a = F (\ k x -> runF f (\ bc -> runF a (k . bc) x) x)
+  f <.> a = F (\ k -> K (\ x -> runF f (K (\ bc -> runF a (lmap bc k) • x)) • x))
 
 
 class Profunctor p => ProfunctorCotimes p where
@@ -52,7 +53,7 @@ class Profunctor p => ProfunctorCotimes p where
   infixl 4 <&>
 
 instance ProfunctorCotimes (-->) where
-  f <&> a = F (\ k c -> runF f k (runF a k :>-- c))
+  f <&> a = F (\ k -> K (\ c -> runF f k • (runF a k :>-- c)))
 
 
 -- Unital semirings
@@ -64,30 +65,32 @@ instance ProfunctorOne (->) where
   one = const
 
 instance ProfunctorOne (-->) where
-  one a = F (\ k _ -> k a)
+  one a = F (\ k -> K (\ _ -> k • a))
 
 
 class ProfunctorCotimes p => ProfunctorCoOne p where
-  coOne :: (a -> Void) -> p a b
+  coOne :: (a • Void) -> p a b
 
 instance ProfunctorCoOne (-->) where
-  coOne k = F (\ _ a -> k a)
+  coOne = F . const
 
 
 -- Exponentials
 
-newtype a --> b = F { runF :: (b -> Void) -> (a -> Void) }
-  deriving (Functor)
+newtype a --> b = F { runF :: (b • Void) -> (a • Void) }
 
 infixr 0 -->
 
 instance Profunctor (-->) where
   dimap f g = F . dimap (lmap g) (lmap f) . runF
 
+instance Functor ((-->) a) where
+  fmap = rmap
+
 
 -- Coexponentials
 
-data a >-- b = (a -> Void) :>-- b
+data a >-- b = (a • Void) :>-- b
   deriving (Functor)
 
 infixr 0 >--, :>--
