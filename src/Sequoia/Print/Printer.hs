@@ -7,6 +7,7 @@ module Sequoia.Print.Printer
   -- * Elimination
 , print
   -- * Computation
+, (<#>)
 , (<&>)
 , liftP2
 , pair
@@ -57,6 +58,11 @@ print p = (runPrint p idK •)
 
 
 -- Computation
+
+(<#>) :: (b >- a) -> Printer a -> Printer b
+f <#> a = Printer (\ k -> K (\ b -> runPrint a (K (\ a -> runPrint (coK f) (K ((k •) . mappend a)) • b)) • coA f))
+
+infixl 4 <#>
 
 (<&>) :: Printer (a >- b) -> Printer a -> Printer b
 pf <&> pa = Printer (\ k -> K (\ b -> runPrint pf k • (pa >- b)))
