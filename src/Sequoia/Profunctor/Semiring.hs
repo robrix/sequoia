@@ -8,6 +8,7 @@ module Sequoia.Profunctor.Semiring
 , ProfunctorCotimes(..)
   -- * Unital semirings
 , ProfunctorOne(..)
+, ProfunctorCoOne(..)
   -- * Exponentials
 , type (-->)(..)
   -- * Coexponentials
@@ -64,6 +65,10 @@ instance ProfunctorOne (->) where
 
 instance ProfunctorOne (-->) where
   one a = F (\ k _ -> k a)
+
+
+class ProfunctorCotimes p => ProfunctorCoOne p where
+  coOne :: (a -> Void) -> p a b
 
 
 -- Exponentials
