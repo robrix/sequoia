@@ -44,7 +44,7 @@ instance ProfunctorTimes (->) where
   (<.>) = (<*>)
 
 instance ProfunctorTimes (-->) where
-  f <.> a = F (\ k -> K (\ x -> runF f (K (\ bc -> runF a (lmap bc k) • x)) • x))
+  (<.>) = (<*>)
 
 
 class Profunctor p => ProfunctorCotimes p where
