@@ -36,7 +36,7 @@ import Sequoia.Profunctor.Continuation
 newtype Printer a = Printer { runPrint :: forall r . Doc • r -> a • r }
 
 instance Semigroup (Printer a) where
-  p1 <> p2 = Printer (\ k -> K (\ a -> runPrint p1 (K (\ a' -> runPrint p2 (lmap (mappend a') k) • a)) • a))
+  p1 <> p2 = printer (\ k a -> appPrint p1 a (\ a' -> appPrint p2 a (lmap (mappend a') k)))
 
 instance Monoid (Printer a) where
   mempty = Printer (constK . (• mempty))
@@ -73,7 +73,7 @@ appPrint p a k = runPrint p (K k) • a
 -- Computation
 
 (<#>) :: (b >- a) -> Printer a -> Printer b
-f <#> a = printer (\ k b -> appPrint a (coconst f) (\ a -> runPrint (coK f) (K (k . mappend a)) • b))
+f <#> a = printer (\ k b -> appPrint a (coconst f) (\ a -> appPrint (coK f) b (k . mappend a)))
 
 infixl 4 <#>
 
