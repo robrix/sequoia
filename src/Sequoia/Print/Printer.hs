@@ -95,7 +95,9 @@ pair a b = pairP <&> a <&> b
 
 pairP :: Printer (a >- b >- (a, b))
 pairP = printer (\ k (pa :>- pb :>- (a, b)) ->
-  appPrint pa a (\ da -> appPrint pb b (\ db -> k (parens (da <> comma <+> db)))))
+  appPrint pa a (appPrint pb b . (k .) . pairD))
+  where
+  pairD da db = parens (da <> comma <+> db)
 
 
 -- Documents
