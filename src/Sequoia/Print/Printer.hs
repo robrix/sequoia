@@ -8,6 +8,8 @@ module Sequoia.Print.Printer
 , print
   -- * Documents
 , Doc(..)
+  -- * Coexponentials
+, type (>-)(..)
 ) where
 
 import Data.Functor.Contravariant
@@ -55,3 +57,14 @@ newtype Doc = Doc { getDoc :: ShowS }
 instance Print Doc where
   char c = Doc (c:)
   string s = Doc (s<>)
+
+
+-- Coexponentials
+
+data a >- b = Printer a :>- b
+  deriving (Functor)
+
+infixr 0 >-, :>-
+
+instance Profunctor (>-) where
+  dimap f g (a :>- b) = contramap f a :>- g b
