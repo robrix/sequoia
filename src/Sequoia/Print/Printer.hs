@@ -18,8 +18,8 @@ module Sequoia.Print.Printer
   -- * Documents
 , Doc(..)
   -- * Coexponentials
-, type (>-)(..)
-, (>-)
+, type (>--)(..)
+, (>--)
 , coK
 , coconst
 ) where
@@ -57,8 +57,8 @@ printer f = Printer (K . f . (•))
 withSubject :: (a -> Printer a) -> Printer a
 withSubject f = printer (\ k a -> appPrint (f a) a k)
 
-contrapure :: (b -> a) -> Printer (a >- b)
-contrapure f = printer (\ k (pa :>- b) -> appPrint pa (f b) k)
+contrapure :: (b -> a) -> Printer (a >-- b)
+contrapure f = printer (\ k (pa :>-- b) -> appPrint pa (f b) k)
 
 
 -- Elimination
@@ -72,13 +72,13 @@ appPrint p a k = runPrint p (K k) • a
 
 -- Computation
 
-(<#>) :: (b >- a) -> Printer a -> Printer b
+(<#>) :: (b >-- a) -> Printer a -> Printer b
 f <#> a = printer (\ k b -> appPrint a (coconst f) (\ a -> appPrint (coK f) b (k . mappend a)))
 
 infixl 4 <#>
 
-(<&>) :: Printer (a >- b) -> Printer a -> Printer b
-pf <&> pa = printer (\ k b -> appPrint pf (pa >- b) k)
+(<&>) :: Printer (a >-- b) -> Printer a -> Printer b
+pf <&> pa = printer (\ k b -> appPrint pf (pa >-- b) k)
 
 infixl 4 <&>
 
@@ -87,14 +87,14 @@ a <& b = contramap coconst a <&> b
 
 infixl 4 <&
 
-liftP2 :: ((b >- c) >- a) -> Printer a -> Printer b -> Printer c
+liftP2 :: ((b >-- c) >-- a) -> Printer a -> Printer b -> Printer c
 liftP2 f a b = f <#> a <&> b
 
 pair :: Printer a -> Printer b -> Printer (a, b)
 pair a b = pairP <&> a <&> b
 
-pairP :: Printer (a >- b >- (a, b))
-pairP = printer (\ k (pa :>- pb :>- (a, b)) ->
+pairP :: Printer (a >-- b >-- (a, b))
+pairP = printer (\ k (pa :>-- pb :>-- (a, b)) ->
   appPrint pa a (appPrint pb b . (k .) . pairD))
   where
   pairD da db = parens (da <> comma <+> db)
@@ -112,21 +112,21 @@ instance Print Doc where
 
 -- Coexponentials
 
-data a >- b = Printer a :>- b
+data a >-- b = Printer a :>-- b
   deriving (Functor)
 
-infixr 0 >-, :>-
+infixr 0 >--, :>--
 
-instance Profunctor (>-) where
-  dimap f g (a :>- b) = contramap f a >- g b
-
-
-(>-) :: Printer a -> b -> a >- b
-(>-) = (:>-)
+instance Profunctor (>--) where
+  dimap f g (a :>-- b) = contramap f a >-- g b
 
 
-coK :: (a >- b) -> Printer a
-coK (k :>- _) = k
+(>--) :: Printer a -> b -> a >-- b
+(>--) = (:>--)
 
-coconst :: (a >- b) -> b
-coconst (_ :>- a) = a
+
+coK :: (a >-- b) -> Printer a
+coK (k :>-- _) = k
+
+coconst :: (a >-- b) -> b
+coconst (_ :>-- a) = a
