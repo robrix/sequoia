@@ -1,9 +1,13 @@
 -- | Pretty-printing.
 module Sequoia.Print.Printer
-( Doc(..)
+( -- * Printers
+  Printer(..)
+  -- * Construction
 , printer
+  -- * Elimination
 , print
-, Printer(..)
+  -- * Documents
+, Doc(..)
 ) where
 
 import Data.Functor.Contravariant
@@ -13,19 +17,7 @@ import Prelude hiding (print)
 import Sequoia.Print.Class
 import Sequoia.Profunctor.Continuation
 
-newtype Doc = Doc { getDoc :: ShowS }
-  deriving (Monoid, Semigroup) via Endo String
-
-instance Print Doc where
-  char c = Doc (c:)
-  string s = Doc (s<>)
-
-
-printer :: (a -> Printer a) -> Printer a
-printer f = Printer (\ k -> K (\ a -> runPrint (f a) k • a))
-
-print :: Printer a -> a -> Doc
-print p = (runPrint p idK •)
+-- Printers
 
 newtype Printer a = Printer { runPrint :: forall r . Doc • r -> a • r }
 
@@ -41,3 +33,25 @@ instance Print (Printer a) where
 
 instance Contravariant Printer where
   contramap f (Printer r) = Printer (lmap f . r)
+
+
+-- Construction
+
+printer :: (a -> Printer a) -> Printer a
+printer f = Printer (\ k -> K (\ a -> runPrint (f a) k • a))
+
+
+-- Elimination
+
+print :: Printer a -> a -> Doc
+print p = (runPrint p idK •)
+
+
+-- Documents
+
+newtype Doc = Doc { getDoc :: ShowS }
+  deriving (Monoid, Semigroup) via Endo String
+
+instance Print Doc where
+  char c = Doc (c:)
+  string s = Doc (s<>)
