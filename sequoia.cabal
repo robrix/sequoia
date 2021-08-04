@@ -150,6 +150,7 @@ library
     Sequoia.Monad.Run
     Sequoia.Monad.Trans.It
     Sequoia.Polarity
+    Sequoia.Print.Class
     Sequoia.Print.Sequent
     Sequoia.Printer
     Sequoia.Profunctor.Adjunction
