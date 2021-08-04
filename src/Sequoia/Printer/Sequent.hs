@@ -30,7 +30,7 @@ instance Applicative (Seq e r _Γ) where
   (<*>) = ap
 
 instance Monad (Seq e r _Γ) where
-  Seq r >>= f = Seq (\ k -> Printer (\ _Γ -> print (r (contramap f (printSeq _Γ k))) _Γ))
+  Seq r >>= f = Seq (\ _Δ -> Printer (\ k _Γ -> runPrint (r (contramap f (printSeq _Γ _Δ))) k _Γ))
 
 
 -- Elimination
@@ -39,7 +39,7 @@ appSeq :: Seq e r _Γ _Δ -> _Γ -> Printer _Δ -> Doc
 appSeq s _Γ _Δ = print (runSeq s _Δ) _Γ
 
 printSeq :: _Γ -> Printer _Δ -> Printer (Seq e r _Γ _Δ)
-printSeq _Γ _Δ = Printer (\ s -> appSeq s _Γ _Δ)
+printSeq _Γ _Δ = Printer (\ k s -> k (appSeq s _Γ _Δ))
 
 
 -- Core

@@ -2,6 +2,7 @@
 module Sequoia.Printer
 ( Doc(..)
 , printer
+, print
 , Printer(..)
 , prec
 , atom
@@ -25,13 +26,25 @@ instance Print Doc where
 
 
 printer :: (forall x . a -> Printer x) -> Printer a
-printer f = Printer (print . f <*> id)
+printer f = Printer (\ k a -> runPrint (f a) k a)
 
-newtype Printer a = Printer { print :: a -> Doc }
-  deriving (Monoid, Print, Semigroup)
+print :: Printer a -> a -> Doc
+print p = runPrint p id
+
+newtype Printer a = Printer { runPrint :: forall r . (Doc -> r) -> (a -> r) }
+
+instance Semigroup (Printer a) where
+  p1 <> p2 = Printer (\ k a -> runPrint p1 (flip (runPrint p2) a . (k .) . mappend) a)
+
+instance Monoid (Printer a) where
+  mempty = Printer (\ k _ -> k mempty)
+
+instance Print (Printer a) where
+  char c = Printer (\ k _ -> k (char c))
+  string s = Printer (\ k _ -> k (string s))
 
 instance Contravariant Printer where
-  contramap f (Printer r) = Printer (r . f)
+  contramap f (Printer r) = Printer (fmap (. f) r)
 
 
 prec :: Print (p a) => Prec -> p a -> PrecPrinter p a
