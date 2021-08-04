@@ -162,6 +162,7 @@ library
     Sequoia.Profunctor.Exponential
     Sequoia.Profunctor.Product
     Sequoia.Profunctor.Recall
+    Sequoia.Profunctor.Semiring
     Sequoia.Profunctor.Sum
     Sequoia.Profunctor.Value
     Sequoia.Sequent
