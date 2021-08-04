@@ -58,6 +58,9 @@ class Monoid p => Print p where
   braces :: p -> p
   braces = enclose lbrace rbrace
 
+  angles :: p -> p
+  angles = enclose langle rangle
+
 instance Print b => Print (a -> b) where
   char   = pure . char
   string = pure . string
