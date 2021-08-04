@@ -3,6 +3,7 @@ module Sequoia.Print.Printer
 ( -- * Printers
   Printer(..)
   -- * Construction
+, printer
 , withSubject
 , contrapure
   -- * Elimination
@@ -48,6 +49,9 @@ instance Contravariant Printer where
 
 
 -- Construction
+
+printer :: (forall r . Doc • r -> a -> r) -> Printer a
+printer f = Printer (K . f)
 
 withSubject :: (a -> Printer a) -> Printer a
 withSubject f = Printer (\ k -> K (\ a -> runPrint (f a) k • a))
