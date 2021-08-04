@@ -13,6 +13,7 @@ import Prelude hiding (print)
 import Sequoia.Calculus.Core
 import Sequoia.Conjunction
 import Sequoia.Disjunction
+import Sequoia.Print.Doc
 import Sequoia.Print.Printer
 
 -- Printable sequents

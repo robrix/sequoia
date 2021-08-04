@@ -20,8 +20,6 @@ module Sequoia.Print.Printer
 , tuple
 , list
 , char'
-  -- * Documents
-, Doc(..)
   -- * Exponentials
 , type (-->)(..)
 , appF
@@ -39,11 +37,11 @@ module Sequoia.Print.Printer
 import Control.Monad (ap)
 import Data.Functor.Contravariant
 import Data.List (uncons)
-import Data.Monoid (Endo(..))
 import Data.Profunctor
 import Prelude hiding (print)
 import Sequoia.Disjunction
 import Sequoia.Print.Class
+import Sequoia.Print.Doc
 
 -- Printers
 
@@ -126,19 +124,6 @@ maybeToEither = maybe (Left ()) Right
 
 char' :: Printer Char
 char' = printer (. char)
-
-
--- Documents
-
-newtype Doc = Doc { getDoc :: ShowS }
-  deriving (Monoid, Semigroup) via Endo String
-
-instance Show Doc where
-  showsPrec _ = getDoc
-
-instance Document Doc where
-  char c = Doc (c:)
-  string s = Doc (s<>)
 
 
 -- Exponentials
