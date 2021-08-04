@@ -8,6 +8,7 @@ module Sequoia.Print.Printer
 , print
   -- * Computation
 , (<&>)
+, liftP2
 , pair
   -- * Documents
 , Doc(..)
@@ -59,6 +60,9 @@ print p = (runPrint p idK •)
 pf <&> pa = Printer (\ k -> K (\ b -> runPrint pf k • (pa >- b)))
 
 infixl 4 <&>
+
+liftP2 :: (b >- c -> a) -> Printer a -> Printer b -> Printer c
+liftP2 f a b = contramap f a <&> b
 
 pair :: Printer a -> Printer b -> Printer (a, b)
 pair a b = pairP <&> a <&> b
