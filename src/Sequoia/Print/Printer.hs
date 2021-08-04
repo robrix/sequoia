@@ -26,6 +26,7 @@ module Sequoia.Print.Printer
 , coconst
 ) where
 
+import Control.Monad (ap)
 import Data.Functor.Contravariant
 import Data.Monoid (Endo(..))
 import Data.Profunctor
@@ -121,6 +122,13 @@ instance Profunctor (-->) where
 
 instance Functor ((-->) a) where
   fmap = rmap
+
+instance Applicative ((-->) a) where
+  pure a = F (constK . (• a))
+  (<*>) = ap
+
+instance Monad ((-->) a) where
+  F r >>= f = F (\ k -> K (\ i -> r (K (\ a -> runF (f a) k • i)) • i))
 
 
 -- Coexponentials
