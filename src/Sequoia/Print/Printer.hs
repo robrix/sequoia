@@ -19,7 +19,7 @@ module Sequoia.Print.Printer
 , pair
 , tuple
 , list
-, char'
+, char1
   -- * Exponentials
 , type (-->)(..)
 , appF
@@ -122,8 +122,8 @@ list pa = brackets go where go = contramap uncons (liftC2 maybeToEither mempty (
 maybeToEither :: Maybe a -> Either () a
 maybeToEither = maybe (Left ()) Right
 
-char' :: Printer Char
-char' = printer (. char)
+char1 :: Printer Char
+char1 = printer (. char)
 
 
 -- Exponentials
