@@ -14,6 +14,8 @@ import Data.Profunctor
 class Profunctor p => ProfunctorPlus p where
   (<|>) :: p a b -> p a b -> p a b
 
+  infixl 3 <|>
+
 
 -- Monoids
 
@@ -25,3 +27,5 @@ class ProfunctorPlus p => ProfunctorZero p where
 
 class ProfunctorPlus p => ProfunctorTimes p where
   (<.>) :: p a (b -> c) -> p a b -> p a c
+
+  infixl 4 <.>
