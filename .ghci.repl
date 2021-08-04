@@ -37,7 +37,7 @@
 :seti -Wno-type-defaults
 :set -Wno-unused-packages
 
-:load Sequoia.Sequent Sequoia.Signal test/Test.hs
+:load Sequoia.Sequent Sequoia.Signal Sequoia.Print.Printer test/Test.hs
 
 import Sequoia.Sequent
 import Sequoia.Signal
