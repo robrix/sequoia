@@ -19,6 +19,7 @@ module Sequoia.Print.Printer
 , pairWith
 , pair
 , tuple
+, list
   -- * Documents
 , Doc(..)
   -- * Exponentials
@@ -37,6 +38,7 @@ module Sequoia.Print.Printer
 
 import Control.Monad (ap)
 import Data.Functor.Contravariant
+import Data.List (uncons)
 import Data.Monoid (Endo(..))
 import Data.Profunctor
 import Prelude hiding (print)
@@ -118,6 +120,12 @@ tuple :: Printer a -> Printer b -> Printer (a, b)
 tuple a b = pairWith combine <&> a <&> b
   where
   combine da db = parens (da <> comma <+> db)
+
+list :: Printer a -> Printer [a]
+list pa = brackets go where go = contramap uncons (liftC2 maybeToEither mempty (pair <&> pa <& comma <& space <&> go))
+
+maybeToEither :: Maybe a -> Either () a
+maybeToEither = maybe (Left ()) Right
 
 
 -- Documents
