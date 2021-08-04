@@ -34,11 +34,10 @@ import Data.Profunctor
 import Prelude hiding (print)
 import Sequoia.Disjunction
 import Sequoia.Print.Class
-import Sequoia.Profunctor.Continuation
 
 -- Printers
 
-newtype Printer a = Printer { runPrint :: forall r . Doc • r -> a • r }
+newtype Printer a = Printer { runPrint :: forall r . (Doc -> r) -> (a -> r) }
 
 instance Semigroup (Printer a) where
   p1 <> p2 = printer (\ k a -> appPrint p1 a (\ a' -> appPrint p2 a (lmap (mappend a') k)))
@@ -57,7 +56,7 @@ instance Contravariant Printer where
 -- Construction
 
 printer :: (forall r . (Doc -> r) -> (a -> r)) -> Printer a
-printer f = Printer (K . f . (•))
+printer = Printer
 
 withSubject :: (a -> Printer a) -> Printer a
 withSubject f = printer (\ k a -> appPrint (f a) a k)
@@ -69,10 +68,10 @@ contrapure f = printer (\ k (pa :>-- b) -> appPrint pa (f b) k)
 -- Elimination
 
 print :: Printer a -> a -> Doc
-print p = (runPrint p idK •)
+print p = runPrint p id
 
 appPrint :: Printer a -> a -> (Doc -> r) -> r
-appPrint p a k = runPrint p (K k) • a
+appPrint p a k = runPrint p k a
 
 
 -- Computation
