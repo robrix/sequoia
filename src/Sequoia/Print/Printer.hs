@@ -118,7 +118,10 @@ tuple a b = pairWith combine <&> a <&> b
   combine da db = parens (da <> comma <+> db)
 
 list :: Printer a -> Printer [a]
-list pa = brackets go where go = contramap uncons (liftC2 maybeToEither mempty (pair <&> pa <& comma <& space <&> go))
+list pa = brackets go
+  where
+  go = contramap uncons (liftC2 maybeToEither mempty (pair <&> pa <&>
+    contramap uncons (liftC2 (fmap (uncurry (:)) . maybeToEither) mempty (comma &> space &> go))))
 
 maybeToEither :: Maybe a -> Either () a
 maybeToEither = maybe (Left ()) Right
