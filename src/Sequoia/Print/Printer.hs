@@ -133,6 +133,9 @@ maybeToEither = maybe (Left ()) Right
 newtype Doc = Doc { getDoc :: ShowS }
   deriving (Monoid, Semigroup) via Endo String
 
+instance Show Doc where
+  showsPrec _ = getDoc
+
 instance Print Doc where
   char c = Doc (c:)
   string s = Doc (s<>)
