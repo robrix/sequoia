@@ -5,6 +5,8 @@ module Sequoia.Profunctor.Semiring
 , ProfunctorZero(..)
   -- * Semirings
 , ProfunctorTimes(..)
+  -- * Unital semirings
+, ProfunctorOne(..)
 ) where
 
 import Data.Profunctor
@@ -29,3 +31,9 @@ class ProfunctorPlus p => ProfunctorTimes p where
   (<.>) :: p a (b -> c) -> p a b -> p a c
 
   infixl 4 <.>
+
+
+-- Unital semirings
+
+class (ProfunctorTimes p, ProfunctorZero p) => ProfunctorOne p where
+  one :: b -> p a b
