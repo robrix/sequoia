@@ -55,6 +55,9 @@ class Monoid p => Print p where
   brackets :: p -> p
   brackets = enclose lbracket rbracket
 
+  braces :: p -> p
+  braces = enclose lbrace rbrace
+
 instance Print b => Print (a -> b) where
   char   = pure . char
   string = pure . string
