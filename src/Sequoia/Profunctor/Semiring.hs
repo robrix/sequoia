@@ -70,6 +70,9 @@ instance ProfunctorOne (-->) where
 class ProfunctorCotimes p => ProfunctorCoOne p where
   coOne :: (a -> Void) -> p a b
 
+instance ProfunctorCoOne (-->) where
+  coOne k = F (\ _ a -> k a)
+
 
 -- Exponentials
 
