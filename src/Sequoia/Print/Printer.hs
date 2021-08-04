@@ -11,6 +11,7 @@ module Sequoia.Print.Printer
   -- * Computation
 , (<&>)
 , (<&)
+, (&>)
 , liftP2
 , liftC2
   -- * Combinators
@@ -90,6 +91,11 @@ infixl 4 <&>
 a <& b = contramap coconst a <&> b
 
 infixl 4 <&
+
+(&>) :: Printer a -> Printer a -> Printer a
+p1 &> p2 = printer (\ k a -> runPrint p1 (\ da -> runPrint p2 (k . mappend da) a) a)
+
+infixl 4 &>
 
 liftP2 :: ((b >-- c) -> a) -> Printer a -> Printer b -> Printer c
 liftP2 f a b = contramap f a <&> b
