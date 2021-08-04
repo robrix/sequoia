@@ -44,11 +44,11 @@ instance Semigroup (Printer a) where
   p1 <> p2 = printer (\ k a -> appPrint p1 a (\ a' -> appPrint p2 a (lmap (mappend a') k)))
 
 instance Monoid (Printer a) where
-  mempty = Printer (constK . (• mempty))
+  mempty = printer (const . ($ mempty))
 
 instance Print (Printer a) where
-  char c = Printer (constK . (• char c))
-  string s = Printer (constK . (• string s))
+  char c = printer (const . ($ char c))
+  string s = printer (const . ($ string s))
 
 instance Contravariant Printer where
   contramap f (Printer r) = Printer (lmap f . r)
