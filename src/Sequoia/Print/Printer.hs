@@ -127,6 +127,10 @@ instance Choice (-->) where
   left'  (F r) = F (\ k -> r (inlL k) <••> inrL k)
   right' (F r) = F (\ k -> inlL k <••> r (inrL k))
 
+instance Cochoice (-->) where
+  unleft  (F f) = F (\ k -> inlL (let f' = f (k <••> inrL f') in f'))
+  unright (F f) = F (\ k -> inrL (let f' = f (inlL f' <••> k) in f'))
+
 instance Strong (-->) where
   first'  (F r) = inF (\ k (a, c) -> r (lmap (,c) k) • a)
   second' (F r) = inF (\ k (c, a) -> r (lmap (c,) k) • a)
