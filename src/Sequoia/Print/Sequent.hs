@@ -1,4 +1,4 @@
-module Sequoia.Printer.Sequent
+module Sequoia.Print.Sequent
 ( -- * Printable sequents
   Seq(..)
   -- * Elimination

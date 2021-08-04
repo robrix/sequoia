@@ -150,8 +150,8 @@ library
     Sequoia.Monad.Run
     Sequoia.Monad.Trans.It
     Sequoia.Polarity
+    Sequoia.Print.Sequent
     Sequoia.Printer
-    Sequoia.Printer.Sequent
     Sequoia.Profunctor.Adjunction
     Sequoia.Profunctor.Applicative
     Sequoia.Profunctor.Coexponential
