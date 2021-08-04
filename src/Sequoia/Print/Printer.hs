@@ -14,10 +14,10 @@ module Sequoia.Print.Printer
 , (<&>)
 , (<&)
 , liftP2
-, pair
 , liftC2
   -- * Combinators
 , pairWith
+, tuple
   -- * Documents
 , Doc(..)
   -- * Exponentials
@@ -101,12 +101,6 @@ infixl 4 <&
 liftP2 :: ((b >-- c) -> a) -> Printer a -> Printer b -> Printer c
 liftP2 f a b = contramap f a <&> b
 
-pair :: Printer a -> Printer b -> Printer (a, b)
-pair a b = pairWith pairD <&> a <&> b
-  where
-  pairD da db = parens (da <> comma <+> db)
-
-
 liftC2 :: (c -> Either a b) -> Printer a -> Printer b -> Printer c
 liftC2 f pa pb = printer (\ k c -> either (runPrint pa k) (runPrint pb k) (f c))
 
@@ -115,6 +109,11 @@ liftC2 f pa pb = printer (\ k c -> either (runPrint pa k) (runPrint pb k) (f c))
 
 pairWith :: (Doc -> Doc -> Doc) -> Printer (a >-- b >-- (a, b))
 pairWith f = printer (\ k (pa :>-- pb :>-- (a, b)) -> appPrint pa a (appPrint pb b . (k .) . f))
+
+tuple :: Printer a -> Printer b -> Printer (a, b)
+tuple a b = pairWith combine <&> a <&> b
+  where
+  combine da db = parens (da <> comma <+> db)
 
 
 -- Documents
