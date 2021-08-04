@@ -8,7 +8,6 @@ module Sequoia.Print.Printer
 , contrapure
   -- * Elimination
 , print
-, appPrint
   -- * Computation
 , (<#>)
 , (<&>)
@@ -51,7 +50,7 @@ import Sequoia.Print.Class
 newtype Printer a = Printer { runPrint :: forall r . (Doc -> r) -> (a -> r) }
 
 instance Semigroup (Printer a) where
-  p1 <> p2 = printer (\ k a -> appPrint p1 a (\ a' -> appPrint p2 a (lmap (mappend a') k)))
+  p1 <> p2 = printer (\ k a -> runPrint p1 (\ a' -> runPrint p2 (lmap (mappend a') k) a) a)
 
 instance Monoid (Printer a) where
   mempty = printer (const . ($ mempty))
@@ -70,10 +69,10 @@ printer :: (forall r . (Doc -> r) -> (a -> r)) -> Printer a
 printer = Printer
 
 withSubject :: (a -> Printer a) -> Printer a
-withSubject f = printer (\ k a -> appPrint (f a) a k)
+withSubject f = printer (\ k a -> runPrint (f a) k a)
 
 contrapure :: (b -> a) -> Printer (a >-- b)
-contrapure f = printer (\ k (pa :>-- b) -> appPrint pa (f b) k)
+contrapure f = printer (\ k (pa :>-- b) -> runPrint pa k (f b))
 
 
 -- Elimination
@@ -81,19 +80,16 @@ contrapure f = printer (\ k (pa :>-- b) -> appPrint pa (f b) k)
 print :: Printer a -> a -> Doc
 print p = runPrint p id
 
-appPrint :: Printer a -> a -> (Doc -> r) -> r
-appPrint p a k = runPrint p k a
-
 
 -- Computation
 
 (<#>) :: (b >-- a) -> Printer a -> Printer b
-f <#> a = printer (\ k b -> appPrint a (coconst f) (\ a -> appPrint (coK f) b (k . mappend a)))
+f <#> a = printer (\ k b -> runPrint a (\ a -> runPrint (coK f) (k . mappend a) b) (coconst f))
 
 infixl 4 <#>
 
 (<&>) :: Printer (a >-- b) -> Printer a -> Printer b
-pf <&> pa = printer (\ k b -> appPrint pf (pa >-- b) k)
+pf <&> pa = printer (\ k b -> runPrint pf k (pa >-- b))
 
 infixl 4 <&>
 
@@ -112,7 +108,7 @@ liftC2 f pa pb = printer (\ k c -> either (runPrint pa k) (runPrint pb k) (f c))
 -- Combinators
 
 pairWith :: (Doc -> Doc -> Doc) -> Printer (a >-- b >-- (a, b))
-pairWith f = printer (\ k (pa :>-- pb :>-- (a, b)) -> appPrint pa a (appPrint pb b . (k .) . f))
+pairWith f = printer (\ k (pa :>-- pb :>-- (a, b)) -> runPrint pa (\ a -> runPrint pb (k . f a) b) a)
 
 pair :: Printer (a >-- b >-- (a, b))
 pair = pairWith (<>)
