@@ -8,6 +8,8 @@ module Sequoia.Profunctor.Semiring
 , ProfunctorCotimes(..)
   -- * Unital semirings
 , ProfunctorOne(..)
+  -- * Exponentials
+, type (-->)(..)
   -- * Coexponentials
 , type (>--)(..)
 ) where
@@ -53,6 +55,12 @@ class ProfunctorTimes p => ProfunctorOne p where
 
 instance ProfunctorOne (->) where
   one = const
+
+
+-- Exponentials
+
+newtype a --> b = F { runF :: (b -> Void) -> (a -> Void) }
+  deriving (Functor)
 
 
 -- Coexponentials
