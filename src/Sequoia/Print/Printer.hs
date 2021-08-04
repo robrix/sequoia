@@ -8,6 +8,7 @@ module Sequoia.Print.Printer
 , print
   -- * Computation
 , (<&>)
+, pair
   -- * Documents
 , Doc(..)
   -- * Coexponentials
@@ -58,6 +59,13 @@ print p = (runPrint p idK •)
 pf <&> pa = Printer (\ k -> K (\ b -> runPrint pf k • (pa >- b)))
 
 infixl 4 <&>
+
+pair :: Printer a -> Printer b -> Printer (a, b)
+pair a b = pairP <&> a <&> b
+
+pairP :: Printer (a >- b >- (a, b))
+pairP = Printer (\ k -> K (\ (pa :>- pb :>- (a, b)) ->
+  runPrint pa (K (\ da -> runPrint pb (K (\ db -> k • parens (da <> comma <+> db))) • b)) • a))
 
 
 -- Documents
