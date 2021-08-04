@@ -1,3 +1,4 @@
+{-# LANGUAGE QuantifiedConstraints #-}
 -- | Pretty-printing.
 module Sequoia.Printer
 ( Doc(..)
@@ -11,7 +12,6 @@ module Sequoia.Printer
 , Print(..)
 ) where
 
-import Control.Applicative (liftA2)
 import Data.Functor.Contravariant
 import Data.Monoid (Endo(..))
 import Prelude hiding (print)
@@ -19,22 +19,21 @@ import Prelude hiding (print)
 newtype Doc = Doc { getDoc :: ShowS }
   deriving (Monoid, Semigroup) via Endo String
 
-instance Print Doc where
-  char c = Doc (c:)
-  string s = Doc (s<>)
-
 
 printer :: (forall x . a -> Printer x) -> Printer a
 printer f = Printer (print . f <*> id)
 
 newtype Printer a = Printer { print :: a -> Doc }
-  deriving (Monoid, Print, Semigroup)
+  deriving (Monoid, Semigroup)
 
 instance Contravariant Printer where
   contramap f (Printer r) = Printer (r . f)
 
+instance Print Printer where
+  char = Printer . const . Doc . (:)
 
-prec :: Print (p a) => Prec -> p a -> PrecPrinter p a
+
+prec :: Print p => Prec -> p a -> PrecPrinter p a
 prec i pr = PrecPrinter $ \ i' -> parensIf (i' > i) pr
 
 atom :: p a -> PrecPrinter p a
@@ -52,54 +51,37 @@ newtype PrecPrinter p a = PrecPrinter { runPrecPrinter :: Prec -> p a }
 instance Contravariant p => Contravariant (PrecPrinter p) where
   contramap f (PrecPrinter r) = PrecPrinter (contramap f . r)
 
-
-parensIf :: Print p => Bool -> p -> p
+parensIf :: Print p => Bool -> p a -> p a
 parensIf True  = parens
 parensIf False = id
 
-class Monoid p => Print p where
+class (Contravariant p, forall a . Monoid (p a)) => Print p where
   {-# MINIMAL char | string #-}
-  char :: Char -> p
+  char :: Char -> p a
   char c = string [c]
-  string :: String -> p
+  string :: String -> p a
   string = foldMap char
 
-  lparen, rparen :: p
+  lparen, rparen :: p a
   lparen = char '('
   rparen = char ')'
 
-  space :: p
+  space :: p a
   space = char ' '
 
-  comma :: p
+  comma :: p a
   comma = char ','
 
-  (<+>) :: p -> p -> p
+  (<+>) :: p a -> p a -> p a
   (<+>) = surround space
 
-  infixr 6 <+>
+  infixl 4 <+>
 
-  surround :: p -> p -> p -> p
+  surround :: p a -> p a -> p a -> p a
   surround x l r = enclose l r x
 
-  enclose :: p -> p -> p -> p
+  enclose :: p a -> p a -> p a -> p a
   enclose l r x = l <> x <> r
 
-  parens :: p -> p
+  parens :: p a -> p a
   parens = enclose lparen rparen
-
-instance Print b => Print (a -> b) where
-  char   = pure . char
-  string = pure . string
-
-  lparen = pure lparen
-  rparen = pure rparen
-  space = pure space
-  comma = pure comma
-
-  (<+>) = liftA2 (<+>)
-
-  surround x l r = enclose <$> x <*> l <*> r
-  enclose l r x = enclose <$> l <*> r <*> x
-
-  parens f = parens <$> f
