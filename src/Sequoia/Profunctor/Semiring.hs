@@ -51,6 +51,9 @@ class Profunctor p => ProfunctorCotimes p where
 class ProfunctorTimes p => ProfunctorOne p where
   one :: b -> p a b
 
+instance ProfunctorOne (->) where
+  one = const
+
 
 -- Coexponentials
 
