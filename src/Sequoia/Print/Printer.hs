@@ -122,6 +122,10 @@ newtype a --> b = F { runF :: forall r . b • r -> a • r }
 instance Profunctor (-->) where
   dimap f g (F r) = F (dimap (lmap g) (lmap f) r)
 
+instance Strong (-->) where
+  first'  (F r) = inF (\ k (a, c) -> r (lmap (,c) k) • a)
+  second' (F r) = inF (\ k (c, a) -> r (lmap (c,) k) • a)
+
 instance Functor ((-->) a) where
   fmap = rmap
 
