@@ -130,7 +130,7 @@ instance Applicative ((-->) a) where
   (<*>) = ap
 
 instance Monad ((-->) a) where
-  F r >>= f = F (\ k -> K (\ i -> r (K (\ a -> runF (f a) k • i)) • i))
+  F r >>= f = inF (\ k i -> r (K (\ a -> runF (f a) k • i)) • i)
 
 
 inF :: (forall r . b • r -> a -> r) -> (a --> b)
