@@ -3,6 +3,8 @@ module Sequoia.Profunctor.Semiring
   ProfunctorPlus(..)
   -- * Monoids
 , ProfunctorZero(..)
+  -- * Semirings
+, ProfunctorTimes(..)
 ) where
 
 import Data.Profunctor
@@ -17,3 +19,9 @@ class Profunctor p => ProfunctorPlus p where
 
 class ProfunctorPlus p => ProfunctorZero p where
   zero :: p a b
+
+
+-- Semirings
+
+class ProfunctorPlus p => ProfunctorTimes p where
+  (<.>) :: p a (b -> c) -> p a b -> p a c
