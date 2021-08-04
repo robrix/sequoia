@@ -37,7 +37,7 @@ instance Monad (Seq e r _Γ) where
 -- Elimination
 
 appSeq :: Seq e r _Γ _Δ -> _Γ -> Printer _Δ -> Doc
-appSeq s _Γ _Δ = print (runSeq s _Δ) _Γ
+appSeq s = flip (print . runSeq s)
 
 printSeq :: _Γ -> Printer _Δ -> Printer (Seq e r _Γ _Δ)
 printSeq _Γ _Δ = Printer (\ k -> K (\ s -> k • appSeq s _Γ _Δ))
