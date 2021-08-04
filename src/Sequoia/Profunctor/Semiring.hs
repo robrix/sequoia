@@ -62,10 +62,10 @@ class ProfunctorTimes p => ProfunctorOne p where
   one :: b -> p a b
 
 instance ProfunctorOne (->) where
-  one = const
+  one = pure
 
 instance ProfunctorOne (-->) where
-  one a = F (\ k -> K (\ _ -> k • a))
+  one = pure
 
 
 class ProfunctorCotimes p => ProfunctorCoOne p where
