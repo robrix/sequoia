@@ -4,6 +4,7 @@ module Sequoia.Print.Printer
   Printer(..)
   -- * Construction
 , printer
+, contrapure
   -- * Elimination
 , print
   -- * Computation
@@ -49,6 +50,9 @@ instance Contravariant Printer where
 
 printer :: (a -> Printer a) -> Printer a
 printer f = Printer (\ k -> K (\ a -> runPrint (f a) k • a))
+
+contrapure :: (b -> a) -> Printer (a >- b)
+contrapure f = Printer (\ k -> K (\ (pa :>- b) -> runPrint pa k • f b))
 
 
 -- Elimination
