@@ -87,8 +87,8 @@ pf <&> pa = printer (\ k b -> runPrint pf k (pa >-- b))
 
 infixl 4 <&>
 
-(<&) :: Printer a -> Printer b -> Printer a
-a <& b = contramap coconst a <&> b
+(<&) :: Printer a -> Printer a -> Printer a
+p1 <& p2 = printer (\ k a -> runPrint p1 (\ d1 -> runPrint p2 (k . mappend d1) a) a)
 
 infixl 4 <&
 
