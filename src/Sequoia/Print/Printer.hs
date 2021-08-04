@@ -93,7 +93,7 @@ a <& b = contramap coconst a <&> b
 infixl 4 <&
 
 (&>) :: Printer a -> Printer a -> Printer a
-p1 &> p2 = printer (\ k a -> runPrint p1 (\ da -> runPrint p2 (k . mappend da) a) a)
+p1 &> p2 = printer (\ k a -> runPrint p1 (\ d1 -> runPrint p2 (k . mappend d1) a) a)
 
 infixl 4 &>
 
