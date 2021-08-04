@@ -51,8 +51,8 @@ instance Contravariant Printer where
 
 -- Construction
 
-printer :: (forall r . Doc • r -> a -> r) -> Printer a
-printer f = Printer (K . f)
+printer :: (forall r . (Doc -> r) -> (a -> r)) -> Printer a
+printer f = Printer (K . f . (•))
 
 withSubject :: (a -> Printer a) -> Printer a
 withSubject f = printer (\ k a -> appPrint (f a) a k)
@@ -66,14 +66,14 @@ contrapure f = printer (\ k (pa :>- b) -> appPrint pa (f b) k)
 print :: Printer a -> a -> Doc
 print p = (runPrint p idK •)
 
-appPrint :: Printer a -> a -> Doc • r -> r
-appPrint p a k = runPrint p k • a
+appPrint :: Printer a -> a -> (Doc -> r) -> r
+appPrint p a k = runPrint p (K k) • a
 
 
 -- Computation
 
 (<#>) :: (b >- a) -> Printer a -> Printer b
-f <#> a = printer (\ k b -> appPrint a (coconst f) (K (\ a -> runPrint (coK f) (K ((k •) . mappend a)) • b)))
+f <#> a = printer (\ k b -> appPrint a (coconst f) (\ a -> runPrint (coK f) (K (k . mappend a)) • b))
 
 infixl 4 <#>
 
@@ -95,7 +95,7 @@ pair a b = pairP <&> a <&> b
 
 pairP :: Printer (a >- b >- (a, b))
 pairP = printer (\ k (pa :>- pb :>- (a, b)) ->
-  appPrint pa a (K (\ da -> appPrint pb b (K (\ db -> k • parens (da <> comma <+> db))))))
+  appPrint pa a (\ da -> appPrint pb b (\ db -> k (parens (da <> comma <+> db)))))
 
 
 -- Documents
