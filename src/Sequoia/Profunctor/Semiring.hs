@@ -29,7 +29,7 @@ class ProfunctorPlus p => ProfunctorZero p where
 
 -- Semirings
 
-class ProfunctorPlus p => ProfunctorTimes p where
+class Profunctor p => ProfunctorTimes p where
   (<.>) :: p a (b -> c) -> p a b -> p a c
 
   infixl 4 <.>
