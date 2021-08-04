@@ -79,6 +79,8 @@ instance ProfunctorCoOne (-->) where
 newtype a --> b = F { runF :: (b -> Void) -> (a -> Void) }
   deriving (Functor)
 
+infixr 0 -->
+
 instance Profunctor (-->) where
   dimap f g = F . dimap (lmap g) (lmap f) . runF
 
