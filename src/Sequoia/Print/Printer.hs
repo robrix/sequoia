@@ -173,16 +173,6 @@ f # a = runF f id a
 infixl 9 #
 
 
-xfmap :: Functor f => (a --> b) -> (f a --> f b)
-xfmap f = F (\ k fa -> k ((f #) <$> fa))
-
-xap :: Applicative f => f (a --> b) -> (f a --> f b)
-xap f = F (\ k fa -> k ((#) <$> f <*> fa))
-
-xbind :: Monad m => (a --> m b) -> (m a --> m b)
-xbind f = F (\ k ma -> k (ma >>= (f #)))
-
-
 -- Coexponentials
 
 data a >-- b = Printer a :>-- b
