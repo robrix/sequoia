@@ -62,6 +62,9 @@ instance ProfunctorOne (->) where
 newtype a --> b = F { runF :: (b -> Void) -> (a -> Void) }
   deriving (Functor)
 
+instance Profunctor (-->) where
+  dimap f g = F . dimap (lmap g) (lmap f) . runF
+
 
 -- Coexponentials
 
