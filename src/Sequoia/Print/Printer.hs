@@ -20,6 +20,7 @@ module Sequoia.Print.Printer
 , tuple
 , list
 , char1
+, string1
   -- * Exponentials
 , type (-->)(..)
 , appF
@@ -124,6 +125,9 @@ maybeToEither = maybe (Left ()) Right
 
 char1 :: Printer Char
 char1 = printer (. char)
+
+string1 :: Printer String
+string1 = printer (. string)
 
 
 -- Exponentials
