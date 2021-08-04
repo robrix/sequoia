@@ -9,14 +9,13 @@ module Sequoia.Printer
 , withPrec
 , Prec(..)
 , PrecPrinter(..)
-, Print(..)
 ) where
 
-import Control.Applicative (liftA2)
 import Data.Functor.Contravariant
 import Data.Monoid (Endo(..))
 import Data.Profunctor
 import Prelude hiding (print)
+import Sequoia.Print.Class
 import Sequoia.Profunctor.Continuation
 
 newtype Doc = Doc { getDoc :: ShowS }
@@ -66,55 +65,3 @@ newtype PrecPrinter p a = PrecPrinter { runPrecPrinter :: Prec -> p a }
 
 instance Contravariant p => Contravariant (PrecPrinter p) where
   contramap f (PrecPrinter r) = PrecPrinter (contramap f . r)
-
-
-parensIf :: Print p => Bool -> p -> p
-parensIf True  = parens
-parensIf False = id
-
-class Monoid p => Print p where
-  {-# MINIMAL char | string #-}
-  char :: Char -> p
-  char c = string [c]
-  string :: String -> p
-  string = foldMap char
-
-  lparen, rparen :: p
-  lparen = char '('
-  rparen = char ')'
-
-  space :: p
-  space = char ' '
-
-  comma :: p
-  comma = char ','
-
-  (<+>) :: p -> p -> p
-  (<+>) = surround space
-
-  infixr 6 <+>
-
-  surround :: p -> p -> p -> p
-  surround x l r = enclose l r x
-
-  enclose :: p -> p -> p -> p
-  enclose l r x = l <> x <> r
-
-  parens :: p -> p
-  parens = enclose lparen rparen
-
-instance Print b => Print (a -> b) where
-  char   = pure . char
-  string = pure . string
-
-  lparen = pure lparen
-  rparen = pure rparen
-  space = pure space
-  comma = pure comma
-
-  (<+>) = liftA2 (<+>)
-
-  surround x l r = enclose <$> x <*> l <*> r
-  enclose l r x = enclose <$> l <*> r <*> x
-
-  parens f = parens <$> f
