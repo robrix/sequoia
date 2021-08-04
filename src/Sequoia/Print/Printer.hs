@@ -1,5 +1,5 @@
 -- | Pretty-printing.
-module Sequoia.Printer
+module Sequoia.Print.Printer
 ( Doc(..)
 , printer
 , print

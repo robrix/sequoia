@@ -152,8 +152,8 @@ library
     Sequoia.Polarity
     Sequoia.Print.Class
     Sequoia.Print.Prec
+    Sequoia.Print.Printer
     Sequoia.Print.Sequent
-    Sequoia.Printer
     Sequoia.Profunctor.Adjunction
     Sequoia.Profunctor.Applicative
     Sequoia.Profunctor.Coexponential
