@@ -47,6 +47,9 @@ class Profunctor p => ProfunctorCotimes p where
 
   infixl 4 <&>
 
+instance ProfunctorCotimes (-->) where
+  f <&> a = F (\ k c -> runF f k (runF a k :>-- c))
+
 
 -- Unital semirings
 
