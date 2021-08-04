@@ -52,7 +52,7 @@ class (ProfunctorTimes p, ProfunctorZero p) => ProfunctorOne p where
 -- Coexponentials
 
 data a >- b = (a -> Void) :>- b
-  deriving Functor
+  deriving (Functor)
 
 infixr 0 >-, :>-
 
