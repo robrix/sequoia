@@ -5,11 +5,13 @@ module Sequoia.Profunctor.Semiring
 , ProfunctorZero(..)
   -- * Semirings
 , ProfunctorTimes(..)
+, ProfunctorCotimes(..)
   -- * Unital semirings
 , ProfunctorOne(..)
 ) where
 
 import Data.Profunctor
+import Data.Void
 
 -- Semigroups
 
@@ -33,7 +35,23 @@ class ProfunctorPlus p => ProfunctorTimes p where
   infixl 4 <.>
 
 
+class Profunctor p => ProfunctorCotimes p where
+  (<&>) :: p (a >- c) b -> p a b -> p c b
+
+  infixl 4 <&>
+
+
 -- Unital semirings
 
 class (ProfunctorTimes p, ProfunctorZero p) => ProfunctorOne p where
   one :: b -> p a b
+
+
+
+data a >- b = (a -> Void) :>- b
+  deriving Functor
+
+infixr 0 >-, :>-
+
+instance Profunctor (>-) where
+  dimap f g (a :>- b) = lmap f a :>- g b
