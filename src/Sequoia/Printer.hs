@@ -4,11 +4,6 @@ module Sequoia.Printer
 , printer
 , print
 , Printer(..)
-, prec
-, atom
-, withPrec
-, Prec(..)
-, PrecPrinter(..)
 ) where
 
 import Data.Functor.Contravariant
@@ -46,22 +41,3 @@ instance Print (Printer a) where
 
 instance Contravariant Printer where
   contramap f (Printer r) = Printer (lmap f . r)
-
-
-prec :: Print (p a) => Prec -> p a -> PrecPrinter p a
-prec i pr = PrecPrinter $ \ i' -> parensIf (i' > i) pr
-
-atom :: p a -> PrecPrinter p a
-atom = PrecPrinter . const
-
-withPrec :: Prec -> PrecPrinter p a -> p a
-withPrec = flip runPrecPrinter
-
-newtype Prec = Prec { getPrec :: Int }
-  deriving (Eq, Ord, Show)
-
-newtype PrecPrinter p a = PrecPrinter { runPrecPrinter :: Prec -> p a }
-  deriving (Functor)
-
-instance Contravariant p => Contravariant (PrecPrinter p) where
-  contramap f (PrecPrinter r) = PrecPrinter (contramap f . r)
