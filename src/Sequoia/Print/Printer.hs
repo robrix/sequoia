@@ -10,6 +10,7 @@ module Sequoia.Print.Printer
 , Doc(..)
   -- * Coexponentials
 , type (>-)(..)
+, (>-)
 ) where
 
 import Data.Functor.Contravariant
@@ -68,3 +69,7 @@ infixr 0 >-, :>-
 
 instance Profunctor (>-) where
   dimap f g (a :>- b) = contramap f a :>- g b
+
+
+(>-) :: Printer a -> b -> a >- b
+(>-) = (:>-)
