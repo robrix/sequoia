@@ -41,6 +41,9 @@ class Profunctor p => ProfunctorTimes p where
 instance ProfunctorTimes (->) where
   f <.> a = \ x -> f x (a x)
 
+instance ProfunctorTimes (-->) where
+  f <.> a = F (\ k x -> runF f (\ bc -> runF a (k . bc) x) x)
+
 
 class Profunctor p => ProfunctorCotimes p where
   (<&>) :: p (a >-- c) b -> p a b -> p c b
