@@ -22,6 +22,7 @@ module Sequoia.Print.Printer
 , appF
 , (#)
 , xfmap
+, xap
   -- * Coexponentials
 , type (>--)(..)
 , (>--)
@@ -157,6 +158,9 @@ infixl 9 #
 
 xfmap :: Functor f => (a --> b) -> (f a --> f b)
 xfmap f = F (\ k fa -> k ((f #) <$> fa))
+
+xap :: Applicative f => f (a --> b) -> (f a --> f b)
+xap f = F (\ k fa -> k ((#) <$> f <*> fa))
 
 
 -- Coexponentials
