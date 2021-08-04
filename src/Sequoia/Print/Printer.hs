@@ -91,8 +91,8 @@ a <& b = contramap coconst a <&> b
 
 infixl 4 <&
 
-liftP2 :: ((b >-- c) >-- a) -> Printer a -> Printer b -> Printer c
-liftP2 f a b = f <#> a <&> b
+liftP2 :: ((b >-- c) -> a) -> Printer a -> Printer b -> Printer c
+liftP2 f a b = contramap f a <&> b
 
 pair :: Printer a -> Printer b -> Printer (a, b)
 pair a b = pairP <&> a <&> b
