@@ -20,6 +20,10 @@ class Monoid p => Print p where
   lparen = char '('
   rparen = char ')'
 
+  lbracket, rbracket :: p
+  lbracket = char '['
+  rbracket = char ']'
+
   space :: p
   space = char ' '
 
