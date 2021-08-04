@@ -17,6 +17,7 @@ module Sequoia.Print.Printer
 , liftC2
   -- * Combinators
 , pairWith
+, pair
 , tuple
   -- * Documents
 , Doc(..)
@@ -109,6 +110,9 @@ liftC2 f pa pb = printer (\ k c -> either (runPrint pa k) (runPrint pb k) (f c))
 
 pairWith :: (Doc -> Doc -> Doc) -> Printer (a >-- b >-- (a, b))
 pairWith f = printer (\ k (pa :>-- pb :>-- (a, b)) -> appPrint pa a (appPrint pb b . (k .) . f))
+
+pair :: Printer (a >-- b >-- (a, b))
+pair = pairWith (<>)
 
 tuple :: Printer a -> Printer b -> Printer (a, b)
 tuple a b = pairWith combine <&> a <&> b
