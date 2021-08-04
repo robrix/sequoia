@@ -110,7 +110,7 @@ exlrC h f g = h <$> f . exl <*> g . exr
 
 
 (>∘∘<) :: Conj d => e ∘ b -> e ∘ c -> e ∘ (b `d` c)
-a >∘∘< b = V ((∘ a) >---< (∘ b))
+V a >∘∘< V b = V (a >---< b)
 
 infix 3 >∘∘<
 
