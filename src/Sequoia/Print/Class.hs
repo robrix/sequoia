@@ -28,6 +28,10 @@ class Monoid p => Print p where
   lbrace = char '{'
   rbrace = char '}'
 
+  langle, rangle :: p
+  langle = char '<'
+  rangle = char '>'
+
   space :: p
   space = char ' '
 
