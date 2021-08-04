@@ -17,6 +17,8 @@ module Sequoia.Print.Printer
 , pair
   -- * Documents
 , Doc(..)
+  -- * Exponentials
+, type (-->)(..)
   -- * Coexponentials
 , type (>--)(..)
 , (>--)
@@ -108,6 +110,11 @@ newtype Doc = Doc { getDoc :: ShowS }
 instance Print Doc where
   char c = Doc (c:)
   string s = Doc (s<>)
+
+
+-- Exponentials
+
+newtype a --> b = F { runF :: forall r . b • r -> a • r }
 
 
 -- Coexponentials
