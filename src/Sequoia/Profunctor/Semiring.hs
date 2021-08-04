@@ -88,7 +88,7 @@ instance Functor ((-->) a) where
   fmap = rmap
 
 instance Applicative ((-->) a) where
-  pure a = F (\ k -> K (\ _ -> k • a))
+  pure a = F (K . const . (• a))
   f <*> a = F (\ k -> K (\ x -> runF f (K (\ bc -> runF a (lmap bc k) • x)) • x))
 
 
