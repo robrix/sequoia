@@ -20,6 +20,7 @@ module Sequoia.Print.Printer
   -- * Exponentials
 , type (-->)(..)
 , appF
+, (#)
   -- * Coexponentials
 , type (>--)(..)
 , (>--)
@@ -146,6 +147,11 @@ instance Monad ((-->) a) where
 
 appF :: (a --> b) -> a -> (b -> r) -> r
 appF f a b = runF f b a
+
+(#) :: (a --> b) -> (a -> b)
+f # a = runF f id a
+
+infixl 9 #
 
 
 -- Coexponentials
