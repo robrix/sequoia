@@ -6,6 +6,8 @@ module Sequoia.Print.Printer
 , printer
   -- * Elimination
 , print
+  -- * Computation
+, (<&>)
   -- * Documents
 , Doc(..)
   -- * Coexponentials
@@ -48,6 +50,14 @@ printer f = Printer (\ k -> K (\ a -> runPrint (f a) k • a))
 
 print :: Printer a -> a -> Doc
 print p = (runPrint p idK •)
+
+
+-- Computation
+
+(<&>) :: Printer (a >- b) -> Printer a -> Printer b
+pf <&> pa = Printer (\ k -> K (\ b -> runPrint pf k • (pa :>- b)))
+
+infixl 4 <&>
 
 
 -- Documents
