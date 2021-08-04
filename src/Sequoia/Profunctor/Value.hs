@@ -8,12 +8,8 @@ module Sequoia.Profunctor.Value
 , (∘)
   -- * Coercion
 , _V
-  -- * Computation
-, (>∘∘<)
-, (>∘∘∘<)
 ) where
 
-import Control.Applicative (liftA2)
 import Control.Category (Category)
 import Data.Distributive
 import Data.Functor.Identity
@@ -23,7 +19,6 @@ import Data.Profunctor.Rep as Pro
 import Data.Profunctor.Sieve
 import Data.Profunctor.Traversing
 import Fresnel.Iso
-import Sequoia.Conjunction
 import Sequoia.Monad.Run
 
 -- Value profunctor
@@ -60,16 +55,3 @@ e ∘ V v = v e
 
 _V :: Iso (e ∘ a) (e' ∘ a') (e -> a) (e' -> a')
 _V = coerced
-
-
--- Computation
-
-(>∘∘<) :: Conj d => e ∘ b -> e ∘ c -> e ∘ (b `d` c)
-a >∘∘< b = V ((∘ a) >---< (∘ b))
-
-infix 3 >∘∘<
-
-(>∘∘∘<) :: Conj d => (a -> e ∘ b) -> (a -> e ∘ c) -> (a -> e ∘ (b `d` c))
-(>∘∘∘<) = liftA2 (>∘∘<)
-
-infix 3 >∘∘∘<

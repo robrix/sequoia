@@ -7,6 +7,8 @@ module Sequoia.Conjunction
 , _exlA
 , _exrA
 , exlrC
+, (>∘∘<)
+, (>∘∘∘<)
 , assocL
 , assocR
 , assocConj
@@ -60,6 +62,7 @@ import Fresnel.Iso
 import Fresnel.Lens
 import Sequoia.Bifunctor.Product
 import Sequoia.Profunctor.Diagonal
+import Sequoia.Profunctor.Value
 
 class Conj c where
   {-# MINIMAL exl, exr, ((>--<) | (>---<)) #-}
@@ -104,6 +107,18 @@ _exrA = lens exrF (liftA2 (>--<) . exlF)
 
 exlrC :: Conj c => (a' -> b' -> r) -> (a -> a') -> (b -> b') -> (a `c` b -> r)
 exlrC h f g = h <$> f . exl <*> g . exr
+
+
+(>∘∘<) :: Conj d => e ∘ b -> e ∘ c -> e ∘ (b `d` c)
+a >∘∘< b = V ((∘ a) >---< (∘ b))
+
+infix 3 >∘∘<
+
+(>∘∘∘<) :: Conj d => (a -> e ∘ b) -> (a -> e ∘ c) -> (a -> e ∘ (b `d` c))
+(>∘∘∘<) = liftA2 (>∘∘<)
+
+infix 3 >∘∘∘<
+
 
 assocL :: Conj p => a `p` (b `p` c) -> (a `p` b) `p` c
 assocL = (exl &&& exl . exr) &&& exr . exr
