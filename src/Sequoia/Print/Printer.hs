@@ -19,7 +19,7 @@ module Sequoia.Print.Printer
 , type (>-)(..)
 , (>-)
 , coK
-, coA
+, coconst
 ) where
 
 import Data.Functor.Contravariant
@@ -65,7 +65,7 @@ print p = (runPrint p idK •)
 -- Computation
 
 (<#>) :: (b >- a) -> Printer a -> Printer b
-f <#> a = Printer (\ k -> K (\ b -> runPrint a (K (\ a -> runPrint (coK f) (K ((k •) . mappend a)) • b)) • coA f))
+f <#> a = Printer (\ k -> K (\ b -> runPrint a (K (\ a -> runPrint (coK f) (K ((k •) . mappend a)) • b)) • coconst f))
 
 infixl 4 <#>
 
@@ -75,7 +75,7 @@ pf <&> pa = Printer (\ k -> K (\ b -> runPrint pf k • (pa >- b)))
 infixl 4 <&>
 
 (<&) :: Printer a -> Printer b -> Printer a
-a <& b = contrapure coA <&> a <&> b
+a <& b = contrapure coconst <&> a <&> b
 
 infixl 4 <&
 
@@ -118,5 +118,5 @@ instance Profunctor (>-) where
 coK :: (a >- b) -> Printer a
 coK (k :>- _) = k
 
-coA :: (a >- b) -> b
-coA (_ :>- a) = a
+coconst :: (a >- b) -> b
+coconst (_ :>- a) = a
