@@ -55,10 +55,10 @@ printer :: (forall r . Doc • r -> a -> r) -> Printer a
 printer f = Printer (K . f)
 
 withSubject :: (a -> Printer a) -> Printer a
-withSubject f = printer (\ k a -> runPrint (f a) k • a)
+withSubject f = printer (\ k a -> appPrint (f a) a k)
 
 contrapure :: (b -> a) -> Printer (a >- b)
-contrapure f = printer (\ k (pa :>- b) -> runPrint pa k • f b)
+contrapure f = printer (\ k (pa :>- b) -> appPrint pa (f b) k)
 
 
 -- Elimination
@@ -73,12 +73,12 @@ appPrint p a k = runPrint p k • a
 -- Computation
 
 (<#>) :: (b >- a) -> Printer a -> Printer b
-f <#> a = printer (\ k b -> runPrint a (K (\ a -> runPrint (coK f) (K ((k •) . mappend a)) • b)) • coconst f)
+f <#> a = printer (\ k b -> appPrint a (coconst f) (K (\ a -> runPrint (coK f) (K ((k •) . mappend a)) • b)))
 
 infixl 4 <#>
 
 (<&>) :: Printer (a >- b) -> Printer a -> Printer b
-pf <&> pa = printer (\ k b -> runPrint pf k • (pa >- b))
+pf <&> pa = printer (\ k b -> appPrint pf (pa >- b) k)
 
 infixl 4 <&>
 
@@ -95,7 +95,7 @@ pair a b = pairP <&> a <&> b
 
 pairP :: Printer (a >- b >- (a, b))
 pairP = printer (\ k (pa :>- pb :>- (a, b)) ->
-  runPrint pa (K (\ da -> runPrint pb (K (\ db -> k • parens (da <> comma <+> db))) • b)) • a)
+  appPrint pa a (K (\ da -> appPrint pb b (K (\ db -> k • parens (da <> comma <+> db))))))
 
 
 -- Documents
