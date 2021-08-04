@@ -94,7 +94,7 @@ exrD :: Disj d => a `d` b -> Maybe b
 exrD = const Nothing <--> Just
 
 (<••>) :: Disj d => a • r -> b • r -> (a `d` b) • r
-a <••> b = K ((a •) <--> (b •))
+K a <••> K b = K (a <--> b)
 
 infix 3 <••>
 
