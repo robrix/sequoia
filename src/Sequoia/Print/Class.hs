@@ -89,6 +89,9 @@ class Monoid p => Document p where
   flatAlt :: p -> p -> p
   flatAlt = const
 
+  nest :: Int -> p -> p
+  nest _ = id
+
 instance Document b => Document (a -> b) where
   char   = pure . char
   string = pure . string
@@ -106,6 +109,7 @@ instance Document b => Document (a -> b) where
 
   group = fmap group
   flatAlt = liftA2 flatAlt
+  nest i = fmap (nest i)
 
 
 -- Combinators
