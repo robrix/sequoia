@@ -52,7 +52,7 @@ import Data.Maybe (fromMaybe)
 -- Pretty-printing
 
 class Monoid p => Document p where
-  {-# MINIMAL char | string #-}
+  {-# MINIMAL (char | string), column #-}
   char :: Char -> p
   char c = string [c]
   string :: String -> p
@@ -92,6 +92,9 @@ class Monoid p => Document p where
   nest :: Int -> p -> p
   nest _ = id
 
+
+  column :: (Int -> p) -> p
+
 instance Document b => Document (a -> b) where
   char   = pure . char
   string = pure . string
@@ -110,6 +113,8 @@ instance Document b => Document (a -> b) where
   group = fmap group
   flatAlt = liftA2 flatAlt
   nest i = fmap (nest i)
+
+  column f a = column (`f` a)
 
 
 -- Combinators
