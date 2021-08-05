@@ -49,6 +49,7 @@ module Sequoia.Print.Class
   -- * Combinators
 , align
 , hang
+, indent
 , width
 , fill
 , fillBreak
@@ -266,6 +267,9 @@ align d = column (\ k -> nesting (\ i -> nest (k - i) d))
 
 hang :: ResponsiveDocument p => Int -> p -> p
 hang = fmap align . nest
+
+indent :: ResponsiveDocument p => Int -> p -> p
+indent i d = hang i (stimes i space <> d)
 
 
 width :: ResponsiveDocument p => p -> (Int -> p) -> p
