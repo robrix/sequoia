@@ -48,10 +48,12 @@ module Sequoia.Print.Class
 , ResponsiveDocument(..)
   -- * Combinators
 , width
+, fill
 ) where
 
 import Control.Applicative (liftA2)
 import Data.Maybe (fromMaybe)
+import Data.Semigroup
 
 -- Pretty-printing
 
@@ -256,3 +258,7 @@ instance ResponsiveDocument b => ResponsiveDocument (a -> b) where
 
 width :: ResponsiveDocument p => p -> (Int -> p) -> p
 width p f = column $ \ start -> p <> column (\ end -> f (end - start))
+
+
+fill :: ResponsiveDocument p => Int -> p -> p
+fill n p = width p $ \ w -> stimes (n - w) space
