@@ -10,6 +10,7 @@ module Sequoia.Print.Class
 , sep
 , hcat
 , vcat
+, fillCat
 , enclose
 , encloseSep
 , list
@@ -133,6 +134,9 @@ hcat = mconcat
 
 vcat :: Document p => [p] -> p
 vcat = concatWith (surround line')
+
+fillCat :: Document p => [p] -> p
+fillCat = concatWith (surround softline')
 
 
 enclose :: Semigroup p => p -> p -> p -> p
