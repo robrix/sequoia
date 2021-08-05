@@ -8,7 +8,6 @@ module Sequoia.Conjunction
 , _exrA
 , exlrC
 , (>∘∘<)
-, (>∘∘∘<)
 , assocL
 , assocR
 , assocConj
@@ -113,11 +112,6 @@ exlrC h f g = h <$> f . exl <*> g . exr
 V a >∘∘< V b = V (a >---< b)
 
 infix 3 >∘∘<
-
-(>∘∘∘<) :: Conj d => (a -> e ∘ b) -> (a -> e ∘ c) -> (a -> e ∘ (b `d` c))
-(>∘∘∘<) = liftA2 (>∘∘<)
-
-infix 3 >∘∘∘<
 
 
 assocL :: Conj p => a `p` (b `p` c) -> (a `p` b) `p` c
