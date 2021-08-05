@@ -4,6 +4,7 @@ module Sequoia.Print.Class
   -- * Combinators
 , parensIf
 , concatWith
+, hsep
 , enclose
 , encloseSep
 , list
@@ -108,6 +109,9 @@ parensIf False = id
 concatWith :: (Monoid p, Foldable t) => (p -> p -> p) -> t p -> p
 concatWith (<>) = fromMaybe mempty . foldr (\ a -> Just . maybe a (a <>)) Nothing
 
+
+hsep :: Document p => [p] -> p
+hsep = concatWith (<+>)
 
 enclose :: Semigroup p => p -> p -> p -> p
 enclose l r x = l <> x <> r
