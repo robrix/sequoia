@@ -45,7 +45,7 @@ import Sequoia.Print.Doc
 
 -- Printers
 
-newtype Printer r a = Printer { runPrint :: (Doc -> r) -> (a -> r) }
+newtype Printer r a = Printer { getPrint :: (Doc -> r) -> (a -> r) }
 
 instance Semigroup (Printer r a) where
   p1 <> p2 = printer (\ k a -> appPrint p1 a (appPrint p2 a . ((`lmap` k) . mappend)))
@@ -67,7 +67,7 @@ printer :: ((Doc -> r) -> (a -> r)) -> Printer r a
 printer = Printer
 
 withSubject :: (a -> Printer r a) -> Printer r a
-withSubject f = printer (\ k a -> runPrint (f a) k a)
+withSubject f = printer (\ k a -> getPrint (f a) k a)
 
 contrapure :: (b -> a) -> Printer r (a >-r-~ b)
 contrapure f = printer (\ _ (a :>-- b) -> a (f b))
@@ -76,16 +76,16 @@ contrapure f = printer (\ _ (a :>-- b) -> a (f b))
 -- Elimination
 
 print :: Printer Doc a -> a -> Doc
-print p = runPrint p id
+print p = getPrint p id
 
 appPrint :: Printer r a -> a -> (Doc -> r) -> r
-appPrint p a k = runPrint p k a
+appPrint p a k = getPrint p k a
 
 
 -- Computation
 
 (<&>) :: Printer r (a >-r-~ b) -> Printer r a -> Printer r b
-pf <&> pa = printer (\ k b -> runPrint pf k (runPrint pa k >-- b))
+pf <&> pa = printer (\ k b -> getPrint pf k (getPrint pa k >-- b))
 
 infixl 3 <&>
 
@@ -98,7 +98,7 @@ liftP2 :: ((b >-r-~ c) -> a) -> Printer r a -> Printer r b -> Printer r c
 liftP2 f a b = contramap f a <&> b
 
 liftC2 :: (c -> Either a b) -> Printer r a -> Printer r b -> Printer r c
-liftC2 f pa pb = printer (\ k c -> either (runPrint pa k) (runPrint pb k) (f c))
+liftC2 f pa pb = printer (\ k c -> either (getPrint pa k) (getPrint pb k) (f c))
 
 
 fanoutWith :: (Doc -> Doc -> Doc) -> Printer r a -> Printer r a -> Printer r a
@@ -175,7 +175,7 @@ infixl 9 #
 
 
 contramapExp :: (a' ~~r~> a) -> (Printer r a -> Printer r a')
-contramapExp f pa = printer (\ k a' -> appF f a' (runPrint pa k))
+contramapExp f pa = printer (\ k a' -> appF f a' (getPrint pa k))
 
 
 -- Coexponentials
