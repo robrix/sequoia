@@ -115,7 +115,7 @@ instance Kontravariant r (Printer r) where
 liftP2 :: Coapplicative r f => ((b >-r-~ c) -> a) -> f a -> f b -> f c
 liftP2 f a b = contramap f a <&> b
 
-liftC2 :: (c -> Either a b) -> Printer r a -> Printer r b -> Printer r c
+liftC2 :: (Coapplicative r f, Kontravariant r f) => (c -> Either a b) -> f a -> f b -> f c
 liftC2 f pa pb = f <#> pa <&> pb
 
 
