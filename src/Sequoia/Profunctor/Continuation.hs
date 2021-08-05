@@ -74,8 +74,12 @@ dn a = K (• a)
 (=<<^) :: (a -> b •• r) -> (a •• r -> b •• r)
 f =<<^ m = K (\ k -> m • K ((• k) . f))
 
+infixr 1 =<<^
+
 (^>>=) :: a •• r -> (a -> b •• r) -> b •• r
 m ^>>= f = K (\ k -> m • K ((• k) . f))
+
+infixl 1 ^>>=
 
 
 newtype DN r a = DN { runDN :: a •• r }
@@ -88,7 +92,7 @@ instance Applicative (DN r) where
   DN f <*> DN a = DN (K (\ k -> f • K (\ f -> a • K (\ a -> k • f a))))
 
 instance Monad (DN r) where
-  DN m >>= f = DN (m ^>>= (runDN . f))
+  DN m >>= f = DN (m ^>>= runDN . f)
 
 
 -- Triple negation
