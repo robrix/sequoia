@@ -347,7 +347,7 @@ mapR
   -> _Γ -|s e r|- _Δ > a
   -- --------------------
   -> _Γ -|s e r|- _Δ > a'
-mapR f = mapΔ (inlL <•••> f . inrL)
+mapR f = mapΔ (\ k -> inlL k <••> f (inrL k))
 
 
 mapL2
