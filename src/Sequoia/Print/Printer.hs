@@ -10,8 +10,6 @@ module Sequoia.Print.Printer
 , print
   -- * Computation
 , (<&>)
-, (<&)
-, (&>)
 , liftP2
 , liftC2
 , fanoutWith
@@ -86,16 +84,6 @@ appPrint p a k = runPrint p k a
 pf <&> pa = printer (\ k b -> runPrint pf k (runPrint pa k >-- b))
 
 infixl 3 <&>
-
-(<&) :: Printer r a -> Printer r a -> Printer r a
-p1 <& p2 = printer (\ k a -> runPrint p1 (\ d1 -> runPrint p2 (k . mappend d1) a) a)
-
-infixl 3 <&
-
-(&>) :: Printer r a -> Printer r a -> Printer r a
-p1 &> p2 = printer (\ k a -> runPrint p1 (\ d1 -> runPrint p2 (k . mappend d1) a) a)
-
-infixl 3 &>
 
 (<#>) :: (c -> Either a b) -> Printer r a -> Printer r (Coexp r b c)
 f <#> a = contramapExp (cocurry f) a
