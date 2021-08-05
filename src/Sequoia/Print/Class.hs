@@ -161,11 +161,7 @@ cat = group . vcat
 
 
 punctuate :: Document p => p -> [p] -> [p]
-punctuate s = go
-  where
-  go []     = []
-  go [x]    = [x]
-  go (x:xs) = x <> s : go xs
+punctuate s = fromMaybe [] . foldr (\ a -> maybe (Just [a]) (Just . (a <> s :))) Nothing
 
 
 enclose :: Semigroup p => p -> p -> p -> p
