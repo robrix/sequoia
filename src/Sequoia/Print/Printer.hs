@@ -14,7 +14,6 @@ module Sequoia.Print.Printer
 , (&>)
 , liftP2
 , liftC2
-, (<:>)
 , fanoutWith
   -- * Combinators
 , tuple
@@ -110,11 +109,6 @@ liftC2 :: (c -> Either a b) -> Printer r a -> Printer r b -> Printer r c
 liftC2 f pa pb = printer (\ k c -> either (runPrint pa k) (runPrint pb k) (f c))
 
 
-(<:>) :: Printer r a -> Printer r a -> Printer r a
-(<:>) = fanoutWith (<>)
-
-infixl 4 <:>
-
 fanoutWith :: (Doc -> Doc -> Doc) -> Printer r a -> Printer r a -> Printer r a
 fanoutWith f l r = printer (\ k a -> appPrint l a (appPrint r a . (k .) . f))
 
@@ -129,7 +123,7 @@ tuple a b = fanoutWith combine (contramap fst a) (contramap snd b)
 list :: Printer r a -> Printer r [a]
 list pa = brackets go
   where
-  go = maybeToEither . uncons <#> mempty <&> ((fst >$< pa) <:> (snd >$< tail))
+  go = maybeToEither . uncons <#> mempty <&> (fst >$< pa) <> (snd >$< tail)
   tail = fmap toList . maybeToEither . nonEmpty <#> mempty <&> comma <> space <> go
 
 maybeToEither :: Maybe a -> Either () a
