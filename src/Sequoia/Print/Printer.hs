@@ -13,6 +13,7 @@ module Sequoia.Print.Printer
 , runPrint
   -- * Computation
 , Coapplicative(..)
+, Kontravariant(..)
 , liftP2
 , liftC2
 , fanoutWith
@@ -98,6 +99,13 @@ class Contravariant f => Coapplicative r f | f -> r where
 
 instance Coapplicative r (Printer r) where
   pf <&> pa = printer (\ k b -> getPrint pf k (getPrint pa k >-- b))
+
+
+class Contravariant f => Kontravariant r f | f -> r where
+  kontramap :: (a' ~~r~> a) -> (f a -> f a')
+
+instance Kontravariant r (Printer r) where
+  kontramap f pa = printer (\ k a' -> appF f a' (getPrint pa k))
 
 
 (<#>) :: (c -> Either a b) -> Printer r a -> Printer r (b >-r-~ c)
