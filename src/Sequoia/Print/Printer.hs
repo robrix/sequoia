@@ -28,7 +28,6 @@ module Sequoia.Print.Printer
 , type (~>)
 , appF
 , (#)
-, contramapExp
   -- * Coexponentials
 , Coexp(..)
 , type (>-)
@@ -109,7 +108,7 @@ instance Kontravariant r (Printer r) where
 
 
 (<#>) :: (c -> Either a b) -> Printer r a -> Printer r (b >-r-~ c)
-f <#> a = contramapExp (cocurry f) a
+f <#> a = kontramap (cocurry f) a
 
 infixl 3 <#>
 
@@ -191,10 +190,6 @@ appF f a b = runF f b a
 f # a = runF f id a
 
 infixl 9 #
-
-
-contramapExp :: (a' ~~r~> a) -> (Printer r a -> Printer r a')
-contramapExp f pa = printer (\ k a' -> appF f a' (getPrint pa k))
 
 
 -- Coexponentials
