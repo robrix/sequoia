@@ -87,6 +87,9 @@ instance Applicative (DN r) where
   pure = DN . dn
   DN f <*> DN a = DN (K (\ k -> f • K (\ f -> a • K (\ a -> k • f a))))
 
+instance Monad (DN r) where
+  DN m >>= f = DN (m ^>>= (runDN . f))
+
 
 -- Triple negation
 
