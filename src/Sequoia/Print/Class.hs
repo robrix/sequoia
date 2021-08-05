@@ -7,6 +7,7 @@ module Sequoia.Print.Class
 , enclose
 , encloseSep
 , list
+, tupled
 , surround
 , (<+>)
 , (</>)
@@ -120,6 +121,15 @@ list :: Document p => [p] -> p
 list
   = group
   . brackets
+  . encloseSep
+    (flatAlt space mempty)
+    (flatAlt space mempty)
+    (comma <> space)
+
+tupled :: Document p => [p] -> p
+tupled
+  = group
+  . parens
   . encloseSep
     (flatAlt space mempty)
     (flatAlt space mempty)
