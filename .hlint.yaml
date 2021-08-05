@@ -29,3 +29,6 @@
 # Env/Res
 - fixity: infixl 8 •∘
 - fixity: infixl 7 ••
+
+
+- warn: {name: "Use lmap/compose", lhs: "K ((k •) . f)", rhs: "k <<^ f"}
