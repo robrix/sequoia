@@ -14,6 +14,8 @@ module Sequoia.Print.Class
 , rbrace
 , langle
 , rangle
+, squote
+, dquote
 , space
 , comma
 ) where
@@ -93,6 +95,10 @@ rbrace = char '}'
 langle, rangle :: Document p => p
 langle = char '<'
 rangle = char '>'
+
+squote, dquote :: Document p => p
+squote = char '\''
+dquote = char '"'
 
 space :: Document p => p
 space = char ' '
