@@ -5,6 +5,7 @@ module Sequoia.Print.Class
 , parensIf
 , concatWith
 , enclose
+, encloseSep
 , surround
 , (<+>)
 , (</>)
@@ -109,6 +110,9 @@ concatWith (<>) = fromMaybe mempty . foldr (\ a -> Just . maybe a (a <>)) Nothin
 enclose :: Semigroup p => p -> p -> p -> p
 enclose l r x = l <> x <> r
 
+
+encloseSep :: Document p => p -> p -> p -> [p] -> p
+encloseSep l r s ps = enclose l r (group (concatWith (surround (line' <> s)) ps))
 surround :: Semigroup p => p -> p -> p -> p
 surround x l r = enclose l r x
 
