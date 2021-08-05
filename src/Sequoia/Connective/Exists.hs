@@ -2,6 +2,7 @@
 module Sequoia.Connective.Exists
 ( -- * Existential quantification
   Exists(..)
+  -- * Elimination
 , runExists
 ) where
 
@@ -14,6 +15,9 @@ import Sequoia.Profunctor.Continuation
 data Exists r p f = forall x . Polarized p x => Exists (f x •• r)
 
 instance Polarized P (Exists r p f)
+
+
+-- Elimination
 
 runExists :: (forall x . Polarized p x => f x -> a) -> Exists r p f -> a •• r
 runExists f (Exists r) = r <<^ (<<^ f)
