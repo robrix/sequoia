@@ -74,7 +74,7 @@ withSubject :: (a -> Printer r a) -> Printer r a
 withSubject f = printer (\ k -> runPrint k <*> f)
 
 contrapure :: (b -> a) -> Printer r (a >-r-~ b)
-contrapure f = printer (\ _ (a :>-- b) -> a (f b))
+contrapure f = printer (\ _ c -> runCoexp c f)
 
 
 -- Elimination
