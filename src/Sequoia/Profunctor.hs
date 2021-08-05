@@ -10,6 +10,8 @@ module Sequoia.Profunctor
 
 import Data.Profunctor
 
+-- Composition
+
 (^>>) :: Profunctor p => (a' -> a) -> (a `p` b) -> (a' `p` b)
 (^>>) = lmap
 
