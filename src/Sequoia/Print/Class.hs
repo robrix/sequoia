@@ -173,7 +173,7 @@ enclose l r x = l <> x <> r
 
 
 encloseSep :: Document p => p -> p -> p -> [p] -> p
-encloseSep l r s ps = enclose l r (group (concatWith (surround (line' <> s)) ps))
+encloseSep l r s = enclose l r . group . concatWith (surround (line' <> s))
 
 
 list :: Document p => [p] -> p
