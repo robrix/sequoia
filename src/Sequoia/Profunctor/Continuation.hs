@@ -11,6 +11,7 @@ module Sequoia.Profunctor.Continuation
 , type (••)
 , dn
 , (=<<^)
+, (^>>=)
 , DN(..)
   -- * Triple negation
 , type (•••)
@@ -72,6 +73,9 @@ dn a = K (• a)
 
 (=<<^) :: (a -> b •• r) -> (a •• r -> b •• r)
 f =<<^ m = K (\ k -> m • K ((• k) . f))
+
+(^>>=) :: a •• r -> (a -> b •• r) -> b •• r
+m ^>>= f = K (\ k -> m • K ((• k) . f))
 
 
 newtype DN r a = DN { runDN :: a •• r }
