@@ -6,6 +6,7 @@ module Sequoia.Connective.Exists
 , exists
   -- * Elimination
 , runExists
+, runExistsM
 ) where
 
 import Sequoia.Polarity
@@ -29,3 +30,6 @@ exists f = Exists (dn f)
 
 runExists :: (forall x . Polarized p x => f x -> a) -> Exists r p f -> a •• r
 runExists f (Exists r) = r <<^ (<<^ f)
+
+runExistsM :: (forall x . Polarized p x => f x -> a •• r) -> Exists r p f -> a •• r
+runExistsM f (Exists r) = f =<<^ r
