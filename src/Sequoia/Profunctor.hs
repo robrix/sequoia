@@ -3,6 +3,7 @@ module Sequoia.Profunctor
   module Data.Profunctor
   -- * Composition
 , (^>>)
+, (<<^)
 ) where
 
 import Data.Profunctor
@@ -10,4 +11,7 @@ import Data.Profunctor
 (^>>) :: Profunctor p => (a' -> a) -> (a `p` b) -> (a' `p` b)
 (^>>) = lmap
 
-infixr 1 ^>>
+(<<^) :: Profunctor p => (a `p` b) -> (a' -> a) -> (a' `p` b)
+(<<^) = flip lmap
+
+infixr 1 ^>>, <<^
