@@ -94,6 +94,7 @@ appPrint p a k = getPrint p k a
 
 class Contravariant f => Coapplicative r f | f -> r where
   (<&>) :: f (a >-r-~ b) -> f a -> f b
+
   infixl 3 <&>
 
 instance Coapplicative r (Printer r) where
