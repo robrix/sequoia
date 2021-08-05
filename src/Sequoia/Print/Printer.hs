@@ -107,7 +107,7 @@ instance Kontravariant r (Printer r) where
   kontramap f pa = printer (\ k a' -> appF f a' (getPrint pa k))
 
 
-(<#>) :: (c -> Either a b) -> Printer r a -> Printer r (b >-r-~ c)
+(<#>) :: Kontravariant r f => (c -> Either a b) -> f a -> f (b >-r-~ c)
 f <#> a = kontramap (cocurry f) a
 
 infixl 3 <#>
