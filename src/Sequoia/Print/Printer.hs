@@ -20,11 +20,15 @@ module Sequoia.Print.Printer
 , string1
   -- * Exponentials
 , Exp(..)
+, type (~~)
+, type (~>)
 , appF
 , (#)
 , contramapExp
   -- * Coexponentials
 , Coexp(..)
+, type (>-)
+, type (-~)
 , (>--)
 , cocurry
 ) where
@@ -154,6 +158,10 @@ instance Monad (Exp r a) where
   F r >>= f = F (\ k i -> r (\ a -> runF (f a) k i) i)
 
 
+type a ~~r = Exp r a
+type r~> b = r b
+
+
 appF :: Exp r a b -> a -> (b -> r) -> r
 appF f a b = runF f b a
 
@@ -176,6 +184,10 @@ infixr 0 >--, :>--
 
 instance Profunctor (Coexp r) where
   dimap f g (a :>-- b) = lmap f a >-- g b
+
+
+type b >-r = Coexp r b
+type r-~ a = r a
 
 
 (>--) :: (b -> r) -> a -> Coexp r b a
