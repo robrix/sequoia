@@ -2,8 +2,10 @@
 {-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Connective.Quantification
-( -- * Quantified constraints
-  type (==>)
+( -- * Adjunction
+  leftAdjunct
+  -- * Quantified constraints
+, type (==>)
   -- * Connectives
 , module Sequoia.Connective.Exists
 , module Sequoia.Connective.ForAll
@@ -12,6 +14,13 @@ module Sequoia.Connective.Quantification
 import Data.Kind (Constraint)
 import Sequoia.Connective.Exists
 import Sequoia.Connective.ForAll
+import Sequoia.Polarity
+
+-- Adjunction
+
+leftAdjunct :: (forall x . Exists r p a -> b x) -> (forall x . Polarized p x => a x -> ForAll r p b)
+leftAdjunct f a = forAll (f (exists a))
+
 
 -- Quantified constraints
 
