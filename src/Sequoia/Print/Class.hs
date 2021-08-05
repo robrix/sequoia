@@ -265,8 +265,6 @@ fill :: ResponsiveDocument p => Int -> p -> p
 fill n p = width p $ \ w -> stimes (n - w) space
 
 fillBreak :: ResponsiveDocument p => Int -> p -> p
-fillBreak f x = width x go
-  where
-  go w
-    | w > f     = nest f line'
-    | otherwise = stimes (f - w) space
+fillBreak f x = width x $ \case
+  w | w > f -> nest f line'
+    | otherwise -> stimes (f - w) space
