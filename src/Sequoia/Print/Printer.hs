@@ -69,7 +69,7 @@ printer = Printer
 withSubject :: (a -> Printer r a) -> Printer r a
 withSubject f = printer (\ k a -> runPrint (f a) k a)
 
-contrapure :: (b -> a) -> Printer r (Coexp r a b)
+contrapure :: (b -> a) -> Printer r (a >-r-~ b)
 contrapure f = printer (\ _ (a :>-- b) -> a (f b))
 
 
@@ -84,17 +84,17 @@ appPrint p a k = runPrint p k a
 
 -- Computation
 
-(<&>) :: Printer r (Coexp r a b) -> Printer r a -> Printer r b
+(<&>) :: Printer r (a >-r-~ b) -> Printer r a -> Printer r b
 pf <&> pa = printer (\ k b -> runPrint pf k (runPrint pa k >-- b))
 
 infixl 3 <&>
 
-(<#>) :: (c -> Either a b) -> Printer r a -> Printer r (Coexp r b c)
+(<#>) :: (c -> Either a b) -> Printer r a -> Printer r (b >-r-~ c)
 f <#> a = contramapExp (cocurry f) a
 
 infixl 3 <#>
 
-liftP2 :: (Coexp r b c -> a) -> Printer r a -> Printer r b -> Printer r c
+liftP2 :: ((b >-r-~ c) -> a) -> Printer r a -> Printer r b -> Printer r c
 liftP2 f a b = contramap f a <&> b
 
 liftC2 :: (c -> Either a b) -> Printer r a -> Printer r b -> Printer r c
@@ -165,16 +165,16 @@ infixr 1 ~~
 infixr 0 ~>
 
 
-appF :: Exp r a b -> a -> (b -> r) -> r
+appF :: (a ~~r~> b) -> a -> (b -> r) -> r
 appF f a b = runF f b a
 
-(#) :: Exp b a b -> (a -> b)
+(#) :: (a ~~b~> b) -> (a -> b)
 f # a = runF f id a
 
 infixl 9 #
 
 
-contramapExp :: Exp r a' a -> (Printer r a -> Printer r a')
+contramapExp :: (a' ~~r~> a) -> (Printer r a -> Printer r a')
 contramapExp f pa = printer (\ k a' -> appF f a' (runPrint pa k))
 
 
@@ -196,8 +196,8 @@ infixr 1 >-
 infixr 0 -~
 
 
-(>--) :: (b -> r) -> a -> Coexp r b a
+(>--) :: (b -> r) -> a -> (b >-r-~ a)
 (>--) = (:>--)
 
-cocurry :: (c -> Either a b) -> Exp r (Coexp r b c) a
+cocurry :: (c -> Either a b) -> (b >-r-~ c) ~~r~> a
 cocurry f = F $ \ k (b :>-- c) -> either k b (f c)
