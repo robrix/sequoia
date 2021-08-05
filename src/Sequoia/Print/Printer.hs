@@ -8,6 +8,7 @@ module Sequoia.Print.Printer
 , withSubject
 , contrapure
   -- * Elimination
+, getPrint
 , print
 , appPrint
 , runPrint
@@ -50,7 +51,7 @@ import Sequoia.Print.Doc
 
 -- Printers
 
-newtype Printer r a = Printer { getPrint :: (Doc -> r) -> (a -> r) }
+newtype Printer r a = Printer ((Doc -> r) -> (a -> r))
 
 instance Semigroup (Printer r a) where
   p1 <> p2 = printer (\ k a -> appPrint p1 a (appPrint p2 a . ((`lmap` k) . mappend)))
@@ -79,6 +80,9 @@ contrapure = printer . const . runCoexp
 
 
 -- Elimination
+
+getPrint :: Printer r a -> ((Doc -> r) -> (a -> r))
+getPrint (Printer r) = r
 
 print :: Printer Doc a -> a -> Doc
 print p = getPrint p id
