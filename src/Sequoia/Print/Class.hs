@@ -38,36 +38,32 @@ class Monoid p => Document p where
   string :: String -> p
   string = foldMap char
 
-  surround :: p -> p -> p -> p
-  surround x l r = enclose l r x
-
-  enclose :: p -> p -> p -> p
-  enclose l r x = l <> x <> r
+  enclosing :: p -> p -> p -> p
+  enclosing = enclose
 
   parens :: p -> p
-  parens = enclose lparen rparen
+  parens = enclosing lparen rparen
 
   brackets :: p -> p
-  brackets = enclose lbracket rbracket
+  brackets = enclosing lbracket rbracket
 
   braces :: p -> p
-  braces = enclose lbrace rbrace
+  braces = enclosing lbrace rbrace
 
   angles :: p -> p
-  angles = enclose langle rangle
+  angles = enclosing langle rangle
 
   squotes :: p -> p
-  squotes = enclose squote squote
+  squotes = enclosing squote squote
 
   dquotes :: p -> p
-  dquotes = enclose dquote dquote
+  dquotes = enclosing dquote dquote
 
 instance Document b => Document (a -> b) where
   char   = pure . char
   string = pure . string
 
-  surround x l r = enclose <$> x <*> l <*> r
-  enclose l r x = enclose <$> l <*> r <*> x
+  enclosing l r x = enclosing <$> l <*> r <*> x
 
   parens f = parens <$> f
   brackets f = brackets <$> f
@@ -85,6 +81,13 @@ parensIf False = id
 
 concatWith :: (Monoid p, Foldable t) => (p -> p -> p) -> t p -> p
 concatWith (<>) = fromMaybe mempty . foldr (\ a -> Just . maybe a (a <>)) Nothing
+
+
+surround :: Semigroup p => p -> p -> p -> p
+surround x l r = enclose l r x
+
+enclose :: Semigroup p => p -> p -> p -> p
+enclose l r x = l <> x <> r
 
 
 (<+>) :: Document p => p -> p -> p
