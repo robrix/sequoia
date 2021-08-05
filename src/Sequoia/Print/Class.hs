@@ -3,6 +3,17 @@ module Sequoia.Print.Class
   Document(..)
   -- * Combinators
 , parensIf
+  -- * Characters
+, lparen
+, rparen
+, lbracket
+, rbracket
+, lbrace
+, rbrace
+, langle
+, rangle
+, space
+, comma
 ) where
 
 import Control.Applicative (liftA2)
@@ -15,28 +26,6 @@ class Monoid p => Document p where
   char c = string [c]
   string :: String -> p
   string = foldMap char
-
-  lparen, rparen :: p
-  lparen = char '('
-  rparen = char ')'
-
-  lbracket, rbracket :: p
-  lbracket = char '['
-  rbracket = char ']'
-
-  lbrace, rbrace :: p
-  lbrace = char '{'
-  rbrace = char '}'
-
-  langle, rangle :: p
-  langle = char '<'
-  rangle = char '>'
-
-  space :: p
-  space = char ' '
-
-  comma :: p
-  comma = char ','
 
   (<+>) :: p -> p -> p
   (<+>) = surround space
@@ -65,17 +54,6 @@ instance Document b => Document (a -> b) where
   char   = pure . char
   string = pure . string
 
-  lparen = pure lparen
-  rparen = pure rparen
-  lbracket = pure lbracket
-  rbracket = pure rbracket
-  lbrace = pure lbrace
-  rbrace = pure rbrace
-  langle = pure langle
-  rangle = pure rangle
-  space = pure space
-  comma = pure comma
-
   (<+>) = liftA2 (<+>)
 
   surround x l r = enclose <$> x <*> l <*> r
@@ -92,3 +70,28 @@ instance Document b => Document (a -> b) where
 parensIf :: Document p => Bool -> p -> p
 parensIf True  = parens
 parensIf False = id
+
+
+-- Characters
+
+lparen, rparen :: Document p => p
+lparen = char '('
+rparen = char ')'
+
+lbracket, rbracket :: Document p => p
+lbracket = char '['
+rbracket = char ']'
+
+lbrace, rbrace :: Document p => p
+lbrace = char '{'
+rbrace = char '}'
+
+langle, rangle :: Document p => p
+langle = char '<'
+rangle = char '>'
+
+space :: Document p => p
+space = char ' '
+
+comma :: Document p => p
+comma = char ','
