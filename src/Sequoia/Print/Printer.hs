@@ -161,6 +161,9 @@ instance Monad (Exp r a) where
 type a ~~r = Exp r a
 type r~> b = r b
 
+infixr 1 ~~
+infixr 0 ~>
+
 
 appF :: Exp r a b -> a -> (b -> r) -> r
 appF f a b = runF f b a
@@ -188,6 +191,9 @@ instance Profunctor (Coexp r) where
 
 type b >-r = Coexp r b
 type r-~ a = r a
+
+infixr 1 >-
+infixr 0 -~
 
 
 (>--) :: (b -> r) -> a -> Coexp r b a
