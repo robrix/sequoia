@@ -32,6 +32,7 @@ module Sequoia.Print.Class
 , squote
 , dquote
 , space
+, space'
 , line
 , line'
 , softline
@@ -231,8 +232,9 @@ squote, dquote :: Document p => p
 squote = char '\''
 dquote = char '"'
 
-space, line, line', softline, softline' :: Document p => p
+space, space', line, line', softline, softline' :: Document p => p
 space = char ' '
+space' = flatAlt space mempty
 line = flatAlt hardline space
 line' = flatAlt hardline mempty
 softline = flatAlt space hardline
