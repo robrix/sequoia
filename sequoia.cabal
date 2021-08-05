@@ -155,6 +155,7 @@ library
     Sequoia.Print.Prec
     Sequoia.Print.Printer
     Sequoia.Print.Sequent
+    Sequoia.Profunctor
     Sequoia.Profunctor.Adjunction
     Sequoia.Profunctor.Applicative
     Sequoia.Profunctor.Coexponential
