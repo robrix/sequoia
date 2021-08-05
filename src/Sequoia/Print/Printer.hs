@@ -34,6 +34,7 @@ module Sequoia.Print.Printer
 , (>--)
 , cocurry
 , elimCoexp
+, runCoexp
 ) where
 
 import Control.Monad (ap)
@@ -208,6 +209,9 @@ infixr 0 -~
 cocurry :: (c -> Either a b) -> (b >-r-~ c) ~~r~> a
 cocurry f = F $ \ k (b :>-- c) -> either k b (f c)
 
+
+runCoexp :: Coexp r b a -> (a -> b) -> r
+runCoexp (b :>-- a) f = b (f a)
 
 elimCoexp :: Coexp r b a -> Exp r a b -> r
 elimCoexp (b :>-- a) f = runF f b a
