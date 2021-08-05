@@ -339,7 +339,7 @@ mapL
   -> a  < _Γ -|s e r|- _Δ
   -- --------------------
   -> a' < _Γ -|s e r|- _Δ
-mapL f = mapΓ (f . exlF >∘∘∘< exrF)
+mapL f = mapΓ (\ v -> f (exlF v) >∘∘< exrF v)
 
 mapR
   :: Contextual s
