@@ -103,14 +103,14 @@ instance Coapplicative r (Printer r) where
 class Contravariant f => Kontravariant r f | f -> r where
   kontramap :: (a' ~~r~> a) -> (f a -> f a')
 
+  (<#>) :: (c -> Either a b) -> f a -> f (b >-r-~ c)
+  f <#> a = kontramap (cocurry f) a
+
+  infixl 3 <#>
+
 instance Kontravariant r (Printer r) where
   kontramap f pa = printer (\ k a' -> appF f a' (getPrint pa k))
 
-
-(<#>) :: Kontravariant r f => (c -> Either a b) -> f a -> f (b >-r-~ c)
-f <#> a = kontramap (cocurry f) a
-
-infixl 3 <#>
 
 liftP2 :: ((b >-r-~ c) -> a) -> Printer r a -> Printer r b -> Printer r c
 liftP2 f a b = contramap f a <&> b
