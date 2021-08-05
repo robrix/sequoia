@@ -48,7 +48,7 @@ import Sequoia.Print.Doc
 newtype Printer r a = Printer { runPrint :: (Doc -> r) -> (a -> r) }
 
 instance Semigroup (Printer r a) where
-  p1 <> p2 = printer (\ k a -> runPrint p1 (\ a' -> runPrint p2 (lmap (mappend a') k) a) a)
+  p1 <> p2 = printer (\ k a -> appPrint p1 a (appPrint p2 a . ((`lmap` k) . mappend)))
 
 instance Monoid (Printer r a) where
   mempty = printer (const . ($ mempty))
