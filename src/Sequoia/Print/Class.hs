@@ -177,22 +177,10 @@ encloseSep l r s ps = enclose l r (group (concatWith (surround (line' <> s)) ps)
 
 
 list :: Document p => [p] -> p
-list
-  = group
-  . brackets
-  . encloseSep
-    (flatAlt space mempty)
-    (flatAlt space mempty)
-    (comma <> space)
+list = group . brackets . encloseSep space' space' (comma <> space)
 
 tupled :: Document p => [p] -> p
-tupled
-  = group
-  . parens
-  . encloseSep
-    (flatAlt space mempty)
-    (flatAlt space mempty)
-    (comma <> space)
+tupled = group . parens . encloseSep space' space' (comma <> space)
 
 
 surround :: Semigroup p => p -> p -> p -> p
