@@ -47,6 +47,7 @@ module Sequoia.Print.Class
   -- * Responsive documents
 , ResponsiveDocument(..)
   -- * Combinators
+, align
 , width
 , fill
 , fillBreak
@@ -258,6 +259,10 @@ instance ResponsiveDocument b => ResponsiveDocument (a -> b) where
 
 
 -- Combinators
+
+align :: ResponsiveDocument p => p -> p
+align d = column (\ k -> nesting (\ i -> nest (k - i) d))
+
 
 width :: ResponsiveDocument p => p -> (Int -> p) -> p
 width p f = column $ \ start -> p <> column (\ end -> f (end - start))
