@@ -4,6 +4,7 @@ module Sequoia.Print.Class
   -- * Combinators
 , parensIf
 , concatWith
+, (<+>)
   -- * Characters
 , lparen
 , rparen
@@ -17,7 +18,6 @@ module Sequoia.Print.Class
 , comma
 ) where
 
-import Control.Applicative (liftA2)
 import Data.Maybe (fromMaybe)
 
 -- Pretty-printing
@@ -28,11 +28,6 @@ class Monoid p => Document p where
   char c = string [c]
   string :: String -> p
   string = foldMap char
-
-  (<+>) :: p -> p -> p
-  (<+>) = surround space
-
-  infixr 6 <+>
 
   surround :: p -> p -> p -> p
   surround x l r = enclose l r x
@@ -56,8 +51,6 @@ instance Document b => Document (a -> b) where
   char   = pure . char
   string = pure . string
 
-  (<+>) = liftA2 (<+>)
-
   surround x l r = enclose <$> x <*> l <*> r
   enclose l r x = enclose <$> l <*> r <*> x
 
@@ -75,6 +68,12 @@ parensIf False = id
 
 concatWith :: (Monoid p, Foldable t) => (p -> p -> p) -> t p -> p
 concatWith (<>) = fromMaybe mempty . foldr (\ a -> Just . maybe a (a <>)) Nothing
+
+
+(<+>) :: Document p => p -> p -> p
+(<+>) = surround space
+
+infixr 6 <+>
 
 
 -- Characters
