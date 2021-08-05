@@ -116,7 +116,7 @@ liftP2 :: Coapplicative r f => ((b >-r-~ c) -> a) -> f a -> f b -> f c
 liftP2 f a b = contramap f a <&> b
 
 liftC2 :: (c -> Either a b) -> Printer r a -> Printer r b -> Printer r c
-liftC2 f pa pb = printer (\ k c -> either (getPrint pa k) (getPrint pb k) (f c))
+liftC2 f pa pb = f <#> pa <&> pb
 
 
 fanoutWith :: (Doc -> Doc -> Doc) -> Printer r a -> Printer r a -> Printer r a
