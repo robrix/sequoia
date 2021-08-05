@@ -112,7 +112,7 @@ instance Kontravariant r (Printer r) where
   kontramap f pa = printer (\ k a' -> appF f a' (getPrint pa k))
 
 
-liftP2 :: ((b >-r-~ c) -> a) -> Printer r a -> Printer r b -> Printer r c
+liftP2 :: Coapplicative r f => ((b >-r-~ c) -> a) -> f a -> f b -> f c
 liftP2 f a b = contramap f a <&> b
 
 liftC2 :: (c -> Either a b) -> Printer r a -> Printer r b -> Printer r c
