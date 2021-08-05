@@ -29,6 +29,7 @@ module Sequoia.Print.Class
 , pipe
 ) where
 
+import Control.Applicative (liftA2)
 import Data.Maybe (fromMaybe)
 
 -- Pretty-printing
@@ -68,6 +69,9 @@ class Monoid p => Document p where
   group :: p -> p
   group = id
 
+  flatAlt :: p -> p -> p
+  flatAlt = const
+
 instance Document b => Document (a -> b) where
   char   = pure . char
   string = pure . string
@@ -84,6 +88,7 @@ instance Document b => Document (a -> b) where
   hardline = pure hardline
 
   group = fmap group
+  flatAlt = liftA2 flatAlt
 
 
 -- Combinators
