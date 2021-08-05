@@ -63,6 +63,8 @@ _K = coerced
 
 type a ••r = a • r • r
 
+infixl 7 ••
+
 dn :: a -> a •• r
 dn a = K (• a)
 
@@ -80,6 +82,8 @@ instance Applicative (DN r) where
 -- Triple negation
 
 type a •••r = a • r • r • r
+
+infixl 7 •••
 
 tnE :: a ••• r -> a • r
 tnE ta = K ((ta •) . dn)
