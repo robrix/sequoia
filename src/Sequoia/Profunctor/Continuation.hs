@@ -10,6 +10,7 @@ module Sequoia.Profunctor.Continuation
   -- * Double negation
 , type (••)
 , dn
+, (=<<^)
 , DN(..)
   -- * Triple negation
 , type (•••)
@@ -67,6 +68,10 @@ infixl 7 ••
 
 dn :: a -> a •• r
 dn a = K (• a)
+
+
+(=<<^) :: (a -> b •• r) -> (a •• r -> b •• r)
+f =<<^ m = K (\ k -> m • K ((• k) . f))
 
 
 newtype DN r a = DN { runDN :: a •• r }
