@@ -19,6 +19,10 @@ module Sequoia.Print.Class
 , squote
 , dquote
 , space
+, line
+, line'
+, softline
+, softline'
 , semi
 , comma
 , colon
@@ -136,8 +140,12 @@ squote, dquote :: Document p => p
 squote = char '\''
 dquote = char '"'
 
-space :: Document p => p
+space, line, line', softline, softline' :: Document p => p
 space = char ' '
+line = flatAlt hardline space
+line' = flatAlt hardline mempty
+softline = flatAlt space hardline
+softline' = flatAlt mempty hardline
 
 semi, comma, colon, dot, slash, backslash, equals, pipe :: Document p => p
 semi = char ';'
