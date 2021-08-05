@@ -17,7 +17,14 @@ module Sequoia.Print.Class
 , squote
 , dquote
 , space
+, semi
 , comma
+, colon
+, dot
+, slash
+, backslash
+, equals
+, pipe
 ) where
 
 import Data.Maybe (fromMaybe)
@@ -111,5 +118,12 @@ dquote = char '"'
 space :: Document p => p
 space = char ' '
 
-comma :: Document p => p
+semi, comma, colon, dot, slash, backslash, equals, pipe :: Document p => p
+semi = char ';'
 comma = char ','
+colon = char ':'
+dot = char '.'
+slash = char '/'
+backslash = char '\\'
+equals = char '='
+pipe = char '|'
