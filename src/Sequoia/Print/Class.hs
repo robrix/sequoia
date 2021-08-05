@@ -44,6 +44,8 @@ module Sequoia.Print.Class
 , backslash
 , equals
 , pipe
+  -- * Responsive documents
+, ResponsiveDocument(..)
 ) where
 
 import Control.Applicative (liftA2)
@@ -52,7 +54,7 @@ import Data.Maybe (fromMaybe)
 -- Pretty-printing
 
 class Monoid p => Document p where
-  {-# MINIMAL (char | string), column #-}
+  {-# MINIMAL char | string #-}
   char :: Char -> p
   char c = string [c]
   string :: String -> p
@@ -93,8 +95,6 @@ class Monoid p => Document p where
   nest _ = id
 
 
-  column :: (Int -> p) -> p
-
 instance Document b => Document (a -> b) where
   char   = pure . char
   string = pure . string
@@ -113,8 +113,6 @@ instance Document b => Document (a -> b) where
   group = fmap group
   flatAlt = liftA2 flatAlt
   nest i = fmap (nest i)
-
-  column f a = column (`f` a)
 
 
 -- Combinators
@@ -241,3 +239,12 @@ slash = char '/'
 backslash = char '\\'
 equals = char '='
 pipe = char '|'
+
+
+-- Responsive documents
+
+class Document p => ResponsiveDocument p where
+  column :: (Int -> p) -> p
+
+instance ResponsiveDocument b => ResponsiveDocument (a -> b) where
+  column f a = column (`f` a)
