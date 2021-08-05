@@ -129,7 +129,7 @@ tuple a b = fanoutWith combine (contramap fst a) (contramap snd b)
 list :: Printer r a -> Printer r [a]
 list pa = brackets go
   where
-  go = maybeToEither . uncons <#> mempty <&> (contramap fst pa <:> contramap snd tail)
+  go = maybeToEither . uncons <#> mempty <&> ((fst >$< pa) <:> (snd >$< tail))
   tail = fmap toList . maybeToEither . nonEmpty <#> mempty <&> comma <:> space <:> go
 
 maybeToEither :: Maybe a -> Either () a
