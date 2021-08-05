@@ -1,3 +1,4 @@
+{-# LANGUAGE FunctionalDependencies #-}
 -- | Pretty-printing.
 module Sequoia.Print.Printer
 ( -- * Printers
@@ -11,7 +12,7 @@ module Sequoia.Print.Printer
 , appPrint
 , runPrint
   -- * Computation
-, (<&>)
+, Coapplicative(..)
 , liftP2
 , liftC2
 , fanoutWith
@@ -91,10 +92,13 @@ appPrint p a k = getPrint p k a
 
 -- Computation
 
-(<&>) :: Printer r (a >-r-~ b) -> Printer r a -> Printer r b
-pf <&> pa = printer (\ k b -> getPrint pf k (getPrint pa k >-- b))
+class Contravariant f => Coapplicative r f | f -> r where
+  (<&>) :: f (a >-r-~ b) -> f a -> f b
+  infixl 3 <&>
 
-infixl 3 <&>
+instance Coapplicative r (Printer r) where
+  pf <&> pa = printer (\ k b -> getPrint pf k (getPrint pa k >-- b))
+
 
 (<#>) :: (c -> Either a b) -> Printer r a -> Printer r (b >-r-~ c)
 f <#> a = contramapExp (cocurry f) a
