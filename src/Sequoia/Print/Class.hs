@@ -172,14 +172,14 @@ enclose :: Semigroup p => p -> p -> p -> p
 enclose l r x = l <> x <> r
 
 
-encloseSep :: Document p => p -> p -> p -> [p] -> p
+encloseSep :: (Document p, Foldable t) => p -> p -> p -> t p -> p
 encloseSep l r s = enclose l r . group . concatWith (surround (line' <> s))
 
 
-list :: Document p => [p] -> p
+list :: (Document p, Foldable t) => t p -> p
 list = group . brackets . encloseSep space' space' (comma <> space)
 
-tupled :: Document p => [p] -> p
+tupled :: (Document p, Foldable t) => t p -> p
 tupled = group . parens . encloseSep space' space' (comma <> space)
 
 
