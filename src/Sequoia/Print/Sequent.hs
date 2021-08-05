@@ -18,7 +18,7 @@ import Sequoia.Print.Printer
 
 -- Printable sequents
 
-newtype Seq e r _Γ _Δ = Seq { runSeq :: Printer _Δ -> Printer _Γ }
+newtype Seq e r _Γ _Δ = Seq { runSeq :: Printer r _Δ -> Printer r _Γ }
 
 instance Profunctor (Seq e r) where
   dimap f g = Seq . dimap (contramap g) (contramap f) . runSeq
@@ -36,11 +36,11 @@ instance Monad (Seq e r _Γ) where
 
 -- Elimination
 
-appSeq :: Seq e r _Γ _Δ -> _Γ -> Printer _Δ -> Doc
-appSeq s = flip (print . runSeq s)
+appSeq :: Seq e r _Γ _Δ -> _Γ -> Printer r _Δ -> (Doc -> r) -> r
+appSeq s _Γ pΔ k = runPrint (runSeq s pΔ) k _Γ
 
-printSeq :: _Γ -> Printer _Δ -> Printer (Seq e r _Γ _Δ)
-printSeq _Γ _Δ = Printer (\ k s -> k (appSeq s _Γ _Δ))
+printSeq :: _Γ -> Printer r _Δ -> Printer r (Seq e r _Γ _Δ)
+printSeq _Γ _Δ = Printer (\ k s -> appSeq s _Γ _Δ k)
 
 
 -- Core

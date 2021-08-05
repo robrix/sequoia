@@ -14,25 +14,22 @@ module Sequoia.Print.Printer
 , (&>)
 , liftP2
 , liftC2
+, (<:>)
+, fanoutWith
   -- * Combinators
-, pairWith
-, pair
 , tuple
 , list
 , char1
 , string1
   -- * Exponentials
-, type (-->)(..)
+, Exp(..)
 , appF
 , (#)
-, xfmap
-, xap
-, xbind
+, contramapExp
   -- * Coexponentials
-, type (>--)(..)
+, Coexp(..)
 , (>--)
-, coK
-, coconst
+, cocurry
 ) where
 
 import Control.Monad (ap)
@@ -47,149 +44,160 @@ import Sequoia.Print.Doc
 
 -- Printers
 
-newtype Printer a = Printer { runPrint :: forall r . (Doc -> r) -> (a -> r) }
+newtype Printer r a = Printer { runPrint :: (Doc -> r) -> (a -> r) }
 
-instance Semigroup (Printer a) where
+instance Semigroup (Printer r a) where
   p1 <> p2 = printer (\ k a -> runPrint p1 (\ a' -> runPrint p2 (lmap (mappend a') k) a) a)
 
-instance Monoid (Printer a) where
+instance Monoid (Printer r a) where
   mempty = printer (const . ($ mempty))
 
-instance Document (Printer a) where
+instance Document (Printer r a) where
   char c = printer (const . ($ char c))
   string s = printer (const . ($ string s))
 
-instance Contravariant Printer where
+instance Contravariant (Printer r) where
   contramap f (Printer r) = Printer (lmap f . r)
 
 
 -- Construction
 
-printer :: (forall r . (Doc -> r) -> (a -> r)) -> Printer a
+printer :: ((Doc -> r) -> (a -> r)) -> Printer r a
 printer = Printer
 
-withSubject :: (a -> Printer a) -> Printer a
+withSubject :: (a -> Printer r a) -> Printer r a
 withSubject f = printer (\ k a -> runPrint (f a) k a)
 
-contrapure :: (b -> a) -> Printer (a >-- b)
-contrapure f = printer (\ k (pa :>-- b) -> runPrint pa k (f b))
+contrapure :: (b -> a) -> Printer r (Coexp r a b)
+contrapure f = printer (\ _ (a :>-- b) -> a (f b))
 
 
 -- Elimination
 
-print :: Printer a -> a -> Doc
+print :: Printer Doc a -> a -> Doc
 print p = runPrint p id
+
+appPrint :: Printer r a -> a -> (Doc -> r) -> r
+appPrint p a k = runPrint p k a
 
 
 -- Computation
 
-(<&>) :: Printer (a >-- b) -> Printer a -> Printer b
-pf <&> pa = printer (\ k b -> runPrint pf k (pa >-- b))
+(<&>) :: Printer r (Coexp r a b) -> Printer r a -> Printer r b
+pf <&> pa = printer (\ k b -> runPrint pf k (runPrint pa k >-- b))
 
-infixl 4 <&>
+infixl 3 <&>
 
-(<&) :: Printer a -> Printer a -> Printer a
+(<&) :: Printer r a -> Printer r a -> Printer r a
 p1 <& p2 = printer (\ k a -> runPrint p1 (\ d1 -> runPrint p2 (k . mappend d1) a) a)
 
-infixl 4 <&
+infixl 3 <&
 
-(&>) :: Printer a -> Printer a -> Printer a
+(&>) :: Printer r a -> Printer r a -> Printer r a
 p1 &> p2 = printer (\ k a -> runPrint p1 (\ d1 -> runPrint p2 (k . mappend d1) a) a)
 
-infixl 4 &>
+infixl 3 &>
 
-liftP2 :: ((b >-- c) -> a) -> Printer a -> Printer b -> Printer c
+(<#>) :: (c -> Either a b) -> Printer r a -> Printer r (Coexp r b c)
+f <#> a = contramapExp (cocurry f) a
+
+infixl 3 <#>
+
+liftP2 :: (Coexp r b c -> a) -> Printer r a -> Printer r b -> Printer r c
 liftP2 f a b = contramap f a <&> b
 
-liftC2 :: (c -> Either a b) -> Printer a -> Printer b -> Printer c
+liftC2 :: (c -> Either a b) -> Printer r a -> Printer r b -> Printer r c
 liftC2 f pa pb = printer (\ k c -> either (runPrint pa k) (runPrint pb k) (f c))
+
+
+(<:>) :: Printer r a -> Printer r a -> Printer r a
+(<:>) = fanoutWith (<>)
+
+infixl 4 <:>
+
+fanoutWith :: (Doc -> Doc -> Doc) -> Printer r a -> Printer r a -> Printer r a
+fanoutWith f l r = printer (\ k a -> appPrint l a (appPrint r a . (k .) . f))
 
 
 -- Combinators
 
-pairWith :: (Doc -> Doc -> Doc) -> Printer (a >-- b >-- (a, b))
-pairWith f = printer (\ k (pa :>-- pb :>-- (a, b)) -> runPrint pa (\ a -> runPrint pb (k . f a) b) a)
-
-pair :: Printer (a >-- b >-- (a, b))
-pair = pairWith (<>)
-
-tuple :: Printer a -> Printer b -> Printer (a, b)
-tuple a b = pairWith combine <&> a <&> b
+tuple :: Printer r a -> Printer r b -> Printer r (a, b)
+tuple a b = fanoutWith combine (contramap fst a) (contramap snd b)
   where
   combine da db = parens (da <> comma <+> db)
 
-list :: Printer a -> Printer [a]
+list :: Printer r a -> Printer r [a]
 list pa = brackets go
   where
-  go = liftC2 (maybeToEither . uncons) mempty (pair <&> pa <&>
-    liftC2 (fmap toList . maybeToEither . nonEmpty) mempty (comma &> space &> go))
+  go = maybeToEither . uncons <#> mempty <&> (contramap fst pa <:> contramap snd tail)
+  tail = fmap toList . maybeToEither . nonEmpty <#> mempty <&> comma <:> space <:> go
 
 maybeToEither :: Maybe a -> Either () a
 maybeToEither = maybe (Left ()) Right
 
-char1 :: Printer Char
+char1 :: Printer r Char
 char1 = printer (. char)
 
-string1 :: Printer String
+string1 :: Printer r String
 string1 = printer (. string)
 
 
 -- Exponentials
 
-newtype a --> b = F { runF :: forall r . (b -> r) -> (a -> r) }
+newtype Exp r a b = F { runF :: (b -> r) -> (a -> r) }
 
-instance Profunctor (-->) where
+instance Profunctor (Exp r) where
   dimap f g (F r) = F (dimap (lmap g) (lmap f) r)
 
-instance Choice (-->) where
+instance Choice (Exp r) where
   left'  (F r) = F (\ k -> r (inlL k) <--> inrL k)
   right' (F r) = F (\ k -> inlL k <--> r (inrL k))
 
-instance Cochoice (-->) where
+instance Cochoice (Exp r) where
   unleft  (F f) = F (\ k -> inlL (let f' = f (k <--> inrL f') in f'))
   unright (F f) = F (\ k -> inrL (let f' = f (inlL f' <--> k) in f'))
 
-instance Strong (-->) where
+instance Strong (Exp r) where
   first'  (F r) = F (\ k (a, c) -> r (lmap (,c) k) a)
   second' (F r) = F (\ k (c, a) -> r (lmap (c,) k) a)
 
-instance Functor ((-->) a) where
+instance Functor (Exp r a) where
   fmap = rmap
 
-instance Applicative ((-->) a) where
+instance Applicative (Exp r a) where
   pure a = F (const . ($ a))
   (<*>) = ap
 
-instance Monad ((-->) a) where
+instance Monad (Exp r a) where
   F r >>= f = F (\ k i -> r (\ a -> runF (f a) k i) i)
 
 
-appF :: (a --> b) -> a -> (b -> r) -> r
+appF :: Exp r a b -> a -> (b -> r) -> r
 appF f a b = runF f b a
 
-(#) :: (a --> b) -> (a -> b)
+(#) :: Exp b a b -> (a -> b)
 f # a = runF f id a
 
 infixl 9 #
 
 
+contramapExp :: Exp r a' a -> (Printer r a -> Printer r a')
+contramapExp f pa = printer (\ k a' -> appF f a' (runPrint pa k))
+
+
 -- Coexponentials
 
-data a >-- b = Printer a :>-- b
+data Coexp r b a = (:>--) { coK :: b -> r, coconst :: a }
   deriving (Functor)
 
 infixr 0 >--, :>--
 
-instance Profunctor (>--) where
-  dimap f g (a :>-- b) = contramap f a >-- g b
+instance Profunctor (Coexp r) where
+  dimap f g (a :>-- b) = lmap f a >-- g b
 
 
-(>--) :: Printer a -> b -> a >-- b
+(>--) :: (b -> r) -> a -> Coexp r b a
 (>--) = (:>--)
 
-
-coK :: (a >-- b) -> Printer a
-coK (k :>-- _) = k
-
-coconst :: (a >-- b) -> b
-coconst (_ :>-- a) = a
+cocurry :: (c -> Either a b) -> Exp r (Coexp r b c) a
+cocurry f = F $ \ k (b :>-- c) -> either k b (f c)
