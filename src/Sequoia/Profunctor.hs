@@ -1,6 +1,6 @@
 module Sequoia.Profunctor
 ( -- * Profunctors
-  Profunctor(..)
+  module Data.Profunctor
 ) where
 
 import Data.Profunctor
