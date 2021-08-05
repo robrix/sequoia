@@ -46,6 +46,8 @@ module Sequoia.Print.Class
 , pipe
   -- * Responsive documents
 , ResponsiveDocument(..)
+  -- * Combinators
+, width
 ) where
 
 import Control.Applicative (liftA2)
@@ -248,3 +250,9 @@ class Document p => ResponsiveDocument p where
 
 instance ResponsiveDocument b => ResponsiveDocument (a -> b) where
   column f a = column (`f` a)
+
+
+-- Combinators
+
+width :: ResponsiveDocument p => p -> (Int -> p) -> p
+width p f = column $ \ start -> p <> column (\ end -> f (end - start))
