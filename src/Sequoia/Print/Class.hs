@@ -83,11 +83,11 @@ concatWith :: (Monoid p, Foldable t) => (p -> p -> p) -> t p -> p
 concatWith (<>) = fromMaybe mempty . foldr (\ a -> Just . maybe a (a <>)) Nothing
 
 
-surround :: Semigroup p => p -> p -> p -> p
-surround x l r = enclose l r x
-
 enclose :: Semigroup p => p -> p -> p -> p
 enclose l r x = l <> x <> r
+
+surround :: Semigroup p => p -> p -> p -> p
+surround x l r = enclose l r x
 
 
 (<+>) :: Document p => p -> p -> p
