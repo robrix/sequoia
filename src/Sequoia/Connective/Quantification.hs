@@ -20,11 +20,11 @@ import Sequoia.Profunctor.Continuation
 
 -- Adjunction
 
-leftAdjunct :: (forall x . Exists r p a -> b x) -> (forall x . Polarized p x => a x -> ForAll r p b)
-leftAdjunct f a = forAll (f (exists a))
+leftAdjunct :: (forall x . Exists r p a -> b x •• r) -> (forall x . Polarized p x => a x •• r -> ForAll r p b)
+leftAdjunct f a = ForAll (f (Exists a))
 
-rightAdjunct :: (forall x . a x -> ForAll r p b) -> (forall x . Polarized p x => Exists r p a -> b x •• r)
-rightAdjunct f = runExistsM (runForAll . f)
+rightAdjunct :: (forall x . a x •• r -> ForAll r p b) -> (forall x . Polarized p x => Exists r p a -> b x •• r)
+rightAdjunct f (Exists r) = runForAll (f r)
 
 
 -- Quantified constraints
