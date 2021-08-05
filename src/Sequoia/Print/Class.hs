@@ -52,6 +52,9 @@ class Monoid p => Document p where
   squotes :: p -> p
   squotes = enclose squote squote
 
+  dquotes :: p -> p
+  dquotes = enclose dquote dquote
+
 instance Document b => Document (a -> b) where
   char   = pure . char
   string = pure . string
@@ -64,6 +67,7 @@ instance Document b => Document (a -> b) where
   braces f = braces <$> f
   angles f = angles <$> f
   squotes f = squotes <$> f
+  dquotes f = dquotes <$> f
 
 
 -- Combinators
