@@ -3,6 +3,7 @@ module Sequoia.Print.Class
   Document(..)
   -- * Combinators
 , parensIf
+, concatWith
   -- * Characters
 , lparen
 , rparen
@@ -70,6 +71,11 @@ instance Document b => Document (a -> b) where
 parensIf :: Document p => Bool -> p -> p
 parensIf True  = parens
 parensIf False = id
+
+concatWith :: (Monoid p, Foldable t) => (p -> p -> p) -> t p -> p
+concatWith (<>) ds
+  | null ds   = mempty
+  | otherwise = foldr1 (<>) ds
 
 
 -- Characters
