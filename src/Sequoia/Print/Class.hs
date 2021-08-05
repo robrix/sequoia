@@ -64,6 +64,10 @@ class Monoid p => Document p where
   hardline :: p
   hardline = char '\n'
 
+
+  group :: p -> p
+  group = id
+
 instance Document b => Document (a -> b) where
   char   = pure . char
   string = pure . string
@@ -78,6 +82,8 @@ instance Document b => Document (a -> b) where
   dquotes f = dquotes <$> f
 
   hardline = pure hardline
+
+  group = fmap group
 
 
 -- Combinators
