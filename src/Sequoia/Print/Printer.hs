@@ -45,7 +45,7 @@ import Data.List.NonEmpty (nonEmpty, toList)
 import Data.Profunctor
 import Prelude hiding (print)
 import Sequoia.Disjunction
-import Sequoia.Print.Class
+import Sequoia.Print.Class hiding (list)
 
 -- Printers
 

@@ -6,6 +6,7 @@ module Sequoia.Print.Class
 , concatWith
 , enclose
 , encloseSep
+, list
 , surround
 , (<+>)
 , (</>)
@@ -113,6 +114,18 @@ enclose l r x = l <> x <> r
 
 encloseSep :: Document p => p -> p -> p -> [p] -> p
 encloseSep l r s ps = enclose l r (group (concatWith (surround (line' <> s)) ps))
+
+
+list :: Document p => [p] -> p
+list
+  = group
+  . brackets
+  . encloseSep
+    (flatAlt space mempty)
+    (flatAlt space mempty)
+    (comma <> space)
+
+
 surround :: Semigroup p => p -> p -> p -> p
 surround x l r = enclose l r x
 
