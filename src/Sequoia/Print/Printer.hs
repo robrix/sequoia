@@ -8,6 +8,7 @@ module Sequoia.Print.Printer
 , contrapure
   -- * Elimination
 , print
+, appPrint
   -- * Computation
 , (<&>)
 , liftP2
