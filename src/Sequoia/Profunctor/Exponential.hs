@@ -215,7 +215,7 @@ mapExpFnC :: (e1 ==> r1 -> e2 ==> r2) -> (b • r -> e ∘ a -> e1 ==> r1) -> (b
 mapExpFnC = rmap . rmap
 
 
-dnE :: (a --|Exp e r|-> b) • r • r -> a --|Exp e r|-> b
+dnE :: (a --|Exp e r|-> b) •• r -> a --|Exp e r|-> b
 dnE k = exp (\ k' v -> cont (\ _K -> pure (k • _K (\ f -> k' ↓ f ↑ v))))
 
 reset :: a --|Exp e b|-> b -> a --|Exp e r|-> b

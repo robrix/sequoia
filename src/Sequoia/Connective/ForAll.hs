@@ -8,6 +8,6 @@ import Sequoia.Profunctor.Continuation
 
 -- Universal quantification
 
-newtype ForAll r p f = ForAll { runForAll :: forall x . Polarized p x => f x • r • r }
+newtype ForAll r p f = ForAll { runForAll :: forall x . Polarized p x => f x •• r }
 
 instance Polarized N (ForAll r p f)

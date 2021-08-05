@@ -28,7 +28,7 @@ funPar1 = iso
   (\ k -> K ((k •) . (mkPar (inrL (lmap pure k)) =<<)))
   (\ k -> K ((k •) . fmap mkFun))
 
-funPar2 :: Iso' (e ∘ (a ¬ r ⅋ b) • r • r) (e ∘ (a ~~Fun e r~> b) • r • r)
+funPar2 :: Iso' (e ∘ (a ¬ r ⅋ b) •• r) (e ∘ (a ~~Fun e r~> b) •• r)
 funPar2 = iso
   (lmap (\ f -> K ((f •) . fmap mkFun)))
   (lmap (\ p -> K ((p •) . (mkPar (inrL (lmap pure p)) =<<))))
