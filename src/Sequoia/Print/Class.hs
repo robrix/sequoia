@@ -18,6 +18,7 @@ module Sequoia.Print.Class
 ) where
 
 import Control.Applicative (liftA2)
+import Data.Maybe (fromMaybe)
 
 -- Pretty-printing
 
@@ -73,9 +74,7 @@ parensIf True  = parens
 parensIf False = id
 
 concatWith :: (Monoid p, Foldable t) => (p -> p -> p) -> t p -> p
-concatWith (<>) ds
-  | null ds   = mempty
-  | otherwise = foldr1 (<>) ds
+concatWith (<>) = fromMaybe mempty . foldr (\ a -> Just . maybe a (a <>)) Nothing
 
 
 -- Characters
