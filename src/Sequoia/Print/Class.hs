@@ -4,6 +4,8 @@ module Sequoia.Print.Class
   -- * Combinators
 , parensIf
 , concatWith
+, enclose
+, surround
 , (<+>)
   -- * Characters
 , lparen
