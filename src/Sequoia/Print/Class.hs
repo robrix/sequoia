@@ -67,6 +67,12 @@ instance Document b => Document (a -> b) where
 
   lparen = pure lparen
   rparen = pure rparen
+  lbracket = pure lbracket
+  rbracket = pure rbracket
+  lbrace = pure lbrace
+  rbrace = pure rbrace
+  langle = pure langle
+  rangle = pure rangle
   space = pure space
   comma = pure comma
 
@@ -76,6 +82,9 @@ instance Document b => Document (a -> b) where
   enclose l r x = enclose <$> l <*> r <*> x
 
   parens f = parens <$> f
+  brackets f = brackets <$> f
+  braces f = braces <$> f
+  angles f = angles <$> f
 
 
 -- Combinators
