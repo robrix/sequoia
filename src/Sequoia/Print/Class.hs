@@ -268,5 +268,5 @@ fillBreak :: ResponsiveDocument p => Int -> p -> p
 fillBreak f x = width x go
   where
   go w
-    | w > f = nest f line'
+    | w > f     = nest f line'
     | otherwise = stimes (f - w) space
