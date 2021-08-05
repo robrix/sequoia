@@ -250,9 +250,11 @@ pipe = char '|'
 
 class Document p => ResponsiveDocument p where
   column :: (Int -> p) -> p
+  nesting :: (Int -> p) -> p
 
 instance ResponsiveDocument b => ResponsiveDocument (a -> b) where
   column f a = column (`f` a)
+  nesting f a = nesting (`f` a)
 
 
 -- Combinators
