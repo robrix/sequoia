@@ -22,11 +22,11 @@ import Control.Category (Category)
 import Data.Distributive
 import Data.Functor.Identity
 import Data.Functor.Rep as Co
-import Data.Profunctor
 import Data.Profunctor.Rep as Pro
 import Data.Profunctor.Sieve
 import Data.Profunctor.Traversing
 import Fresnel.Iso
+import Sequoia.Profunctor
 
 -- Continuation profunctor
 
@@ -85,11 +85,11 @@ infixl 1 ^>>=
 newtype DN r a = DN { runDN :: a •• r }
 
 instance Functor (DN r) where
-  fmap f = DN . lmap (lmap f) . runDN
+  fmap f = DN . (<<^ (<<^ f)) . runDN
 
 instance Applicative (DN r) where
   pure = DN . dn
-  DN f <*> DN a = DN (K (\ k -> f • K (\ f -> a • K (\ a -> k • f a))))
+  DN f <*> DN a = DN (f <<^ (a <<^) . (<<^))
 
 instance Monad (DN r) where
   DN m >>= f = DN (m ^>>= runDN . f)
