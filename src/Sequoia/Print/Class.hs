@@ -7,6 +7,7 @@ module Sequoia.Print.Class
 , enclose
 , surround
 , (<+>)
+, (</>)
   -- * Characters
 , lparen
 , rparen
@@ -116,6 +117,11 @@ surround x l r = enclose l r x
 (<+>) = surround space
 
 infixr 6 <+>
+
+(</>) :: Document p => p -> p -> p
+(</>) = surround line
+
+infixr 6 </>
 
 
 -- Characters
