@@ -51,7 +51,7 @@ import Sequoia.Print.Doc
 
 -- Printers
 
-newtype Printer r a = Printer ((Doc -> r) -> (a -> r))
+newtype Printer r a = Printer (a ~~r~> Doc)
 
 instance Semigroup (Printer r a) where
   p1 <> p2 = printer (\ k a -> appPrint p1 a (appPrint p2 a . ((`lmap` k) . mappend)))
@@ -64,13 +64,13 @@ instance Document (Printer r a) where
   string s = printer (const . ($ string s))
 
 instance Contravariant (Printer r) where
-  contramap f (Printer r) = Printer (lmap f . r)
+  contramap f (Printer r) = Printer (lmap f r)
 
 
 -- Construction
 
 printer :: ((Doc -> r) -> (a -> r)) -> Printer r a
-printer = Printer
+printer = Printer . F
 
 withSubject :: (a -> Printer r a) -> Printer r a
 withSubject f = printer (\ k -> runPrint k <*> f)
@@ -82,7 +82,7 @@ contrapure = printer . const . runCoexp
 -- Elimination
 
 getPrint :: Printer r a -> ((Doc -> r) -> (a -> r))
-getPrint (Printer r) = r
+getPrint (Printer r) = runF r
 
 print :: Printer Doc a -> a -> Doc
 print p = getPrint p id
