@@ -57,6 +57,7 @@ module Sequoia.Print.Class
 ) where
 
 import Control.Applicative (liftA2)
+import Data.Foldable (fold)
 import Data.Maybe (fromMaybe)
 import Data.Semigroup
 
@@ -134,29 +135,29 @@ concatWith :: (Monoid p, Foldable t) => (p -> p -> p) -> t p -> p
 concatWith (<>) = fromMaybe mempty . foldr (\ a -> Just . maybe a (a <>)) Nothing
 
 
-hsep :: Document p => [p] -> p
+hsep :: (Document p, Foldable t) => t p -> p
 hsep = concatWith (<+>)
 
-vsep :: Document p => [p] -> p
+vsep :: (Document p, Foldable t) => t p -> p
 vsep = concatWith (</>)
 
-fillSep :: Document p => [p] -> p
+fillSep :: (Document p, Foldable t) => t p -> p
 fillSep = concatWith (surround softline)
 
-sep :: Document p => [p] -> p
+sep :: (Document p, Foldable t) => t p -> p
 sep = group . vsep
 
 
-hcat :: Document p => [p] -> p
-hcat = mconcat
+hcat :: (Document p, Foldable t) => t p -> p
+hcat = fold
 
-vcat :: Document p => [p] -> p
+vcat :: (Document p, Foldable t) => t p -> p
 vcat = concatWith (surround line')
 
-fillCat :: Document p => [p] -> p
+fillCat :: (Document p, Foldable t) => t p -> p
 fillCat = concatWith (surround softline')
 
-cat :: Document p => [p] -> p
+cat :: (Document p, Foldable t) => t p -> p
 cat = group . vcat
 
 
