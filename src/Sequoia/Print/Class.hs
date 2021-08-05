@@ -61,6 +61,9 @@ class Monoid p => Document p where
   dquotes :: p -> p
   dquotes = enclosing dquote dquote
 
+  hardline :: p
+  hardline = char '\n'
+
 instance Document b => Document (a -> b) where
   char   = pure . char
   string = pure . string
@@ -73,6 +76,8 @@ instance Document b => Document (a -> b) where
   angles f = angles <$> f
   squotes f = squotes <$> f
   dquotes f = dquotes <$> f
+
+  hardline = pure hardline
 
 
 -- Combinators
