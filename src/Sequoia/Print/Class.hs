@@ -49,6 +49,9 @@ class Monoid p => Document p where
   angles :: p -> p
   angles = enclose langle rangle
 
+  squotes :: p -> p
+  squotes = enclose squote squote
+
 instance Document b => Document (a -> b) where
   char   = pure . char
   string = pure . string
@@ -60,6 +63,7 @@ instance Document b => Document (a -> b) where
   brackets f = brackets <$> f
   braces f = braces <$> f
   angles f = angles <$> f
+  squotes f = squotes <$> f
 
 
 -- Combinators
