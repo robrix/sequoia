@@ -160,7 +160,7 @@ cat :: Document p => [p] -> p
 cat = group . vcat
 
 
-punctuate :: Document p => p -> [p] -> [p]
+punctuate :: (Document p, Foldable t) => p -> t p -> [p]
 punctuate s = fromMaybe [] . foldr (\ a -> maybe (Just [a]) (Just . (a <> s :))) Nothing
 
 
