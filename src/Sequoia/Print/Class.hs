@@ -74,12 +74,12 @@ instance Document b => Document (a -> b) where
 
   enclosing l r x = enclosing <$> l <*> r <*> x
 
-  parens f = parens <$> f
-  brackets f = brackets <$> f
-  braces f = braces <$> f
-  angles f = angles <$> f
-  squotes f = squotes <$> f
-  dquotes f = dquotes <$> f
+  parens = fmap parens
+  brackets = fmap brackets
+  braces = fmap braces
+  angles = fmap angles
+  squotes = fmap squotes
+  dquotes = fmap dquotes
 
   hardline = pure hardline
 
