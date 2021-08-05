@@ -266,5 +266,5 @@ fill n p = width p $ \ w -> stimes (n - w) space
 
 fillBreak :: ResponsiveDocument p => Int -> p -> p
 fillBreak f x = width x $ \case
-  w | w > f -> nest f line'
+  w | w > f     -> nest f line'
     | otherwise -> stimes (f - w) space
