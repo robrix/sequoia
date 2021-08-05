@@ -9,6 +9,7 @@ module Sequoia.Print.Printer
   -- * Elimination
 , print
 , appPrint
+, runPrint
   -- * Computation
 , (<&>)
 , liftP2
@@ -78,6 +79,9 @@ contrapure f = printer (\ _ (a :>-- b) -> a (f b))
 
 print :: Printer Doc a -> a -> Doc
 print p = getPrint p id
+
+runPrint :: (Doc -> r) -> a -> Printer r a -> r
+runPrint k a p = getPrint p k a
 
 appPrint :: Printer r a -> a -> (Doc -> r) -> r
 appPrint p a k = getPrint p k a
