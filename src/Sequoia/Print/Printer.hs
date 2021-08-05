@@ -74,7 +74,7 @@ withSubject :: (a -> Printer r a) -> Printer r a
 withSubject f = printer (\ k -> runPrint k <*> f)
 
 contrapure :: (b -> a) -> Printer r (a >-r-~ b)
-contrapure f = printer (\ _ c -> runCoexp c f)
+contrapure = printer . const . runCoexp
 
 
 -- Elimination
@@ -210,8 +210,8 @@ cocurry :: (c -> Either a b) -> (b >-r-~ c) ~~r~> a
 cocurry f = F $ \ k (b :>-- c) -> either k b (f c)
 
 
-runCoexp :: Coexp r b a -> (a -> b) -> r
-runCoexp (b :>-- a) f = b (f a)
+runCoexp :: (a -> b) -> Coexp r b a -> r
+runCoexp f (b :>-- a) = b (f a)
 
 elimCoexp :: Coexp r b a -> Exp r a b -> r
 elimCoexp (b :>-- a) f = runF f b a
