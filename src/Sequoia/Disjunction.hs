@@ -8,7 +8,6 @@ module Sequoia.Disjunction
 , exlD
 , exrD
 , (<••>)
-, (<•••>)
 , (<∘∘>)
 , mirrorDisj
 , cocurryDisj
@@ -43,7 +42,6 @@ module Sequoia.Disjunction
 , inrR
 ) where
 
-import Control.Applicative (liftA2)
 import Control.Category (Category, (>>>))
 import Data.Functor.Contravariant
 import Data.Profunctor
@@ -97,11 +95,6 @@ exrD = const Nothing <--> Just
 K a <••> K b = K (a <--> b)
 
 infix 3 <••>
-
-(<•••>) :: Disj d => (e -> a • r) -> (e -> b • r) -> (e -> (a `d` b) • r)
-(<•••>) = liftA2 (<••>)
-
-infix 3 <•••>
 
 (<∘∘>) :: Disj d => (e ∘ a -> r) -> (e ∘ b -> r) -> (e ∘ (a `d` b) -> e ==> r)
 (l <∘∘> r) ab = C ((l <--> r) . bisequenceDisjV ab)
