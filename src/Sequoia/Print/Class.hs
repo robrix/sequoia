@@ -5,6 +5,7 @@ module Sequoia.Print.Class
 , parensIf
 , concatWith
 , hsep
+, vsep
 , enclose
 , encloseSep
 , list
@@ -112,6 +113,9 @@ concatWith (<>) = fromMaybe mempty . foldr (\ a -> Just . maybe a (a <>)) Nothin
 
 hsep :: Document p => [p] -> p
 hsep = concatWith (<+>)
+
+vsep :: Document p => [p] -> p
+vsep = concatWith (</>)
 
 enclose :: Semigroup p => p -> p -> p -> p
 enclose l r x = l <> x <> r
