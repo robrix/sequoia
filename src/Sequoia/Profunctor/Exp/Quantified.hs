@@ -7,9 +7,12 @@ module Sequoia.Profunctor.Exp.Quantified
 , (#)
   -- * Coexponentials
 , type (>--)(..)
+  -- * Computation
+, cocurry
 ) where
 
 import qualified Control.Category as Cat
+import           Data.Function ((&))
 import           Data.Profunctor
 import           Prelude hiding (exp)
 
@@ -47,3 +50,9 @@ data b >-- a = (:>--) { coreturn :: forall r . ((b -> r) -> r) -> r, coconst :: 
 
 instance Profunctor (>--) where
   dimap f g (b :>-- a) = lmap (lmap (lmap f)) b :>-- g a
+
+
+-- Computation
+
+cocurry :: (c --> Either a b) -> ((b >-- c) --> a)
+cocurry f = Exp (\ k (b :>-- c) -> getExp f (either k (b . (&))) c)
