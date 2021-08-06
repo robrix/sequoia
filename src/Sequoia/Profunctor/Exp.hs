@@ -19,15 +19,20 @@ module Sequoia.Profunctor.Exp
 , uncocurry
 ) where
 
-import Data.Function ((&))
-import Prelude hiding (exp)
-import Sequoia.Disjunction
-import Sequoia.Profunctor
-import Sequoia.Profunctor.Applicative
+import qualified Control.Category as Cat
+import           Data.Function ((&))
+import           Prelude hiding (exp)
+import           Sequoia.Disjunction
+import           Sequoia.Profunctor
+import           Sequoia.Profunctor.Applicative
 
 -- Exponential functors
 
 newtype Exp r a b = Exp { getExp :: (b -> r) -> (a -> r) }
+
+instance Cat.Category (Exp r) where
+  id = exp id
+  f . g = Exp (getExp g . getExp f)
 
 instance Profunctor (Exp r) where
   dimap f g = Exp . dimap (<<^ g) (<<^ f) . getExp
