@@ -51,6 +51,10 @@ instance Document b =>  Document (Printer r a b) where
 instance Coapply (Coexp r) (Printer r) where
   pf <&> pa = printer (\ k b -> getPrint pf k (getPrint pa k >- b))
 
+instance ProfunctorCPS (Exp r) (Printer r) where
+  lmapCPS f p = printer (getExp f . getPrint p)
+  rmapCPS f p = printer (getPrint p . getExp f)
+
 
 -- Construction
 
