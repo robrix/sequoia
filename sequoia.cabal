@@ -69,6 +69,7 @@ library
     Sequoia.Bifunctor.Join
     Sequoia.Bifunctor.Product
     Sequoia.Bifunctor.Sum
+    Sequoia.Birepresentable
     Sequoia.Calculus.Additive
     Sequoia.Calculus.Assertion
     Sequoia.Calculus.Bottom
