@@ -4,3 +4,4 @@ module Sequoia.Profunctor.Exp.Quantified
 ) where
 
 newtype a --> b = Exp { getExp :: forall r . (b -> r) -> (a -> r) }
+  deriving (Functor)
