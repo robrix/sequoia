@@ -5,6 +5,8 @@ module Sequoia.Profunctor.Exp.Quantified
 
 import Data.Profunctor
 
+-- Exponentials
+
 newtype a --> b = Exp { getExp :: forall r . (b -> r) -> (a -> r) }
   deriving (Functor)
 
