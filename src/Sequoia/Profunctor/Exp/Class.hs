@@ -1,3 +1,4 @@
+{-# LANGUAGE FunctionalDependencies #-}
 module Sequoia.Profunctor.Exp.Class
 ( -- * Exponentials
   Exponential(..)
@@ -13,18 +14,18 @@ import Prelude hiding (exp)
 
 -- Exponentials
 
-class Profunctor ex => Exponential ex where
+class Profunctor ex => Exponential r ex | ex -> r where
   exp :: ((b -> r) -> (a -> r)) -> ex a b
 
   appExp :: ex a b -> ((b -> r) -> (a -> r))
 
-exp' :: Exponential ex => (a -> b) -> ex a b
+exp' :: Exponential r ex => (a -> b) -> ex a b
 exp' f = exp (. f)
 
 
 -- Coexponentials
 
-class Profunctor co => Coexponential co where
+class Profunctor co => Coexponential r co | co -> r where
   coexp :: (a -> r) -> b -> co a b
 
   runCoexp :: ((a -> r) -> (b -> r)) -> (co a b -> r)
@@ -32,5 +33,5 @@ class Profunctor co => Coexponential co where
 
 -- Computation
 
-cocurry :: (Exponential ex, Coexponential co) => ex c (Either a b) -> ex (co b c) a
+cocurry :: (Exponential r ex, Coexponential r co) => ex c (Either a b) -> ex (co b c) a
 cocurry f = exp (\ k -> runCoexp (appExp f . either k))
