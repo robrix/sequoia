@@ -1,6 +1,7 @@
 {-# LANGUAGE FunctionalDependencies #-}
 module Sequoia.Profunctor.Applicative
-( Coapply(..)
+( ContravariantCPS(..)
+, Coapply(..)
 , Coapplicative(..)
   -- * Exponentials
 , type (~~)
@@ -12,6 +13,9 @@ module Sequoia.Profunctor.Applicative
 
 import Data.Kind (Type)
 import Data.Profunctor
+
+class Profunctor p => ContravariantCPS ex p | p -> ex where
+  contramapCPS :: (a' ~~ex~> a) -> (p a b -> p a' b)
 
 class Profunctor p => Coapply co p | p -> co where
   {-# MINIMAL coliftC2 | (<&>) #-}
