@@ -10,6 +10,7 @@ module Sequoia.Profunctor.Diagonal
 , dedupArrow
   -- * Diagonal functor
 , Δ(..)
+, inDiag
 ) where
 
 import Control.Arrow (Arrow(..), Kleisli(..))
@@ -89,3 +90,6 @@ dedupArrow = arr dedup
 
 newtype Δ a = Δ { exDiag :: (a, a) }
   deriving (Functor)
+
+inDiag :: a -> Δ a
+inDiag a = Δ (a, a)
