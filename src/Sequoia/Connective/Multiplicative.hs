@@ -120,6 +120,7 @@ newtype Δ a = Δ { exDiag :: (a, a) }
 
 instance Distributive Δ where
   distribute g = Δ (exl . exDiag <$> g, exr . exDiag <$> g)
+  collect f g = Δ (exl . exDiag . f <$> g, exr . exDiag . f <$> g)
 
 
 -- Construction
