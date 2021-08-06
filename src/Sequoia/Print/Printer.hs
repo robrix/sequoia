@@ -25,12 +25,12 @@ module Sequoia.Print.Printer
 , string1
 ) where
 
-import Data.Kind (Type)
 import Data.List (uncons)
 import Data.List.NonEmpty (nonEmpty, toList)
 import Data.Profunctor
 import Prelude hiding (exp, print)
 import Sequoia.Print.Class hiding (list)
+import Sequoia.Profunctor.Applicative
 import Sequoia.Profunctor.Exp
 
 -- Printers
@@ -47,6 +47,9 @@ instance Monoid b => Monoid (Printer r a b) where
 instance Document b =>  Document (Printer r a b) where
   char c = printer (const . ($ char c))
   string s = printer (const . ($ string s))
+
+instance Coapply (Coexp r) (Printer r) where
+  pf <&> pa = printer (\ k b -> getPrint pf k (getPrint pa k >- b))
 
 
 -- Construction
@@ -78,31 +81,22 @@ appPrint p a k = getPrint p k a
 
 -- Computation
 
-class Profunctor f => Coapplicative r f | f -> r where
-  (<&>) :: f (a >-Coexp r-~ b) c -> f a c -> f b c
+class Profunctor f => Kontravariant ex f | f -> ex where
+  kontramap :: (a' ~~ex~> a) -> (f a b -> f a' b)
 
-  infixl 3 <&>
-
-instance Coapplicative r (Printer r) where
-  pf <&> pa = printer (\ k b -> getPrint pf k (getPrint pa k >- b))
-
-
-class Profunctor f => Kontravariant r f | f -> r where
-  kontramap :: (a' ~~Exp r~> a) -> (f a b -> f a' b)
-
-  (<#>) :: (c -> Either a b) -> f a d -> f (b >-Coexp r-~ c) d
-  f <#> a = kontramap (cocurry (exp f)) a
-
-  infixl 3 <#>
-
-instance Kontravariant r (Printer r) where
+instance Kontravariant (Exp r) (Printer r) where
   kontramap f pa = printer (\ k a' -> appExp f a' (getPrint pa k))
 
 
-liftP2 :: Coapplicative r f => ((b >-Coexp r-~ c) -> a) -> f a d -> f b d -> f c d
+(<#>) :: Kontravariant (Exp r) f => (c -> Either a b) -> f a d -> f (b >-Coexp r-~ c) d
+(<#>) = kontramap . cocurry . exp
+
+infixl 3 <#>
+
+liftP2 :: Coapplicative co f => ((b >-co-~ c) -> a) -> f a d -> f b d -> f c d
 liftP2 f a b = lmap f a <&> b
 
-liftC2 :: (Coapplicative r f, Kontravariant r f) => (c -> Either a b) -> f a d -> f b d -> f c d
+liftC2 :: (Coapplicative (Coexp r) f, Kontravariant (Exp r) f) => (c -> Either a b) -> f a d -> f b d -> f c d
 liftC2 f pa pb = f <#> pa <&> pb
 
 
@@ -131,19 +125,3 @@ char1 = printer (. char)
 
 string1 :: Document b => Printer r String b
 string1 = printer (. string)
-
-
--- Coexponentials
-
-type a ~~r = (r :: Type -> Type -> Type) a
-type r~> b = r b
-
-infixr 1 ~~
-infixr 0 ~>
-
-
-type b >-r = (r :: Type -> Type -> Type) b
-type r-~ a = r a
-
-infixr 1 >-
-infixr 0 -~
