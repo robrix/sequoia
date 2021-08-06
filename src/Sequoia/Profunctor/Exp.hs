@@ -7,6 +7,7 @@ module Sequoia.Profunctor.Exp
 , appExp
 , runExp
 , elimExp
+, (#)
   -- * Computation
 , (<#>)
   -- * Coexponential functors
@@ -86,6 +87,11 @@ runExp k a x = getExp x k a
 
 elimExp :: Exp r a b -> Coexp r b a -> r
 elimExp (Exp f) (b :>- a) = f b a
+
+(#) :: (a ~~Exp b~> b) -> (a -> b)
+f # a = appExp f a id
+
+infixl 9 #
 
 
 -- Computation
