@@ -7,6 +7,7 @@ module Sequoia.Profunctor.Semiring
   -- * Semirings
 , RApply(..)
 , LApply(..)
+, ProfunctorApply(..)
   -- * Unital semirings
 , ROne(..)
 , LOne(..)
@@ -51,6 +52,10 @@ class Profunctor p => LApply r p | p -> r where
 
 instance LApply r (Exp r) where
   f <&> a = Exp (\ k c -> getExp f k (getExp a k :>- c))
+
+
+class (LApply r p, RApply p) => ProfunctorApply r p where
+  diap :: p (Coexp r a b) (c -> d) -> (p a c -> p b d)
 
 
 -- Unital semirings
