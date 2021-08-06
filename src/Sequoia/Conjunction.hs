@@ -34,6 +34,7 @@ module Sequoia.Conjunction
 , bimapConj
 , bitraverseConj
 , bisequenceConj
+, bidistributeConj
   -- * Lifted projections
 , exlK
 , exrK
@@ -199,6 +200,9 @@ bitraverseConj = exlrC (liftA2 inlr)
 
 bisequenceConj :: (Conj p, Applicative f) => f a `p` f b -> f (a `p` b)
 bisequenceConj = uncurryConj (liftA2 (>--<))
+
+bidistributeConj :: (Conj c, Functor g) => g (a `c` b) -> g a `c` g b
+bidistributeConj = fmap exl >---< fmap exr
 
 
 -- Lifted projections
