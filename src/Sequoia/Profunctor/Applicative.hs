@@ -22,7 +22,7 @@ class Profunctor p => Coapply co p | p -> co where
   (<&>) :: p (a >-co-~ b) d -> p a d -> p b d
   (<&>) = coliftC2 id
 
-  infixl 4 <&>
+  infixl 3 <&>
 
 class Coapply co p => Coapplicative co p | p -> co where
   copure :: (b -> a) -> p (co a b) c
