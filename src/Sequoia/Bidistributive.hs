@@ -13,3 +13,7 @@ class Bifunctor p => Bidistributive p where
 
   bicollect :: Functor f => (a -> p b c) -> f a -> p (f b) (f c)
   bicollect f = bidistribute . fmap f
+
+instance Bidistributive (,) where
+  bidistribute g = (fst <$> g, snd <$> g)
+  bicollect f g = (fst . f <$> g, snd . f <$> g)
