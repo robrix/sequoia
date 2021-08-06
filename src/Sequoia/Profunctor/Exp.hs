@@ -2,7 +2,7 @@ module Sequoia.Profunctor.Exp
 ( -- * Exponential functors
   Exp(..)
   -- * Elimination
-, runExp
+, appExp
 ) where
 
 import Data.Function ((&))
@@ -20,10 +20,10 @@ instance Functor (Exp r a) where
 
 instance Applicative (Exp r a) where
   pure = Exp . (const .) . (&)
-  xf <*> xa = Exp (\ k a -> runExp xf a (runExp xa a . (k .)))
+  xf <*> xa = Exp (\ k a -> appExp xf a (appExp xa a . (k .)))
 
 
 -- Elimination
 
-runExp :: Exp r a b -> a -> (b -> r) -> r
-runExp = flip . getExp
+appExp :: Exp r a b -> a -> (b -> r) -> r
+appExp = flip . getExp
