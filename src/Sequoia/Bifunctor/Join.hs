@@ -1,2 +1,5 @@
 module Sequoia.Bifunctor.Join
-() where
+( Join(..)
+) where
+
+newtype Join p a = Join { runJoin :: p a a }
