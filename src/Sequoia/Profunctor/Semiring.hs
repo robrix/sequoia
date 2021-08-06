@@ -11,6 +11,7 @@ module Sequoia.Profunctor.Semiring
   -- * Unital semirings
 , ROne(..)
 , LOne(..)
+, ProfunctorOne(..)
 ) where
 
 import Data.Profunctor
@@ -77,3 +78,7 @@ class LApply r p => LOne r p | p -> r where
 
 instance LOne r (Exp r) where
   lpure = Exp . const . (•)
+
+
+class (LOne r p, ROne p) => ProfunctorOne r p | p -> r where
+  dipure :: Coexp r a b -> p a b
