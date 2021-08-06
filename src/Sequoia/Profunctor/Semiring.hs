@@ -4,8 +4,8 @@ module Sequoia.Profunctor.Semiring
   -- * Monoids
 , RMonoid(..)
   -- * Semirings
-, RApplicative(..)
-, LApplicative(..)
+, RApply(..)
+, LApply(..)
   -- * Unital semirings
 , ROne(..)
 , LOne(..)
@@ -35,30 +35,30 @@ class RSemigroup p => RMonoid p where
 
 -- Semirings
 
-class Profunctor p => RApplicative p where
+class Profunctor p => RApply p where
   (<.>) :: p a (b -> c) -> p a b -> p a c
 
   infixl 4 <.>
 
-instance RApplicative (->) where
+instance RApply (->) where
   (<.>) = (<*>)
 
-instance RApplicative (-->) where
+instance RApply (-->) where
   (<.>) = (<*>)
 
 
-class Profunctor p => LApplicative p where
+class Profunctor p => LApply p where
   (<&>) :: p (a >-- c) b -> p a b -> p c b
 
   infixl 4 <&>
 
-instance LApplicative (-->) where
+instance LApply (-->) where
   f <&> a = F (\ k -> K (\ c -> runF f k • (runF a k :>-- c)))
 
 
 -- Unital semirings
 
-class RApplicative p => ROne p where
+class RApply p => ROne p where
   rpure :: b -> p a b
 
 instance ROne (->) where
@@ -68,7 +68,7 @@ instance ROne (-->) where
   rpure = pure
 
 
-class LApplicative p => LOne p where
+class LApply p => LOne p where
   lpure :: (a • Void) -> p a b
 
 instance LOne (-->) where
