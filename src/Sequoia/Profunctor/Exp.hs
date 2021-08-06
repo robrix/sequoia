@@ -23,6 +23,9 @@ instance Applicative (Exp r a) where
   pure = Exp . (const .) . (&)
   xf <*> xa = Exp (\ k a -> appExp xf a (appExp xa a . (k .)))
 
+instance Monad (Exp r a) where
+  m >>= f = Exp (\ k a -> runExp (runExp k a . f) a m)
+
 
 -- Elimination
 
