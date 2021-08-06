@@ -35,6 +35,7 @@ import qualified Control.Category as Cat
 import           Data.Coerce
 import           Prelude hiding (exp)
 import           Sequoia.Disjunction
+import           Sequoia.Monad.Run
 import           Sequoia.Profunctor
 import           Sequoia.Profunctor.Continuation
 
@@ -66,7 +67,7 @@ instance Functor (Exp r a) where
 
 instance Applicative (Exp r a) where
   pure = Exp . fmap (K . const) . flip (•)
-  xf <*> xa = Exp (\ k -> K (\ a -> appExp xf a • (appExp xa a <<^ (k <<^))))
+  xf <*> xa = Exp (\ k -> cont (\ _K -> getExp xf (_K (getExp xa . (k <<^)))))
 
 instance Monad (Exp r a) where
   m >>= f = Exp (\ k -> K (\ a -> runExp (runExp k a <<^ f) a • m))
