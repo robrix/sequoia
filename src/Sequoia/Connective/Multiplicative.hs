@@ -11,6 +11,10 @@ module Sequoia.Connective.Multiplicative
 , runPar
   -- * Positive conjunction
 , type (⊗)(..)
+  -- * Diagonal functor
+, Δ(..)
+  -- ** Construction
+, inDiag
   -- * Connectives
 , module Sequoia.Connective.Bottom
 , module Sequoia.Connective.One
@@ -96,3 +100,15 @@ instance Conj (⊗) where
   (>--<) = (:⊗)
   exl (l :⊗ _) = l
   exr (_ :⊗ r) = r
+
+
+-- Diagonal functor
+
+newtype Δ a = Δ { exDiag :: (a, a) }
+  deriving (Functor)
+
+
+-- Construction
+
+inDiag :: a -> Δ a
+inDiag a = Δ (a, a)
