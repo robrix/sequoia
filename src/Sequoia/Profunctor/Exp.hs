@@ -94,8 +94,8 @@ elimCoexp (a :>- b) (Exp f) = f a b
 
 -- Computation
 
-cocurry :: (c -> Either a b) -> Exp r (Coexp r b c) a
-cocurry f = Exp (\ k (b :>- c) -> either k b (f c))
+cocurry :: Exp r c (Either a b) -> Exp r (Coexp r b c) a
+cocurry f = Exp (\ k (b :>- c) -> appExp f c (either k b))
 
 uncocurry :: Exp r (Coexp r b c) a -> Exp r c (Either a b)
 uncocurry f = Exp (\ k c -> appExp f (inrL k >- c) (inlL k))
