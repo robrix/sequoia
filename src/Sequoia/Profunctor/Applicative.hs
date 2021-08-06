@@ -15,7 +15,7 @@ import Data.Kind (Type)
 import Data.Profunctor
 
 class Profunctor p => ContravariantCPS ex p | p -> ex where
-  contramapCPS :: (a' ~~ex~> a) -> (p a b -> p a' b)
+  lmapCPS :: (a' ~~ex~> a) -> (p a b -> p a' b)
 
 class Profunctor p => Coapply co p | p -> co where
   {-# MINIMAL coliftC2 | (<&>) #-}
