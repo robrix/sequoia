@@ -5,11 +5,13 @@ module Sequoia.Profunctor.Exp.Void
 , type (>--)(..)
   -- * Computation
 , cocurry
+, uncocurry
 ) where
 
 import qualified Control.Category as Cat
 import           Data.Profunctor
 import           Data.Void
+import           Sequoia.Disjunction
 
 -- Exponentials
 
@@ -41,3 +43,6 @@ instance Profunctor (>--) where
 
 cocurry :: (c --> Either a b) -> ((b >-- c) --> a)
 cocurry f = Exp (\ k (b :>-- c) -> getExp f (either k b) c)
+
+uncocurry :: ((b >-- c) --> a) -> c --> Either a b
+uncocurry f = Exp (\ k c -> getExp f (inlL k) (inrL k :>-- c))
