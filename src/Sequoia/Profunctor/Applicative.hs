@@ -20,10 +20,10 @@ class (Profunctor p, Cat.Category ex) => ProfunctorCPS ex p | p -> ex where
   dimapCPS f g = rmapCPS g . lmapCPS f
 
   lmapCPS :: (a' ~~ex~> a) -> (p a b -> p a' b)
-  lmapCPS f = dimapCPS f Cat.id
+  lmapCPS = (`dimapCPS` Cat.id)
 
   rmapCPS :: (b ~~ex~> b') -> (p a b -> p a b')
-  rmapCPS f = dimapCPS Cat.id f
+  rmapCPS = (Cat.id `dimapCPS`)
 
 class Profunctor p => Coapply co p | p -> co where
   {-# MINIMAL coliftC2 | (<&>) #-}
