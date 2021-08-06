@@ -55,7 +55,9 @@ instance LApply r (Exp r) where
 
 
 class (LApply r p, RApply p) => ProfunctorApply r p where
-  diap :: p (Coexp r a b) (c -> d) -> (p a c -> p b d)
+  (<&.>) :: p (Coexp r a b) (c -> d) -> (p a c -> p b d)
+
+  infixl 4 <&.>
 
 
 -- Unital semirings
