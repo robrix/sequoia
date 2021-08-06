@@ -88,9 +88,7 @@ fanoutWith f l r = printer (\ k a -> appPrint l a (appPrint r a . (k .) . f))
 -- Combinators
 
 tuple :: Document c => Printer r a c -> Printer r b c -> Printer r (a, b) c
-tuple a b = fanoutWith combine (lmap fst a) (lmap snd b)
-  where
-  combine da db = parens (da <> comma <+> db)
+tuple a b = parens (lmap fst a <> comma <+> lmap snd b)
 
 list :: Document b => Printer r a b -> Printer r [a] b
 list pa = brackets go
