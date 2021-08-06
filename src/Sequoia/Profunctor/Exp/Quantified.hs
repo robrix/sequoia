@@ -5,6 +5,8 @@ module Sequoia.Profunctor.Exp.Quantified
 , exp
   -- * Elimination
 , (#)
+  -- * Coexponentials
+, type (>--)(..)
 ) where
 
 import qualified Control.Category as Cat
@@ -36,3 +38,8 @@ exp f = Exp (. f)
 (#) = (`getExp` id)
 
 infixl 9 #
+
+
+-- Coexponentials
+
+data b >-- a = (forall r . ((b -> r) -> r) -> r) :>-- a
