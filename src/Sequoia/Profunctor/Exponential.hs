@@ -116,6 +116,9 @@ instance Coapply (Coexp e r) (Exp e r) where
   coliftC2 f a b = exp (\ k v -> k ↓ a ↑ V (\ e -> f (v -< runExpK b e k)))
   f <&> a = exp (\ k v -> k ↓ f ↑ V (\ e -> v -< runExpK a e k))
 
+instance Coapplicative (Coexp e r) (Exp e r) where
+  copure f = expFn (\ _ v e -> withCoexpFn (v e) (\ b a -> a (f (b e))))
+
 instance Arrow (Exp e r) where
   arr = exp'
   first  = first'
