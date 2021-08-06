@@ -13,6 +13,8 @@ module Sequoia.Profunctor.Exp
 , (>-)
   -- * Elimination
 , elimCoexp
+  -- * Computation
+, cocurry
 ) where
 
 import Data.Function ((&))
@@ -86,3 +88,9 @@ instance Functor (Coexp r b) where
 
 elimCoexp :: Coexp r a b -> Exp r b a -> r
 elimCoexp (a :>- b) (Exp f) = f a b
+
+
+-- Computation
+
+cocurry :: (c -> Either a b) -> Exp r (Coexp r b c) a
+cocurry f = Exp (\ k (b :>- c) -> either k b (f c))
