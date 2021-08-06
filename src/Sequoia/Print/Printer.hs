@@ -25,6 +25,7 @@ module Sequoia.Print.Printer
 , string1
 ) where
 
+import Data.Kind (Type)
 import Data.List (uncons)
 import Data.List.NonEmpty (nonEmpty, toList)
 import Data.Profunctor
@@ -34,7 +35,7 @@ import Sequoia.Profunctor.Exp
 
 -- Printers
 
-newtype Printer r a b = Printer (a ~~r~> b)
+newtype Printer r a b = Printer (a ~~Exp r~> b)
   deriving (Applicative, Choice, Cochoice, Functor, Monad, Profunctor, Strong)
 
 instance Semigroup b => Semigroup (Printer r a b) where
@@ -56,7 +57,7 @@ printer = Printer . Exp
 withSubject :: (a -> Printer r a b) -> Printer r a b
 withSubject f = printer (\ k -> runPrint k <*> f)
 
-contrapure :: (b -> a) -> Printer r (a >-r-~ b) c
+contrapure :: (b -> a) -> Printer r (a >-Coexp r-~ b) c
 contrapure = printer . const . runCoexp
 
 
@@ -78,7 +79,7 @@ appPrint p a k = getPrint p k a
 -- Computation
 
 class Profunctor f => Coapplicative r f | f -> r where
-  (<&>) :: f (a >-r-~ b) c -> f a c -> f b c
+  (<&>) :: f (a >-Coexp r-~ b) c -> f a c -> f b c
 
   infixl 3 <&>
 
@@ -87,9 +88,9 @@ instance Coapplicative r (Printer r) where
 
 
 class Profunctor f => Kontravariant r f | f -> r where
-  kontramap :: (a' ~~r~> a) -> (f a b -> f a' b)
+  kontramap :: (a' ~~Exp r~> a) -> (f a b -> f a' b)
 
-  (<#>) :: (c -> Either a b) -> f a d -> f (b >-r-~ c) d
+  (<#>) :: (c -> Either a b) -> f a d -> f (b >-Coexp r-~ c) d
   f <#> a = kontramap (cocurry (exp f)) a
 
   infixl 3 <#>
@@ -98,7 +99,7 @@ instance Kontravariant r (Printer r) where
   kontramap f pa = printer (\ k a' -> appExp f a' (getPrint pa k))
 
 
-liftP2 :: Coapplicative r f => ((b >-r-~ c) -> a) -> f a d -> f b d -> f c d
+liftP2 :: Coapplicative r f => ((b >-Coexp r-~ c) -> a) -> f a d -> f b d -> f c d
 liftP2 f a b = lmap f a <&> b
 
 liftC2 :: (Coapplicative r f, Kontravariant r f) => (c -> Either a b) -> f a d -> f b d -> f c d
@@ -134,14 +135,14 @@ string1 = printer (. string)
 
 -- Coexponentials
 
-type a ~~r = Exp r a
+type a ~~r = (r :: Type -> Type -> Type) a
 type r~> b = r b
 
 infixr 1 ~~
 infixr 0 ~>
 
 
-type b >-r = Coexp r b
+type b >-r = (r :: Type -> Type -> Type) b
 type r-~ a = r a
 
 infixr 1 >-
