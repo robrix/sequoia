@@ -5,8 +5,10 @@ module Sequoia.Bifunctor.Join
 import Data.Bifoldable
 import Data.Bifunctor
 import Data.Bitraversable
+import Data.Distributive
 import Data.Functor.Contravariant
 import Sequoia.Bicontravariant
+import Sequoia.Bidistributive
 
 newtype Join p a = Join { runJoin :: p a a }
 
@@ -21,3 +23,7 @@ instance Bicontravariant p => Contravariant (Join p) where
 
 instance Bitraversable p => Traversable (Join p) where
   traverse f = fmap Join . bitraverse f f . runJoin
+
+instance Bidistributive p => Distributive (Join p) where
+  distribute g = Join (bidistribute (runJoin <$> g))
+  collect f g = Join (bicollect (runJoin . f) g)
