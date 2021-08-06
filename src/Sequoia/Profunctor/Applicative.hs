@@ -11,10 +11,11 @@ module Sequoia.Profunctor.Applicative
 , type (-~)
 ) where
 
+import Control.Category as Cat hiding ((.))
 import Data.Kind (Type)
 import Data.Profunctor
 
-class Profunctor p => ProfunctorCPS ex p | p -> ex where
+class (Profunctor p, Cat.Category ex) => ProfunctorCPS ex p | p -> ex where
   dimapCPS :: (a' ~~ex~> a) -> (b ~~ex~> b') -> (p a b -> p a' b')
   dimapCPS f g = rmapCPS g . lmapCPS f
 
@@ -28,7 +29,7 @@ class Profunctor p => Coapply co p | p -> co where
   coliftC2 f = (<&>) . lmap f
 
   (<&>) :: p (a >-co-~ b) d -> p a d -> p b d
-  (<&>) = coliftC2 id
+  (<&>) = coliftC2 Prelude.id
 
   infixl 3 <&>
 
