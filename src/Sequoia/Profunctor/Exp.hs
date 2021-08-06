@@ -7,6 +7,8 @@ module Sequoia.Profunctor.Exp
 , appExp
 , runExp
 , elimExp
+  -- * Computation
+, (<#>)
   -- * Coexponential functors
 , Coexp(..)
   -- * Construction
@@ -84,6 +86,14 @@ runExp k a x = getExp x k a
 
 elimExp :: Exp r a b -> Coexp r b a -> r
 elimExp (Exp f) (b :>- a) = f b a
+
+
+-- Computation
+
+(<#>) :: ProfunctorCPS (Exp r) p => (c -> Either a b) -> p a d -> p (b >-Coexp r-~ c) d
+(<#>) = lmapCPS . cocurry . exp
+
+infixl 3 <#>
 
 
 -- Coexponential functors

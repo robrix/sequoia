@@ -83,11 +83,6 @@ appPrint p a k = getPrint p k a
 
 -- Computation
 
-(<#>) :: ProfunctorCPS (Exp r) p => (c -> Either a b) -> p a d -> p (b >-Coexp r-~ c) d
-(<#>) = lmapCPS . cocurry . exp
-
-infixl 3 <#>
-
 liftC2 :: (Coapplicative (Coexp r) f, ProfunctorCPS (Exp r) f) => (c -> Either a b) -> f a d -> f b d -> f c d
 liftC2 f pa pb = f <#> pa <&> pb
 
