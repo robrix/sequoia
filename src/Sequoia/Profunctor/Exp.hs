@@ -89,7 +89,7 @@ elimExp (Exp f) (b :>- a) = f b a
 
 data Coexp r b a = (b -> r) :>- a
 
-infixr 0 :>-
+infixr 0 >-, :>-
 
 instance Profunctor (Coexp r) where
   dimap f g (b :>- a) = (b <<^ f) :>- g a
