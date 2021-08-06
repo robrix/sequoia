@@ -25,6 +25,8 @@ exp' f = exp (. f)
 -- Coexponentials
 
 class Profunctor co => Coexponential co where
+  coexp :: (a -> r) -> b -> co a b
+
   runCoexp :: ((a -> r) -> (b -> r)) -> (co a b -> r)
 
 
