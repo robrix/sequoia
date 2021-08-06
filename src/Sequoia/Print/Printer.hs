@@ -14,7 +14,6 @@ module Sequoia.Print.Printer
 , runPrint
   -- * Computation
 , Coapplicative(..)
-, Kontravariant(..)
 , liftP2
 , liftC2
 , fanoutWith
@@ -85,13 +84,6 @@ appPrint p a k = getPrint p k a
 
 
 -- Computation
-
-class Profunctor f => Kontravariant ex f | f -> ex where
-  kontramap :: (a' ~~ex~> a) -> (f a b -> f a' b)
-
-instance Kontravariant (Exp r) (Printer r) where
-  kontramap f pa = printer (\ k a' -> appExp f a' (getPrint pa k))
-
 
 (<#>) :: ProfunctorCPS (Exp r) p => (c -> Either a b) -> p a d -> p (b >-Coexp r-~ c) d
 (<#>) = lmapCPS . cocurry . exp
