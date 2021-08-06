@@ -165,6 +165,7 @@ library
     Sequoia.Profunctor.Exchange
     Sequoia.Profunctor.Exp
     Sequoia.Profunctor.Exp.Quantified
+    Sequoia.Profunctor.Exp.Void
     Sequoia.Profunctor.Exponential
     Sequoia.Profunctor.Product
     Sequoia.Profunctor.Recall
