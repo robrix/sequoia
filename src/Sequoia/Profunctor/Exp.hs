@@ -32,6 +32,10 @@ newtype Exp r a b = Exp { getExp :: (b -> r) -> (a -> r) }
 instance Profunctor (Exp r) where
   dimap f g = Exp . dimap (<<^ g) (<<^ f) . getExp
 
+instance Strong (Exp r) where
+  first'  f = Exp (\ k (a, c) -> appExp f a (k . (,c)))
+  second' f = Exp (\ k (c, a) -> appExp f a (k . (c,)))
+
 instance Functor (Exp r a) where
   fmap = rmap
 
