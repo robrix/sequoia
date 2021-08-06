@@ -2,6 +2,8 @@ module Sequoia.Profunctor.Exp.Class
 ( -- * Exponentials
   Exponential(..)
 , exp'
+  -- * Coexponentials
+, Coexponential(..)
 ) where
 
 import Data.Profunctor
@@ -16,3 +18,9 @@ class Profunctor ex => Exponential ex where
 
 exp' :: Exponential ex => (a -> b) -> ex a b
 exp' f = exp (. f)
+
+
+-- Coexponentials
+
+class Profunctor co => Coexponential co where
+  runCoexp :: ((a -> r) -> (b -> r)) -> (co a b -> r)
