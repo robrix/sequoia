@@ -31,6 +31,9 @@ instance MonadRun ((->) a) where
 instance MonadRun Identity where
   withRun b = b runIdentity
 
+instance MonadRun ((•) a) where
+  withRun b = K (\ a -> b (• a) • a)
+
 
 -- CPS lowering
 
