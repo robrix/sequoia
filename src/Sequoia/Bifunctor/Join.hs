@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeFamilies #-}
 module Sequoia.Bifunctor.Join
 ( Join(..)
 ) where
@@ -7,8 +8,10 @@ import Data.Bifunctor
 import Data.Bitraversable
 import Data.Distributive
 import Data.Functor.Contravariant
+import Data.Functor.Rep
 import Sequoia.Bicontravariant
 import Sequoia.Bidistributive
+import Sequoia.Birepresentable
 
 newtype Join p a = Join { runJoin :: p a a }
 
@@ -27,3 +30,8 @@ instance Bitraversable p => Traversable (Join p) where
 instance Bidistributive p => Distributive (Join p) where
   distribute g = Join (bidistribute (runJoin <$> g))
   collect f g = Join (bicollect (runJoin . f) g)
+
+instance Birepresentable p => Representable (Join p) where
+  type Rep (Join p) = Birep p
+  tabulate f = Join (bitabulate f f)
+  index = biindex . runJoin
