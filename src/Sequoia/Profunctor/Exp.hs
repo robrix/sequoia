@@ -50,7 +50,7 @@ runExp :: (b -> r) -> a -> Exp r a b -> r
 runExp k a x = getExp x k a
 
 elimExp :: Exp r a b -> Coexp r b a -> r
-elimExp f (b :>- a) = appExp f a b
+elimExp (Exp f) (b :>- a) = f b a
 
 
 -- Coexponential functors
@@ -69,4 +69,4 @@ instance Functor (Coexp r b) where
 -- Elimination
 
 elimCoexp :: Coexp r a b -> Exp r b a -> r
-elimCoexp (b :>- a) f = appExp f a b
+elimCoexp (a :>- b) (Exp f) = f a b
