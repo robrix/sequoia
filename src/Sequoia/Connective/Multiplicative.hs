@@ -25,6 +25,7 @@ module Sequoia.Connective.Multiplicative
 import Data.Bifoldable
 import Data.Bifunctor
 import Data.Bitraversable
+import Data.Distributive
 import Sequoia.Conjunction
 import Sequoia.Connective.Bottom
 import Sequoia.Connective.Negation
@@ -116,6 +117,9 @@ instance Conj (⊗) where
 
 newtype Δ a = Δ { exDiag :: (a, a) }
   deriving (Functor)
+
+instance Distributive Δ where
+  distribute g = Δ (exl . exDiag <$> g, exr . exDiag <$> g)
 
 
 -- Construction
