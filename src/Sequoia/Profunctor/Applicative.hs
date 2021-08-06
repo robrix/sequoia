@@ -1,60 +1,50 @@
 {-# LANGUAGE FunctionalDependencies #-}
 module Sequoia.Profunctor.Applicative
 ( ProfunctorCPS(..)
+, (<#>)
 , Coapply(..)
 , Coapplicative(..)
-  -- * Exponentials
-, type (~~)
-, type (~>)
-  -- * Coexponentials
-, type (>-)
-, type (-~)
 ) where
 
 import Control.Category as Cat hiding ((.))
-import Data.Kind (Type)
 import Data.Profunctor
+import Prelude hiding (exp)
+import Sequoia.Profunctor.Exp
 
-class (Profunctor p, Cat.Category ex) => ProfunctorCPS ex p | p -> ex where
+class Profunctor p => ProfunctorCPS r p | p -> r where
   {-# MINIMAL dimapCPS | (lmapCPS, rmapCPS) #-}
 
-  dimapCPS :: (a' ~~ex~> a) -> (b ~~ex~> b') -> (p a b -> p a' b')
+  dimapCPS :: (a' ~~r~> a) -> (b ~~r~> b') -> (p a b -> p a' b')
   dimapCPS f g = rmapCPS g . lmapCPS f
 
-  lmapCPS :: (a' ~~ex~> a) -> (p a b -> p a' b)
+  lmapCPS :: (a' ~~r~> a) -> (p a b -> p a' b)
   lmapCPS = (`dimapCPS` Cat.id)
 
-  rmapCPS :: (b ~~ex~> b') -> (p a b -> p a b')
+  rmapCPS :: (b ~~r~> b') -> (p a b -> p a b')
   rmapCPS = (Cat.id `dimapCPS`)
 
-class Profunctor p => Coapply co p | p -> co where
+(<#>) :: ProfunctorCPS r p => (c -> Either a b) -> p a d -> p (b >-r-~ c) d
+(<#>) = lmapCPS . cocurry . exp
+
+infixl 3 <#>
+
+class Profunctor p => Coapply r p | p -> r where
   {-# MINIMAL coliftC2 | (<&>) #-}
 
-  coliftC2 :: ((b >-co-~ c) -> a) -> p a d -> p b d -> p c d
+  coliftC2 :: ((b >-r-~ c) -> a) -> p a d -> p b d -> p c d
   coliftC2 f = (<&>) . lmap f
 
-  (<&>) :: p (a >-co-~ b) d -> p a d -> p b d
+  (<&>) :: p (a >-r-~ b) d -> p a d -> p b d
   (<&>) = coliftC2 Prelude.id
 
   infixl 3 <&>
 
-class Coapply co p => Coapplicative co p | p -> co where
-  copure :: (b -> a) -> p (co a b) c
+instance Coapply r (Exp r) where
+  coliftC2 f (Exp a) (Exp b) = Exp (\ k c -> a k (f (b k :>- c)))
+  Exp f <&> Exp a = Exp (\ k b -> f k (a k :>- b))
 
+class Coapply r p => Coapplicative r p | p -> r where
+  copure :: (b -> a) -> p (a >-r-~ b) c
 
--- Exponentials
-
-type a ~~r = (r :: Type -> Type -> Type) a
-type r~> b = r b
-
-infixr 1 ~~
-infixr 0 ~>
-
-
--- Coexponentials
-
-type b >-r = (r :: Type -> Type -> Type) b
-type r-~ a = r a
-
-infixr 1 >-
-infixr 0 -~
+instance Coapplicative r (Exp r) where
+  copure f = Exp (\ _ (a :>- b) -> a (f b))

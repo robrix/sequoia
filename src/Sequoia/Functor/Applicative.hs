@@ -4,39 +4,27 @@ module Sequoia.Functor.Applicative
   comap
 , Contrapply(..)
 , Contrapplicative(..)
-  -- * Coexponentials
-, type (>-)
-, type (-~)
 ) where
 
 import Data.Functor.Contravariant
-import Data.Kind (Type)
+import Sequoia.Profunctor.Exp
 
 -- Contravariant applicative
 
 comap :: Contravariant f => (a' -> a) -> (f a -> f a')
 comap = contramap
 
-class Contravariant f => Contrapply co f | f -> co where
+class Contravariant f => Contrapply r f | f -> r where
   {-# MINIMAL coliftC2 | (<&>) #-}
 
-  coliftC2 :: ((b >-co-~ c) -> a) -> f a -> f b -> f c
+  coliftC2 :: ((b >-r-~ c) -> a) -> f a -> f b -> f c
   coliftC2 f = (<&>) . comap f
 
-  (<&>) :: f (a >-co-~ b) -> f a -> f b
+  (<&>) :: f (a >-r-~ b) -> f a -> f b
   (<&>) = coliftC2 id
 
   infixl 4 <&>
 
 
-class Contrapply co f => Contrapplicative co f | f -> co where
-  copure :: (b -> a) -> f (co a b)
-
-
--- Coexponentials
-
-type b >-r = (r :: Type -> Type -> Type) b
-type r-~ a = r a
-
-infixr 1 >-
-infixr 0 -~
+class Contrapply r f => Contrapplicative r f | f -> r where
+  copure :: (b -> a) -> f (a >-r-~ b)

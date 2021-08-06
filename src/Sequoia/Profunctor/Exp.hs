@@ -1,6 +1,9 @@
 module Sequoia.Profunctor.Exp
 ( -- * Exponential functors
   Exp(..)
+  -- * Mixfix syntax
+, type (~~)
+, type (~>)
   -- * Construction
 , exp
   -- * Elimination
@@ -8,15 +11,17 @@ module Sequoia.Profunctor.Exp
 , runExp
 , elimExp
 , (#)
-  -- * Computation
-, (<#>)
   -- * Coexponential functors
 , Coexp(..)
+  -- * Mixfix syntax
+, type (>-)
+, type (-~)
   -- * Construction
 , (>-)
   -- * Elimination
 , runCoexp
 , elimCoexp
+, withCoexp
   -- * Computation
 , cocurry
 , uncocurry
@@ -28,7 +33,6 @@ import           Data.Function ((&))
 import           Prelude hiding (exp)
 import           Sequoia.Disjunction
 import           Sequoia.Profunctor
-import           Sequoia.Profunctor.Applicative
 
 -- Exponential functors
 
@@ -63,12 +67,14 @@ instance Applicative (Exp r a) where
 instance Monad (Exp r a) where
   m >>= f = Exp (\ k a -> runExp (runExp k a . f) a m)
 
-instance Coapply (Coexp r) (Exp r) where
-  coliftC2 f (Exp a) (Exp b) = Exp (\ k c -> a k (f (b k :>- c)))
-  Exp f <&> Exp a = Exp (\ k b -> f k (a k :>- b))
 
-instance Coapplicative (Coexp r) (Exp r) where
-  copure f = Exp (\ _ (a :>- b) -> a (f b))
+-- Mixfix syntax
+
+type a ~~r = Exp r a
+type r~> b = r b
+
+infixr 1 ~~
+infixr 0 ~>
 
 
 -- Construction
@@ -88,7 +94,7 @@ runExp k a x = getExp x k a
 elimExp :: Exp r a b -> Coexp r b a -> r
 elimExp (Exp f) (b :>- a) = f b a
 
-(#) :: (a ~~Exp b~> b) -> (a -> b)
+(#) :: (a ~~b~> b) -> (a -> b)
 f # a = appExp f a id
 
 infixl 9 #
@@ -96,23 +102,28 @@ infixl 9 #
 
 -- Computation
 
-(<#>) :: ProfunctorCPS (Exp r) p => (c -> Either a b) -> p a d -> p (b >-Coexp r-~ c) d
-(<#>) = lmapCPS . cocurry . exp
-
-infixl 3 <#>
 
 
 -- Coexponential functors
 
 data Coexp r b a = (b -> r) :>- a
 
-infixr 0 >-, :>-
+infixr 0 :>-
 
 instance Profunctor (Coexp r) where
   dimap f g (b :>- a) = (b <<^ f) :>- g a
 
 instance Functor (Coexp r b) where
   fmap = rmap
+
+
+-- Mixfix syntax
+
+type b >-r = Coexp r b
+type r-~ a = r a
+
+infixr 1 >-
+infixr 0 -~
 
 
 -- Construction
@@ -128,6 +139,9 @@ runCoexp f (b :>- a) = b (f a)
 
 elimCoexp :: Coexp r a b -> Exp r b a -> r
 elimCoexp (a :>- b) (Exp f) = f a b
+
+withCoexp :: Coexp r a b -> ((a -> r) -> b -> s) -> s
+withCoexp (a :>- b) f = f a b
 
 
 -- Computation

@@ -29,7 +29,7 @@ import Sequoia.Profunctor.Exp
 
 -- Printers
 
-newtype Printer r a b = Printer (a ~~Exp r~> b)
+newtype Printer r a b = Printer (a ~~r~> b)
   deriving (Applicative, Choice, Cochoice, Functor, Monad, Profunctor, Strong)
 
 instance Semigroup b => Semigroup (Printer r a b) where
@@ -42,13 +42,13 @@ instance Document b =>  Document (Printer r a b) where
   char c = printer (const . ($ char c))
   string s = printer (const . ($ string s))
 
-instance Coapply (Coexp r) (Printer r) where
+instance Coapply r (Printer r) where
   pf <&> pa = printer (\ k b -> getPrint pf k (getPrint pa k >- b))
 
-instance Coapplicative (Coexp r) (Printer r) where
+instance Coapplicative r (Printer r) where
   copure = printer . const . runCoexp
 
-instance ProfunctorCPS (Exp r) (Printer r) where
+instance ProfunctorCPS r (Printer r) where
   dimapCPS f g p = printer (getExp f . getPrint p . getExp g)
   lmapCPS f p = printer (getExp f . getPrint p)
   rmapCPS f p = printer (getPrint p . getExp f)
@@ -83,7 +83,7 @@ appPrint p a k = getPrint p k a
 tuple :: (forall a b . Document b => Document (p a b), Document c, Coapplicative co p) => p a c -> p b c -> p (a, b) c
 tuple a b = parens (lmap fst a <> comma <+> lmap snd b)
 
-list :: (forall a b . Document b => Document (p a b), Document b, ProfunctorCPS (Exp r) p, Coapplicative (Coexp r) p) => p a b -> p [a] b
+list :: (forall a b . Document b => Document (p a b), Document b, ProfunctorCPS r p, Coapplicative r p) => p a b -> p [a] b
 list pa = brackets go
   where
   go = maybeToEither . uncons <#> mempty <&> lmap fst pa <> lmap snd tail

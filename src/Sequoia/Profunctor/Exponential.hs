@@ -57,6 +57,7 @@ import           Sequoia.Profunctor.Coexponential
 import           Sequoia.Profunctor.Context
 import           Sequoia.Profunctor.Continuation as K
 import           Sequoia.Profunctor.Diagonal
+import qualified Sequoia.Profunctor.Exp as X
 import           Sequoia.Profunctor.Value as V
 
 -- Exponential profunctor
@@ -112,12 +113,12 @@ instance MonadRes r (Exp e r a) where
 instance MonadRunK r (Exp e r a) where
   withRunK f = exp (\ k v -> withRun (\ run -> k ↓ f (\ k' m -> run (k' ↓ m ↑ v)) ↑ v))
 
-instance Coapply (Coexp e r) (Exp e r) where
-  coliftC2 f a b = exp (\ k v -> k ↓ a ↑ V (\ e -> f (v -< runExpK b e k)))
-  f <&> a = exp (\ k v -> k ↓ f ↑ V (\ e -> v -< runExpK a e k))
+instance Coapply r (Exp e r) where
+  coliftC2 f a b = exp (\ k v -> k ↓ a ↑ V (\ e -> f ((runExpK b e k •) X.:>- e ∘ v)))
+  f <&> a = exp (\ k v -> k ↓ f ↑ V (\ e -> (runExpK a e k •) X.:>- e ∘ v))
 
-instance Coapplicative (Coexp e r) (Exp e r) where
-  copure f = expFn (\ _ v e -> withCoexpFn (v e) (\ b a -> a (f (b e))))
+instance Coapplicative r (Exp e r) where
+  copure f = expFn (\ _ v e -> X.withCoexp (v e) (\ a b -> a (f b)))
 
 instance Arrow (Exp e r) where
   arr = exp'
