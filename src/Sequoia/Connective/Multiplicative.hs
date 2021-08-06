@@ -118,6 +118,9 @@ instance Bifoldable (⊗) where
 instance Bifunctor (⊗) where
   bimap = bimapConj
 
+instance Bitraversable (⊗) where
+  bitraverse = bitraverseConj
+
 
 -- Diagonal functor
 
