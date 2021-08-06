@@ -23,6 +23,7 @@ class (Profunctor p, Cat.Category ex) => ProfunctorCPS ex p | p -> ex where
   lmapCPS f = dimapCPS f Cat.id
 
   rmapCPS :: (b ~~ex~> b') -> (p a b -> p a b')
+  rmapCPS f = dimapCPS Cat.id f
 
 class Profunctor p => Coapply co p | p -> co where
   {-# MINIMAL coliftC2 | (<&>) #-}
