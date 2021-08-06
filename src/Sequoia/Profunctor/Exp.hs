@@ -16,6 +16,7 @@ module Sequoia.Profunctor.Exp
 import Data.Function ((&))
 import Prelude hiding (exp)
 import Sequoia.Profunctor
+import Sequoia.Profunctor.Applicative
 
 -- Exponential functors
 
@@ -33,6 +34,10 @@ instance Applicative (Exp r a) where
 
 instance Monad (Exp r a) where
   m >>= f = Exp (\ k a -> runExp (runExp k a . f) a m)
+
+instance Coapply (Coexp r) (Exp r) where
+  coliftC2 f (Exp a) (Exp b) = Exp (\ k c -> a k (f (b k :>- c)))
+  Exp f <&> Exp a = Exp (\ k b -> f k (a k :>- b))
 
 
 -- Construction
