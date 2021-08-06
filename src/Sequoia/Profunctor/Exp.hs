@@ -9,6 +9,8 @@ module Sequoia.Profunctor.Exp
 , elimExp
   -- * Coexponential functors
 , Coexp(..)
+  -- * Construction
+, (>-)
   -- * Elimination
 , elimCoexp
 ) where
@@ -72,6 +74,12 @@ instance Profunctor (Coexp r) where
 
 instance Functor (Coexp r b) where
   fmap = rmap
+
+
+-- Construction
+
+(>-) :: (b -> r) -> a -> Coexp r b a
+(>-) = (:>-)
 
 
 -- Elimination
