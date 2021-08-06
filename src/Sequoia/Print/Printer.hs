@@ -1,4 +1,5 @@
 {-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE QuantifiedConstraints #-}
 -- | Pretty-printing.
 module Sequoia.Print.Printer
 ( -- * Printers
@@ -79,7 +80,7 @@ appPrint p a k = getPrint p k a
 
 -- Combinators
 
-tuple :: Document c => Printer r a c -> Printer r b c -> Printer r (a, b) c
+tuple :: (forall a b . Document b => Document (p a b), Document c, Coapplicative co p) => p a c -> p b c -> p (a, b) c
 tuple a b = parens (lmap fst a <> comma <+> lmap snd b)
 
 list :: Document b => Printer r a b -> Printer r [a] b
