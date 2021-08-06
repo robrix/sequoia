@@ -10,3 +10,4 @@ class Bifunctor p => Bidistributive p where
   bidistribute = bicollect id
 
   bicollect :: Functor f => (a -> p b c) -> f a -> p (f b) (f c)
+  bicollect f = bidistribute . fmap f
