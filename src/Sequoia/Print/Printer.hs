@@ -6,7 +6,6 @@ module Sequoia.Print.Printer
   -- * Construction
 , printer
 , withSubject
-, contrapure
   -- * Elimination
 , getPrint
 , print
@@ -62,9 +61,6 @@ printer = Printer . Exp
 
 withSubject :: (a -> Printer r a b) -> Printer r a b
 withSubject f = printer (\ k -> runPrint k <*> f)
-
-contrapure :: (b -> a) -> Printer r (a >-Coexp r-~ b) c
-contrapure = printer . const . runCoexp
 
 
 -- Elimination
