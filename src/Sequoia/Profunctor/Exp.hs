@@ -6,6 +6,7 @@ module Sequoia.Profunctor.Exp
   -- * Elimination
 , appExp
 , runExp
+, elimExp
   -- * Coexponential functors
 , Coexp(..)
   -- * Elimination
@@ -47,6 +48,9 @@ appExp = flip . getExp
 
 runExp :: (b -> r) -> a -> Exp r a b -> r
 runExp k a x = getExp x k a
+
+elimExp :: Exp r a b -> Coexp r b a -> r
+elimExp f (b :>- a) = appExp f a b
 
 
 -- Coexponential functors
