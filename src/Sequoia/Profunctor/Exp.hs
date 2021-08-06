@@ -12,6 +12,7 @@ module Sequoia.Profunctor.Exp
   -- * Construction
 , (>-)
   -- * Elimination
+, runCoexp
 , elimCoexp
   -- * Computation
 , cocurry
@@ -87,6 +88,9 @@ instance Functor (Coexp r b) where
 
 
 -- Elimination
+
+runCoexp :: (a -> b) -> Coexp r b a -> r
+runCoexp f (b :>- a) = b (f a)
 
 elimCoexp :: Coexp r a b -> Exp r b a -> r
 elimCoexp (a :>- b) (Exp f) = f a b
