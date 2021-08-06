@@ -50,3 +50,6 @@ runExp k a x = getExp x k a
 -- Coexponential functors
 
 data Coexp r b a = (b -> r) :>- a
+
+instance Profunctor (Coexp r) where
+  dimap f g (b :>- a) = (b <<^ f) :>- g a
