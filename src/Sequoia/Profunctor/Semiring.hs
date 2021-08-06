@@ -4,7 +4,7 @@ module Sequoia.Profunctor.Semiring
   -- * Monoids
 , ProfunctorZero(..)
   -- * Semirings
-, ProfunctorTimes(..)
+, RApplicative(..)
 , ProfunctorCotimes(..)
   -- * Unital semirings
 , ProfunctorOne(..)
@@ -35,15 +35,15 @@ class ProfunctorPlus p => ProfunctorZero p where
 
 -- Semirings
 
-class Profunctor p => ProfunctorTimes p where
+class Profunctor p => RApplicative p where
   (<.>) :: p a (b -> c) -> p a b -> p a c
 
   infixl 4 <.>
 
-instance ProfunctorTimes (->) where
+instance RApplicative (->) where
   (<.>) = (<*>)
 
-instance ProfunctorTimes (-->) where
+instance RApplicative (-->) where
   (<.>) = (<*>)
 
 
@@ -58,7 +58,7 @@ instance ProfunctorCotimes (-->) where
 
 -- Unital semirings
 
-class ProfunctorTimes p => ProfunctorOne p where
+class RApplicative p => ProfunctorOne p where
   rpure :: b -> p a b
 
 instance ProfunctorOne (->) where
