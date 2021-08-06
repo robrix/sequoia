@@ -1,12 +1,15 @@
 module Sequoia.Profunctor.Exp
 ( -- * Exponential functors
   Exp(..)
+  -- * Construction
+, exp
   -- * Elimination
 , appExp
 , runExp
 ) where
 
 import Data.Function ((&))
+import Prelude hiding (exp)
 import Sequoia.Profunctor
 
 -- Exponential functors
@@ -25,6 +28,12 @@ instance Applicative (Exp r a) where
 
 instance Monad (Exp r a) where
   m >>= f = Exp (\ k a -> runExp (runExp k a . f) a m)
+
+
+-- Construction
+
+exp :: (a -> b) -> Exp r a b
+exp = Exp . flip (.)
 
 
 -- Elimination
