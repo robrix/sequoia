@@ -14,7 +14,6 @@ module Sequoia.Print.Printer
 , runPrint
   -- * Computation
 , Coapplicative(..)
-, liftP2
 , liftC2
 , fanoutWith
   -- * Combinators
@@ -89,9 +88,6 @@ appPrint p a k = getPrint p k a
 (<#>) = lmapCPS . cocurry . exp
 
 infixl 3 <#>
-
-liftP2 :: Coapplicative co f => ((b >-co-~ c) -> a) -> f a d -> f b d -> f c d
-liftP2 f a b = lmap f a <&> b
 
 liftC2 :: (Coapplicative (Coexp r) f, ProfunctorCPS (Exp r) f) => (c -> Either a b) -> f a d -> f b d -> f c d
 liftC2 f pa pb = f <#> pa <&> pb
