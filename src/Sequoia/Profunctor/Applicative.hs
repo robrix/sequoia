@@ -15,6 +15,7 @@ import Data.Kind (Type)
 import Data.Profunctor
 
 class Profunctor p => ProfunctorCPS ex p | p -> ex where
+  dimapCPS :: (a' ~~ex~> a) -> (b ~~ex~> b') -> (p a b -> p a' b')
   lmapCPS :: (a' ~~ex~> a) -> (p a b -> p a' b)
   rmapCPS :: (b ~~ex~> b') -> (p a b -> p a b')
 
