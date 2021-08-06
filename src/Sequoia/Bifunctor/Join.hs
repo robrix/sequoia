@@ -4,6 +4,7 @@ module Sequoia.Bifunctor.Join
 
 import Data.Bifoldable
 import Data.Bifunctor
+import Data.Bitraversable
 import Data.Functor.Contravariant
 import Sequoia.Bicontravariant
 
@@ -17,3 +18,6 @@ instance Bifunctor p => Functor (Join p) where
 
 instance Bicontravariant p => Contravariant (Join p) where
   contramap f = Join . contrabimap f f . runJoin
+
+instance Bitraversable p => Traversable (Join p) where
+  traverse f = fmap Join . bitraverse f f . runJoin
