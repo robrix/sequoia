@@ -3,6 +3,7 @@ module Sequoia.Profunctor.Exp
   Exp(..)
   -- * Elimination
 , appExp
+, runExp
 ) where
 
 import Data.Function ((&))
@@ -27,3 +28,6 @@ instance Applicative (Exp r a) where
 
 appExp :: Exp r a b -> a -> (b -> r) -> r
 appExp = flip . getExp
+
+runExp :: (b -> r) -> a -> Exp r a b -> r
+runExp k a x = getExp x k a
