@@ -6,6 +6,8 @@ module Sequoia.Bidistributive
 import Data.Bifunctor
 
 class Bifunctor p => Bidistributive p where
+  {-# MINIMAL bidistribute | bicollect #-}
+
   bidistribute :: Functor f => f (p b c) -> p (f b) (f c)
   bidistribute = bicollect id
 
