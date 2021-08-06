@@ -3,6 +3,7 @@ module Sequoia.Profunctor.Exp
   Exp(..)
 ) where
 
+import Data.Function ((&))
 import Sequoia.Profunctor
 
 -- Exponential functors
@@ -14,3 +15,7 @@ instance Profunctor (Exp r) where
 
 instance Functor (Exp r a) where
   fmap = rmap
+
+instance Applicative (Exp r a) where
+  pure = Exp . (const .) . (&)
+  Exp xf <*> Exp xa = Exp (\ k a -> xf (\ f -> xa (k . f) a) a)
