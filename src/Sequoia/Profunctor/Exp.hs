@@ -8,10 +8,10 @@ import Sequoia.Profunctor
 
 -- Exponential functors
 
-newtype Exp r a b = Exp { runExp :: (b -> r) -> (a -> r) }
+newtype Exp r a b = Exp { getExp :: (b -> r) -> (a -> r) }
 
 instance Profunctor (Exp r) where
-  dimap f g = Exp . dimap (<<^ g) (<<^ f) . runExp
+  dimap f g = Exp . dimap (<<^ g) (<<^ f) . getExp
 
 instance Functor (Exp r a) where
   fmap = rmap
