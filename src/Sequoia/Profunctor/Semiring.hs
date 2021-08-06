@@ -8,7 +8,7 @@ module Sequoia.Profunctor.Semiring
 , LApplicative(..)
   -- * Unital semirings
 , ROne(..)
-, ProfunctorCoOne(..)
+, LOne(..)
   -- * Exponentials
 , type (-->)(..)
   -- * Coexponentials
@@ -68,10 +68,10 @@ instance ROne (-->) where
   rpure = pure
 
 
-class LApplicative p => ProfunctorCoOne p where
+class LApplicative p => LOne p where
   lpure :: (a • Void) -> p a b
 
-instance ProfunctorCoOne (-->) where
+instance LOne (-->) where
   lpure = F . const
 
 
