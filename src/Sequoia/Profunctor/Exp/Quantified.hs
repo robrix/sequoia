@@ -1,2 +1,6 @@
 module Sequoia.Profunctor.Exp.Quantified
-() where
+( -- * Exponentials
+  type (-->)(..)
+) where
+
+newtype a --> b = Exp { getExp :: forall r . (b -> r) -> (a -> r) }
