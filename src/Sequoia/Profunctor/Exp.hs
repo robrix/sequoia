@@ -5,6 +5,7 @@ module Sequoia.Profunctor.Exp
 , type (~~)
 , type (~>)
   -- * Construction
+, exp
 , exp'
 , expFn
   -- * Elimination
@@ -30,10 +31,12 @@ module Sequoia.Profunctor.Exp
 ) where
 
 import qualified Control.Category as Cat
+import           Data.Coerce
 import           Data.Function ((&))
 import           Prelude hiding (exp)
 import           Sequoia.Disjunction
 import           Sequoia.Profunctor
+import           Sequoia.Profunctor.Continuation
 
 -- Exponential functors
 
@@ -79,6 +82,9 @@ infixr 0 ~>
 
 
 -- Construction
+
+exp :: (b • r -> a • r) -> Exp r a b
+exp = coerce
 
 exp' :: (a -> b) -> Exp r a b
 exp' = Exp . flip (.)
