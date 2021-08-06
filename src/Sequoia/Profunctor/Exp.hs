@@ -6,6 +6,7 @@ module Sequoia.Profunctor.Exp
 , type (~>)
   -- * Construction
 , exp
+, expFn
   -- * Elimination
 , appExp
 , runExp
@@ -81,6 +82,9 @@ infixr 0 ~>
 
 exp :: (a -> b) -> Exp r a b
 exp = Exp . flip (.)
+
+expFn :: ((b -> r) -> (a -> r)) -> Exp r a b
+expFn = Exp
 
 
 -- Elimination
