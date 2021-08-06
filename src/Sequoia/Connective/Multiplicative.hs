@@ -1,6 +1,9 @@
 module Sequoia.Connective.Multiplicative
 ( elimPar
 , elimTensor
+  -- * Adjunction
+, leftAdjunct
+, rightAdjunct
   -- * Connectives
 , module Sequoia.Connective.Bottom
 , module Sequoia.Connective.One
@@ -21,3 +24,12 @@ elimPar = (. exl) . flip (•-) <--> (. exr) . flip (•-)
 
 elimTensor :: a ⊗ b -> a ¬ r ⅋ b ¬ r -> r
 elimTensor = flip ((. exl) . (•¬) <--> (. exr) . (•¬))
+
+
+-- Adjunction
+
+leftAdjunct :: (a ⅋ a -> b) -> (a -> b ⊗ b)
+leftAdjunct f = f . inl >---< f . inr
+
+rightAdjunct :: (a -> b ⊗ b) -> (a ⅋ a -> b)
+rightAdjunct f = exl . f <--> exr . f
