@@ -21,6 +21,8 @@ import           Prelude hiding (exp)
 newtype a --> b = Exp { getExp :: forall r . (b -> r) -> (a -> r) }
   deriving (Functor)
 
+infixr 0 -->
+
 instance Cat.Category (-->) where
   id = Exp id
   f . g = Exp (getExp g . getExp f)
@@ -47,6 +49,8 @@ infixl 9 #
 
 data b >-- a = (:>--) { coreturn :: forall r . ((b -> r) -> r) -> r, coconst :: a }
   deriving (Functor)
+
+infixr 0 >--, :>--
 
 instance Profunctor (>--) where
   dimap f g (b :>-- a) = lmap (lmap (lmap f)) b :>-- g a
