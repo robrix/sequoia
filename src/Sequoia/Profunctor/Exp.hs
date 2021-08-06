@@ -15,10 +15,12 @@ module Sequoia.Profunctor.Exp
 , elimCoexp
   -- * Computation
 , cocurry
+, uncocurry
 ) where
 
 import Data.Function ((&))
 import Prelude hiding (exp)
+import Sequoia.Disjunction
 import Sequoia.Profunctor
 import Sequoia.Profunctor.Applicative
 
@@ -94,3 +96,6 @@ elimCoexp (a :>- b) (Exp f) = f a b
 
 cocurry :: (c -> Either a b) -> Exp r (Coexp r b c) a
 cocurry f = Exp (\ k (b :>- c) -> either k b (f c))
+
+uncocurry :: Exp r (Coexp r b c) a -> Exp r c (Either a b)
+uncocurry f = Exp (\ k c -> appExp f (inrL k >- c) (inlL k))
