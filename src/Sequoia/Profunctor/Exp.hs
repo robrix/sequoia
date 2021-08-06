@@ -32,6 +32,10 @@ newtype Exp r a b = Exp { getExp :: (b -> r) -> (a -> r) }
 instance Profunctor (Exp r) where
   dimap f g = Exp . dimap (<<^ g) (<<^ f) . getExp
 
+instance Choice (Exp r) where
+  left'  (Exp r) = Exp (\ k -> r (inlL k) <--> inrL k)
+  right' (Exp r) = Exp (\ k -> inlL k <--> r (inrL k))
+
 instance Strong (Exp r) where
   first'  f = Exp (\ k (a, c) -> appExp f a (k . (,c)))
   second' f = Exp (\ k (c, a) -> appExp f a (k . (c,)))
