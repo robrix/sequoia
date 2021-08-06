@@ -29,6 +29,7 @@ import Data.Bitraversable
 import Data.Distributive
 import Data.Functor.Adjunction
 import Data.Functor.Rep
+import Sequoia.Bidistributive
 import Sequoia.Bifunctor.Join
 import Sequoia.Conjunction
 import Sequoia.Connective.Bottom
@@ -128,6 +129,9 @@ instance Bifunctor (⊗) where
 
 instance Bitraversable (⊗) where
   bitraverse = bitraverseConj
+
+instance Bidistributive (⊗) where
+  bidistribute = fmap exl >---< fmap exr
 
 
 -- Diagonal functor
