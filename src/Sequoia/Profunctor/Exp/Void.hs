@@ -30,3 +30,6 @@ data b >-- a = (:>--) { coreturn :: b -> Void, coconst :: a }
   deriving (Functor)
 
 infixr 0 >--, :>--
+
+instance Profunctor (>--) where
+  dimap f g (b :>-- a) = b . f :>-- g a
