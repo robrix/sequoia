@@ -2,6 +2,9 @@
 module Sequoia.Profunctor.Applicative
 ( Coapply(..)
 , Coapplicative(..)
+  -- * Exponentials
+, type (~~)
+, type (~>)
   -- * Coexponentials
 , type (>-)
 , type (-~)
@@ -23,6 +26,15 @@ class Profunctor p => Coapply co p | p -> co where
 
 class Coapply co p => Coapplicative co p | p -> co where
   copure :: (b -> a) -> p (co a b) c
+
+
+-- Exponentials
+
+type a ~~r = (r :: Type -> Type -> Type) a
+type r~> b = r b
+
+infixr 1 ~~
+infixr 0 ~>
 
 
 -- Coexponentials
