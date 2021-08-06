@@ -93,15 +93,15 @@ instance Kontravariant (Exp r) (Printer r) where
   kontramap f pa = printer (\ k a' -> appExp f a' (getPrint pa k))
 
 
-(<#>) :: Kontravariant (Exp r) f => (c -> Either a b) -> f a d -> f (b >-Coexp r-~ c) d
-(<#>) = kontramap . cocurry . exp
+(<#>) :: ProfunctorCPS (Exp r) p => (c -> Either a b) -> p a d -> p (b >-Coexp r-~ c) d
+(<#>) = lmapCPS . cocurry . exp
 
 infixl 3 <#>
 
 liftP2 :: Coapplicative co f => ((b >-co-~ c) -> a) -> f a d -> f b d -> f c d
 liftP2 f a b = lmap f a <&> b
 
-liftC2 :: (Coapplicative (Coexp r) f, Kontravariant (Exp r) f) => (c -> Either a b) -> f a d -> f b d -> f c d
+liftC2 :: (Coapplicative (Coexp r) f, ProfunctorCPS (Exp r) f) => (c -> Either a b) -> f a d -> f b d -> f c d
 liftC2 f pa pb = f <#> pa <&> pb
 
 
