@@ -11,8 +11,6 @@ module Sequoia.Print.Printer
 , print
 , appPrint
 , runPrint
-  -- * Computation
-, fanoutWith
   -- * Combinators
 , tuple
 , list
@@ -77,12 +75,6 @@ runPrint k a p = getPrint p k a
 
 appPrint :: Printer r a b -> a -> (b -> r) -> r
 appPrint p a k = getPrint p k a
-
-
--- Computation
-
-fanoutWith :: (b -> b -> b) -> Printer r a b -> Printer r a b -> Printer r a b
-fanoutWith f l r = printer (\ k a -> appPrint l a (appPrint r a . (k .) . f))
 
 
 -- Combinators
