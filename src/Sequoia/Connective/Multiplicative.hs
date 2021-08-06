@@ -112,6 +112,9 @@ instance Conj (⊗) where
   exl (l :⊗ _) = l
   exr (_ :⊗ r) = r
 
+instance Bifoldable (⊗) where
+  bifoldMap = bifoldMapConj
+
 
 -- Diagonal functor
 
