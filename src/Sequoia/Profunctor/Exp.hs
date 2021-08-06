@@ -5,7 +5,7 @@ module Sequoia.Profunctor.Exp
 , type (~~)
 , type (~>)
   -- * Construction
-, exp
+, exp'
 , expFn
   -- * Elimination
 , appExp
@@ -40,7 +40,7 @@ import           Sequoia.Profunctor
 newtype Exp r a b = Exp { getExp :: (b -> r) -> (a -> r) }
 
 instance Cat.Category (Exp r) where
-  id = exp id
+  id = exp' id
   f . g = Exp (getExp g . getExp f)
 
 instance Profunctor (Exp r) where
@@ -80,8 +80,8 @@ infixr 0 ~>
 
 -- Construction
 
-exp :: (a -> b) -> Exp r a b
-exp = Exp . flip (.)
+exp' :: (a -> b) -> Exp r a b
+exp' = Exp . flip (.)
 
 expFn :: ((b -> r) -> (a -> r)) -> Exp r a b
 expFn = Exp

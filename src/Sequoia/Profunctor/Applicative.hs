@@ -24,7 +24,7 @@ class Profunctor p => ProfunctorCPS r p | p -> r where
   rmapCPS = (Cat.id `dimapCPS`)
 
 (<#>) :: ProfunctorCPS r p => (c -> Either a b) -> p a d -> p (b >-r-~ c) d
-(<#>) = lmapCPS . cocurry . exp
+(<#>) = lmapCPS . cocurry . exp'
 
 infixl 3 <#>
 
