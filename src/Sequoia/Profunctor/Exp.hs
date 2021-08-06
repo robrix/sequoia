@@ -13,6 +13,7 @@ module Sequoia.Profunctor.Exp
 , runExp
 , elimExp
 , (#)
+, getExpFn
   -- * Coexponential functors
 , Coexp(..)
   -- * Mixfix syntax
@@ -32,7 +33,6 @@ module Sequoia.Profunctor.Exp
 
 import qualified Control.Category as Cat
 import           Data.Coerce
-import           Data.Function ((&))
 import           Prelude hiding (exp)
 import           Sequoia.Disjunction
 import           Sequoia.Profunctor
@@ -40,7 +40,7 @@ import           Sequoia.Profunctor.Continuation
 
 -- Exponential functors
 
-newtype Exp r a b = Exp { getExp :: (b -> r) -> (a -> r) }
+newtype Exp r a b = Exp { getExp :: (b • r) -> (a • r) }
 
 instance Cat.Category (Exp r) where
   id = exp' id
@@ -50,26 +50,26 @@ instance Profunctor (Exp r) where
   dimap f g = Exp . dimap (<<^ g) (<<^ f) . getExp
 
 instance Choice (Exp r) where
-  left'  (Exp r) = Exp (\ k -> r (inlL k) <--> inrL k)
-  right' (Exp r) = Exp (\ k -> inlL k <--> r (inrL k))
+  left'  f = Exp (\ k -> getExp f (inlL k) <••> inrL k)
+  right' f = Exp (\ k -> inlL k <••> getExp f (inrL k))
 
 instance Cochoice (Exp r) where
-  unleft  (Exp f) = Exp (\ k -> inlL (let f' = f (k <--> inrL f') in f'))
-  unright (Exp f) = Exp (\ k -> inrL (let f' = f (inlL f' <--> k) in f'))
+  unleft  f = Exp (\ k -> inlL (let f' = getExp f (k <••> inrL f') in f'))
+  unright f = Exp (\ k -> inrL (let f' = getExp f (inlL f' <••> k) in f'))
 
 instance Strong (Exp r) where
-  first'  f = Exp (\ k (a, c) -> appExp f a (k . (,c)))
-  second' f = Exp (\ k (c, a) -> appExp f a (k . (c,)))
+  first'  f = Exp (\ k -> K (\ (a, c) -> getExp f (lmap (,c) k) • a))
+  second' f = Exp (\ k -> K (\ (c, a) -> getExp f (lmap (c,) k) • a))
 
 instance Functor (Exp r a) where
   fmap = rmap
 
 instance Applicative (Exp r a) where
-  pure = Exp . (const .) . (&)
-  xf <*> xa = Exp (\ k a -> appExp xf a (appExp xa a . (k .)))
+  pure = Exp . fmap (K . const) . flip (•)
+  xf <*> xa = Exp (\ k -> K (\ a -> appExp xf a • (appExp xa a <<^ (k <<^))))
 
 instance Monad (Exp r a) where
-  m >>= f = Exp (\ k a -> runExp (runExp k a . f) a m)
+  m >>= f = Exp (\ k -> K (\ a -> runExp (runExp k a <<^ f) a • m))
 
 
 -- Mixfix syntax
@@ -87,31 +87,30 @@ exp :: (b • r -> a • r) -> Exp r a b
 exp = coerce
 
 exp' :: (a -> b) -> Exp r a b
-exp' = Exp . flip (.)
+exp' = Exp . lmap
 
 expFn :: ((b -> r) -> (a -> r)) -> Exp r a b
-expFn = Exp
+expFn = coerce
 
 
 -- Elimination
 
-appExp :: Exp r a b -> a -> (b -> r) -> r
-appExp = flip . getExp
+appExp :: Exp r a b -> a -> b •• r
+appExp f a = K ((• a) . getExp f)
 
-runExp :: (b -> r) -> a -> Exp r a b -> r
-runExp k a x = getExp x k a
+runExp :: (b • r) -> a -> Exp r a b • r
+runExp k a = K (\ f -> getExp f k • a)
 
-elimExp :: Exp r a b -> Coexp r b a -> r
-elimExp (Exp f) (b :>- a) = f b a
+elimExp :: Exp r a b -> Coexp r b a • r
+elimExp f = K (\ (b :>- a) -> getExp f (K b) • a)
 
 (#) :: (a ~~b~> b) -> (a -> b)
-f # a = appExp f a id
+f # a = appExp f a • idK
 
 infixl 9 #
 
-
--- Computation
-
+getExpFn :: Exp r a b -> ((b -> r) -> (a -> r))
+getExpFn = coerce
 
 
 -- Coexponential functors
@@ -148,7 +147,7 @@ runCoexp :: (a -> b) -> Coexp r b a -> r
 runCoexp f (b :>- a) = b (f a)
 
 elimCoexp :: Coexp r a b -> Exp r b a -> r
-elimCoexp (a :>- b) (Exp f) = f a b
+elimCoexp (a :>- b) (Exp f) = f (K a) • b
 
 withCoexp :: Coexp r a b -> ((a -> r) -> b -> s) -> s
 withCoexp (a :>- b) f = f a b
@@ -157,10 +156,10 @@ withCoexp (a :>- b) f = f a b
 -- Computation
 
 cocurry :: Exp r c (Either a b) -> Exp r (Coexp r b c) a
-cocurry f = Exp (\ k (b :>- c) -> appExp f c (either k b))
+cocurry f = Exp (\ k -> K (\ (b :>- c) -> getExp f (k <••> K b) • c))
 
 uncocurry :: Exp r (Coexp r b c) a -> Exp r c (Either a b)
-uncocurry f = Exp (\ k c -> appExp f (inrL k >- c) (inlL k))
+uncocurry f = Exp (\ k -> K (\ c -> getExp f (inlL k) • ((inrL k •) >- c)))
 
 coap :: Exp r c (Either (Coexp r b c) b)
-coap = Exp (\ k -> inlL k . (inrL k >-))
+coap = Exp (\ k -> lmap ((inrL k •) >-) (inlL k))

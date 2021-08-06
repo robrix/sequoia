@@ -49,15 +49,15 @@ instance Coapplicative r (Printer r) where
   copure = printer . const . runCoexp
 
 instance ProfunctorCPS r (Printer r) where
-  dimapCPS f g p = printer (getExp f . getPrint p . getExp g)
-  lmapCPS f p = printer (getExp f . getPrint p)
-  rmapCPS f p = printer (getPrint p . getExp f)
+  dimapCPS f g p = printer (getExpFn f . getPrint p . getExpFn g)
+  lmapCPS f p = printer (getExpFn f . getPrint p)
+  rmapCPS f p = printer (getPrint p . getExpFn f)
 
 
 -- Construction
 
 printer :: ((b -> r) -> (a -> r)) -> Printer r a b
-printer = Printer . Exp
+printer = Printer . expFn
 
 withSubject :: (a -> Printer r a b) -> Printer r a b
 withSubject f = printer (\ k -> runPrint k <*> f)
@@ -66,7 +66,7 @@ withSubject f = printer (\ k -> runPrint k <*> f)
 -- Elimination
 
 getPrint :: Printer r a b -> ((b -> r) -> (a -> r))
-getPrint (Printer r) = getExp r
+getPrint (Printer r) = getExpFn r
 
 print :: Printer b a b -> a -> b
 print p = getPrint p id

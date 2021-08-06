@@ -40,11 +40,11 @@ class Profunctor p => Coapply r p | p -> r where
   infixl 3 <&>
 
 instance Coapply r (Exp r) where
-  coliftC2 f (Exp a) (Exp b) = Exp (\ k c -> a k (f (b k :>- c)))
-  Exp f <&> Exp a = Exp (\ k b -> f k (a k :>- b))
+  coliftC2 f a b = expFn (\ k c -> getExpFn a k (f (getExpFn b k :>- c)))
+  f <&> a = expFn (\ k b -> getExpFn f k (getExpFn a k :>- b))
 
 class Coapply r p => Coapplicative r p | p -> r where
   copure :: (b -> a) -> p (a >-r-~ b) c
 
 instance Coapplicative r (Exp r) where
-  copure f = Exp (\ _ (a :>- b) -> a (f b))
+  copure f = expFn (\ _ (a :>- b) -> a (f b))
