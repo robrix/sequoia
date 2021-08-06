@@ -115,6 +115,9 @@ instance Conj (⊗) where
 instance Bifoldable (⊗) where
   bifoldMap = bifoldMapConj
 
+instance Bifunctor (⊗) where
+  bimap = bimapConj
+
 
 -- Diagonal functor
 
