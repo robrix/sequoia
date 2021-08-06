@@ -3,6 +3,8 @@ module Sequoia.Profunctor.Exp.Void
   type (-->)(..)
   -- * Coexponentials
 , type (>--)(..)
+  -- * Computation
+, cocurry
 ) where
 
 import qualified Control.Category as Cat
@@ -33,3 +35,9 @@ infixr 0 >--, :>--
 
 instance Profunctor (>--) where
   dimap f g (b :>-- a) = b . f :>-- g a
+
+
+-- Computation
+
+cocurry :: (c --> Either a b) -> ((b >-- c) --> a)
+cocurry f = Exp (\ k (b :>-- c) -> getExp f (either k b) c)
