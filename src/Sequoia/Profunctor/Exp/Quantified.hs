@@ -1,10 +1,13 @@
 module Sequoia.Profunctor.Exp.Quantified
 ( -- * Exponentials
   type (-->)(..)
+  -- * Construction
+, exp
 ) where
 
 import qualified Control.Category as Cat
 import           Data.Profunctor
+import           Prelude hiding (exp)
 
 -- Exponentials
 
@@ -17,3 +20,9 @@ instance Cat.Category (-->) where
 
 instance Profunctor (-->) where
   dimap f g (Exp r) = Exp (\ k -> r (k . g) . f)
+
+
+-- Construction
+
+exp :: (a -> b) -> (a --> b)
+exp f = Exp (. f)
