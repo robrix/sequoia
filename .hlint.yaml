@@ -31,4 +31,5 @@
 - fixity: infixl 7 ••
 
 
+- warn: {name: "Double-negate", lhs: "K (• a)", rhs: "dn a"}
 - warn: {name: "Use lmap/compose", lhs: "K ((k •) . f)", rhs: "k <<^ f"}
