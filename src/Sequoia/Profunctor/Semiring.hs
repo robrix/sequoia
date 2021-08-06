@@ -5,7 +5,7 @@ module Sequoia.Profunctor.Semiring
 , ProfunctorZero(..)
   -- * Semirings
 , RApplicative(..)
-, ProfunctorCotimes(..)
+, LApplicative(..)
   -- * Unital semirings
 , ProfunctorOne(..)
 , ProfunctorCoOne(..)
@@ -47,12 +47,12 @@ instance RApplicative (-->) where
   (<.>) = (<*>)
 
 
-class Profunctor p => ProfunctorCotimes p where
+class Profunctor p => LApplicative p where
   (<&>) :: p (a >-- c) b -> p a b -> p c b
 
   infixl 4 <&>
 
-instance ProfunctorCotimes (-->) where
+instance LApplicative (-->) where
   f <&> a = F (\ k -> K (\ c -> runF f k • (runF a k :>-- c)))
 
 
@@ -68,7 +68,7 @@ instance ProfunctorOne (-->) where
   rpure = pure
 
 
-class ProfunctorCotimes p => ProfunctorCoOne p where
+class LApplicative p => ProfunctorCoOne p where
   lpure :: (a • Void) -> p a b
 
 instance ProfunctorCoOne (-->) where
