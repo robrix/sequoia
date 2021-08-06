@@ -43,3 +43,4 @@ infixl 9 #
 -- Coexponentials
 
 data b >-- a = (:>--) { coreturn :: forall r . ((b -> r) -> r) -> r, coconst :: a }
+  deriving (Functor)
