@@ -3,6 +3,8 @@ module Sequoia.Profunctor.Exp.Quantified
   type (-->)(..)
   -- * Construction
 , exp
+  -- * Elimination
+, (#)
 ) where
 
 import qualified Control.Category as Cat
@@ -26,3 +28,11 @@ instance Profunctor (-->) where
 
 exp :: (a -> b) -> (a --> b)
 exp f = Exp (. f)
+
+
+-- Elimination
+
+(#) :: (a --> b) -> (a -> b)
+(#) = (`getExp` id)
+
+infixl 9 #
