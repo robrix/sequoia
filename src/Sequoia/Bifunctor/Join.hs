@@ -34,4 +34,4 @@ instance Bidistributive p => Distributive (Join p) where
 instance Birepresentable p => Representable (Join p) where
   type Rep (Join p) = Birep p
   tabulate f = Join (bitabulate f f)
-  index = biindex . runJoin
+  index = fmap (either id id) . biindex . runJoin
