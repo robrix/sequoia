@@ -13,7 +13,6 @@ module Sequoia.Print.Printer
 , runPrint
   -- * Computation
 , Coapplicative(..)
-, liftC2
 , fanoutWith
   -- * Combinators
 , tuple
@@ -82,10 +81,6 @@ appPrint p a k = getPrint p k a
 
 
 -- Computation
-
-liftC2 :: (Coapplicative (Coexp r) f, ProfunctorCPS (Exp r) f) => (c -> Either a b) -> f a d -> f b d -> f c d
-liftC2 f pa pb = f <#> pa <&> pb
-
 
 fanoutWith :: (b -> b -> b) -> Printer r a b -> Printer r a b -> Printer r a b
 fanoutWith f l r = printer (\ k a -> appPrint l a (appPrint r a . (k .) . f))
