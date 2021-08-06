@@ -8,4 +8,4 @@ import Data.Profunctor
 -- Exponentials
 
 class Profunctor ex => Exponential ex where
-  exp :: (a -> b) -> ex a b
+  exp :: ((b -> r) -> (a -> r)) -> ex a b
