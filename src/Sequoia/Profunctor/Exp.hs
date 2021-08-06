@@ -8,6 +8,8 @@ module Sequoia.Profunctor.Exp
 , runExp
   -- * Coexponential functors
 , Coexp(..)
+  -- * Elimination
+, elimCoexp
 ) where
 
 import Data.Function ((&))
@@ -56,3 +58,9 @@ instance Profunctor (Coexp r) where
 
 instance Functor (Coexp r b) where
   fmap = rmap
+
+
+-- Elimination
+
+elimCoexp :: Coexp r a b -> Exp r b a -> r
+elimCoexp (b :>- a) f = appExp f a b
