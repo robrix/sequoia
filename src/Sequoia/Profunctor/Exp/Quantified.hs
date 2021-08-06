@@ -44,3 +44,6 @@ infixl 9 #
 
 data b >-- a = (:>--) { coreturn :: forall r . ((b -> r) -> r) -> r, coconst :: a }
   deriving (Functor)
+
+instance Profunctor (>--) where
+  dimap f g (b :>-- a) = lmap (lmap (lmap f)) b :>-- g a
