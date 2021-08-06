@@ -20,7 +20,7 @@ instance Functor (Exp r a) where
 
 instance Applicative (Exp r a) where
   pure = Exp . (const .) . (&)
-  Exp xf <*> Exp xa = Exp (\ k a -> xf (\ f -> xa (k . f) a) a)
+  xf <*> xa = Exp (\ k a -> runExp xf a (runExp xa a . (k .)))
 
 
 -- Elimination
