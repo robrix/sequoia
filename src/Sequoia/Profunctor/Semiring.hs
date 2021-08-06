@@ -69,10 +69,10 @@ instance ProfunctorOne (-->) where
 
 
 class ProfunctorCotimes p => ProfunctorCoOne p where
-  coOne :: (a • Void) -> p a b
+  lpure :: (a • Void) -> p a b
 
 instance ProfunctorCoOne (-->) where
-  coOne = F . const
+  lpure = F . const
 
 
 -- Exponentials
