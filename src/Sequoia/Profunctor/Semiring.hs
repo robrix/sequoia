@@ -1,3 +1,4 @@
+{-# LANGUAGE FunctionalDependencies #-}
 module Sequoia.Profunctor.Semiring
 ( -- * Semigroups
   RSemigroup(..)
@@ -9,15 +10,11 @@ module Sequoia.Profunctor.Semiring
   -- * Unital semirings
 , ROne(..)
 , LOne(..)
-  -- * Exponentials
-, type (-->)(..)
-  -- * Coexponentials
-, type (>--)(..)
 ) where
 
 import Data.Profunctor
-import Data.Void
 import Sequoia.Profunctor.Continuation
+import Sequoia.Profunctor.Exp
 
 -- Semigroups
 
@@ -43,17 +40,17 @@ class Profunctor p => RApply p where
 instance RApply (->) where
   (<.>) = (<*>)
 
-instance RApply (-->) where
+instance RApply (Exp r) where
   (<.>) = (<*>)
 
 
-class Profunctor p => LApply p where
-  (<&>) :: p (a >-- c) b -> p a b -> p c b
+class Profunctor p => LApply r p | p -> r where
+  (<&>) :: p (Coexp r a c) b -> p a b -> p c b
 
   infixl 4 <&>
 
-instance LApply (-->) where
-  f <&> a = F (\ k -> K (\ c -> runF f k • (runF a k :>-- c)))
+instance LApply r (Exp r) where
+  f <&> a = Exp (\ k c -> getExp f k (getExp a k :>- c))
 
 
 -- Unital semirings
@@ -64,40 +61,12 @@ class RApply p => ROne p where
 instance ROne (->) where
   rpure = pure
 
-instance ROne (-->) where
+instance ROne (Exp r) where
   rpure = pure
 
 
-class LApply p => LOne p where
-  lpure :: (a • Void) -> p a b
+class LApply r p => LOne r p | p -> r where
+  lpure :: (a • r) -> p a b
 
-instance LOne (-->) where
-  lpure = F . const
-
-
--- Exponentials
-
-newtype a --> b = F { runF :: (b • Void) -> (a • Void) }
-
-infixr 0 -->
-
-instance Profunctor (-->) where
-  dimap f g = F . dimap (lmap g) (lmap f) . runF
-
-instance Functor ((-->) a) where
-  fmap = rmap
-
-instance Applicative ((-->) a) where
-  pure a = F (K . const . (• a))
-  f <*> a = F (\ k -> K (\ x -> runF f (K (\ bc -> runF a (lmap bc k) • x)) • x))
-
-
--- Coexponentials
-
-data a >-- b = (a • Void) :>-- b
-  deriving (Functor)
-
-infixr 0 >--, :>--
-
-instance Profunctor (>--) where
-  dimap f g (a :>-- b) = lmap f a :>-- g b
+instance LOne r (Exp r) where
+  lpure = Exp . const . (•)
