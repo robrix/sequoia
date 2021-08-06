@@ -40,7 +40,6 @@ module Sequoia.Profunctor.Exponential
 
 import           Control.Arrow
 import qualified Control.Category as Cat
-import           Control.Monad (join)
 import           Data.Coerce
 import           Data.Function
 import           Data.Profunctor
@@ -113,8 +112,9 @@ instance MonadRes r (Exp e r a) where
 instance MonadRunK r (Exp e r a) where
   withRunK f = exp (\ k v -> withRun (\ run -> k ↓ f (\ k' m -> run (k' ↓ m ↑ v)) ↑ v))
 
-instance Coapply (Exp e r) where
-  coliftA2 f a b = exp (\ k -> let r a v = k ↓ a ↑ v in join . (r a <∘∘> r b) . fmap f)
+instance Coapply (Coexp e r) (Exp e r) where
+  coliftC2 f a b = exp (\ k v -> k ↓ a ↑ V (\ e -> f (v -< runExpK b e k)))
+  f <&> a = exp (\ k v -> k ↓ f ↑ V (\ e -> v -< runExpK a e k))
 
 instance Arrow (Exp e r) where
   arr = exp'

@@ -29,9 +29,9 @@ instance Pro.Coadjunction p q => Adjunction (Con p r) (Con q r) where
   leftAdjunct  f a = Con (Pro.leftCoadjunct  (runCon . f) a)
   rightAdjunct f a = Con (Pro.rightCoadjunct (runCon . f) a)
 
-instance Pro.Coapply p => Contrapply (Con p r) where
-  contraliftA2 f (Con a) (Con b) = Con (Pro.coliftA2 f a b)
-  contrap (Con a) (Con b) = Con (Pro.coap a b)
+instance Pro.Coapply c p => Contrapply c (Con p r) where
+  coliftC2 f (Con a) (Con b) = Con (Pro.coliftC2 f a b)
+  Con a <&> Con b = Con (a Pro.<&> b)
 
-instance Pro.Coapplicative p => Contrapplicative (Con p r) where
-  contrapure = Con . Pro.copure
+instance Pro.Coapplicative c p => Contrapplicative c (Con p r) where
+  copure = Con . Pro.copure

@@ -1,26 +1,42 @@
+{-# LANGUAGE FunctionalDependencies #-}
 module Sequoia.Functor.Applicative
-( Contrapply(..)
+( -- * Contravariant applicative
+  comap
+, Contrapply(..)
 , Contrapplicative(..)
+  -- * Coexponentials
+, type (>-)
+, type (-~)
 ) where
 
 import Data.Functor.Contravariant
-import Data.Functor.Contravariant.Rep
+import Data.Kind (Type)
 
-class Contravariant k => Contrapply k where
-  {-# MINIMAL contraliftA2 | contrap #-}
+-- Contravariant applicative
 
-  contraliftA2 :: (c -> Either a b) -> k a -> k b -> k c
-  contraliftA2 f a b = contramap f (contrap a b)
+comap :: Contravariant f => (a' -> a) -> (f a -> f a')
+comap = contramap
 
-  contrap :: k a -> k b -> k (Either a b)
-  contrap = contraliftA2 id
+class Contravariant f => Contrapply co f | f -> co where
+  {-# MINIMAL coliftC2 | (<&>) #-}
 
-  coapl :: k a -> k b -> k a
-  coapl = contraliftA2 Left
+  coliftC2 :: ((b >-co-~ c) -> a) -> f a -> f b -> f c
+  coliftC2 f = (<&>) . comap f
 
-  coapr :: k a -> k b -> k b
-  coapr = contraliftA2 Right
+  (<&>) :: f (a >-co-~ b) -> f a -> f b
+  (<&>) = coliftC2 id
 
-class (Contrapply k, Representable k) => Contrapplicative k where
-  contrapure :: (a -> Rep k) -> k a
-  contrapure = tabulate
+  infixl 4 <&>
+
+
+class Contrapply co f => Contrapplicative co f | f -> co where
+  copure :: (b -> a) -> f (co a b)
+
+
+-- Coexponentials
+
+type b >-r = (r :: Type -> Type -> Type) b
+type r-~ a = r a
+
+infixr 1 >-
+infixr 0 -~
