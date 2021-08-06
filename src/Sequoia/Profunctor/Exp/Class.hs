@@ -12,5 +12,7 @@ import Prelude hiding (exp)
 class Profunctor ex => Exponential ex where
   exp :: ((b -> r) -> (a -> r)) -> ex a b
 
+  app :: ex a b -> ((b -> r) -> (a -> r))
+
 exp' :: Exponential ex => (a -> b) -> ex a b
 exp' f = exp (. f)
