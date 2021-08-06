@@ -1,2 +1,8 @@
 module Sequoia.Profunctor.Exp
-() where
+( -- * Exponential functors
+  Exp(..)
+) where
+
+-- Exponential functors
+
+newtype Exp r a b = Exp { runExp :: (b -> r) -> (a -> r) }
