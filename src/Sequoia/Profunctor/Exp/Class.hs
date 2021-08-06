@@ -1,5 +1,5 @@
 module Sequoia.Profunctor.Exp.Class
-( -- Exponentials
+( -- * Exponentials
   Exponential(..)
 , exp'
 ) where
