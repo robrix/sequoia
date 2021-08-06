@@ -7,7 +7,7 @@ module Sequoia.Profunctor.Semiring
 , RApplicative(..)
 , LApplicative(..)
   -- * Unital semirings
-, ProfunctorOne(..)
+, ROne(..)
 , ProfunctorCoOne(..)
   -- * Exponentials
 , type (-->)(..)
@@ -58,13 +58,13 @@ instance LApplicative (-->) where
 
 -- Unital semirings
 
-class RApplicative p => ProfunctorOne p where
+class RApplicative p => ROne p where
   rpure :: b -> p a b
 
-instance ProfunctorOne (->) where
+instance ROne (->) where
   rpure = pure
 
-instance ProfunctorOne (-->) where
+instance ROne (-->) where
   rpure = pure
 
 
