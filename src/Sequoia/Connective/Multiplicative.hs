@@ -1,5 +1,6 @@
 module Sequoia.Connective.Multiplicative
-( elimPar
+( -- * Elimination
+  elimPar
 , elimTensor
   -- * Adjunction
 , leftAdjunct
@@ -19,6 +20,8 @@ import Sequoia.Connective.One
 import Sequoia.Connective.Par
 import Sequoia.Disjunction
 import Sequoia.Polarity
+
+-- Elimination
 
 elimPar :: a ⅋ b -> Negate e a r ⊗ Negate e b r -> r
 elimPar = (. exl) . flip (•-) <--> (. exr) . flip (•-)
