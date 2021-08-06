@@ -9,7 +9,7 @@ module Sequoia.Profunctor.Applicative
 import Control.Category as Cat hiding ((.))
 import Data.Profunctor
 import Prelude hiding (exp)
-import Sequoia.Profunctor.Continuation
+import Sequoia.Profunctor
 import Sequoia.Profunctor.Exp
 
 class Profunctor p => ProfunctorCPS r p | p -> r where
@@ -41,8 +41,8 @@ class Profunctor p => Coapply r p | p -> r where
   infixl 3 <&>
 
 instance Coapply r (Exp r) where
-  coliftC2 f a b = expFn (\ k c -> getExpFn a k (f (getExp b (K k) :>- c)))
-  f <&> a = expFn (\ k b -> getExpFn f k (getExp a (K k) :>- b))
+  coliftC2 f a b = Exp (\ k -> getExp a k <<^ f . (getExp b k :>-))
+  f <&> a = Exp (\ k -> getExp f k <<^ (getExp a k :>-))
 
 class Coapply r p => Coapplicative r p | p -> r where
   copure :: (b -> a) -> p (a >-r-~ b) c
