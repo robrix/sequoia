@@ -52,7 +52,7 @@ class Profunctor p => LApply r p | p -> r where
   infixl 4 <&>
 
 instance LApply r (Exp r) where
-  f <&> a = Exp (\ k -> K (\ c -> getExp f k • ((getExp a k •) :>- c)))
+  f <&> a = Exp (\ k -> K (\ c -> getExp f k • (getExp a k :>- c)))
 
 
 class (LApply r p, RApply p) => ProfunctorApply r p where

@@ -25,6 +25,7 @@ import Data.Profunctor
 import Prelude hiding (exp, print)
 import Sequoia.Print.Class hiding (list)
 import Sequoia.Profunctor.Applicative
+import Sequoia.Profunctor.Continuation
 import Sequoia.Profunctor.Exp
 
 -- Printers
@@ -43,10 +44,10 @@ instance Document b =>  Document (Printer r a b) where
   string s = printer (const . ($ string s))
 
 instance Coapply r (Printer r) where
-  pf <&> pa = printer (\ k b -> getPrint pf k (getPrint pa k >- b))
+  pf <&> pa = printer (\ k b -> getPrint pf k (K (getPrint pa k) >- b))
 
 instance Coapplicative r (Printer r) where
-  copure = printer . const . runCoexp
+  copure = printer . const . (•) . runCoexp
 
 instance ProfunctorCPS r (Printer r) where
   dimapCPS f g p = printer (getExpFn f . getPrint p . getExpFn g)

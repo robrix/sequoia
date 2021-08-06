@@ -102,7 +102,7 @@ runExp :: (b • r) -> a -> Exp r a b • r
 runExp k a = K (\ f -> getExp f k • a)
 
 elimExp :: Exp r a b -> Coexp r b a • r
-elimExp f = K (\ (b :>- a) -> getExp f (K b) • a)
+elimExp f = K (\ (b :>- a) -> getExp f b • a)
 
 (#) :: (a ~~b~> b) -> (a -> b)
 f # a = appExp f a • idK
@@ -115,7 +115,7 @@ getExpFn = coerce
 
 -- Coexponential functors
 
-data Coexp r b a = (b -> r) :>- a
+data Coexp r b a = (b • r) :>- a
 
 infixr 0 :>-
 
@@ -137,29 +137,29 @@ infixr 0 -~
 
 -- Construction
 
-(>-) :: (b -> r) -> a -> Coexp r b a
+(>-) :: (b • r) -> a -> Coexp r b a
 (>-) = (:>-)
 
 
 -- Elimination
 
-runCoexp :: (a -> b) -> Coexp r b a -> r
-runCoexp f (b :>- a) = b (f a)
+runCoexp :: (a -> b) -> Coexp r b a • r
+runCoexp f = K (\ (b :>- a) -> b • f a)
 
-elimCoexp :: Coexp r a b -> Exp r b a -> r
-elimCoexp (a :>- b) (Exp f) = f (K a) • b
+elimCoexp :: Coexp r a b -> Exp r b a • r
+elimCoexp (a :>- b) = K (\ (Exp f) -> f a • b)
 
-withCoexp :: Coexp r a b -> ((a -> r) -> b -> s) -> s
+withCoexp :: Coexp r a b -> ((a • r) -> b -> s) -> s
 withCoexp (a :>- b) f = f a b
 
 
 -- Computation
 
 cocurry :: Exp r c (Either a b) -> Exp r (Coexp r b c) a
-cocurry f = Exp (\ k -> K (\ (b :>- c) -> getExp f (k <••> K b) • c))
+cocurry f = Exp (\ k -> K (\ (b :>- c) -> getExp f (k <••> b) • c))
 
 uncocurry :: Exp r (Coexp r b c) a -> Exp r c (Either a b)
-uncocurry f = Exp (\ k -> K (\ c -> getExp f (inlL k) • ((inrL k •) >- c)))
+uncocurry f = Exp (\ k -> K (\ c -> getExp f (inlL k) • (inrL k >- c)))
 
 coap :: Exp r c (Either (Coexp r b c) b)
-coap = Exp (\ k -> lmap ((inrL k •) >-) (inlL k))
+coap = Exp (\ k -> lmap (inrL k >-) (inlL k))

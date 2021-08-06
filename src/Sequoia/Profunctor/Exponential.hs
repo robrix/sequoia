@@ -38,7 +38,7 @@ module Sequoia.Profunctor.Exponential
 , shift
 ) where
 
-import           Control.Arrow
+import           Control.Arrow hiding ((<<^))
 import qualified Control.Category as Cat
 import           Data.Coerce
 import           Data.Function
@@ -52,6 +52,7 @@ import           Prelude hiding (exp)
 import           Sequoia.Conjunction
 import           Sequoia.Disjunction
 import           Sequoia.Monad.Run
+import           Sequoia.Profunctor
 import           Sequoia.Profunctor.Applicative
 import           Sequoia.Profunctor.Coexponential
 import           Sequoia.Profunctor.Context
@@ -114,11 +115,11 @@ instance MonadRunK r (Exp e r a) where
   withRunK f = exp (\ k v -> withRun (\ run -> k ↓ f (\ k' m -> run (k' ↓ m ↑ v)) ↑ v))
 
 instance Coapply r (Exp e r) where
-  coliftC2 f a b = exp (\ k v -> k ↓ a ↑ V (\ e -> f ((runExpK b e k •) X.:>- e ∘ v)))
-  f <&> a = exp (\ k v -> k ↓ f ↑ V (\ e -> (runExpK a e k •) X.:>- e ∘ v))
+  coliftC2 f a b = exp (\ k v -> k ↓ a ↑ V (\ e -> f (runExpK b e k X.:>- e ∘ v)))
+  f <&> a = exp (\ k v -> k ↓ f ↑ V (\ e -> runExpK a e k X.:>- e ∘ v))
 
 instance Coapplicative r (Exp e r) where
-  copure f = expFn (\ _ v e -> X.withCoexp (v e) (\ a b -> a (f b)))
+  copure f = expFn (\ _ v e -> X.withCoexp (v e) ((•) . (<<^ f)))
 
 instance Arrow (Exp e r) where
   arr = exp'
