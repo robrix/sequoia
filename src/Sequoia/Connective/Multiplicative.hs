@@ -31,6 +31,7 @@ import Data.Functor.Adjunction
 import Data.Functor.Rep
 import Sequoia.Bidistributive
 import Sequoia.Bifunctor.Join
+import Sequoia.Birepresentable
 import Sequoia.Conjunction
 import Sequoia.Connective.Bottom
 import Sequoia.Connective.Negation
@@ -133,6 +134,11 @@ instance Bitraversable (⊗) where
 instance Bidistributive (⊗) where
   bidistribute = bidistributeConj
   bicollect = bicollectConj
+
+instance Birepresentable (⊗) where
+  type Birep (⊗) = Either () ()
+  bitabulate f g = f (inl ()) >--< g (inr ())
+  biindex p = const (exl p) `bimap` const (exr p)
 
 
 -- Diagonal functor
