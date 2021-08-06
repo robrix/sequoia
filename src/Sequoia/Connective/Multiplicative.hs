@@ -5,6 +5,7 @@ module Sequoia.Connective.Multiplicative
   -- * Adjunction
 , leftAdjunct
 , rightAdjunct
+, leftAdjunctΔTensor
   -- * Negative disjunction
 , type (⅋)(..)
   -- ** Elimination
@@ -47,6 +48,10 @@ leftAdjunct f = f . inl >---< f . inr
 
 rightAdjunct :: (a -> b ⊗ b) -> (a ⅋ a -> b)
 rightAdjunct f = exl . f <--> exr . f
+
+
+leftAdjunctΔTensor :: (Δ a -> b) -> (a -> b ⊗ b)
+leftAdjunctΔTensor f = f . inDiag >---< f . inDiag
 
 
 -- Negative disjunction
