@@ -53,3 +53,6 @@ data Coexp r b a = (b -> r) :>- a
 
 instance Profunctor (Coexp r) where
   dimap f g (b :>- a) = (b <<^ f) :>- g a
+
+instance Functor (Coexp r b) where
+  fmap = rmap
