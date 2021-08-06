@@ -131,7 +131,8 @@ instance Bitraversable (⊗) where
   bitraverse = bitraverseConj
 
 instance Bidistributive (⊗) where
-  bidistribute = fmap exl >---< fmap exr
+  bidistribute = bidistributeConj
+  bicollect = bicollectConj
 
 
 -- Diagonal functor
