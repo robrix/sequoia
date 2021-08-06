@@ -2,7 +2,7 @@ module Sequoia.Profunctor.Semiring
 ( -- * Semigroups
   RSemigroup(..)
   -- * Monoids
-, ProfunctorZero(..)
+, RMonoid(..)
   -- * Semirings
 , RApplicative(..)
 , LApplicative(..)
@@ -29,7 +29,7 @@ class Profunctor p => RSemigroup p where
 
 -- Monoids
 
-class RSemigroup p => ProfunctorZero p where
+class RSemigroup p => RMonoid p where
   zero :: p a b
 
 
