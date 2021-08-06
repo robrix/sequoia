@@ -102,4 +102,4 @@ type a •••r = a • r • r • r
 infixl 7 •••
 
 tnE :: a ••• r -> a • r
-tnE ta = K ((ta •) . dn)
+tnE = (<<^ dn)
