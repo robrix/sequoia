@@ -12,7 +12,6 @@ module Sequoia.Print.Printer
 , appPrint
 , runPrint
   -- * Computation
-, Coapplicative(..)
 , fanoutWith
   -- * Combinators
 , tuple
