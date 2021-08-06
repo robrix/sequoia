@@ -17,6 +17,7 @@ module Sequoia.Profunctor.Exp
   -- * Computation
 , cocurry
 , uncocurry
+, coap
 ) where
 
 import qualified Control.Category as Cat
@@ -120,3 +121,6 @@ cocurry f = Exp (\ k (b :>- c) -> appExp f c (either k b))
 
 uncocurry :: Exp r (Coexp r b c) a -> Exp r c (Either a b)
 uncocurry f = Exp (\ k c -> appExp f (inrL k >- c) (inlL k))
+
+coap :: Exp r c (Either (Coexp r b c) b)
+coap = Exp (\ k c -> k (inl (k . inr >- c)))
