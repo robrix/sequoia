@@ -42,4 +42,4 @@ infixl 9 #
 
 -- Coexponentials
 
-data b >-- a = (forall r . ((b -> r) -> r) -> r) :>-- a
+data b >-- a = (:>--) { coreturn :: forall r . ((b -> r) -> r) -> r, coconst :: a }
