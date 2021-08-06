@@ -16,7 +16,7 @@ import Prelude hiding (exp)
 class Profunctor ex => Exponential ex where
   exp :: ((b -> r) -> (a -> r)) -> ex a b
 
-  app :: ex a b -> ((b -> r) -> (a -> r))
+  appExp :: ex a b -> ((b -> r) -> (a -> r))
 
 exp' :: Exponential ex => (a -> b) -> ex a b
 exp' f = exp (. f)
@@ -31,4 +31,4 @@ class Profunctor co => Coexponential co where
 -- Computation
 
 cocurry :: (Exponential ex, Coexponential co) => ex c (Either a b) -> ex (co b c) a
-cocurry f = exp (\ k -> runCoexp (app f . either k))
+cocurry f = exp (\ k -> runCoexp (appExp f . either k))
