@@ -5,7 +5,8 @@ module Sequoia.Profunctor.Exp.Void
 , type (>--)(..)
 ) where
 
-import Data.Void
+import qualified Control.Category as Cat
+import           Data.Void
 
 -- Exponentials
 
@@ -13,6 +14,10 @@ newtype a --> b = Exp { getExp :: (b -> Void) -> (a -> Void) }
   deriving (Functor)
 
 infixr 0 -->
+
+instance Cat.Category (-->) where
+  id = Exp id
+  f . g = Exp (getExp g . getExp f)
 
 
 -- Coexponentials
