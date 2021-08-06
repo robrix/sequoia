@@ -59,13 +59,13 @@ instance ProfunctorCotimes (-->) where
 -- Unital semirings
 
 class ProfunctorTimes p => ProfunctorOne p where
-  one :: b -> p a b
+  rpure :: b -> p a b
 
 instance ProfunctorOne (->) where
-  one = pure
+  rpure = pure
 
 instance ProfunctorOne (-->) where
-  one = pure
+  rpure = pure
 
 
 class ProfunctorCotimes p => ProfunctorCoOne p where
