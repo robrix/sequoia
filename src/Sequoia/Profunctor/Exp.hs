@@ -39,6 +39,9 @@ instance Coapply (Coexp r) (Exp r) where
   coliftC2 f (Exp a) (Exp b) = Exp (\ k c -> a k (f (b k :>- c)))
   Exp f <&> Exp a = Exp (\ k b -> f k (a k :>- b))
 
+instance Coapplicative (Coexp r) (Exp r) where
+  copure f = Exp (\ _ (a :>- b) -> a (f b))
+
 
 -- Construction
 
