@@ -4,8 +4,8 @@ module Sequoia.Connective.Multiplicative
   elimPar
 , elimTensor
   -- * Adjunction
-, leftAdjunct
-, rightAdjunct
+, leftAdjunctParTensor
+, rightAdjunctParTensor
 , leftAdjunctΔTensor
 , leftAdjunctParΔ
   -- * Negative disjunction
@@ -27,7 +27,9 @@ import Data.Bifoldable
 import Data.Bifunctor
 import Data.Bitraversable
 import Data.Distributive
+import Data.Functor.Adjunction
 import Data.Functor.Rep
+import Sequoia.Bifunctor.Join
 import Sequoia.Conjunction
 import Sequoia.Connective.Bottom
 import Sequoia.Connective.Negation
@@ -47,11 +49,11 @@ elimTensor = flip ((. exl) . (•¬) <--> (. exr) . (•¬))
 
 -- Adjunction
 
-leftAdjunct :: (a ⅋ a -> b) -> (a -> b ⊗ b)
-leftAdjunct f = f . inl >---< f . inr
+leftAdjunctParTensor :: (a ⅋ a -> b) -> (a -> b ⊗ b)
+leftAdjunctParTensor f = f . inl >---< f . inr
 
-rightAdjunct :: (a -> b ⊗ b) -> (a ⅋ a -> b)
-rightAdjunct f = exl . f <--> exr . f
+rightAdjunctParTensor :: (a -> b ⊗ b) -> (a ⅋ a -> b)
+rightAdjunctParTensor f = exl . f <--> exr . f
 
 
 leftAdjunctΔTensor :: (Δ a -> b) -> (a -> b ⊗ b)
@@ -92,6 +94,10 @@ instance Bifunctor (⅋) where
 
 instance Bitraversable (⅋) where
   bitraverse = bitraverseDisj
+
+instance Adjunction (Join (⅋)) Δ where
+  leftAdjunct  f = Δ . (f . Join . inl >---< f . Join . inr)
+  rightAdjunct f = (exl . exDiag . f <--> exr . exDiag . f) . runJoin
 
 
 -- Elimination
