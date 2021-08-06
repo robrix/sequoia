@@ -83,7 +83,7 @@ appPrint p a k = getPrint p k a
 tuple :: (forall a b . Document b => Document (p a b), Document c, Coapplicative co p) => p a c -> p b c -> p (a, b) c
 tuple a b = parens (lmap fst a <> comma <+> lmap snd b)
 
-list :: Document b => Printer r a b -> Printer r [a] b
+list :: (forall a b . Document b => Document (p a b), Document b, ProfunctorCPS (Exp r) p, Coapplicative (Coexp r) p) => p a b -> p [a] b
 list pa = brackets go
   where
   go = maybeToEither . uncons <#> mempty <&> lmap fst pa <> lmap snd tail
