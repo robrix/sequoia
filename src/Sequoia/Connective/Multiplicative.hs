@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeFamilies #-}
 module Sequoia.Connective.Multiplicative
 ( -- * Elimination
   elimPar
@@ -26,6 +27,7 @@ import Data.Bifoldable
 import Data.Bifunctor
 import Data.Bitraversable
 import Data.Distributive
+import Data.Functor.Rep
 import Sequoia.Conjunction
 import Sequoia.Connective.Bottom
 import Sequoia.Connective.Negation
@@ -130,6 +132,13 @@ newtype Δ a = Δ { exDiag :: (a, a) }
 instance Distributive Δ where
   distribute g = Δ (exl . exDiag <$> g, exr . exDiag <$> g)
   collect f g = Δ (exl . exDiag . f <$> g, exr . exDiag . f <$> g)
+
+instance Representable Δ where
+  type Rep Δ = Bool
+  tabulate f = Δ (f False, f True)
+  index (Δ a) b
+    | False <- b = exl a
+    | True  <- b = exr a
 
 
 -- Construction
