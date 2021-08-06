@@ -1,6 +1,8 @@
 module Sequoia.Profunctor.Exp.Void
 ( -- * Exponentials
   type (-->)(..)
+  -- * Construction
+, exp
   -- * Coexponentials
 , type (>--)(..)
   -- * Computation
@@ -12,6 +14,7 @@ module Sequoia.Profunctor.Exp.Void
 import qualified Control.Category as Cat
 import           Data.Profunctor
 import           Data.Void
+import           Prelude hiding (exp)
 import           Sequoia.Disjunction
 
 -- Exponentials
@@ -27,6 +30,12 @@ instance Cat.Category (-->) where
 
 instance Profunctor (-->) where
   dimap f g = Exp . dimap (lmap g) (lmap f) . getExp
+
+
+-- Construction
+
+exp :: (a -> b) -> (a --> b)
+exp f = Exp (. f)
 
 
 -- Coexponentials
