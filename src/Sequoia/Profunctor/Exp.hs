@@ -36,6 +36,10 @@ instance Choice (Exp r) where
   left'  (Exp r) = Exp (\ k -> r (inlL k) <--> inrL k)
   right' (Exp r) = Exp (\ k -> inlL k <--> r (inrL k))
 
+instance Cochoice (Exp r) where
+  unleft  (Exp f) = Exp (\ k -> inlL (let f' = f (k <--> inrL f') in f'))
+  unright (Exp f) = Exp (\ k -> inrL (let f' = f (inlL f' <--> k) in f'))
+
 instance Strong (Exp r) where
   first'  f = Exp (\ k (a, c) -> appExp f a (k . (,c)))
   second' f = Exp (\ k (c, a) -> appExp f a (k . (c,)))
