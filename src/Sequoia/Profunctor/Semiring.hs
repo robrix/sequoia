@@ -1,6 +1,6 @@
 module Sequoia.Profunctor.Semiring
 ( -- * Semigroups
-  ProfunctorPlus(..)
+  RSemigroup(..)
   -- * Monoids
 , ProfunctorZero(..)
   -- * Semirings
@@ -21,7 +21,7 @@ import Sequoia.Profunctor.Continuation
 
 -- Semigroups
 
-class Profunctor p => ProfunctorPlus p where
+class Profunctor p => RSemigroup p where
   (<|>) :: p a b -> p a b -> p a b
 
   infixl 3 <|>
@@ -29,7 +29,7 @@ class Profunctor p => ProfunctorPlus p where
 
 -- Monoids
 
-class ProfunctorPlus p => ProfunctorZero p where
+class RSemigroup p => ProfunctorZero p where
   zero :: p a b
 
 
