@@ -52,6 +52,7 @@ instance Coapply (Coexp r) (Printer r) where
   pf <&> pa = printer (\ k b -> getPrint pf k (getPrint pa k >- b))
 
 instance ProfunctorCPS (Exp r) (Printer r) where
+  dimapCPS f g p = printer (getExp f . getPrint p . getExp g)
   lmapCPS f p = printer (getExp f . getPrint p)
   rmapCPS f p = printer (getPrint p . getExp f)
 
