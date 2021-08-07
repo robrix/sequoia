@@ -7,7 +7,7 @@ module Sequoia.Monad.Run
 , MonadRunK(..)
   -- * Construction
 , fn
-, inK
+, inKM
 , cont
 , contK
   -- * Defaults
@@ -46,8 +46,8 @@ class Monad m => MonadRunK r m | m -> r where
 fn :: MonadRun m => (a -> m r) -> m (a -> r)
 fn = distributeRun
 
-inK :: MonadRun m => (a -> m r) -> m (a • r)
-inK = fmap K . fn
+inKM :: MonadRun m => (a -> m r) -> m (a • r)
+inKM = fmap K . fn
 
 cont :: MonadRun m => ((forall b . (b -> m r) -> b • r) -> m a) -> m a
 cont f = withRun (\ run -> f (K . (run .)))
