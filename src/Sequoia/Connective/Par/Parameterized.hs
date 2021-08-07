@@ -1,8 +1,6 @@
 module Sequoia.Connective.Par.Parameterized
 ( -- * Par
   Par(..)
-  -- * Elimination
-, runPar
 ) where
 
 import Data.Bifunctor
@@ -27,9 +25,3 @@ instance Functor (Par r a) where
 
 instance Bifunctor (Par r) where
   bimap f g (Par r) = Par (r <<^ bimap (<<^ f) (<<^ g))
-
-
--- Elimination
-
-runPar :: (a • r, b • r) -> Par r a b • r
-runPar e = K (\ (Par r) -> r • e)
