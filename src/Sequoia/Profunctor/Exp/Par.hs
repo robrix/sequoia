@@ -43,4 +43,4 @@ exp' f = exp (\ a kb -> kb • pure (f a))
 -- Elimination
 
 runExp :: Exp env res a b -> b • res -> a -> env ==> res
-runExp (Exp r) k a = C (\ env -> r • (dn a <••> K (\ b -> k • env ∘ b)))
+runExp (Exp r) k a = C (\ env -> r • (dn a <••> (k <<^ (env ∘))))
