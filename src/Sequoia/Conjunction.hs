@@ -36,6 +36,8 @@ module Sequoia.Conjunction
 , bisequenceConj
 , bidistributeConj
 , bicollectConj
+, bitabulateConj
+, biindexConj
   -- * Lifted projections
 , exlK
 , exrK
@@ -208,6 +210,11 @@ bidistributeConj = fmap exl >---< fmap exr
 bicollectConj :: (Conj p, Functor g) => (a -> b `p` c) -> g a -> g b `p` g c
 bicollectConj f = fmap (exl . f) >---< fmap (exr . f)
 
+bitabulateConj :: Conj c => (Either () () -> a) -> (Either () () -> b) -> a `c` b
+bitabulateConj f g = f (Left ()) >--< g (Right ())
+
+biindexConj :: Conj c => a `c` b -> Either () () -> Either a b
+biindexConj p = const (Left (exl p)) `either` const (Right (exr p))
 
 -- Lifted projections
 
