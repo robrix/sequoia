@@ -172,6 +172,7 @@ library
     Sequoia.Profunctor.Exchange
     Sequoia.Profunctor.Exp
     Sequoia.Profunctor.Exp.Class
+    Sequoia.Profunctor.Exp.Par
     Sequoia.Profunctor.Exp.Quantified
     Sequoia.Profunctor.Exp.Void
     Sequoia.Profunctor.Exponential
