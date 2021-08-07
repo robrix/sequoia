@@ -80,8 +80,8 @@ type a ••r = a • r • r
 
 infixl 7 ••
 
-dn :: a -> a •• r
-dn a = K (• a)
+dn :: (Continuation j, Continuation k) => a -> (a `j` r) `k` r
+dn a = inK (• a)
 
 
 (=<<^) :: (a -> b •• r) -> (a •• r -> b •• r)
