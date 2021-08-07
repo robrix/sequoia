@@ -34,7 +34,7 @@ instance Profunctor (Exp e r) where
 -- Construction
 
 exp :: (a -> (env ≁ b) • res -> res) -> Exp env res a b
-exp f = Exp (K (\ k -> inlL k • inK (\ a -> f a (inrL k))))
+exp f = Exp (K (\ k -> inlL k • inK (`f` inrL k)))
 
 exp' :: (a -> b) -> Exp env res a b
 exp' f = exp (\ a kb -> kb • pure (f a))
