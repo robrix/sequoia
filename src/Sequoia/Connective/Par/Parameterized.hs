@@ -5,6 +5,8 @@ module Sequoia.Connective.Par.Parameterized
 , runPar
 ) where
 
+import Sequoia.Conjunction
+import Sequoia.Disjunction
 import Sequoia.Polarity
 import Sequoia.Profunctor.Continuation
 
@@ -13,6 +15,10 @@ import Sequoia.Profunctor.Continuation
 newtype Par r a b = Par ((a • r, b • r) • r)
 
 instance (Neg a, Neg b) => Polarized N (Par r a b) where
+
+instance DisjIn (Par r) where
+  inl l = Par (exlL (dn l))
+  inr r = Par (exrL (dn r))
 
 
 -- Elimination
