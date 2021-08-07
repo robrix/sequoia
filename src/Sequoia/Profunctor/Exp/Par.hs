@@ -28,7 +28,7 @@ instance Profunctor (Exp e r) where
 -- Construction
 
 exp' :: (a -> b) -> Exp env res a b
-exp' f = Exp (Par (K (\ (ka, kb) -> ka • Not (K (\ a -> kb • pure (f a))))))
+exp' f = Exp (Par (K (\ (ka, kb) -> ka • Not (kb <<^ pure . f))))
 
 
 -- Elimination
