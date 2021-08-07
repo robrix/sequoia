@@ -153,6 +153,7 @@ library
     Sequoia.Monad.It
     Sequoia.Monad.Run
     Sequoia.Monad.Trans.It
+    Sequoia.Nulladjunction
     Sequoia.Polarity
     Sequoia.Print.Class
     Sequoia.Print.Doc
