@@ -30,11 +30,11 @@ instance Profunctor (Exp e r) where
 
 -- Construction
 
-exp :: (forall res . a -> (env ≁ b) • res -> res) -> Exp env res a b
-exp f = Exp (\ kb ka -> ka • inK (`f` kb))
+exp :: (forall res . (env ≁ b) • res -> a -> res) -> Exp env res a b
+exp f = Exp (\ b a -> a • inK (f b))
 
 exp' :: (a -> b) -> Exp env res a b
-exp' f = exp (\ a kb -> kb • pure (f a))
+exp' f = exp (\ b a -> b • pure (f a))
 
 
 -- Elimination
