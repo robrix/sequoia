@@ -123,7 +123,7 @@ instance Profunctor (Fun e r) where
   dimap f g (Fun r) = Fun (dimap (lmap g) (lmap f) r)
 
 appFun :: Fun e r a b -> a -> b • r -> r
-appFun (Fun f) a b = f b •¬ a
+appFun (Fun f) a b = f b • a
 
 
 data Sub r a b = a :-< (b • r)

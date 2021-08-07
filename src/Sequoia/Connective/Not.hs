@@ -2,8 +2,6 @@ module Sequoia.Connective.Not
 ( -- * Not
   Not(..)
 , type (¬)
-  -- * Elimination
-, (•¬)
 ) where
 
 import Data.Profunctor
@@ -21,11 +19,3 @@ instance Pos a => Polarized N (Not a r) where
 type (¬) = Not
 
 infixr 9 ¬
-
-
--- Elimination
-
-(•¬) :: Not a r -> (a -> r)
-(•¬) = (•) . getNot
-
-infixl 7 •¬

@@ -37,7 +37,7 @@ elimWith :: a & b -> Negate e a r ⊕ Negate e b r -> r
 elimWith = flip ((. exl) . (•-) <--> (. exr) . (•-))
 
 elimSum :: a ⊕ b -> a ¬ r & b ¬ r -> r
-elimSum = (. exl) . flip (•¬) <--> (. exr) . flip (•¬)
+elimSum = (. exl) . flip (•) <--> (. exr) . flip (•)
 
 
 -- Adjunctions

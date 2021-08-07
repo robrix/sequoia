@@ -40,7 +40,7 @@ elimPar :: a ⅋ b -> Negate e a r ⊗ Negate e b r -> r
 elimPar = (. exl) . flip (•-) <--> (. exr) . flip (•-)
 
 elimTensor :: a ⊗ b -> a ¬ r ⅋ b ¬ r -> r
-elimTensor = flip ((. exl) . (•¬) <--> (. exr) . (•¬))
+elimTensor = flip ((. exl) . (•) <--> (. exr) . (•))
 
 
 -- Adjunction
