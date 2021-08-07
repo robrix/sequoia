@@ -6,13 +6,14 @@ module Sequoia.Connective.NotUntrue
 , (∘≁)
 ) where
 
+import Data.Profunctor
 import Sequoia.Polarity
 import Sequoia.Profunctor.Value
 
 -- NotUntrue
 
 newtype NotUntrue e a = NotUntrue { runNotUntrue :: e ∘ a }
-  deriving (Applicative, Functor, Monad)
+  deriving (Applicative, Functor, Monad, Profunctor)
 
 instance Neg a => Polarized P (NotUntrue e a)
 
