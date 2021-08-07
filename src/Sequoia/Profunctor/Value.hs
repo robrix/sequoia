@@ -6,6 +6,7 @@ module Sequoia.Profunctor.Value
 , Value(..)
   -- * Construction
 , idV
+, constV
   -- * Coercion
 , _V
 ) where
@@ -54,6 +55,9 @@ class Profunctor v => Value v where
 
 idV :: Value v => e `v` e
 idV = inV id
+
+constV :: Value v => a -> e `v` a
+constV = inV . const
 
 
 -- Coercion
