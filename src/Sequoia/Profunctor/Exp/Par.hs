@@ -1,3 +1,4 @@
+-- | Exponentials, represented as ¬A ⅋ ≁B.
 module Sequoia.Profunctor.Exp.Par
 ( -- * Exponentials
   Exp(..)
