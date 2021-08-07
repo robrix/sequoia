@@ -17,6 +17,7 @@ module Sequoia.Connective.Additive
 import Data.Bifoldable
 import Data.Bifunctor
 import Data.Bitraversable
+import Sequoia.Biadjunction
 import Sequoia.Bidistributive
 import Sequoia.Birepresentable
 import Sequoia.Conjunction
@@ -34,6 +35,13 @@ elimWith = flip ((. exl) . (•-) <--> (. exr) . (•-))
 
 elimSum :: a ⊕ b -> a ¬ r & b ¬ r -> r
 elimSum = (. exl) . flip (•¬) <--> (. exr) . flip (•¬)
+
+
+-- Adjunctions
+
+instance Biadjunction (⊕) (&) where
+  bileftAdjunct = bileftAdjunctDisjConj
+  birightAdjunct = birightAdjunctDisjConj
 
 
 -- Negative conjunction
