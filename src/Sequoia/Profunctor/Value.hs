@@ -52,8 +52,8 @@ class Profunctor v => Value v where
 
 -- Construction
 
-idV :: e ∘ e
-idV = V id
+idV :: Value v => e `v` e
+idV = inV id
 
 
 -- Coercion
