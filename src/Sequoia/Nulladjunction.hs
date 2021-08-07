@@ -1,4 +1,5 @@
 {-# LANGUAGE FunctionalDependencies #-}
+-- | Adjunctions between nullary “functors”.
 module Sequoia.Nulladjunction
 ( -- * Nullary adjunctions
   Nulladjunction(..)
