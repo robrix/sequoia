@@ -106,3 +106,6 @@ instance Bifoldable (⊕) where
 
 instance Bifunctor (⊕) where
   bimap = bimapDisj
+
+instance Bitraversable (⊕) where
+  bitraverse = bitraverseDisj
