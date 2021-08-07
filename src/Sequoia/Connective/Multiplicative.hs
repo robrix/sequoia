@@ -21,6 +21,7 @@ import Data.Bifoldable
 import Data.Bifunctor
 import Data.Bitraversable
 import Data.Functor.Adjunction
+import Sequoia.Biadjunction
 import Sequoia.Bidistributive
 import Sequoia.Bifunctor.Join
 import Sequoia.Birepresentable
@@ -48,6 +49,10 @@ leftAdjunctParTensor f = f . inl >---< f . inr
 
 rightAdjunctParTensor :: (a -> b ⊗ b) -> (a ⅋ a -> b)
 rightAdjunctParTensor f = exl . f <--> exr . f
+
+instance Biadjunction (⅋) (⊗) where
+  bileftAdjunct  = bileftAdjunctDisjConj
+  birightAdjunct = birightAdjunctDisjConj
 
 instance Adjunction (Join (⅋)) (Join (⊗)) where
   leftAdjunct  f = Join . (f . Join . inl >---< f . Join . inr)
