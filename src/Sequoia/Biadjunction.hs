@@ -4,6 +4,7 @@ module Sequoia.Biadjunction
   Biadjunction(..)
   -- * Defaults
 , bileftAdjunctDisjConj
+, birightAdjunctDisjConj
 ) where
 
 import Data.Bifunctor
@@ -26,3 +27,6 @@ instance Biadjunction Either (,) where
 
 bileftAdjunctDisjConj :: (Disj f, Conj u) => (f a a -> b) -> (a -> u b b)
 bileftAdjunctDisjConj f = f . inl >---< f . inr
+
+birightAdjunctDisjConj :: (Disj f, Conj u) => (a -> u b b) -> (f a a -> b)
+birightAdjunctDisjConj f = exl . f <--> exr . f
