@@ -3,9 +3,6 @@ module Sequoia.Connective.Multiplicative
 ( -- * Elimination
   elimPar
 , elimTensor
-  -- * Adjunction
-, leftAdjunctParTensor
-, rightAdjunctParTensor
   -- * Negative disjunction
 , type (⅋)(..)
   -- ** Elimination
@@ -43,12 +40,6 @@ elimTensor = flip ((. exl) . (•¬) <--> (. exr) . (•¬))
 
 
 -- Adjunction
-
-leftAdjunctParTensor :: (a ⅋ a -> b) -> (a -> b ⊗ b)
-leftAdjunctParTensor f = f . inl >---< f . inr
-
-rightAdjunctParTensor :: (a -> b ⊗ b) -> (a ⅋ a -> b)
-rightAdjunctParTensor f = exl . f <--> exr . f
 
 instance Biadjunction (⅋) (⊗) where
   bileftAdjunct  = bileftAdjunctDisjConj
