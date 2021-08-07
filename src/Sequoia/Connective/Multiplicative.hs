@@ -1,4 +1,5 @@
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Connective.Multiplicative
 ( -- * Elimination
   elimPar
@@ -21,6 +22,7 @@ import Data.Bitraversable
 import Data.Distributive
 import Data.Functor.Adjunction
 import Data.Functor.Identity
+import Data.Functor.Rep
 import Sequoia.Biadjunction
 import Sequoia.Bidistributive
 import Sequoia.Bifunctor.Join
@@ -64,7 +66,7 @@ instance Polarized N (Bottom r) where
 
 newtype One e = One { getOne :: e }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-  deriving (Applicative, Monad) via Identity
+  deriving (Applicative, Monad, Representable) via Identity
 
 instance Polarized P (One e) where
 
