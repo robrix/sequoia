@@ -131,8 +131,6 @@ infixr 6 ⊕
 
 instance (Pos a, Pos b) => Polarized P (a ⊕ b)
 
-instance Disj (⊕) where
-
 instance DisjIn (⊕) where
   inl = InL
   inr = InR

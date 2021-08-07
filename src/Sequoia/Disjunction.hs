@@ -1,3 +1,4 @@
+{-# LANGUAGE ConstraintKinds #-}
 module Sequoia.Disjunction
 ( -- * Disjunction
   Disj
@@ -59,10 +60,7 @@ import Sequoia.Profunctor.Value
 
 -- Disjunction
 
-class (DisjIn d, DisjEx d) => Disj d where
-
-instance Disj Either where
-instance Disj (+) where
+type Disj d = (DisjIn d, DisjEx d)
 
 class DisjIn d where
   inl :: a -> (a `d` b)

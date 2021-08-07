@@ -101,8 +101,6 @@ instance Functor ((⅋) f) where
 instance Traversable ((⅋) f) where
   traverse = traverseDisj
 
-instance Disj (⅋) where
-
 instance DisjIn (⅋) where
   inl l = Par (exlL (dn l))
   inr r = Par (exrL (dn r))

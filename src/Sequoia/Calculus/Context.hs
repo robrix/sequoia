@@ -89,8 +89,6 @@ data a > b
 
 infixl 4 >, |>
 
-instance Disj (>) where
-
 instance DisjIn (>) where
   inl = L
   inr = R
