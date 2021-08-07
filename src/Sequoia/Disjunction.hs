@@ -189,22 +189,22 @@ bisequenceDisj = inlF <--> inrF
 
 -- Lifted injections
 
-inlF :: (Functor f, Disj d) => f a -> f (a `d` b)
-inrF :: (Functor f, Disj d) => f b -> f (a `d` b)
+inlF :: (Functor f, DisjIn d) => f a -> f (a `d` b)
+inrF :: (Functor f, DisjIn d) => f b -> f (a `d` b)
 inlF = fmap inl
 inrF = fmap inr
 
-inlK :: (Contravariant k, Disj d) => k (a `d` b) -> k a
-inrK :: (Contravariant k, Disj d) => k (a `d` b) -> k b
+inlK :: (Contravariant k, DisjIn d) => k (a `d` b) -> k a
+inrK :: (Contravariant k, DisjIn d) => k (a `d` b) -> k b
 inlK = contramap inl
 inrK = contramap inr
 
-inlL :: (Profunctor p, Disj d) => p (a `d` b) r -> p a r
-inrL :: (Profunctor p, Disj d) => p (a `d` b) r -> p b r
+inlL :: (Profunctor p, DisjIn d) => p (a `d` b) r -> p a r
+inrL :: (Profunctor p, DisjIn d) => p (a `d` b) r -> p b r
 inlL = lmap inl
 inrL = lmap inr
 
-inlR :: (Profunctor p, Disj d) => p l a -> p l (a `d` b)
-inrR :: (Profunctor p, Disj d) => p l b -> p l (a `d` b)
+inlR :: (Profunctor p, DisjIn d) => p l a -> p l (a `d` b)
+inrR :: (Profunctor p, DisjIn d) => p l b -> p l (a `d` b)
 inlR = rmap inl
 inrR = rmap inr
