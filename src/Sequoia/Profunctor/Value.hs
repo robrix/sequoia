@@ -2,10 +2,10 @@
 module Sequoia.Profunctor.Value
 ( -- * Value profunctor
   type (∘)(..)
+  -- * Value abstraction
+, Value(..)
   -- * Construction
 , idV
-  -- * Elimination
-, (∘)
   -- * Coercion
 , _V
 ) where
@@ -26,8 +26,6 @@ import Sequoia.Monad.Run
 newtype e ∘ a = V (e -> a)
   deriving (Applicative, Category, Choice, Closed, Cochoice, Pro.Corepresentable, Costrong, Functor, Mapping, Monad, MonadRun, Profunctor, Co.Representable, Pro.Representable, Strong, Traversing)
 
-infixl 8 ∘
-
 instance Distributive ((∘) e) where
   distribute = distributeRep
   collect = collectRep
@@ -38,17 +36,24 @@ instance Sieve (∘) Identity where
 instance Cosieve (∘) Identity where
   cosieve = lmap runIdentity . flip (∘)
 
+instance Value (∘) where
+  inV = V
+  e ∘ V v = v e
+
+
+-- Value abstraction
+
+class Profunctor v => Value v where
+  inV :: (e -> a) -> v e a
+  (∘) :: e -> (v e a -> a)
+
+  infixl 8 ∘
+
 
 -- Construction
 
 idV :: e ∘ e
 idV = V id
-
-
--- Elimination
-
-(∘) :: e -> e ∘ a -> a
-e ∘ V v = v e
 
 
 -- Coercion
