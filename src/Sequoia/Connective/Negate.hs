@@ -2,8 +2,6 @@ module Sequoia.Connective.Negate
 ( -- * Negate
   Negate(..)
 , type (-)
-  -- * Construction
-, negate
   -- * Elimination
 , (•-)
 ) where
@@ -27,12 +25,6 @@ instance Neg a => Polarized P (Negate e a r) where
 type (-) = Negate
 
 infixr 9 -
-
-
--- Construction
-
-negate :: e -> a • r -> Negate e a r
-negate = Negate
 
 
 -- Elimination

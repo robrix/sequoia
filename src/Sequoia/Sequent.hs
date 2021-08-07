@@ -168,7 +168,7 @@ instance NotIntro Seq where
 
 instance NegateIntro Seq where
   negateL = negateLK . kL
-  negateR a = popR (\ k -> env (\ e -> liftR (pure (negate e k)))) >>> wkR a
+  negateR a = popR (\ k -> env (\ e -> liftR (pure (Negate e k)))) >>> wkR a
 
 
 -- Additive

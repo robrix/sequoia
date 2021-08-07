@@ -114,7 +114,7 @@ instance PExpr Eval where
   trueL = fmap (lmap trueA)
   trueR = fmap true
   negateL = fmap (runElim negateK)
-  negateR f = env (\ e -> Negate.negate e <$> f)
+  negateR f = env (\ e -> Negate e <$> f)
 
 
 newtype Fun e r a b = Fun (b • r -> a ¬ r)

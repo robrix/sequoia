@@ -16,7 +16,7 @@ module Sequoia.Calculus.Negate
 ) where
 
 import Data.Profunctor
-import Prelude hiding (init, negate)
+import Prelude hiding (init)
 import Sequoia.Calculus.Context
 import Sequoia.Calculus.Control
 import Sequoia.Calculus.Core
@@ -96,7 +96,7 @@ negateRK
   => _Γ -|s e r|- _Δ > a • r
   -- ------------------------------
   -> _Γ -|s e r|- _Δ > Negate e a r
-negateRK s = sequent (\ _Δ _Γ -> env (\ e -> appSequent s (lmap (fmap (negate e)) _Δ) _Γ))
+negateRK s = sequent (\ _Δ _Γ -> env (\ e -> appSequent s (lmap (fmap (Negate e)) _Δ) _Γ))
 
 
 negateLK'
@@ -104,7 +104,7 @@ negateLK'
   => Negate e a r < _Γ -|s e r|- _Δ
   -- ------------------------------
   ->        a • r < _Γ -|s e r|- _Δ
-negateLK' s = sequent (\ _Δ _Γ -> env (\ e -> appSequent s _Δ (pure (negate e (e ∘ exlF _Γ)) >∘∘< exrF _Γ)))
+negateLK' s = sequent (\ _Δ _Γ -> env (\ e -> appSequent s _Δ (pure (Negate e (e ∘ exlF _Γ)) >∘∘< exrF _Γ)))
 
 negateRK'
   :: Contextual s
