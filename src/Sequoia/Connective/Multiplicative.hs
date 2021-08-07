@@ -49,6 +49,10 @@ leftAdjunctParTensor f = f . inl >---< f . inr
 rightAdjunctParTensor :: (a -> b ⊗ b) -> (a ⅋ a -> b)
 rightAdjunctParTensor f = exl . f <--> exr . f
 
+instance Adjunction (Join (⅋)) (Join (⊗)) where
+  leftAdjunct  f = Join . (f . Join . inl >---< f . Join . inr)
+  rightAdjunct f = (exl . runJoin . f <--> exr . runJoin . f) . runJoin
+
 
 -- Negative disjunction
 
@@ -80,10 +84,6 @@ instance Bifunctor (⅋) where
 
 instance Bitraversable (⅋) where
   bitraverse = bitraverseDisj
-
-instance Adjunction (Join (⅋)) (Join (⊗)) where
-  leftAdjunct  f = Join . (f . Join . inl >---< f . Join . inr)
-  rightAdjunct f = (exl . runJoin . f <--> exr . runJoin . f) . runJoin
 
 
 -- Elimination
