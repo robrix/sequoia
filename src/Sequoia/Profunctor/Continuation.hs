@@ -61,11 +61,11 @@ class Profunctor k => Continuation k where
 
 -- Construction
 
-idK :: a • a
-idK = K id
+idK :: Continuation k => a `k` a
+idK = inK id
 
-constK :: r -> a • r
-constK = K . const
+constK :: Continuation k => r -> a `k` r
+constK = inK . const
 
 
 -- Coercion
