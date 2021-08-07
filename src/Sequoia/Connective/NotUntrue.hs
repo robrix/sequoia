@@ -13,7 +13,7 @@ import Sequoia.Profunctor.Value
 -- NotUntrue
 
 newtype NotUntrue e a = NotUntrue { runNotUntrue :: e ∘ a }
-  deriving (Applicative, Functor, Monad, Profunctor)
+  deriving (Applicative, Functor, Monad, Profunctor, Value)
 
 instance Neg a => Polarized P (NotUntrue e a)
 
