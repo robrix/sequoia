@@ -121,10 +121,10 @@ mirrorDisj = inr <--> inl
 cocurryDisj :: Disj d => (c -> (b `d` a) •• r) -> ((c, b • r) -> a •• r)
 cocurryDisj f (c, b) = K (\ k -> f c • (b <••> k))
 
-councurryDisj :: Disj d => ((c, b • r) -> a •• r) -> c -> (b `d` a) •• r
+councurryDisj :: DisjIn d => ((c, b • r) -> a •• r) -> c -> (b `d` a) •• r
 councurryDisj f c = K (\ k -> f (c, inlL k) • inrL k)
 
-coapDisj :: Disj d => c -> ((c, b • r) `d` b) •• r
+coapDisj :: DisjIn d => c -> ((c, b • r) `d` b) •• r
 coapDisj c = K (\ k -> inlL k • (c, inrL k))
 
 
