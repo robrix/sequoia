@@ -18,7 +18,7 @@ import Sequoia.Profunctor.Value
 
 -- Exponentials
 
-newtype Exp env res a b = Exp { getExp :: (a, (env ≁ b) • res) • res }
+newtype Exp env res a b = Exp { getExp :: (a, (env ≁ b) • res) -> res }
 
 instance Functor (Exp env res a) where
   fmap = rmap
@@ -30,13 +30,13 @@ instance Profunctor (Exp e r) where
 -- Construction
 
 exp :: (a -> (env ≁ b) • res -> res) -> Exp env res a b
-exp = Exp . K . uncurry
+exp = Exp . uncurry
 
 exp' :: (a -> b) -> Exp env res a b
-exp' f = Exp (K (\ (a, kb) -> kb • NotUntrue (pure (f a))))
+exp' f = Exp (\ (a, kb) -> kb • NotUntrue (pure (f a)))
 
 
 -- Elimination
 
 runExp :: Exp env res a b -> b • res -> a -> env ==> res
-runExp (Exp (K r)) k a = C (\ env -> r (a, K (\ b -> k • env ∘ runNotUntrue b)))
+runExp (Exp r) k a = C (\ env -> r (a, K (\ b -> k • env ∘ runNotUntrue b)))
