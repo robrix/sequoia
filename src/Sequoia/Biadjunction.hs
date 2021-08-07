@@ -5,9 +5,12 @@ module Sequoia.Biadjunction
   -- * Defaults
 , bileftAdjunctDisjConj
 , birightAdjunctDisjConj
+, leftAdjunctBiadjunction
+, rightAdjunctBiadjunction
 ) where
 
 import Data.Bifunctor
+import Sequoia.Bifunctor.Join
 import Sequoia.Birepresentable
 import Sequoia.Conjunction
 import Sequoia.Disjunction
@@ -30,3 +33,9 @@ bileftAdjunctDisjConj f = f . inl >---< f . inr
 
 birightAdjunctDisjConj :: (Disj f, Conj u) => (a -> u b b) -> (f a a -> b)
 birightAdjunctDisjConj f = exl . f <--> exr . f
+
+leftAdjunctBiadjunction :: Biadjunction f u => (Join f a -> b) -> (a -> Join u b)
+leftAdjunctBiadjunction f = Join . bileftAdjunct (f . Join)
+
+rightAdjunctBiadjunction :: Biadjunction f u => (a -> Join u b) -> (Join f a -> b)
+rightAdjunctBiadjunction f = birightAdjunct (runJoin . f) . runJoin
