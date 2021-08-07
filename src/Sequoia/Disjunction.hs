@@ -118,8 +118,8 @@ bisequenceDisjV = fmap (bimapDisj pure pure) . flip (∘)
 mirrorDisj :: Disj d => a `d` b -> b `d` a
 mirrorDisj = inr <--> inl
 
-cocurryDisj :: Disj d => (c -> (b `d` a) •• r) -> ((c, b • r) -> a •• r)
-cocurryDisj f (c, b) = K (\ k -> f c • (b <••> k))
+cocurryDisj :: (Disj d, Continuation k) => (c -> ((b `d` a) `k` r) `k` r) -> ((c, b `k` r) -> (a `k` r) `k` r)
+cocurryDisj f (c, b) = inK (\ k -> f c • (b <••> k))
 
 councurryDisj :: DisjIn d => ((c, b • r) -> a •• r) -> c -> (b `d` a) •• r
 councurryDisj f c = K (\ k -> f (c, inlL k) • inrL k)
