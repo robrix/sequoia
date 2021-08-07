@@ -2,12 +2,14 @@ module Sequoia.Profunctor.Exp.Par
 ( -- * Exponentials
   Exp(..)
   -- * Construction
+, exp
 , exp'
   -- * Elimination
 , runExp
 ) where
 
 import Data.Bifunctor
+import Prelude hiding (exp)
 import Sequoia.Calculus.Not
 import Sequoia.Calculus.NotUntrue
 import Sequoia.Connective.Par.Parameterized
@@ -26,6 +28,9 @@ instance Profunctor (Exp e r) where
 
 
 -- Construction
+
+exp :: ((a ¬ res) • res -> (env ≁ b) • res -> res) -> Exp env res a b
+exp = Exp . Par . K . uncurry
 
 exp' :: (a -> b) -> Exp env res a b
 exp' f = Exp (Par (K (\ (ka, kb) -> ka • Not (kb <<^ pure . f))))
