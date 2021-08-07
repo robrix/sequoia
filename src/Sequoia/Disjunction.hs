@@ -107,13 +107,13 @@ a <••> b = inK ((a •) <--> (b •))
 
 infix 3 <••>
 
-(<∘∘>) :: Disj d => (e ∘ a -> r) -> (e ∘ b -> r) -> (e ∘ (a `d` b) -> e ==> r)
+(<∘∘>) :: (Disj d, Value v) => (e `v` a -> r) -> (e `v` b -> r) -> (e `v` (a `d` b) -> e ==> r)
 (l <∘∘> r) ab = C ((l <--> r) . bisequenceDisjV ab)
 
 infix 3 <∘∘>
 
-bisequenceDisjV :: Disj d => e ∘ (a `d` b) -> e -> (e ∘ a) `d` (e ∘ b)
-bisequenceDisjV = fmap (bimapDisj pure pure) . flip (∘)
+bisequenceDisjV :: (Disj d, Value v) => e `v` (a `d` b) -> e -> (e `v` a) `d` (e `v` b)
+bisequenceDisjV = fmap (bimapDisj (inV . pure) (inV . pure)) . flip (∘)
 
 mirrorDisj :: Disj d => a `d` b -> b `d` a
 mirrorDisj = inr <--> inl
