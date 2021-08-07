@@ -10,7 +10,6 @@ module Sequoia.Connective.Implicative
 import Fresnel.Iso
 import Sequoia.Connective.Function
 import Sequoia.Connective.Not
-import Sequoia.Connective.NotUntrue
 import Sequoia.Connective.Par
 import Sequoia.Connective.Subtraction
 import Sequoia.Disjunction
@@ -37,4 +36,4 @@ mkPar :: b • r -> a ~~Fun e r~> b -> e ∘ (a ¬ r ⅋ b)
 mkPar p f = V (\ e -> inl (Not (K (\ a -> p ↓ runFunExp f ↑ pure a <== e))))
 
 mkFun :: a ¬ r ⅋ b -> a ~~Fun e r~> b
-mkFun p = fun (\ b a -> C (\ e -> ((• e ∘≁ a) <--> (b •)) p))
+mkFun p = fun (\ b a -> C (\ e -> ((• e ∘ a) <--> (b •)) p))
