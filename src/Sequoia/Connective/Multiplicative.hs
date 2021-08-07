@@ -3,29 +3,29 @@ module Sequoia.Connective.Multiplicative
 ( -- * Elimination
   elimPar
 , elimTensor
+  -- * Negative falsity
+, Bottom(..)
+  -- * Positive truth
+, One(..)
   -- * Negative disjunction
 , type (⅋)(..)
   -- ** Elimination
 , runPar
   -- * Positive conjunction
 , type (⊗)(..)
-  -- * Connectives
-, module Sequoia.Connective.Bottom
-, module Sequoia.Connective.One
 ) where
 
 import Data.Bifoldable
 import Data.Bifunctor
 import Data.Bitraversable
 import Data.Functor.Adjunction
+import Data.Functor.Identity
 import Sequoia.Biadjunction
 import Sequoia.Bidistributive
 import Sequoia.Bifunctor.Join
 import Sequoia.Birepresentable
 import Sequoia.Conjunction
-import Sequoia.Connective.Bottom
 import Sequoia.Connective.Negation
-import Sequoia.Connective.One
 import Sequoia.Disjunction
 import Sequoia.Polarity
 import Sequoia.Profunctor.Continuation
@@ -48,6 +48,23 @@ instance Biadjunction (⅋) (⊗) where
 instance Adjunction (Join (⅋)) (Join (⊗)) where
   leftAdjunct  = leftAdjunctBiadjunction
   rightAdjunct = rightAdjunctBiadjunction
+
+
+-- Negative falsity
+
+newtype Bottom r = Bottom { absurdN :: r }
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+  deriving (Applicative, Monad) via Identity
+
+instance Polarized N (Bottom r) where
+
+
+-- Positive truth
+
+newtype One e = One { getOne :: e }
+  deriving (Eq, Ord, Show)
+
+instance Polarized P (One e) where
 
 
 -- Negative disjunction
