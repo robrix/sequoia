@@ -125,9 +125,9 @@ instance Core Seq where
 
 -- Structural rules
 
-deriving via Contextually Seq instance Weaken   Seq
-deriving via Contextually Seq instance Contract Seq
-deriving via Contextually Seq instance Exchange Seq
+deriving via Profunctorially Seq instance Weaken   Seq
+deriving via Profunctorially Seq instance Contract Seq
+deriving via Profunctorially Seq instance Exchange Seq
 
 
 -- Contextual rules
