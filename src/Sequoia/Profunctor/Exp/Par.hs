@@ -11,6 +11,7 @@ module Sequoia.Profunctor.Exp.Par
 
 import Data.Bifunctor
 import Prelude hiding (exp)
+import Sequoia.Calculus.Par
 import Sequoia.Disjunction
 import Sequoia.Profunctor
 import Sequoia.Profunctor.Context
@@ -19,7 +20,7 @@ import Sequoia.Profunctor.Value
 
 -- Exponentials
 
-newtype Exp env res a b = Exp { getExp :: ((a • res) `Either` (env ∘ b)) •• res }
+newtype Exp env res a b = Exp { getExp :: ((a • res) ⅋ (env ∘ b)) •• res }
 
 instance Functor (Exp env res a) where
   fmap = rmap
