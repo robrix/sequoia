@@ -27,6 +27,7 @@ import Sequoia.Birepresentable
 import Sequoia.Conjunction
 import Sequoia.Connective.Negation
 import Sequoia.Disjunction
+import Sequoia.Nulladjunction
 import Sequoia.Polarity
 import Sequoia.Profunctor.Continuation
 
@@ -48,6 +49,10 @@ instance Biadjunction (⊕) (&) where
 instance Adjunction (Join (⊕)) (Join (&)) where
   leftAdjunct = leftAdjunctBiadjunction
   rightAdjunct = rightAdjunctBiadjunction
+
+instance Nulladjunction Zero Top where
+  nullleftAdjunct _ _ = Top
+  nullrightAdjunct _ = absurdP
 
 
 -- Negative truth
