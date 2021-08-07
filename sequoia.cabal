@@ -64,6 +64,7 @@ common common
 library
   import: common
   exposed-modules:
+    Sequoia.Biadjunction
     Sequoia.Bicontravariant
     Sequoia.Bidistributive
     Sequoia.Bifunctor.Join

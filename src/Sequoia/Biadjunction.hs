@@ -1,0 +1,2 @@
+module Sequoia.Biadjunction
+() where
