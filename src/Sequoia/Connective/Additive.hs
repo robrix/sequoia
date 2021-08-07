@@ -103,3 +103,6 @@ instance Disj (⊕) where
 
 instance Bifoldable (⊕) where
   bifoldMap = bifoldMapDisj
+
+instance Bifunctor (⊕) where
+  bimap = bimapDisj
