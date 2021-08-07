@@ -124,8 +124,8 @@ cocurryDisj f (c, b) = inK (\ k -> f c • (b <••> k))
 councurryDisj :: (DisjIn d, Continuation k) => ((c, b `k` r) -> (a `k` r) `k` r) -> c -> ((b `d` a) `k` r) `k` r
 councurryDisj f c = inK (\ k -> f (c, inlL k) • inrL k)
 
-coapDisj :: DisjIn d => c -> ((c, b • r) `d` b) •• r
-coapDisj c = K (\ k -> inlL k • (c, inrL k))
+coapDisj :: (DisjIn d, Continuation k) => c -> (((c, b `k` r) `d` b) `k` r) `k` r
+coapDisj c = inK (\ k -> inlL k • (c, inrL k))
 
 
 -- Generalizations
