@@ -18,6 +18,7 @@ module Sequoia.Connective.Multiplicative
 import Data.Bifoldable
 import Data.Bifunctor
 import Data.Bitraversable
+import Data.Distributive
 import Data.Functor.Adjunction
 import Data.Functor.Identity
 import Sequoia.Biadjunction
@@ -66,6 +67,10 @@ newtype One e = One { getOne :: e }
   deriving (Applicative, Monad) via Identity
 
 instance Polarized P (One e) where
+
+instance Distributive One where
+  distribute = One . fmap getOne
+  collect f = One . fmap (getOne . f)
 
 
 -- Negative disjunction
