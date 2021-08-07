@@ -46,8 +46,8 @@ instance Biadjunction (⅋) (⊗) where
   birightAdjunct = birightAdjunctDisjConj
 
 instance Adjunction (Join (⅋)) (Join (⊗)) where
-  leftAdjunct f = Join . bileftAdjunct (f . Join)
-  rightAdjunct f = birightAdjunct (runJoin . f) . runJoin
+  leftAdjunct  = leftAdjunctBiadjunction
+  rightAdjunct = rightAdjunctBiadjunction
 
 
 -- Negative disjunction
