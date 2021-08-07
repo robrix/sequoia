@@ -2,6 +2,8 @@
 module Sequoia.Profunctor.Continuation
 ( -- * Continuation profunctor
   type (•)(..)
+  -- * Continuation abstraction
+, Continuation(..)
   -- * Construction
 , idK
 , constK
@@ -30,10 +32,8 @@ import Sequoia.Profunctor
 
 -- Continuation profunctor
 
-newtype a • r = K { (•) :: a -> r }
+newtype a • r = K { runK :: a -> r }
   deriving (Applicative, Category, Choice, Closed, Cochoice, Pro.Corepresentable, Costrong, Functor, Mapping, Monad, Profunctor, Co.Representable, Pro.Representable, Strong, Traversing)
-
-infixl 7 •
 
 instance Distributive ((•) a) where
   distribute = distributeRep
@@ -44,6 +44,19 @@ instance Sieve (•) Identity where
 
 instance Cosieve (•) Identity where
   cosieve = lmap runIdentity . (•)
+
+instance Continuation (•) where
+  inK = K
+  (•) = runK
+
+
+-- Continuation abstraction
+
+class Profunctor k => Continuation k where
+  inK :: (a -> r) -> k a r
+  (•) :: k a r -> (a -> r)
+
+  infixl 7 •
 
 
 -- Construction
