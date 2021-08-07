@@ -12,7 +12,7 @@ import Sequoia.Profunctor.Continuation
 
 -- Par
 
-newtype Par r a b = Par ((a • r, b • r) • r)
+newtype Par r a b = Par { getPar :: (a • r, b • r) • r }
 
 instance (Neg a, Neg b) => Polarized N (Par r a b) where
 
