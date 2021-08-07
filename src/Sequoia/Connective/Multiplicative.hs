@@ -102,8 +102,12 @@ instance Traversable ((⅋) f) where
   traverse = traverseDisj
 
 instance Disj (⅋) where
+
+instance DisjIn (⅋) where
   inl l = Par (exlL (dn l))
   inr r = Par (exrL (dn r))
+
+instance DisjEx (⅋) where
   ifl <--> ifr = (runPar (K ifl >--< K ifr) •)
 
 instance Bifoldable (⅋) where

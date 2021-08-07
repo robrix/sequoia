@@ -132,8 +132,12 @@ infixr 6 ⊕
 instance (Pos a, Pos b) => Polarized P (a ⊕ b)
 
 instance Disj (⊕) where
+
+instance DisjIn (⊕) where
   inl = InL
   inr = InR
+
+instance DisjEx (⊕) where
   ifl <--> ifr = \case
     InL l -> ifl l
     InR r -> ifr r

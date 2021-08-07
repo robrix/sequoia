@@ -90,8 +90,12 @@ data a > b
 infixl 4 >, |>
 
 instance Disj (>) where
+
+instance DisjIn (>) where
   inl = L
   inr = R
+
+instance DisjEx (>) where
   f <--> g = \case
     L a -> f a
     R b -> g b

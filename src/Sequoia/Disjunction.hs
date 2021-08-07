@@ -1,6 +1,8 @@
 module Sequoia.Disjunction
 ( -- * Disjunction
-  Disj(..)
+  Disj
+, DisjIn(..)
+, DisjEx(..)
 , _inl
 , _inr
 , _inlK
@@ -57,20 +59,31 @@ import Sequoia.Profunctor.Value
 
 -- Disjunction
 
-class Disj d where
+class (DisjIn d, DisjEx d) => Disj d where
+
+instance Disj Either where
+instance Disj (+) where
+
+class DisjIn d where
   inl :: a -> (a `d` b)
   inr :: b -> (a `d` b)
+
+instance DisjIn Either where
+  inl = Left
+  inr = Right
+
+instance DisjIn (+) where
+  inl = inSl
+  inr = inSr
+
+class DisjEx d where
   (<-->) :: (a -> r) -> (b -> r) -> (a `d` b -> r)
   infix 3 <-->
 
-instance Disj Either where
-  inl = Left
-  inr = Right
+instance DisjEx Either where
   (<-->) = either
 
-instance Disj (+) where
-  inl = inSl
-  inr = inSr
+instance DisjEx (+) where
   (<-->) = runS
 
 _inl :: Disj d => Prism (a `d` b) (a' `d` b) a a'
