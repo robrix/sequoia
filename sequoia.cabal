@@ -116,6 +116,7 @@ library
     Sequoia.Connective.Function
     Sequoia.Connective.Iff
     Sequoia.Connective.Implicative
+    Sequoia.Connective.Initial
     Sequoia.Connective.Mu
     Sequoia.Connective.Multiplicative
     Sequoia.Connective.Negate
