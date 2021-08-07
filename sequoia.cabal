@@ -112,6 +112,7 @@ library
     Sequoia.Connective.Bottom
     Sequoia.Connective.Down
     Sequoia.Connective.Exists
+    Sequoia.Connective.Final
     Sequoia.Connective.ForAll
     Sequoia.Connective.Function
     Sequoia.Connective.Iff
