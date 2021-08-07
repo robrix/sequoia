@@ -100,3 +100,6 @@ instance Disj (⊕) where
   ifl <--> ifr = \case
     InL l -> ifl l
     InR r -> ifr r
+
+instance Bifoldable (⊕) where
+  bifoldMap = bifoldMapDisj
