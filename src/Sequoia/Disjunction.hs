@@ -121,8 +121,8 @@ mirrorDisj = inr <--> inl
 cocurryDisj :: (Disj d, Continuation k) => (c -> ((b `d` a) `k` r) `k` r) -> ((c, b `k` r) -> (a `k` r) `k` r)
 cocurryDisj f (c, b) = inK (\ k -> f c • (b <••> k))
 
-councurryDisj :: DisjIn d => ((c, b • r) -> a •• r) -> c -> (b `d` a) •• r
-councurryDisj f c = K (\ k -> f (c, inlL k) • inrL k)
+councurryDisj :: (DisjIn d, Continuation k) => ((c, b `k` r) -> (a `k` r) `k` r) -> c -> ((b `d` a) `k` r) `k` r
+councurryDisj f c = inK (\ k -> f (c, inlL k) • inrL k)
 
 coapDisj :: DisjIn d => c -> ((c, b • r) `d` b) •• r
 coapDisj c = K (\ k -> inlL k • (c, inrL k))
