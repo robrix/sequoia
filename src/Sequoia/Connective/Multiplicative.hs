@@ -30,6 +30,7 @@ import Sequoia.Birepresentable
 import Sequoia.Conjunction
 import Sequoia.Connective.Negation
 import Sequoia.Disjunction
+import Sequoia.Nulladjunction
 import Sequoia.Polarity
 import Sequoia.Profunctor.Continuation
 
@@ -55,6 +56,10 @@ instance Adjunction (Join (⅋)) (Join (⊗)) where
 instance Adjunction Bottom One where
   leftAdjunct  f = One . f . Bottom
   rightAdjunct f = getOne . f . absurdN
+
+instance Nulladjunction r e => Nulladjunction (Bottom r) (One e) where
+  nullleftAdjunct f = One . nullleftAdjunct (f . Bottom)
+  nullrightAdjunct f = nullrightAdjunct (getOne . f) . absurdN
 
 
 -- Negative falsity
