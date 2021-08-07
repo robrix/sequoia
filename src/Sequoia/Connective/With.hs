@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeFamilies #-}
 module Sequoia.Connective.With
 ( -- * Negative conjunction
   type (&)(..)
@@ -9,6 +10,7 @@ import Data.Bifoldable
 import Data.Bifunctor
 import Data.Bitraversable
 import Sequoia.Bidistributive
+import Sequoia.Birepresentable
 import Sequoia.Conjunction
 import Sequoia.Disjunction
 import Sequoia.Polarity
@@ -48,6 +50,11 @@ instance Bitraversable (&) where
 instance Bidistributive (&) where
   bidistribute = bidistributeConj
   bicollect = bicollectConj
+
+instance Birepresentable (&) where
+  type Birep (&) = Either () ()
+  bitabulate = bitabulateConj
+  biindex = biindexConj
 
 
 -- Elimination
