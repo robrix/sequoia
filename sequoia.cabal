@@ -127,6 +127,7 @@ library
     Sequoia.Connective.Nu
     Sequoia.Connective.One
     Sequoia.Connective.Par
+    Sequoia.Connective.Par.Parameterized
     Sequoia.Connective.Quantification
     Sequoia.Connective.Shift
     Sequoia.Connective.Subtraction
