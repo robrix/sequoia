@@ -7,3 +7,4 @@ import Sequoia.Calculus.NotUntrue
 import Sequoia.Calculus.Par
 
 newtype Exp e r a b = Exp { getExp :: a ¬ r ⅋ e ≁ b }
+  deriving (Functor)
