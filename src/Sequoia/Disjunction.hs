@@ -102,8 +102,8 @@ exlD = Just <--> const Nothing
 exrD :: Disj d => a `d` b -> Maybe b
 exrD = const Nothing <--> Just
 
-(<••>) :: (Disj d, Continuation k) => a `k` r -> b `k` r -> (a `d` b) • r
-a <••> b = K ((a •) <--> (b •))
+(<••>) :: (Disj d, Continuation k) => a `k` r -> b `k` r -> (a `d` b) `k` r
+a <••> b = inK ((a •) <--> (b •))
 
 infix 3 <••>
 
