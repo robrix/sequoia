@@ -117,5 +117,5 @@ instance Bidistributive (⊗) where
 
 instance Birepresentable (⊗) where
   type Birep (⊗) = Either () ()
-  bitabulate f g = f (inl ()) >--< g (inr ())
-  biindex p = const (exl p) `bimap` const (exr p)
+  bitabulate = bitabulateConj
+  biindex = biindexConj
