@@ -112,8 +112,8 @@ exlrC :: Conj c => (a' -> b' -> r) -> (a -> a') -> (b -> b') -> (a `c` b -> r)
 exlrC h f g = h <$> f . exl <*> g . exr
 
 
-(>∘∘<) :: Conj d => e ∘ b -> e ∘ c -> e ∘ (b `d` c)
-V a >∘∘< V b = V (a >---< b)
+(>∘∘<) :: (Conj d, Value v) => e `v` b -> e `v` c -> e `v` (b `d` c)
+a >∘∘< b = inV ((∘ a) >---< (∘ b))
 
 infix 3 >∘∘<
 
