@@ -62,7 +62,8 @@ instance Polarized N (Bottom r) where
 -- Positive truth
 
 newtype One e = One { getOne :: e }
-  deriving (Eq, Ord, Show)
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+  deriving (Applicative, Monad) via Identity
 
 instance Polarized P (One e) where
 
