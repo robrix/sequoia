@@ -6,18 +6,12 @@ module Sequoia.Connective.Multiplicative
   -- * Adjunction
 , leftAdjunctParTensor
 , rightAdjunctParTensor
-, leftAdjunctΔTensor
-, leftAdjunctParΔ
   -- * Negative disjunction
 , type (⅋)(..)
   -- ** Elimination
 , runPar
   -- * Positive conjunction
 , type (⊗)(..)
-  -- * Diagonal functor
-, Δ(..)
-  -- ** Construction
-, inDiag
   -- * Connectives
 , module Sequoia.Connective.Bottom
 , module Sequoia.Connective.One
@@ -26,9 +20,7 @@ module Sequoia.Connective.Multiplicative
 import Data.Bifoldable
 import Data.Bifunctor
 import Data.Bitraversable
-import Data.Distributive
 import Data.Functor.Adjunction
-import Data.Functor.Rep
 import Sequoia.Bidistributive
 import Sequoia.Bifunctor.Join
 import Sequoia.Birepresentable
@@ -56,14 +48,6 @@ leftAdjunctParTensor f = f . inl >---< f . inr
 
 rightAdjunctParTensor :: (a -> b ⊗ b) -> (a ⅋ a -> b)
 rightAdjunctParTensor f = exl . f <--> exr . f
-
-
-leftAdjunctΔTensor :: (Δ a -> b) -> (a -> b ⊗ b)
-leftAdjunctΔTensor f = f . inDiag >---< f . inDiag
-
-
-leftAdjunctParΔ :: (a ⅋ a -> b) -> (a -> Δ b)
-leftAdjunctParΔ f = Δ . (f . inl >---< f . inr)
 
 
 -- Negative disjunction
@@ -97,9 +81,9 @@ instance Bifunctor (⅋) where
 instance Bitraversable (⅋) where
   bitraverse = bitraverseDisj
 
-instance Adjunction (Join (⅋)) Δ where
-  leftAdjunct  f = Δ . (f . Join . inl >---< f . Join . inr)
-  rightAdjunct f = (exl . exDiag . f <--> exr . exDiag . f) . runJoin
+instance Adjunction (Join (⅋)) (Join (⊗)) where
+  leftAdjunct  f = Join . (f . Join . inl >---< f . Join . inr)
+  rightAdjunct f = (exl . runJoin . f <--> exr . runJoin . f) . runJoin
 
 
 -- Elimination
@@ -139,26 +123,3 @@ instance Birepresentable (⊗) where
   type Birep (⊗) = Either () ()
   bitabulate f g = f (inl ()) >--< g (inr ())
   biindex p = const (exl p) `bimap` const (exr p)
-
-
--- Diagonal functor
-
-newtype Δ a = Δ { exDiag :: (a, a) }
-  deriving (Functor)
-
-instance Distributive Δ where
-  distribute g = Δ (exl . exDiag <$> g, exr . exDiag <$> g)
-  collect f g = Δ (exl . exDiag . f <$> g, exr . exDiag . f <$> g)
-
-instance Representable Δ where
-  type Rep Δ = Bool
-  tabulate f = Δ (f False, f True)
-  index (Δ a) b
-    | False <- b = exl a
-    | True  <- b = exr a
-
-
--- Construction
-
-inDiag :: a -> Δ a
-inDiag a = Δ (a, a)
