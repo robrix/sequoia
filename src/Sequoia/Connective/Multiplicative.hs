@@ -52,6 +52,10 @@ instance Adjunction (Join (⅋)) (Join (⊗)) where
   leftAdjunct  = leftAdjunctBiadjunction
   rightAdjunct = rightAdjunctBiadjunction
 
+instance Adjunction Bottom One where
+  leftAdjunct  f = One . f . Bottom
+  rightAdjunct f = getOne . f . absurdN
+
 
 -- Negative falsity
 
