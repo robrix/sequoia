@@ -3,15 +3,17 @@ module Sequoia.Connective.Additive
 ( -- * Duals
   elimWith
 , elimSum
+  -- * Negative truth
+, Top(..)
+  -- * Positive falsity
+, Zero
+, absurdP
   -- * Negative conjunction
 , type (&)(..)
   -- * Elimination
 , runWith
   -- * Positive disjunction
 , type (⊕)(..)
-  -- * Connectives
-, module Sequoia.Connective.Top
-, module Sequoia.Connective.Zero
 ) where
 
 import Data.Bifoldable
@@ -24,8 +26,6 @@ import Sequoia.Bifunctor.Join
 import Sequoia.Birepresentable
 import Sequoia.Conjunction
 import Sequoia.Connective.Negation
-import Sequoia.Connective.Top
-import Sequoia.Connective.Zero
 import Sequoia.Disjunction
 import Sequoia.Polarity
 import Sequoia.Profunctor.Continuation
@@ -48,6 +48,24 @@ instance Biadjunction (⊕) (&) where
 instance Adjunction (Join (⊕)) (Join (&)) where
   leftAdjunct = leftAdjunctBiadjunction
   rightAdjunct = rightAdjunctBiadjunction
+
+
+-- Negative truth
+
+data Top = Top
+  deriving (Eq, Ord, Show)
+
+instance Polarized N Top where
+
+
+-- Positive falsity
+
+data Zero
+
+instance Polarized P Zero where
+
+absurdP :: Zero -> a
+absurdP = \case
 
 
 -- Negative conjunction

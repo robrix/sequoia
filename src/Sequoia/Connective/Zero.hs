@@ -4,13 +4,4 @@ module Sequoia.Connective.Zero
 , absurdP
 ) where
 
-import Sequoia.Polarity
-
--- Positive falsity
-
-data Zero
-
-instance Polarized P Zero where
-
-absurdP :: Zero -> a
-absurdP = \case
+import Sequoia.Connective.Additive

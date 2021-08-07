@@ -3,11 +3,4 @@ module Sequoia.Connective.Top
   Top(..)
 ) where
 
-import Sequoia.Polarity
-
--- Negative truth
-
-data Top = Top
-  deriving (Eq, Ord, Show)
-
-instance Polarized N Top where
+import Sequoia.Connective.Additive
