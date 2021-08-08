@@ -178,7 +178,7 @@ bifoldMapDisj :: Disj p => (a -> m) -> (b -> m) -> (a `p` b -> m)
 bifoldMapDisj = (<-->)
 
 bimapDisj :: Disj p => (a -> a') -> (b -> b') -> (a `p` b -> a' `p` b')
-bimapDisj f g = inl . f <--> inr . g
+bimapDisj = (+++)
 
 bitraverseDisj :: (Disj p, Functor m) => (a -> m a') -> (b -> m b') -> (a `p` b -> m (a' `p` b'))
 bitraverseDisj f g = fmap inl . f <--> fmap inr . g
