@@ -33,7 +33,7 @@ funPar2 = iso
   (<<^ (\ k -> k <<^ (mkPar (inrL (k <<^ pure)) =<<)))
 
 mkPar :: b • r -> a ~~Fun e r~> b -> e ∘ (a ¬ r ⅋ b)
-mkPar p f = V (\ e -> inl (Not (K (\ a -> p ↓ runFunExp f ↑ pure a <== e))))
+mkPar p f = V (\ e -> inl (inK (\ a -> p ↓ runFunExp f ↑ pure a <== e)))
 
 mkFun :: a ¬ r ⅋ b -> a ~~Fun e r~> b
 mkFun p = fun (\ b a -> C (\ e -> ((• e ∘ a) <--> (b •)) p))

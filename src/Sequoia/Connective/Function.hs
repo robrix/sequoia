@@ -15,6 +15,7 @@ import           Data.Kind (Type)
 import           Data.Profunctor
 import           Data.Profunctor.Traversing
 import           Prelude hiding (exp)
+import           Sequoia.Connective.Bottom
 import           Sequoia.Connective.Not
 import           Sequoia.Connective.NotUntrue
 import           Sequoia.Polarity
@@ -44,10 +45,10 @@ fun :: (b ¬ r -> e ≁ a -> e ==> r) -> a ~~Fun e r~> b
 fun = Fun
 
 funExp :: Exp e r a b -> a ~~Fun e r~> b
-funExp = fun . dimap getNot (lmap runNotUntrue) . runExp
+funExp = fun . dimap (rmap absurdN . getNot) (lmap runNotUntrue) . runExp
 
 
 -- Elimination
 
 runFunExp :: a ~~Fun e r~> b -> Exp e r a b
-runFunExp = exp . dimap Not (lmap NotUntrue) . getFun
+runFunExp = exp . dimap (Not . rmap Bottom) (lmap NotUntrue) . getFun

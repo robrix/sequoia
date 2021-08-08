@@ -94,12 +94,12 @@ instance NExpr Eval where
   parL f g = elim (runPar (K (collect (•) f), K (collect (•) g)) •)
   parR r = bisequenceDisj (coerceDisj r)
   funL a b = elim (\ f -> appFun f <$> a <*> b)
-  funR f = Fun . fmap Not <$> evalF f
+  funR f = Fun . fmap (Not . rmap Bottom) <$> evalF f
   notUntrueL a = env (\ e -> lmap ((e ∘) . runNotUntrue) <$> a)
   -- FIXME: this is always scoped statically
   notUntrueR = fmap (NotUntrue . pure)
-  notL = fmap (runElim getNot)
-  notR = fmap Not
+  notL = fmap (runElim (rmap absurdN . getNot))
+  notR = fmap (Not . rmap Bottom)
 
 instance PExpr Eval where
   zeroL = fmap absurdP

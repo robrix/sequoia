@@ -5,13 +5,15 @@ module Sequoia.Connective.Not
 ) where
 
 import Data.Profunctor
+import Sequoia.Connective.Bottom
 import Sequoia.Polarity
 import Sequoia.Profunctor.Continuation
 
 -- Not
 
-newtype Not a r = Not { getNot :: a • r }
-  deriving (Continuation, Functor, Profunctor)
+newtype Not a r = Not { getNot :: a • Bottom r }
+  deriving (Functor)
+  deriving (Continuation, Profunctor) via (•)
 
 instance Pos a => Polarized N (Not a r) where
 

@@ -21,6 +21,7 @@ import Sequoia.Calculus.Context
 import Sequoia.Calculus.Control
 import Sequoia.Calculus.Core
 import Sequoia.Calculus.Structural
+import Sequoia.Connective.Bottom
 import Sequoia.Connective.Negation
 import Sequoia.Connective.Not
 import Sequoia.Contextual
@@ -87,14 +88,14 @@ notLK
   => a • r < _Γ -|s e r|- _Δ
   -- -----------------------
   -> a ¬ r < _Γ -|s e r|- _Δ
-notLK = mapL (fmap getNot)
+notLK = mapL (fmap (rmap absurdN . getNot))
 
 notRK
   :: Contextual s
   => _Γ -|s e r|- _Δ > a • r
   -- -----------------------
   -> _Γ -|s e r|- _Δ > a ¬ r
-notRK = mapR (lmap Not)
+notRK = mapR (lmap (Not . rmap Bottom))
 
 
 notLK'
@@ -102,11 +103,11 @@ notLK'
   => a ¬ r < _Γ -|s e r|- _Δ
   -- -----------------------
   -> a • r < _Γ -|s e r|- _Δ
-notLK' = mapL (fmap Not)
+notLK' = mapL (fmap (Not . rmap Bottom))
 
 notRK'
   :: Contextual s
   => _Γ -|s e r|- _Δ > a ¬ r
   -- -----------------------
   -> _Γ -|s e r|- _Δ > a • r
-notRK' = mapR (lmap getNot)
+notRK' = mapR (lmap (rmap absurdN . getNot))
