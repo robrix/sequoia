@@ -12,6 +12,7 @@ module Sequoia.Functor.Continuation
 ) where
 
 import Data.Functor.Contravariant
+import Data.Functor.Contravariant.Adjunction
 import Data.Functor.Contravariant.Rep
 
 -- Continuation functor
@@ -29,6 +30,10 @@ instance Representable ((•) r) where
 instance Continuation r ((•) r) where
   inK = K
   (•) = runK
+
+instance Adjunction ((•) r) ((•) r) where
+  leftAdjunct  f a = inK (\ b -> f b • a)
+  rightAdjunct f a = inK (\ b -> f b • a)
 
 
 -- Continuation abstraction
