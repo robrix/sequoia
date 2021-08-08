@@ -13,6 +13,7 @@ module Sequoia.Profunctor.Continuation
 , _K
   -- * Defaults
 , protabulateCont
+, sieveCont
 , cotabulateCont
 , cosieveCont
   -- * Double negation
@@ -92,6 +93,9 @@ _K = coerced
 
 protabulateCont :: ContinuationI k => (a -> Identity b) -> a `k` b
 protabulateCont = inK . rmap runIdentity
+
+sieveCont :: ContinuationE k => a `k` b -> (a -> Identity b)
+sieveCont = rmap Identity . (•)
 
 cotabulateCont :: ContinuationI k => (Identity a -> b) -> a `k` b
 cotabulateCont = inK . lmap Identity
