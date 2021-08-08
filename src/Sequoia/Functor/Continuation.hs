@@ -13,6 +13,9 @@ import Data.Functor.Contravariant
 
 newtype r • a = K { runK :: a -> r }
 
+instance Contravariant ((•) r) where
+  contramap f = K . (. f) . runK
+
 
 -- Continuation abstraction
 
