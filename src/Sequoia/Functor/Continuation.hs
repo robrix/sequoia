@@ -1,2 +1,8 @@
 module Sequoia.Functor.Continuation
-() where
+( -- * Continuation functor
+  type (•)(..)
+) where
+
+-- Continuation functor
+
+newtype r • a = K { runK :: a -> r }
