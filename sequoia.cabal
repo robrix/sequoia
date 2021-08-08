@@ -120,6 +120,7 @@ library
     Sequoia.Connective.Initial
     Sequoia.Connective.Mu
     Sequoia.Connective.Multiplicative
+    Sequoia.Connective.Multiplicative.Unit
     Sequoia.Connective.Negate
     Sequoia.Connective.Negation
     Sequoia.Connective.Not
