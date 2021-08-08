@@ -11,6 +11,8 @@ module Sequoia.Profunctor.Continuation
 , constK
   -- * Coercion
 , _K
+  -- * Defaults
+, cotabulateCont
   -- * Double negation
 , type (••)
 , dn
@@ -82,6 +84,12 @@ constK = inK . const
 
 _K :: Iso (a • r) (a' • r') (a -> r) (a' -> r')
 _K = coerced
+
+
+-- Defaults
+
+cotabulateCont :: ContinuationI k => (Identity a -> b) -> a `k` b
+cotabulateCont = inK . lmap Identity
 
 
 -- Double negation
