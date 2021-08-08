@@ -19,6 +19,9 @@ data Negate e a r = Negate { negateE :: e, negateK :: a • r }
 instance Profunctor (Negate e) where
   dimap f g (Negate e k) = Negate e (dimap f g k)
 
+instance ContinuationE (Negate e) where
+  (•) = (•) . negateK
+
 instance Neg a => Polarized P (Negate e a r) where
 
 
