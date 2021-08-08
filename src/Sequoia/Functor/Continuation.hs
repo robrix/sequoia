@@ -5,6 +5,8 @@ module Sequoia.Functor.Continuation
   type (•)(..)
   -- * Continuation abstraction
 , Continuation(..)
+  -- * Construction
+, idK
 ) where
 
 import Data.Functor.Contravariant
@@ -22,3 +24,9 @@ instance Contravariant ((•) r) where
 class Contravariant k => Continuation r k | k -> r where
   inK :: (a -> r) -> k a
   (•) :: k a -> (a -> r)
+
+
+-- Construction
+
+idK :: Continuation r k => k r
+idK = inK id
