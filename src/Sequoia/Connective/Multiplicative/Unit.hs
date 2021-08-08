@@ -27,6 +27,10 @@ instance Nulladjunction r e => Nulladjunction (Bottom r) (One e) where
   nullleftAdjunct f = One . nullleftAdjunct (f . Bottom)
   nullrightAdjunct f = nullrightAdjunct (getOne . f) . absurdN
 
+instance Nulladjunction e r => Nulladjunction (One e) (Bottom r) where
+  nullleftAdjunct f = Bottom . nullleftAdjunct (f . One)
+  nullrightAdjunct f = nullrightAdjunct (absurdN . f) . getOne
+
 
 -- Negative falsity
 
