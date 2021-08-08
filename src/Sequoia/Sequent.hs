@@ -193,7 +193,7 @@ instance SumIntro Seq where
 -- Multiplicative
 
 instance BottomIntro Seq where
-  botL = liftL (K absurdN)
+  botL = liftL absurdNK
   botR = wkR
 
 instance OneIntro Seq where
