@@ -1,6 +1,7 @@
 module Sequoia.Connective.Bottom
 ( -- * Negative falsity
   Bottom(..)
+  -- ** Elimination
 , absurdNK
 ) where
 

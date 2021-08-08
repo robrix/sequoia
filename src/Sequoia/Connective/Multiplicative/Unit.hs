@@ -2,6 +2,7 @@
 module Sequoia.Connective.Multiplicative.Unit
 ( -- * Negative falsity
   Bottom(..)
+  -- ** Elimination
 , absurdNK
   -- * Positive truth
 , One(..)
@@ -46,6 +47,8 @@ instance Distributive Bottom where
   distribute = Bottom . fmap absurdN
   collect f = Bottom . fmap (absurdN . f)
 
+
+-- Elimination
 
 absurdNK :: Continuation k => Bottom r `k` r
 absurdNK = inK absurdN
