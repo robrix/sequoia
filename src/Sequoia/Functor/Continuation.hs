@@ -7,6 +7,7 @@ module Sequoia.Functor.Continuation
 , Continuation(..)
   -- * Construction
 , idK
+, constK
 ) where
 
 import Data.Functor.Contravariant
@@ -30,3 +31,6 @@ class Contravariant k => Continuation r k | k -> r where
 
 idK :: Continuation r k => k r
 idK = inK id
+
+constK :: Continuation r k => r -> k a
+constK = inK . const
