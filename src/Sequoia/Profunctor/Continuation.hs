@@ -3,7 +3,9 @@ module Sequoia.Profunctor.Continuation
 ( -- * Continuation profunctor
   type (•)(..)
   -- * Continuation abstraction
-, Continuation(..)
+, Continuation
+, ContinuationI(..)
+, ContinuationE(..)
   -- * Construction
 , idK
 , constK
@@ -45,15 +47,23 @@ instance Sieve (•) Identity where
 instance Cosieve (•) Identity where
   cosieve = lmap runIdentity . (•)
 
-instance Continuation (•) where
+instance Continuation (•)
+
+instance ContinuationI (•) where
   inK = K
+
+instance ContinuationE (•) where
   (•) = runK
 
 
 -- Continuation abstraction
 
-class Profunctor k => Continuation k where
+class (ContinuationE k, ContinuationI k) => Continuation k
+
+class Profunctor k => ContinuationI k where
   inK :: (a -> r) -> k a r
+
+class Profunctor k => ContinuationE k where
   (•) :: k a r -> (a -> r)
 
   infixl 7 •
@@ -61,10 +71,10 @@ class Profunctor k => Continuation k where
 
 -- Construction
 
-idK :: Continuation k => a `k` a
+idK :: ContinuationI k => a `k` a
 idK = inK id
 
-constK :: Continuation k => r -> a `k` r
+constK :: ContinuationI k => r -> a `k` r
 constK = inK . const
 
 
@@ -80,7 +90,7 @@ type a ••r = a • r • r
 
 infixl 7 ••
 
-dn :: (Continuation j, Continuation k) => a -> (a `j` r) `k` r
+dn :: (ContinuationE j, ContinuationI k) => a -> (a `j` r) `k` r
 dn a = inK (• a)
 
 

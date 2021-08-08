@@ -13,7 +13,7 @@ import Sequoia.Profunctor.Continuation
 
 newtype Not a r = Not { getNot :: a • Bottom r }
   deriving (Functor)
-  deriving (Continuation, Profunctor) via (•)
+  deriving (Continuation, ContinuationE, ContinuationI, Profunctor) via (•)
 
 instance Pos a => Polarized N (Not a r) where
 
