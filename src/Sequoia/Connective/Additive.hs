@@ -34,7 +34,7 @@ import Sequoia.Profunctor.Continuation
 -- Duals
 
 elimWith :: a & b -> Negate e a r ⊕ Negate e b r -> r
-elimWith = flip ((. exl) . (•-) <--> (. exr) . (•-))
+elimWith = flip ((. exl) . (•) <--> (. exr) . (•))
 
 elimSum :: a ⊕ b -> a ¬ r & b ¬ r -> r
 elimSum = (. exl) . flip (•) <--> (. exr) . flip (•)

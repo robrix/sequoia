@@ -2,8 +2,6 @@ module Sequoia.Connective.Negate
 ( -- * Negate
   Negate(..)
 , type (-)
-  -- * Elimination
-, (•-)
 ) where
 
 import Data.Profunctor
@@ -28,11 +26,3 @@ instance Neg a => Polarized P (Negate e a r) where
 type (-) = Negate
 
 infixr 9 -
-
-
--- Elimination
-
-(•-) :: Negate e a r -> (a -> r)
-(•-) = (•) . negateK
-
-infixl 7 •-
