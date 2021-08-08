@@ -1,4 +1,5 @@
 {-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE TypeFamilies #-}
 -- | Continuations encoded as (contravariant) functors.
 module Sequoia.Functor.Continuation
 ( -- * Continuation functor
@@ -11,6 +12,7 @@ module Sequoia.Functor.Continuation
 ) where
 
 import Data.Functor.Contravariant
+import Data.Functor.Contravariant.Rep
 
 -- Continuation functor
 
@@ -18,6 +20,11 @@ newtype r • a = K { runK :: a -> r }
 
 instance Contravariant ((•) r) where
   contramap f = K . (. f) . runK
+
+instance Representable ((•) r) where
+  type Rep ((•) r) = r
+  tabulate = inK
+  index = (•)
 
 instance Continuation r ((•) r) where
   inK = K
