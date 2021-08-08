@@ -205,7 +205,7 @@ bisequenceConj :: (Conj p, Applicative f) => f a `p` f b -> f (a `p` b)
 bisequenceConj = uncurryConj (liftA2 (>--<))
 
 bidistributeConj :: (Conj c, Functor g) => g (a `c` b) -> g a `c` g b
-bidistributeConj = fmap exl >---< fmap exr
+bidistributeConj = exlF >---< exrF
 
 bicollectConj :: (Conj p, Functor g) => (a -> b `p` c) -> g a -> g b `p` g c
 bicollectConj f = fmap (exl . f) >---< fmap (exr . f)
