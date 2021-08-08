@@ -19,6 +19,10 @@ instance Adjunction Bottom One where
   leftAdjunct  f = One . f . Bottom
   rightAdjunct f = getOne . f . absurdN
 
+instance Adjunction One Bottom where
+  leftAdjunct  f = Bottom . f . One
+  rightAdjunct f = absurdN . f . getOne
+
 instance Nulladjunction r e => Nulladjunction (Bottom r) (One e) where
   nullleftAdjunct f = One . nullleftAdjunct (f . Bottom)
   nullrightAdjunct f = nullrightAdjunct (getOne . f) . absurdN
