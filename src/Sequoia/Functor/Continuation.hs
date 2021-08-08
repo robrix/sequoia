@@ -19,6 +19,10 @@ newtype r • a = K { runK :: a -> r }
 instance Contravariant ((•) r) where
   contramap f = K . (. f) . runK
 
+instance Continuation r ((•) r) where
+  inK = K
+  (•) = runK
+
 
 -- Continuation abstraction
 
