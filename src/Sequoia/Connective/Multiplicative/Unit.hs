@@ -2,6 +2,7 @@
 module Sequoia.Connective.Multiplicative.Unit
 ( -- * Negative falsity
   Bottom(..)
+, absurdNK
   -- * Positive truth
 , One(..)
 ) where
@@ -12,6 +13,7 @@ import Data.Functor.Identity
 import Data.Functor.Rep
 import Sequoia.Nulladjunction
 import Sequoia.Polarity
+import Sequoia.Profunctor.Continuation
 
 -- Adjunction
 
@@ -43,6 +45,10 @@ instance Polarized N (Bottom r) where
 instance Distributive Bottom where
   distribute = Bottom . fmap absurdN
   collect f = Bottom . fmap (absurdN . f)
+
+
+absurdNK :: Continuation k => Bottom r `k` r
+absurdNK = inK absurdN
 
 
 -- Positive truth
