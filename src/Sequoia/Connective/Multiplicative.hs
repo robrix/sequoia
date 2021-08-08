@@ -6,6 +6,7 @@ module Sequoia.Connective.Multiplicative
 , elimTensor
   -- * Negative falsity
 , Bottom(..)
+, absurdNK
   -- * Positive truth
 , One(..)
   -- * Negative disjunction
