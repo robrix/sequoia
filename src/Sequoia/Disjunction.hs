@@ -181,7 +181,7 @@ bimapDisj :: Disj p => (a -> a') -> (b -> b') -> (a `p` b -> a' `p` b')
 bimapDisj = (+++)
 
 bitraverseDisj :: (Disj p, Functor m) => (a -> m a') -> (b -> m b') -> (a `p` b -> m (a' `p` b'))
-bitraverseDisj f g = fmap inl . f <--> fmap inr . g
+bitraverseDisj f g = inlF . f <--> inrF . g
 
 bisequenceDisj :: (Disj d, Functor f) => f a `d` f b -> f (a `d` b)
 bisequenceDisj = inlF <--> inrF
