@@ -5,7 +5,9 @@ module Sequoia.Connective.Not
 , type (¬)
 ) where
 
+import Data.Distributive
 import Data.Functor.Identity
+import Data.Functor.Rep as Co
 import Data.Profunctor
 import Data.Profunctor.Rep as Pro
 import Data.Profunctor.Sieve
@@ -17,7 +19,12 @@ import Sequoia.Profunctor.Continuation
 
 newtype Not a r = Not { getNot :: a • Bottom r }
   deriving (Functor)
+  deriving (Co.Representable) via ((•) a)
   deriving (Continuation, ContinuationE, ContinuationI, Corepresentable, Costrong, Profunctor, Pro.Representable, Strong) via (•)
+
+instance Distributive (Not a) where
+  distribute = distributeRep
+  collect = collectRep
 
 instance Sieve Not Identity where
   sieve = rmap Identity . (•)
