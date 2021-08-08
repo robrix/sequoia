@@ -172,7 +172,7 @@ fmapDisj :: Disj p => (b -> b') -> (a `p` b -> a `p` b')
 fmapDisj g = inl <--> inr . g
 
 traverseDisj :: (Disj p, Applicative m) => (b -> m b') -> (a `p` b) -> m (a `p` b')
-traverseDisj f = pure . inl <--> fmap inr . f
+traverseDisj f = pure . inl <--> inrF . f
 
 bifoldMapDisj :: Disj p => (a -> m) -> (b -> m) -> (a `p` b -> m)
 bifoldMapDisj = (<-->)
