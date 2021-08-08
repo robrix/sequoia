@@ -7,6 +7,8 @@ module Sequoia.Functor.Continuation
 , Continuation(..)
 ) where
 
+import Data.Functor.Contravariant
+
 -- Continuation functor
 
 newtype r • a = K { runK :: a -> r }
@@ -14,6 +16,6 @@ newtype r • a = K { runK :: a -> r }
 
 -- Continuation abstraction
 
-class Continuation r k | k -> r where
+class Contravariant k => Continuation r k | k -> r where
   inK :: (a -> r) -> k a
   (•) :: k a -> (a -> r)
