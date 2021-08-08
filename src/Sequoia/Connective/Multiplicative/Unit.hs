@@ -28,7 +28,7 @@ instance Nulladjunction r e => Nulladjunction (Bottom r) (One e) where
 
 newtype Bottom r = Bottom { absurdN :: r }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-  deriving (Applicative, Monad) via Identity
+  deriving (Applicative, Monad, Representable) via Identity
 
 instance Polarized N (Bottom r) where
 
