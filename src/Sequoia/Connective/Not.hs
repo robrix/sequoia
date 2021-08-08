@@ -17,7 +17,7 @@ import Sequoia.Profunctor.Continuation
 
 newtype Not a r = Not { getNot :: a • Bottom r }
   deriving (Functor)
-  deriving (Continuation, ContinuationE, ContinuationI, Corepresentable, Costrong, Profunctor) via (•)
+  deriving (Continuation, ContinuationE, ContinuationI, Corepresentable, Costrong, Profunctor, Representable, Strong) via (•)
 
 instance Sieve Not Identity where
   sieve = rmap Identity . (•)
