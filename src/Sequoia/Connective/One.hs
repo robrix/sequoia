@@ -3,4 +3,4 @@ module Sequoia.Connective.One
   One(..)
 ) where
 
-import Sequoia.Connective.Multiplicative
+import Sequoia.Connective.Multiplicative.Unit (One(..))

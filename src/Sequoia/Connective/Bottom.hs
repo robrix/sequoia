@@ -3,4 +3,4 @@ module Sequoia.Connective.Bottom
   Bottom(..)
 ) where
 
-import Sequoia.Connective.Multiplicative
+import Sequoia.Connective.Multiplicative.Unit (Bottom(..))
