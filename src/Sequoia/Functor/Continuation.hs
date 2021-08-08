@@ -26,6 +26,8 @@ class Contravariant k => Continuation r k | k -> r where
   inK :: (a -> r) -> k a
   (•) :: k a -> (a -> r)
 
+  infixl 7 •
+
 
 -- Construction
 
