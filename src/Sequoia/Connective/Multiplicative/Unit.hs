@@ -32,6 +32,10 @@ newtype Bottom r = Bottom { absurdN :: r }
 
 instance Polarized N (Bottom r) where
 
+instance Distributive Bottom where
+  distribute = Bottom . fmap absurdN
+  collect f = Bottom . fmap (absurdN . f)
+
 
 -- Positive truth
 
