@@ -1,3 +1,4 @@
+-- | Continuations encoded as (contravariant) functors.
 module Sequoia.Functor.Continuation
 ( -- * Continuation functor
   type (•)(..)
