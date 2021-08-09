@@ -15,9 +15,9 @@ import Data.Kind (Type)
 import Data.Profunctor
 import Fresnel.Lens
 import Sequoia.Polarity
-import Sequoia.Profunctor.Coexponential
 import Sequoia.Profunctor.Context
 import Sequoia.Profunctor.Continuation
+import Sequoia.Profunctor.Exp (Coexp(..))
 import Sequoia.Profunctor.Value
 
 -- Subtraction
@@ -41,8 +41,8 @@ infixr 5 -~
 
 -- Elimination
 
-runSubCoexp :: Sub e r b a -> Coexp e r b a
-runSubCoexp (a :-< k) = a -< k
+runSubCoexp :: Sub e r b a -> Coexp r b (e ∘ a)
+runSubCoexp (a :-< k) = k :>- a
 
 appSub :: Sub e r b a -> (b • r -> a • r) -> e ==> r
 appSub (a :-< k) f = C (\ e -> f k • e ∘ a)

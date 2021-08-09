@@ -1,6 +1,6 @@
 module Sequoia.Connective.Function
 ( -- * Implication
-  Fun(getFun)
+  Fun(..)
 , type (~~)
 , type (~>)
   -- * Construction
@@ -11,26 +11,22 @@ module Sequoia.Connective.Function
 ) where
 
 import qualified Control.Category as Cat
+import           Data.Coerce
 import           Data.Kind (Type)
-import           Data.Profunctor
 import           Data.Profunctor.Traversing
 import           Prelude hiding (exp)
-import           Sequoia.Connective.Bottom
-import           Sequoia.Connective.Not
-import           Sequoia.Connective.NotUntrue
 import           Sequoia.Polarity
-import           Sequoia.Profunctor.Context
+import           Sequoia.Profunctor
 import           Sequoia.Profunctor.Continuation
-import           Sequoia.Profunctor.Exponential
-import           Sequoia.Profunctor.Value
+import           Sequoia.Profunctor.Exp (Exp(..))
 
 -- Implication
 
-newtype Fun e r a b = Fun { getFun :: b ¬ r -> e ≁ a -> e ==> r }
-  deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via Exp e r
-  deriving (Functor) via Exp e r a
+newtype Fun r a b = Fun { getFun :: (b • r) -> (a • r) }
+  deriving (Cat.Category, Choice, Profunctor, Strong, Traversing) via Exp r
+  deriving (Functor) via Exp r a
 
-instance (Pos a, Neg b) => Polarized N (Fun e r a b) where
+instance (Pos a, Neg b) => Polarized N (Fun r a b) where
 
 type l ~~(r :: Type -> Type -> Type) = r l
 type l~> r = l r
@@ -41,14 +37,14 @@ infixr 5 ~>
 
 -- Construction
 
-fun :: (b ¬ r -> e ≁ a -> e ==> r) -> a ~~Fun e r~> b
-fun = Fun
+fun :: (b • r -> a -> r) -> a ~~Fun r~> b
+fun = coerce
 
-funExp :: Exp e r a b -> a ~~Fun e r~> b
-funExp = fun . dimap (rmap absurdN . getNot) (lmap runNotUntrue) . runExp
+funExp :: Exp r a b -> a ~~Fun r~> b
+funExp = coerce
 
 
 -- Elimination
 
-runFunExp :: a ~~Fun e r~> b -> Exp e r a b
-runFunExp = exp . dimap (Not . rmap Bottom) (lmap NotUntrue) . getFun
+runFunExp :: Fun r a b -> Exp r a b
+runFunExp = coerce

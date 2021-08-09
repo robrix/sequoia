@@ -16,24 +16,24 @@ import Sequoia.Disjunction
 import Sequoia.Profunctor
 import Sequoia.Profunctor.Context
 import Sequoia.Profunctor.Continuation
-import Sequoia.Profunctor.Exponential
+import Sequoia.Profunctor.Exp (elimExp, (↑), (↓))
 import Sequoia.Profunctor.Value
 
-elimFun :: a ~~Fun e r~> b -> b >-Sub e r-~ a -> e ==> r
-elimFun f = elimExp (runFunExp f) . runSubCoexp
+elimFun :: a ~~Fun r~> b -> b >-Sub e r-~ a -> e ==> r
+elimFun f s = C (\ e -> elimExp (runFunExp f) • ((e ∘) <$> runSubCoexp s))
 
-funPar1 :: Iso' (e ∘ (a ¬ r ⅋ b) • r) (e ∘ (a ~~Fun e r~> b) • r)
+funPar1 :: Iso' ((a ¬ r ⅋ b) • r) ((a ~~Fun r~> b) • r)
 funPar1 = iso
-  (\ k -> k <<^ (mkPar (inrL (k <<^ pure)) =<<))
-  (<<^ fmap mkFun)
+  (\ k -> k <<^ mkPar (inrL k))
+  (<<^ mkFun)
 
-funPar2 :: Iso' (e ∘ (a ¬ r ⅋ b) •• r) (e ∘ (a ~~Fun e r~> b) •• r)
+funPar2 :: Iso' ((a ¬ r ⅋ b) •• r) ((a ~~Fun r~> b) •• r)
 funPar2 = iso
-  (<<^ (<<^ fmap mkFun))
-  (<<^ (\ k -> k <<^ (mkPar (inrL (k <<^ pure)) =<<)))
+  (<<^ (<<^ mkFun))
+  (<<^ (\ k -> k <<^ mkPar (inrL k)))
 
-mkPar :: b • r -> a ~~Fun e r~> b -> e ∘ (a ¬ r ⅋ b)
-mkPar p f = V (\ e -> inl (inK (\ a -> p ↓ runFunExp f ↑ pure a <== e)))
+mkPar :: b • r -> a ~~Fun r~> b -> (a ¬ r ⅋ b)
+mkPar p f = inl (inK (\ a -> p ↓ runFunExp f ↑ a))
 
-mkFun :: a ¬ r ⅋ b -> a ~~Fun e r~> b
-mkFun p = fun (\ b a -> C (\ e -> ((• e ∘ a) <--> (b •)) p))
+mkFun :: a ¬ r ⅋ b -> a ~~Fun r~> b
+mkFun p = fun (\ b a -> ((• a) <--> (b •)) p)

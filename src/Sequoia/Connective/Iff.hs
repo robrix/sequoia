@@ -13,7 +13,7 @@ import Sequoia.Polarity
 
 -- Logical biconditional
 
-newtype Iff e r a b = Iff { getIff :: (Down a ~~Fun e r~> b) & (Down b ~~Fun e r~> a) }
+newtype Iff e r a b = Iff { getIff :: (Down a ~~Fun r~> b) & (Down b ~~Fun r~> a) }
 
 instance (Neg a, Neg b) => Polarized N (Iff e r a b)
 

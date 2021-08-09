@@ -69,8 +69,14 @@ infixl 3 ↓
 liftLR :: Exp e r a b -> Seq e r (a < _Γ) (_Δ > b)
 liftLR = dimap exl inr . seqExp
 
+liftLR' :: ((b • r) -> (a • r)) -> Seq e r (a < _Γ) (_Δ > b)
+liftLR' f = seq (\ _Δ _Γ -> C (\ e -> f (inrL _Δ) • e ∘ exlR _Γ))
+
 lowerLR :: (Exp e r a b -> _Γ -|Seq e r|- _Δ) -> a < _Γ -|Seq e r|- _Δ > b -> _Γ -|Seq e r|- _Δ
 lowerLR f p = seq (\ _Δ _Γ -> _Δ ↓ f (exp (\ b a -> _Δ |> b ↓ p ↑ a <| _Γ)) ↑ _Γ)
+
+lowerLR' :: (((b • r) -> (a • r)) -> _Γ -|Seq e r|- _Δ) -> a < _Γ -|Seq e r|- _Δ > b -> _Γ -|Seq e r|- _Δ
+lowerLR' f p = seq (\ _Δ _Γ -> withRun (\ run -> _Δ ↓ f (\ b -> inK (\ a -> run (_Δ |> b ↓ p ↑ pure a <| _Γ))) ↑ _Γ))
 
 seq :: (_Δ • r -> e ∘ _Γ -> e ==> r) -> Seq e r _Γ _Δ
 seq = Seq
@@ -229,8 +235,8 @@ instance XOrIntro Seq where
 -- Implication
 
 instance FunctionIntro Seq where
-  funL a b = popL (val (\ f -> a >>> liftLR (runFunExp f) >>> wkL' b))
-  funR = lowerLR (liftR . pure . funExp) . wkR'
+  funL a b = popL (val (\ f -> a >>> liftLR' (getFun f) >>> wkL' b))
+  funR = lowerLR' (liftR . pure . Fun) . wkR'
 
 instance SubtractionIntro Seq where
   subL f = popL (val (\ s -> liftR (subA s) >>> f >>> liftL (subK s)))

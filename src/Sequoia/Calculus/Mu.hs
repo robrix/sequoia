@@ -21,8 +21,8 @@ import Sequoia.Polarity
 class Core s => MuIntro s where
   muL
     :: ((Neg ==> Pos) f, Neg a)
-    => _Γ -|s e r|- _Δ > f a ~~Fun e r~> a   ->   a < _Γ -|s e r|- _Δ
-    -- --------------------------------------------------------------
+    => _Γ -|s e r|- _Δ > f a ~~Fun r~> a   ->   a < _Γ -|s e r|- _Δ
+    -- ------------------------------------------------------------
     ->                 Mu e r f < _Γ -|s e r|- _Δ
 
   muR
