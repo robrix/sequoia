@@ -59,6 +59,7 @@ data Val
   | VNot (Val -> Val)
   | VNeg (Val -> Val)
 
+
 data Elim
   = EZero
   | EBottom
