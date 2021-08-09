@@ -79,3 +79,6 @@ instance Ord1 Snoc where
     go (s1:>a1) (s2:>a2) = compare a1 a2 <> go s1 s2
     go Nil      _        = LT
     go _        _        = GT
+
+instance Show1 Snoc where
+  liftShowsPrec _ sl p s = showParen (p > 10) $ showString "fromList" . showChar ' ' . sl (toList s)
