@@ -91,7 +91,7 @@ instance NExpr Eval where
   withL1 = fmap (lmap exl)
   withL2 = fmap (lmap exr)
   withR = liftA2 inlr
-  parL f g = elim (runPar (K (collect (•) f), K (collect (•) g)) •)
+  parL f g = elim ((distribute f <••> distribute g) •)
   parR r = bisequenceDisj (coerceDisj r)
   funL a b = elim (\ f -> appFun f <$> a <*> b)
   funR f = Fun . fmap (Not . rmap Bottom) <$> evalF f
