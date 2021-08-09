@@ -6,6 +6,7 @@ module Sequoia.Snoc
 import Data.Align
 import Data.Foldable (toList)
 import Data.These
+import Data.Zip
 
 -- Snoc lists
 
@@ -31,3 +32,10 @@ instance Semialign Snoc where
   align Nil     bs      = That <$> bs
   align as      Nil     = This <$> as
   align (as:>a) (bs:>b) = align as bs :> These a b
+
+instance Zip Snoc where
+  zipWith f = go
+    where
+    go = curry $ \case
+      (as:>a, bs:>b) -> go as bs :> f a b
+      _              -> Nil
