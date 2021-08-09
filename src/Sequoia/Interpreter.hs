@@ -8,10 +8,15 @@ module Sequoia.Interpreter
 , Elim(..)
   -- ** Construction
 , vvar
+  -- ** Elimination
+, showsVal
+, showsElim
 ) where
 
+import Data.Functor.Classes
 import Sequoia.DeBruijn
 import Sequoia.Snoc
+import Text.Show (showListWith)
 
 -- Expressions
 
@@ -69,3 +74,32 @@ data Elim
 
 vvar :: Level -> Val
 vvar d = VNe d Nil
+
+
+-- Elimination
+
+showsVal :: Level -> Int -> Val -> ShowS
+showsVal d p = \case
+  VNe v sp  -> showsBinaryWith showsPrec (liftShowsPrec (showsElim d) (showListWith (showsElim d 0))) "VNe" p v sp
+  VTop      -> showString "VTop"
+  VBottom   -> showString "VBottom"
+  VOne      -> showString "VOne"
+  VWith a b -> showsBinaryWith (showsVal d) (showsVal d) "VWith" p a b
+  VSum1 a   -> showsUnaryWith (showsVal d) "VSum1" p a
+  VSum2 b   -> showsUnaryWith (showsVal d) "VSum2" p b
+  VNot a    -> showsUnaryWith (showsBinder d) "VNot" p a
+  VNeg a    -> showsUnaryWith (showsBinder d) "VNeg" p a
+
+showsElim :: Level -> Int -> Elim -> ShowS
+showsElim d p = \case
+  EZero    -> showString "EZero"
+  EBottom  -> showString "EBottom"
+  EOne     -> showString "EOne"
+  EWIth1 f -> showsUnaryWith (showsBinder d) "EWith1" p f
+  EWIth2 g -> showsUnaryWith (showsBinder d) "EWith2" p g
+  ESum f g -> showsBinaryWith (showsBinder d) (showsBinder d) "ESum" p f g
+  ENot v   -> showsUnaryWith (showsVal d) "ENot" p v
+  ENeg v   -> showsUnaryWith (showsVal d) "ENeg" p v
+
+showsBinder :: Level -> Int -> (Val -> Val) -> ShowS
+showsBinder d p b = showsVal (succ d) p (b (vvar d))
