@@ -18,6 +18,12 @@ module Sequoia.Interpreter
   -- * Evaluation (definitional)
 , Env
 , evalDef
+  -- * Evaluation (CK machine)
+, Cont
+, Frame(..)
+, evalCK
+, load
+, unload
 ) where
 
 import Data.Foldable (foldl')
@@ -188,3 +194,68 @@ evalDef env = \case
 
 evalBinder :: Env -> Scope -> (Val -> Val)
 evalBinder env (Scope e) a = evalDef (a : env) e
+
+
+-- Evaluation (CK machine)
+
+type Cont = Snoc Frame
+
+data Frame
+  = FRWithL () Expr
+  | FRWithR Val ()
+  | FRSum1 ()
+  | FRSum2 ()
+  | FLZero
+  | FLBottom
+  | FLOne
+  | FLWith1 Scope
+  | FLWith2 Scope
+  | FLSum Scope Scope
+  | FLNotL () Expr
+  | FLNotR Val ()
+  | FLNegL () Expr
+  | FLNegR Val ()
+
+evalCK :: Env -> Expr -> Val
+evalCK env e = load env e Nil
+
+load :: Env -> Expr -> Cont -> Val
+load env e k = case e of
+  Var a      -> unload env (env !! getIndex a) k
+  RTop       -> unload env VTop k
+  RBottom    -> unload env VBottom k
+  ROne       -> unload env VOne k
+  RWith a b  -> load env a (k :> FRWithL () b)
+  RSum1 a    -> load env a (k :> FRSum1 ())
+  RSum2 b    -> load env b (k :> FRSum2 ())
+  RNot f     -> unload env (VNot (loadBinder env f k)) k
+  RNeg f     -> unload env (VNeg (loadBinder env f k)) k
+  LZero s    -> load env s (k :> FLZero)
+  LBottom s  -> load env s (k :> FLBottom)
+  LOne s     -> load env s (k :> FLOne)
+  LWith1 s f -> load env s (k :> FLWith1 f)
+  LWith2 s g -> load env s (k :> FLWith2 g)
+  LSum s f g -> load env s (k :> FLSum f g)
+  LNot s v   -> load env s (k :> FLNotL () v)
+  LNeg s v   -> load env s (k :> FLNegL () v)
+
+loadBinder :: Env -> Scope -> Cont -> (Val -> Val)
+loadBinder env (Scope f) k a = load (a : env) f k
+
+unload :: Env -> Val -> Cont -> Val
+unload env v = \case
+  Nil               -> v
+  k :> FRWithL () r -> load env r (k :> FRWithR v ())
+  k :> FRWithR u () -> unload env (VWith u v) k
+  k :> FRSum1 ()    -> unload env (VSum1 v) k
+  k :> FRSum2 ()    -> unload env (VSum2 v) k
+  k :> FLZero       -> unload env (vapp v EZero) k
+  k :> FLBottom     -> unload env (vapp v EBottom) k
+  k :> FLOne        -> unload env (vapp v EOne) k
+  k :> FLWith1 f    -> unload env (vapp v (EWith1 (loadBinder env f k))) k
+  k :> FLWith2 g    -> unload env (vapp v (EWith2 (loadBinder env g k))) k
+  k :> FLSum f g    -> unload env (vapp v (ESum (loadBinder env f k) (loadBinder env g k))) k
+  k :> FLNotL () r  -> load env r (k :> FLNotR v ())
+  k :> FLNotR u ()  -> unload env (vapp v (ENot u)) k
+  k :> FLNegL () r  -> load env r (k :> FLNegR v ())
+  k :> FLNegR u ()  -> unload env (vapp v (ENeg u)) k
