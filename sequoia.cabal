@@ -186,6 +186,7 @@ library
     Sequoia.Profunctor.Value
     Sequoia.Sequent
     Sequoia.Signal
+    Sequoia.Snoc
     Sequoia.Span
     Sequoia.Syntax
 
