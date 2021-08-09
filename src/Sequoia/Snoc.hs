@@ -3,7 +3,9 @@ module Sequoia.Snoc
   Snoc(..)
 ) where
 
+import Data.Align
 import Data.Foldable (toList)
+import Data.These
 
 -- Snoc lists
 
@@ -23,3 +25,9 @@ instance Semigroup (Snoc a) where
 
 instance Monoid (Snoc a) where
   mempty = Nil
+
+instance Semialign Snoc where
+  align Nil     Nil     = Nil
+  align Nil     bs      = That <$> bs
+  align as      Nil     = This <$> as
+  align (as:>a) (bs:>b) = align as bs :> These a b
