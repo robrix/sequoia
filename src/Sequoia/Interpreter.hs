@@ -17,7 +17,7 @@ module Sequoia.Interpreter
 , quoteElim
   -- * Evaluation (definitional)
 , Env
-, eval
+, evalDef
 ) where
 
 import Data.Foldable (foldl')
@@ -166,25 +166,25 @@ quoteBinder d f = Scope (quoteVal (succ d) (f (vvar d)))
 
 type Env = [Val]
 
-eval :: Env -> Expr -> Val
-eval env = \case
+evalDef :: Env -> Expr -> Val
+evalDef env = \case
   Var v      -> env !! getIndex v
   RTop       -> VTop
   RBottom    -> VBottom
   ROne       -> VOne
-  RWith a b  -> VWith (eval env a) (eval env b)
-  RSum1 a    -> VSum1 (eval env a)
-  RSum2 b    -> VSum2 (eval env b)
+  RWith a b  -> VWith (evalDef env a) (evalDef env b)
+  RSum1 a    -> VSum1 (evalDef env a)
+  RSum2 b    -> VSum2 (evalDef env b)
   RNot f     -> VNot (evalBinder env f)
   RNeg f     -> VNeg (evalBinder env f)
-  LZero s    -> vapp (eval env s) EZero
-  LBottom s  -> vapp (eval env s) EBottom
-  LOne s     -> vapp (eval env s) EOne
-  LWith1 s f -> vapp (eval env s) (EWith1 (evalBinder env f))
-  LWith2 s g -> vapp (eval env s) (EWith2 (evalBinder env g))
-  LSum s f g -> vapp (eval env s) (ESum (evalBinder env f) (evalBinder env g))
-  LNot s v   -> vapp (eval env s) (ENot (eval env v))
-  LNeg s v   -> vapp (eval env s) (ENeg (eval env v))
+  LZero s    -> vapp (evalDef env s) EZero
+  LBottom s  -> vapp (evalDef env s) EBottom
+  LOne s     -> vapp (evalDef env s) EOne
+  LWith1 s f -> vapp (evalDef env s) (EWith1 (evalBinder env f))
+  LWith2 s g -> vapp (evalDef env s) (EWith2 (evalBinder env g))
+  LSum s f g -> vapp (evalDef env s) (ESum (evalBinder env f) (evalBinder env g))
+  LNot s v   -> vapp (evalDef env s) (ENot (evalDef env v))
+  LNeg s v   -> vapp (evalDef env s) (ENeg (evalDef env v))
 
 evalBinder :: Env -> Scope -> (Val -> Val)
-evalBinder env (Scope e) a = eval (a : env) e
+evalBinder env (Scope e) a = evalDef (a : env) e
