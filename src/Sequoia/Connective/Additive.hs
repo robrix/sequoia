@@ -75,7 +75,7 @@ absurdP = \case
 
 -- Negative conjunction
 
-newtype a & b = With (forall r . Either (a • r) (b • r) • r)
+newtype a & b = With (forall r . (a • r ⊕ b • r) • r)
 
 infixr 6 &
 
@@ -116,7 +116,7 @@ instance Birepresentable (&) where
 
 -- Elimination
 
-runWith :: Either (a • r) (b • r) -> (a & b) • r
+runWith :: (a • r ⊕ b • r) -> (a & b) • r
 runWith e = K (\ (With r) -> r • e)
 
 
