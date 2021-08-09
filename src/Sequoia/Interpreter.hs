@@ -15,6 +15,9 @@ module Sequoia.Interpreter
   -- * Quotation
 , quoteVal
 , quoteElim
+  -- * Evaluation (definitional)
+, Env
+, eval
 ) where
 
 import Data.Foldable (foldl')
@@ -157,3 +160,31 @@ quoteElim d s = \case
 
 quoteBinder :: Level -> (Val -> Val) -> Scope
 quoteBinder d f = Scope (quoteVal (succ d) (f (vvar d)))
+
+
+-- Evaluation (definitional)
+
+type Env = [Val]
+
+eval :: Env -> Expr -> Val
+eval env = \case
+  Var v      -> env !! getIndex v
+  RTop       -> VTop
+  RBottom    -> VBottom
+  ROne       -> VOne
+  RWith a b  -> VWith (eval env a) (eval env b)
+  RSum1 a    -> VSum1 (eval env a)
+  RSum2 b    -> VSum2 (eval env b)
+  RNot f     -> VNot (evalBinder env f)
+  RNeg f     -> VNeg (evalBinder env f)
+  LZero s    -> vapp (eval env s) EZero
+  LBottom s  -> vapp (eval env s) EBottom
+  LOne s     -> vapp (eval env s) EOne
+  LWith1 s f -> vapp (eval env s) (EWith1 (evalBinder env f))
+  LWith2 s g -> vapp (eval env s) (EWith2 (evalBinder env g))
+  LSum s f g -> vapp (eval env s) (ESum (evalBinder env f) (evalBinder env g))
+  LNot s v   -> vapp (eval env s) (ENot (eval env v))
+  LNeg s v   -> vapp (eval env s) (ENeg (eval env v))
+
+evalBinder :: Env -> Scope -> (Val -> Val)
+evalBinder env (Scope e) a = eval (a : env) e
