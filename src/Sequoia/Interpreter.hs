@@ -6,6 +6,8 @@ module Sequoia.Interpreter
   -- * Values
 , Val(..)
 , Elim(..)
+  -- ** Construction
+, vvar
 ) where
 
 import Sequoia.DeBruijn
@@ -61,3 +63,9 @@ data Elim
   | ESum (Val -> Val) (Val -> Val)
   | ENot Val
   | ENeg Val
+
+
+-- Construction
+
+vvar :: Level -> Val
+vvar d = VNe d Nil
