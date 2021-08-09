@@ -3,6 +3,7 @@ module Sequoia.Snoc
   Snoc(..)
 ) where
 
+import Control.Applicative (Alternative(..))
 import Data.Align
 import Data.Foldable (toList)
 import Data.These
@@ -52,3 +53,7 @@ instance Applicative Snoc where
     where
     go accum Nil     _  = accum Nil
     go accum (fs:>f) as = go (accum . flip (foldl (\ fas a -> fas :> f a)) as) fs as
+
+instance Alternative Snoc where
+  empty = Nil
+  (<|>) = (<>)
