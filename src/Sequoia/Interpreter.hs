@@ -8,6 +8,7 @@ module Sequoia.Interpreter
 , Elim(..)
   -- ** Construction
 , vvar
+, vapp
   -- ** Elimination
 , showsVal
 , showsElim
@@ -85,6 +86,19 @@ instance Show Elim where
 
 vvar :: Level -> Val
 vvar d = VNe d Nil
+
+vapp :: Val -> Elim -> Val
+vapp = curry $ \case
+  (v,         EZero)    -> v
+  (VBottom,   EBottom)  -> VBottom
+  (VOne,      EOne)     -> VOne
+  (VWith a _, EWith1 f) -> f a
+  (VWith _ b, EWith2 g) -> g b
+  (VSum1 a,   ESum f _) -> f a
+  (VSum2 b,   ESum _ g) -> g b
+  (VNot k,    ENot a)   -> k a
+  (VNeg k,    ENeg a)   -> k a
+  (v,        e)         -> error $ "cannot elim " <> show v <> " with " <> show e
 
 
 -- Elimination
