@@ -19,6 +19,7 @@ data Expr
   | RSum1 Expr
   | RSum2 Expr
   | RNot Scope
+  | RNeg Scope
   -- No rule for LTop
   | LZero
   | LBottom
@@ -27,5 +28,6 @@ data Expr
   | LWith2 Expr Scope
   | LSum Expr Scope Scope
   | LNot Expr Expr
+  | LNeg Expr Expr
 
 newtype Scope = Scope { getScope :: Expr }
