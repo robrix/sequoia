@@ -8,10 +8,10 @@
 - fixity: infix 4 -><-
 
 # Continuation
-- fixity: infixl 7 •
+- fixity: infixl 8 •
 
 # Value
-- fixity: infixl 8 ∘
+- fixity: infixl 9 ∘
 
 # Seq/Snk/Src
 - fixity: infixl 3 ↑
@@ -27,8 +27,8 @@
 - fixity: infixr 1 >>∘
 
 # Env/Res
-- fixity: infixl 8 •∘
-- fixity: infixl 7 ••
+- fixity: infixl 9 •∘
+- fixity: infixl 8 ••
 
 
 - warn: {name: "Double-negate", lhs: "K (• a)", rhs: "dn a", side: "subst K == K"}
