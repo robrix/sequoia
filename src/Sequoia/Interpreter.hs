@@ -59,6 +59,9 @@ data Val
   | VNot (Val -> Val)
   | VNeg (Val -> Val)
 
+instance Show Val where
+  showsPrec = showsVal 0
+
 
 data Elim
   = EZero
