@@ -57,3 +57,9 @@ instance Applicative Snoc where
 instance Alternative Snoc where
   empty = Nil
   (<|>) = (<>)
+
+instance Monad Snoc where
+  as >>= f = go id as
+    where
+    go accum Nil     = accum Nil
+    go accum (as:>a) = go (accum . (<> f a)) as
