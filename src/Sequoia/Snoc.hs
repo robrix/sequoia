@@ -45,3 +45,10 @@ instance Zip Snoc where
     go acc = curry $ \case
       (as:>a, bs:>b) -> go (acc . (:> f a b)) as bs
       _              -> acc Nil
+
+instance Applicative Snoc where
+  pure = (Nil :>)
+  fs <*> as = go id fs as
+    where
+    go accum Nil     _  = accum Nil
+    go accum (fs:>f) as = go (accum . flip (foldl (\ fas a -> fas :> f a)) as) fs as
