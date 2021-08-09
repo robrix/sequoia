@@ -28,10 +28,13 @@ instance Monoid (Snoc a) where
   mempty = Nil
 
 instance Semialign Snoc where
-  align Nil     Nil     = Nil
-  align Nil     bs      = That <$> bs
-  align as      Nil     = This <$> as
-  align (as:>a) (bs:>b) = align as bs :> These a b
+  align = go
+    where
+    go = curry $ \case
+      (Nil, Nil)     -> Nil
+      (Nil, bs)      -> That <$> bs
+      (as,  Nil)     -> This <$> as
+      (as:>a, bs:>b) -> go as bs :> These a b
 
 instance Zip Snoc where
   zipWith f = go
