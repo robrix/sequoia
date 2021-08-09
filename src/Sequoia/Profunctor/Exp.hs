@@ -33,6 +33,7 @@ module Sequoia.Profunctor.Exp
 
 import qualified Control.Category as Cat
 import           Data.Coerce
+import           Data.Profunctor.Traversing
 import           Prelude hiding (exp)
 import           Sequoia.Disjunction
 import           Sequoia.Monad.Run
@@ -61,6 +62,10 @@ instance Cochoice (Exp r) where
 instance Strong (Exp r) where
   first'  f = Exp (\ k -> K (\ (a, c) -> getExp f (lmap (,c) k) • a))
   second' f = Exp (\ k -> K (\ (c, a) -> getExp f (lmap (c,) k) • a))
+
+instance Traversing (Exp r) where
+  traverse' f = Exp (\ b -> inK (\ a -> runDN (traverse (DN . appExp f) a) • b))
+  wander traverse f = Exp (\ b -> inK (\ a -> runDN (traverse (DN . appExp f) a) • b))
 
 instance Functor (Exp r a) where
   fmap = rmap
