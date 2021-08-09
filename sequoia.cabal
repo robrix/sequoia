@@ -154,6 +154,7 @@ library
     Sequoia.Functor.Sink.Internal
     Sequoia.Functor.Source
     Sequoia.Functor.Source.Internal
+    Sequoia.Interpreter
     Sequoia.Lambda
     Sequoia.Line
     Sequoia.Monad.It
