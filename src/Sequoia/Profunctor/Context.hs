@@ -155,10 +155,10 @@ instance MonadRes r (Src e r) where
 (••) :: MonadRes r m => a • r -> a -> m r
 k •• v = res (k • v)
 
-infix 7 ••
+infix 8 ••
 
 
 (•∘) :: (MonadEnv e m, MonadRes r m) => a • r -> e ∘ a -> m r
 k •∘ v = env (\ e -> res (k • e ∘ v))
 
-infix 8 •∘
+infix 9 •∘
