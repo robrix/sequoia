@@ -48,7 +48,7 @@ class Profunctor v => Value v where
   inV :: (e -> a) -> v e a
   (∘) :: e -> (v e a -> a)
 
-  infixl 8 ∘
+  infixl 9 ∘
 
 
 -- Construction

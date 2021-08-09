@@ -71,7 +71,7 @@ class Profunctor k => ContinuationI k where
 class Profunctor k => ContinuationE k where
   (•) :: k a r -> (a -> r)
 
-  infixl 7 •
+  infixl 8 •
 
 
 -- Construction
@@ -108,7 +108,7 @@ cosieveCont = lmap runIdentity . (•)
 
 type a ••r = a • r • r
 
-infixl 7 ••
+infixl 8 ••
 
 dn :: (ContinuationE j, ContinuationI k) => a -> (a `j` r) `k` r
 dn a = inK (• a)
@@ -142,7 +142,7 @@ instance Monad (DN r) where
 
 type a •••r = a • r • r • r
 
-infixl 7 •••
+infixl 8 •••
 
 tnE :: a ••• r -> a • r
 tnE = (<<^ dn)
