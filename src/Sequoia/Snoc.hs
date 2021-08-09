@@ -37,8 +37,8 @@ instance Semialign Snoc where
       (as:>a, bs:>b) -> go (acc . (:> These a b)) as bs
 
 instance Zip Snoc where
-  zipWith f = go
+  zipWith f = go id
     where
-    go = curry $ \case
-      (as:>a, bs:>b) -> go as bs :> f a b
-      _              -> Nil
+    go acc = curry $ \case
+      (as:>a, bs:>b) -> go (acc . (:> f a b)) as bs
+      _              -> acc Nil
