@@ -16,6 +16,8 @@ module Sequoia.Profunctor.Exp
 , getExpFn
 , (↑)
 , (↓)
+  -- * Computation
+, dnE
   -- * Coexponential functors
 , Coexp(..)
   -- * Mixfix syntax
@@ -130,6 +132,12 @@ infixl 2 ↑
 k ↓ f = getExp f k
 
 infixl 3 ↓
+
+
+-- Computation
+
+dnE :: Exp r a b •• r -> Exp r a b
+dnE k = exp (\ k' -> k <<^ \ a -> K (\ f -> k' ↓ f ↑ a))
 
 
 -- Coexponential functors
