@@ -32,9 +32,9 @@ data Expr
   | RNot Scope
   | RNeg Scope
   -- No rule for LTop
-  | LZero
-  | LBottom
-  | LOne
+  | LZero Expr
+  | LBottom Expr
+  | LOne Expr
   | LWith1 Expr Scope
   | LWith2 Expr Scope
   | LSum Expr Scope Scope
