@@ -14,6 +14,8 @@ module Sequoia.Profunctor.Exp
 , elimExp
 , (#)
 , getExpFn
+, (↑)
+, (↓)
   -- * Coexponential functors
 , Coexp(..)
   -- * Mixfix syntax
@@ -117,6 +119,17 @@ infixl 9 #
 
 getExpFn :: Exp r a b -> ((b -> r) -> (a -> r))
 getExpFn = coerce
+
+
+(↑) :: (a • r) -> (a -> r)
+(↑) = (•)
+
+infixl 2 ↑
+
+(↓) :: b • r -> Exp r a b -> a • r
+k ↓ f = getExp f k
+
+infixl 3 ↓
 
 
 -- Coexponential functors
