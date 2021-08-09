@@ -71,3 +71,11 @@ instance Eq1 Snoc where
     go Nil      Nil      = True
     go (s1:>a1) (s2:>a2) = eq a1 a2 && go s1 s2
     go _        _        = False
+
+instance Ord1 Snoc where
+  liftCompare compare = go
+    where
+    go Nil      Nil      = EQ
+    go (s1:>a1) (s2:>a2) = compare a1 a2 <> go s1 s2
+    go Nil      _        = LT
+    go _        _        = GT
