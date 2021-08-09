@@ -21,8 +21,11 @@ instance Show a => Show (Snoc a) where
   showsPrec p s = showParen (p > 10) $ showString "fromList" . showChar ' ' . showList (toList s)
 
 instance Semigroup (Snoc a) where
-  a <> Nil       = a
-  a <> (bs :> b) = (a <> bs) :> b
+  a <> b = go id b
+    where
+    go acc = \case
+      Nil   -> acc a
+      bs:>b -> go (acc . (:> b)) bs
 
 instance Monoid (Snoc a) where
   mempty = Nil
