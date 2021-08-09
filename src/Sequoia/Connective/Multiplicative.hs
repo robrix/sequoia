@@ -55,7 +55,7 @@ instance Adjunction (Join (⅋)) (Join (⊗)) where
 
 -- Negative disjunction
 
-newtype a ⅋ b = Par (forall r . (a • r, b • r) • r)
+newtype a ⅋ b = Par (forall r . (a • r ⊗ b • r) • r)
 
 infixr 7 ⅋
 
@@ -89,7 +89,7 @@ instance Bitraversable (⅋) where
 
 -- Elimination
 
-runPar :: (a • r, b • r) -> (a ⅋ b) • r
+runPar :: (a • r ⊗ b • r) -> (a ⅋ b) • r
 runPar e = K (\ (Par r) -> r • e)
 
 
