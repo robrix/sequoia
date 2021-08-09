@@ -73,6 +73,9 @@ data Elim
   | ENot Val
   | ENeg Val
 
+instance Show Elim where
+  showsPrec = showsElim 0
+
 
 -- Construction
 
