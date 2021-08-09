@@ -29,5 +29,7 @@ data Expr
   | LSum Expr Scope Scope
   | LNot Expr Expr
   | LNeg Expr Expr
+  deriving (Show)
 
 newtype Scope = Scope { getScope :: Expr }
+  deriving (Show)
