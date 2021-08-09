@@ -107,7 +107,7 @@ vapp = curry $ \case
   (VSum2 b,   ESum _ g) -> g b
   (VNot k,    ENot a)   -> k a
   (VNeg k,    ENeg a)   -> k a
-  (v,        e)         -> error $ "cannot elim " <> show v <> " with " <> show e
+  (v,         e)        -> error $ "cannot elim " <> show v <> " with " <> show e
 
 
 -- Elimination
