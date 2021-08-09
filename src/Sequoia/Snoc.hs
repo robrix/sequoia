@@ -6,6 +6,7 @@ module Sequoia.Snoc
 import Control.Applicative (Alternative(..))
 import Data.Align
 import Data.Foldable (toList)
+import Data.Functor.Classes
 import Data.These
 import Data.Zip
 
@@ -63,3 +64,10 @@ instance Monad Snoc where
     where
     go accum Nil     = accum Nil
     go accum (as:>a) = go (accum . (<> f a)) as
+
+instance Eq1 Snoc where
+  liftEq eq = go
+    where
+    go Nil      Nil      = True
+    go (s1:>a1) (s2:>a2) = eq a1 a2 && go s1 s2
+    go _        _        = False
