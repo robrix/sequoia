@@ -20,7 +20,7 @@ data Snoc a
 infixl 5 :>
 
 instance Show a => Show (Snoc a) where
-  showsPrec p s = showParen (p > 10) $ showString "fromList" . showChar ' ' . showList (toList s)
+  showsPrec = showsPrec1
 
 instance Semigroup (Snoc a) where
   a <> b = go id b
