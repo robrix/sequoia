@@ -11,8 +11,12 @@ module Sequoia.Interpreter
   -- ** Elimination
 , showsVal
 , showsElim
+  -- * Quotation
+, quoteVal
+, quoteElim
 ) where
 
+import Data.Foldable (foldl')
 import Data.Functor.Classes
 import Sequoia.DeBruijn
 import Sequoia.Snoc
@@ -110,3 +114,32 @@ showsElim d p = \case
 
 showsBinder :: Level -> Int -> (Val -> Val) -> ShowS
 showsBinder d p b = showsVal (succ d) p (b (vvar d))
+
+
+-- Quotation
+
+quoteVal :: Level -> Val -> Expr
+quoteVal d = \case
+  VNe v sp  -> foldl' (quoteElim d) (Var (levelToIndex d v)) sp
+  VTop      -> RTop
+  VBottom   -> RBottom
+  VOne      -> ROne
+  VWith a b -> RWith (quoteVal d a) (quoteVal d b)
+  VSum1 a   -> RSum1 (quoteVal d a)
+  VSum2 b   -> RSum2 (quoteVal d b)
+  VNot f    -> RNot (quoteBinder d f)
+  VNeg f    -> RNeg (quoteBinder d f)
+
+quoteElim :: Level -> Expr -> Elim -> Expr
+quoteElim d s = \case
+  EZero    -> LZero s
+  EBottom  -> LBottom s
+  EOne     -> LOne s
+  EWith1 f -> LWith1 s (quoteBinder d f)
+  EWith2 g -> LWith2 s (quoteBinder d g)
+  ESum f g -> LSum s (quoteBinder d f) (quoteBinder d g)
+  ENot v   -> LNot s (quoteVal d v)
+  ENeg v   -> LNeg s (quoteVal d v)
+
+quoteBinder :: Level -> (Val -> Val) -> Scope
+quoteBinder d f = Scope (quoteVal (succ d) (f (vvar d)))
