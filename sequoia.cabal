@@ -142,6 +142,7 @@ library
     Sequoia.Connective.Zero
     Sequoia.Cons
     Sequoia.Contextual
+    Sequoia.DeBruijn
     Sequoia.Disjunction
     Sequoia.Functor.Applicative
     Sequoia.Functor.C
