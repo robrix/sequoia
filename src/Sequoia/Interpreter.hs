@@ -67,8 +67,8 @@ data Elim
   = EZero
   | EBottom
   | EOne
-  | EWIth1 (Val -> Val)
-  | EWIth2 (Val -> Val)
+  | EWith1 (Val -> Val)
+  | EWith2 (Val -> Val)
   | ESum (Val -> Val) (Val -> Val)
   | ENot Val
   | ENeg Val
@@ -102,8 +102,8 @@ showsElim d p = \case
   EZero    -> showString "EZero"
   EBottom  -> showString "EBottom"
   EOne     -> showString "EOne"
-  EWIth1 f -> showsUnaryWith (showsBinder d) "EWith1" p f
-  EWIth2 g -> showsUnaryWith (showsBinder d) "EWith2" p g
+  EWith1 f -> showsUnaryWith (showsBinder d) "EWith1" p f
+  EWith2 g -> showsUnaryWith (showsBinder d) "EWith2" p g
   ESum f g -> showsBinaryWith (showsBinder d) (showsBinder d) "ESum" p f g
   ENot v   -> showsUnaryWith (showsVal d) "ENot" p v
   ENeg v   -> showsUnaryWith (showsVal d) "ENeg" p v
