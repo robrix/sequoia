@@ -13,7 +13,7 @@ import Sequoia.Polarity
 
 -- Exclusive disjunction
 
-newtype XOr e r a b = XOr { getXOr :: (Up a >-Sub e r-~ b) ⊕ (Up b >-Sub e r-~ a) }
+newtype XOr e r a b = XOr { getXOr :: (Up a >-Sub r-~ b) ⊕ (Up b >-Sub r-~ a) }
 
 instance (Pos a, Pos b) => Polarized P (XOr e r a b)
 

@@ -14,13 +14,11 @@ import Sequoia.Connective.Par
 import Sequoia.Connective.Subtraction
 import Sequoia.Disjunction
 import Sequoia.Profunctor
-import Sequoia.Profunctor.Context
 import Sequoia.Profunctor.Continuation
 import Sequoia.Profunctor.Exp (elimExp, (↑), (↓))
-import Sequoia.Profunctor.Value
 
-elimFun :: a ~~Fun r~> b -> b >-Sub e r-~ a -> e ==> r
-elimFun f s = C (\ e -> elimExp (runFunExp f) • ((e ∘) <$> runSubCoexp s))
+elimFun :: a ~~Fun r~> b -> b >-Sub r-~ a -> r
+elimFun f s = elimExp (runFunExp f) • runSubCoexp s
 
 funPar1 :: Iso' ((a ¬ r ⅋ b) • r) ((a ~~Fun r~> b) • r)
 funPar1 = iso

@@ -15,22 +15,20 @@ import Data.Kind (Type)
 import Data.Profunctor
 import Fresnel.Lens
 import Sequoia.Polarity
-import Sequoia.Profunctor.Context
 import Sequoia.Profunctor.Continuation
 import Sequoia.Profunctor.Exp (Coexp(..))
-import Sequoia.Profunctor.Value
 
 -- Subtraction
 
-data Sub e r b a = (:-<) { subA :: e ∘ a, subK :: b • r }
+data Sub r b a = (:-<) { subA :: a, subK :: b • r }
   deriving (Functor)
 
 infixr 6 :-<
 
-instance Profunctor (Sub e r) where
-  dimap f g (a :-< k) = rmap g a :-< lmap f k
+instance Profunctor (Sub r) where
+  dimap f g (a :-< k) = g a :-< lmap f k
 
-instance (Pos a, Neg b) => Polarized P (Sub e r b a) where
+instance (Pos a, Neg b) => Polarized P (Sub r b a) where
 
 type a >-r = (r :: Type -> Type -> Type) a
 type s-~ b = s b
@@ -41,17 +39,17 @@ infixr 5 -~
 
 -- Elimination
 
-runSubCoexp :: Sub e r b a -> Coexp r b (e ∘ a)
+runSubCoexp :: Sub r b a -> Coexp r b a
 runSubCoexp (a :-< k) = k :>- a
 
-appSub :: Sub e r b a -> (b • r -> a • r) -> e ==> r
-appSub (a :-< k) f = C (\ e -> f k • e ∘ a)
+appSub :: Sub r b a -> (b • r -> a • r) -> r
+appSub (a :-< k) f = f k • a
 
 
 -- Optics
 
-subA_ :: Lens (b >-Sub e r-~ a) (b >-Sub e' r-~ a') (e ∘ a) (e' ∘ a')
+subA_ :: Lens (b >-Sub r-~ a) (b >-Sub r-~ a') a a'
 subA_ = lens subA (\ s subA -> s{ subA })
 
-subK_ :: Lens (b >-Sub e r-~ a) (b' >-Sub e r'-~ a) (b • r) (b' • r')
+subK_ :: Lens (b >-Sub r-~ a) (b' >-Sub r'-~ a) (b • r) (b' • r')
 subK_ = lens subK (\ s subK -> s{ subK })
