@@ -95,7 +95,7 @@ data Elim f a
   | ENot a
   | ENeg a
 
-instance Show (Elim ((->) Val) Val) where
+instance (ShowTerm1 f, ShowTerm a) => Show (Elim f a) where
   showsPrec = showsTerm 0
 
 
