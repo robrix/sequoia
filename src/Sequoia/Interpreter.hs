@@ -145,7 +145,7 @@ showsElim d p = \case
   ENeg v   -> showsUnaryWith (showsVal d) "ENeg" p v
 
 showsBinder :: Level -> Int -> (Val -> Val) -> ShowS
-showsBinder d p b = showsVal (succ d) p (b (vvar d))
+showsBinder = runBinder1 showsVal
 
 
 -- Quotation
