@@ -116,15 +116,6 @@ instance ShowTerm Val where
     VNot a    -> showsUnaryWith (showsBinder d) "VNot" p a
     VNeg a    -> showsUnaryWith (showsBinder d) "VNeg" p a
 
-class ShowTerm1 f where
-  liftShowsTerm :: (Level -> Int -> a -> ShowS) -> Level -> Int -> f a -> ShowS
-
-instance ShowTerm1 Scope where
-  liftShowsTerm showsExpr d p = showsExpr d p . getScope
-
-instance ShowTerm1 ((->) Val) where
-  liftShowsTerm showsVal d p b = bindVal (flip . showsVal) d b p
-
 instance ShowTerm1 f => ShowTerm (Elim f Val) where
   showsTerm d p = \case
     EZero    -> showString "EZero"
@@ -135,6 +126,16 @@ instance ShowTerm1 f => ShowTerm (Elim f Val) where
     ESum f g -> showsBinaryWith (liftShowsTerm showsVal d) (liftShowsTerm showsVal d) "ESum" p f g
     ENot v   -> showsUnaryWith (showsVal d) "ENot" p v
     ENeg v   -> showsUnaryWith (showsVal d) "ENeg" p v
+
+
+class ShowTerm1 f where
+  liftShowsTerm :: (Level -> Int -> a -> ShowS) -> Level -> Int -> f a -> ShowS
+
+instance ShowTerm1 Scope where
+  liftShowsTerm showsExpr d p = showsExpr d p . getScope
+
+instance ShowTerm1 ((->) Val) where
+  liftShowsTerm showsVal d p b = bindVal (flip . showsVal) d b p
 
 
 -- Construction
