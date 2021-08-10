@@ -87,6 +87,7 @@ instance Show Val where
 
 
 data Elim f a
+  -- No rule for ETop
   = EZero
   | EBottom
   | EOne
