@@ -101,14 +101,17 @@ instance Show (Elim ((->) Val) Val) where
   showsPrec = showsElim 0
 
 
+class ShowTerm a where
+  showsTerm :: Level -> Int -> a -> ShowS
+
 class ShowTerm1 f where
   liftShowsPrecLevel :: (Level -> Int -> a -> ShowS) -> Level -> Int -> f a -> ShowS
 
 instance ShowTerm1 Scope where
   liftShowsPrecLevel showsExpr d p = showsExpr d p . getScope
 
-instance ShowTerm1 f => ShowTerm1 (Elim f) where
-  liftShowsPrecLevel showsVal d p = \case
+instance ShowTerm1 f => ShowTerm (Elim f Val) where
+  showsTerm d p = \case
     EZero    -> showString "EZero"
     EBottom  -> showString "EBottom"
     EOne     -> showString "EOne"
