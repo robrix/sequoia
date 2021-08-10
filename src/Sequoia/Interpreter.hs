@@ -12,8 +12,8 @@ module Sequoia.Interpreter
 , vvar
 , vapp
   -- ** Elimination
-, runBinder
-, runBinder1
+, bindVal
+, bindVal1
 , showsVal
 , showsElim
   -- * Quotation
@@ -122,11 +122,11 @@ vapp = curry $ \case
 
 -- Elimination
 
-runBinder :: (Level -> a -> b) -> Level -> (Val -> a) -> b
-runBinder with d b = with (succ d) (b (vvar d))
+bindVal :: (Level -> a -> b) -> Level -> (Val -> a) -> b
+bindVal with d b = with (succ d) (b (vvar d))
 
-runBinder1 :: (Level -> a -> b -> c) -> Level -> a -> (Val -> b) -> c
-runBinder1 with d a b = with (succ d) a (b (vvar d))
+bindVal1 :: (Level -> a -> b -> c) -> Level -> a -> (Val -> b) -> c
+bindVal1 with d a b = with (succ d) a (b (vvar d))
 
 
 showsVal :: Level -> Int -> Val -> ShowS
@@ -153,7 +153,7 @@ showsElim d p = \case
   ENeg v   -> showsUnaryWith (showsVal d) "ENeg" p v
 
 showsBinder :: Level -> Int -> (Val -> Val) -> ShowS
-showsBinder = runBinder1 showsVal
+showsBinder = bindVal1 showsVal
 
 
 -- Quotation
@@ -182,7 +182,7 @@ quoteElim d s = \case
   ENeg v   -> LNeg s (quoteVal d v)
 
 quoteBinder :: Level -> (Val -> Val) -> Expr
-quoteBinder = runBinder quoteVal
+quoteBinder = bindVal quoteVal
 
 
 -- Evaluation (definitional)
