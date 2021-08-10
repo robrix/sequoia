@@ -47,7 +47,7 @@ data Term binder e r _Γ _Δ a where
   TSum2 :: Term binder e r _Γ _Δ b -> Term binder e r _Γ _Δ (a ⊕ b)
   TBot :: Term binder e r _Γ _Δ _Δ -> Term binder e r _Γ _Δ (_Δ `Either` Bottom Void)
   TOne :: Term binder e r _Γ _Δ (One ())
-  TFun :: binder _Γ _Δ a b -> Term binder e r _Γ _Δ (a -> b)
+  TFun :: binder a b -> Term binder e r _Γ _Δ (a -> b)
   TNot :: Coterm binder e r _Γ _Δ a -> Term binder e r _Γ _Δ (Not a r)
 
 data Coterm binder e r _Γ _Δ a where
