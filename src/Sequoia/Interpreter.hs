@@ -13,6 +13,8 @@ module Sequoia.Interpreter
 , vapp
   -- ** Elimination
 , bindVal
+  -- ** Computation
+, mapElim
   -- * Quotation
 , quoteVal
 , quoteElim
@@ -162,6 +164,20 @@ vapp = curry $ \case
 
 bindVal :: (Level -> a -> b) -> Level -> (Val -> a) -> b
 bindVal with d b = with (succ d) (b (vvar d))
+
+
+-- Computation
+
+mapElim :: (a -> b) -> (f a -> g b) -> (Elim f a -> Elim g b)
+mapElim g h = \case
+  EZero    -> EZero
+  EBottom  -> EBottom
+  EOne     -> EOne
+  EWith1 f -> EWith1 (h f)
+  EWith2 g -> EWith2 (h g)
+  ESum f g -> ESum (h f) (h g)
+  ENot a   -> ENot (g a)
+  ENeg a   -> ENeg (g a)
 
 
 -- Quotation
