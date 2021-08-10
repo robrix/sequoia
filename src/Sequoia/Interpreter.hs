@@ -106,13 +106,13 @@ class ShowTerm a where
 
 instance ShowTerm Val where
   showsTerm d p = \case
-    VNe v sp  -> showsBinaryWith showsPrec (liftShowsPrec (showsElim d) (showListWith (showsElim d 0))) "VNe" p v sp
+    VNe v sp  -> showsBinaryWith showsPrec (liftShowsPrec (showsTerm d) (showListWith (showsTerm d 0))) "VNe" p v sp
     VTop      -> showString "VTop"
     VBottom   -> showString "VBottom"
     VOne      -> showString "VOne"
-    VWith a b -> showsBinaryWith (showsVal d) (showsVal d) "VWith" p a b
-    VSum1 a   -> showsUnaryWith (showsVal d) "VSum1" p a
-    VSum2 b   -> showsUnaryWith (showsVal d) "VSum2" p b
+    VWith a b -> showsBinaryWith (showsTerm d) (showsTerm d) "VWith" p a b
+    VSum1 a   -> showsUnaryWith (showsTerm d) "VSum1" p a
+    VSum2 b   -> showsUnaryWith (showsTerm d) "VSum2" p b
     VNot a    -> showsUnaryWith (showsBinder d) "VNot" p a
     VNeg a    -> showsUnaryWith (showsBinder d) "VNeg" p a
 
@@ -121,11 +121,11 @@ instance ShowTerm1 f => ShowTerm (Elim f Val) where
     EZero    -> showString "EZero"
     EBottom  -> showString "EBottom"
     EOne     -> showString "EOne"
-    EWith1 f -> showsUnaryWith (liftShowsTerm showsVal d) "EWith1" p f
-    EWith2 g -> showsUnaryWith (liftShowsTerm showsVal d) "EWith2" p g
-    ESum f g -> showsBinaryWith (liftShowsTerm showsVal d) (liftShowsTerm showsVal d) "ESum" p f g
-    ENot v   -> showsUnaryWith (showsVal d) "ENot" p v
-    ENeg v   -> showsUnaryWith (showsVal d) "ENeg" p v
+    EWith1 f -> showsUnaryWith (liftShowsTerm showsTerm d) "EWith1" p f
+    EWith2 g -> showsUnaryWith (liftShowsTerm showsTerm d) "EWith2" p g
+    ESum f g -> showsBinaryWith (liftShowsTerm showsTerm d) (liftShowsTerm showsTerm d) "ESum" p f g
+    ENot v   -> showsUnaryWith (showsTerm d) "ENot" p v
+    ENeg v   -> showsUnaryWith (showsTerm d) "ENeg" p v
 
 
 class ShowTerm1 f where
