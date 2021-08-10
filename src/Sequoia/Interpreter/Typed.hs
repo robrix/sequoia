@@ -76,6 +76,7 @@ data Coterm binder e r _Γ _Δ a where
 
 deriving instance Show2 binder => Show (Coterm binder e r _Γ _Δ a)
 
+
 -- Expressions
 
 data Expr as bs a where
