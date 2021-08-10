@@ -49,15 +49,6 @@ data Expr
   | RNot (Scope Expr)
   | RNeg (Scope Expr)
   | L Expr (Elim Scope Expr)
-  -- No rule for LTop
-  | LZero Expr
-  | LBottom Expr
-  | LOne Expr
-  | LWith1 Expr (Scope Expr)
-  | LWith2 Expr (Scope Expr)
-  | LSum Expr (Scope Expr) (Scope Expr)
-  | LNot Expr Expr
-  | LNeg Expr Expr
   deriving (Show)
 
 newtype Scope a = Scope { getScope :: a }
@@ -196,15 +187,15 @@ quoteVal d = \case
   VNeg f    -> RNeg (Scope (quoteBinder d f))
 
 quoteElim :: Level -> Expr -> Elim ((->) Val) Val -> Expr
-quoteElim d s = \case
-  EZero    -> LZero s
-  EBottom  -> LBottom s
-  EOne     -> LOne s
-  EWith1 f -> LWith1 s (Scope (quoteBinder d f))
-  EWith2 g -> LWith2 s (Scope (quoteBinder d g))
-  ESum f g -> LSum s (Scope (quoteBinder d f)) (Scope (quoteBinder d g))
-  ENot v   -> LNot s (quoteVal d v)
-  ENeg v   -> LNeg s (quoteVal d v)
+quoteElim d s = L s . \case
+  EZero    -> EZero
+  EBottom  -> EBottom
+  EOne     -> EOne
+  EWith1 f -> EWith1 (Scope (quoteBinder d f))
+  EWith2 g -> EWith2 (Scope (quoteBinder d g))
+  ESum f g -> ESum (Scope (quoteBinder d f)) (Scope (quoteBinder d g))
+  ENot v   -> ENot (quoteVal d v)
+  ENeg v   -> ENeg (quoteVal d v)
 
 quoteBinder :: Level -> (Val -> Val) -> Expr
 quoteBinder = bindVal quoteVal
@@ -216,24 +207,16 @@ type Env = [Val]
 
 evalDef :: Env -> Expr -> Val
 evalDef env = \case
-  Var v      -> env !! getIndex v
-  RTop       -> VTop
-  RBottom    -> VBottom
-  ROne       -> VOne
-  RWith a b  -> VWith (evalDef env a) (evalDef env b)
-  RSum1 a    -> VSum1 (evalDef env a)
-  RSum2 b    -> VSum2 (evalDef env b)
-  RNot f     -> VNot (evalBinder env (getScope f))
-  RNeg f     -> VNeg (evalBinder env (getScope f))
-  L s e      -> vapp (evalDef env s) (mapElim (evalDef env) (evalBinder env . getScope) e)
-  LZero s    -> vapp (evalDef env s) EZero
-  LBottom s  -> vapp (evalDef env s) EBottom
-  LOne s     -> vapp (evalDef env s) EOne
-  LWith1 s f -> vapp (evalDef env s) (EWith1 (evalBinder env (getScope f)))
-  LWith2 s g -> vapp (evalDef env s) (EWith2 (evalBinder env (getScope g)))
-  LSum s f g -> vapp (evalDef env s) (ESum (evalBinder env (getScope f)) (evalBinder env (getScope g)))
-  LNot s v   -> vapp (evalDef env s) (ENot (evalDef env v))
-  LNeg s v   -> vapp (evalDef env s) (ENeg (evalDef env v))
+  Var v     -> env !! getIndex v
+  RTop      -> VTop
+  RBottom   -> VBottom
+  ROne      -> VOne
+  RWith a b -> VWith (evalDef env a) (evalDef env b)
+  RSum1 a   -> VSum1 (evalDef env a)
+  RSum2 b   -> VSum2 (evalDef env b)
+  RNot f    -> VNot (evalBinder env (getScope f))
+  RNeg f    -> VNeg (evalBinder env (getScope f))
+  L s e     -> vapp (evalDef env s) (mapElim (evalDef env) (evalBinder env . getScope) e)
 
 evalBinder :: Env -> Expr -> (Val -> Val)
 evalBinder = bindExpr evalDef
@@ -282,14 +265,6 @@ load env e k = case e of
     ESum f g -> FLSum f g
     ENot v   -> FLNotL () v
     ENeg v   -> FLNegL () v)
-  LZero s    -> load env s (k :> FLZero)
-  LBottom s  -> load env s (k :> FLBottom)
-  LOne s     -> load env s (k :> FLOne)
-  LWith1 s f -> load env s (k :> FLWith1 f)
-  LWith2 s g -> load env s (k :> FLWith2 g)
-  LSum s f g -> load env s (k :> FLSum f g)
-  LNot s v   -> load env s (k :> FLNotL () v)
-  LNeg s v   -> load env s (k :> FLNegL () v)
 
 loadBinder :: Env -> Expr -> Cont -> (Val -> Val)
 loadBinder env f k a = bindExpr load env f a k
