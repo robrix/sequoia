@@ -5,6 +5,8 @@ module Sequoia.Interpreter.Typed
   Expr(..)
 , Coexpr(..)
 , Scope(..)
+  -- * Values
+, Val(..)
   -- * Definitional interpreter
 , evalDef
 , coevalDef
@@ -58,6 +60,18 @@ deriving instance Show (Coexpr as bs a)
 
 newtype Scope as bs a b = Scope { getScope :: Expr (a, as) bs b }
   deriving (Show)
+
+
+-- Values
+
+data Val as bs a where
+  VTop :: Val as bs Top
+  VWith :: Val as bs a -> Val as bs b -> Val as bs (a & b)
+  VSum1 :: Val as bs a -> Val as bs (a ⊕ b)
+  VSum2 :: Val as bs b -> Val as bs (a ⊕ b)
+  VBottom :: Val as bs (Bottom Void)
+  VOne :: Val as bs (One ())
+  VFun :: (Val as bs a -> Val as bs b) -> Val as bs (a -> b)
 
 
 -- Definitional interpreter
