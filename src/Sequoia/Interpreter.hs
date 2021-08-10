@@ -226,6 +226,7 @@ data Frame
   | FL (Elim Scope Expr)
   | FLNotR Val ()
   | FLNegR Val ()
+  deriving (Show)
 
 evalCK :: Env -> Expr -> Val
 evalCK env e = load env e Nil
