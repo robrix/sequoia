@@ -190,6 +190,7 @@ library
     Sequoia.Signal
     Sequoia.Snoc
     Sequoia.Span
+    Sequoia.Spine
     Sequoia.Syntax
 
   -- Modules included in this library but not exported.
