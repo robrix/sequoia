@@ -113,8 +113,8 @@ instance ShowTerm Val where
     VWith a b -> showsBinaryWith (showsTerm d) (showsTerm d) "VWith" p a b
     VSum1 a   -> showsUnaryWith (showsTerm d) "VSum1" p a
     VSum2 b   -> showsUnaryWith (showsTerm d) "VSum2" p b
-    VNot a    -> showsUnaryWith (showsBinder d) "VNot" p a
-    VNeg a    -> showsUnaryWith (showsBinder d) "VNeg" p a
+    VNot a    -> showsUnaryWith (liftShowsTerm showsTerm d) "VNot" p a
+    VNeg a    -> showsUnaryWith (liftShowsTerm showsTerm d) "VNeg" p a
 
 instance ShowTerm1 f => ShowTerm (Elim f Val) where
   showsTerm d p = \case
