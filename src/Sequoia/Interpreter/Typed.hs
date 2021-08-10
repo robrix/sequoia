@@ -22,6 +22,8 @@ module Sequoia.Interpreter.Typed
 
 import Data.Void
 import Sequoia.Conjunction
+import Sequoia.Connective.Bottom
+import Sequoia.Connective.One
 import Sequoia.Connective.Sum
 import Sequoia.Connective.Top
 import Sequoia.Connective.With
@@ -36,7 +38,7 @@ data Expr as bs a where
   RWith :: Expr as bs a -> Expr as bs b -> Expr as bs (a & b)
   RSum1 :: Expr as bs a -> Expr as bs (a ⊕ b)
   RSum2 :: Expr as bs b -> Expr as bs (a ⊕ b)
-  RBot :: Expr as bs _Δ -> Expr as bs (Either _Δ Void)
+  RBot :: Expr as bs _Δ -> Expr as bs (Either _Δ (Bottom Void))
   ROne :: Expr as bs ()
   RFun :: Scope as bs a b -> Expr as bs (a -> b)
 
@@ -48,7 +50,7 @@ data Coexpr as bs a where
   LWith1 :: Coexpr as bs a -> Coexpr as bs (a & b)
   LWith2 :: Coexpr as bs b -> Coexpr as bs (a & b)
   LSum :: Coexpr as bs a -> Coexpr as bs b -> Coexpr as bs (a ⊕ b)
-  LBot :: Coexpr as bs Void
+  LBot :: Coexpr as bs (Bottom Void)
   LOne :: Coexpr as bs  _Γ -> Coexpr as bs  ((), _Γ)
   LFun :: Expr as bs a -> Coexpr as bs  b -> Coexpr as bs  (a -> b)
 
@@ -78,7 +80,7 @@ coevalDef ctx@(_ :|-: _Δ) = \case
   LWith1 a -> coevalDef ctx a . exl
   LWith2 b -> coevalDef ctx b . exr
   LSum l r -> coevalDef ctx l <--> coevalDef ctx r
-  LBot     -> absurd
+  LBot     -> absurd . absurdN
   LOne a   -> coevalDef ctx a . snd
   LFun a b -> \ f -> coevalDef ctx b (f (evalDef ctx a))
 
@@ -86,7 +88,7 @@ coevalDef ctx@(_ :|-: _Δ) = \case
 -- Environments
 
 data Γ as where
-  Γ :: Γ ()
+  Γ :: Γ (One ())
   (:<) :: a -> Γ b -> Γ (a, b)
 
 infixr 5 :<
@@ -97,7 +99,7 @@ IxLS i <! (_ :< t) = i <! t
 
 
 data Δ r as where
-  Δ :: r -> Δ r Void
+  Δ :: r -> Δ r (Bottom Void)
   (:>) :: Δ r a -> (b -> r) -> Δ r (a, b)
 
 infixl 5 :>
