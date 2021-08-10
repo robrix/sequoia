@@ -113,8 +113,8 @@ vapp = curry $ \case
 
 -- Elimination
 
-runBinder :: (Level -> Int -> a -> b) -> Level -> Int -> (Val -> a) -> b
-runBinder with d p b = with (succ d) p (b (vvar d))
+runBinder :: (Level -> a -> b) -> Level -> (Val -> a) -> b
+runBinder with d b = with (succ d) (b (vvar d))
 
 
 showsVal :: Level -> Int -> Val -> ShowS
