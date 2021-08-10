@@ -66,7 +66,7 @@ newtype Scope a = Scope { getScope :: a }
 
 -- Elimination
 
-runExpr :: (Env -> Expr -> a) -> Env -> Scope Expr -> (Val -> a)
+runExpr :: ([a] -> Expr -> b) -> [a] -> Scope Expr -> (a -> b)
 runExpr with env (Scope e) a = with (a : env) e
 
 
