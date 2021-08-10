@@ -48,10 +48,10 @@ data Term binder e r _Γ _Δ a where
   TSum2 :: Term binder e r _Γ _Δ b -> Term binder e r _Γ _Δ (a ⊕ b)
   TBot :: Term binder e r _Γ _Δ _Δ -> Term binder e r _Γ _Δ (_Δ `Either` Bottom Void)
   TOne :: Term binder e r _Γ _Δ (One ())
-  TFun :: binder a b -> Term binder e r _Γ _Δ (a -> b)
+  TFun :: binder e r _Γ _Δ a b -> Term binder e r _Γ _Δ (a -> b)
   TNot :: Coterm binder e r _Γ _Δ a -> Term binder e r _Γ _Δ (Not a r)
 
-instance Show2 binder => Show (Term binder e r _Γ _Δ a) where
+instance Show2 (binder e r _Γ _Δ) => Show (Term binder e r _Γ _Δ a) where
   showsPrec p = \case
     TVar i    -> showsUnaryWith showsPrec "TVar" p i
     TTop      -> showString "TTop"
@@ -74,7 +74,7 @@ data Coterm binder e r _Γ _Δ a where
   CFun :: Term binder e r _Γ _Δ a -> Coterm binder e r _Γ _Δ b -> Coterm binder e r _Γ _Δ (a -> b)
   CNot :: Term binder e r _Γ _Δ a -> Coterm binder e r _Γ _Δ (Not a r)
 
-deriving instance Show2 binder => Show (Coterm binder e r _Γ _Δ a)
+deriving instance Show2 (binder e r _Γ _Δ) => Show (Coterm binder e r _Γ _Δ a)
 
 
 -- Expressions
