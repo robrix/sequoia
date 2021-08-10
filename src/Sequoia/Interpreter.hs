@@ -43,20 +43,20 @@ data Expr
   | RWith Expr Expr
   | RSum1 Expr
   | RSum2 Expr
-  | RNot Scope
-  | RNeg Scope
+  | RNot (Scope Expr)
+  | RNeg (Scope Expr)
   -- No rule for LTop
   | LZero Expr
   | LBottom Expr
   | LOne Expr
-  | LWith1 Expr Scope
-  | LWith2 Expr Scope
-  | LSum Expr Scope Scope
+  | LWith1 Expr (Scope Expr)
+  | LWith2 Expr (Scope Expr)
+  | LSum Expr (Scope Expr) (Scope Expr)
   | LNot Expr Expr
   | LNeg Expr Expr
   deriving (Show)
 
-newtype Scope = Scope { getScope :: Expr }
+newtype Scope a = Scope { getScope :: a }
   deriving (Show)
 
 
@@ -164,7 +164,7 @@ quoteElim d s = \case
   ENot v   -> LNot s (quoteVal d v)
   ENeg v   -> LNeg s (quoteVal d v)
 
-quoteBinder :: Level -> (Val -> Val) -> Scope
+quoteBinder :: Level -> (Val -> Val) -> Scope Expr
 quoteBinder d f = Scope (quoteVal (succ d) (f (vvar d)))
 
 
@@ -192,7 +192,7 @@ evalDef env = \case
   LNot s v   -> vapp (evalDef env s) (ENot (evalDef env v))
   LNeg s v   -> vapp (evalDef env s) (ENeg (evalDef env v))
 
-evalBinder :: Env -> Scope -> (Val -> Val)
+evalBinder :: Env -> Scope Expr -> (Val -> Val)
 evalBinder env (Scope e) a = evalDef (a : env) e
 
 
@@ -208,9 +208,9 @@ data Frame
   | FLZero
   | FLBottom
   | FLOne
-  | FLWith1 Scope
-  | FLWith2 Scope
-  | FLSum Scope Scope
+  | FLWith1 (Scope Expr)
+  | FLWith2 (Scope Expr)
+  | FLSum (Scope Expr) (Scope Expr)
   | FLNotL () Expr
   | FLNotR Val ()
   | FLNegL () Expr
@@ -239,7 +239,7 @@ load env e k = case e of
   LNot s v   -> load env s (k :> FLNotL () v)
   LNeg s v   -> load env s (k :> FLNegL () v)
 
-loadBinder :: Env -> Scope -> Cont -> (Val -> Val)
+loadBinder :: Env -> Scope Expr -> Cont -> (Val -> Val)
 loadBinder env (Scope f) k a = load (a : env) f k
 
 unload :: Env -> Val -> Cont -> Val
