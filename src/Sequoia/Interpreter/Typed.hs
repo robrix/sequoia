@@ -116,7 +116,7 @@ class ShowBinder t where
   showsBinder :: Level -> Int -> t e r _Γ _Δ a b -> ShowS
 
 instance ShowBinder FO where
-  showsBinder d p (FO t) = showsUnaryWith (showsTerm d) "FO" p t
+  showsBinder d p (FO t) = showsUnaryWith (showsTerm (succ d)) "FO" p t
 
 
 -- Expressions
