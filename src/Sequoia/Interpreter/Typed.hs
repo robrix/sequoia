@@ -12,8 +12,8 @@ import Sequoia.DeBruijn
 data Expr _Γ _Δ where
   Var :: Index -> Expr _Γ (_Δ, b)
   Covar :: Index -> Expr (a, _Γ) _Δ
-  RFun :: Scope (a, _Γ) (_Δ, b) -> Expr _Γ (_Δ, a -> b)
   LFun :: Expr _Γ (_Δ, a) -> Expr (b, _Γ) _Δ -> Expr _Γ _Δ
+  RFun :: Scope (a, _Γ) (_Δ, b) -> Expr _Γ (_Δ, a -> b)
 
 deriving instance Show (Expr _Γ _Δ)
 
