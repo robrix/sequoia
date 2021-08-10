@@ -3,6 +3,8 @@ module Sequoia.Interpreter
 ( -- * Expressions
   Expr(..)
 , Scope(..)
+  -- ** Elimination
+, runExpr
   -- * Values
 , Val(..)
 , Elim(..)
@@ -60,6 +62,12 @@ data Expr
 
 newtype Scope a = Scope { getScope :: a }
   deriving (Show)
+
+
+-- Elimination
+
+runExpr :: (Env -> Expr -> a) -> Env -> Scope Expr -> (Val -> a)
+runExpr with env (Scope e) a = with (a : env) e
 
 
 -- Values
