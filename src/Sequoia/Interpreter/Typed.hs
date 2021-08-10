@@ -13,7 +13,7 @@ import Sequoia.DeBruijn
 
 data Expr a where
   Var :: Index -> Expr a
-  RBot :: Expr _Δ -> Expr Void
+  RBot :: Expr _Δ -> Expr (Either _Δ Void)
   ROne :: Expr ()
   RFun :: Scope a b -> Expr (a -> b)
 
