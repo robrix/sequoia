@@ -198,19 +198,19 @@ evalDef env = \case
   RWith a b  -> VWith (evalDef env a) (evalDef env b)
   RSum1 a    -> VSum1 (evalDef env a)
   RSum2 b    -> VSum2 (evalDef env b)
-  RNot f     -> VNot (evalBinder env f)
-  RNeg f     -> VNeg (evalBinder env f)
+  RNot f     -> VNot (evalBinder env (getScope f))
+  RNeg f     -> VNeg (evalBinder env (getScope f))
   LZero s    -> vapp (evalDef env s) EZero
   LBottom s  -> vapp (evalDef env s) EBottom
   LOne s     -> vapp (evalDef env s) EOne
-  LWith1 s f -> vapp (evalDef env s) (EWith1 (evalBinder env f))
-  LWith2 s g -> vapp (evalDef env s) (EWith2 (evalBinder env g))
-  LSum s f g -> vapp (evalDef env s) (ESum (evalBinder env f) (evalBinder env g))
+  LWith1 s f -> vapp (evalDef env s) (EWith1 (evalBinder env (getScope f)))
+  LWith2 s g -> vapp (evalDef env s) (EWith2 (evalBinder env (getScope g)))
+  LSum s f g -> vapp (evalDef env s) (ESum (evalBinder env (getScope f)) (evalBinder env (getScope g)))
   LNot s v   -> vapp (evalDef env s) (ENot (evalDef env v))
   LNeg s v   -> vapp (evalDef env s) (ENeg (evalDef env v))
 
-evalBinder :: Env -> Scope Expr -> (Val -> Val)
-evalBinder env = runExpr evalDef env . getScope
+evalBinder :: Env -> Expr -> (Val -> Val)
+evalBinder = runExpr evalDef
 
 
 -- Evaluation (CK machine)
