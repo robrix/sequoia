@@ -16,7 +16,8 @@ module Sequoia.Interpreter.Typed
 , (:|-:)(..)
 , type (|-)
 , (|-)
-, Ix(..)
+, IxL(..)
+, IxR(..)
 ) where
 
 import Data.Void
@@ -24,7 +25,7 @@ import Data.Void
 -- Expressions
 
 data Expr as bs a where
-  Var :: Ix as a -> Expr as bs a
+  Var :: IxL a as -> Expr as bs a
   RBot :: Expr as bs _Δ -> Expr as bs (Either _Δ Void)
   ROne :: Expr as bs ()
   RFun :: Scope as bs a b -> Expr as bs (a -> b)
@@ -32,14 +33,14 @@ data Expr as bs a where
 deriving instance Show (Expr as bs a)
 
 data Coexpr as bs a where
-  Covar :: Ix bs a -> Coexpr as bs a
+  Covar :: IxR bs a -> Coexpr as bs a
   LBot :: Coexpr as bs Void
   LOne :: Coexpr as bs  _Γ -> Coexpr as bs  ((), _Γ)
   LFun :: Expr as bs a -> Coexpr as bs  b -> Coexpr as bs  (a -> b)
 
 deriving instance Show (Coexpr as bs a)
 
-newtype Scope as bs a b = Scope { getScope :: Expr (as, a) bs b }
+newtype Scope as bs a b = Scope { getScope :: Expr (a, as) bs b }
   deriving (Show)
 
 
@@ -64,13 +65,13 @@ coevalDef ctx@(_ :|-: _Δ) = \case
 
 data Γ as where
   Γ :: Γ ()
-  (:<) :: a -> Γ b -> Γ (b, a)
+  (:<) :: a -> Γ b -> Γ (a, b)
 
 infixr 5 :<
 
-(<!) :: Ix as a -> Γ as -> a
-IxZ   <! (h :< _) = h
-IxS i <! (_ :< t) = i <! t
+(<!) :: IxL a as -> Γ as -> a
+IxLZ   <! (h :< _) = h
+IxLS i <! (_ :< t) = i <! t
 
 
 data Δ r as where
@@ -79,10 +80,10 @@ data Δ r as where
 
 infixl 5 :>
 
-(!>) :: Δ r as -> Ix as a -> (a -> r)
+(!>) :: Δ r as -> IxR as a -> (a -> r)
 delta !> ix = case (ix, delta) of
-  (IxZ,   _ :> r) -> r
-  (IxS i, l :> _) -> l !> i
+  (IxRZ,   _ :> r) -> r
+  (IxRS i, l :> _) -> l !> i
 
 
 data a :|-: b = a :|-: b
@@ -95,8 +96,14 @@ type (|-) = (:|-:)
 (|-) = (:|-:)
 
 
-data Ix as a where
-  IxZ :: Ix (a, b) b
-  IxS :: Ix a c -> Ix (a, b) c
+data IxL a as where
+  IxLZ :: IxL a (a, b)
+  IxLS :: IxL c b -> IxL c (a, b)
 
-deriving instance Show (Ix as a)
+deriving instance Show (IxL as a)
+
+data IxR as a where
+  IxRZ :: IxR (a, b) b
+  IxRS :: IxR a c -> IxR (a, b) c
+
+deriving instance Show (IxR as a)
