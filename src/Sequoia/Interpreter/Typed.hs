@@ -84,6 +84,40 @@ instance Show2 (FO e r _Γ _Δ) where
   liftShowsPrec2 _ _ _ _ p (FO t) = showsUnaryWith showsPrec "FO" p t
 
 
+class ShowTerm t where
+  showsTerm :: Int -> t a -> ShowS
+
+instance ShowBinder binder => ShowTerm (Term binder e r _Γ _Δ) where
+  showsTerm p = \case
+    TVar i    -> showsUnaryWith showsPrec "TVar" p i
+    TTop      -> showString "TTop"
+    TWith a b -> showsBinaryWith showsTerm showsTerm "TWith" p a b
+    TSum1 a   -> showsUnaryWith showsTerm "TSum1" p a
+    TSum2 b   -> showsUnaryWith showsTerm "TSum2" p b
+    TBot a    -> showsUnaryWith showsTerm "TBot" p a
+    TOne      -> showString "TOne"
+    TFun f    -> showsUnaryWith showsBinder "TFun" p f
+    TNot k    -> showsUnaryWith showsTerm "TNot" p k
+
+instance ShowBinder binder => ShowTerm (Coterm binder e r _Γ _Δ) where
+  showsTerm p = \case
+    CVar i   -> showsUnaryWith showsPrec "CVar" p i
+    CZero    -> showString "CZero"
+    CWith1 f -> showsUnaryWith showsTerm "CWith1" p f
+    CWith2 g -> showsUnaryWith showsTerm "CWith2" p g
+    CSum f g -> showsBinaryWith showsTerm showsTerm "CSum" p f g
+    CBot     -> showString "CBot"
+    COne a   -> showsUnaryWith showsTerm "COne" p a
+    CFun a b -> showsBinaryWith showsTerm showsTerm "CFun" p a b
+    CNot a   -> showsUnaryWith showsTerm "CNot" p a
+
+class ShowBinder t where
+  showsBinder :: Int -> t e r _Γ _Δ a b -> ShowS
+
+instance ShowBinder FO where
+  showsBinder p (FO t) = showsUnaryWith showsTerm "FO" p t
+
+
 -- Expressions
 
 data Expr as bs a where
