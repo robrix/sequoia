@@ -22,6 +22,7 @@ module Sequoia.Interpreter.Typed
 
 import Data.Void
 import Sequoia.Connective.Sum
+import Sequoia.Disjunction
 
 -- Expressions
 
@@ -37,6 +38,7 @@ deriving instance Show (Expr as bs a)
 
 data Coexpr as bs a where
   Covar :: IxR bs a -> Coexpr as bs a
+  LSum :: Coexpr as bs a -> Coexpr as bs b -> Coexpr as bs (a ⊕ b)
   LBot :: Coexpr as bs Void
   LOne :: Coexpr as bs  _Γ -> Coexpr as bs  ((), _Γ)
   LFun :: Expr as bs a -> Coexpr as bs  b -> Coexpr as bs  (a -> b)
@@ -61,6 +63,7 @@ evalDef ctx@(_Γ :|-: _Δ) = \case
 coevalDef :: Γ as |- Δ r bs -> Coexpr as bs a -> (a -> r)
 coevalDef ctx@(_ :|-: _Δ) = \case
   Covar i  -> _Δ !> i
+  LSum l r -> coevalDef ctx l <--> coevalDef ctx r
   LBot     -> absurd
   LOne a   -> coevalDef ctx a . snd
   LFun a b -> \ f -> coevalDef ctx b (f (evalDef ctx a))
