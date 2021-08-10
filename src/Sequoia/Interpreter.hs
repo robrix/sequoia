@@ -224,15 +224,7 @@ data Frame
   | FRSum1 ()
   | FRSum2 ()
   | FL (Elim Scope Expr)
-  | FLZero
-  | FLBottom
-  | FLOne
-  | FLWith1 (Scope Expr)
-  | FLWith2 (Scope Expr)
-  | FLSum (Scope Expr) (Scope Expr)
-  | FLNotL () Expr
   | FLNotR Val ()
-  | FLNegL () Expr
   | FLNegR Val ()
 
 evalCK :: Env -> Expr -> Val
@@ -270,13 +262,5 @@ unload env v = \case
     ESum f g -> unload env (vapp v (ESum (loadBinder env (getScope f) k) (loadBinder env (getScope g) k))) k
     ENot r   -> load env r (k :> FLNotR v ())
     ENeg r   -> load env r (k :> FLNegR v ())) k
-  k :> FLZero       -> unload env (vapp v EZero) k
-  k :> FLBottom     -> unload env (vapp v EBottom) k
-  k :> FLOne        -> unload env (vapp v EOne) k
-  k :> FLWith1 f    -> unload env (vapp v (EWith1 (loadBinder env (getScope f) k))) k
-  k :> FLWith2 g    -> unload env (vapp v (EWith2 (loadBinder env (getScope g) k))) k
-  k :> FLSum f g    -> unload env (vapp v (ESum (loadBinder env (getScope f) k) (loadBinder env (getScope g) k))) k
-  k :> FLNotL () r  -> load env r (k :> FLNotR v ())
   k :> FLNotR u ()  -> unload env (vapp v (ENot u)) k
-  k :> FLNegL () r  -> load env r (k :> FLNegR v ())
   k :> FLNegR u ()  -> unload env (vapp v (ENeg u)) k
