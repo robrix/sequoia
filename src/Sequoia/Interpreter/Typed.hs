@@ -4,6 +4,7 @@ module Sequoia.Interpreter.Typed
 ( -- * Terms
   Term(..)
 , Coterm(..)
+, FO(..)
   -- * Expressions
 , Expr(..)
 , Coexpr(..)
@@ -75,6 +76,12 @@ data Coterm binder e r _Γ _Δ a where
   CNot :: Term binder e r _Γ _Δ a -> Coterm binder e r _Γ _Δ (Not a r)
 
 deriving instance Show2 (binder e r _Γ _Δ) => Show (Coterm binder e r _Γ _Δ a)
+
+
+newtype FO e r _Γ _Δ a b = FO (Term FO e r (a, _Γ) _Δ b)
+
+instance Show2 (FO e r _Γ _Δ) where
+  liftShowsPrec2 _ _ _ _ p (FO t) = showsUnaryWith showsPrec "FO" p t
 
 
 -- Expressions
