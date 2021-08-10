@@ -223,6 +223,7 @@ data Frame
   | FRWithR Val ()
   | FRSum1 ()
   | FRSum2 ()
+  | FL (Elim Scope Expr)
   | FLZero
   | FLBottom
   | FLOne
@@ -239,24 +240,16 @@ evalCK env e = load env e Nil
 
 load :: Env -> Expr -> Cont -> Val
 load env e k = case e of
-  Var a      -> unload env (env !! getIndex a) k
-  RTop       -> unload env VTop k
-  RBottom    -> unload env VBottom k
-  ROne       -> unload env VOne k
-  RWith a b  -> load env a (k :> FRWithL () b)
-  RSum1 a    -> load env a (k :> FRSum1 ())
-  RSum2 b    -> load env b (k :> FRSum2 ())
-  RNot f     -> unload env (VNot (loadBinder env (getScope f) k)) k
-  RNeg f     -> unload env (VNeg (loadBinder env (getScope f) k)) k
-  L s e      -> load env s (k :> case e of
-    EZero    -> FLZero
-    EBottom  -> FLBottom
-    EOne     -> FLOne
-    EWith1 f -> FLWith1 f
-    EWith2 g -> FLWith2 g
-    ESum f g -> FLSum f g
-    ENot v   -> FLNotL () v
-    ENeg v   -> FLNegL () v)
+  Var a     -> unload env (env !! getIndex a) k
+  RTop      -> unload env VTop k
+  RBottom   -> unload env VBottom k
+  ROne      -> unload env VOne k
+  RWith a b -> load env a (k :> FRWithL () b)
+  RSum1 a   -> load env a (k :> FRSum1 ())
+  RSum2 b   -> load env b (k :> FRSum2 ())
+  RNot f    -> unload env (VNot (loadBinder env (getScope f) k)) k
+  RNeg f    -> unload env (VNeg (loadBinder env (getScope f) k)) k
+  L s e     -> load env s (k :> FL e)
 
 loadBinder :: Env -> Expr -> Cont -> (Val -> Val)
 loadBinder env f k a = bindExpr load env f a k
@@ -268,6 +261,15 @@ unload env v = \case
   k :> FRWithR u () -> unload env (VWith u v) k
   k :> FRSum1 ()    -> unload env (VSum1 v) k
   k :> FRSum2 ()    -> unload env (VSum2 v) k
+  k :> FL e         -> unload env (case e of
+    EZero    -> unload env (vapp v EZero) k
+    EBottom  -> unload env (vapp v EBottom) k
+    EOne     -> unload env (vapp v EOne) k
+    EWith1 f -> unload env (vapp v (EWith1 (loadBinder env (getScope f) k))) k
+    EWith2 g -> unload env (vapp v (EWith2 (loadBinder env (getScope g) k))) k
+    ESum f g -> unload env (vapp v (ESum (loadBinder env (getScope f) k) (loadBinder env (getScope g) k))) k
+    ENot r   -> load env r (k :> FLNotR v ())
+    ENeg r   -> load env r (k :> FLNegR v ())) k
   k :> FLZero       -> unload env (vapp v EZero) k
   k :> FLBottom     -> unload env (vapp v EBottom) k
   k :> FLOne        -> unload env (vapp v EOne) k
