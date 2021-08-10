@@ -29,6 +29,7 @@ module Sequoia.Interpreter.Typed
 import Data.Void
 import Sequoia.Conjunction
 import Sequoia.Connective.Bottom
+import Sequoia.Connective.Not
 import Sequoia.Connective.One
 import Sequoia.Connective.Sum
 import Sequoia.Connective.Top
@@ -47,6 +48,7 @@ data Term binder e r _Γ _Δ a where
   TBot :: Term binder e r _Γ _Δ _Δ -> Term binder e r _Γ _Δ (_Δ `Either` Bottom Void)
   TOne :: Term binder e r _Γ _Δ (One ())
   TFun :: binder _Γ _Δ a b -> Term binder e r _Γ _Δ (a -> b)
+  TNot :: Coterm binder e r _Γ _Δ a -> Term binder e r _Γ _Δ (Not a r)
 
 data Coterm binder e r _Γ _Δ a where
   CVar :: IxR _Δ a -> Coterm binder e r _Γ _Δ a
@@ -57,6 +59,7 @@ data Coterm binder e r _Γ _Δ a where
   CBot :: Coterm binder e r _Γ _Δ (Bottom Void)
   COne :: Coterm binder e r _Γ _Δ _Γ -> Coterm binder e r _Γ _Δ (One (), _Γ)
   CFun :: Term binder e r _Γ _Δ a -> Coterm binder e r _Γ _Δ b -> Coterm binder e r _Γ _Δ (a -> b)
+  CNot :: Term binder e r _Γ _Δ a -> Coterm binder e r _Γ _Δ (Not a r)
 
 
 -- Expressions
