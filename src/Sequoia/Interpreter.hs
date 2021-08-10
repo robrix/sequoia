@@ -83,7 +83,7 @@ data Val
   | VNeg (Val -> Val)
 
 instance Show Val where
-  showsPrec = showsVal 0
+  showsPrec = showsTerm 0
 
 
 data Elim f a
@@ -98,7 +98,7 @@ data Elim f a
   | ENeg a
 
 instance Show (Elim ((->) Val) Val) where
-  showsPrec = showsElim 0
+  showsPrec = showsTerm 0
 
 
 class ShowTerm a where
