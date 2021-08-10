@@ -117,7 +117,7 @@ instance ShowTerm Val where
     VNot a    -> showsUnaryWith (liftShowsTerm showsTerm d) "VNot" p a
     VNeg a    -> showsUnaryWith (liftShowsTerm showsTerm d) "VNeg" p a
 
-instance ShowTerm1 f => ShowTerm (Elim f Val) where
+instance (ShowTerm1 f, ShowTerm a) => ShowTerm (Elim f a) where
   showsTerm d p = \case
     EZero    -> showString "EZero"
     EBottom  -> showString "EBottom"
