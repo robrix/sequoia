@@ -41,6 +41,8 @@ deriving instance Show (Expr as bs a)
 
 data Coexpr as bs a where
   Covar :: IxR bs a -> Coexpr as bs a
+  LWith1 :: Coexpr as bs a -> Coexpr as bs (a & b)
+  LWith2 :: Coexpr as bs b -> Coexpr as bs (a & b)
   LSum :: Coexpr as bs a -> Coexpr as bs b -> Coexpr as bs (a ⊕ b)
   LBot :: Coexpr as bs Void
   LOne :: Coexpr as bs  _Γ -> Coexpr as bs  ((), _Γ)
@@ -67,6 +69,8 @@ evalDef ctx@(_Γ :|-: _Δ) = \case
 coevalDef :: Γ as |- Δ r bs -> Coexpr as bs a -> (a -> r)
 coevalDef ctx@(_ :|-: _Δ) = \case
   Covar i  -> _Δ !> i
+  LWith1 a -> coevalDef ctx a . exl
+  LWith2 b -> coevalDef ctx b . exr
   LSum l r -> coevalDef ctx l <--> coevalDef ctx r
   LBot     -> absurd
   LOne a   -> coevalDef ctx a . snd
