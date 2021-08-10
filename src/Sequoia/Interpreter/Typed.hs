@@ -2,6 +2,7 @@
 module Sequoia.Interpreter.Typed
 ( -- Expressions
   Expr(..)
+, Coexpr(..)
 , Scope(..)
 ) where
 
@@ -10,17 +11,19 @@ import Sequoia.DeBruijn
 
 -- Expressions
 
-data Expr _Γ _Δ where
-  Var :: Index -> Expr _Γ (_Δ, b)
-  Covar :: Index -> Expr (a, _Γ) _Δ
-  LBot :: Expr (Void, _Γ) _Δ
-  RBot :: Expr _Γ (_Δ, Void) -> Expr _Γ _Δ
-  LOne :: Expr ((), _Γ) _Δ -> Expr _Γ _Δ
-  ROne :: Expr _Γ (_Δ, ())
-  LFun :: Expr _Γ (_Δ, a) -> Expr (b, _Γ) _Δ -> Expr _Γ _Δ
-  RFun :: Scope (a, _Γ) (_Δ, b) -> Expr _Γ (_Δ, a -> b)
+data Expr a where
+  Var :: Index -> Expr a
+  RBot :: Expr _Δ -> Expr Void
+  ROne :: Expr ()
+  RFun :: Scope a b -> Expr (a -> b)
 
-deriving instance Show (Expr _Γ _Δ)
+deriving instance Show (Expr a)
 
-newtype Scope _Γ _Δ = Scope { getScope :: Expr _Γ _Δ }
+data Coexpr a where
+  Covar :: Index -> Coexpr a
+  LBot :: Coexpr Void
+  LOne :: Coexpr _Γ -> Coexpr ()
+  LFun :: Expr a -> Coexpr b -> Coexpr (a -> b)
+
+newtype Scope a b = Scope { getScope :: Expr b }
   deriving (Show)
