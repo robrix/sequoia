@@ -167,22 +167,22 @@ quoteVal d = \case
   VWith a b -> RWith (quoteVal d a) (quoteVal d b)
   VSum1 a   -> RSum1 (quoteVal d a)
   VSum2 b   -> RSum2 (quoteVal d b)
-  VNot f    -> RNot (quoteBinder d f)
-  VNeg f    -> RNeg (quoteBinder d f)
+  VNot f    -> RNot (Scope (quoteBinder d f))
+  VNeg f    -> RNeg (Scope (quoteBinder d f))
 
 quoteElim :: Level -> Expr -> Elim ((->) Val) Val -> Expr
 quoteElim d s = \case
   EZero    -> LZero s
   EBottom  -> LBottom s
   EOne     -> LOne s
-  EWith1 f -> LWith1 s (quoteBinder d f)
-  EWith2 g -> LWith2 s (quoteBinder d g)
-  ESum f g -> LSum s (quoteBinder d f) (quoteBinder d g)
+  EWith1 f -> LWith1 s (Scope (quoteBinder d f))
+  EWith2 g -> LWith2 s (Scope (quoteBinder d g))
+  ESum f g -> LSum s (Scope (quoteBinder d f)) (Scope (quoteBinder d g))
   ENot v   -> LNot s (quoteVal d v)
   ENeg v   -> LNeg s (quoteVal d v)
 
-quoteBinder :: Level -> (Val -> Val) -> Scope Expr
-quoteBinder d = Scope . runBinder quoteVal d
+quoteBinder :: Level -> (Val -> Val) -> Expr
+quoteBinder = runBinder quoteVal
 
 
 -- Evaluation (definitional)
