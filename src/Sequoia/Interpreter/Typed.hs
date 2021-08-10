@@ -21,13 +21,16 @@ module Sequoia.Interpreter.Typed
 ) where
 
 import Data.Void
+import Sequoia.Conjunction
 import Sequoia.Connective.Sum
+import Sequoia.Connective.With
 import Sequoia.Disjunction
 
 -- Expressions
 
 data Expr as bs a where
   Var :: IxL a as -> Expr as bs a
+  RWith :: Expr as bs a -> Expr as bs b -> Expr as bs (a & b)
   RSum1 :: Expr as bs a -> Expr as bs (a ⊕ b)
   RSum2 :: Expr as bs b -> Expr as bs (a ⊕ b)
   RBot :: Expr as bs _Δ -> Expr as bs (Either _Δ Void)
@@ -53,12 +56,13 @@ newtype Scope as bs a b = Scope { getScope :: Expr (a, as) bs b }
 
 evalDef :: Γ as |- Δ r bs -> Expr as bs a -> a
 evalDef ctx@(_Γ :|-: _Δ) = \case
-  Var i   -> i <! _Γ
-  RSum1 a -> InL (evalDef ctx a)
-  RSum2 b -> InR (evalDef ctx b)
-  RBot a  -> Left (evalDef ctx a)
-  ROne    -> ()
-  RFun b  -> \ a -> evalDef (a :< _Γ :|-: _Δ) (getScope b)
+  Var i     -> i <! _Γ
+  RWith a b -> evalDef ctx a >--< evalDef ctx b
+  RSum1 a   -> InL (evalDef ctx a)
+  RSum2 b   -> InR (evalDef ctx b)
+  RBot a    -> Left (evalDef ctx a)
+  ROne      -> ()
+  RFun b    -> \ a -> evalDef (a :< _Γ :|-: _Δ) (getScope b)
 
 coevalDef :: Γ as |- Δ r bs -> Coexpr as bs a -> (a -> r)
 coevalDef ctx@(_ :|-: _Δ) = \case
