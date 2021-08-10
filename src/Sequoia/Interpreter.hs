@@ -110,6 +110,9 @@ class ShowTerm1 f where
 instance ShowTerm1 Scope where
   liftShowsPrecLevel showsExpr d p = showsExpr d p . getScope
 
+instance ShowTerm1 ((->) Val) where
+  liftShowsPrecLevel showsVal d p b = bindVal (flip . showsVal) d b p
+
 instance ShowTerm1 f => ShowTerm (Elim f Val) where
   showsTerm d p = \case
     EZero    -> showString "EZero"
