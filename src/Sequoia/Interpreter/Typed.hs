@@ -41,7 +41,7 @@ data Expr as bs a where
   RSum1 :: Expr as bs a -> Expr as bs (a ⊕ b)
   RSum2 :: Expr as bs b -> Expr as bs (a ⊕ b)
   RBot :: Expr as bs _Δ -> Expr as bs (Either _Δ (Bottom Void))
-  ROne :: Expr as bs ()
+  ROne :: Expr as bs (One ())
   RFun :: Scope as bs a b -> Expr as bs (a -> b)
 
 deriving instance Show (Expr as bs a)
@@ -84,7 +84,7 @@ evalDef ctx@(_Γ :|-: _Δ) = \case
   RSum1 a   -> InL (evalDef ctx a)
   RSum2 b   -> InR (evalDef ctx b)
   RBot a    -> Left (evalDef ctx a)
-  ROne      -> ()
+  ROne      -> One ()
   RFun b    -> \ a -> evalDef (a :< _Γ :|-: _Δ) (getScope b)
 
 coevalDef :: Γ as |- Δ r bs -> Coexpr as bs a -> (a -> r)
