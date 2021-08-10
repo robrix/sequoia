@@ -4,7 +4,7 @@ module Sequoia.Interpreter
   Expr(..)
 , Scope(..)
   -- ** Elimination
-, runExpr
+, bindExpr
   -- * Values
 , Val(..)
 , Elim(..)
@@ -66,8 +66,8 @@ newtype Scope a = Scope { getScope :: a }
 
 -- Elimination
 
-runExpr :: ([a] -> Expr -> b) -> [a] -> Expr -> (a -> b)
-runExpr with env e a = with (a : env) e
+bindExpr :: ([a] -> Expr -> b) -> [a] -> Expr -> (a -> b)
+bindExpr with env e a = with (a : env) e
 
 
 -- Values
@@ -210,7 +210,7 @@ evalDef env = \case
   LNeg s v   -> vapp (evalDef env s) (ENeg (evalDef env v))
 
 evalBinder :: Env -> Expr -> (Val -> Val)
-evalBinder = runExpr evalDef
+evalBinder = bindExpr evalDef
 
 
 -- Evaluation (CK machine)
@@ -257,7 +257,7 @@ load env e k = case e of
   LNeg s v   -> load env s (k :> FLNegL () v)
 
 loadBinder :: Env -> Expr -> Cont -> (Val -> Val)
-loadBinder env f k a = runExpr load env f a k
+loadBinder env f k a = bindExpr load env f a k
 
 unload :: Env -> Val -> Cont -> Val
 unload env v = \case
