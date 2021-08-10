@@ -11,6 +11,7 @@ module Sequoia.Interpreter
 , vapp
   -- ** Elimination
 , runBinder
+, runBinder1
 , showsVal
 , showsElim
   -- * Quotation
@@ -115,6 +116,9 @@ vapp = curry $ \case
 
 runBinder :: (Level -> a -> b) -> Level -> (Val -> a) -> b
 runBinder with d b = with (succ d) (b (vvar d))
+
+runBinder1 :: (Level -> a -> b -> c) -> Level -> a -> (Val -> b) -> c
+runBinder1 with d a b = with (succ d) a (b (vvar d))
 
 
 showsVal :: Level -> Int -> Val -> ShowS
