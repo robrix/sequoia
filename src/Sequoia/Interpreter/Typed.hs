@@ -38,25 +38,25 @@ import Sequoia.Disjunction
 
 -- Terms
 
-data Term binder _Γ _Δ a where
-  TVar :: IxL a _Γ -> Term binder _Γ _Δ a
-  TTop :: Term binder _Γ _Δ Top
-  TWith :: Term binder _Γ _Δ a -> Term binder _Γ _Δ b -> Term binder _Γ _Δ (a & b)
-  TSum1 :: Term binder _Γ _Δ a -> Term binder _Γ _Δ (a ⊕ b)
-  TSum2 :: Term binder _Γ _Δ b -> Term binder _Γ _Δ (a ⊕ b)
-  TBot :: Term binder _Γ _Δ _Δ -> Term binder _Γ _Δ (_Δ `Either` Bottom Void)
-  TOne :: Term binder _Γ _Δ (One ())
-  TFun :: binder _Γ _Δ a b -> Term binder _Γ _Δ (a -> b)
+data Term binder e r _Γ _Δ a where
+  TVar :: IxL a _Γ -> Term binder e r _Γ _Δ a
+  TTop :: Term binder e r _Γ _Δ Top
+  TWith :: Term binder e r _Γ _Δ a -> Term binder e r _Γ _Δ b -> Term binder e r _Γ _Δ (a & b)
+  TSum1 :: Term binder e r _Γ _Δ a -> Term binder e r _Γ _Δ (a ⊕ b)
+  TSum2 :: Term binder e r _Γ _Δ b -> Term binder e r _Γ _Δ (a ⊕ b)
+  TBot :: Term binder e r _Γ _Δ _Δ -> Term binder e r _Γ _Δ (_Δ `Either` Bottom Void)
+  TOne :: Term binder e r _Γ _Δ (One ())
+  TFun :: binder _Γ _Δ a b -> Term binder e r _Γ _Δ (a -> b)
 
-data Coterm binder _Γ _Δ a where
-  CVar :: IxR _Δ a -> Coterm binder _Γ _Δ a
-  CZero :: Coterm binder _Γ _Δ Zero
-  CWith1 :: Coterm binder _Γ _Δ a -> Coterm binder _Γ _Δ (a & b)
-  CWith2 :: Coterm binder _Γ _Δ b -> Coterm binder _Γ _Δ (a & b)
-  CSum :: Coterm binder _Γ _Δ a -> Coterm binder _Γ _Δ b -> Coterm binder _Γ _Δ (a ⊕ b)
-  CBot :: Coterm binder _Γ _Δ (Bottom Void)
-  COne :: Coterm binder _Γ _Δ _Γ -> Coterm binder _Γ _Δ (One (), _Γ)
-  CFun :: Term binder _Γ _Δ a -> Coterm binder _Γ _Δ b -> Coterm binder _Γ _Δ (a -> b)
+data Coterm binder e r _Γ _Δ a where
+  CVar :: IxR _Δ a -> Coterm binder e r _Γ _Δ a
+  CZero :: Coterm binder e r _Γ _Δ Zero
+  CWith1 :: Coterm binder e r _Γ _Δ a -> Coterm binder e r _Γ _Δ (a & b)
+  CWith2 :: Coterm binder e r _Γ _Δ b -> Coterm binder e r _Γ _Δ (a & b)
+  CSum :: Coterm binder e r _Γ _Δ a -> Coterm binder e r _Γ _Δ b -> Coterm binder e r _Γ _Δ (a ⊕ b)
+  CBot :: Coterm binder e r _Γ _Δ (Bottom Void)
+  COne :: Coterm binder e r _Γ _Δ _Γ -> Coterm binder e r _Γ _Δ (One (), _Γ)
+  CFun :: Term binder e r _Γ _Δ a -> Coterm binder e r _Γ _Δ b -> Coterm binder e r _Γ _Δ (a -> b)
 
 
 -- Expressions
