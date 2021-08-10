@@ -5,6 +5,7 @@ module Sequoia.Interpreter.Typed
 , Scope(..)
 ) where
 
+import Data.Void
 import Sequoia.DeBruijn
 
 -- Expressions
@@ -12,6 +13,10 @@ import Sequoia.DeBruijn
 data Expr _Γ _Δ where
   Var :: Index -> Expr _Γ (_Δ, b)
   Covar :: Index -> Expr (a, _Γ) _Δ
+  LBot :: Expr (Void, _Γ) _Δ
+  RBot :: Expr _Γ (_Δ, Void) -> Expr _Γ _Δ
+  LOne :: Expr ((), _Γ) _Δ -> Expr _Γ _Δ
+  ROne :: Expr _Γ (_Δ, ())
   LFun :: Expr _Γ (_Δ, a) -> Expr (b, _Γ) _Δ -> Expr _Γ _Δ
   RFun :: Scope (a, _Γ) (_Δ, b) -> Expr _Γ (_Δ, a -> b)
 
