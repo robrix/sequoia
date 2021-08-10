@@ -38,25 +38,25 @@ import Sequoia.Disjunction
 
 -- Terms
 
-data Term binder a where
-  TVar :: IxL a as -> Term binder a
-  TTop :: Term binder Top
-  TWith :: Term binder a -> Term binder b -> Term binder (a & b)
-  TSum1 :: Term binder a -> Term binder (a ⊕ b)
-  TSum2 :: Term binder b -> Term binder (a ⊕ b)
-  TBot :: Term binder _Δ -> Term binder (_Δ `Either` Bottom Void)
-  TOne :: Term binder (One ())
-  TFun :: binder a b -> Term binder (a -> b)
+data Term binder _Γ _Δ a where
+  TVar :: IxL a _Γ -> Term binder _Γ _Δ a
+  TTop :: Term binder _Γ _Δ Top
+  TWith :: Term binder _Γ _Δ a -> Term binder _Γ _Δ b -> Term binder _Γ _Δ (a & b)
+  TSum1 :: Term binder _Γ _Δ a -> Term binder _Γ _Δ (a ⊕ b)
+  TSum2 :: Term binder _Γ _Δ b -> Term binder _Γ _Δ (a ⊕ b)
+  TBot :: Term binder _Γ _Δ _Δ -> Term binder _Γ _Δ (_Δ `Either` Bottom Void)
+  TOne :: Term binder _Γ _Δ (One ())
+  TFun :: binder _Γ _Δ a b -> Term binder _Γ _Δ (a -> b)
 
-data Coterm binder a where
-  CVar :: IxR as a -> Coterm binder a
-  CZero :: Coterm binder Zero
-  CWith1 :: Coterm binder a -> Coterm binder (a & b)
-  CWith2 :: Coterm binder b -> Coterm binder (a & b)
-  CSum :: Coterm binder a -> Coterm binder b -> Coterm binder (a ⊕ b)
-  CBot :: Coterm binder (Bottom Void)
-  COne :: Coterm binder _Γ -> Coterm binder (One (), _Γ)
-  CFun :: Term binder a -> Coterm binder b -> Coterm binder (a -> b)
+data Coterm binder _Γ _Δ a where
+  CVar :: IxR _Δ a -> Coterm binder _Γ _Δ a
+  CZero :: Coterm binder _Γ _Δ Zero
+  CWith1 :: Coterm binder _Γ _Δ a -> Coterm binder _Γ _Δ (a & b)
+  CWith2 :: Coterm binder _Γ _Δ b -> Coterm binder _Γ _Δ (a & b)
+  CSum :: Coterm binder _Γ _Δ a -> Coterm binder _Γ _Δ b -> Coterm binder _Γ _Δ (a ⊕ b)
+  CBot :: Coterm binder _Γ _Δ (Bottom Void)
+  COne :: Coterm binder _Γ _Δ _Γ -> Coterm binder _Γ _Δ (One (), _Γ)
+  CFun :: Term binder _Γ _Δ a -> Coterm binder _Γ _Δ b -> Coterm binder _Γ _Δ (a -> b)
 
 
 -- Expressions
