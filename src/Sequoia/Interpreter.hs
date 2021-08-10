@@ -13,7 +13,6 @@ module Sequoia.Interpreter
 , vapp
   -- ** Elimination
 , bindVal
-, bindVal1
 , showsVal
 , showsElim
   -- * Quotation
@@ -124,9 +123,6 @@ vapp = curry $ \case
 
 bindVal :: (Level -> a -> b) -> Level -> (Val -> a) -> b
 bindVal with d b = with (succ d) (b (vvar d))
-
-bindVal1 :: (Level -> a -> b -> c) -> Level -> a -> (Val -> b) -> c
-bindVal1 with d a b = with (succ d) a (b (vvar d))
 
 
 showsVal :: Level -> Int -> Val -> ShowS
