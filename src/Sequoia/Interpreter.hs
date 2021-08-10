@@ -257,7 +257,7 @@ load env e k = case e of
   LNeg s v   -> load env s (k :> FLNegL () v)
 
 loadBinder :: Env -> Scope Expr -> Cont -> (Val -> Val)
-loadBinder env (Scope f) k a = load (a : env) f k
+loadBinder env (Scope f) k a = runExpr load env f a k
 
 unload :: Env -> Val -> Cont -> Val
 unload env v = \case
