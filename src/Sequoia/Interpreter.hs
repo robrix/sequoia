@@ -48,6 +48,7 @@ data Expr
   | RSum2 Expr
   | RNot (Scope Expr)
   | RNeg (Scope Expr)
+  | L Expr (Elim Scope Expr)
   -- No rule for LTop
   | LZero Expr
   | LBottom Expr
@@ -224,6 +225,7 @@ evalDef env = \case
   RSum2 b    -> VSum2 (evalDef env b)
   RNot f     -> VNot (evalBinder env (getScope f))
   RNeg f     -> VNeg (evalBinder env (getScope f))
+  L s e      -> vapp (evalDef env s) (mapElim (evalDef env) (evalBinder env . getScope) e)
   LZero s    -> vapp (evalDef env s) EZero
   LBottom s  -> vapp (evalDef env s) EBottom
   LOne s     -> vapp (evalDef env s) EOne
@@ -271,6 +273,15 @@ load env e k = case e of
   RSum2 b    -> load env b (k :> FRSum2 ())
   RNot f     -> unload env (VNot (loadBinder env (getScope f) k)) k
   RNeg f     -> unload env (VNeg (loadBinder env (getScope f) k)) k
+  L s e      -> load env s (k :> case e of
+    EZero    -> FLZero
+    EBottom  -> FLBottom
+    EOne     -> FLOne
+    EWith1 f -> FLWith1 f
+    EWith2 g -> FLWith2 g
+    ESum f g -> FLSum f g
+    ENot v   -> FLNotL () v
+    ENeg v   -> FLNegL () v)
   LZero s    -> load env s (k :> FLZero)
   LBottom s  -> load env s (k :> FLBottom)
   LOne s     -> load env s (k :> FLOne)
