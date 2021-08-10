@@ -187,15 +187,7 @@ quoteVal d = \case
   VNeg f    -> RNeg (Scope (quoteBinder d f))
 
 quoteElim :: Level -> Expr -> Elim ((->) Val) Val -> Expr
-quoteElim d s = L s . \case
-  EZero    -> EZero
-  EBottom  -> EBottom
-  EOne     -> EOne
-  EWith1 f -> EWith1 (Scope (quoteBinder d f))
-  EWith2 g -> EWith2 (Scope (quoteBinder d g))
-  ESum f g -> ESum (Scope (quoteBinder d f)) (Scope (quoteBinder d g))
-  ENot v   -> ENot (quoteVal d v)
-  ENeg v   -> ENeg (quoteVal d v)
+quoteElim d s = L s . mapElim (quoteVal d) (Scope . quoteBinder d)
 
 quoteBinder :: Level -> (Val -> Val) -> Expr
 quoteBinder = bindVal quoteVal
