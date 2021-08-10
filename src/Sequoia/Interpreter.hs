@@ -63,7 +63,7 @@ newtype Scope a = Scope { getScope :: a }
 -- Values
 
 data Val
-  = VNe Level (Snoc Elim)
+  = VNe Level (Snoc (Elim ((->) Val) Val))
   | VTop
   | VBottom
   | VOne
@@ -77,17 +77,17 @@ instance Show Val where
   showsPrec = showsVal 0
 
 
-data Elim
+data Elim f a
   = EZero
   | EBottom
   | EOne
-  | EWith1 (Val -> Val)
-  | EWith2 (Val -> Val)
-  | ESum (Val -> Val) (Val -> Val)
-  | ENot Val
-  | ENeg Val
+  | EWith1 (f a)
+  | EWith2 (f a)
+  | ESum (f a) (f a)
+  | ENot a
+  | ENeg a
 
-instance Show Elim where
+instance Show (Elim ((->) Val) Val) where
   showsPrec = showsElim 0
 
 
@@ -96,7 +96,7 @@ instance Show Elim where
 vvar :: Level -> Val
 vvar d = VNe d Nil
 
-vapp :: Val -> Elim -> Val
+vapp :: Val -> Elim ((->) Val) Val -> Val
 vapp = curry $ \case
   (v,         EZero)    -> v
   (VBottom,   EBottom)  -> VBottom
@@ -124,7 +124,7 @@ showsVal d p = \case
   VNot a    -> showsUnaryWith (showsBinder d) "VNot" p a
   VNeg a    -> showsUnaryWith (showsBinder d) "VNeg" p a
 
-showsElim :: Level -> Int -> Elim -> ShowS
+showsElim :: Level -> Int -> Elim ((->) Val) Val -> ShowS
 showsElim d p = \case
   EZero    -> showString "EZero"
   EBottom  -> showString "EBottom"
@@ -153,7 +153,7 @@ quoteVal d = \case
   VNot f    -> RNot (quoteBinder d f)
   VNeg f    -> RNeg (quoteBinder d f)
 
-quoteElim :: Level -> Expr -> Elim -> Expr
+quoteElim :: Level -> Expr -> Elim ((->) Val) Val -> Expr
 quoteElim d s = \case
   EZero    -> LZero s
   EBottom  -> LBottom s
