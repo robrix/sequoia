@@ -102,6 +102,9 @@ instance Show (Elim ((->) Val) Val) where
 class ShowTerm a where
   showsTerm :: Level -> Int -> a -> ShowS
 
+instance ShowTerm Expr where
+  showsTerm _ = showsPrec
+
 instance ShowTerm Val where
   showsTerm d p = \case
     VNe v sp  -> showsBinaryWith showsPrec (liftShowsPrec (showsTerm d) (showListWith (showsTerm d 0))) "VNe" p v sp
