@@ -174,7 +174,7 @@ quoteElim d s = \case
   ENeg v   -> LNeg s (quoteVal d v)
 
 quoteBinder :: Level -> (Val -> Val) -> Scope Expr
-quoteBinder d f = Scope (quoteVal (succ d) (f (vvar d)))
+quoteBinder d = Scope . runBinder quoteVal d
 
 
 -- Evaluation (definitional)
