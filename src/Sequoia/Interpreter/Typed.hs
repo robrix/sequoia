@@ -26,6 +26,7 @@ module Sequoia.Interpreter.Typed
 , IxR(..)
 ) where
 
+import Data.Functor.Classes
 import Data.Void
 import Sequoia.Conjunction
 import Sequoia.Connective.Bottom
@@ -50,6 +51,18 @@ data Term binder e r _Γ _Δ a where
   TFun :: binder a b -> Term binder e r _Γ _Δ (a -> b)
   TNot :: Coterm binder e r _Γ _Δ a -> Term binder e r _Γ _Δ (Not a r)
 
+instance Show2 binder => Show (Term binder e r _Γ _Δ a) where
+  showsPrec p = \case
+    TVar i    -> showsUnaryWith showsPrec "TVar" p i
+    TTop      -> showString "TTop"
+    TWith a b -> showsBinaryWith showsPrec showsPrec "TWith" p a b
+    TSum1 a   -> showsUnaryWith showsPrec "TSum1" p a
+    TSum2 b   -> showsUnaryWith showsPrec "TSum2" p b
+    TBot a    -> showsUnaryWith showsPrec "TBot" p a
+    TOne      -> showString "TOne"
+    TFun f    -> liftShowsPrec2 (const (const id)) (const id) (const (const id)) (const id) p f
+    TNot k    -> showsUnaryWith showsPrec "TNot" p k
+
 data Coterm binder e r _Γ _Δ a where
   CVar :: IxR _Δ a -> Coterm binder e r _Γ _Δ a
   CZero :: Coterm binder e r _Γ _Δ Zero
@@ -61,6 +74,7 @@ data Coterm binder e r _Γ _Δ a where
   CFun :: Term binder e r _Γ _Δ a -> Coterm binder e r _Γ _Δ b -> Coterm binder e r _Γ _Δ (a -> b)
   CNot :: Term binder e r _Γ _Δ a -> Coterm binder e r _Γ _Δ (Not a r)
 
+deriving instance Show2 binder => Show (Coterm binder e r _Γ _Δ a)
 
 -- Expressions
 
