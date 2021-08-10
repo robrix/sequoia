@@ -22,7 +22,7 @@ deriving instance Show (Expr a)
 data Coexpr a where
   Covar :: Index -> Coexpr a
   LBot :: Coexpr Void
-  LOne :: Coexpr _Γ -> Coexpr ()
+  LOne :: Coexpr _Γ -> Coexpr ((), _Γ)
   LFun :: Expr a -> Coexpr b -> Coexpr (a -> b)
 
 newtype Scope a b = Scope { getScope :: Expr b }
