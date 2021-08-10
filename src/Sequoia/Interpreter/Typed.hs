@@ -1,6 +1,6 @@
 {-# LANGUAGE GADTs #-}
 module Sequoia.Interpreter.Typed
-( -- Expressions
+( -- * Expressions
   Expr(..)
 , Coexpr(..)
 , Scope(..)
