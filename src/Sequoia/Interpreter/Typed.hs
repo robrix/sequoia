@@ -1,8 +1,11 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE GADTs #-}
 module Sequoia.Interpreter.Typed
-( -- * Expressions
-  Expr(..)
+( -- * Terms
+  Term(..)
+, Coterm(..)
+  -- * Expressions
+, Expr(..)
 , Coexpr(..)
 , Scope(..)
   -- * Values
@@ -32,6 +35,29 @@ import Sequoia.Connective.Top
 import Sequoia.Connective.With
 import Sequoia.Connective.Zero
 import Sequoia.Disjunction
+
+-- Terms
+
+data Term binder a where
+  TVar :: IxL a as -> Term binder a
+  TTop :: Term binder Top
+  TWith :: Term binder a -> Term binder b -> Term binder (a & b)
+  TSum1 :: Term binder a -> Term binder (a ⊕ b)
+  TSum2 :: Term binder b -> Term binder (a ⊕ b)
+  TBot :: Term binder _Δ -> Term binder (_Δ `Either` Bottom Void)
+  TOne :: Term binder (One ())
+  TFun :: binder a b -> Term binder (a -> b)
+
+data Coterm binder a where
+  CVar :: IxR as a -> Coterm binder a
+  CZero :: Coterm binder Zero
+  CWith1 :: Coterm binder a -> Coterm binder (a & b)
+  CWith2 :: Coterm binder b -> Coterm binder (a & b)
+  CSum :: Coterm binder a -> Coterm binder b -> Coterm binder (a ⊕ b)
+  CBot :: Coterm binder (Bottom Void)
+  COne :: Coterm binder _Γ -> Coterm binder (One (), _Γ)
+  CFun :: Term binder a -> Coterm binder b -> Coterm binder (a -> b)
+
 
 -- Expressions
 
