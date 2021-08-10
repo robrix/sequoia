@@ -62,12 +62,9 @@ coevalDef ctx@(_ :|-: _Δ) = \case
 
 -- Environments
 
-type (*) = (,)
-
-
 data Γ as where
   Γ :: Γ ()
-  (:<) :: a -> Γ b -> Γ (b * a)
+  (:<) :: a -> Γ b -> Γ (b, a)
 
 infixr 5 :<
 
@@ -78,7 +75,7 @@ IxS i <! (_ :< t) = i <! t
 
 data Δ r as where
   Δ :: r -> Δ r Void
-  (:>) :: Δ r a -> (b -> r) -> Δ r (a * b)
+  (:>) :: Δ r a -> (b -> r) -> Δ r (a, b)
 
 infixl 5 :>
 
@@ -99,7 +96,7 @@ type (|-) = (:|-:)
 
 
 data Ix as a where
-  IxZ :: Ix (a * b) b
-  IxS :: Ix a c -> Ix (a * b) c
+  IxZ :: Ix (a, b) b
+  IxS :: Ix a c -> Ix (a, b) c
 
 deriving instance Show (Ix as a)
