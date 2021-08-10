@@ -210,7 +210,7 @@ evalDef env = \case
   LNeg s v   -> vapp (evalDef env s) (ENeg (evalDef env v))
 
 evalBinder :: Env -> Scope Expr -> (Val -> Val)
-evalBinder env (Scope e) a = evalDef (a : env) e
+evalBinder env = runExpr evalDef env . getScope
 
 
 -- Evaluation (CK machine)
