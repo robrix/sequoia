@@ -176,7 +176,7 @@ mapElim g h = \case
 
 quoteVal :: Level -> Val -> Expr
 quoteVal d = \case
-  VNe v sp  -> foldl' (quoteElim d) (Var (levelToIndex d v)) sp
+  VNe v sp  -> foldl' ((. quoteElim d) . L) (Var (levelToIndex d v)) sp
   VTop      -> RTop
   VBottom   -> RBottom
   VOne      -> ROne
@@ -186,8 +186,8 @@ quoteVal d = \case
   VNot f    -> RNot (Scope (quoteBinder d f))
   VNeg f    -> RNeg (Scope (quoteBinder d f))
 
-quoteElim :: Level -> Expr -> Elim ((->) Val) Val -> Expr
-quoteElim d s = L s . mapElim (quoteVal d) (Scope . quoteBinder d)
+quoteElim :: Level -> Elim ((->) Val) Val -> Elim Scope Expr
+quoteElim d = mapElim (quoteVal d) (Scope . quoteBinder d)
 
 quoteBinder :: Level -> (Val -> Val) -> Expr
 quoteBinder = bindVal quoteVal
