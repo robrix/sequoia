@@ -54,7 +54,7 @@ data Coexpr as bs a where
   LWith2 :: Coexpr as bs b -> Coexpr as bs (a & b)
   LSum :: Coexpr as bs a -> Coexpr as bs b -> Coexpr as bs (a ⊕ b)
   LBot :: Coexpr as bs (Bottom Void)
-  LOne :: Coexpr as bs _Γ -> Coexpr as bs ((), _Γ)
+  LOne :: Coexpr as bs _Γ -> Coexpr as bs (One (), _Γ)
   LFun :: Expr as bs a -> Coexpr as bs b -> Coexpr as bs (a -> b)
 
 deriving instance Show (Coexpr as bs a)
