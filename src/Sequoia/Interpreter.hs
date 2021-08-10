@@ -105,22 +105,22 @@ class ShowTerm a where
   showsTerm :: Level -> Int -> a -> ShowS
 
 class ShowTerm1 f where
-  liftShowsPrecLevel :: (Level -> Int -> a -> ShowS) -> Level -> Int -> f a -> ShowS
+  liftShowsTerm :: (Level -> Int -> a -> ShowS) -> Level -> Int -> f a -> ShowS
 
 instance ShowTerm1 Scope where
-  liftShowsPrecLevel showsExpr d p = showsExpr d p . getScope
+  liftShowsTerm showsExpr d p = showsExpr d p . getScope
 
 instance ShowTerm1 ((->) Val) where
-  liftShowsPrecLevel showsVal d p b = bindVal (flip . showsVal) d b p
+  liftShowsTerm showsVal d p b = bindVal (flip . showsVal) d b p
 
 instance ShowTerm1 f => ShowTerm (Elim f Val) where
   showsTerm d p = \case
     EZero    -> showString "EZero"
     EBottom  -> showString "EBottom"
     EOne     -> showString "EOne"
-    EWith1 f -> showsUnaryWith (liftShowsPrecLevel showsVal d) "EWith1" p f
-    EWith2 g -> showsUnaryWith (liftShowsPrecLevel showsVal d) "EWith2" p g
-    ESum f g -> showsBinaryWith (liftShowsPrecLevel showsVal d) (liftShowsPrecLevel showsVal d) "ESum" p f g
+    EWith1 f -> showsUnaryWith (liftShowsTerm showsVal d) "EWith1" p f
+    EWith2 g -> showsUnaryWith (liftShowsTerm showsVal d) "EWith2" p g
+    ESum f g -> showsBinaryWith (liftShowsTerm showsVal d) (liftShowsTerm showsVal d) "ESum" p f g
     ENot v   -> showsUnaryWith (showsVal d) "ENot" p v
     ENeg v   -> showsUnaryWith (showsVal d) "ENeg" p v
 
