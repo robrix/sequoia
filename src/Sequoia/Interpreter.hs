@@ -101,6 +101,21 @@ instance Show (Elim ((->) Val) Val) where
   showsPrec = showsElim 0
 
 
+class ShowLevel1 f where
+  liftShowsPrecLevel :: (Level -> Int -> a -> ShowS) -> Level -> Int -> f a -> ShowS
+
+instance ShowLevel1 f => ShowLevel1 (Elim f) where
+  liftShowsPrecLevel showsVal d p = \case
+    EZero    -> showString "EZero"
+    EBottom  -> showString "EBottom"
+    EOne     -> showString "EOne"
+    EWith1 f -> showsUnaryWith (liftShowsPrecLevel showsVal d) "EWith1" p f
+    EWith2 g -> showsUnaryWith (liftShowsPrecLevel showsVal d) "EWith2" p g
+    ESum f g -> showsBinaryWith (liftShowsPrecLevel showsVal d) (liftShowsPrecLevel showsVal d) "ESum" p f g
+    ENot v   -> showsUnaryWith (showsVal d) "ENot" p v
+    ENeg v   -> showsUnaryWith (showsVal d) "ENeg" p v
+
+
 -- Construction
 
 vvar :: Level -> Val
