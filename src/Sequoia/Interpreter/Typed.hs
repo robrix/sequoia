@@ -162,11 +162,11 @@ data Val as bs a where
 
 data Coval as bs a where
   EZero :: Coval as bs Zero
-  EWith1 :: (Val as bs a -> Coval as bs a) -> Coval as bs (a & b)
-  EWith2 :: (Val as bs b -> Coval as bs b) -> Coval as bs (a & b)
-  ESum :: (Val as bs a -> Coval as bs a) -> (Val as bs b -> Coval as bs b) -> Coval as bs (a ⊕ b)
+  EWith1 :: Coval as bs a -> Coval as bs (a & b)
+  EWith2 :: Coval as bs b -> Coval as bs (a & b)
+  ESum :: Coval as bs a -> Coval as bs b -> Coval as bs (a ⊕ b)
   EBottom :: Coval as bs (Bottom Void)
-  EOne :: Val as bs a -> Coval as bs (One (), a)
+  EOne :: Coval as bs a -> Coval as bs (One (), a)
   EFun :: Val as bs a -> Coval as bs b -> Coval as bs (a -> b)
 
 
