@@ -17,15 +17,13 @@ module Sequoia.Interpreter.Typed
 , evalDef
 , coevalDef
   -- * Environments
-, Γ(..)
-, (<!)
-, Δ(..)
-, (!>)
 , type (|-)(..)
-, E
-, R
+, (<!)
 , IxL(..)
+, E
+, (!>)
 , IxR(..)
+, R
 ) where
 
 import Data.Functor.Classes
@@ -198,35 +196,6 @@ coevalDef ctx = \case
 
 -- Environments
 
-data Γ as where
-  Γ :: e -> Γ (One e)
-  (:<) :: a -> Γ b -> Γ (a, b)
-
-infixr 5 :<
-
-(<!) :: IxL a as -> as |- bs -> a
-i      <! (c :>> _) = i <! c
-IxLZ   <! (h :<< _) = h
-IxLS i <! (_ :<< c) = i <! c
-
-infixr 2 <!
-
-
-data Δ as where
-  Δ :: r -> Δ (Bottom r)
-  (:>) :: Δ a -> (b -> R a) -> Δ (a, b)
-
-infixl 5 :>
-
-(!>) :: as |- bs -> IxR bs b -> (b -> R bs)
-delta !> ix = case (ix, delta) of
-  (i,      _ :<< c) -> c !> i
-  (IxRZ,   _ :>> r) -> r
-  (IxRS i, c :>> _) -> c !> i
-
-infixl 2 !>
-
-
 data a |- b where
   ΓΔ :: One e |- Bottom r
   (:<<) :: a -> as |- bs -> (a, as) |- bs
@@ -237,14 +206,12 @@ infixr 5 :<<
 infixl 5 :>>
 
 
-type family E ctx where
-  E (_, as) = E as
-  E (One e) = e
+(<!) :: IxL a as -> as |- bs -> a
+i      <! (c :>> _) = i <! c
+IxLZ   <! (h :<< _) = h
+IxLS i <! (_ :<< c) = i <! c
 
-type family R ctx where
-  R (bs, _)    = R bs
-  R (Bottom r) = r
-
+infixr 2 <!
 
 data IxL a as where
   IxLZ :: IxL a (a, b)
@@ -252,8 +219,25 @@ data IxL a as where
 
 deriving instance Show (IxL as a)
 
+type family E ctx where
+  E (_, as) = E as
+  E (One e) = e
+
+
+(!>) :: as |- bs -> IxR bs b -> (b -> R bs)
+delta !> ix = case (ix, delta) of
+  (i,      _ :<< c) -> c !> i
+  (IxRZ,   _ :>> r) -> r
+  (IxRS i, c :>> _) -> c !> i
+
+infixl 2 !>
+
 data IxR as a where
   IxRZ :: IxR (a, b) b
   IxRS :: IxR a c -> IxR (a, b) c
 
 deriving instance Show (IxR as a)
+
+type family R ctx where
+  R (bs, _)    = R bs
+  R (Bottom r) = r
