@@ -70,6 +70,7 @@ data Coterm binder ctx a where
   CSum :: Coterm binder ctx a -> Coterm binder ctx b -> Coterm binder ctx (a ⊕ b)
   CBot :: Coterm binder (as |- bs) (Bottom (R bs))
   COne :: Coterm binder (as |- bs) _Γ -> Coterm binder (as |- bs) (One (E as), _Γ)
+  CPar :: Coterm binder ctx a -> Coterm binder ctx b -> Coterm binder ctx (a ⅋ b)
   CTensor :: Coterm binder ctx (a, b) -> Coterm binder ctx (a ⊗ b)
   CFun :: Term binder ctx a -> Coterm binder ctx b -> Coterm binder ctx (a -> b)
   CNot :: Term binder ctx a -> Coterm binder ctx (Not a r)
@@ -108,6 +109,7 @@ instance ShowBinder binder => ShowTerm (Coterm binder (_Γ |- _Δ)) where
     CSum f g  -> showsBinaryWith showsTerm showsTerm "CSum" p f g
     CBot      -> showString "CBot"
     COne a    -> showsUnaryWith showsTerm "COne" p a
+    CPar f g  -> showsBinaryWith showsTerm showsTerm "CPar" p f g
     CTensor f -> showsUnaryWith showsTerm "CTensor" p f
     CFun a b  -> showsBinaryWith showsTerm showsTerm "CFun" p a b
     CNot a    -> showsUnaryWith showsTerm "CNot" p a
