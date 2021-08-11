@@ -214,9 +214,9 @@ getE = \case
 
 
 (<!) :: IxL a as -> as |- bs -> a
-i      <! (c :>> _) = i <! c
-IxLZ   <! (h :<< _) = h
-IxLS i <! (_ :<< c) = i <! c
+i      <! c :>> _ = i <! c
+IxLZ   <! h :<< _ = h
+IxLS i <! _ :<< c = i <! c
 
 infixr 2 <!
 
