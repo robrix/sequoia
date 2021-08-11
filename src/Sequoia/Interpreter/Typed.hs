@@ -1,5 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE TypeFamilies #-}
 module Sequoia.Interpreter.Typed
 ( -- * Terms
   Term(..)
@@ -21,6 +22,8 @@ module Sequoia.Interpreter.Typed
 , Δ(..)
 , (!>)
 , type (|-)(..)
+, E
+, R
 , IxL(..)
 , IxR(..)
 ) where
@@ -232,6 +235,15 @@ data (a |- b) e r where
 infix 3 |-
 infixr 5 :<<
 infixl 5 :>>
+
+
+type family E ctx where
+  E (_, as) = E as
+  E (One e) = e
+
+type family R ctx where
+  R (bs, _)    = R bs
+  R (Bottom r) = r
 
 
 data IxL a as where
