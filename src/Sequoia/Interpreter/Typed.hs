@@ -178,6 +178,7 @@ data Coval ctx a where
   ESum :: Coval ctx a -> Coval ctx b -> Coval ctx (a ⊕ b)
   EBottom :: Coval (as |- bs) (Bottom (R bs))
   EOne :: Coval (as |- bs) a -> Coval (as |- bs) (One (E as), a)
+  EPar :: Coval ctx a -> Coval ctx b -> Coval ctx (a ⅋ b)
   ETensor :: Coval ctx (a, b) -> Coval ctx (a ⊗ b)
   EFun :: Val ctx a -> Coval ctx b -> Coval ctx (a -> b)
 
@@ -207,6 +208,7 @@ quoteCoval = \case
   ESum f g  -> LSum (quoteCoval f) (quoteCoval g)
   EBottom   -> LBot
   EOne v    -> LOne (quoteCoval v)
+  EPar f g  -> LPar (quoteCoval f) (quoteCoval g)
   ETensor a -> LTensor (quoteCoval a)
   EFun a b  -> LFun (quoteVal a) (quoteCoval b)
 
@@ -265,6 +267,7 @@ execCoval ctx@(_Γ :|-: _Δ) = \case
   ESum a b  -> execCoval ctx a <--> execCoval ctx b
   EBottom   -> absurdN
   EOne a    -> execCoval ctx a . snd
+  EPar a b  -> execCoval ctx a <--> execCoval ctx b
   ETensor a -> execCoval ctx a . coerceConj
   EFun a b  -> \ f -> execCoval ctx b (f (execVal ctx a))
 
