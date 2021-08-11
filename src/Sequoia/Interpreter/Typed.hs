@@ -13,6 +13,9 @@ module Sequoia.Interpreter.Typed
   -- * Values
 , Val(..)
 , Coval(..)
+  -- * Quotation
+, quoteVal
+, quoteCoval
   -- * Definitional interpreter
 , evalDef
 , coevalDef
@@ -145,11 +148,11 @@ newtype Scope as bs a b = Scope { getScope :: Expr ((a < as) |- bs) b }
 -- Values
 
 data Val ctx a where
+  VNe :: IxL a as -> Val (as |- bs) a
   VTop :: Val ctx Top
   VWith :: Val ctx a -> Val ctx b -> Val ctx (a & b)
   VSum1 :: Val ctx a -> Val ctx (a ⊕ b)
   VSum2 :: Val ctx b -> Val ctx (a ⊕ b)
-  VBottom :: Val (as |- bs) (Bottom (R bs))
   VOne :: Val (as |- bs) (One (E as))
   VFun :: (Val (a < as |- bs) a -> Val ((a < as) |- bs) b) -> Val (as |- bs) (a -> b)
 
@@ -161,6 +164,35 @@ data Coval ctx a where
   EBottom :: Coval (as |- bs) (Bottom (R bs))
   EOne :: Coval (as |- bs) a -> Coval (as |- bs) (One (E as), a)
   EFun :: Val ctx a -> Coval ctx b -> Coval ctx (a -> b)
+
+bindVal :: (a -> b) -> (Val (x < as |- bs) x -> a) -> b
+bindVal with b = with (b (VNe IxLZ))
+
+
+-- Quotation
+
+quoteVal :: Val (as |- bs) a -> Expr (as |- bs) a
+quoteVal = \case
+  VNe l     -> Var l
+  VTop      -> RTop
+  VWith a b -> RWith (quoteVal a) (quoteVal b)
+  VSum1 a   -> RSum1 (quoteVal a)
+  VSum2 b   -> RSum2 (quoteVal b)
+  VOne      -> ROne
+  VFun f    -> RFun (quoteBinder f)
+
+quoteCoval :: Coval (as |- bs) a -> Coexpr (as |- bs) a
+quoteCoval = \case
+  EZero    -> LZero
+  EWith1 f -> LWith1 (quoteCoval f)
+  EWith2 g -> LWith2 (quoteCoval g)
+  ESum f g -> LSum (quoteCoval f) (quoteCoval g)
+  EBottom  -> LBot
+  EOne v   -> LOne (quoteCoval v)
+  EFun a b -> LFun (quoteVal a) (quoteCoval b)
+
+quoteBinder :: (Val (t < as |- bs) t -> Val ((t < as) |- bs) u) -> Scope as bs t u
+quoteBinder = Scope . bindVal quoteVal
 
 
 -- Definitional interpreter
