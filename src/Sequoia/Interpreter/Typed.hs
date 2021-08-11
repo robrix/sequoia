@@ -43,18 +43,18 @@ import Sequoia.Disjunction
 
 -- Terms
 
-data Term binder e r _Γ _Δ a where
-  TVar :: IxL a _Γ -> Term binder e r _Γ _Δ a
-  TTop :: Term binder e r _Γ _Δ Top
-  TWith :: Term binder e r _Γ _Δ a -> Term binder e r _Γ _Δ b -> Term binder e r _Γ _Δ (a & b)
-  TSum1 :: Term binder e r _Γ _Δ a -> Term binder e r _Γ _Δ (a ⊕ b)
-  TSum2 :: Term binder e r _Γ _Δ b -> Term binder e r _Γ _Δ (a ⊕ b)
-  TBot :: Term binder e r _Γ _Δ _Δ -> Term binder e r _Γ _Δ (_Δ `Either` Bottom Void)
-  TOne :: Term binder e r _Γ _Δ (One ())
-  TFun :: binder e r _Γ _Δ a b -> Term binder e r _Γ _Δ (a -> b)
-  TNot :: Coterm binder e r _Γ _Δ a -> Term binder e r _Γ _Δ (Not a r)
+data Term binder ctx a where
+  TVar :: IxL a _Γ -> Term binder ctx a
+  TTop :: Term binder ctx Top
+  TWith :: Term binder ctx a -> Term binder ctx b -> Term binder ctx (a & b)
+  TSum1 :: Term binder ctx a -> Term binder ctx (a ⊕ b)
+  TSum2 :: Term binder ctx b -> Term binder ctx (a ⊕ b)
+  TBot :: Term binder ctx _Δ -> Term binder ctx (_Δ `Either` Bottom Void)
+  TOne :: Term binder ctx (One ())
+  TFun :: binder _Γ _Δ a b -> Term binder (_Γ |- _Δ) (a -> b)
+  TNot :: Coterm binder ctx a -> Term binder ctx (Not a r)
 
-instance Show2 (binder e r _Γ _Δ) => Show (Term binder e r _Γ _Δ a) where
+instance Show2 (binder _Γ _Δ) => Show (Term binder (_Γ |- _Δ) a) where
   showsPrec p = \case
     TVar i    -> showsUnaryWith showsPrec "TVar" p i
     TTop      -> showString "TTop"
@@ -66,30 +66,30 @@ instance Show2 (binder e r _Γ _Δ) => Show (Term binder e r _Γ _Δ a) where
     TFun f    -> liftShowsPrec2 (const (const id)) (const id) (const (const id)) (const id) p f
     TNot k    -> showsUnaryWith showsPrec "TNot" p k
 
-data Coterm binder e r _Γ _Δ a where
-  CVar :: IxR _Δ a -> Coterm binder e r _Γ _Δ a
-  CZero :: Coterm binder e r _Γ _Δ Zero
-  CWith1 :: Coterm binder e r _Γ _Δ a -> Coterm binder e r _Γ _Δ (a & b)
-  CWith2 :: Coterm binder e r _Γ _Δ b -> Coterm binder e r _Γ _Δ (a & b)
-  CSum :: Coterm binder e r _Γ _Δ a -> Coterm binder e r _Γ _Δ b -> Coterm binder e r _Γ _Δ (a ⊕ b)
-  CBot :: Coterm binder e r _Γ _Δ (Bottom Void)
-  COne :: Coterm binder e r _Γ _Δ _Γ -> Coterm binder e r _Γ _Δ (One (), _Γ)
-  CFun :: Term binder e r _Γ _Δ a -> Coterm binder e r _Γ _Δ b -> Coterm binder e r _Γ _Δ (a -> b)
-  CNot :: Term binder e r _Γ _Δ a -> Coterm binder e r _Γ _Δ (Not a r)
+data Coterm binder ctx a where
+  CVar :: IxR _Δ a -> Coterm binder ctx a
+  CZero :: Coterm binder ctx Zero
+  CWith1 :: Coterm binder ctx a -> Coterm binder ctx (a & b)
+  CWith2 :: Coterm binder ctx b -> Coterm binder ctx (a & b)
+  CSum :: Coterm binder ctx a -> Coterm binder ctx b -> Coterm binder ctx (a ⊕ b)
+  CBot :: Coterm binder ctx (Bottom Void)
+  COne :: Coterm binder ctx _Γ -> Coterm binder ctx (One (), _Γ)
+  CFun :: Term binder ctx a -> Coterm binder ctx b -> Coterm binder ctx (a -> b)
+  CNot :: Term binder ctx a -> Coterm binder ctx (Not a r)
 
-deriving instance Show2 (binder e r _Γ _Δ) => Show (Coterm binder e r _Γ _Δ a)
+deriving instance Show2 (binder _Γ _Δ) => Show (Coterm binder (_Γ |- _Δ) a)
 
 
-newtype FO e r _Γ _Δ a b = FO (Term FO e r (a, _Γ) _Δ b)
+newtype FO _Γ _Δ a b = FO (Term FO ((a, _Γ) |- _Δ) b)
 
-instance Show2 (FO e r _Γ _Δ) where
+instance Show2 (FO _Γ _Δ) where
   liftShowsPrec2 _ _ _ _ p (FO t) = showsUnaryWith showsPrec "FO" p t
 
 
 class ShowTerm t where
   showsTerm :: Level -> Int -> t a -> ShowS
 
-instance ShowBinder binder => ShowTerm (Term binder e r _Γ _Δ) where
+instance ShowBinder binder => ShowTerm (Term binder (_Γ |- _Δ)) where
   showsTerm d p = \case
     TVar i    -> showsUnaryWith showsPrec "TVar" p i
     TTop      -> showString "TTop"
@@ -101,7 +101,7 @@ instance ShowBinder binder => ShowTerm (Term binder e r _Γ _Δ) where
     TFun f    -> showsUnaryWith (showsBinder d) "TFun" p f
     TNot k    -> showsUnaryWith (showsTerm d) "TNot" p k
 
-instance ShowBinder binder => ShowTerm (Coterm binder e r _Γ _Δ) where
+instance ShowBinder binder => ShowTerm (Coterm binder (_Γ |- _Δ)) where
   showsTerm d p = \case
     CVar i   -> showsUnaryWith showsPrec "CVar" p i
     CZero    -> showString "CZero"
@@ -114,7 +114,7 @@ instance ShowBinder binder => ShowTerm (Coterm binder e r _Γ _Δ) where
     CNot a   -> showsUnaryWith (showsTerm d) "CNot" p a
 
 class ShowBinder t where
-  showsBinder :: Level -> Int -> t e r _Γ _Δ a b -> ShowS
+  showsBinder :: Level -> Int -> t _Γ _Δ a b -> ShowS
 
 instance ShowBinder FO where
   showsBinder d p (FO t) = showsUnaryWith (showsTerm (succ d)) "FO" p t
