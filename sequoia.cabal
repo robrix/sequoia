@@ -143,6 +143,7 @@ library
     Sequoia.Cons
     Sequoia.Contextual
     Sequoia.DeBruijn
+    Sequoia.DeBruijn.Typed
     Sequoia.Disjunction
     Sequoia.Functor.Applicative
     Sequoia.Functor.C
