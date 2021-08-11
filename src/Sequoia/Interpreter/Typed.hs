@@ -2,15 +2,8 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE TypeFamilies #-}
 module Sequoia.Interpreter.Typed
-( -- * Terms
-  Term(..)
-, Coterm(..)
-, FO(..)
-, HO(..)
-, ShowTerm(..)
-, ShowBinder(..)
-  -- * Expressions
-, Expr(..)
+( -- * Expressions
+  Expr(..)
 , Coexpr(..)
 , Scope(..)
   -- * Values
@@ -31,11 +24,9 @@ module Sequoia.Interpreter.Typed
 ) where
 
 import Control.Applicative (liftA2)
-import Data.Functor.Classes
 import Sequoia.Conjunction
 import Sequoia.Connective.Bottom
 import Sequoia.Connective.Function
-import Sequoia.Connective.Not
 import Sequoia.Connective.One
 import Sequoia.Connective.Par
 import Sequoia.Connective.Sum
@@ -47,86 +38,6 @@ import Sequoia.Context
 import Sequoia.Disjunction
 import Sequoia.Profunctor
 import Sequoia.Profunctor.Continuation
-
--- Terms
-
-data Term binder ctx a where
-  TVar :: IxL a _Γ -> Term binder ctx a
-  TTop :: Term binder ctx Top
-  TWith :: Term binder ctx a -> Term binder ctx b -> Term binder ctx (a & b)
-  TSum1 :: Term binder ctx a -> Term binder ctx (a ⊕ b)
-  TSum2 :: Term binder ctx b -> Term binder ctx (a ⊕ b)
-  TBot :: Term binder (as |- bs) _Δ -> Term binder (as |- bs) (_Δ `Either` Bottom (R bs))
-  TOne :: Term binder (as |- bs) (One (E as))
-  TPar :: Term binder ctx (Either a b) -> Term binder ctx (a ⅋ b)
-  TTensor :: Term binder ctx a -> Term binder ctx b -> Term binder ctx (a ⊗ b)
-  TFun :: binder _Γ _Δ a b -> Term binder (_Γ |- _Δ) (Fun (R _Δ) a b)
-  TNot :: Coterm binder ctx a -> Term binder ctx (Not a r)
-
-instance ShowBinder binder => Show (Term binder (_Γ |- _Δ) a) where
-  showsPrec = showsTerm
-
-data Coterm binder ctx a where
-  CVar :: IxR _Δ a -> Coterm binder ctx a
-  CZero :: Coterm binder ctx Zero
-  CWith1 :: Coterm binder ctx a -> Coterm binder ctx (a & b)
-  CWith2 :: Coterm binder ctx b -> Coterm binder ctx (a & b)
-  CSum :: Coterm binder ctx a -> Coterm binder ctx b -> Coterm binder ctx (a ⊕ b)
-  CBot :: Coterm binder (as |- bs) (Bottom (R bs))
-  COne :: Coterm binder (as |- bs) _Γ -> Coterm binder (as |- bs) (One (E as), _Γ)
-  CPar :: Coterm binder ctx a -> Coterm binder ctx b -> Coterm binder ctx (a ⅋ b)
-  CTensor :: Coterm binder ctx (a, b) -> Coterm binder ctx (a ⊗ b)
-  CFun :: Term binder (_Γ |- _Δ) a -> Coterm binder (_Γ |- _Δ) b -> Coterm binder (_Γ |- _Δ) (Fun (R _Δ) a b)
-  CNot :: Term binder ctx a -> Coterm binder ctx (Not a r)
-
-deriving instance ShowBinder binder => Show (Coterm binder (_Γ |- _Δ) a)
-
-
-newtype FO _Γ _Δ a b = FO (Term FO ((a < _Γ) |- _Δ) b)
-
-newtype HO _Γ _Δ a b = HO (Term HO (_Γ |- _Δ) a -> Term HO ((a < _Γ) |- _Δ) b)
-
-
-class ShowTerm t where
-  showsTerm :: Int -> t a -> ShowS
-
-instance ShowBinder binder => ShowTerm (Term binder (_Γ |- _Δ)) where
-  showsTerm p = \case
-    TVar i      -> showsUnaryWith showsPrec "TVar" p i
-    TTop        -> showString "TTop"
-    TWith a b   -> showsBinaryWith showsTerm showsTerm "TWith" p a b
-    TSum1 a     -> showsUnaryWith showsTerm "TSum1" p a
-    TSum2 b     -> showsUnaryWith showsTerm "TSum2" p b
-    TBot a      -> showsUnaryWith showsTerm "TBot" p a
-    TOne        -> showString "TOne"
-    TPar a      -> showsUnaryWith showsTerm "TPar" p a
-    TTensor a b -> showsBinaryWith showsTerm showsTerm "TTensor" p a b
-    TFun f      -> showsUnaryWith showsBinder "TFun" p f
-    TNot k      -> showsUnaryWith showsTerm "TNot" p k
-
-instance ShowBinder binder => ShowTerm (Coterm binder (_Γ |- _Δ)) where
-  showsTerm p = \case
-    CVar i    -> showsUnaryWith showsPrec "CVar" p i
-    CZero     -> showString "CZero"
-    CWith1 f  -> showsUnaryWith showsTerm "CWith1" p f
-    CWith2 g  -> showsUnaryWith showsTerm "CWith2" p g
-    CSum f g  -> showsBinaryWith showsTerm showsTerm "CSum" p f g
-    CBot      -> showString "CBot"
-    COne a    -> showsUnaryWith showsTerm "COne" p a
-    CPar f g  -> showsBinaryWith showsTerm showsTerm "CPar" p f g
-    CTensor f -> showsUnaryWith showsTerm "CTensor" p f
-    CFun a b  -> showsBinaryWith showsTerm showsTerm "CFun" p a b
-    CNot a    -> showsUnaryWith showsTerm "CNot" p a
-
-class ShowBinder t where
-  showsBinder :: Int -> t _Γ _Δ a b -> ShowS
-
-instance ShowBinder FO where
-  showsBinder p (FO t) = showsUnaryWith showsTerm "FO" p t
-
-instance ShowBinder HO where
-  showsBinder p (HO t) = showsUnaryWith (\ p f -> showsTerm p (f (TVar IxLZ))) "HO" p t
-
 
 -- Expressions
 
