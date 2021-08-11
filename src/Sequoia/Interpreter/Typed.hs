@@ -16,21 +16,22 @@ module Sequoia.Interpreter.Typed
   -- * Definitional interpreter
 , evalDef
 , coevalDef
-  -- * Environments
+  -- * Sequents
 , type (|-)(..)
-, getE
+  -- * Empty contexts
 , Γ(..)
-, type (<)(..)
-, (<!)
-, IxL(..)
-, E
 , Δ(..)
+  -- * Context extensions
+, type (<)(..)
 , type(>)(..)
-, (!>)
+  -- * De Bruijn indices/levels
+, IxL(..)
 , IxR(..)
-, R
 , LvL(..)
 , type (⊆)(..)
+  -- * Context abstractions
+, LCtx(..)
+, RCtx(..)
 , Cardinality(..)
 ) where
 
@@ -150,7 +151,7 @@ data Coexpr ctx a where
 
 deriving instance Show (Coexpr ctx a)
 
-newtype Scope as bs a b = Scope { getScope :: Expr ((a, as) |- bs) b }
+newtype Scope as bs a b = Scope { getScope :: Expr ((a < as) |- bs) b }
   deriving (Show)
 
 
@@ -177,20 +178,20 @@ data Coval ctx a where
 
 -- Definitional interpreter
 
-evalDef :: as |- bs -> Expr (as |- bs) a -> a
-evalDef ctx = \case
-  Var i     -> i <! ctx
+evalDef :: LCtx as => as |- bs -> Expr (as |- bs) a -> a
+evalDef ctx@(_Γ :|-: _Δ) = \case
+  Var i     -> i <! _Γ
   RTop      -> Top
   RWith a b -> evalDef ctx a >--< evalDef ctx b
   RSum1 a   -> InL (evalDef ctx a)
   RSum2 b   -> InR (evalDef ctx b)
   RBot a    -> Left (evalDef ctx a)
-  ROne      -> One (getE ctx)
-  RFun b    -> \ a -> evalDef (a :<< ctx) (getScope b)
+  ROne      -> One (getE _Γ)
+  RFun b    -> \ a -> evalDef (a <| ctx) (getScope b)
 
-coevalDef :: as |- bs -> Coexpr (as |- bs) a -> (a -> R bs)
-coevalDef ctx = \case
-  Covar i  -> ctx !> i
+coevalDef :: (LCtx as, RCtx bs) => as |- bs -> Coexpr (as |- bs) a -> (a -> R bs)
+coevalDef ctx@(_Γ :|-: _Δ) = \case
+  Covar i  -> _Δ !> i
   LZero    -> absurdP
   LWith1 a -> coevalDef ctx a . exl
   LWith2 b -> coevalDef ctx b . exr
@@ -200,80 +201,58 @@ coevalDef ctx = \case
   LFun a b -> \ f -> coevalDef ctx b (f (evalDef ctx a))
 
 
--- Environments
+-- Sequents
 
-data a |- b where
-  ΓΔ :: Γ e -> Γ e |- Δ r
-  (:<<) :: a -> as |- bs -> (a, as) |- bs
-  (:>>) :: as |- bs -> (b -> R bs) -> as |- (bs, b)
+data as |- bs = as :|-: bs
 
-infix 3 |-
-infixr 5 :<<
-infixl 5 :>>
+infix 3 |-, :|-:
 
-getE :: as |- bs -> E as
-getE = \case
-  ΓΔ (Γ e) -> e
-  _ :<< s  -> getE s
-  s :>> _  -> getE s
+(|-) :: as -> bs -> as |- bs
+(|-) = (:|-:)
+
+(<|) :: a -> as |- bs -> a < as |- bs
+a <| (as :|-: bs) = a :< as |- bs
 
 
-newtype Γ e = Γ e
+-- Empty contexts
+
+newtype Γ e = Γ { getΓ :: e }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-
-data a < as = a :< as
-  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-
-infixr 4 <, :<
-
-(<!) :: IxL a as -> as |- bs -> a
-i      <! c :>> _ = i <! c
-IxLZ   <! h :<< _ = h
-IxLS i <! _ :<< c = i <! c
-
-infixr 2 <!
-
-data IxL a as where
-  IxLZ :: IxL a (a, b)
-  IxLS :: IxL c b -> IxL c (a, b)
-
-deriving instance Show (IxL as a)
-
-type family E ctx where
-  E (_, as) = E as
-  E (Γ e)   = e
-
 
 newtype Δ r = Δ r
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
-data as > a = as :> a
+
+-- Context extensions
+
+data a < b = a :< b
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+
+infixr 4 <, :<, <|
+
+data as > a = as :> (a -> R as)
 
 infixl 4 >, :>
 
-(!>) :: as |- bs -> IxR bs b -> (b -> R bs)
-delta !> ix = case (ix, delta) of
-  (i,      _ :<< c) -> c !> i
-  (IxRZ,   _ :>> r) -> r
-  (IxRS i, c :>> _) -> c !> i
 
-infixl 2 !>
+-- De Bruijn indices/levels
+
+data IxL a as where
+  IxLZ :: IxL a (a < b)
+  IxLS :: IxL c b -> IxL c (a < b)
+
+deriving instance Show (IxL as a)
 
 data IxR as a where
-  IxRZ :: IxR (a, b) b
-  IxRS :: IxR a c -> IxR (a, b) c
+  IxRZ :: IxR (a > b) b
+  IxRS :: IxR a c -> IxR (a > b) c
 
 deriving instance Show (IxR as a)
 
-type family R ctx where
-  R (bs, _)    = R bs
-  R (Bottom r) = r
-
 
 data LvL a as where
-  LvLZ :: LvL a (a, One e)
-  LvLS :: LvL a as -> LvL b (b, as)
+  LvLZ :: LvL a (a < Γ e)
+  LvLS :: LvL a as -> LvL b (b < as)
 
 
 class sub ⊆ sup where
@@ -284,8 +263,49 @@ instance ctx ⊆ ctx where
     LvLZ   -> IxLZ
     LvLS _ -> IxLZ
 
-instance ctx ⊆ ctx' => ctx ⊆ (a, ctx') where
+instance ctx ⊆ ctx' => ctx ⊆ (a < ctx') where
   lvToIx = IxLS . lvToIx
+
+
+-- Context abstractions
+
+class LCtx c where
+  type E c
+  getE :: c -> E c
+
+  (<!) :: IxL a c -> c -> a
+
+  infixr 2 <!
+
+instance LCtx (Γ e) where
+  type E (Γ e) = e
+  getE = getΓ
+  i <! _ = case i of {}
+
+instance LCtx as => LCtx (a < as) where
+  type E (a < as) = E as
+  getE (_ :< t) = getE t
+  IxLZ   <! h :< _ = h
+  IxLS i <! _ :< t = i <! t
+
+
+class RCtx c where
+  type R c
+
+  (!>) :: c -> IxR c a -> (a -> R c)
+
+  infixl 2 !>
+
+instance RCtx (Δ r) where
+  type R (Δ r) = r
+
+  _ !> i = case i of {}
+
+instance RCtx as => RCtx (as > a) where
+  type R (as > a) = R as
+
+  _  :> a !> IxRZ   = a
+  as :> _ !> IxRS i = as !> i
 
 
 class Cardinality ctx where
