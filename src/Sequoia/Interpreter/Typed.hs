@@ -52,7 +52,7 @@ data Term binder ctx a where
   TFun :: binder _Γ _Δ a b -> Term binder (_Γ |- _Δ) (a -> b)
   TNot :: Coterm binder ctx a -> Term binder ctx (Not a r)
 
-instance Show2 (binder _Γ _Δ) => Show (Term binder (_Γ |- _Δ) a) where
+instance ShowBinder binder => Show (Term binder (_Γ |- _Δ) a) where
   showsPrec p = \case
     TVar i    -> showsUnaryWith showsPrec "TVar" p i
     TTop      -> showString "TTop"
@@ -61,7 +61,7 @@ instance Show2 (binder _Γ _Δ) => Show (Term binder (_Γ |- _Δ) a) where
     TSum2 b   -> showsUnaryWith showsPrec "TSum2" p b
     TBot a    -> showsUnaryWith showsPrec "TBot" p a
     TOne      -> showString "TOne"
-    TFun f    -> liftShowsPrec2 (const (const id)) (const id) (const (const id)) (const id) p f
+    TFun f    -> showsBinder p f
     TNot k    -> showsUnaryWith showsPrec "TNot" p k
 
 data Coterm binder ctx a where
@@ -75,7 +75,7 @@ data Coterm binder ctx a where
   CFun :: Term binder ctx a -> Coterm binder ctx b -> Coterm binder ctx (a -> b)
   CNot :: Term binder ctx a -> Coterm binder ctx (Not a r)
 
-deriving instance Show2 (binder _Γ _Δ) => Show (Coterm binder (_Γ |- _Δ) a)
+deriving instance ShowBinder binder => Show (Coterm binder (_Γ |- _Δ) a)
 
 
 newtype FO _Γ _Δ a b = FO (Term FO ((a < _Γ) |- _Δ) b)
