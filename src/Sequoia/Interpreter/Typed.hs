@@ -31,6 +31,7 @@ module Sequoia.Interpreter.Typed
 , R
 , LvL(..)
 , type (⊆)(..)
+, Cardinality(..)
 ) where
 
 import Data.Functor.Classes
@@ -285,3 +286,16 @@ instance ctx ⊆ ctx where
 
 instance ctx ⊆ ctx' => ctx ⊆ (a, ctx') where
   lvToIx = IxLS . lvToIx
+
+
+class Cardinality ctx where
+  cardinality :: i ctx -> Int
+
+instance Cardinality (Γ e) where
+  cardinality _ = 0
+
+instance Cardinality as => Cardinality (a < as) where
+  cardinality c = 1 + cardinality (tailOf c)
+
+tailOf :: i (a < as) -> [as]
+tailOf _ = []
