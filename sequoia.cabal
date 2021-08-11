@@ -141,6 +141,7 @@ library
     Sequoia.Connective.XOr
     Sequoia.Connective.Zero
     Sequoia.Cons
+    Sequoia.Context
     Sequoia.Contextual
     Sequoia.DeBruijn
     Sequoia.DeBruijn.Typed
