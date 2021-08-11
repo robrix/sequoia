@@ -20,10 +20,12 @@ module Sequoia.Interpreter.Typed
 , type (|-)(..)
 , getE
 , Γ(..)
+, type (<)(..)
 , (<!)
 , IxL(..)
 , E
 , Δ(..)
+, type(>)(..)
 , (!>)
 , IxR(..)
 , R
@@ -218,6 +220,11 @@ getE = \case
 newtype Γ e = Γ e
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
+data a < as = a :< as
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+
+infixr 4 <, :<
+
 (<!) :: IxL a as -> as |- bs -> a
 i      <! c :>> _ = i <! c
 IxLZ   <! h :<< _ = h
@@ -238,6 +245,11 @@ type family E ctx where
 
 newtype Δ r = Δ r
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+
+data as > a = as :> a
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+
+infixl 4 >, :>
 
 (!>) :: as |- bs -> IxR bs b -> (b -> R bs)
 delta !> ix = case (ix, delta) of
