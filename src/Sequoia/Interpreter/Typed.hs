@@ -212,6 +212,8 @@ infixr 5 <|
 IxLZ   <! (h :< _ :|-: _Δ) = h
 IxLS i <! (_ :< t :|-: _Δ) = i <! (t |- _Δ)
 
+infixr 2 <!
+
 
 data Δ r as where
   Δ :: r -> Δ r (Bottom Void)
@@ -222,12 +224,14 @@ infixl 5 :>
 (!>) :: Γ as |- Δ r bs -> IxR bs b -> (b -> r)
 delta !> ix = case (ix, delta) of
   (IxRZ,   _Γ :|-: _ :> r) -> r
-  (IxRS i, _Γ :|-: l :> _) -> (_Γ :|-: l) !> i
+  (IxRS i, _Γ :|-: l :> _) -> _Γ :|-: l !> i
+
+infixl 2 !>
 
 
 data a :|-: b = a :|-: b
 
-infix 2 :|-:, |-
+infix 3 :|-:, |-
 
 type (|-) = (:|-:)
 
