@@ -134,6 +134,7 @@ data Expr ctx a where
   RSum2 :: Expr ctx b -> Expr ctx (a ⊕ b)
   RBot :: Expr (as |- bs) _Δ -> Expr (as |- bs) (Either _Δ (Bottom (R bs)))
   ROne :: Expr (as |- bs) (One (E as))
+  RPar :: Expr ctx (Either a b) -> Expr ctx (a ⅋ b)
   RTensor :: Expr ctx a -> Expr ctx b -> Expr ctx (a ⊗ b)
   RFun :: Scope as bs a b -> Expr (as |- bs) (a -> b)
 
@@ -221,6 +222,7 @@ evalDef ctx@(_Γ :|-: _Δ) = \case
   RSum2 b     -> InR (evalDef ctx b)
   RBot a      -> Left (evalDef ctx a)
   ROne        -> One (getE _Γ)
+  RPar a      -> coerceDisj (evalDef ctx a)
   RTensor a b -> evalDef ctx a >--< evalDef ctx b
   RFun b      -> \ a -> evalDef (a <| ctx) (getScope b)
 
