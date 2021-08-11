@@ -69,8 +69,8 @@ instance Show (Index a as) where
   showsPrec p = showsUnaryWith showsPrec "Index" p . getIndex
 
 
-indexToLevel :: Int -> Index a as -> Level a as
-indexToLevel cardinality (Index index) = Level $ cardinality - index - 1
+indexToLevel :: Cardinality as =>Index a as -> Level a as
+indexToLevel i@(Index index) = Level $ cardinality i - index - 1
 
 
 -- Typed de Bruijn levels
@@ -88,8 +88,8 @@ instance Show (Level a as) where
   showsPrec p = showsUnaryWith showsPrec "Level" p . getLevel
 
 
-levelToIndex :: Int -> Level a as -> Index a as
-levelToIndex cardinality (Level level) = Index $ cardinality - level - 1
+levelToIndex :: Cardinality as => Level a as -> Index a as
+levelToIndex l@(Level level) = Index $ cardinality l - level - 1
 
 
 class sub ⊆ sup where
