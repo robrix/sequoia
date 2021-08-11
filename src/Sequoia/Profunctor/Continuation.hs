@@ -21,6 +21,8 @@ module Sequoia.Profunctor.Continuation
 , dn
 , (=<<^)
 , (^>>=)
+, (•=<<)
+, (>>=•)
 , DN(..)
   -- * Triple negation
 , type (•••)
@@ -123,6 +125,17 @@ infixr 1 =<<^
 m ^>>= f = K (\ k -> m • K ((• k) . f))
 
 infixl 1 ^>>=
+
+
+(•=<<) :: Monad m => (a • m b) -> (m a -> m b)
+(•=<<) = (=<<) . (•)
+
+infixr 1 •=<<
+
+(>>=•) :: Monad m => m a -> (a • m b) -> m b
+(>>=•) = (. (•)) . (>>=)
+
+infixl 1 >>=•
 
 
 newtype DN r a = DN { runDN :: a •• r }
