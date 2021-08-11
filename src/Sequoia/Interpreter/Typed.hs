@@ -151,7 +151,7 @@ evalDef ctx@(_Γ :|-: _Δ) = \case
 
 coevalDef :: (LCtx as, RCtx bs) => as |- bs -> Coexpr (as |- bs) a -> (a • R bs)
 coevalDef ctx@(_Γ :|-: _Δ) = \case
-  Covar i   -> K (_Δ !> i)
+  Covar i   -> _Δ !> i
   LZero     -> K absurdP
   LWith1 a  -> exlL (coevalDef ctx a)
   LWith2 b  -> exrL (coevalDef ctx b)

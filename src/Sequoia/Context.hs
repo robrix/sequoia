@@ -24,6 +24,7 @@ module Sequoia.Context
 ) where
 
 import Data.Functor.Classes
+import Sequoia.Profunctor.Continuation
 
 -- Empty contexts
 
@@ -41,7 +42,7 @@ data a < b = a :< b
 
 infixr 4 <, :<
 
-data as > a = as :> (a -> R as)
+data as > a = as :> (a • R as)
 
 infixl 4 >, :>
 
@@ -129,7 +130,7 @@ instance LCtx as => LCtx (a < as) where
 class RCtx c where
   type R c
 
-  (!>) :: c -> IxR c a -> (a -> R c)
+  (!>) :: c -> IxR c a -> (a • R c)
 
   infixl 2 !>
 
