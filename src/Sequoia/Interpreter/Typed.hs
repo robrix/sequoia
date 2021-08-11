@@ -173,7 +173,7 @@ data Coval as bs a where
 
 -- Definitional interpreter
 
-evalDef :: (as |- bs) e r -> Expr as bs a -> a
+evalDef :: as |- bs -> Expr as bs a -> a
 evalDef ctx = \case
   Var i     -> i <! ctx
   RTop      -> Top
@@ -184,7 +184,7 @@ evalDef ctx = \case
   ROne      -> One ()
   RFun b    -> \ a -> evalDef (a :<< ctx) (getScope b)
 
-coevalDef :: (as |- bs) e r -> Coexpr as bs a -> (a -> r)
+coevalDef :: as |- bs -> Coexpr as bs a -> (a -> R bs)
 coevalDef ctx = \case
   Covar i  -> ctx !> i
   LZero    -> absurdP
@@ -204,7 +204,7 @@ data Γ as where
 
 infixr 5 :<
 
-(<!) :: IxL a as -> (as |- bs) e r -> a
+(<!) :: IxL a as -> as |- bs -> a
 i      <! (c :>> _) = i <! c
 IxLZ   <! (h :<< _) = h
 IxLS i <! (_ :<< c) = i <! c
@@ -218,7 +218,7 @@ data Δ as where
 
 infixl 5 :>
 
-(!>) :: (as |- bs) e r -> IxR bs b -> (b -> r)
+(!>) :: as |- bs -> IxR bs b -> (b -> R bs)
 delta !> ix = case (ix, delta) of
   (i,      _ :<< c) -> c !> i
   (IxRZ,   _ :>> r) -> r
@@ -227,10 +227,10 @@ delta !> ix = case (ix, delta) of
 infixl 2 !>
 
 
-data (a |- b) e r where
-  ΓΔ :: (One e |- Bottom r) e r
-  (:<<) :: a -> (as |- bs) e r -> ((a, as) |- bs) e r
-  (:>>) :: (as |- bs) e r -> (b -> r) -> (as |- (bs, b)) e r
+data a |- b where
+  ΓΔ :: One e |- Bottom r
+  (:<<) :: a -> as |- bs -> (a, as) |- bs
+  (:>>) :: as |- bs -> (b -> R bs) -> as |- (bs, b)
 
 infix 3 |-
 infixr 5 :<<
