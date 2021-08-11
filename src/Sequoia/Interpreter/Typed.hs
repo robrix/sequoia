@@ -38,7 +38,6 @@ import Sequoia.Connective.Sum
 import Sequoia.Connective.Top
 import Sequoia.Connective.With
 import Sequoia.Connective.Zero
-import Sequoia.DeBruijn
 import Sequoia.Disjunction
 
 -- Terms
@@ -87,37 +86,37 @@ instance Show2 (FO _Γ _Δ) where
 
 
 class ShowTerm t where
-  showsTerm :: Level -> Int -> t a -> ShowS
+  showsTerm :: Int -> t a -> ShowS
 
 instance ShowBinder binder => ShowTerm (Term binder (_Γ |- _Δ)) where
-  showsTerm d p = \case
+  showsTerm p = \case
     TVar i    -> showsUnaryWith showsPrec "TVar" p i
     TTop      -> showString "TTop"
-    TWith a b -> showsBinaryWith (showsTerm d) (showsTerm d) "TWith" p a b
-    TSum1 a   -> showsUnaryWith (showsTerm d) "TSum1" p a
-    TSum2 b   -> showsUnaryWith (showsTerm d) "TSum2" p b
-    TBot a    -> showsUnaryWith (showsTerm d) "TBot" p a
+    TWith a b -> showsBinaryWith showsTerm showsTerm "TWith" p a b
+    TSum1 a   -> showsUnaryWith showsTerm "TSum1" p a
+    TSum2 b   -> showsUnaryWith showsTerm "TSum2" p b
+    TBot a    -> showsUnaryWith showsTerm "TBot" p a
     TOne      -> showString "TOne"
-    TFun f    -> showsUnaryWith (showsBinder d) "TFun" p f
-    TNot k    -> showsUnaryWith (showsTerm d) "TNot" p k
+    TFun f    -> showsUnaryWith showsBinder "TFun" p f
+    TNot k    -> showsUnaryWith showsTerm "TNot" p k
 
 instance ShowBinder binder => ShowTerm (Coterm binder (_Γ |- _Δ)) where
-  showsTerm d p = \case
+  showsTerm p = \case
     CVar i   -> showsUnaryWith showsPrec "CVar" p i
     CZero    -> showString "CZero"
-    CWith1 f -> showsUnaryWith (showsTerm d) "CWith1" p f
-    CWith2 g -> showsUnaryWith (showsTerm d) "CWith2" p g
-    CSum f g -> showsBinaryWith (showsTerm d) (showsTerm d) "CSum" p f g
+    CWith1 f -> showsUnaryWith showsTerm "CWith1" p f
+    CWith2 g -> showsUnaryWith showsTerm "CWith2" p g
+    CSum f g -> showsBinaryWith showsTerm showsTerm "CSum" p f g
     CBot     -> showString "CBot"
-    COne a   -> showsUnaryWith (showsTerm d) "COne" p a
-    CFun a b -> showsBinaryWith (showsTerm d) (showsTerm d) "CFun" p a b
-    CNot a   -> showsUnaryWith (showsTerm d) "CNot" p a
+    COne a   -> showsUnaryWith showsTerm "COne" p a
+    CFun a b -> showsBinaryWith showsTerm showsTerm "CFun" p a b
+    CNot a   -> showsUnaryWith showsTerm "CNot" p a
 
 class ShowBinder t where
-  showsBinder :: Level -> Int -> t _Γ _Δ a b -> ShowS
+  showsBinder :: Int -> t _Γ _Δ a b -> ShowS
 
 instance ShowBinder FO where
-  showsBinder d p (FO t) = showsUnaryWith (showsTerm (succ d)) "FO" p t
+  showsBinder p (FO t) = showsUnaryWith showsTerm "FO" p t
 
 
 -- Expressions
