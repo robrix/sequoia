@@ -25,6 +25,7 @@ module Sequoia.Interpreter.Typed
 , (|-)
 , IxL(..)
 , IxR(..)
+, (:|-)(..)
 ) where
 
 import Data.Functor.Classes
@@ -250,3 +251,9 @@ data IxR as a where
   IxRS :: IxR a c -> IxR (a, b) c
 
 deriving instance Show (IxR as a)
+
+
+data (a :|- b) e r where
+  ΓΔ :: (One e :|- Bottom r) e r
+  (:<<) :: a -> (as :|- bs) e r -> ((a, as) :|- bs) e r
+  (:>>) :: (as :|- bs) e r -> b -> (as :|- (bs, b)) e r
