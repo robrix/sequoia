@@ -198,7 +198,7 @@ coevalDef ctx = \case
 -- Environments
 
 data a |- b where
-  ΓΔ :: e -> One e |- Bottom r
+  ΓΔ :: Γ e -> One e |- Bottom r
   (:<<) :: a -> as |- bs -> (a, as) |- bs
   (:>>) :: as |- bs -> (b -> R bs) -> as |- (bs, b)
 
@@ -208,10 +208,13 @@ infixl 5 :>>
 
 getE :: as |- bs -> E as
 getE = \case
-  ΓΔ e    -> e
-  _ :<< s -> getE s
-  s :>> _ -> getE s
+  ΓΔ (Γ e) -> e
+  _ :<< s  -> getE s
+  s :>> _  -> getE s
 
+
+newtype Γ e = Γ e
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
 (<!) :: IxL a as -> as |- bs -> a
 i      <! c :>> _ = i <! c
