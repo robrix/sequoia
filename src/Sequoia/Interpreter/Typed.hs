@@ -173,7 +173,7 @@ data Coval as bs a where
 -- Definitional interpreter
 
 evalDef :: Γ as |- Δ r bs -> Expr as bs a -> a
-evalDef ctx@(_Γ :|-: _Δ) = \case
+evalDef ctx = \case
   Var i     -> i <! ctx
   RTop      -> Top
   RWith a b -> evalDef ctx a >--< evalDef ctx b
@@ -181,10 +181,10 @@ evalDef ctx@(_Γ :|-: _Δ) = \case
   RSum2 b   -> InR (evalDef ctx b)
   RBot a    -> Left (evalDef ctx a)
   ROne      -> One ()
-  RFun b    -> \ a -> evalDef (a :< _Γ :|-: _Δ) (getScope b)
+  RFun b    -> \ a -> evalDef (a <| ctx) (getScope b)
 
 coevalDef :: Γ as |- Δ r bs -> Coexpr as bs a -> (a -> r)
-coevalDef ctx@(_ :|-: _Δ) = \case
+coevalDef ctx = \case
   Covar i  -> ctx !> i
   LZero    -> absurdP
   LWith1 a -> coevalDef ctx a . exl
@@ -202,6 +202,11 @@ data Γ as where
   (:<) :: a -> Γ b -> Γ (a, b)
 
 infixr 5 :<
+
+(<|) :: a -> Γ as |- Δ r bs -> Γ (a, as) |- Δ r bs
+a <| (as :|-: bs) = a :< as |- bs
+
+infixr 5 <|
 
 (<!) :: IxL a as -> Γ as |- Δ r bs -> a
 IxLZ   <! (h :< _ :|-: _Δ) = h
