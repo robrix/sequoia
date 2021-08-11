@@ -32,5 +32,6 @@ newtype Level a as = Level { getLevel :: Int }
 instance Show (Level a as) where
   showsPrec p = showsUnaryWith showsPrec "Level" p . getLevel
 
+
 levelToIndex :: Int -> Level a as -> Index a as
 levelToIndex cardinality (Level level) = Index $ cardinality - level - 1
