@@ -29,6 +29,7 @@ import Sequoia.Connective.Bottom
 import Sequoia.Connective.Function
 import Sequoia.Connective.One
 import Sequoia.Connective.Par
+import Sequoia.Connective.Subtraction
 import Sequoia.Connective.Sum
 import Sequoia.Connective.Tensor
 import Sequoia.Connective.Top
@@ -52,6 +53,7 @@ data Expr ctx a where
   RPar :: Expr ctx (Either a b) -> Expr ctx (a ⅋ b)
   RTensor :: Expr ctx a -> Expr ctx b -> Expr ctx (a ⊗ b)
   RFun :: Scope as bs a b -> Expr (as |- bs) (Fun (R bs) a b)
+  RSub :: Expr (as |- bs) a -> Coexpr (as |- bs) b -> Expr (as |- bs) (Sub (R bs) b a)
 
 deriving instance Show (Expr ctx a)
 
@@ -133,7 +135,7 @@ quoteBinder = Scope . bindVal quoteVal
 
 -- Definitional interpreter
 
-evalDef :: LCtx as => as |- bs -> Expr (as |- bs) a -> a
+evalDef :: (LCtx as, RCtx bs) => as |- bs -> Expr (as |- bs) a -> a
 evalDef ctx@(_Γ :|-: _Δ) = \case
   Var i       -> i <! _Γ
   RTop        -> Top
@@ -145,6 +147,7 @@ evalDef ctx@(_Γ :|-: _Δ) = \case
   RPar a      -> coerceDisj (evalDef ctx a)
   RTensor a b -> evalDef ctx a >--< evalDef ctx b
   RFun b      -> fun' (\ a -> evalDef (a <| ctx) (getScope b))
+  RSub a b    -> evalDef ctx a :-< K (coevalDef ctx b)
 
 coevalDef :: (LCtx as, RCtx bs) => as |- bs -> Coexpr (as |- bs) a -> (a -> R bs)
 coevalDef ctx@(_Γ :|-: _Δ) = \case
