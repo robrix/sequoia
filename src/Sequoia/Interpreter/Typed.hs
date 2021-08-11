@@ -6,6 +6,7 @@ module Sequoia.Interpreter.Typed
   Term(..)
 , Coterm(..)
 , FO(..)
+, HO(..)
   -- * Expressions
 , Expr(..)
 , Coexpr(..)
@@ -79,6 +80,9 @@ newtype FO _Γ _Δ a b = FO (Term FO ((a < _Γ) |- _Δ) b)
 
 instance Show2 (FO _Γ _Δ) where
   liftShowsPrec2 _ _ _ _ p (FO t) = showsUnaryWith showsPrec "FO" p t
+
+
+newtype HO _Γ _Δ a b = HO (Term HO (_Γ |- _Δ) a -> Term HO ((a < _Γ) |- _Δ) b)
 
 
 class ShowTerm t where
