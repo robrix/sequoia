@@ -26,6 +26,7 @@ module Sequoia.Interpreter.Typed
 , IxR(..)
 , R
 , LvL(..)
+, type (⊆)(..)
 ) where
 
 import Data.Functor.Classes
@@ -253,3 +254,15 @@ type family R ctx where
 data LvL a as where
   LvLZ :: LvL (One e) (One e)
   LvLS :: LvL a as -> LvL b (b, as)
+
+
+class sub ⊆ sup where
+  lvToIx :: LvL a sub -> IxL a sup
+
+instance ctx ⊆ ctx where
+  lvToIx = \case
+    LvLZ   -> IxLZ
+    LvLS _ -> IxLZ
+
+instance ctx ⊆ ctx' => ctx ⊆ (a, ctx') where
+  lvToIx = IxLS . lvToIx
