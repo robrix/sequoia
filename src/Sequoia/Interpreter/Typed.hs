@@ -91,7 +91,7 @@ instance ShowBinder binder => ShowTerm (Term binder (_Γ |- _Δ)) where
     TSum2 b     -> showsUnaryWith showsTerm "TSum2" p b
     TBot a      -> showsUnaryWith showsTerm "TBot" p a
     TOne        -> showString "TOne"
-    TTensor a b -> showsBinaryWith showsTerm showsTerm "TWith" p a b
+    TTensor a b -> showsBinaryWith showsTerm showsTerm "TTensor" p a b
     TFun f      -> showsUnaryWith showsBinder "TFun" p f
     TNot k      -> showsUnaryWith showsTerm "TNot" p k
 
