@@ -7,6 +7,7 @@ module Sequoia.Connective.Function
 , fun
 , funExp
   -- * Elimination
+, appFun
 , runFunExp
 ) where
 
@@ -45,6 +46,9 @@ funExp = coerce
 
 
 -- Elimination
+
+appFun :: Fun r a b -> a -> DN r b
+appFun f a = DN (K ((• a) . getFun f))
 
 runFunExp :: Fun r a b -> Exp r a b
 runFunExp = coerce
