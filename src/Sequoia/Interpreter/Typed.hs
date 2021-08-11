@@ -167,6 +167,7 @@ data Val ctx a where
   VSum1 :: Val ctx a -> Val ctx (a ⊕ b)
   VSum2 :: Val ctx b -> Val ctx (a ⊕ b)
   VOne :: Val (as |- bs) (One (E as))
+  VPar :: Val ctx (Either a b) -> Val ctx (a ⅋ b)
   VTensor :: Val ctx a -> Val ctx b -> Val ctx (a ⊗ b)
   VFun :: (Val (a < as |- bs) a -> Val ((a < as) |- bs) b) -> Val (as |- bs) (a -> b)
 
@@ -194,6 +195,7 @@ quoteVal = \case
   VSum1 a     -> RSum1 (quoteVal a)
   VSum2 b     -> RSum2 (quoteVal b)
   VOne        -> ROne
+  VPar a      -> RPar (quoteVal a)
   VTensor a b -> RTensor (quoteVal a) (quoteVal b)
   VFun f      -> RFun (quoteBinder f)
 
@@ -251,6 +253,7 @@ execVal ctx@(_Γ :|-: _Δ) = \case
   VSum1 a     -> InL (execVal ctx a)
   VSum2 b     -> InR (execVal ctx b)
   VOne        -> One (getE _Γ)
+  VPar a      -> coerceDisj (execVal ctx a)
   VTensor a b -> execVal ctx a >--< execVal ctx b
   VFun f      -> \ a -> bindVal (execVal (a <| ctx)) f
 
