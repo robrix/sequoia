@@ -36,6 +36,7 @@ import Sequoia.Connective.Bottom
 import Sequoia.Connective.Not
 import Sequoia.Connective.One
 import Sequoia.Connective.Sum
+import Sequoia.Connective.Tensor
 import Sequoia.Connective.Top
 import Sequoia.Connective.With
 import Sequoia.Connective.Zero
@@ -52,20 +53,22 @@ data Term binder ctx a where
   TSum2 :: Term binder ctx b -> Term binder ctx (a ⊕ b)
   TBot :: Term binder (as |- bs) _Δ -> Term binder (as |- bs) (_Δ `Either` Bottom (R bs))
   TOne :: Term binder (as |- bs) (One (E as))
+  TTensor :: Term binder ctx a -> Term binder ctx b -> Term binder ctx (a ⊗ b)
   TFun :: binder _Γ _Δ a b -> Term binder (_Γ |- _Δ) (a -> b)
   TNot :: Coterm binder ctx a -> Term binder ctx (Not a r)
 
 instance ShowBinder binder => Show (Term binder (_Γ |- _Δ) a) where
   showsPrec p = \case
-    TVar i    -> showsUnaryWith showsPrec "TVar" p i
-    TTop      -> showString "TTop"
-    TWith a b -> showsBinaryWith showsPrec showsPrec "TWith" p a b
-    TSum1 a   -> showsUnaryWith showsPrec "TSum1" p a
-    TSum2 b   -> showsUnaryWith showsPrec "TSum2" p b
-    TBot a    -> showsUnaryWith showsPrec "TBot" p a
-    TOne      -> showString "TOne"
-    TFun f    -> showsBinder p f
-    TNot k    -> showsUnaryWith showsPrec "TNot" p k
+    TVar i      -> showsUnaryWith showsPrec "TVar" p i
+    TTop        -> showString "TTop"
+    TWith a b   -> showsBinaryWith showsPrec showsPrec "TWith" p a b
+    TSum1 a     -> showsUnaryWith showsPrec "TSum1" p a
+    TSum2 b     -> showsUnaryWith showsPrec "TSum2" p b
+    TBot a      -> showsUnaryWith showsPrec "TBot" p a
+    TOne        -> showString "TOne"
+    TTensor a b -> showsBinaryWith showsPrec showsPrec "TWith" p a b
+    TFun f      -> showsBinder p f
+    TNot k      -> showsUnaryWith showsPrec "TNot" p k
 
 data Coterm binder ctx a where
   CVar :: IxR _Δ a -> Coterm binder ctx a
@@ -91,15 +94,16 @@ class ShowTerm t where
 
 instance ShowBinder binder => ShowTerm (Term binder (_Γ |- _Δ)) where
   showsTerm p = \case
-    TVar i    -> showsUnaryWith showsPrec "TVar" p i
-    TTop      -> showString "TTop"
-    TWith a b -> showsBinaryWith showsTerm showsTerm "TWith" p a b
-    TSum1 a   -> showsUnaryWith showsTerm "TSum1" p a
-    TSum2 b   -> showsUnaryWith showsTerm "TSum2" p b
-    TBot a    -> showsUnaryWith showsTerm "TBot" p a
-    TOne      -> showString "TOne"
-    TFun f    -> showsUnaryWith showsBinder "TFun" p f
-    TNot k    -> showsUnaryWith showsTerm "TNot" p k
+    TVar i      -> showsUnaryWith showsPrec "TVar" p i
+    TTop        -> showString "TTop"
+    TWith a b   -> showsBinaryWith showsTerm showsTerm "TWith" p a b
+    TSum1 a     -> showsUnaryWith showsTerm "TSum1" p a
+    TSum2 b     -> showsUnaryWith showsTerm "TSum2" p b
+    TBot a      -> showsUnaryWith showsTerm "TBot" p a
+    TOne        -> showString "TOne"
+    TTensor a b -> showsBinaryWith showsTerm showsTerm "TWith" p a b
+    TFun f      -> showsUnaryWith showsBinder "TFun" p f
+    TNot k      -> showsUnaryWith showsTerm "TNot" p k
 
 instance ShowBinder binder => ShowTerm (Coterm binder (_Γ |- _Δ)) where
   showsTerm p = \case
