@@ -28,7 +28,6 @@ module Sequoia.Interpreter.Typed
 ) where
 
 import Data.Functor.Classes
-import Data.Void
 import Sequoia.Conjunction
 import Sequoia.Connective.Bottom
 import Sequoia.Connective.Not
@@ -48,8 +47,8 @@ data Term binder ctx a where
   TWith :: Term binder ctx a -> Term binder ctx b -> Term binder ctx (a & b)
   TSum1 :: Term binder ctx a -> Term binder ctx (a ⊕ b)
   TSum2 :: Term binder ctx b -> Term binder ctx (a ⊕ b)
-  TBot :: Term binder ctx _Δ -> Term binder ctx (_Δ `Either` Bottom Void)
-  TOne :: Term binder ctx (One ())
+  TBot :: Term binder (as |- bs) _Δ -> Term binder (as |- bs) (_Δ `Either` Bottom (R bs))
+  TOne :: Term binder (as |- bs) (One (E as))
   TFun :: binder _Γ _Δ a b -> Term binder (_Γ |- _Δ) (a -> b)
   TNot :: Coterm binder ctx a -> Term binder ctx (Not a r)
 
@@ -71,8 +70,8 @@ data Coterm binder ctx a where
   CWith1 :: Coterm binder ctx a -> Coterm binder ctx (a & b)
   CWith2 :: Coterm binder ctx b -> Coterm binder ctx (a & b)
   CSum :: Coterm binder ctx a -> Coterm binder ctx b -> Coterm binder ctx (a ⊕ b)
-  CBot :: Coterm binder ctx (Bottom Void)
-  COne :: Coterm binder ctx _Γ -> Coterm binder ctx (One (), _Γ)
+  CBot :: Coterm binder (as |- bs) (Bottom (R bs))
+  COne :: Coterm binder (as |- bs) _Γ -> Coterm binder (as |- bs) (One (E as), _Γ)
   CFun :: Term binder ctx a -> Coterm binder ctx b -> Coterm binder ctx (a -> b)
   CNot :: Term binder ctx a -> Coterm binder ctx (Not a r)
 
@@ -127,8 +126,8 @@ data Expr ctx a where
   RWith :: Expr ctx a -> Expr ctx b -> Expr ctx (a & b)
   RSum1 :: Expr ctx a -> Expr ctx (a ⊕ b)
   RSum2 :: Expr ctx b -> Expr ctx (a ⊕ b)
-  RBot :: Expr ctx _Δ -> Expr ctx (Either _Δ (Bottom Void))
-  ROne :: Expr ctx (One ())
+  RBot :: Expr (as |- bs) _Δ -> Expr (as |- bs) (Either _Δ (Bottom (R bs)))
+  ROne :: Expr (as |- bs) (One (E as))
   RFun :: Scope as bs a b -> Expr (as |- bs) (a -> b)
 
 deriving instance Show (Expr ctx a)
@@ -139,8 +138,8 @@ data Coexpr ctx a where
   LWith1 :: Coexpr ctx a -> Coexpr ctx (a & b)
   LWith2 :: Coexpr ctx b -> Coexpr ctx (a & b)
   LSum :: Coexpr ctx a -> Coexpr ctx b -> Coexpr ctx (a ⊕ b)
-  LBot :: Coexpr ctx (Bottom Void)
-  LOne :: Coexpr ctx _Γ -> Coexpr ctx (One (), _Γ)
+  LBot :: Coexpr (as |- bs) (Bottom (R bs))
+  LOne :: Coexpr (as |- bs) _Γ -> Coexpr (as |- bs) (One (E as), _Γ)
   LFun :: Expr ctx a -> Coexpr ctx b -> Coexpr ctx (a -> b)
 
 deriving instance Show (Coexpr ctx a)
@@ -156,8 +155,8 @@ data Val ctx a where
   VWith :: Val ctx a -> Val ctx b -> Val ctx (a & b)
   VSum1 :: Val ctx a -> Val ctx (a ⊕ b)
   VSum2 :: Val ctx b -> Val ctx (a ⊕ b)
-  VBottom :: Val ctx (Bottom Void)
-  VOne :: Val ctx (One ())
+  VBottom :: Val (as |- bs) (Bottom (R bs))
+  VOne :: Val (as |- bs) (One (E as))
   VFun :: (Val (as |- bs) a -> Val ((a, as) |- bs) b) -> Val (as |- bs) (a -> b)
 
 data Coval ctx a where
@@ -165,8 +164,8 @@ data Coval ctx a where
   EWith1 :: Coval ctx a -> Coval ctx (a & b)
   EWith2 :: Coval ctx b -> Coval ctx (a & b)
   ESum :: Coval ctx a -> Coval ctx b -> Coval ctx (a ⊕ b)
-  EBottom :: Coval ctx (Bottom Void)
-  EOne :: Coval ctx a -> Coval ctx (One (), a)
+  EBottom :: Coval (as |- bs) (Bottom (R bs))
+  EOne :: Coval (as |- bs) a -> Coval (as |- bs) (One (E as), a)
   EFun :: Val ctx a -> Coval ctx b -> Coval ctx (a -> b)
 
 
@@ -180,7 +179,7 @@ evalDef ctx = \case
   RSum1 a   -> InL (evalDef ctx a)
   RSum2 b   -> InR (evalDef ctx b)
   RBot a    -> Left (evalDef ctx a)
-  ROne      -> One ()
+  ROne      -> One (getE ctx)
   RFun b    -> \ a -> evalDef (a :<< ctx) (getScope b)
 
 coevalDef :: as |- bs -> Coexpr (as |- bs) a -> (a -> R bs)
@@ -190,7 +189,7 @@ coevalDef ctx = \case
   LWith1 a -> coevalDef ctx a . exl
   LWith2 b -> coevalDef ctx b . exr
   LSum l r -> coevalDef ctx l <--> coevalDef ctx r
-  LBot     -> absurd . absurdN
+  LBot     -> absurdN
   LOne a   -> coevalDef ctx a . snd
   LFun a b -> \ f -> coevalDef ctx b (f (evalDef ctx a))
 
