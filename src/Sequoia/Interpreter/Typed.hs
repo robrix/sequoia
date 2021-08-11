@@ -122,58 +122,58 @@ instance ShowBinder FO where
 
 -- Expressions
 
-data Expr as bs a where
-  Var :: IxL a as -> Expr as bs a
-  RTop :: Expr as bs Top
-  RWith :: Expr as bs a -> Expr as bs b -> Expr as bs (a & b)
-  RSum1 :: Expr as bs a -> Expr as bs (a ⊕ b)
-  RSum2 :: Expr as bs b -> Expr as bs (a ⊕ b)
-  RBot :: Expr as bs _Δ -> Expr as bs (Either _Δ (Bottom Void))
-  ROne :: Expr as bs (One ())
-  RFun :: Scope as bs a b -> Expr as bs (a -> b)
+data Expr ctx a where
+  Var :: IxL a as -> Expr (as |- bs) a
+  RTop :: Expr ctx Top
+  RWith :: Expr ctx a -> Expr ctx b -> Expr ctx (a & b)
+  RSum1 :: Expr ctx a -> Expr ctx (a ⊕ b)
+  RSum2 :: Expr ctx b -> Expr ctx (a ⊕ b)
+  RBot :: Expr ctx _Δ -> Expr ctx (Either _Δ (Bottom Void))
+  ROne :: Expr ctx (One ())
+  RFun :: Scope as bs a b -> Expr (as |- bs) (a -> b)
 
-deriving instance Show (Expr as bs a)
+deriving instance Show (Expr ctx a)
 
-data Coexpr as bs a where
-  Covar :: IxR bs a -> Coexpr as bs a
-  LZero :: Coexpr as bs Zero
-  LWith1 :: Coexpr as bs a -> Coexpr as bs (a & b)
-  LWith2 :: Coexpr as bs b -> Coexpr as bs (a & b)
-  LSum :: Coexpr as bs a -> Coexpr as bs b -> Coexpr as bs (a ⊕ b)
-  LBot :: Coexpr as bs (Bottom Void)
-  LOne :: Coexpr as bs _Γ -> Coexpr as bs (One (), _Γ)
-  LFun :: Expr as bs a -> Coexpr as bs b -> Coexpr as bs (a -> b)
+data Coexpr ctx a where
+  Covar :: IxR bs b -> Coexpr (as |- bs) b
+  LZero :: Coexpr ctx Zero
+  LWith1 :: Coexpr ctx a -> Coexpr ctx (a & b)
+  LWith2 :: Coexpr ctx b -> Coexpr ctx (a & b)
+  LSum :: Coexpr ctx a -> Coexpr ctx b -> Coexpr ctx (a ⊕ b)
+  LBot :: Coexpr ctx (Bottom Void)
+  LOne :: Coexpr ctx _Γ -> Coexpr ctx (One (), _Γ)
+  LFun :: Expr ctx a -> Coexpr ctx b -> Coexpr ctx (a -> b)
 
-deriving instance Show (Coexpr as bs a)
+deriving instance Show (Coexpr ctx a)
 
-newtype Scope as bs a b = Scope { getScope :: Expr (a, as) bs b }
+newtype Scope as bs a b = Scope { getScope :: Expr ((a, as) |- bs) b }
   deriving (Show)
 
 
 -- Values
 
-data Val as bs a where
-  VTop :: Val as bs Top
-  VWith :: Val as bs a -> Val as bs b -> Val as bs (a & b)
-  VSum1 :: Val as bs a -> Val as bs (a ⊕ b)
-  VSum2 :: Val as bs b -> Val as bs (a ⊕ b)
-  VBottom :: Val as bs (Bottom Void)
-  VOne :: Val as bs (One ())
-  VFun :: (Val as bs a -> Val as bs b) -> Val as bs (a -> b)
+data Val ctx a where
+  VTop :: Val ctx Top
+  VWith :: Val ctx a -> Val ctx b -> Val ctx (a & b)
+  VSum1 :: Val ctx a -> Val ctx (a ⊕ b)
+  VSum2 :: Val ctx b -> Val ctx (a ⊕ b)
+  VBottom :: Val ctx (Bottom Void)
+  VOne :: Val ctx (One ())
+  VFun :: (Val ctx a -> Val ctx b) -> Val ctx (a -> b)
 
-data Coval as bs a where
-  EZero :: Coval as bs Zero
-  EWith1 :: Coval as bs a -> Coval as bs (a & b)
-  EWith2 :: Coval as bs b -> Coval as bs (a & b)
-  ESum :: Coval as bs a -> Coval as bs b -> Coval as bs (a ⊕ b)
-  EBottom :: Coval as bs (Bottom Void)
-  EOne :: Coval as bs a -> Coval as bs (One (), a)
-  EFun :: Val as bs a -> Coval as bs b -> Coval as bs (a -> b)
+data Coval ctx a where
+  EZero :: Coval ctx Zero
+  EWith1 :: Coval ctx a -> Coval ctx (a & b)
+  EWith2 :: Coval ctx b -> Coval ctx (a & b)
+  ESum :: Coval ctx a -> Coval ctx b -> Coval ctx (a ⊕ b)
+  EBottom :: Coval ctx (Bottom Void)
+  EOne :: Coval ctx a -> Coval ctx (One (), a)
+  EFun :: Val ctx a -> Coval ctx b -> Coval ctx (a -> b)
 
 
 -- Definitional interpreter
 
-evalDef :: as |- bs -> Expr as bs a -> a
+evalDef :: as |- bs -> Expr (as |- bs) a -> a
 evalDef ctx = \case
   Var i     -> i <! ctx
   RTop      -> Top
@@ -184,7 +184,7 @@ evalDef ctx = \case
   ROne      -> One ()
   RFun b    -> \ a -> evalDef (a :<< ctx) (getScope b)
 
-coevalDef :: as |- bs -> Coexpr as bs a -> (a -> R bs)
+coevalDef :: as |- bs -> Coexpr (as |- bs) a -> (a -> R bs)
 coevalDef ctx = \case
   Covar i  -> ctx !> i
   LZero    -> absurdP
