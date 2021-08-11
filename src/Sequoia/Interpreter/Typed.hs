@@ -142,6 +142,7 @@ data Coexpr ctx a where
   LSum :: Coexpr ctx a -> Coexpr ctx b -> Coexpr ctx (a ⊕ b)
   LBot :: Coexpr (as |- bs) (Bottom (R bs))
   LOne :: Coexpr (as |- bs) _Γ -> Coexpr (as |- bs) (One (E as), _Γ)
+  LTensor :: Coexpr ctx (a, b) -> Coexpr ctx (a ⊗ b)
   LFun :: Expr ctx a -> Coexpr ctx b -> Coexpr ctx (a -> b)
 
 deriving instance Show (Coexpr ctx a)
@@ -218,14 +219,15 @@ evalDef ctx@(_Γ :|-: _Δ) = \case
 
 coevalDef :: (LCtx as, RCtx bs) => as |- bs -> Coexpr (as |- bs) a -> (a -> R bs)
 coevalDef ctx@(_Γ :|-: _Δ) = \case
-  Covar i  -> _Δ !> i
-  LZero    -> absurdP
-  LWith1 a -> coevalDef ctx a . exl
-  LWith2 b -> coevalDef ctx b . exr
-  LSum l r -> coevalDef ctx l <--> coevalDef ctx r
-  LBot     -> absurdN
-  LOne a   -> coevalDef ctx a . snd
-  LFun a b -> \ f -> coevalDef ctx b (f (evalDef ctx a))
+  Covar i   -> _Δ !> i
+  LZero     -> absurdP
+  LWith1 a  -> coevalDef ctx a . exl
+  LWith2 b  -> coevalDef ctx b . exr
+  LSum l r  -> coevalDef ctx l <--> coevalDef ctx r
+  LBot      -> absurdN
+  LOne a    -> coevalDef ctx a . snd
+  LTensor a -> coevalDef ctx a . coerceConj
+  LFun a b  -> \ f -> coevalDef ctx b (f (evalDef ctx a))
 
 
 -- Execution
