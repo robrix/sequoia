@@ -20,12 +20,9 @@ module Sequoia.Interpreter.Typed
 , (<!)
 , Δ(..)
 , (!>)
-, (:|-:)(..)
-, type (|-)
-, (|-)
+, type (|-)(..)
 , IxL(..)
 , IxR(..)
-, (:|-)(..)
 ) where
 
 import Data.Functor.Classes
@@ -173,7 +170,7 @@ data Coval as bs a where
 
 -- Definitional interpreter
 
-evalDef :: Γ e as |- Δ r bs -> Expr as bs a -> a
+evalDef :: (as |- bs) e r -> Expr as bs a -> a
 evalDef ctx = \case
   Var i     -> i <! ctx
   RTop      -> Top
@@ -182,9 +179,9 @@ evalDef ctx = \case
   RSum2 b   -> InR (evalDef ctx b)
   RBot a    -> Left (evalDef ctx a)
   ROne      -> One ()
-  RFun b    -> \ a -> evalDef (a <| ctx) (getScope b)
+  RFun b    -> \ a -> evalDef (a :<< ctx) (getScope b)
 
-coevalDef :: Γ e as |- Δ r bs -> Coexpr as bs a -> (a -> r)
+coevalDef :: (as |- bs) e r -> Coexpr as bs a -> (a -> r)
 coevalDef ctx = \case
   Covar i  -> ctx !> i
   LZero    -> absurdP
@@ -204,14 +201,10 @@ data Γ e as where
 
 infixr 5 :<
 
-(<|) :: a -> Γ e as |- Δ r bs -> Γ e (a, as) |- Δ r bs
-a <| (as :|-: bs) = a :< as |- bs
-
-infixr 5 <|
-
-(<!) :: IxL a as -> Γ e as |- Δ r bs -> a
-IxLZ   <! (h :< _ :|-: _Δ) = h
-IxLS i <! (_ :< t :|-: _Δ) = i <! (t |- _Δ)
+(<!) :: IxL a as -> (as |- bs) e r -> a
+i      <! (c :>> _) = i <! c
+IxLZ   <! (h :<< _) = h
+IxLS i <! (_ :<< c) = i <! c
 
 infixr 2 <!
 
@@ -222,23 +215,23 @@ data Δ r as where
 
 infixl 5 :>
 
-(!>) :: Γ e as |- Δ r bs -> IxR bs b -> (b -> r)
+(!>) :: (as |- bs) e r -> IxR bs b -> (b -> r)
 delta !> ix = case (ix, delta) of
-  (IxRZ,   _Γ :|-: _ :> r) -> r
-  (IxRS i, _Γ :|-: l :> _) -> _Γ :|-: l !> i
+  (i,      _ :<< c) -> c !> i
+  (IxRZ,   _ :>> r) -> r
+  (IxRS i, c :>> _) -> c !> i
 
 infixl 2 !>
 
 
-data a :|-: b = a :|-: b
+data (a |- b) e r where
+  ΓΔ :: (One e |- Bottom r) e r
+  (:<<) :: a -> (as |- bs) e r -> ((a, as) |- bs) e r
+  (:>>) :: (as |- bs) e r -> (b -> r) -> (as |- (bs, b)) e r
 
-infix 3 :|-:, |-
-
-type (|-) = (:|-:)
-
-(|-) :: a -> b -> a |- b
-(|-) = (:|-:)
-
+infix 3 |-
+infixr 5 :<<
+infixl 5 :>>
 
 data IxL a as where
   IxLZ :: IxL a (a, b)
@@ -251,9 +244,3 @@ data IxR as a where
   IxRS :: IxR a c -> IxR (a, b) c
 
 deriving instance Show (IxR as a)
-
-
-data (a :|- b) e r where
-  ΓΔ :: (One e :|- Bottom r) e r
-  (:<<) :: a -> (as :|- bs) e r -> ((a, as) :|- bs) e r
-  (:>>) :: (as :|- bs) e r -> b -> (as :|- (bs, b)) e r
