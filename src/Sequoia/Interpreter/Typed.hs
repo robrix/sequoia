@@ -151,7 +151,7 @@ data Val ctx a where
   VSum2 :: Val ctx b -> Val ctx (a ⊕ b)
   VBottom :: Val (as |- bs) (Bottom (R bs))
   VOne :: Val (as |- bs) (One (E as))
-  VFun :: (Val (as |- bs) a -> Val ((a, as) |- bs) b) -> Val (as |- bs) (a -> b)
+  VFun :: (Val (a < as |- bs) a -> Val ((a < as) |- bs) b) -> Val (as |- bs) (a -> b)
 
 data Coval ctx a where
   EZero :: Coval ctx Zero
