@@ -197,7 +197,7 @@ coevalDef ctx = \case
 -- Environments
 
 data a |- b where
-  ΓΔ :: One e |- Bottom r
+  ΓΔ :: e -> One e |- Bottom r
   (:<<) :: a -> as |- bs -> (a, as) |- bs
   (:>>) :: as |- bs -> (b -> R bs) -> as |- (bs, b)
 
