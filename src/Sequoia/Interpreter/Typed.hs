@@ -217,7 +217,7 @@ infixr 2 <!
 
 
 data Δ r as where
-  Δ :: r -> Δ r (Bottom Void)
+  Δ :: r -> Δ r (Bottom r)
   (:>) :: Δ r a -> (b -> r) -> Δ r (a, b)
 
 infixl 5 :>
