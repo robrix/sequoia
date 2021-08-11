@@ -68,6 +68,7 @@ data Coterm binder ctx a where
   CSum :: Coterm binder ctx a -> Coterm binder ctx b -> Coterm binder ctx (a ⊕ b)
   CBot :: Coterm binder (as |- bs) (Bottom (R bs))
   COne :: Coterm binder (as |- bs) _Γ -> Coterm binder (as |- bs) (One (E as), _Γ)
+  CTensor :: Coterm binder ctx (a, b) -> Coterm binder ctx (a ⊗ b)
   CFun :: Term binder ctx a -> Coterm binder ctx b -> Coterm binder ctx (a -> b)
   CNot :: Term binder ctx a -> Coterm binder ctx (Not a r)
 
@@ -97,15 +98,16 @@ instance ShowBinder binder => ShowTerm (Term binder (_Γ |- _Δ)) where
 
 instance ShowBinder binder => ShowTerm (Coterm binder (_Γ |- _Δ)) where
   showsTerm p = \case
-    CVar i   -> showsUnaryWith showsPrec "CVar" p i
-    CZero    -> showString "CZero"
-    CWith1 f -> showsUnaryWith showsTerm "CWith1" p f
-    CWith2 g -> showsUnaryWith showsTerm "CWith2" p g
-    CSum f g -> showsBinaryWith showsTerm showsTerm "CSum" p f g
-    CBot     -> showString "CBot"
-    COne a   -> showsUnaryWith showsTerm "COne" p a
-    CFun a b -> showsBinaryWith showsTerm showsTerm "CFun" p a b
-    CNot a   -> showsUnaryWith showsTerm "CNot" p a
+    CVar i    -> showsUnaryWith showsPrec "CVar" p i
+    CZero     -> showString "CZero"
+    CWith1 f  -> showsUnaryWith showsTerm "CWith1" p f
+    CWith2 g  -> showsUnaryWith showsTerm "CWith2" p g
+    CSum f g  -> showsBinaryWith showsTerm showsTerm "CSum" p f g
+    CBot      -> showString "CBot"
+    COne a    -> showsUnaryWith showsTerm "COne" p a
+    CTensor f -> showsUnaryWith showsTerm "CTensor" p f
+    CFun a b  -> showsBinaryWith showsTerm showsTerm "CFun" p a b
+    CNot a    -> showsUnaryWith showsTerm "CNot" p a
 
 class ShowBinder t where
   showsBinder :: Int -> t _Γ _Δ a b -> ShowS
