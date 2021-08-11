@@ -157,6 +157,7 @@ data Val ctx a where
   VSum1 :: Val ctx a -> Val ctx (a ⊕ b)
   VSum2 :: Val ctx b -> Val ctx (a ⊕ b)
   VOne :: Val (as |- bs) (One (E as))
+  VTensor :: Val ctx a -> Val ctx b -> Val ctx (a ⊗ b)
   VFun :: (Val (a < as |- bs) a -> Val ((a < as) |- bs) b) -> Val (as |- bs) (a -> b)
 
 data Coval ctx a where
@@ -176,13 +177,14 @@ bindVal with b = with (b (VNe IxLZ))
 
 quoteVal :: Val (as |- bs) a -> Expr (as |- bs) a
 quoteVal = \case
-  VNe l     -> Var l
-  VTop      -> RTop
-  VWith a b -> RWith (quoteVal a) (quoteVal b)
-  VSum1 a   -> RSum1 (quoteVal a)
-  VSum2 b   -> RSum2 (quoteVal b)
-  VOne      -> ROne
-  VFun f    -> RFun (quoteBinder f)
+  VNe l       -> Var l
+  VTop        -> RTop
+  VWith a b   -> RWith (quoteVal a) (quoteVal b)
+  VSum1 a     -> RSum1 (quoteVal a)
+  VSum2 b     -> RSum2 (quoteVal b)
+  VOne        -> ROne
+  VTensor a b -> RTensor (quoteVal a) (quoteVal b)
+  VFun f      -> RFun (quoteBinder f)
 
 quoteCoval :: Coval (as |- bs) a -> Coexpr (as |- bs) a
 quoteCoval = \case
@@ -228,13 +230,14 @@ coevalDef ctx@(_Γ :|-: _Δ) = \case
 
 execVal :: LCtx as => as |- bs -> Val (as |- bs) a -> a
 execVal ctx@(_Γ :|-: _Δ) = \case
-  VNe i     -> i <! _Γ
-  VTop      -> Top
-  VWith a b -> execVal ctx a >--< execVal ctx b
-  VSum1 a   -> InL (execVal ctx a)
-  VSum2 b   -> InR (execVal ctx b)
-  VOne      -> One (getE _Γ)
-  VFun f    -> \ a -> bindVal (execVal (a <| ctx)) f
+  VNe i       -> i <! _Γ
+  VTop        -> Top
+  VWith a b   -> execVal ctx a >--< execVal ctx b
+  VSum1 a     -> InL (execVal ctx a)
+  VSum2 b     -> InR (execVal ctx b)
+  VOne        -> One (getE _Γ)
+  VTensor a b -> execVal ctx a >--< execVal ctx b
+  VFun f      -> \ a -> bindVal (execVal (a <| ctx)) f
 
 execCoval :: (LCtx as, RCtx bs) => as |- bs -> Coval (as |- bs) a -> (a -> R bs)
 execCoval ctx@(_Γ :|-: _Δ) = \case
