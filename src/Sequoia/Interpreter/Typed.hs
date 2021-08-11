@@ -174,7 +174,7 @@ data Coval as bs a where
 
 evalDef :: Γ as |- Δ r bs -> Expr as bs a -> a
 evalDef ctx@(_Γ :|-: _Δ) = \case
-  Var i     -> i <! _Γ
+  Var i     -> i <! ctx
   RTop      -> Top
   RWith a b -> evalDef ctx a >--< evalDef ctx b
   RSum1 a   -> InL (evalDef ctx a)
@@ -185,7 +185,7 @@ evalDef ctx@(_Γ :|-: _Δ) = \case
 
 coevalDef :: Γ as |- Δ r bs -> Coexpr as bs a -> (a -> r)
 coevalDef ctx@(_ :|-: _Δ) = \case
-  Covar i  -> _Δ !> i
+  Covar i  -> ctx !> i
   LZero    -> absurdP
   LWith1 a -> coevalDef ctx a . exl
   LWith2 b -> coevalDef ctx b . exr
@@ -203,9 +203,9 @@ data Γ as where
 
 infixr 5 :<
 
-(<!) :: IxL a as -> Γ as -> a
-IxLZ   <! (h :< _) = h
-IxLS i <! (_ :< t) = i <! t
+(<!) :: IxL a as -> Γ as |- Δ r bs -> a
+IxLZ   <! (h :< _ :|-: _Δ) = h
+IxLS i <! (_ :< t :|-: _Δ) = i <! (t |- _Δ)
 
 
 data Δ r as where
@@ -214,10 +214,10 @@ data Δ r as where
 
 infixl 5 :>
 
-(!>) :: Δ r as -> IxR as a -> (a -> r)
+(!>) :: Γ as |- Δ r bs -> IxR bs b -> (b -> r)
 delta !> ix = case (ix, delta) of
-  (IxRZ,   _ :> r) -> r
-  (IxRS i, l :> _) -> l !> i
+  (IxRZ,   _Γ :|-: _ :> r) -> r
+  (IxRS i, _Γ :|-: l :> _) -> (_Γ :|-: l) !> i
 
 
 data a :|-: b = a :|-: b
