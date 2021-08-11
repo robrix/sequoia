@@ -198,9 +198,9 @@ coevalDef ctx = \case
 
 -- Environments
 
-data Γ e as where
-  Γ :: Γ e (One e)
-  (:<) :: a -> Γ e b -> Γ e (a, b)
+data Γ as where
+  Γ :: Γ (One e)
+  (:<) :: a -> Γ b -> Γ (a, b)
 
 infixr 5 :<
 
@@ -212,9 +212,9 @@ IxLS i <! (_ :<< c) = i <! c
 infixr 2 <!
 
 
-data Δ r as where
-  Δ :: r -> Δ r (Bottom r)
-  (:>) :: Δ r a -> (b -> r) -> Δ r (a, b)
+data Δ as where
+  Δ :: r -> Δ (Bottom r)
+  (:>) :: Δ a -> (b -> R a) -> Δ (a, b)
 
 infixl 5 :>
 
