@@ -147,20 +147,20 @@ evalDef ctx@(_Γ :|-: _Δ) = \case
   RPar a      -> coerceDisj (evalDef ctx a)
   RTensor a b -> evalDef ctx a >--< evalDef ctx b
   RFun b      -> fun' (\ a -> evalDef (a <| ctx) (getScope b))
-  RSub a b    -> evalDef ctx a :-< K (coevalDef ctx b)
+  RSub a b    -> evalDef ctx a :-< coevalDef ctx b
 
-coevalDef :: (LCtx as, RCtx bs) => as |- bs -> Coexpr (as |- bs) a -> (a -> R bs)
+coevalDef :: (LCtx as, RCtx bs) => as |- bs -> Coexpr (as |- bs) a -> (a • R bs)
 coevalDef ctx@(_Γ :|-: _Δ) = \case
-  Covar i   -> _Δ !> i
-  LZero     -> absurdP
-  LWith1 a  -> coevalDef ctx a . exl
-  LWith2 b  -> coevalDef ctx b . exr
-  LSum l r  -> coevalDef ctx l <--> coevalDef ctx r
-  LBot      -> absurdN
-  LOne a    -> coevalDef ctx a . snd
-  LPar l r  -> coevalDef ctx l <--> coevalDef ctx r
-  LTensor a -> coevalDef ctx a . coerceConj
-  LFun a b  -> \ f -> getFun f (K (coevalDef ctx b)) • evalDef ctx a
+  Covar i   -> K (_Δ !> i)
+  LZero     -> K absurdP
+  LWith1 a  -> exlL (coevalDef ctx a)
+  LWith2 b  -> exrL (coevalDef ctx b)
+  LSum l r  -> coevalDef ctx l <••> coevalDef ctx r
+  LBot      -> K absurdN
+  LOne a    -> exrL (coevalDef ctx a)
+  LPar l r  -> coevalDef ctx l <••> coevalDef ctx r
+  LTensor a -> coevalDef ctx a <<^ coerceConj
+  LFun a b  -> K (\ f -> getFun f (coevalDef ctx b) • evalDef ctx a)
 
 
 -- Execution
