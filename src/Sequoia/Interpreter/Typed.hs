@@ -299,3 +299,12 @@ instance Cardinality as => Cardinality (a < as) where
 
 tailOf :: i (a < as) -> [as]
 tailOf _ = []
+
+instance Cardinality (Δ e) where
+  cardinality _ = 0
+
+instance Cardinality as => Cardinality (as > a) where
+  cardinality c = 1 + cardinality (initOf c)
+
+initOf :: i (as > a) -> [as]
+initOf _ = []
