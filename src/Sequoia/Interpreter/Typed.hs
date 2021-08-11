@@ -19,6 +19,7 @@ module Sequoia.Interpreter.Typed
   -- * Environments
 , type (|-)(..)
 , getE
+, Γ(..)
 , (<!)
 , IxL(..)
 , E
