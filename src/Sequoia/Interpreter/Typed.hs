@@ -72,7 +72,7 @@ data Coterm binder ctx a where
 deriving instance Show2 (binder _Γ _Δ) => Show (Coterm binder (_Γ |- _Δ) a)
 
 
-newtype FO _Γ _Δ a b = FO (Term FO ((a, _Γ) |- _Δ) b)
+newtype FO _Γ _Δ a b = FO (Term FO ((a < _Γ) |- _Δ) b)
 
 instance Show2 (FO _Γ _Δ) where
   liftShowsPrec2 _ _ _ _ p (FO t) = showsUnaryWith showsPrec "FO" p t
