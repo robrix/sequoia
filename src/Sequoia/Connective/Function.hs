@@ -5,6 +5,7 @@ module Sequoia.Connective.Function
 , type (~>)
   -- * Construction
 , fun
+, fun'
 , funExp
   -- * Elimination
 , appFun
@@ -40,6 +41,9 @@ infixr 5 ~>
 
 fun :: (b • r -> a -> r) -> a ~~Fun r~> b
 fun = coerce
+
+fun' :: (a -> b) -> a ~~Fun r~> b
+fun' = Fun . (^>>)
 
 funExp :: Exp r a b -> a ~~Fun r~> b
 funExp = coerce
