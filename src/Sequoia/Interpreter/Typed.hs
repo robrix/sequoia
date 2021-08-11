@@ -22,6 +22,9 @@ module Sequoia.Interpreter.Typed
   -- * Definitional interpreter
 , evalDef
 , coevalDef
+  -- * Execution
+, execVal
+, execCoval
   -- * Sequents
 , type (|-)(..)
 , (<|)
@@ -223,6 +226,29 @@ coevalDef ctx@(_Γ :|-: _Δ) = \case
   LBot     -> absurdN
   LOne a   -> coevalDef ctx a . snd
   LFun a b -> \ f -> coevalDef ctx b (f (evalDef ctx a))
+
+
+-- Execution
+
+execVal :: LCtx as => as |- bs -> Val (as |- bs) a -> a
+execVal ctx@(_Γ :|-: _Δ) = \case
+  VNe i     -> i <! _Γ
+  VTop      -> Top
+  VWith a b -> execVal ctx a >--< execVal ctx b
+  VSum1 a   -> InL (execVal ctx a)
+  VSum2 b   -> InR (execVal ctx b)
+  VOne      -> One (getE _Γ)
+  VFun f    -> \ a -> bindVal (execVal (a <| ctx)) f
+
+execCoval :: (LCtx as, RCtx bs) => as |- bs -> Coval (as |- bs) a -> (a -> R bs)
+execCoval ctx@(_Γ :|-: _Δ) = \case
+  EZero    -> absurdP
+  EWith1 a -> execCoval ctx a . exl
+  EWith2 b -> execCoval ctx b . exr
+  ESum a b -> execCoval ctx a <--> execCoval ctx b
+  EBottom  -> absurdN
+  EOne a   -> execCoval ctx a . snd
+  EFun a b -> \ f -> execCoval ctx b (f (execVal ctx a))
 
 
 -- Sequents
