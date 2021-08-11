@@ -30,6 +30,7 @@ module Sequoia.Interpreter.Typed
 , (<|)
 ) where
 
+import Control.Applicative (liftA2)
 import Data.Functor.Classes
 import Sequoia.Conjunction
 import Sequoia.Connective.Bottom
@@ -44,6 +45,7 @@ import Sequoia.Connective.With
 import Sequoia.Connective.Zero
 import Sequoia.Context
 import Sequoia.Disjunction
+import Sequoia.Profunctor
 import Sequoia.Profunctor.Continuation
 
 -- Terms
@@ -249,29 +251,29 @@ coevalDef ctx@(_Γ :|-: _Δ) = \case
 
 -- Execution
 
-execVal :: LCtx as => as |- bs -> Val (as |- bs) a -> a
+execVal :: LCtx as => as |- bs -> Val (as |- bs) a -> DN (R bs) a
 execVal ctx@(_Γ :|-: _Δ) = \case
-  VNe i       -> i <! _Γ
-  VTop        -> Top
-  VWith a b   -> execVal ctx a >--< execVal ctx b
-  VSum1 a     -> InL (execVal ctx a)
-  VSum2 b     -> InR (execVal ctx b)
-  VOne        -> One (getE _Γ)
-  VPar a      -> coerceDisj (execVal ctx a)
-  VTensor a b -> execVal ctx a >--< execVal ctx b
-  VFun f      -> fun' (\ a -> bindVal (execVal (a <| ctx)) f)
+  VNe i       -> pure (i <! _Γ)
+  VTop        -> pure Top
+  VWith a b   -> liftA2 inlr (execVal ctx a) (execVal ctx b)
+  VSum1 a     -> InL <$> execVal ctx a
+  VSum2 b     -> InR <$> execVal ctx b
+  VOne        -> pure (One (getE _Γ))
+  VPar a      -> coerceDisj <$> execVal ctx a
+  VTensor a b -> liftA2 inlr (execVal ctx a) (execVal ctx b)
+  VFun f      -> pure (fun (\ b a -> runDN (bindVal (execVal (a <| ctx)) f) • b))
 
-execCoval :: (LCtx as, RCtx bs) => as |- bs -> Coval (as |- bs) a -> (a -> R bs)
+execCoval :: (LCtx as, RCtx bs) => as |- bs -> Coval (as |- bs) a -> (a • R bs)
 execCoval ctx@(_Γ :|-: _Δ) = \case
-  EZero     -> absurdP
-  EWith1 a  -> execCoval ctx a . exl
-  EWith2 b  -> execCoval ctx b . exr
-  ESum a b  -> execCoval ctx a <--> execCoval ctx b
-  EBottom   -> absurdN
-  EOne a    -> execCoval ctx a . snd
-  EPar a b  -> execCoval ctx a <--> execCoval ctx b
-  ETensor a -> execCoval ctx a . coerceConj
-  EFun a b  -> \ f -> getFun f (K (execCoval ctx b)) • execVal ctx a
+  EZero     -> K absurdP
+  EWith1 a  -> exlL (execCoval ctx a)
+  EWith2 b  -> exrL (execCoval ctx b)
+  ESum a b  -> execCoval ctx a <••> execCoval ctx b
+  EBottom   -> K absurdN
+  EOne a    -> exrL (execCoval ctx a)
+  EPar a b  -> execCoval ctx a <••> execCoval ctx b
+  ETensor a -> execCoval ctx a <<^ coerceConj
+  EFun a b  -> K (\ f -> runDN (execVal ctx a >>= appFun f) • execCoval ctx b)
 
 
 -- Sequents
