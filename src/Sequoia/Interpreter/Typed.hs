@@ -199,7 +199,7 @@ coevalDef ctx = \case
 -- Environments
 
 data Γ e as where
-  Γ :: Γ e (One ())
+  Γ :: Γ e (One e)
   (:<) :: a -> Γ e b -> Γ e (a, b)
 
 infixr 5 :<
