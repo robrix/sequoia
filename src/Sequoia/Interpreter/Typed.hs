@@ -202,7 +202,7 @@ coevalDef ctx = \case
 -- Environments
 
 data a |- b where
-  ΓΔ :: Γ e -> One e |- Bottom r
+  ΓΔ :: Γ e -> Γ e |- Δ r
   (:<<) :: a -> as |- bs -> (a, as) |- bs
   (:>>) :: as |- bs -> (b -> R bs) -> as |- (bs, b)
 
@@ -240,7 +240,7 @@ deriving instance Show (IxL as a)
 
 type family E ctx where
   E (_, as) = E as
-  E (One e) = e
+  E (Γ e)   = e
 
 
 newtype Δ r = Δ r
