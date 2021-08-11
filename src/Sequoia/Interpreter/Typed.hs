@@ -25,6 +25,7 @@ module Sequoia.Interpreter.Typed
 , (!>)
 , IxR(..)
 , R
+, LvL(..)
 ) where
 
 import Data.Functor.Classes
@@ -247,3 +248,8 @@ deriving instance Show (IxR as a)
 type family R ctx where
   R (bs, _)    = R bs
   R (Bottom r) = r
+
+
+data LvL a as where
+  LvLZ :: LvL (One e) (One e)
+  LvLS :: LvL a as -> LvL b (b, as)
