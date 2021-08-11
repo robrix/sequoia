@@ -170,6 +170,7 @@ data Coval ctx a where
   ESum :: Coval ctx a -> Coval ctx b -> Coval ctx (a ⊕ b)
   EBottom :: Coval (as |- bs) (Bottom (R bs))
   EOne :: Coval (as |- bs) a -> Coval (as |- bs) (One (E as), a)
+  ETensor :: Coval ctx (a, b) -> Coval ctx (a ⊗ b)
   EFun :: Val ctx a -> Coval ctx b -> Coval ctx (a -> b)
 
 bindVal :: (a -> b) -> (Val (x < as |- bs) x -> a) -> b
@@ -191,13 +192,14 @@ quoteVal = \case
 
 quoteCoval :: Coval (as |- bs) a -> Coexpr (as |- bs) a
 quoteCoval = \case
-  EZero    -> LZero
-  EWith1 f -> LWith1 (quoteCoval f)
-  EWith2 g -> LWith2 (quoteCoval g)
-  ESum f g -> LSum (quoteCoval f) (quoteCoval g)
-  EBottom  -> LBot
-  EOne v   -> LOne (quoteCoval v)
-  EFun a b -> LFun (quoteVal a) (quoteCoval b)
+  EZero     -> LZero
+  EWith1 f  -> LWith1 (quoteCoval f)
+  EWith2 g  -> LWith2 (quoteCoval g)
+  ESum f g  -> LSum (quoteCoval f) (quoteCoval g)
+  EBottom   -> LBot
+  EOne v    -> LOne (quoteCoval v)
+  ETensor a -> LTensor (quoteCoval a)
+  EFun a b  -> LFun (quoteVal a) (quoteCoval b)
 
 quoteBinder :: (Val (t < as |- bs) t -> Val ((t < as) |- bs) u) -> Scope as bs t u
 quoteBinder = Scope . bindVal quoteVal
@@ -245,13 +247,14 @@ execVal ctx@(_Γ :|-: _Δ) = \case
 
 execCoval :: (LCtx as, RCtx bs) => as |- bs -> Coval (as |- bs) a -> (a -> R bs)
 execCoval ctx@(_Γ :|-: _Δ) = \case
-  EZero    -> absurdP
-  EWith1 a -> execCoval ctx a . exl
-  EWith2 b -> execCoval ctx b . exr
-  ESum a b -> execCoval ctx a <--> execCoval ctx b
-  EBottom  -> absurdN
-  EOne a   -> execCoval ctx a . snd
-  EFun a b -> \ f -> execCoval ctx b (f (execVal ctx a))
+  EZero     -> absurdP
+  EWith1 a  -> execCoval ctx a . exl
+  EWith2 b  -> execCoval ctx b . exr
+  ESum a b  -> execCoval ctx a <--> execCoval ctx b
+  EBottom   -> absurdN
+  EOne a    -> execCoval ctx a . snd
+  ETensor a -> execCoval ctx a . coerceConj
+  EFun a b  -> \ f -> execCoval ctx b (f (execVal ctx a))
 
 
 -- Sequents
