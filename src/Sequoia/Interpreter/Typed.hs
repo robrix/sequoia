@@ -18,6 +18,7 @@ module Sequoia.Interpreter.Typed
 , coevalDef
   -- * Environments
 , type (|-)(..)
+, getE
 , (<!)
 , IxL(..)
 , E
@@ -204,6 +205,12 @@ data a |- b where
 infix 3 |-
 infixr 5 :<<
 infixl 5 :>>
+
+getE :: as |- bs -> E as
+getE = \case
+  ΓΔ e    -> e
+  _ :<< s -> getE s
+  s :>> _ -> getE s
 
 
 (<!) :: IxL a as -> as |- bs -> a
