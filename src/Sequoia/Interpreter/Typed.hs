@@ -23,6 +23,7 @@ module Sequoia.Interpreter.Typed
 , (<!)
 , IxL(..)
 , E
+, Δ(..)
 , (!>)
 , IxR(..)
 , R
@@ -234,6 +235,9 @@ type family E ctx where
   E (_, as) = E as
   E (One e) = e
 
+
+newtype Δ r = Δ r
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
 (!>) :: as |- bs -> IxR bs b -> (b -> R bs)
 delta !> ix = case (ix, delta) of
