@@ -58,17 +58,7 @@ data Term binder ctx a where
   TNot :: Coterm binder ctx a -> Term binder ctx (Not a r)
 
 instance ShowBinder binder => Show (Term binder (_Γ |- _Δ) a) where
-  showsPrec p = \case
-    TVar i      -> showsUnaryWith showsPrec "TVar" p i
-    TTop        -> showString "TTop"
-    TWith a b   -> showsBinaryWith showsPrec showsPrec "TWith" p a b
-    TSum1 a     -> showsUnaryWith showsPrec "TSum1" p a
-    TSum2 b     -> showsUnaryWith showsPrec "TSum2" p b
-    TBot a      -> showsUnaryWith showsPrec "TBot" p a
-    TOne        -> showString "TOne"
-    TTensor a b -> showsBinaryWith showsPrec showsPrec "TWith" p a b
-    TFun f      -> showsBinder p f
-    TNot k      -> showsUnaryWith showsPrec "TNot" p k
+  showsPrec = showsTerm
 
 data Coterm binder ctx a where
   CVar :: IxR _Δ a -> Coterm binder ctx a
