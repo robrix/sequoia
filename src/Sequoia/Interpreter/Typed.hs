@@ -233,6 +233,7 @@ infix 3 |-
 infixr 5 :<<
 infixl 5 :>>
 
+
 data IxL a as where
   IxLZ :: IxL a (a, b)
   IxLS :: IxL c b -> IxL c (a, b)
