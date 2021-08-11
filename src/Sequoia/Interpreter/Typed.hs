@@ -33,6 +33,7 @@ module Sequoia.Interpreter.Typed
 import Data.Functor.Classes
 import Sequoia.Conjunction
 import Sequoia.Connective.Bottom
+import Sequoia.Connective.Function
 import Sequoia.Connective.Not
 import Sequoia.Connective.One
 import Sequoia.Connective.Par
@@ -43,6 +44,7 @@ import Sequoia.Connective.With
 import Sequoia.Connective.Zero
 import Sequoia.Context
 import Sequoia.Disjunction
+import Sequoia.Profunctor.Continuation
 
 -- Terms
 
@@ -56,7 +58,7 @@ data Term binder ctx a where
   TOne :: Term binder (as |- bs) (One (E as))
   TPar :: Term binder ctx (Either a b) -> Term binder ctx (a ⅋ b)
   TTensor :: Term binder ctx a -> Term binder ctx b -> Term binder ctx (a ⊗ b)
-  TFun :: binder _Γ _Δ a b -> Term binder (_Γ |- _Δ) (a -> b)
+  TFun :: binder _Γ _Δ a b -> Term binder (_Γ |- _Δ) (Fun (R _Δ) a b)
   TNot :: Coterm binder ctx a -> Term binder ctx (Not a r)
 
 instance ShowBinder binder => Show (Term binder (_Γ |- _Δ) a) where
@@ -72,7 +74,7 @@ data Coterm binder ctx a where
   COne :: Coterm binder (as |- bs) _Γ -> Coterm binder (as |- bs) (One (E as), _Γ)
   CPar :: Coterm binder ctx a -> Coterm binder ctx b -> Coterm binder ctx (a ⅋ b)
   CTensor :: Coterm binder ctx (a, b) -> Coterm binder ctx (a ⊗ b)
-  CFun :: Term binder ctx a -> Coterm binder ctx b -> Coterm binder ctx (a -> b)
+  CFun :: Term binder (_Γ |- _Δ) a -> Coterm binder (_Γ |- _Δ) b -> Coterm binder (_Γ |- _Δ) (Fun (R _Δ) a b)
   CNot :: Term binder ctx a -> Coterm binder ctx (Not a r)
 
 deriving instance ShowBinder binder => Show (Coterm binder (_Γ |- _Δ) a)
@@ -136,7 +138,7 @@ data Expr ctx a where
   ROne :: Expr (as |- bs) (One (E as))
   RPar :: Expr ctx (Either a b) -> Expr ctx (a ⅋ b)
   RTensor :: Expr ctx a -> Expr ctx b -> Expr ctx (a ⊗ b)
-  RFun :: Scope as bs a b -> Expr (as |- bs) (a -> b)
+  RFun :: Scope as bs a b -> Expr (as |- bs) (Fun (R bs) a b)
 
 deriving instance Show (Expr ctx a)
 
@@ -150,7 +152,7 @@ data Coexpr ctx a where
   LOne :: Coexpr (as |- bs) _Γ -> Coexpr (as |- bs) (One (E as), _Γ)
   LPar :: Coexpr ctx a -> Coexpr ctx b -> Coexpr ctx (a ⅋ b)
   LTensor :: Coexpr ctx (a, b) -> Coexpr ctx (a ⊗ b)
-  LFun :: Expr ctx a -> Coexpr ctx b -> Coexpr ctx (a -> b)
+  LFun :: Expr (as |- bs) a -> Coexpr (as |- bs) b -> Coexpr (as |- bs) (Fun (R bs) a b)
 
 deriving instance Show (Coexpr ctx a)
 
@@ -169,7 +171,7 @@ data Val ctx a where
   VOne :: Val (as |- bs) (One (E as))
   VPar :: Val ctx (Either a b) -> Val ctx (a ⅋ b)
   VTensor :: Val ctx a -> Val ctx b -> Val ctx (a ⊗ b)
-  VFun :: (Val (a < as |- bs) a -> Val ((a < as) |- bs) b) -> Val (as |- bs) (a -> b)
+  VFun :: (Val (a < as |- bs) a -> Val ((a < as) |- bs) b) -> Val (as |- bs) (Fun (R bs) a b)
 
 data Coval ctx a where
   EZero :: Coval ctx Zero
@@ -180,7 +182,7 @@ data Coval ctx a where
   EOne :: Coval (as |- bs) a -> Coval (as |- bs) (One (E as), a)
   EPar :: Coval ctx a -> Coval ctx b -> Coval ctx (a ⅋ b)
   ETensor :: Coval ctx (a, b) -> Coval ctx (a ⊗ b)
-  EFun :: Val ctx a -> Coval ctx b -> Coval ctx (a -> b)
+  EFun :: Val (as |- bs) a -> Coval (as |- bs) b -> Coval (as |- bs) (Fun (R bs) a b)
 
 bindVal :: (a -> b) -> (Val (x < as |- bs) x -> a) -> b
 bindVal with b = with (b (VNe IxLZ))
@@ -229,7 +231,7 @@ evalDef ctx@(_Γ :|-: _Δ) = \case
   ROne        -> One (getE _Γ)
   RPar a      -> coerceDisj (evalDef ctx a)
   RTensor a b -> evalDef ctx a >--< evalDef ctx b
-  RFun b      -> \ a -> evalDef (a <| ctx) (getScope b)
+  RFun b      -> fun' (\ a -> evalDef (a <| ctx) (getScope b))
 
 coevalDef :: (LCtx as, RCtx bs) => as |- bs -> Coexpr (as |- bs) a -> (a -> R bs)
 coevalDef ctx@(_Γ :|-: _Δ) = \case
@@ -242,7 +244,7 @@ coevalDef ctx@(_Γ :|-: _Δ) = \case
   LOne a    -> coevalDef ctx a . snd
   LPar l r  -> coevalDef ctx l <--> coevalDef ctx r
   LTensor a -> coevalDef ctx a . coerceConj
-  LFun a b  -> \ f -> coevalDef ctx b (f (evalDef ctx a))
+  LFun a b  -> \ f -> getFun f (K (coevalDef ctx b)) • evalDef ctx a
 
 
 -- Execution
@@ -257,7 +259,7 @@ execVal ctx@(_Γ :|-: _Δ) = \case
   VOne        -> One (getE _Γ)
   VPar a      -> coerceDisj (execVal ctx a)
   VTensor a b -> execVal ctx a >--< execVal ctx b
-  VFun f      -> \ a -> bindVal (execVal (a <| ctx)) f
+  VFun f      -> fun' (\ a -> bindVal (execVal (a <| ctx)) f)
 
 execCoval :: (LCtx as, RCtx bs) => as |- bs -> Coval (as |- bs) a -> (a -> R bs)
 execCoval ctx@(_Γ :|-: _Δ) = \case
@@ -269,7 +271,7 @@ execCoval ctx@(_Γ :|-: _Δ) = \case
   EOne a    -> execCoval ctx a . snd
   EPar a b  -> execCoval ctx a <--> execCoval ctx b
   ETensor a -> execCoval ctx a . coerceConj
-  EFun a b  -> \ f -> execCoval ctx b (f (execVal ctx a))
+  EFun a b  -> \ f -> getFun f (K (execCoval ctx b)) • execVal ctx a
 
 
 -- Sequents
