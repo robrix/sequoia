@@ -148,6 +148,7 @@ data Coexpr ctx a where
   LSum :: Coexpr ctx a -> Coexpr ctx b -> Coexpr ctx (a ⊕ b)
   LBot :: Coexpr (as |- bs) (Bottom (R bs))
   LOne :: Coexpr (as |- bs) _Γ -> Coexpr (as |- bs) (One (E as), _Γ)
+  LPar :: Coexpr ctx a -> Coexpr ctx b -> Coexpr ctx (a ⅋ b)
   LTensor :: Coexpr ctx (a, b) -> Coexpr ctx (a ⊗ b)
   LFun :: Expr ctx a -> Coexpr ctx b -> Coexpr ctx (a -> b)
 
@@ -235,6 +236,7 @@ coevalDef ctx@(_Γ :|-: _Δ) = \case
   LSum l r  -> coevalDef ctx l <--> coevalDef ctx r
   LBot      -> absurdN
   LOne a    -> coevalDef ctx a . snd
+  LPar l r  -> coevalDef ctx l <--> coevalDef ctx r
   LTensor a -> coevalDef ctx a . coerceConj
   LFun a b  -> \ f -> coevalDef ctx b (f (evalDef ctx a))
 
