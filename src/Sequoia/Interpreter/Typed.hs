@@ -7,6 +7,8 @@ module Sequoia.Interpreter.Typed
 , Coterm(..)
 , FO(..)
 , HO(..)
+, ShowTerm(..)
+, ShowBinder(..)
   -- * Expressions
 , Expr(..)
 , Coexpr(..)
@@ -117,6 +119,9 @@ class ShowBinder t where
 
 instance ShowBinder FO where
   showsBinder p (FO t) = showsUnaryWith showsTerm "FO" p t
+
+instance ShowBinder HO where
+  showsBinder p (HO t) = showsUnaryWith (\ p f -> showsTerm p (f (TVar IxLZ))) "HO" p t
 
 
 -- Expressions
