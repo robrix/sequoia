@@ -35,6 +35,7 @@ import Sequoia.Conjunction
 import Sequoia.Connective.Bottom
 import Sequoia.Connective.Not
 import Sequoia.Connective.One
+import Sequoia.Connective.Par
 import Sequoia.Connective.Sum
 import Sequoia.Connective.Tensor
 import Sequoia.Connective.Top
@@ -53,6 +54,7 @@ data Term binder ctx a where
   TSum2 :: Term binder ctx b -> Term binder ctx (a ⊕ b)
   TBot :: Term binder (as |- bs) _Δ -> Term binder (as |- bs) (_Δ `Either` Bottom (R bs))
   TOne :: Term binder (as |- bs) (One (E as))
+  TPar :: Term binder ctx (Either a b) -> Term binder ctx (a ⅋ b)
   TTensor :: Term binder ctx a -> Term binder ctx b -> Term binder ctx (a ⊗ b)
   TFun :: binder _Γ _Δ a b -> Term binder (_Γ |- _Δ) (a -> b)
   TNot :: Coterm binder ctx a -> Term binder ctx (Not a r)
@@ -92,6 +94,7 @@ instance ShowBinder binder => ShowTerm (Term binder (_Γ |- _Δ)) where
     TSum2 b     -> showsUnaryWith showsTerm "TSum2" p b
     TBot a      -> showsUnaryWith showsTerm "TBot" p a
     TOne        -> showString "TOne"
+    TPar a      -> showsUnaryWith showsTerm "TPar" p a
     TTensor a b -> showsBinaryWith showsTerm showsTerm "TTensor" p a b
     TFun f      -> showsUnaryWith showsBinder "TFun" p f
     TNot k      -> showsUnaryWith showsTerm "TNot" p k
