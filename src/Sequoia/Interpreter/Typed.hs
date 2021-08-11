@@ -252,7 +252,7 @@ type family R ctx where
 
 
 data LvL a as where
-  LvLZ :: LvL (One e) (One e)
+  LvLZ :: LvL a (a, One e)
   LvLS :: LvL a as -> LvL b (b, as)
 
 
