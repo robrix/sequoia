@@ -173,7 +173,7 @@ data Coval as bs a where
 
 -- Definitional interpreter
 
-evalDef :: Γ as |- Δ r bs -> Expr as bs a -> a
+evalDef :: Γ e as |- Δ r bs -> Expr as bs a -> a
 evalDef ctx = \case
   Var i     -> i <! ctx
   RTop      -> Top
@@ -184,7 +184,7 @@ evalDef ctx = \case
   ROne      -> One ()
   RFun b    -> \ a -> evalDef (a <| ctx) (getScope b)
 
-coevalDef :: Γ as |- Δ r bs -> Coexpr as bs a -> (a -> r)
+coevalDef :: Γ e as |- Δ r bs -> Coexpr as bs a -> (a -> r)
 coevalDef ctx = \case
   Covar i  -> ctx !> i
   LZero    -> absurdP
@@ -198,18 +198,18 @@ coevalDef ctx = \case
 
 -- Environments
 
-data Γ as where
-  Γ :: Γ (One ())
-  (:<) :: a -> Γ b -> Γ (a, b)
+data Γ e as where
+  Γ :: Γ e (One ())
+  (:<) :: a -> Γ e b -> Γ e (a, b)
 
 infixr 5 :<
 
-(<|) :: a -> Γ as |- Δ r bs -> Γ (a, as) |- Δ r bs
+(<|) :: a -> Γ e as |- Δ r bs -> Γ e (a, as) |- Δ r bs
 a <| (as :|-: bs) = a :< as |- bs
 
 infixr 5 <|
 
-(<!) :: IxL a as -> Γ as |- Δ r bs -> a
+(<!) :: IxL a as -> Γ e as |- Δ r bs -> a
 IxLZ   <! (h :< _ :|-: _Δ) = h
 IxLS i <! (_ :< t :|-: _Δ) = i <! (t |- _Δ)
 
@@ -222,7 +222,7 @@ data Δ r as where
 
 infixl 5 :>
 
-(!>) :: Γ as |- Δ r bs -> IxR bs b -> (b -> r)
+(!>) :: Γ e as |- Δ r bs -> IxR bs b -> (b -> r)
 delta !> ix = case (ix, delta) of
   (IxRZ,   _Γ :|-: _ :> r) -> r
   (IxRS i, _Γ :|-: l :> _) -> _Γ :|-: l !> i
