@@ -119,6 +119,11 @@ class LCtx c where
 
   infixr 2 <!
 
+instance LCtx (ΓΔ e r) where
+  type E (ΓΔ e r) = e
+  getE = getΓΔ
+  i <! _ = case i of {}
+
 instance LCtx (Γ e) where
   type E (Γ e) = e
   getE = getΓ
