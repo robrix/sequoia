@@ -37,6 +37,7 @@ import Control.Applicative (liftA2)
 import Prelude hiding (exp)
 import Sequoia.Conjunction
 import Sequoia.Connective.Function
+import Sequoia.Connective.Subtraction
 import Sequoia.Connective.Sum
 import Sequoia.Connective.With
 import Sequoia.Disjunction
@@ -59,6 +60,7 @@ data Expr b where
   XSumR1 :: Expr a -> Expr (a ⊕ b)
   XSumR2 :: Expr b -> Expr (a ⊕ b)
   XFunR :: Expr b -> Expr (Fun R a b)
+  XSubR :: Expr a -> Coexpr b -> Expr (Sub R b a)
 
 deriving instance Show (Expr b)
 
@@ -67,6 +69,7 @@ data Coexpr a where
   XWithL2 :: Coexpr b -> Coexpr (a & b)
   XSumL :: Coexpr a -> Coexpr b -> Coexpr (a ⊕ b)
   XFunL :: Expr a -> Coexpr b -> Coexpr (Fun R a b)
+  XSubL :: Expr b -> Coexpr (Sub R b a)
 
 deriving instance Show (Coexpr a)
 
@@ -79,12 +82,14 @@ data Val b where
   VSumR1 :: Val a -> Val (a ⊕ b)
   VSumR2 :: Val b -> Val (a ⊕ b)
   VFunR :: (Val a -> Val b) -> Val (Fun R a b)
+  VSubR :: Val a -> Coval b -> Val (Sub R b a)
 
 data Coval a where
   VWithL1 :: Coval a -> Coval (a & b)
   VWithL2 :: Coval b -> Coval (a & b)
   VSumL :: Coval a -> Coval b -> Coval (a ⊕ b)
   VFunL :: Val a -> Coval b -> Coval (Fun R a b)
+  VSubL :: (Val a -> Val b) -> Coval (Sub R b a)
 
 
 -- Quotation
@@ -96,6 +101,7 @@ quoteVal c = \case
   VSumR1 a   -> XSumR1 (quoteVal c a)
   VSumR2 b   -> XSumR2 (quoteVal c b)
   VFunR f    -> XFunR (quoteVal (succ c) (f (VNe (Lv c))))
+  VSubR a b  -> XSubR (quoteVal c a) (quoteCoval c b)
 
 quoteCoval :: Cardinal -> Coval a -> Coexpr a
 quoteCoval c = \case
@@ -103,6 +109,7 @@ quoteCoval c = \case
   VWithL2 g -> XWithL2 (quoteCoval c g)
   VSumL f g -> XSumL (quoteCoval c f) (quoteCoval c g)
   VFunL a b -> XFunL (quoteVal c a) (quoteCoval c b)
+  VSubL f   -> XSubL (quoteVal (succ c) (f (VNe (Lv c))))
 
 
 -- Evaluator
@@ -126,6 +133,7 @@ evalDef ctx = \case
   XSumR1 a   -> VSumR1 (evalDef ctx a)
   XSumR2 b   -> VSumR2 (evalDef ctx b)
   XFunR f    -> VFunR (\ a -> evalDef (a :< ctx) f)
+  XSubR a b  -> VSubR (evalDef ctx a) (coevalDef ctx b)
 
 coevalDef :: Γ Val as -> Coexpr b -> Coval b
 coevalDef ctx = \case
@@ -133,6 +141,7 @@ coevalDef ctx = \case
   XWithL2 g -> VWithL2 (coevalDef ctx g)
   XSumL f g -> VSumL (coevalDef ctx f) (coevalDef ctx g)
   XFunL a b -> VFunL (evalDef ctx a) (coevalDef ctx b)
+  XSubL f   -> VSubL (\ a -> evalDef (a :< ctx) f)
 
 
 -- Execution
@@ -144,6 +153,7 @@ execVal ctx = \case
   VSumR1 a   -> inlF (execVal ctx a)
   VSumR2 b   -> inrF (execVal ctx b)
   VFunR f    -> pure (fun (\ b a -> let ctx' = I a :< ctx in eval (execVal ctx' (f (VNe (lv ctx')))) • Coeval b))
+  VSubR a b  -> do { a' <- execVal ctx a ; pure (coeval (execCoval ctx b) :>- a') }
 
 execCoval :: Γ I as -> Coval a -> Coeval a R
 execCoval ctx = \case
@@ -151,6 +161,7 @@ execCoval ctx = \case
   VWithL2 g -> exrL (execCoval ctx g)
   VSumL f g -> execCoval ctx f <••> execCoval ctx g
   VFunL a b -> inK (\ f -> eval (execVal ctx a >>= evalFun f) • execCoval ctx b)
+  VSubL f   -> inK (\ (b :>- a) -> let ctx' = I a :< ctx in eval (execVal ctx' (f (VNe (lv ctx')))) • Coeval b)
 
 
 -- Contexts
