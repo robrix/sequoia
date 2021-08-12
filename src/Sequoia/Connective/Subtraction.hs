@@ -11,22 +11,22 @@ module Sequoia.Connective.Subtraction
 , subK_
 ) where
 
-import Data.Kind (Type)
-import Data.Profunctor
-import Fresnel.Lens
-import Sequoia.Polarity
-import Sequoia.Profunctor.Continuation
-import Sequoia.Profunctor.Exp (Coexp(..))
+import           Data.Kind (Type)
+import           Data.Profunctor
+import           Fresnel.Lens
+import           Sequoia.Polarity
+import           Sequoia.Profunctor.Continuation
+import qualified Sequoia.Profunctor.Exp as Coexp
 
 -- Subtraction
 
-data Sub r b a = (:-<) { subA :: a, subK :: b • r }
+data Sub r b a = (:>-) { subK :: b • r, subA :: a }
   deriving (Functor)
 
-infixr 6 :-<
+infixr 6 :>-
 
 instance Profunctor (Sub r) where
-  dimap f g (a :-< k) = g a :-< lmap f k
+  dimap f g (k :>- a) = lmap f k :>- g a
 
 instance (Pos a, Neg b) => Polarized P (Sub r b a) where
 
@@ -39,11 +39,11 @@ infixr 5 -~
 
 -- Elimination
 
-runSubCoexp :: Sub r b a -> Coexp r b a
-runSubCoexp (a :-< k) = k :>- a
+runSubCoexp :: Sub r b a -> Coexp.Coexp r b a
+runSubCoexp (k :>- a) = k Coexp.:>- a
 
 appSub :: Sub r b a -> (b • r -> a • r) -> r
-appSub (a :-< k) f = f k • a
+appSub (k :>- a) f = f k • a
 
 
 -- Optics

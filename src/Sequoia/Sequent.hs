@@ -240,7 +240,7 @@ instance FunctionIntro Seq where
 
 instance SubtractionIntro Seq where
   subL f = popL (val (\ s -> liftR (pure (subA s)) >>> f >>> liftL (subK s)))
-  subR a b = wkR' a >>> popL (val (popR . fmap (liftR . pure) . (:-<))) >>> wkL' (wkR b)
+  subR a b = wkR' a >>> popL (val (popR . fmap (liftR . pure) . flip (:>-))) >>> wkL' (wkR b)
 
 
 -- Quantification

@@ -153,7 +153,7 @@ evalDef ctx@(_Γ :|-: _Δ) = \case
   RPar a      -> coerceDisj <$> evalDef ctx a
   RTensor a b -> liftA2 inlr (evalDef ctx a) (evalDef ctx b)
   RFun f      -> pure (fun (\ b a -> runDN (evalDef (a <| ctx) (getScope f)) • b))
-  RSub a b    -> evalDef ctx a <&> (:-< coevalDef ctx b)
+  RSub a b    -> evalDef ctx a <&> (coevalDef ctx b :>-)
 
 coevalDef :: (LCtx as, RCtx bs) => as |- bs -> Coexpr (as |- bs) a -> (a • R bs)
 coevalDef ctx@(_Γ :|-: _Δ) = \case
@@ -167,7 +167,7 @@ coevalDef ctx@(_Γ :|-: _Δ) = \case
   LPar l r  -> coevalDef ctx l <••> coevalDef ctx r
   LTensor a -> coevalDef ctx a <<^ coerceConj
   LFun a b  -> K (\ f -> runDN (evalDef ctx a >>= appFun f) • coevalDef ctx b)
-  LSub f    -> K (\ (a :-< b) -> runDN (evalDef (a <| ctx) (getScope f)) • b)
+  LSub f    -> K (\ (b :>- a) -> runDN (evalDef (a <| ctx) (getScope f)) • b)
 
 
 -- Execution
@@ -183,7 +183,7 @@ execVal ctx@(_Γ :|-: _Δ) = \case
   VPar a      -> coerceDisj <$> execVal ctx a
   VTensor a b -> liftA2 inlr (execVal ctx a) (execVal ctx b)
   VFun f      -> pure (fun (\ b a -> runDN (bindVal (execVal (a <| ctx)) f) • b))
-  VSub a b    -> execVal ctx a <&> (:-< execCoval ctx b)
+  VSub a b    -> execVal ctx a <&> (execCoval ctx b :>-)
 
 execCoval :: (LCtx as, RCtx bs) => as |- bs -> Coval (as |- bs) a -> (a • R bs)
 execCoval ctx@(_Γ :|-: _Δ) = \case
@@ -196,7 +196,7 @@ execCoval ctx@(_Γ :|-: _Δ) = \case
   EPar a b  -> execCoval ctx a <••> execCoval ctx b
   ETensor a -> execCoval ctx a <<^ coerceConj
   EFun a b  -> K (\ f -> runDN (execVal ctx a >>= appFun f) • execCoval ctx b)
-  ESub f    -> K (\ (a :-< b) -> runDN (bindVal (execVal (a <| ctx)) f) • b)
+  ESub f    -> K (\ (b :>- a) -> runDN (bindVal (execVal (a <| ctx)) f) • b)
 
 
 -- Sequents
