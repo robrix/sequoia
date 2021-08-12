@@ -101,6 +101,7 @@ data Coval ctx a where
   EPar :: Coval ctx a -> Coval ctx b -> Coval ctx (a ⅋ b)
   ETensor :: Coval ctx (a, b) -> Coval ctx (a ⊗ b)
   EFun :: Val (as |- bs) a -> Coval (as |- bs) b -> Coval (as |- bs) (Fun (R bs) a b)
+  ESub :: (Val (a < as |- bs) a -> Val ((a < as) |- bs) b) -> Coval (as |- bs) (Sub (R bs) b a)
 
 bindVal :: (a -> b) -> (Val (x < as |- bs) x -> a) -> b
 bindVal with b = with (b (VNe IxLZ))
@@ -132,6 +133,7 @@ quoteCoval = \case
   EPar f g  -> LPar (quoteCoval f) (quoteCoval g)
   ETensor a -> LTensor (quoteCoval a)
   EFun a b  -> LFun (quoteVal a) (quoteCoval b)
+  ESub f    -> LSub (quoteBinder f)
 
 quoteBinder :: (Val (t < as |- bs) t -> Val ((t < as) |- bs) u) -> Scope as bs t u
 quoteBinder = Scope . bindVal quoteVal
@@ -194,6 +196,7 @@ execCoval ctx@(_Γ :|-: _Δ) = \case
   EPar a b  -> execCoval ctx a <••> execCoval ctx b
   ETensor a -> execCoval ctx a <<^ coerceConj
   EFun a b  -> K (\ f -> runDN (execVal ctx a >>= appFun f) • execCoval ctx b)
+  ESub f    -> K (\ (a :-< b) -> runDN (bindVal (execVal (a <| ctx)) f) • b)
 
 
 -- Sequents
