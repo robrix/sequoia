@@ -2,6 +2,8 @@
 module Sequoia.Spine
 ( -- * Spines
   Spine(..)
+, viewL
+, ViewL(..)
 , viewR
 , ViewR(..)
 ) where
@@ -21,6 +23,18 @@ instance Cat.Category (Spine arr) where
   fs . gs = case fs of
     Id    -> gs
     fs:.f -> (gs Cat.>>> fs) :. f
+
+
+viewL :: Spine arr a b -> ViewL arr a b
+viewL q = case viewR q of
+  NilR -> NilL
+  p :> l -> case viewL p of
+      NilL   -> l :< Id
+      h :< t -> h :< (t :. l)
+
+data ViewL arr a b where
+  NilL :: ViewL arr a a
+  (:<) :: arr a b -> Spine arr b c -> ViewL arr a c
 
 
 viewR :: Spine arr a b -> ViewR arr a b
