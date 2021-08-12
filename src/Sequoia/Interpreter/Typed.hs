@@ -49,7 +49,7 @@ data Expr ctx a where
   RWith :: Expr ctx a -> Expr ctx b -> Expr ctx (a & b)
   RSum1 :: Expr ctx a -> Expr ctx (a ⊕ b)
   RSum2 :: Expr ctx b -> Expr ctx (a ⊕ b)
-  RBot :: Expr (as |- bs) _Δ -> Expr (as |- bs) (Either _Δ (Bottom (R bs)))
+  RBottom :: Expr (as |- bs) _Δ -> Expr (as |- bs) (Either _Δ (Bottom (R bs)))
   ROne :: Expr (as |- bs) (One (E as))
   RPar :: Expr ctx (Either a b) -> Expr ctx (a ⅋ b)
   RTensor :: Expr ctx a -> Expr ctx b -> Expr ctx (a ⊗ b)
@@ -64,7 +64,7 @@ data Coexpr ctx a where
   LWith1 :: Coexpr ctx a -> Coexpr ctx (a & b)
   LWith2 :: Coexpr ctx b -> Coexpr ctx (a & b)
   LSum :: Coexpr ctx a -> Coexpr ctx b -> Coexpr ctx (a ⊕ b)
-  LBot :: Coexpr (as |- bs) (Bottom (R bs))
+  LBottom :: Coexpr (as |- bs) (Bottom (R bs))
   LOne :: Coexpr (as |- bs) _Γ -> Coexpr (as |- bs) (One (E as), _Γ)
   LPar :: Coexpr ctx a -> Coexpr ctx b -> Coexpr ctx (a ⅋ b)
   LTensor :: Coexpr ctx (a, b) -> Coexpr ctx (a ⊗ b)
@@ -125,7 +125,7 @@ quoteCoval = \case
   EWith1 f  -> LWith1 (quoteCoval f)
   EWith2 g  -> LWith2 (quoteCoval g)
   ESum f g  -> LSum (quoteCoval f) (quoteCoval g)
-  EBottom   -> LBot
+  EBottom   -> LBottom
   EOne v    -> LOne (quoteCoval v)
   EPar f g  -> LPar (quoteCoval f) (quoteCoval g)
   ETensor a -> LTensor (quoteCoval a)
@@ -144,7 +144,7 @@ evalDef ctx@(_Γ :|-: _Δ) = \case
   RWith a b   -> liftA2 inlr (evalDef ctx a) (evalDef ctx b)
   RSum1 a     -> inlF (evalDef ctx a)
   RSum2 b     -> inrF (evalDef ctx b)
-  RBot a      -> inlF (evalDef ctx a)
+  RBottom a   -> inlF (evalDef ctx a)
   ROne        -> pure (One (getE _Γ))
   RPar a      -> coerceDisj <$> evalDef ctx a
   RTensor a b -> liftA2 inlr (evalDef ctx a) (evalDef ctx b)
@@ -158,7 +158,7 @@ coevalDef ctx@(_Γ :|-: _Δ) = \case
   LWith1 a  -> exlL (coevalDef ctx a)
   LWith2 b  -> exrL (coevalDef ctx b)
   LSum l r  -> coevalDef ctx l <••> coevalDef ctx r
-  LBot      -> K absurdN
+  LBottom   -> K absurdN
   LOne a    -> exrL (coevalDef ctx a)
   LPar l r  -> coevalDef ctx l <••> coevalDef ctx r
   LTensor a -> coevalDef ctx a <<^ coerceConj
