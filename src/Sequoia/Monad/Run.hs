@@ -40,6 +40,9 @@ instance MonadRun ((•) a) where
 class Monad m => MonadRunK r m | m -> r where
   withRunK :: ((forall x . x • r -> m x -> r) -> m a) -> m a
 
+instance MonadRunK r (DN r) where
+  withRunK f = DN (K (\ k -> runDN (f (\ k m -> runDN m • k)) • k))
+
 
 -- Construction
 
