@@ -76,7 +76,7 @@ instance DisjIn (+) where
 
 class DisjEx d where
   (<-->) :: (a -> r) -> (b -> r) -> (a `d` b -> r)
-  infix 3 <-->
+  infixr 3 <-->
 
 instance DisjEx Either where
   (<-->) = either
@@ -105,12 +105,12 @@ exrD = const Nothing <--> Just
 (<••>) :: (Disj d, Continuation k) => a `k` r -> b `k` r -> (a `d` b) `k` r
 a <••> b = inK ((a •) <--> (b •))
 
-infix 3 <••>
+infixr 3 <••>
 
 (<∘∘>) :: (Disj d, Value v) => (e `v` a -> r) -> (e `v` b -> r) -> (e `v` (a `d` b) -> e ==> r)
 (l <∘∘> r) ab = C ((l <--> r) . bisequenceDisjV ab)
 
-infix 3 <∘∘>
+infixr 3 <∘∘>
 
 bisequenceDisjV :: (Disj d, Value v) => e `v` (a `d` b) -> e -> (e `v` a) `d` (e `v` b)
 bisequenceDisjV = fmap (bimapDisj (inV . pure) (inV . pure)) . flip (∘)
