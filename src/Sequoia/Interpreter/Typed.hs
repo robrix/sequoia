@@ -3,7 +3,10 @@
 {-# LANGUAGE TypeFamilies #-}
 module Sequoia.Interpreter.Typed
 ( -- * Expressions
-  Expr
+  Src(..)
+, Snk
+, absurdSnk
+, Expr
   -- * Values
 , Val
   -- * Quotation
@@ -32,6 +35,12 @@ import Sequoia.Profunctor.Continuation
 import Sequoia.Profunctor.Exp hiding (Coexp(..))
 
 -- Expressions
+
+data Src = Src
+data Snk
+
+absurdSnk :: Snk -> a
+absurdSnk = \case
 
 data Expr a b where
 
