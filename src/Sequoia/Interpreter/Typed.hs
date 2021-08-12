@@ -4,7 +4,6 @@
 module Sequoia.Interpreter.Typed
 ( -- * Expressions
   Expr(..)
-, Coexpr(..)
   -- * Values
 , Val(..)
 , Coval(..)
@@ -50,24 +49,21 @@ data Expr ctx a b where
   RPar :: Expr ctx (E ctx) (Either a b) -> Expr ctx (E ctx) (a ⅋ b)
   RTensor :: Expr ctx (E ctx) a -> Expr ctx (E ctx) b -> Expr ctx (E ctx) (a ⊗ b)
   RFun :: Expr (a < ctx) (E ctx) b -> Expr ctx (E ctx) (Fun (R ctx) a b)
-  RSub :: Expr ctx (E ctx) a -> Coexpr ctx b (R ctx) -> Expr ctx (E ctx) (Sub (R ctx) b a)
+  RSub :: Expr ctx (E ctx) a -> Expr ctx b (R ctx) -> Expr ctx (E ctx) (Sub (R ctx) b a)
+
+  Covar :: IxR ctx b -> Expr ctx b (R ctx)
+  LZero :: Expr ctx Zero (R ctx)
+  LWith1 :: Expr ctx a (R ctx) -> Expr ctx (a & b) (R ctx)
+  LWith2 :: Expr ctx b (R ctx) -> Expr ctx (a & b) (R ctx)
+  LSum :: Expr ctx a (R ctx) -> Expr ctx b (R ctx) -> Expr ctx (a ⊕ b) (R ctx)
+  LBottom :: Expr ctx (Bottom (R ctx)) (R ctx)
+  LOne :: Expr ctx _Γ (R ctx) -> Expr ctx (One (E ctx), _Γ) (R ctx)
+  LPar :: Expr ctx a (R ctx) -> Expr ctx b (R ctx) -> Expr ctx (a ⅋ b) (R ctx)
+  LTensor :: Expr ctx (a, b) (R ctx) -> Expr ctx (a ⊗ b) (R ctx)
+  LFun :: Expr ctx (E ctx) a -> Expr ctx b (R ctx) -> Expr ctx (Fun (R ctx) a b) (R ctx)
+  LSub :: Expr (a < ctx) (E ctx) b -> Expr ctx (Sub (R ctx) b a) (R ctx)
 
 deriving instance Show (Expr ctx a b)
-
-data Coexpr ctx a b where
-  Covar :: IxR ctx b -> Coexpr ctx b (R ctx)
-  LZero :: Coexpr ctx Zero (R ctx)
-  LWith1 :: Coexpr ctx a (R ctx) -> Coexpr ctx (a & b) (R ctx)
-  LWith2 :: Coexpr ctx b (R ctx) -> Coexpr ctx (a & b) (R ctx)
-  LSum :: Coexpr ctx a (R ctx) -> Coexpr ctx b (R ctx) -> Coexpr ctx (a ⊕ b) (R ctx)
-  LBottom :: Coexpr ctx (Bottom (R ctx)) (R ctx)
-  LOne :: Coexpr ctx _Γ (R ctx) -> Coexpr ctx (One (E ctx), _Γ) (R ctx)
-  LPar :: Coexpr ctx a (R ctx) -> Coexpr ctx b (R ctx) -> Coexpr ctx (a ⅋ b) (R ctx)
-  LTensor :: Coexpr ctx (a, b) (R ctx) -> Coexpr ctx (a ⊗ b) (R ctx)
-  LFun :: Expr ctx (E ctx) a -> Coexpr ctx b (R ctx) -> Coexpr ctx (Fun (R ctx) a b) (R ctx)
-  LSub :: Expr (a < ctx) (E ctx) b -> Coexpr ctx (Sub (R ctx) b a) (R ctx)
-
-deriving instance Show (Coexpr ctx a b)
 
 
 -- Values
@@ -115,7 +111,7 @@ quoteVal = \case
   VFun f      -> RFun (quoteBinder f)
   VSub a b    -> RSub (quoteVal a) (quoteCoval b)
 
-quoteCoval :: Coval ctx a (R ctx) -> Coexpr ctx a (R ctx)
+quoteCoval :: Coval ctx a (R ctx) -> Expr ctx a (R ctx)
 quoteCoval = \case
   EZero     -> LZero
   EWith1 f  -> LWith1 (quoteCoval f)
@@ -148,7 +144,7 @@ evalDef ctx = \case
   RFun f      -> pure (fun (\ b a -> runDN (evalDef (a :< ctx) f) • b))
   RSub a b    -> evalDef ctx a <&> (coevalDef ctx b :>-)
 
-coevalDef :: Ctx ctx => ctx -> Coexpr ctx a (R ctx) -> (a • R ctx)
+coevalDef :: Ctx ctx => ctx -> Expr ctx a (R ctx) -> (a • R ctx)
 coevalDef ctx = \case
   Covar i   -> ctx !> i
   LZero     -> K absurdP
