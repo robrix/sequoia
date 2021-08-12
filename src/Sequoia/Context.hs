@@ -143,6 +143,11 @@ class RCtx c where
 
   infixl 2 !>
 
+instance RCtx (ΓΔ e r) where
+  type R (ΓΔ e r) = r
+
+  _ !> i = case i of {}
+
 instance RCtx (Δ r) where
   type R (Δ r) = r
 
