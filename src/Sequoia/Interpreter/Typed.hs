@@ -69,6 +69,7 @@ data Coexpr ctx a where
   LPar :: Coexpr ctx a -> Coexpr ctx b -> Coexpr ctx (a ⅋ b)
   LTensor :: Coexpr ctx (a, b) -> Coexpr ctx (a ⊗ b)
   LFun :: Expr (as |- bs) a -> Coexpr (as |- bs) b -> Coexpr (as |- bs) (Fun (R bs) a b)
+  LSub :: Scope as bs a b -> Coexpr (as |- bs) (Sub (R bs) b a)
 
 deriving instance Show (Coexpr ctx a)
 
@@ -162,6 +163,7 @@ coevalDef ctx@(_Γ :|-: _Δ) = \case
   LPar l r  -> coevalDef ctx l <••> coevalDef ctx r
   LTensor a -> coevalDef ctx a <<^ coerceConj
   LFun a b  -> K (\ f -> runDN (evalDef ctx a >>= appFun f) • coevalDef ctx b)
+  LSub f    -> K (\ (a :-< b) -> runDN (evalDef (a <| ctx) (getScope f)) • b)
 
 
 -- Execution
