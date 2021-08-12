@@ -1,8 +1,10 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE TypeFamilies #-}
 module Sequoia.Context
-( -- * Empty contexts
-  ΓΔ(..)
+( -- * Sequents
+  type (|-)(..)
+  -- * Empty contexts
+, ΓΔ(..)
   -- * Context extensions
 , type (<)(..)
 , type (>)(..)
@@ -21,6 +23,14 @@ module Sequoia.Context
 
 import Data.Functor.Classes
 import Sequoia.Profunctor.Continuation
+
+-- Sequents
+
+data _Γ |- _Δ = _Γ :|-: _Δ
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+
+infix 3 |-, :|-:
+
 
 -- Empty contexts
 
