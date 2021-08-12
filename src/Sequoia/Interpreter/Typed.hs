@@ -33,8 +33,11 @@ module Sequoia.Interpreter.Typed
 , Ix(index)
 ) where
 
+import Control.Applicative (liftA2)
 import Prelude hiding (exp)
+import Sequoia.Conjunction
 import Sequoia.Connective.Function
+import Sequoia.Connective.With
 import Sequoia.Monad.Run
 import Sequoia.Profunctor
 import Sequoia.Profunctor.Continuation
@@ -50,11 +53,14 @@ absurdR = \case
 
 data Expr b where
   XVar :: Ix a -> Expr a
+  XWithR :: Expr a -> Expr b -> Expr (a & b)
   XFunR :: Expr b -> Expr (Fun R a b)
 
 deriving instance Show (Expr b)
 
 data Coexpr a where
+  XWithL1 :: Coexpr a -> Coexpr (a & b)
+  XWithL2 :: Coexpr b -> Coexpr (a & b)
   XFunL :: Expr a -> Coexpr b -> Coexpr (Fun R a b)
 
 deriving instance Show (Coexpr a)
@@ -64,9 +70,12 @@ deriving instance Show (Coexpr a)
 
 data Val b where
   VNe :: Lv a -> Val a
+  VWithR :: Val a -> Val b -> Val (a & b)
   VFunR :: (Val a -> Val b) -> Val (Fun R a b)
 
 data Coval a where
+  VWithL1 :: Coval a -> Coval (a & b)
+  VWithL2 :: Coval b -> Coval (a & b)
   VFunL :: Val a -> Coval b -> Coval (Fun R a b)
 
 
@@ -74,11 +83,14 @@ data Coval a where
 
 quoteVal :: Cardinal -> Val b -> Expr b
 quoteVal c = \case
-  VNe l   -> XVar (lvToIx c l)
-  VFunR f -> XFunR (quoteVal (succ c) (f (VNe (Lv c))))
+  VNe l      -> XVar (lvToIx c l)
+  VWithR a b -> XWithR (quoteVal c a) (quoteVal c b)
+  VFunR f    -> XFunR (quoteVal (succ c) (f (VNe (Lv c))))
 
 quoteCoval :: Cardinal -> Coval a -> Coexpr a
 quoteCoval c = \case
+  VWithL1 f -> XWithL1 (quoteCoval c f)
+  VWithL2 g -> XWithL2 (quoteCoval c g)
   VFunL a b -> XFunL (quoteVal c a) (quoteCoval c b)
 
 
@@ -98,11 +110,14 @@ newtype Coeval a r = Coeval { coeval :: a • r }
 
 evalDef :: Γ Val as -> Expr b -> Val b
 evalDef ctx = \case
-  XVar i  -> i <! ctx
-  XFunR f -> VFunR (\ a -> evalDef (a :< ctx) f)
+  XVar i     -> i <! ctx
+  XWithR a b -> VWithR (evalDef ctx a) (evalDef ctx b)
+  XFunR f    -> VFunR (\ a -> evalDef (a :< ctx) f)
 
 coevalDef :: Γ Val as -> Coexpr b -> Coval b
 coevalDef ctx = \case
+  XWithL1 f -> VWithL1 (coevalDef ctx f)
+  XWithL2 g -> VWithL2 (coevalDef ctx g)
   XFunL a b -> VFunL (evalDef ctx a) (coevalDef ctx b)
 
 
@@ -110,11 +125,14 @@ coevalDef ctx = \case
 
 execVal :: Γ I as -> Val b -> Eval R b
 execVal ctx = \case
-  VNe l   -> pure (getI (lvToIx (cardinality ctx) l <! ctx))
-  VFunR f -> pure (fun (\ b a -> let ctx' = I a :< ctx in eval (execVal ctx' (f (VNe (lv ctx')))) • Coeval b))
+  VNe l      -> pure (getI (lvToIx (cardinality ctx) l <! ctx))
+  VWithR a b -> liftA2 inlr (execVal ctx a) (execVal ctx b)
+  VFunR f    -> pure (fun (\ b a -> let ctx' = I a :< ctx in eval (execVal ctx' (f (VNe (lv ctx')))) • Coeval b))
 
 execCoval :: Γ I as -> Coval a -> Coeval a R
 execCoval ctx = \case
+  VWithL1 f -> exlL (execCoval ctx f)
+  VWithL2 g -> exrL (execCoval ctx g)
   VFunL a b -> inK (\ f -> eval (execVal ctx a >>= evalFun f) • execCoval ctx b)
 
 
