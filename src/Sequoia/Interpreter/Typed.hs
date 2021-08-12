@@ -89,6 +89,7 @@ data Val ctx a where
   VPar :: Val ctx (Either a b) -> Val ctx (a ⅋ b)
   VTensor :: Val ctx a -> Val ctx b -> Val ctx (a ⊗ b)
   VFun :: (Val (a < as |- bs) a -> Val ((a < as) |- bs) b) -> Val (as |- bs) (Fun (R bs) a b)
+  VSub :: Val (as |- bs) a -> Coval (as |- bs) b -> Val (as |- bs) (Sub (R bs) b a)
 
 data Coval ctx a where
   EZero :: Coval ctx Zero
@@ -118,6 +119,7 @@ quoteVal = \case
   VPar a      -> RPar (quoteVal a)
   VTensor a b -> RTensor (quoteVal a) (quoteVal b)
   VFun f      -> RFun (quoteBinder f)
+  VSub a b    -> RSub (quoteVal a) (quoteCoval b)
 
 quoteCoval :: Coval (as |- bs) a -> Coexpr (as |- bs) a
 quoteCoval = \case
@@ -168,7 +170,7 @@ coevalDef ctx@(_Γ :|-: _Δ) = \case
 
 -- Execution
 
-execVal :: LCtx as => as |- bs -> Val (as |- bs) a -> DN (R bs) a
+execVal :: (LCtx as, RCtx bs) => as |- bs -> Val (as |- bs) a -> DN (R bs) a
 execVal ctx@(_Γ :|-: _Δ) = \case
   VNe i       -> pure (i <! _Γ)
   VTop        -> pure Top
@@ -179,6 +181,7 @@ execVal ctx@(_Γ :|-: _Δ) = \case
   VPar a      -> coerceDisj <$> execVal ctx a
   VTensor a b -> liftA2 inlr (execVal ctx a) (execVal ctx b)
   VFun f      -> pure (fun (\ b a -> runDN (bindVal (execVal (a <| ctx)) f) • b))
+  VSub a b    -> execVal ctx a <&> (:-< execCoval ctx b)
 
 execCoval :: (LCtx as, RCtx bs) => as |- bs -> Coval (as |- bs) a -> (a • R bs)
 execCoval ctx@(_Γ :|-: _Δ) = \case
