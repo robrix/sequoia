@@ -24,6 +24,7 @@ module Sequoia.Interpreter.Typed
 ) where
 
 import Control.Applicative (liftA2)
+import Data.Functor ((<&>))
 import Sequoia.Conjunction
 import Sequoia.Connective.Bottom
 import Sequoia.Connective.Function
@@ -135,19 +136,19 @@ quoteBinder = Scope . bindVal quoteVal
 
 -- Definitional interpreter
 
-evalDef :: (LCtx as, RCtx bs) => as |- bs -> Expr (as |- bs) a -> a
+evalDef :: (LCtx as, RCtx bs) => as |- bs -> Expr (as |- bs) a -> DN (R bs) a
 evalDef ctx@(_Γ :|-: _Δ) = \case
-  Var i       -> i <! _Γ
-  RTop        -> Top
-  RWith a b   -> evalDef ctx a >--< evalDef ctx b
-  RSum1 a     -> InL (evalDef ctx a)
-  RSum2 b     -> InR (evalDef ctx b)
-  RBot a      -> Left (evalDef ctx a)
-  ROne        -> One (getE _Γ)
-  RPar a      -> coerceDisj (evalDef ctx a)
-  RTensor a b -> evalDef ctx a >--< evalDef ctx b
-  RFun b      -> fun' (\ a -> evalDef (a <| ctx) (getScope b))
-  RSub a b    -> evalDef ctx a :-< coevalDef ctx b
+  Var i       -> pure (i <! _Γ)
+  RTop        -> pure Top
+  RWith a b   -> liftA2 inlr (evalDef ctx a) (evalDef ctx b)
+  RSum1 a     -> inlF (evalDef ctx a)
+  RSum2 b     -> inrF (evalDef ctx b)
+  RBot a      -> inlF (evalDef ctx a)
+  ROne        -> pure (One (getE _Γ))
+  RPar a      -> coerceDisj <$> evalDef ctx a
+  RTensor a b -> liftA2 inlr (evalDef ctx a) (evalDef ctx b)
+  RFun f      -> pure (fun (\ b a -> runDN (evalDef (a <| ctx) (getScope f)) • b))
+  RSub a b    -> evalDef ctx a <&> (:-< coevalDef ctx b)
 
 coevalDef :: (LCtx as, RCtx bs) => as |- bs -> Coexpr (as |- bs) a -> (a • R bs)
 coevalDef ctx@(_Γ :|-: _Δ) = \case
@@ -160,7 +161,7 @@ coevalDef ctx@(_Γ :|-: _Δ) = \case
   LOne a    -> exrL (coevalDef ctx a)
   LPar l r  -> coevalDef ctx l <••> coevalDef ctx r
   LTensor a -> coevalDef ctx a <<^ coerceConj
-  LFun a b  -> K (\ f -> getFun f (coevalDef ctx b) • evalDef ctx a)
+  LFun a b  -> K (\ f -> runDN (evalDef ctx a >>= appFun f) • coevalDef ctx b)
 
 
 -- Execution
@@ -170,8 +171,8 @@ execVal ctx@(_Γ :|-: _Δ) = \case
   VNe i       -> pure (i <! _Γ)
   VTop        -> pure Top
   VWith a b   -> liftA2 inlr (execVal ctx a) (execVal ctx b)
-  VSum1 a     -> InL <$> execVal ctx a
-  VSum2 b     -> InR <$> execVal ctx b
+  VSum1 a     -> inlF (execVal ctx a)
+  VSum2 b     -> inrF (execVal ctx b)
   VOne        -> pure (One (getE _Γ))
   VPar a      -> coerceDisj <$> execVal ctx a
   VTensor a b -> liftA2 inlr (execVal ctx a) (execVal ctx b)
