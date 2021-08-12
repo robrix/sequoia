@@ -81,6 +81,9 @@ instance Applicative (Exp r a) where
 instance Monad (Exp r a) where
   m >>= f = Exp (\ k -> K (\ a -> runExp (runExp k a <<^ f) a • m))
 
+instance MonadRunK r (Exp r a) where
+  withRunK f = Exp (\ k -> K (\ a -> let run k m = runExp k a • m in run k (f run)))
+
 
 -- Mixfix syntax
 
