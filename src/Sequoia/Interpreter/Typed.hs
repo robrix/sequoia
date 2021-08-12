@@ -17,9 +17,6 @@ module Sequoia.Interpreter.Typed
   -- * Execution
 , execVal
 , execCoval
-  -- * Sequents
-, type (|-)(..)
-, (<|)
 ) where
 
 import Control.Applicative (liftA2)
@@ -43,32 +40,32 @@ import Sequoia.Profunctor.Continuation
 -- Expressions
 
 data Expr ctx a b where
-  Var :: IxL a as -> Expr (as |- bs) (E as) a
-  RTop :: Expr (as |- bs) (E as) Top
-  RWith :: Expr (as |- bs) (E as) a -> Expr (as |- bs) (E as) b -> Expr (as |- bs) (E as) (a & b)
-  RSum1 :: Expr (as |- bs) (E as) a -> Expr (as |- bs) (E as) (a ⊕ b)
-  RSum2 :: Expr (as |- bs) (E as) b -> Expr (as |- bs) (E as) (a ⊕ b)
-  RBottom :: Expr (as |- bs) (E as) _Δ -> Expr (as |- bs) (E as) (Either _Δ (Bottom (R bs)))
-  ROne :: Expr (as |- bs) (E as) (One (E as))
-  RPar :: Expr (as |- bs) (E as) (Either a b) -> Expr (as |- bs) (E as) (a ⅋ b)
-  RTensor :: Expr (as |- bs) (E as) a -> Expr (as |- bs) (E as) b -> Expr (as |- bs) (E as) (a ⊗ b)
-  RFun :: Expr ((a < as) |- bs) (E as) b -> Expr (as |- bs) (E as) (Fun (R bs) a b)
-  RSub :: Expr (as |- bs) (E as) a -> Coexpr (as |- bs) b (R bs) -> Expr (as |- bs) (E as) (Sub (R bs) b a)
+  Var :: IxL a ctx -> Expr ctx (E ctx) a
+  RTop :: Expr ctx (E ctx) Top
+  RWith :: Expr ctx (E ctx) a -> Expr ctx (E ctx) b -> Expr ctx (E ctx) (a & b)
+  RSum1 :: Expr ctx (E ctx) a -> Expr ctx (E ctx) (a ⊕ b)
+  RSum2 :: Expr ctx (E ctx) b -> Expr ctx (E ctx) (a ⊕ b)
+  RBottom :: Expr ctx (E ctx) _Δ -> Expr ctx (E ctx) (Either _Δ (Bottom (R ctx)))
+  ROne :: Expr ctx (E ctx) (One (E ctx))
+  RPar :: Expr ctx (E ctx) (Either a b) -> Expr ctx (E ctx) (a ⅋ b)
+  RTensor :: Expr ctx (E ctx) a -> Expr ctx (E ctx) b -> Expr ctx (E ctx) (a ⊗ b)
+  RFun :: Expr (a < ctx) (E ctx) b -> Expr ctx (E ctx) (Fun (R ctx) a b)
+  RSub :: Expr ctx (E ctx) a -> Coexpr ctx b (R ctx) -> Expr ctx (E ctx) (Sub (R ctx) b a)
 
 deriving instance Show (Expr ctx a b)
 
 data Coexpr ctx a b where
-  Covar :: IxR bs b -> Coexpr (as |- bs) b (R bs)
-  LZero :: Coexpr (as |- bs) Zero (R bs)
-  LWith1 :: Coexpr (as |- bs) a (R bs) -> Coexpr (as |- bs) (a & b) (R bs)
-  LWith2 :: Coexpr (as |- bs) b (R bs) -> Coexpr (as |- bs) (a & b) (R bs)
-  LSum :: Coexpr (as |- bs) a (R bs) -> Coexpr (as |- bs) b (R bs) -> Coexpr (as |- bs) (a ⊕ b) (R bs)
-  LBottom :: Coexpr (as |- bs) (Bottom (R bs)) (R bs)
-  LOne :: Coexpr (as |- bs) _Γ (R bs) -> Coexpr (as |- bs) (One (E as), _Γ) (R bs)
-  LPar :: Coexpr (as |- bs) a (R bs) -> Coexpr (as |- bs) b (R bs) -> Coexpr (as |- bs) (a ⅋ b) (R bs)
-  LTensor :: Coexpr (as |- bs) (a, b) (R bs) -> Coexpr (as |- bs) (a ⊗ b) (R bs)
-  LFun :: Expr (as |- bs) (E as) a -> Coexpr (as |- bs) b (R bs) -> Coexpr (as |- bs) (Fun (R bs) a b) (R bs)
-  LSub :: Expr ((a < as) |- bs) (E as) b -> Coexpr (as |- bs) (Sub (R bs) b a) (R bs)
+  Covar :: IxR ctx b -> Coexpr ctx b (R ctx)
+  LZero :: Coexpr ctx Zero (R ctx)
+  LWith1 :: Coexpr ctx a (R ctx) -> Coexpr ctx (a & b) (R ctx)
+  LWith2 :: Coexpr ctx b (R ctx) -> Coexpr ctx (a & b) (R ctx)
+  LSum :: Coexpr ctx a (R ctx) -> Coexpr ctx b (R ctx) -> Coexpr ctx (a ⊕ b) (R ctx)
+  LBottom :: Coexpr ctx (Bottom (R ctx)) (R ctx)
+  LOne :: Coexpr ctx _Γ (R ctx) -> Coexpr ctx (One (E ctx), _Γ) (R ctx)
+  LPar :: Coexpr ctx a (R ctx) -> Coexpr ctx b (R ctx) -> Coexpr ctx (a ⅋ b) (R ctx)
+  LTensor :: Coexpr ctx (a, b) (R ctx) -> Coexpr ctx (a ⊗ b) (R ctx)
+  LFun :: Expr ctx (E ctx) a -> Coexpr ctx b (R ctx) -> Coexpr ctx (Fun (R ctx) a b) (R ctx)
+  LSub :: Expr (a < ctx) (E ctx) b -> Coexpr ctx (Sub (R ctx) b a) (R ctx)
 
 deriving instance Show (Coexpr ctx a b)
 
@@ -76,36 +73,36 @@ deriving instance Show (Coexpr ctx a b)
 -- Values
 
 data Val ctx a where
-  VNe :: IxL a as -> Val (as |- bs) a
+  VNe :: IxL a ctx -> Val ctx a
   VTop :: Val ctx Top
   VWith :: Val ctx a -> Val ctx b -> Val ctx (a & b)
   VSum1 :: Val ctx a -> Val ctx (a ⊕ b)
   VSum2 :: Val ctx b -> Val ctx (a ⊕ b)
-  VOne :: Val (as |- bs) (One (E as))
+  VOne :: Val ctx (One (E ctx))
   VPar :: Val ctx (Either a b) -> Val ctx (a ⅋ b)
   VTensor :: Val ctx a -> Val ctx b -> Val ctx (a ⊗ b)
-  VFun :: (Val (a < as |- bs) a -> Val ((a < as) |- bs) b) -> Val (as |- bs) (Fun (R bs) a b)
-  VSub :: Val (as |- bs) a -> Coval (as |- bs) b -> Val (as |- bs) (Sub (R bs) b a)
+  VFun :: (Val (a < ctx) a -> Val (a < ctx) b) -> Val ctx (Fun (R ctx) a b)
+  VSub :: Val ctx a -> Coval ctx b -> Val ctx (Sub (R ctx) b a)
 
 data Coval ctx a where
   EZero :: Coval ctx Zero
   EWith1 :: Coval ctx a -> Coval ctx (a & b)
   EWith2 :: Coval ctx b -> Coval ctx (a & b)
   ESum :: Coval ctx a -> Coval ctx b -> Coval ctx (a ⊕ b)
-  EBottom :: Coval (as |- bs) (Bottom (R bs))
-  EOne :: Coval (as |- bs) a -> Coval (as |- bs) (One (E as), a)
+  EBottom :: Coval ctx (Bottom (R ctx))
+  EOne :: Coval ctx a -> Coval ctx (One (E ctx), a)
   EPar :: Coval ctx a -> Coval ctx b -> Coval ctx (a ⅋ b)
   ETensor :: Coval ctx (a, b) -> Coval ctx (a ⊗ b)
-  EFun :: Val (as |- bs) a -> Coval (as |- bs) b -> Coval (as |- bs) (Fun (R bs) a b)
-  ESub :: (Val (a < as |- bs) a -> Val ((a < as) |- bs) b) -> Coval (as |- bs) (Sub (R bs) b a)
+  EFun :: Val ctx a -> Coval ctx b -> Coval ctx (Fun (R ctx) a b)
+  ESub :: (Val (a < ctx) a -> Val (a < ctx) b) -> Coval ctx (Sub (R ctx) b a)
 
-bindVal :: (a -> b) -> (Val (x < as |- bs) x -> a) -> b
+bindVal :: (a -> b) -> (Val (x < ctx) x -> a) -> b
 bindVal with b = with (b (VNe IxLZ))
 
 
 -- Quotation
 
-quoteVal :: Val (as |- bs) b -> Expr (as |- bs) (E as) b
+quoteVal :: Val ctx b -> Expr ctx (E ctx) b
 quoteVal = \case
   VNe l       -> Var l
   VTop        -> RTop
@@ -118,7 +115,7 @@ quoteVal = \case
   VFun f      -> RFun (quoteBinder f)
   VSub a b    -> RSub (quoteVal a) (quoteCoval b)
 
-quoteCoval :: Coval (as |- bs) a -> Coexpr (as |- bs) a (R bs)
+quoteCoval :: Coval ctx a -> Coexpr ctx a (R ctx)
 quoteCoval = \case
   EZero     -> LZero
   EWith1 f  -> LWith1 (quoteCoval f)
@@ -131,29 +128,29 @@ quoteCoval = \case
   EFun a b  -> LFun (quoteVal a) (quoteCoval b)
   ESub f    -> LSub (quoteBinder f)
 
-quoteBinder :: (Val (t < as |- bs) t -> Val ((t < as) |- bs) u) -> Expr ((t < as) |- bs) (E as) u
+quoteBinder :: (Val (t < ctx) t -> Val (t < ctx) u) -> Expr (t < ctx) (E ctx) u
 quoteBinder = bindVal quoteVal
 
 
 -- Definitional interpreter
 
-evalDef :: (LCtx as, RCtx bs) => as |- bs -> Expr (as |- bs) (E as) b -> DN (R bs) b
-evalDef ctx@(_Γ :|-: _Δ) = \case
-  Var i       -> pure (i <! _Γ)
+evalDef :: Ctx ctx => ctx -> Expr ctx (E ctx) b -> DN (R ctx) b
+evalDef ctx = \case
+  Var i       -> pure (i <! ctx)
   RTop        -> pure Top
   RWith a b   -> liftA2 inlr (evalDef ctx a) (evalDef ctx b)
   RSum1 a     -> inlF (evalDef ctx a)
   RSum2 b     -> inrF (evalDef ctx b)
   RBottom a   -> inlF (evalDef ctx a)
-  ROne        -> pure (One (getE _Γ))
+  ROne        -> pure (One (getE ctx))
   RPar a      -> coerceDisj <$> evalDef ctx a
   RTensor a b -> liftA2 inlr (evalDef ctx a) (evalDef ctx b)
-  RFun f      -> pure (fun (\ b a -> runDN (evalDef (a <| ctx) f) • b))
+  RFun f      -> pure (fun (\ b a -> runDN (evalDef (a :< ctx) f) • b))
   RSub a b    -> evalDef ctx a <&> (coevalDef ctx b :>-)
 
-coevalDef :: (LCtx as, RCtx bs) => as |- bs -> Coexpr (as |- bs) a (R bs) -> (a • R bs)
-coevalDef ctx@(_Γ :|-: _Δ) = \case
-  Covar i   -> _Δ !> i
+coevalDef :: Ctx ctx => ctx -> Coexpr ctx a (R ctx) -> (a • R ctx)
+coevalDef ctx = \case
+  Covar i   -> ctx !> i
   LZero     -> K absurdP
   LWith1 a  -> exlL (coevalDef ctx a)
   LWith2 b  -> exrL (coevalDef ctx b)
@@ -163,26 +160,26 @@ coevalDef ctx@(_Γ :|-: _Δ) = \case
   LPar l r  -> coevalDef ctx l <••> coevalDef ctx r
   LTensor a -> coevalDef ctx a <<^ coerceConj
   LFun a b  -> K (\ f -> runDN (evalDef ctx a >>= appFun f) • coevalDef ctx b)
-  LSub f    -> K (\ (b :>- a) -> runDN (evalDef (a <| ctx) f) • b)
+  LSub f    -> K (\ (b :>- a) -> runDN (evalDef (a :< ctx) f) • b)
 
 
 -- Execution
 
-execVal :: (LCtx as, RCtx bs) => as |- bs -> Val (as |- bs) a -> DN (R bs) a
-execVal ctx@(_Γ :|-: _Δ) = \case
-  VNe i       -> pure (i <! _Γ)
+execVal :: Ctx ctx => ctx -> Val ctx a -> DN (R ctx) a
+execVal ctx = \case
+  VNe i       -> pure (i <! ctx)
   VTop        -> pure Top
   VWith a b   -> liftA2 inlr (execVal ctx a) (execVal ctx b)
   VSum1 a     -> inlF (execVal ctx a)
   VSum2 b     -> inrF (execVal ctx b)
-  VOne        -> pure (One (getE _Γ))
+  VOne        -> pure (One (getE ctx))
   VPar a      -> coerceDisj <$> execVal ctx a
   VTensor a b -> liftA2 inlr (execVal ctx a) (execVal ctx b)
-  VFun f      -> pure (fun (\ b a -> runDN (bindVal (execVal (a <| ctx)) f) • b))
+  VFun f      -> pure (fun (\ b a -> runDN (bindVal (execVal (a :< ctx)) f) • b))
   VSub a b    -> execVal ctx a <&> (execCoval ctx b :>-)
 
-execCoval :: (LCtx as, RCtx bs) => as |- bs -> Coval (as |- bs) a -> (a • R bs)
-execCoval ctx@(_Γ :|-: _Δ) = \case
+execCoval :: Ctx ctx => ctx -> Coval ctx a -> (a • R ctx)
+execCoval ctx = \case
   EZero     -> K absurdP
   EWith1 a  -> exlL (execCoval ctx a)
   EWith2 b  -> exrL (execCoval ctx b)
@@ -192,19 +189,4 @@ execCoval ctx@(_Γ :|-: _Δ) = \case
   EPar a b  -> execCoval ctx a <••> execCoval ctx b
   ETensor a -> execCoval ctx a <<^ coerceConj
   EFun a b  -> K (\ f -> runDN (execVal ctx a >>= appFun f) • execCoval ctx b)
-  ESub f    -> K (\ (b :>- a) -> runDN (bindVal (execVal (a <| ctx)) f) • b)
-
-
--- Sequents
-
-data as |- bs = as :|-: bs
-
-infix 3 |-, :|-:
-
-(|-) :: as -> bs -> as |- bs
-(|-) = (:|-:)
-
-(<|) :: a -> as |- bs -> a < as |- bs
-a <| (as :|-: bs) = a :< as |- bs
-
-infixr 4 <|
+  ESub f    -> K (\ (b :>- a) -> runDN (bindVal (execVal (a :< ctx)) f) • b)
