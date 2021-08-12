@@ -74,7 +74,7 @@ instance Show (Index a as) where
   showsPrec p = showsUnaryWith showsPrec "Index" p . getIndex
 
 
-indexToLevel :: Cardinality as =>Index a as -> Level a as
+indexToLevel :: Cardinality as => Index a as -> Level a as
 indexToLevel i@(Index index) = Level $ cardinality i - index - 1
 
 
