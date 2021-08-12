@@ -115,7 +115,7 @@ execVal ctx = \case
 
 execCoval :: Γ I as -> Coval a -> Coeval a R
 execCoval ctx = \case
-  VFunL a b -> Coeval (K (\ f -> eval (execVal ctx a >>= evalFun f) • execCoval ctx b))
+  VFunL a b -> inK (\ f -> eval (execVal ctx a >>= evalFun f) • execCoval ctx b)
 
 
 -- Contexts
