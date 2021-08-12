@@ -5,7 +5,6 @@ module Sequoia.Interpreter.Typed
 ( -- * Expressions
   Expr(..)
 , Coexpr(..)
-, Scope(..)
   -- * Values
 , Val(..)
 , Coval(..)
@@ -53,7 +52,7 @@ data Expr ctx a where
   ROne :: Expr (as |- bs) (One (E as))
   RPar :: Expr ctx (Either a b) -> Expr ctx (a ⅋ b)
   RTensor :: Expr ctx a -> Expr ctx b -> Expr ctx (a ⊗ b)
-  RFun :: Scope as bs a b -> Expr (as |- bs) (Fun (R bs) a b)
+  RFun :: Expr ((a < as) |- bs) b -> Expr (as |- bs) (Fun (R bs) a b)
   RSub :: Expr (as |- bs) a -> Coexpr (as |- bs) b -> Expr (as |- bs) (Sub (R bs) b a)
 
 deriving instance Show (Expr ctx a)
@@ -69,12 +68,9 @@ data Coexpr ctx a where
   LPar :: Coexpr ctx a -> Coexpr ctx b -> Coexpr ctx (a ⅋ b)
   LTensor :: Coexpr ctx (a, b) -> Coexpr ctx (a ⊗ b)
   LFun :: Expr (as |- bs) a -> Coexpr (as |- bs) b -> Coexpr (as |- bs) (Fun (R bs) a b)
-  LSub :: Scope as bs a b -> Coexpr (as |- bs) (Sub (R bs) b a)
+  LSub :: Expr ((a < as) |- bs) b -> Coexpr (as |- bs) (Sub (R bs) b a)
 
 deriving instance Show (Coexpr ctx a)
-
-newtype Scope as bs a b = Scope { getScope :: Expr ((a < as) |- bs) b }
-  deriving (Show)
 
 
 -- Values
@@ -135,8 +131,8 @@ quoteCoval = \case
   EFun a b  -> LFun (quoteVal a) (quoteCoval b)
   ESub f    -> LSub (quoteBinder f)
 
-quoteBinder :: (Val (t < as |- bs) t -> Val ((t < as) |- bs) u) -> Scope as bs t u
-quoteBinder = Scope . bindVal quoteVal
+quoteBinder :: (Val (t < as |- bs) t -> Val ((t < as) |- bs) u) -> Expr ((t < as) |- bs) u
+quoteBinder = bindVal quoteVal
 
 
 -- Definitional interpreter
@@ -152,7 +148,7 @@ evalDef ctx@(_Γ :|-: _Δ) = \case
   ROne        -> pure (One (getE _Γ))
   RPar a      -> coerceDisj <$> evalDef ctx a
   RTensor a b -> liftA2 inlr (evalDef ctx a) (evalDef ctx b)
-  RFun f      -> pure (fun (\ b a -> runDN (evalDef (a <| ctx) (getScope f)) • b))
+  RFun f      -> pure (fun (\ b a -> runDN (evalDef (a <| ctx) f) • b))
   RSub a b    -> evalDef ctx a <&> (coevalDef ctx b :>-)
 
 coevalDef :: (LCtx as, RCtx bs) => as |- bs -> Coexpr (as |- bs) a -> (a • R bs)
@@ -167,7 +163,7 @@ coevalDef ctx@(_Γ :|-: _Δ) = \case
   LPar l r  -> coevalDef ctx l <••> coevalDef ctx r
   LTensor a -> coevalDef ctx a <<^ coerceConj
   LFun a b  -> K (\ f -> runDN (evalDef ctx a >>= appFun f) • coevalDef ctx b)
-  LSub f    -> K (\ (b :>- a) -> runDN (evalDef (a <| ctx) (getScope f)) • b)
+  LSub f    -> K (\ (b :>- a) -> runDN (evalDef (a <| ctx) f) • b)
 
 
 -- Execution
