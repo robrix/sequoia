@@ -42,19 +42,19 @@ data Snk
 absurdSnk :: Snk -> a
 absurdSnk = \case
 
-data Expr a b where
+data Expr e r a b where
 
-deriving instance Show (Expr a b)
+deriving instance Show (Expr e r a b)
 
 
 -- Values
 
-data Val a b where
+data Val e r a b where
 
 
 -- Quotation
 
-quoteVal :: Val a b -> Expr a b
+quoteVal :: Val e r a b -> Expr e r a b
 quoteVal = \case
 
 
@@ -89,11 +89,11 @@ newtype Eval e r a b = Eval { getEval :: Exp r a b }
 
 -- Definitional interpreter
 
-evalDef :: Expr a b -> Eval e r a b
+evalDef :: Expr e r a b -> Eval e r a b
 evalDef = \case
 
 
 -- Execution
 
-execVal :: Val a b -> Eval e r a b
+execVal :: Val e r a b -> Eval e r a b
 execVal = \case
