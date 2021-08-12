@@ -6,7 +6,7 @@ module Sequoia.Interpreter.Typed
   Src(..)
 , Snk
 , absurdSnk
-, Expr
+, Expr(..)
   -- * Values
 , Val
   -- * Quotation
