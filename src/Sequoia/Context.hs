@@ -2,7 +2,8 @@
 {-# LANGUAGE TypeFamilies #-}
 module Sequoia.Context
 ( -- * Empty contexts
-  Γ(..)
+  ΓΔ(..)
+, Γ(..)
 , Δ(..)
   -- * Context extensions
 , type (<)(..)
@@ -27,6 +28,9 @@ import Data.Functor.Classes
 import Sequoia.Profunctor.Continuation
 
 -- Empty contexts
+
+newtype ΓΔ e r = ΓΔ { getΓΔ :: e }
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
 newtype Γ e = Γ { getΓ :: e }
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
