@@ -42,35 +42,35 @@ import Sequoia.Profunctor.Continuation
 
 -- Expressions
 
-data Expr ctx a where
-  Var :: IxL a as -> Expr (as |- bs) a
-  RTop :: Expr ctx Top
-  RWith :: Expr ctx a -> Expr ctx b -> Expr ctx (a & b)
-  RSum1 :: Expr ctx a -> Expr ctx (a ⊕ b)
-  RSum2 :: Expr ctx b -> Expr ctx (a ⊕ b)
-  RBottom :: Expr (as |- bs) _Δ -> Expr (as |- bs) (Either _Δ (Bottom (R bs)))
-  ROne :: Expr (as |- bs) (One (E as))
-  RPar :: Expr ctx (Either a b) -> Expr ctx (a ⅋ b)
-  RTensor :: Expr ctx a -> Expr ctx b -> Expr ctx (a ⊗ b)
-  RFun :: Expr ((a < as) |- bs) b -> Expr (as |- bs) (Fun (R bs) a b)
-  RSub :: Expr (as |- bs) a -> Coexpr (as |- bs) b -> Expr (as |- bs) (Sub (R bs) b a)
+data Expr ctx a b where
+  Var :: IxL a as -> Expr (as |- bs) (E as) a
+  RTop :: Expr (as |- bs) (E as) Top
+  RWith :: Expr (as |- bs) (E as) a -> Expr (as |- bs) (E as) b -> Expr (as |- bs) (E as) (a & b)
+  RSum1 :: Expr (as |- bs) (E as) a -> Expr (as |- bs) (E as) (a ⊕ b)
+  RSum2 :: Expr (as |- bs) (E as) b -> Expr (as |- bs) (E as) (a ⊕ b)
+  RBottom :: Expr (as |- bs) (E as) _Δ -> Expr (as |- bs) (E as) (Either _Δ (Bottom (R bs)))
+  ROne :: Expr (as |- bs) (E as) (One (E as))
+  RPar :: Expr (as |- bs) (E as) (Either a b) -> Expr (as |- bs) (E as) (a ⅋ b)
+  RTensor :: Expr (as |- bs) (E as) a -> Expr (as |- bs) (E as) b -> Expr (as |- bs) (E as) (a ⊗ b)
+  RFun :: Expr ((a < as) |- bs) (E as) b -> Expr (as |- bs) (E as) (Fun (R bs) a b)
+  RSub :: Expr (as |- bs) (E as) a -> Coexpr (as |- bs) b (R bs) -> Expr (as |- bs) (E as) (Sub (R bs) b a)
 
-deriving instance Show (Expr ctx a)
+deriving instance Show (Expr ctx a b)
 
-data Coexpr ctx a where
-  Covar :: IxR bs b -> Coexpr (as |- bs) b
-  LZero :: Coexpr ctx Zero
-  LWith1 :: Coexpr ctx a -> Coexpr ctx (a & b)
-  LWith2 :: Coexpr ctx b -> Coexpr ctx (a & b)
-  LSum :: Coexpr ctx a -> Coexpr ctx b -> Coexpr ctx (a ⊕ b)
-  LBottom :: Coexpr (as |- bs) (Bottom (R bs))
-  LOne :: Coexpr (as |- bs) _Γ -> Coexpr (as |- bs) (One (E as), _Γ)
-  LPar :: Coexpr ctx a -> Coexpr ctx b -> Coexpr ctx (a ⅋ b)
-  LTensor :: Coexpr ctx (a, b) -> Coexpr ctx (a ⊗ b)
-  LFun :: Expr (as |- bs) a -> Coexpr (as |- bs) b -> Coexpr (as |- bs) (Fun (R bs) a b)
-  LSub :: Expr ((a < as) |- bs) b -> Coexpr (as |- bs) (Sub (R bs) b a)
+data Coexpr ctx a b where
+  Covar :: IxR bs b -> Coexpr (as |- bs) b (R bs)
+  LZero :: Coexpr (as |- bs) Zero (R bs)
+  LWith1 :: Coexpr (as |- bs) a (R bs) -> Coexpr (as |- bs) (a & b) (R bs)
+  LWith2 :: Coexpr (as |- bs) b (R bs) -> Coexpr (as |- bs) (a & b) (R bs)
+  LSum :: Coexpr (as |- bs) a (R bs) -> Coexpr (as |- bs) b (R bs) -> Coexpr (as |- bs) (a ⊕ b) (R bs)
+  LBottom :: Coexpr (as |- bs) (Bottom (R bs)) (R bs)
+  LOne :: Coexpr (as |- bs) _Γ (R bs) -> Coexpr (as |- bs) (One (E as), _Γ) (R bs)
+  LPar :: Coexpr (as |- bs) a (R bs) -> Coexpr (as |- bs) b (R bs) -> Coexpr (as |- bs) (a ⅋ b) (R bs)
+  LTensor :: Coexpr (as |- bs) (a, b) (R bs) -> Coexpr (as |- bs) (a ⊗ b) (R bs)
+  LFun :: Expr (as |- bs) (E as) a -> Coexpr (as |- bs) b (R bs) -> Coexpr (as |- bs) (Fun (R bs) a b) (R bs)
+  LSub :: Expr ((a < as) |- bs) (E as) b -> Coexpr (as |- bs) (Sub (R bs) b a) (R bs)
 
-deriving instance Show (Coexpr ctx a)
+deriving instance Show (Coexpr ctx a b)
 
 
 -- Values
@@ -105,7 +105,7 @@ bindVal with b = with (b (VNe IxLZ))
 
 -- Quotation
 
-quoteVal :: Val (as |- bs) a -> Expr (as |- bs) a
+quoteVal :: Val (as |- bs) b -> Expr (as |- bs) (E as) b
 quoteVal = \case
   VNe l       -> Var l
   VTop        -> RTop
@@ -118,7 +118,7 @@ quoteVal = \case
   VFun f      -> RFun (quoteBinder f)
   VSub a b    -> RSub (quoteVal a) (quoteCoval b)
 
-quoteCoval :: Coval (as |- bs) a -> Coexpr (as |- bs) a
+quoteCoval :: Coval (as |- bs) a -> Coexpr (as |- bs) a (R bs)
 quoteCoval = \case
   EZero     -> LZero
   EWith1 f  -> LWith1 (quoteCoval f)
@@ -131,13 +131,13 @@ quoteCoval = \case
   EFun a b  -> LFun (quoteVal a) (quoteCoval b)
   ESub f    -> LSub (quoteBinder f)
 
-quoteBinder :: (Val (t < as |- bs) t -> Val ((t < as) |- bs) u) -> Expr ((t < as) |- bs) u
+quoteBinder :: (Val (t < as |- bs) t -> Val ((t < as) |- bs) u) -> Expr ((t < as) |- bs) (E as) u
 quoteBinder = bindVal quoteVal
 
 
 -- Definitional interpreter
 
-evalDef :: (LCtx as, RCtx bs) => as |- bs -> Expr (as |- bs) a -> DN (R bs) a
+evalDef :: (LCtx as, RCtx bs) => as |- bs -> Expr (as |- bs) (E as) b -> DN (R bs) b
 evalDef ctx@(_Γ :|-: _Δ) = \case
   Var i       -> pure (i <! _Γ)
   RTop        -> pure Top
@@ -151,7 +151,7 @@ evalDef ctx@(_Γ :|-: _Δ) = \case
   RFun f      -> pure (fun (\ b a -> runDN (evalDef (a <| ctx) f) • b))
   RSub a b    -> evalDef ctx a <&> (coevalDef ctx b :>-)
 
-coevalDef :: (LCtx as, RCtx bs) => as |- bs -> Coexpr (as |- bs) a -> (a • R bs)
+coevalDef :: (LCtx as, RCtx bs) => as |- bs -> Coexpr (as |- bs) a (R bs) -> (a • R bs)
 coevalDef ctx@(_Γ :|-: _Δ) = \case
   Covar i   -> _Δ !> i
   LZero     -> K absurdP
