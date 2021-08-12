@@ -43,6 +43,7 @@ absurdSnk :: Snk -> a
 absurdSnk = \case
 
 data Expr e r a b where
+  XFunR :: Expr e r a b -> Expr e r e (Fun r a b)
 
 deriving instance Show (Expr e r a b)
 
@@ -91,6 +92,7 @@ newtype Eval e r a b = Eval { getEval :: Exp r a b }
 
 evalDef :: Expr e r a b -> Eval e r a b
 evalDef = \case
+  XFunR f -> pure (fun (\ b a -> eval (evalDef f) b • a))
 
 
 -- Execution
