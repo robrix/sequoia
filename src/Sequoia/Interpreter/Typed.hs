@@ -6,20 +6,18 @@ module Sequoia.Interpreter.Typed
   Expr(..)
   -- * Values
 , Val(..)
-, Coval(..)
   -- * Quotation
 , quoteVal
-, quoteCoval
   -- * Definitional interpreter
 , evalDef
-, coevalDef
   -- * Execution
 , execVal
-, execCoval
 ) where
 
 import Control.Applicative (liftA2)
+import Control.Category (Category, (>>>))
 import Data.Functor ((<&>))
+import Prelude hiding (exp)
 import Sequoia.Conjunction
 import Sequoia.Connective.Bottom
 import Sequoia.Connective.Function
@@ -33,8 +31,10 @@ import Sequoia.Connective.With
 import Sequoia.Connective.Zero
 import Sequoia.Context
 import Sequoia.Disjunction
+import Sequoia.Monad.Run
 import Sequoia.Profunctor
 import Sequoia.Profunctor.Continuation
+import Sequoia.Profunctor.Exp hiding (Coexp(..))
 
 -- Expressions
 
@@ -78,19 +78,18 @@ data Val ctx a b where
   VPar :: Val ctx (E ctx) (Either a b) -> Val ctx (E ctx) (a ⅋ b)
   VTensor :: Val ctx (E ctx) a -> Val ctx (E ctx) b -> Val ctx (E ctx) (a ⊗ b)
   VFun :: (Val (a < ctx) (E ctx) a -> Val (a < ctx) (E ctx) b) -> Val ctx (E ctx) (Fun (R ctx) a b)
-  VSub :: Val ctx (E ctx) a -> Coval ctx b (R ctx) -> Val ctx (E ctx) (Sub (R ctx) b a)
+  VSub :: Val ctx (E ctx) a -> Val ctx b (R ctx) -> Val ctx (E ctx) (Sub (R ctx) b a)
 
-data Coval ctx a b where
-  EZero :: Coval ctx Zero (R ctx)
-  EWith1 :: Coval ctx a (R ctx) -> Coval ctx (a & b) (R ctx)
-  EWith2 :: Coval ctx b (R ctx) -> Coval ctx (a & b) (R ctx)
-  ESum :: Coval ctx a (R ctx) -> Coval ctx b (R ctx) -> Coval ctx (a ⊕ b) (R ctx)
-  EBottom :: Coval ctx (Bottom (R ctx)) (R ctx)
-  EOne :: Coval ctx a (R ctx) -> Coval ctx (One (E ctx), a) (R ctx)
-  EPar :: Coval ctx a (R ctx) -> Coval ctx b (R ctx) -> Coval ctx (a ⅋ b) (R ctx)
-  ETensor :: Coval ctx (a, b) (R ctx) -> Coval ctx (a ⊗ b) (R ctx)
-  EFun :: Val ctx (E ctx) a -> Coval ctx b (R ctx) -> Coval ctx (Fun (R ctx) a b) (R ctx)
-  ESub :: (Val (a < ctx) (E ctx) a -> Val (a < ctx) (E ctx) b) -> Coval ctx (Sub (R ctx) b a) (R ctx)
+  EZero :: Val ctx Zero (R ctx)
+  EWith1 :: Val ctx a (R ctx) -> Val ctx (a & b) (R ctx)
+  EWith2 :: Val ctx b (R ctx) -> Val ctx (a & b) (R ctx)
+  ESum :: Val ctx a (R ctx) -> Val ctx b (R ctx) -> Val ctx (a ⊕ b) (R ctx)
+  EBottom :: Val ctx (Bottom (R ctx)) (R ctx)
+  EOne :: Val ctx a (R ctx) -> Val ctx (One (E ctx), a) (R ctx)
+  EPar :: Val ctx a (R ctx) -> Val ctx b (R ctx) -> Val ctx (a ⅋ b) (R ctx)
+  ETensor :: Val ctx (a, b) (R ctx) -> Val ctx (a ⊗ b) (R ctx)
+  EFun :: Val ctx (E ctx) a -> Val ctx b (R ctx) -> Val ctx (Fun (R ctx) a b) (R ctx)
+  ESub :: (Val (a < ctx) (E ctx) a -> Val (a < ctx) (E ctx) b) -> Val ctx (Sub (R ctx) b a) (R ctx)
 
 bindVal :: (a -> b) -> (Val (x < ctx) (E ctx) x -> a) -> b
 bindVal with b = with (b (VNe IxLZ))
@@ -98,7 +97,7 @@ bindVal with b = with (b (VNe IxLZ))
 
 -- Quotation
 
-quoteVal :: Val ctx (E ctx) b -> Expr ctx (E ctx) b
+quoteVal :: Val ctx a b -> Expr ctx a b
 quoteVal = \case
   VNe l       -> Var l
   VTop        -> RTop
@@ -109,28 +108,53 @@ quoteVal = \case
   VPar a      -> RPar (quoteVal a)
   VTensor a b -> RTensor (quoteVal a) (quoteVal b)
   VFun f      -> RFun (quoteBinder f)
-  VSub a b    -> RSub (quoteVal a) (quoteCoval b)
+  VSub a b    -> RSub (quoteVal a) (quoteVal b)
 
-quoteCoval :: Coval ctx a (R ctx) -> Expr ctx a (R ctx)
-quoteCoval = \case
-  EZero     -> LZero
-  EWith1 f  -> LWith1 (quoteCoval f)
-  EWith2 g  -> LWith2 (quoteCoval g)
-  ESum f g  -> LSum (quoteCoval f) (quoteCoval g)
-  EBottom   -> LBottom
-  EOne v    -> LOne (quoteCoval v)
-  EPar f g  -> LPar (quoteCoval f) (quoteCoval g)
-  ETensor a -> LTensor (quoteCoval a)
-  EFun a b  -> LFun (quoteVal a) (quoteCoval b)
-  ESub f    -> LSub (quoteBinder f)
+  EZero       -> LZero
+  EWith1 f    -> LWith1 (quoteVal f)
+  EWith2 g    -> LWith2 (quoteVal g)
+  ESum f g    -> LSum (quoteVal f) (quoteVal g)
+  EBottom     -> LBottom
+  EOne v      -> LOne (quoteVal v)
+  EPar f g    -> LPar (quoteVal f) (quoteVal g)
+  ETensor a   -> LTensor (quoteVal a)
+  EFun a b    -> LFun (quoteVal a) (quoteVal b)
+  ESub f      -> LSub (quoteBinder f)
 
 quoteBinder :: (Val (t < ctx) (E ctx) t -> Val (t < ctx) (E ctx) u) -> Expr (t < ctx) (E ctx) u
 quoteBinder = bindVal quoteVal
 
 
+-- Evaluator
+
+eval :: Eval e r a b -> (b • r) -> a • r
+eval = getExp . getEval
+
+coeval :: Eval e r a r -> (a • r)
+coeval = (`eval` idK)
+
+copure :: (a • r) -> Eval e r a r
+copure = evaluator . (>>>)
+
+evaluator :: ((b • r) -> (a • r)) -> Eval e r a b
+evaluator = Eval . Exp
+
+(<<>>) :: Disj d => Eval e r a s -> Eval e r b s -> Eval e r (a `d` b) s
+f <<>> g = evaluator (\ k -> eval f k <••> eval g k)
+
+infix 3 <<>>
+
+newtype Eval e r a b = Eval { getEval :: Exp r a b }
+  deriving (Applicative, Category, Functor, Monad, MonadRunK r, Profunctor)
+
+
+evalFun :: Fun r a b -> Eval e r a b
+evalFun = Eval . runFunExp
+
+
 -- Definitional interpreter
 
-evalDef :: Ctx ctx => ctx -> Expr ctx (E ctx) b -> DN (R ctx) b
+evalDef :: Ctx ctx => ctx -> Expr ctx a b -> Eval (E ctx) (R ctx) a b
 evalDef ctx = \case
   Var i       -> pure (i <! ctx)
   RTop        -> pure Top
@@ -141,27 +165,25 @@ evalDef ctx = \case
   ROne        -> pure (One (getE ctx))
   RPar a      -> coerceDisj <$> evalDef ctx a
   RTensor a b -> liftA2 inlr (evalDef ctx a) (evalDef ctx b)
-  RFun f      -> pure (fun (\ b a -> runDN (evalDef (a :< ctx) f) • b))
-  RSub a b    -> evalDef ctx a <&> (coevalDef ctx b :>-)
+  RFun f      -> pure (fun (\ b a -> eval (evalDef (a :< ctx) f) b • getE ctx))
+  RSub a b    -> evalDef ctx a <&> (coeval (evalDef ctx b) :>-)
 
-coevalDef :: Ctx ctx => ctx -> Expr ctx a (R ctx) -> (a • R ctx)
-coevalDef ctx = \case
-  Covar i   -> ctx !> i
-  LZero     -> K absurdP
-  LWith1 a  -> exlL (coevalDef ctx a)
-  LWith2 b  -> exrL (coevalDef ctx b)
-  LSum l r  -> coevalDef ctx l <••> coevalDef ctx r
-  LBottom   -> K absurdN
-  LOne a    -> exrL (coevalDef ctx a)
-  LPar l r  -> coevalDef ctx l <••> coevalDef ctx r
-  LTensor a -> coevalDef ctx a <<^ coerceConj
-  LFun a b  -> K (\ f -> runDN (evalDef ctx a >>= appFun f) • coevalDef ctx b)
-  LSub f    -> K (\ (b :>- a) -> runDN (evalDef (a :< ctx) f) • b)
+  Covar i     -> copure (ctx !> i)
+  LZero       -> copure (K absurdP)
+  LWith1 a    -> exlL (evalDef ctx a)
+  LWith2 b    -> exrL (evalDef ctx b)
+  LSum l r    -> evalDef ctx l <<>> evalDef ctx r
+  LBottom     -> copure (K absurdN)
+  LOne a      -> exrL (evalDef ctx a)
+  LPar l r    -> evalDef ctx l <<>> evalDef ctx r
+  LTensor a   -> evalDef ctx a <<^ coerceConj
+  LFun a b    -> copure (K (\ f -> coeval (evalDef ctx a >>> evalFun f >>> evalDef ctx b) • getE ctx))
+  LSub f      -> copure (K (\ (b :>- a) -> eval (evalDef (a :< ctx) f) b • getE ctx))
 
 
 -- Execution
 
-execVal :: Ctx ctx => ctx -> Val ctx (E ctx) a -> DN (R ctx) a
+execVal :: Ctx ctx => ctx -> Val ctx a b -> Eval (E ctx) (R ctx) a b
 execVal ctx = \case
   VNe i       -> pure (i <! ctx)
   VTop        -> pure Top
@@ -171,18 +193,16 @@ execVal ctx = \case
   VOne        -> pure (One (getE ctx))
   VPar a      -> coerceDisj <$> execVal ctx a
   VTensor a b -> liftA2 inlr (execVal ctx a) (execVal ctx b)
-  VFun f      -> pure (fun (\ b a -> runDN (bindVal (execVal (a :< ctx)) f) • b))
-  VSub a b    -> execVal ctx a <&> (execCoval ctx b :>-)
+  VFun f      -> pure (fun (\ b a -> eval (bindVal (execVal (a :< ctx)) f) b • getE ctx))
+  VSub a b    -> execVal ctx a <&> (coeval (execVal ctx b) :>-)
 
-execCoval :: Ctx ctx => ctx -> Coval ctx a (R ctx) -> (a • R ctx)
-execCoval ctx = \case
-  EZero     -> K absurdP
-  EWith1 a  -> exlL (execCoval ctx a)
-  EWith2 b  -> exrL (execCoval ctx b)
-  ESum a b  -> execCoval ctx a <••> execCoval ctx b
-  EBottom   -> K absurdN
-  EOne a    -> exrL (execCoval ctx a)
-  EPar a b  -> execCoval ctx a <••> execCoval ctx b
-  ETensor a -> execCoval ctx a <<^ coerceConj
-  EFun a b  -> K (\ f -> runDN (execVal ctx a >>= appFun f) • execCoval ctx b)
-  ESub f    -> K (\ (b :>- a) -> runDN (bindVal (execVal (a :< ctx)) f) • b)
+  EZero       -> copure (K absurdP)
+  EWith1 a    -> exlL (execVal ctx a)
+  EWith2 b    -> exrL (execVal ctx b)
+  ESum a b    -> execVal ctx a <<>> execVal ctx b
+  EBottom     -> copure (K absurdN)
+  EOne a      -> exrL (execVal ctx a)
+  EPar a b    -> execVal ctx a <<>> execVal ctx b
+  ETensor a   -> execVal ctx a <<^ coerceConj
+  EFun a b    -> copure (K (\ f -> coeval (execVal ctx a >>> evalFun f >>> execVal ctx b) • getE ctx))
+  ESub f      -> copure (K (\ (b :>- a) -> eval (bindVal (execVal (a :< ctx)) f) b • getE ctx))
