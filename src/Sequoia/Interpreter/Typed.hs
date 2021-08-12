@@ -103,7 +103,7 @@ newtype Eval r a = Eval { eval :: Coeval a r • r }
   deriving (Applicative, Functor, Monad, MonadRunK r) via DN r
 
 newtype Coeval a r = Coeval { coeval :: a • r }
-  deriving (ContinuationE, ContinuationI, Profunctor)
+  deriving (Continuation, ContinuationE, ContinuationI, Profunctor)
 
 
 -- Definitional interpreter
