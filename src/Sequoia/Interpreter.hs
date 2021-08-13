@@ -17,7 +17,6 @@ module Sequoia.Interpreter
 , Scope(..)
   -- * Quotation
 , quoteVal
-, quoteElim
   -- * Evaluation (definitional)
 , Env
 , evalDef
@@ -90,7 +89,7 @@ data Elim f a
 deriving instance Show a => Show (Elim EScope a)
 
 instance Show (Elim ((->) Val) Val) where
-  showsPrec p = showsPrec p . quoteElim 0
+  showsPrec p = showsPrec @(Elim EScope Expr) p . mapElim bind quoteVal 0
 
 
 -- Construction
@@ -148,7 +147,7 @@ instance Scope env g f => Scope env (Elim g) (Elim f) where
 
 quoteVal :: Level -> Val -> Expr
 quoteVal d = \case
-  VNe v sp    -> foldl' ((. quoteElim d) . L) (Var (levelToIndex d v)) sp
+  VNe v sp    -> foldl' ((. bind quoteVal d) . L) (Var (levelToIndex d v)) sp
   VTop        -> RTop
   VBottom     -> RBottom
   VOne        -> ROne
@@ -159,9 +158,6 @@ quoteVal d = \case
   VTensor a b -> RTensor (quoteVal d a) (quoteVal d b)
   VNot f      -> RNot (bind quoteVal d f)
   VNeg f      -> RNeg (bind quoteVal d f)
-
-quoteElim :: Level -> Elim ((->) Val) Val -> Elim EScope Expr
-quoteElim = mapElim bind quoteVal
 
 
 -- Evaluation (definitional)
