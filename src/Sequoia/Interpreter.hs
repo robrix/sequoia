@@ -127,18 +127,18 @@ bindVal with d b = Scope (with (succ d) (b (vvar d)))
 
 -- Computation
 
-mapElim :: (a -> b) -> (f a -> g b) -> (f (f a) -> g (g b)) -> (Elim f a -> Elim g b)
-mapElim tm sc sc2 = \case
+mapElim :: (env -> a -> b) -> (forall a b . (env -> a -> b) -> (env -> f a -> g b)) -> env -> (Elim f a -> Elim g b)
+mapElim tm bind env = \case
   EZero     -> EZero
   EBottom   -> EBottom
   EOne      -> EOne
-  EWith1 f  -> EWith1 (sc f)
-  EWith2 f  -> EWith2 (sc f)
-  ESum f g  -> ESum (sc f) (sc g)
-  EPar f g  -> EPar (sc f) (sc g)
-  ETensor f -> ETensor (sc2 f)
-  ENot a    -> ENot (tm a)
-  ENeg a    -> ENeg (tm a)
+  EWith1 f  -> EWith1 (bind tm env f)
+  EWith2 f  -> EWith2 (bind tm env f)
+  ESum f g  -> ESum (bind tm env f) (bind tm env g)
+  EPar f g  -> EPar (bind tm env f) (bind tm env g)
+  ETensor f -> ETensor (bind (bind tm) env f)
+  ENot a    -> ENot (tm env a)
+  ENeg a    -> ENeg (tm env a)
 
 
 -- Quotation
@@ -158,13 +158,10 @@ quoteVal d = \case
   VNeg f      -> RNeg (quoteBinder d f)
 
 quoteElim :: Level -> Elim ((->) Val) Val -> Elim Scope Expr
-quoteElim d = mapElim (quoteVal d) (quoteBinder d) (quoteBinder2 d)
+quoteElim = mapElim quoteVal bindVal
 
 quoteBinder :: Level -> (Val -> Val) -> Scope Expr
 quoteBinder = bindVal quoteVal
-
-quoteBinder2 :: Level -> (Val -> Val -> Val) -> Scope (Scope Expr)
-quoteBinder2 = bindVal quoteBinder
 
 
 -- Evaluation (definitional)
@@ -184,13 +181,10 @@ evalDef env = \case
   RTensor a b -> VTensor (evalDef env a) (evalDef env b)
   RNot f      -> VNot (evalBinder env f)
   RNeg f      -> VNeg (evalBinder env f)
-  L s e       -> vapp (evalDef env s) (mapElim (evalDef env) (evalBinder env) (evalBinder2 env) e)
+  L s e       -> vapp (evalDef env s) (mapElim evalDef bindScope env e)
 
 evalBinder :: Env -> Scope Expr -> (Val -> Val)
 evalBinder = bindScope evalDef
-
-evalBinder2 :: Env -> Scope (Scope Expr) -> (Val -> Val -> Val)
-evalBinder2 = bindScope evalBinder
 
 
 -- Evaluation (CK machine)
