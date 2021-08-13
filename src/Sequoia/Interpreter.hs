@@ -46,6 +46,7 @@ data Expr
   | RWith Expr Expr
   | RSum1 Expr
   | RSum2 Expr
+  | RPar Expr Expr
   | RTensor Expr Expr
   | RNot (Scope Expr)
   | RNeg (Scope Expr)
@@ -75,6 +76,7 @@ data Val
   | VWith Val Val
   | VSum1 Val
   | VSum2 Val
+  | VPar Val Val
   | VTensor Val Val
   | VNot (Val -> Val)
   | VNeg (Val -> Val)
@@ -91,6 +93,7 @@ data Elim f a
   | EWith1 (f a)
   | EWith2 (f a)
   | ESum (f a) (f a)
+  | EPar (f a) (f a)
   | ETensor (f (f a))
   | ENot a
   | ENeg a
@@ -114,6 +117,7 @@ instance ShowTerm Val where
     VWith a b   -> showsBinaryWith (showsTerm d) (showsTerm d) "VWith" p a b
     VSum1 a     -> showsUnaryWith (showsTerm d) "VSum1" p a
     VSum2 b     -> showsUnaryWith (showsTerm d) "VSum2" p b
+    VPar a b    -> showsBinaryWith (showsTerm d) (showsTerm d) "VPar" p a b
     VTensor a b -> showsBinaryWith (showsTerm d) (showsTerm d) "VTensor" p a b
     VNot a      -> showsUnaryWith (liftShowsTerm showsTerm d) "VNot" p a
     VNeg a      -> showsUnaryWith (liftShowsTerm showsTerm d) "VNeg" p a
@@ -126,6 +130,7 @@ instance (ShowTerm1 f, ShowTerm a) => ShowTerm (Elim f a) where
     EWith1 f  -> showsUnaryWith (liftShowsTerm showsTerm d) "EWith1" p f
     EWith2 g  -> showsUnaryWith (liftShowsTerm showsTerm d) "EWith2" p g
     ESum f g  -> showsBinaryWith (liftShowsTerm showsTerm d) (liftShowsTerm showsTerm d) "ESum" p f g
+    EPar f g  -> showsBinaryWith (liftShowsTerm showsTerm d) (liftShowsTerm showsTerm d) "EPar" p f g
     ETensor f -> showsUnaryWith (liftShowsTerm (liftShowsTerm showsTerm) d) "ETensor" p f
     ENot v    -> showsUnaryWith (showsTerm d) "ENot" p v
     ENeg v    -> showsUnaryWith (showsTerm d) "ENeg" p v
@@ -180,6 +185,7 @@ mapElim tm sc sc2 = \case
   EWith1 f  -> EWith1 (sc f)
   EWith2 f  -> EWith2 (sc f)
   ESum f g  -> ESum (sc f) (sc g)
+  EPar f g  -> EPar (sc f) (sc g)
   ETensor f -> ETensor (sc2 f)
   ENot a    -> ENot (tm a)
   ENeg a    -> ENeg (tm a)
@@ -196,6 +202,7 @@ quoteVal d = \case
   VWith a b   -> RWith (quoteVal d a) (quoteVal d b)
   VSum1 a     -> RSum1 (quoteVal d a)
   VSum2 b     -> RSum2 (quoteVal d b)
+  VPar a b    -> RPar (quoteVal d a) (quoteVal d b)
   VTensor a b -> RTensor (quoteVal d a) (quoteVal d b)
   VNot f      -> RNot (quoteBinder d f)
   VNeg f      -> RNeg (quoteBinder d f)
@@ -223,6 +230,7 @@ evalDef env = \case
   RWith a b   -> VWith (evalDef env a) (evalDef env b)
   RSum1 a     -> VSum1 (evalDef env a)
   RSum2 b     -> VSum2 (evalDef env b)
+  RPar a b    -> VPar (evalDef env a) (evalDef env b)
   RTensor a b -> VTensor (evalDef env a) (evalDef env b)
   RNot f      -> VNot (evalBinder env f)
   RNeg f      -> VNeg (evalBinder env f)
@@ -244,6 +252,8 @@ data Frame
   | FRWithR Val ()
   | FRSum1 ()
   | FRSum2 ()
+  | FRParL () Expr
+  | FRParR Val ()
   | FRTensorL () Expr
   | FRTensorR Val ()
   | FL (Elim Scope Expr)
@@ -263,6 +273,7 @@ load env e k = case e of
   RWith a b   -> load env a (k :> FRWithL () b)
   RSum1 a     -> load env a (k :> FRSum1 ())
   RSum2 b     -> load env b (k :> FRSum2 ())
+  RPar a b    -> load env a (k :> FRParL () b)
   RTensor a b -> load env a (k :> FRTensorL () b)
   RNot f      -> unload env (VNot (loadBinder env f k)) k
   RNeg f      -> unload env (VNeg (loadBinder env f k)) k
@@ -281,6 +292,8 @@ unload env v = \case
   k :> FRWithR u ()   -> unload env (VWith u v) k
   k :> FRSum1 ()      -> unload env (VSum1 v) k
   k :> FRSum2 ()      -> unload env (VSum2 v) k
+  k :> FRParL () r    -> load env r (k :> FRParR v ())
+  k :> FRParR u ()    -> unload env (VPar u v) k
   k :> FRTensorL () r -> load env r (k :> FRTensorR v ())
   k :> FRTensorR u () -> unload env (VTensor u v) k
   k :> FL e           -> unload env (case e of
@@ -290,6 +303,7 @@ unload env v = \case
     EWith1 f  -> unload env (vapp v (EWith1 (loadBinder env f k))) k
     EWith2 g  -> unload env (vapp v (EWith2 (loadBinder env g k))) k
     ESum f g  -> unload env (vapp v (ESum (loadBinder env f k) (loadBinder env g k))) k
+    EPar f g  -> unload env (vapp v (EPar (loadBinder env f k) (loadBinder env g k))) k
     ETensor f -> unload env (vapp v (ETensor (loadBinder2 env f k))) k
     ENot r    -> load env r (k :> FLNotR v ())
     ENeg r    -> load env r (k :> FLNegR v ())) k
