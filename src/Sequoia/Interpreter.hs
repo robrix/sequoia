@@ -11,8 +11,6 @@ module Sequoia.Interpreter
   -- ** Construction
 , vvar
 , vapp
-  -- ** Computation
-, mapElim
   -- * Scopes
 , Scope(..)
   -- * Quotation
@@ -89,7 +87,7 @@ data Elim f a
 deriving instance Show a => Show (Elim EScope a)
 
 instance Show (Elim ((->) Val) Val) where
-  showsPrec p = showsPrec @(Elim EScope Expr) p . mapElim bind quoteVal 0
+  showsPrec p = showsPrec @(Elim EScope Expr) p . bind quoteVal 0
 
 
 -- Construction
@@ -112,22 +110,6 @@ vapp = curry $ \case
   (v,           e)         -> error $ "cannot elim " <> show v <> " with " <> show e
 
 
--- Computation
-
-mapElim :: (forall a b . (env -> a -> b) -> (env -> f a -> g b)) -> (env -> a -> b) -> env -> (Elim f a -> Elim g b)
-mapElim bind tm env = \case
-  EZero     -> EZero
-  EBottom   -> EBottom
-  EOne      -> EOne
-  EWith1 f  -> EWith1 (bind tm env f)
-  EWith2 f  -> EWith2 (bind tm env f)
-  ESum f g  -> ESum (bind tm env f) (bind tm env g)
-  EPar f g  -> EPar (bind tm env f) (bind tm env g)
-  ETensor f -> ETensor (bind (bind tm) env f)
-  ENot a    -> ENot (tm env a)
-  ENeg a    -> ENeg (tm env a)
-
-
 -- Scopes
 
 class Scope env g f | f g -> env where
@@ -140,7 +122,17 @@ instance Scope [a] ((->) a) EScope where
   bind with env (EScope e) a = with (a : env) e
 
 instance Scope env g f => Scope env (Elim g) (Elim f) where
-  bind = mapElim bind
+  bind tm env = \case
+    EZero     -> EZero
+    EBottom   -> EBottom
+    EOne      -> EOne
+    EWith1 f  -> EWith1 (bind tm env f)
+    EWith2 f  -> EWith2 (bind tm env f)
+    ESum f g  -> ESum (bind tm env f) (bind tm env g)
+    EPar f g  -> EPar (bind tm env f) (bind tm env g)
+    ETensor f -> ETensor (bind (bind tm) env f)
+    ENot a    -> ENot (tm env a)
+    ENeg a    -> ENeg (tm env a)
 
 
 -- Quotation
@@ -177,7 +169,7 @@ evalDef env = \case
   RTensor a b -> VTensor (evalDef env a) (evalDef env b)
   RNot f      -> VNot (bind evalDef env f)
   RNeg f      -> VNeg (bind evalDef env f)
-  L s e       -> vapp (evalDef env s) (mapElim bind evalDef env e)
+  L s e       -> vapp (evalDef env s) (bind evalDef env e)
 
 
 -- Evaluation (CK machine)
