@@ -131,8 +131,8 @@ bindVal with d b = EScope (with (succ d) (b (vvar d)))
 
 -- Computation
 
-mapElim :: (env -> a -> b) -> (forall a b . (env -> a -> b) -> (env -> f a -> g b)) -> env -> (Elim f a -> Elim g b)
-mapElim tm bind env = \case
+mapElim :: (forall a b . (env -> a -> b) -> (env -> f a -> g b)) -> (env -> a -> b) -> env -> (Elim f a -> Elim g b)
+mapElim bind tm env = \case
   EZero     -> EZero
   EBottom   -> EBottom
   EOne      -> EOne
@@ -157,7 +157,7 @@ instance Scope [a] ((->) a) EScope where
   bind with env (EScope e) a = with (a : env) e
 
 instance Scope env g f => Scope env (Elim g) (Elim f) where
-  bind with = mapElim with bind
+  bind = mapElim bind
 
 
 -- Quotation
@@ -177,7 +177,7 @@ quoteVal d = \case
   VNeg f      -> RNeg (bindVal quoteVal d f)
 
 quoteElim :: Level -> Elim ((->) Val) Val -> Elim EScope Expr
-quoteElim = mapElim quoteVal bindVal
+quoteElim = mapElim bindVal quoteVal
 
 
 -- Evaluation (definitional)
@@ -197,7 +197,7 @@ evalDef env = \case
   RTensor a b -> VTensor (evalDef env a) (evalDef env b)
   RNot f      -> VNot (bindScope evalDef env f)
   RNeg f      -> VNeg (bindScope evalDef env f)
-  L s e       -> vapp (evalDef env s) (mapElim evalDef bindScope env e)
+  L s e       -> vapp (evalDef env s) (mapElim bindScope evalDef env e)
 
 
 -- Evaluation (CK machine)
