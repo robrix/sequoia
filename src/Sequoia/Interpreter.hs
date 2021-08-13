@@ -128,7 +128,7 @@ bindVal :: (Level -> a -> b) -> Level -> (Val -> a) -> b
 bindVal with d b = with (succ d) (b (vvar d))
 
 bindVal2 :: (Level -> a -> b) -> Level -> (Val -> Val -> a) -> b
-bindVal2 with d b = with (succ (succ d)) (b (vvar d) (vvar (succ d)))
+bindVal2 with = bindVal (bindVal with)
 
 
 -- Computation
