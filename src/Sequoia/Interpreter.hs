@@ -30,10 +30,8 @@ module Sequoia.Interpreter
 ) where
 
 import Data.Foldable (foldl')
-import Data.Functor.Classes
 import Sequoia.DeBruijn
 import Sequoia.Snoc
-import Text.Show (showListWith)
 
 -- Expressions
 
@@ -82,7 +80,7 @@ data Val
   | VNeg (Val -> Val)
 
 instance Show Val where
-  showsPrec = showsTerm 0
+  showsPrec p = showsPrec p . quoteVal 0
 
 
 data Elim f a
@@ -98,52 +96,10 @@ data Elim f a
   | ENot a
   | ENeg a
 
-instance (ShowTerm1 f, ShowTerm a) => Show (Elim f a) where
-  showsPrec = showsTerm 0
+deriving instance Show a => Show (Elim Scope a)
 
-
-class ShowTerm a where
-  showsTerm :: Level -> Int -> a -> ShowS
-
-instance ShowTerm Expr where
-  showsTerm _ = showsPrec
-
-instance ShowTerm Val where
-  showsTerm d p = \case
-    VNe v sp    -> showsBinaryWith showsPrec (liftShowsPrec (showsTerm d) (showListWith (showsTerm d 0))) "VNe" p v sp
-    VTop        -> showString "VTop"
-    VBottom     -> showString "VBottom"
-    VOne        -> showString "VOne"
-    VWith a b   -> showsBinaryWith (showsTerm d) (showsTerm d) "VWith" p a b
-    VSum1 a     -> showsUnaryWith (showsTerm d) "VSum1" p a
-    VSum2 b     -> showsUnaryWith (showsTerm d) "VSum2" p b
-    VPar a b    -> showsBinaryWith (showsTerm d) (showsTerm d) "VPar" p a b
-    VTensor a b -> showsBinaryWith (showsTerm d) (showsTerm d) "VTensor" p a b
-    VNot a      -> showsUnaryWith (liftShowsTerm showsTerm d) "VNot" p a
-    VNeg a      -> showsUnaryWith (liftShowsTerm showsTerm d) "VNeg" p a
-
-instance (ShowTerm1 f, ShowTerm a) => ShowTerm (Elim f a) where
-  showsTerm d p = \case
-    EZero     -> showString "EZero"
-    EBottom   -> showString "EBottom"
-    EOne      -> showString "EOne"
-    EWith1 f  -> showsUnaryWith (liftShowsTerm showsTerm d) "EWith1" p f
-    EWith2 g  -> showsUnaryWith (liftShowsTerm showsTerm d) "EWith2" p g
-    ESum f g  -> showsBinaryWith (liftShowsTerm showsTerm d) (liftShowsTerm showsTerm d) "ESum" p f g
-    EPar f g  -> showsBinaryWith (liftShowsTerm showsTerm d) (liftShowsTerm showsTerm d) "EPar" p f g
-    ETensor f -> showsUnaryWith (liftShowsTerm (liftShowsTerm showsTerm) d) "ETensor" p f
-    ENot v    -> showsUnaryWith (showsTerm d) "ENot" p v
-    ENeg v    -> showsUnaryWith (showsTerm d) "ENeg" p v
-
-
-class ShowTerm1 f where
-  liftShowsTerm :: (Level -> Int -> a -> ShowS) -> Level -> Int -> f a -> ShowS
-
-instance ShowTerm1 Scope where
-  liftShowsTerm showsExpr d p = showsExpr d p . getScope
-
-instance ShowTerm1 ((->) Val) where
-  liftShowsTerm showsVal d p b = bindVal (flip . showsVal) d b p
+instance Show (Elim ((->) Val) Val) where
+  showsPrec p = showsPrec p . quoteElim 0
 
 
 -- Construction
