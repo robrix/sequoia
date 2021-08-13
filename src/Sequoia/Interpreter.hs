@@ -176,12 +176,9 @@ evalDef env = \case
   RSum2 b     -> VSum2 (evalDef env b)
   RPar a b    -> VPar (evalDef env a) (evalDef env b)
   RTensor a b -> VTensor (evalDef env a) (evalDef env b)
-  RNot f      -> VNot (evalBinder env f)
-  RNeg f      -> VNeg (evalBinder env f)
+  RNot f      -> VNot (bindScope evalDef env f)
+  RNeg f      -> VNeg (bindScope evalDef env f)
   L s e       -> vapp (evalDef env s) (mapElim evalDef bindScope env e)
-
-evalBinder :: Env -> Scope Expr -> (Val -> Val)
-evalBinder = bindScope evalDef
 
 
 -- Evaluation (CK machine)
