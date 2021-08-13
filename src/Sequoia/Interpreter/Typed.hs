@@ -10,6 +10,7 @@ module Sequoia.Interpreter.Typed
 , Coexpr(..)
   -- * Values
 , Val(..)
+, vvar
 , Coval(..)
   -- * Quotation
 , quoteVal
@@ -100,6 +101,9 @@ data Val b where
   VFunR :: (Val a -> Val b) -> Val (Fun R a b)
   VSubR :: Val a -> Coval b -> Val (Sub R b a)
 
+vvar :: Lv a -> Val a
+vvar = VNe
+
 data Coval a where
   VWithL1 :: Coval a -> Coval (a & b)
   VWithL2 :: Coval b -> Coval (a & b)
@@ -140,7 +144,7 @@ quoteCoval c = \case
   VSubL f    -> XSubL (quoteBinder c f)
 
 quoteBinder :: Cardinal -> (Val a -> Val b) -> Expr b
-quoteBinder c f = quoteVal (succ c) (f (VNe (Lv c)))
+quoteBinder c f = quoteVal (succ c) (f (vvar (Lv c)))
 
 
 -- Evaluator
@@ -198,7 +202,7 @@ execVal ctx = \case
   VTensorR a b -> liftA2 inlr (execVal ctx a) (execVal ctx b)
   VNotR a      -> Eval (inK (• coerceK (coeval (execCoval ctx a))))
   VNegR a      -> Eval (inK (• Negate E (coeval (execCoval ctx a))))
-  VFunR f      -> pure (fun (\ b a -> let ctx' = I a :< ctx in eval (execVal ctx' (f (VNe (lv ctx')))) • Coeval b))
+  VFunR f      -> pure (fun (\ b a -> let ctx' = I a :< ctx in eval (execVal ctx' (f (vvar (lv ctx')))) • Coeval b))
   VSubR a b    -> do { a' <- execVal ctx a ; pure (coeval (execCoval ctx b) :>- a') }
 
 execCoval :: Γ I as -> Coval a -> Coeval a R
@@ -211,7 +215,7 @@ execCoval ctx = \case
   VNotL a    -> inK (\ x -> eval (execVal ctx a) • coerceK x)
   VNegL a    -> inK (\ x -> eval (execVal ctx a) • coerceK x)
   VFunL a b  -> inK (\ f -> eval (execVal ctx a >>= evalFun f) • execCoval ctx b)
-  VSubL f    -> inK (\ (b :>- a) -> let ctx' = I a :< ctx in eval (execVal ctx' (f (VNe (lv ctx')))) • Coeval b)
+  VSubL f    -> inK (\ (b :>- a) -> let ctx' = I a :< ctx in eval (execVal ctx' (f (vvar (lv ctx')))) • Coeval b)
 
 
 -- Contexts
