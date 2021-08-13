@@ -11,6 +11,7 @@ module Sequoia.Profunctor.Continuation
 , constK
   -- * Coercion
 , _K
+, coerceK
   -- * Defaults
 , protabulateCont
 , sieveCont
@@ -89,6 +90,9 @@ constK = inK . const
 
 _K :: Iso (a • r) (a' • r') (a -> r) (a' -> r')
 _K = coerced
+
+coerceK :: (ContinuationE j, ContinuationI k) => j a r -> k a r
+coerceK = inK . (•)
 
 
 -- Defaults
