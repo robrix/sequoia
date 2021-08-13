@@ -149,6 +149,9 @@ mapElim tm bind env = \case
 class Scope env g f | f g -> env where
   bind :: (env -> a -> b) -> (env -> f a -> g b)
 
+instance Scope Level EScope ((->) Val) where
+  bind with d b = EScope (with (succ d) (b (vvar d)))
+
 
 -- Quotation
 
