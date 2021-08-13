@@ -61,7 +61,7 @@ bindExpr :: ([a] -> b -> c) -> [a] -> Scope b -> (a -> c)
 bindExpr with env e a = with (a : env) (getScope e)
 
 bindExpr2 :: ([a] -> b -> c) -> [a] -> Scope (Scope b) -> (a -> a -> c)
-bindExpr2 with env e a b = with (a : b : env) (getScope (getScope e))
+bindExpr2 with = bindExpr (bindExpr with)
 
 
 -- Values
