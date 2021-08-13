@@ -57,7 +57,7 @@ newtype Scope a = Scope { getScope :: a }
 
 -- Elimination
 
-bindScope :: ([a] -> b -> c) -> [a] -> Scope b -> (a -> c)
+bindScope :: ([a] -> b -> c) -> ([a] -> Scope b -> (a -> c))
 bindScope with env e a = with (a : env) (getScope e)
 
 
@@ -121,7 +121,7 @@ vapp = curry $ \case
 
 -- Elimination
 
-bindVal :: (Level -> a -> b) -> Level -> (Val -> a) -> Scope b
+bindVal :: (Level -> a -> b) -> (Level -> (Val -> a) -> Scope b)
 bindVal with d b = Scope (with (succ d) (b (vvar d)))
 
 
