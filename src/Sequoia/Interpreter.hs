@@ -1,4 +1,5 @@
 {-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE UndecidableInstances #-}
 -- | Direct-style and CPS interpreters for a small polarized calculus.
 module Sequoia.Interpreter
 ( -- * Expressions
@@ -154,6 +155,9 @@ instance Scope Level EScope ((->) Val) where
 
 instance Scope [a] ((->) a) EScope where
   bind with env (EScope e) a = with (a : env) e
+
+instance Scope env g f => Scope env (Elim g) (Elim f) where
+  bind with = mapElim with bind
 
 
 -- Quotation
