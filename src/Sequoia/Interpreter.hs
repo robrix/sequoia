@@ -60,9 +60,6 @@ newtype Scope a = Scope { getScope :: a }
 bindExpr :: ([a] -> b -> c) -> [a] -> Scope b -> (a -> c)
 bindExpr with env e a = with (a : env) (getScope e)
 
-bindExpr2 :: ([a] -> b -> c) -> [a] -> Scope (Scope b) -> (a -> a -> c)
-bindExpr2 with = bindExpr (bindExpr with)
-
 
 -- Values
 
@@ -193,7 +190,7 @@ evalBinder :: Env -> Scope Expr -> (Val -> Val)
 evalBinder = bindExpr evalDef
 
 evalBinder2 :: Env -> Scope (Scope Expr) -> (Val -> Val -> Val)
-evalBinder2 = bindExpr2 evalDef
+evalBinder2 = bindExpr (bindExpr evalDef)
 
 
 -- Evaluation (CK machine)
@@ -236,7 +233,7 @@ loadBinder :: Env -> Scope Expr -> Cont -> (Val -> Val)
 loadBinder env f k a = bindExpr load env f a k
 
 loadBinder2 :: Env -> Scope (Scope Expr) -> Cont -> (Val -> Val -> Val)
-loadBinder2 env f k a b = bindExpr2 load env f a b k
+loadBinder2 env f k a b = bindExpr (bindExpr load) env f a b k
 
 unload :: Env -> Val -> Cont -> Val
 unload env v = \case
