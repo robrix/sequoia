@@ -190,7 +190,7 @@ evalBinder :: Env -> Scope Expr -> (Val -> Val)
 evalBinder = bindExpr evalDef
 
 evalBinder2 :: Env -> Scope (Scope Expr) -> (Val -> Val -> Val)
-evalBinder2 = bindExpr (bindExpr evalDef)
+evalBinder2 = bindExpr evalBinder
 
 
 -- Evaluation (CK machine)
