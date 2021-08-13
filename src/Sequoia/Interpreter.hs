@@ -213,12 +213,9 @@ load k env = \case
   RSum2 b     -> load (k :> FRSum2 ()) env b
   RPar a b    -> load (k :> FRParL () b) env a
   RTensor a b -> load (k :> FRTensorL () b) env a
-  RNot f      -> unload k env (VNot (loadBinder k env f))
-  RNeg f      -> unload k env (VNeg (loadBinder k env f))
+  RNot f      -> unload k env (VNot (bindScope (load k) env f))
+  RNeg f      -> unload k env (VNeg (bindScope (load k) env f))
   L s e       -> load (k :> FL e) env s
-
-loadBinder :: Cont -> Env -> Scope Expr -> (Val -> Val)
-loadBinder = bindScope . load
 
 unload :: Cont -> Env -> (Val -> Val)
 unload k env v = case k of
@@ -235,11 +232,11 @@ unload k env v = case k of
     EZero     -> unload k env (vapp v EZero)
     EBottom   -> unload k env (vapp v EBottom)
     EOne      -> unload k env (vapp v EOne)
-    EWith1 f  -> unload k env (vapp v (EWith1 (loadBinder k env f)))
-    EWith2 g  -> unload k env (vapp v (EWith2 (loadBinder k env g)))
-    ESum f g  -> unload k env (vapp v (ESum (loadBinder k env f) (loadBinder k env g)))
-    EPar f g  -> unload k env (vapp v (EPar (loadBinder k env f) (loadBinder k env g)))
-    ETensor f -> unload k env (vapp v (ETensor (bindScope (loadBinder k) env f)))
+    EWith1 f  -> unload k env (vapp v (EWith1 (bindScope (load k) env f)))
+    EWith2 g  -> unload k env (vapp v (EWith2 (bindScope (load k) env g)))
+    ESum f g  -> unload k env (vapp v (ESum (bindScope (load k) env f) (bindScope (load k) env g)))
+    EPar f g  -> unload k env (vapp v (EPar (bindScope (load k) env f) (bindScope (load k) env g)))
+    ETensor f -> unload k env (vapp v (ETensor (bindScope (bindScope (load k)) env f)))
     ENot r    -> load (k :> FLNotR v ()) env r
     ENeg r    -> load (k :> FLNegR v ()) env r)
   k :> FLNotR u ()    -> unload k env (vapp v (ENot u))
