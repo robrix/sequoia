@@ -1,3 +1,4 @@
+{-# LANGUAGE FunctionalDependencies #-}
 -- | Direct-style and CPS interpreters for a small polarized calculus.
 module Sequoia.Interpreter
 ( -- * Expressions
@@ -15,6 +16,8 @@ module Sequoia.Interpreter
 , bindVal
   -- ** Computation
 , mapElim
+  -- * Scopes
+, Scope(..)
   -- * Quotation
 , quoteVal
 , quoteElim
@@ -139,6 +142,12 @@ mapElim tm bind env = \case
   ETensor f -> ETensor (bind (bind tm) env f)
   ENot a    -> ENot (tm env a)
   ENeg a    -> ENeg (tm env a)
+
+
+-- Scopes
+
+class Scope env g f | f g -> env where
+  bind :: (env -> a -> b) -> (env -> f a -> g b)
 
 
 -- Quotation
