@@ -4,8 +4,7 @@
 module Sequoia.Interpreter.Typed
 ( -- * Expressions
   E(..)
-, R
-, absurdR
+, R(..)
 , Expr(..)
 , Coexpr(..)
   -- * Values
@@ -37,14 +36,18 @@ module Sequoia.Interpreter.Typed
 import Control.Applicative (liftA2)
 import Prelude hiding (exp)
 import Sequoia.Conjunction
+import Sequoia.Connective.Bottom
 import Sequoia.Connective.Function
 import Sequoia.Connective.Negate
 import Sequoia.Connective.Not
+import Sequoia.Connective.One
 import Sequoia.Connective.Par
 import Sequoia.Connective.Subtraction
 import Sequoia.Connective.Sum
 import Sequoia.Connective.Tensor
+import Sequoia.Connective.Top
 import Sequoia.Connective.With
+import Sequoia.Connective.Zero
 import Sequoia.Disjunction
 import Sequoia.Monad.Run
 import Sequoia.Profunctor
@@ -54,16 +57,16 @@ import Unsafe.Coerce
 -- Expressions
 
 data E = E
-data R
-
-absurdR :: R -> a
-absurdR = \case
+data R = R
 
 data Expr b where
   XVar :: Ix a -> Expr a
+  XTopR :: Expr Top
   XWithR :: Expr a -> Expr b -> Expr (a & b)
   XSumR1 :: Expr a -> Expr (a ⊕ b)
   XSumR2 :: Expr b -> Expr (a ⊕ b)
+  XBottomR :: Expr (Bottom R)
+  XOneR :: Expr (One E)
   XParR :: Expr (Either a b) -> Expr (a ⅋ b)
   XTensorR :: Expr a -> Expr b -> Expr (a ⊗ b)
   XNotR :: Coexpr a -> Expr (Not a R)
@@ -74,9 +77,12 @@ data Expr b where
 deriving instance Show (Expr b)
 
 data Coexpr a where
+  XZeroL :: Coexpr Zero
   XWithL1 :: Coexpr a -> Coexpr (a & b)
   XWithL2 :: Coexpr b -> Coexpr (a & b)
   XSumL :: Coexpr a -> Coexpr b -> Coexpr (a ⊕ b)
+  XBottomL :: Coexpr (Bottom R)
+  XOneL :: Coexpr (One E)
   XParL :: Coexpr a -> Coexpr b -> Coexpr (a ⅋ b)
   XTensorL :: Coexpr (a, b) -> Coexpr (a ⊗ b)
   XNotL :: Expr a -> Coexpr (Not a R)
@@ -91,9 +97,12 @@ deriving instance Show (Coexpr a)
 
 data Val b where
   VNe :: Lv a -> Val a
+  VTopR :: Val Top
   VWithR :: Val a -> Val b -> Val (a & b)
   VSumR1 :: Val a -> Val (a ⊕ b)
   VSumR2 :: Val b -> Val (a ⊕ b)
+  VBottomR :: Val (Bottom R)
+  VOneR :: Val (One E)
   VParR :: Val (Either a b) -> Val (a ⅋ b)
   VTensorR :: Val a -> Val b -> Val (a ⊗ b)
   VNotR :: Coval a -> Val (Not a R)
@@ -105,9 +114,12 @@ vvar :: Lv a -> Val a
 vvar = VNe
 
 data Coval a where
+  VZeroL :: Coval Zero
   VWithL1 :: Coval a -> Coval (a & b)
   VWithL2 :: Coval b -> Coval (a & b)
   VSumL :: Coval a -> Coval b -> Coval (a ⊕ b)
+  VBottomL :: Coval (Bottom R)
+  VOneL :: Coval (One E)
   VParL :: Coval a -> Coval b -> Coval (a ⅋ b)
   VTensorL :: Coval (a, b) -> Coval (a ⊗ b)
   VNotL :: Val a -> Coval (Not a R)
@@ -121,9 +133,12 @@ data Coval a where
 quoteVal :: Cardinal -> Val b -> Expr b
 quoteVal c = \case
   VNe l        -> XVar (lvToIx c l)
+  VTopR        -> XTopR
   VWithR a b   -> XWithR (quoteVal c a) (quoteVal c b)
   VSumR1 a     -> XSumR1 (quoteVal c a)
   VSumR2 b     -> XSumR2 (quoteVal c b)
+  VBottomR     -> XBottomR
+  VOneR        -> XOneR
   VParR a      -> XParR (quoteVal c a)
   VTensorR a b -> XTensorR (quoteVal c a) (quoteVal c b)
   VNotR a      -> XNotR (quoteCoval c a)
@@ -133,9 +148,12 @@ quoteVal c = \case
 
 quoteCoval :: Cardinal -> Coval a -> Coexpr a
 quoteCoval c = \case
+  VZeroL     -> XZeroL
   VWithL1 f  -> XWithL1 (quoteCoval c f)
   VWithL2 g  -> XWithL2 (quoteCoval c g)
   VSumL f g  -> XSumL (quoteCoval c f) (quoteCoval c g)
+  VBottomL   -> XBottomL
+  VOneL      -> XOneL
   VParL f g  -> XParL (quoteCoval c f) (quoteCoval c g)
   VTensorL f -> XTensorL (quoteCoval c f)
   VNotL a    -> XNotL (quoteVal c a)
@@ -164,9 +182,12 @@ newtype Coeval a r = Coeval { coeval :: a • r }
 evalDef :: Γ Val as -> Expr b -> Val b
 evalDef ctx = \case
   XVar i       -> i <! ctx
+  XTopR        -> VTopR
   XWithR a b   -> VWithR (evalDef ctx a) (evalDef ctx b)
   XSumR1 a     -> VSumR1 (evalDef ctx a)
   XSumR2 b     -> VSumR2 (evalDef ctx b)
+  XBottomR     -> VBottomR
+  XOneR        -> VOneR
   XParR a      -> VParR (evalDef ctx a)
   XTensorR a b -> VTensorR (evalDef ctx a) (evalDef ctx b)
   XNotR a      -> VNotR (coevalDef ctx a)
@@ -176,9 +197,12 @@ evalDef ctx = \case
 
 coevalDef :: Γ Val as -> Coexpr b -> Coval b
 coevalDef ctx = \case
+  XZeroL     -> VZeroL
   XWithL1 f  -> VWithL1 (coevalDef ctx f)
   XWithL2 g  -> VWithL2 (coevalDef ctx g)
   XSumL f g  -> VSumL (coevalDef ctx f) (coevalDef ctx g)
+  XBottomL   -> VBottomL
+  XOneL      -> VOneL
   XParL f g  -> VParL (coevalDef ctx f) (coevalDef ctx g)
   XTensorL f -> VTensorL (coevalDef ctx f)
   XNotL a    -> VNotL (evalDef ctx a)
@@ -195,9 +219,12 @@ evalBinder ctx f a = evalDef (a :< ctx) f
 execVal :: Γ I as -> Val b -> Eval R b
 execVal ctx = \case
   VNe l        -> pure (getI (lvToIx (cardinality ctx) l <! ctx))
+  VTopR        -> pure Top
   VWithR a b   -> liftA2 inlr (execVal ctx a) (execVal ctx b)
   VSumR1 a     -> inlF (execVal ctx a)
   VSumR2 b     -> inrF (execVal ctx b)
+  VBottomR     -> pure (Bottom R)
+  VOneR        -> pure (One E)
   VParR a      -> coerceDisj <$> execVal ctx a
   VTensorR a b -> liftA2 inlr (execVal ctx a) (execVal ctx b)
   VNotR a      -> Eval (inK (• coerceK (coeval (execCoval ctx a))))
@@ -207,9 +234,12 @@ execVal ctx = \case
 
 execCoval :: Γ I as -> Coval a -> Coeval a R
 execCoval ctx = \case
+  VZeroL     -> inK absurdP
   VWithL1 f  -> exlL (execCoval ctx f)
   VWithL2 g  -> exrL (execCoval ctx g)
   VSumL f g  -> execCoval ctx f <••> execCoval ctx g
+  VBottomL   -> inK absurdN
+  VOneL      -> inK (const R . getOne)
   VParL f g  -> execCoval ctx f <••> execCoval ctx g
   VTensorL f -> execCoval ctx f <<^ coerceConj
   VNotL a    -> inK (\ x -> eval (execVal ctx a) • coerceK x)
