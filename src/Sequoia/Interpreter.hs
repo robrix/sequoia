@@ -2,7 +2,7 @@
 module Sequoia.Interpreter
 ( -- * Expressions
   Expr(..)
-, Scope(..)
+, EScope(..)
   -- ** Elimination
 , bindScope
   -- * Values
@@ -46,19 +46,19 @@ data Expr
   | RSum2 Expr
   | RPar Expr Expr
   | RTensor Expr Expr
-  | RNot (Scope Expr)
-  | RNeg (Scope Expr)
-  | L Expr (Elim Scope Expr)
+  | RNot (EScope Expr)
+  | RNeg (EScope Expr)
+  | L Expr (Elim EScope Expr)
   deriving (Show)
 
-newtype Scope a = Scope { getScope :: a }
+newtype EScope a = EScope { getEScope :: a }
   deriving (Show)
 
 
 -- Elimination
 
-bindScope :: ([a] -> b -> c) -> ([a] -> Scope b -> (a -> c))
-bindScope with env e a = with (a : env) (getScope e)
+bindScope :: ([a] -> b -> c) -> ([a] -> EScope b -> (a -> c))
+bindScope with env e a = with (a : env) (getEScope e)
 
 
 -- Values
@@ -93,7 +93,7 @@ data Elim f a
   | ENot a
   | ENeg a
 
-deriving instance Show a => Show (Elim Scope a)
+deriving instance Show a => Show (Elim EScope a)
 
 instance Show (Elim ((->) Val) Val) where
   showsPrec p = showsPrec p . quoteElim 0
@@ -121,8 +121,8 @@ vapp = curry $ \case
 
 -- Elimination
 
-bindVal :: (Level -> a -> b) -> (Level -> (Val -> a) -> Scope b)
-bindVal with d b = Scope (with (succ d) (b (vvar d)))
+bindVal :: (Level -> a -> b) -> (Level -> (Val -> a) -> EScope b)
+bindVal with d b = EScope (with (succ d) (b (vvar d)))
 
 
 -- Computation
@@ -157,7 +157,7 @@ quoteVal d = \case
   VNot f      -> RNot (bindVal quoteVal d f)
   VNeg f      -> RNeg (bindVal quoteVal d f)
 
-quoteElim :: Level -> Elim ((->) Val) Val -> Elim Scope Expr
+quoteElim :: Level -> Elim ((->) Val) Val -> Elim EScope Expr
 quoteElim = mapElim quoteVal bindVal
 
 
@@ -194,7 +194,7 @@ data Frame
   | FRParR Val ()
   | FRTensorL () Expr
   | FRTensorR Val ()
-  | FL (Elim Scope Expr)
+  | FL (Elim EScope Expr)
   | FLNotR Val ()
   | FLNegR Val ()
   deriving (Show)
