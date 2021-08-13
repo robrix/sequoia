@@ -4,7 +4,7 @@ module Sequoia.Interpreter
   Expr(..)
 , Scope(..)
   -- ** Elimination
-, bindExpr
+, bindScope
   -- * Values
 , Val(..)
 , Elim(..)
@@ -57,8 +57,8 @@ newtype Scope a = Scope { getScope :: a }
 
 -- Elimination
 
-bindExpr :: ([a] -> b -> c) -> [a] -> Scope b -> (a -> c)
-bindExpr with env e a = with (a : env) (getScope e)
+bindScope :: ([a] -> b -> c) -> [a] -> Scope b -> (a -> c)
+bindScope with env e a = with (a : env) (getScope e)
 
 
 -- Values
@@ -187,10 +187,10 @@ evalDef env = \case
   L s e       -> vapp (evalDef env s) (mapElim (evalDef env) (evalBinder env) (evalBinder2 env) e)
 
 evalBinder :: Env -> Scope Expr -> (Val -> Val)
-evalBinder = bindExpr evalDef
+evalBinder = bindScope evalDef
 
 evalBinder2 :: Env -> Scope (Scope Expr) -> (Val -> Val -> Val)
-evalBinder2 = bindExpr evalBinder
+evalBinder2 = bindScope evalBinder
 
 
 -- Evaluation (CK machine)
@@ -230,10 +230,10 @@ load env e k = case e of
   L s e       -> load env s (k :> FL e)
 
 loadBinder :: Env -> Scope Expr -> Cont -> (Val -> Val)
-loadBinder env f k a = bindExpr load env f a k
+loadBinder env f k a = bindScope load env f a k
 
 loadBinder2 :: Env -> Scope (Scope Expr) -> Cont -> (Val -> Val -> Val)
-loadBinder2 env f k a b = bindExpr (bindExpr load) env f a b k
+loadBinder2 env f k a b = bindScope (bindScope load) env f a b k
 
 unload :: Env -> Val -> Cont -> Val
 unload env v = \case
