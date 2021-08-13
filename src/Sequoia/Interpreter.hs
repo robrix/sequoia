@@ -154,14 +154,11 @@ quoteVal d = \case
   VSum2 b     -> RSum2 (quoteVal d b)
   VPar a b    -> RPar (quoteVal d a) (quoteVal d b)
   VTensor a b -> RTensor (quoteVal d a) (quoteVal d b)
-  VNot f      -> RNot (quoteBinder d f)
-  VNeg f      -> RNeg (quoteBinder d f)
+  VNot f      -> RNot (bindVal quoteVal d f)
+  VNeg f      -> RNeg (bindVal quoteVal d f)
 
 quoteElim :: Level -> Elim ((->) Val) Val -> Elim Scope Expr
 quoteElim = mapElim quoteVal bindVal
-
-quoteBinder :: Level -> (Val -> Val) -> Scope Expr
-quoteBinder = bindVal quoteVal
 
 
 -- Evaluation (definitional)
