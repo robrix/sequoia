@@ -109,7 +109,7 @@ quoteCoval c = \case
   VWithL2 g -> XWithL2 (quoteCoval c g)
   VSumL f g -> XSumL (quoteCoval c f) (quoteCoval c g)
   VFunL a b -> XFunL (quoteVal c a) (quoteCoval c b)
-  VSubL f   -> XSubL (quoteVal (succ c) (f (VNe (Lv c))))
+  VSubL f   -> XSubL (quoteBinder c f)
 
 quoteBinder :: Cardinal -> (Val a -> Val b) -> Expr b
 quoteBinder c f = quoteVal (succ c) (f (VNe (Lv c)))
@@ -144,7 +144,7 @@ coevalDef ctx = \case
   XWithL2 g -> VWithL2 (coevalDef ctx g)
   XSumL f g -> VSumL (coevalDef ctx f) (coevalDef ctx g)
   XFunL a b -> VFunL (evalDef ctx a) (coevalDef ctx b)
-  XSubL f   -> VSubL (\ a -> evalDef (a :< ctx) f)
+  XSubL f   -> VSubL (evalBinder ctx f)
 
 evalBinder :: Γ Val as -> Expr b -> (Val a -> Val b)
 evalBinder ctx f a = evalDef (a :< ctx) f
