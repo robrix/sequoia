@@ -164,7 +164,7 @@ quoteBinder :: Level -> (Val -> Val) -> Scope Expr
 quoteBinder = fmap Scope . bindVal quoteVal
 
 quoteBinder2 :: Level -> (Val -> Val -> Val) -> Scope (Scope Expr)
-quoteBinder2 = fmap (Scope . Scope) . bindVal (bindVal quoteVal)
+quoteBinder2 = fmap Scope . bindVal quoteBinder
 
 
 -- Evaluation (definitional)
