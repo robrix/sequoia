@@ -220,9 +220,6 @@ load k env = \case
 loadBinder :: Cont -> Env -> Scope Expr -> (Val -> Val)
 loadBinder = bindScope . load
 
-loadBinder2 :: Cont -> Env -> Scope (Scope Expr) -> (Val -> Val -> Val)
-loadBinder2 = bindScope . loadBinder
-
 unload :: Cont -> Env -> (Val -> Val)
 unload k env v = case k of
   Nil                 -> v
@@ -242,7 +239,7 @@ unload k env v = case k of
     EWith2 g  -> unload k env (vapp v (EWith2 (loadBinder k env g)))
     ESum f g  -> unload k env (vapp v (ESum (loadBinder k env f) (loadBinder k env g)))
     EPar f g  -> unload k env (vapp v (EPar (loadBinder k env f) (loadBinder k env g)))
-    ETensor f -> unload k env (vapp v (ETensor (loadBinder2 k env f)))
+    ETensor f -> unload k env (vapp v (ETensor (bindScope (loadBinder k) env f)))
     ENot r    -> load (k :> FLNotR v ()) env r
     ENeg r    -> load (k :> FLNegR v ()) env r)
   k :> FLNotR u ()    -> unload k env (vapp v (ENot u))
