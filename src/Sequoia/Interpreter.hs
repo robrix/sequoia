@@ -46,6 +46,7 @@ data Expr
   | RWith Expr Expr
   | RSum1 Expr
   | RSum2 Expr
+  | RTensor Expr Expr
   | RNot (Scope Expr)
   | RNeg (Scope Expr)
   | L Expr (Elim Scope Expr)
@@ -57,8 +58,11 @@ newtype Scope a = Scope { getScope :: a }
 
 -- Elimination
 
-bindExpr :: ([a] -> Expr -> b) -> [a] -> Expr -> (a -> b)
-bindExpr with env e a = with (a : env) e
+bindExpr :: ([a] -> Expr -> b) -> [a] -> Scope Expr -> (a -> b)
+bindExpr with env e a = with (a : env) (getScope e)
+
+bindExpr2 :: ([a] -> Expr -> b) -> [a] -> Scope (Scope Expr) -> (a -> a -> b)
+bindExpr2 with env e a b = with (a : b : env) (getScope (getScope e))
 
 
 -- Values
@@ -71,6 +75,7 @@ data Val
   | VWith Val Val
   | VSum1 Val
   | VSum2 Val
+  | VTensor Val Val
   | VNot (Val -> Val)
   | VNeg (Val -> Val)
 
@@ -86,6 +91,7 @@ data Elim f a
   | EWith1 (f a)
   | EWith2 (f a)
   | ESum (f a) (f a)
+  | ETensor (f (f a))
   | ENot a
   | ENeg a
 
@@ -101,26 +107,28 @@ instance ShowTerm Expr where
 
 instance ShowTerm Val where
   showsTerm d p = \case
-    VNe v sp  -> showsBinaryWith showsPrec (liftShowsPrec (showsTerm d) (showListWith (showsTerm d 0))) "VNe" p v sp
-    VTop      -> showString "VTop"
-    VBottom   -> showString "VBottom"
-    VOne      -> showString "VOne"
-    VWith a b -> showsBinaryWith (showsTerm d) (showsTerm d) "VWith" p a b
-    VSum1 a   -> showsUnaryWith (showsTerm d) "VSum1" p a
-    VSum2 b   -> showsUnaryWith (showsTerm d) "VSum2" p b
-    VNot a    -> showsUnaryWith (liftShowsTerm showsTerm d) "VNot" p a
-    VNeg a    -> showsUnaryWith (liftShowsTerm showsTerm d) "VNeg" p a
+    VNe v sp    -> showsBinaryWith showsPrec (liftShowsPrec (showsTerm d) (showListWith (showsTerm d 0))) "VNe" p v sp
+    VTop        -> showString "VTop"
+    VBottom     -> showString "VBottom"
+    VOne        -> showString "VOne"
+    VWith a b   -> showsBinaryWith (showsTerm d) (showsTerm d) "VWith" p a b
+    VSum1 a     -> showsUnaryWith (showsTerm d) "VSum1" p a
+    VSum2 b     -> showsUnaryWith (showsTerm d) "VSum2" p b
+    VTensor a b -> showsBinaryWith (showsTerm d) (showsTerm d) "VTensor" p a b
+    VNot a      -> showsUnaryWith (liftShowsTerm showsTerm d) "VNot" p a
+    VNeg a      -> showsUnaryWith (liftShowsTerm showsTerm d) "VNeg" p a
 
 instance (ShowTerm1 f, ShowTerm a) => ShowTerm (Elim f a) where
   showsTerm d p = \case
-    EZero    -> showString "EZero"
-    EBottom  -> showString "EBottom"
-    EOne     -> showString "EOne"
-    EWith1 f -> showsUnaryWith (liftShowsTerm showsTerm d) "EWith1" p f
-    EWith2 g -> showsUnaryWith (liftShowsTerm showsTerm d) "EWith2" p g
-    ESum f g -> showsBinaryWith (liftShowsTerm showsTerm d) (liftShowsTerm showsTerm d) "ESum" p f g
-    ENot v   -> showsUnaryWith (showsTerm d) "ENot" p v
-    ENeg v   -> showsUnaryWith (showsTerm d) "ENeg" p v
+    EZero     -> showString "EZero"
+    EBottom   -> showString "EBottom"
+    EOne      -> showString "EOne"
+    EWith1 f  -> showsUnaryWith (liftShowsTerm showsTerm d) "EWith1" p f
+    EWith2 g  -> showsUnaryWith (liftShowsTerm showsTerm d) "EWith2" p g
+    ESum f g  -> showsBinaryWith (liftShowsTerm showsTerm d) (liftShowsTerm showsTerm d) "ESum" p f g
+    ETensor f -> showsUnaryWith (liftShowsTerm (liftShowsTerm showsTerm) d) "ETensor" p f
+    ENot v    -> showsUnaryWith (showsTerm d) "ENot" p v
+    ENeg v    -> showsUnaryWith (showsTerm d) "ENeg" p v
 
 
 class ShowTerm1 f where
@@ -140,16 +148,17 @@ vvar d = VNe d Nil
 
 vapp :: Val -> Elim ((->) Val) Val -> Val
 vapp = curry $ \case
-  (v,         EZero)    -> v
-  (VBottom,   EBottom)  -> VBottom
-  (VOne,      EOne)     -> VOne
-  (VWith a _, EWith1 f) -> f a
-  (VWith _ b, EWith2 g) -> g b
-  (VSum1 a,   ESum f _) -> f a
-  (VSum2 b,   ESum _ g) -> g b
-  (VNot k,    ENot a)   -> k a
-  (VNeg k,    ENeg a)   -> k a
-  (v,         e)        -> error $ "cannot elim " <> show v <> " with " <> show e
+  (v,           EZero)     -> v
+  (VBottom,     EBottom)   -> VBottom
+  (VOne,        EOne)      -> VOne
+  (VWith a _,   EWith1 f)  -> f a
+  (VWith _ b,   EWith2 g)  -> g b
+  (VSum1 a,     ESum f _)  -> f a
+  (VSum2 b,     ESum _ g)  -> g b
+  (VTensor a b, ETensor f) -> f a b
+  (VNot k,      ENot a)    -> k a
+  (VNeg k,      ENeg a)    -> k a
+  (v,           e)         -> error $ "cannot elim " <> show v <> " with " <> show e
 
 
 -- Elimination
@@ -157,40 +166,48 @@ vapp = curry $ \case
 bindVal :: (Level -> a -> b) -> Level -> (Val -> a) -> b
 bindVal with d b = with (succ d) (b (vvar d))
 
+bindVal2 :: (Level -> a -> b) -> Level -> (Val -> Val -> a) -> b
+bindVal2 with d b = with (succ (succ d)) (b (vvar d) (vvar (succ d)))
+
 
 -- Computation
 
-mapElim :: (a -> b) -> (f a -> g b) -> (Elim f a -> Elim g b)
-mapElim g h = \case
-  EZero    -> EZero
-  EBottom  -> EBottom
-  EOne     -> EOne
-  EWith1 f -> EWith1 (h f)
-  EWith2 g -> EWith2 (h g)
-  ESum f g -> ESum (h f) (h g)
-  ENot a   -> ENot (g a)
-  ENeg a   -> ENeg (g a)
+mapElim :: (a -> b) -> (f a -> g b) -> (f (f a) -> g (g b)) -> (Elim f a -> Elim g b)
+mapElim tm sc sc2 = \case
+  EZero     -> EZero
+  EBottom   -> EBottom
+  EOne      -> EOne
+  EWith1 f  -> EWith1 (sc f)
+  EWith2 f  -> EWith2 (sc f)
+  ESum f g  -> ESum (sc f) (sc g)
+  ETensor f -> ETensor (sc2 f)
+  ENot a    -> ENot (tm a)
+  ENeg a    -> ENeg (tm a)
 
 
 -- Quotation
 
 quoteVal :: Level -> Val -> Expr
 quoteVal d = \case
-  VNe v sp  -> foldl' ((. quoteElim d) . L) (Var (levelToIndex d v)) sp
-  VTop      -> RTop
-  VBottom   -> RBottom
-  VOne      -> ROne
-  VWith a b -> RWith (quoteVal d a) (quoteVal d b)
-  VSum1 a   -> RSum1 (quoteVal d a)
-  VSum2 b   -> RSum2 (quoteVal d b)
-  VNot f    -> RNot (Scope (quoteBinder d f))
-  VNeg f    -> RNeg (Scope (quoteBinder d f))
+  VNe v sp    -> foldl' ((. quoteElim d) . L) (Var (levelToIndex d v)) sp
+  VTop        -> RTop
+  VBottom     -> RBottom
+  VOne        -> ROne
+  VWith a b   -> RWith (quoteVal d a) (quoteVal d b)
+  VSum1 a     -> RSum1 (quoteVal d a)
+  VSum2 b     -> RSum2 (quoteVal d b)
+  VTensor a b -> RTensor (quoteVal d a) (quoteVal d b)
+  VNot f      -> RNot (quoteBinder d f)
+  VNeg f      -> RNeg (quoteBinder d f)
 
 quoteElim :: Level -> Elim ((->) Val) Val -> Elim Scope Expr
-quoteElim d = mapElim (quoteVal d) (Scope . quoteBinder d)
+quoteElim d = mapElim (quoteVal d) (quoteBinder d) (quoteBinder2 d)
 
-quoteBinder :: Level -> (Val -> Val) -> Expr
-quoteBinder = bindVal quoteVal
+quoteBinder :: Level -> (Val -> Val) -> Scope Expr
+quoteBinder = fmap Scope . bindVal quoteVal
+
+quoteBinder2 :: Level -> (Val -> Val -> Val) -> Scope (Scope Expr)
+quoteBinder2 = fmap (Scope . Scope) . bindVal2 quoteVal
 
 
 -- Evaluation (definitional)
@@ -199,19 +216,23 @@ type Env = [Val]
 
 evalDef :: Env -> Expr -> Val
 evalDef env = \case
-  Var v     -> env !! getIndex v
-  RTop      -> VTop
-  RBottom   -> VBottom
-  ROne      -> VOne
-  RWith a b -> VWith (evalDef env a) (evalDef env b)
-  RSum1 a   -> VSum1 (evalDef env a)
-  RSum2 b   -> VSum2 (evalDef env b)
-  RNot f    -> VNot (evalBinder env (getScope f))
-  RNeg f    -> VNeg (evalBinder env (getScope f))
-  L s e     -> vapp (evalDef env s) (mapElim (evalDef env) (evalBinder env . getScope) e)
+  Var v       -> env !! getIndex v
+  RTop        -> VTop
+  RBottom     -> VBottom
+  ROne        -> VOne
+  RWith a b   -> VWith (evalDef env a) (evalDef env b)
+  RSum1 a     -> VSum1 (evalDef env a)
+  RSum2 b     -> VSum2 (evalDef env b)
+  RTensor a b -> VTensor (evalDef env a) (evalDef env b)
+  RNot f      -> VNot (evalBinder env f)
+  RNeg f      -> VNeg (evalBinder env f)
+  L s e       -> vapp (evalDef env s) (mapElim (evalDef env) (evalBinder env) (evalBinder2 env) e)
 
-evalBinder :: Env -> Expr -> (Val -> Val)
+evalBinder :: Env -> Scope Expr -> (Val -> Val)
 evalBinder = bindExpr evalDef
+
+evalBinder2 :: Env -> Scope (Scope Expr) -> (Val -> Val -> Val)
+evalBinder2 = bindExpr2 evalDef
 
 
 -- Evaluation (CK machine)
@@ -223,6 +244,8 @@ data Frame
   | FRWithR Val ()
   | FRSum1 ()
   | FRSum2 ()
+  | FRTensorL () Expr
+  | FRTensorR Val ()
   | FL (Elim Scope Expr)
   | FLNotR Val ()
   | FLNegR Val ()
@@ -233,35 +256,42 @@ evalCK env e = load env e Nil
 
 load :: Env -> Expr -> Cont -> Val
 load env e k = case e of
-  Var a     -> unload env (env !! getIndex a) k
-  RTop      -> unload env VTop k
-  RBottom   -> unload env VBottom k
-  ROne      -> unload env VOne k
-  RWith a b -> load env a (k :> FRWithL () b)
-  RSum1 a   -> load env a (k :> FRSum1 ())
-  RSum2 b   -> load env b (k :> FRSum2 ())
-  RNot f    -> unload env (VNot (loadBinder env (getScope f) k)) k
-  RNeg f    -> unload env (VNeg (loadBinder env (getScope f) k)) k
-  L s e     -> load env s (k :> FL e)
+  Var a       -> unload env (env !! getIndex a) k
+  RTop        -> unload env VTop k
+  RBottom     -> unload env VBottom k
+  ROne        -> unload env VOne k
+  RWith a b   -> load env a (k :> FRWithL () b)
+  RSum1 a     -> load env a (k :> FRSum1 ())
+  RSum2 b     -> load env b (k :> FRSum2 ())
+  RTensor a b -> load env a (k :> FRTensorL () b)
+  RNot f      -> unload env (VNot (loadBinder env f k)) k
+  RNeg f      -> unload env (VNeg (loadBinder env f k)) k
+  L s e       -> load env s (k :> FL e)
 
-loadBinder :: Env -> Expr -> Cont -> (Val -> Val)
+loadBinder :: Env -> Scope Expr -> Cont -> (Val -> Val)
 loadBinder env f k a = bindExpr load env f a k
+
+loadBinder2 :: Env -> Scope (Scope Expr) -> Cont -> (Val -> Val -> Val)
+loadBinder2 env f k a b = bindExpr2 load env f a b k
 
 unload :: Env -> Val -> Cont -> Val
 unload env v = \case
-  Nil               -> v
-  k :> FRWithL () r -> load env r (k :> FRWithR v ())
-  k :> FRWithR u () -> unload env (VWith u v) k
-  k :> FRSum1 ()    -> unload env (VSum1 v) k
-  k :> FRSum2 ()    -> unload env (VSum2 v) k
-  k :> FL e         -> unload env (case e of
-    EZero    -> unload env (vapp v EZero) k
-    EBottom  -> unload env (vapp v EBottom) k
-    EOne     -> unload env (vapp v EOne) k
-    EWith1 f -> unload env (vapp v (EWith1 (loadBinder env (getScope f) k))) k
-    EWith2 g -> unload env (vapp v (EWith2 (loadBinder env (getScope g) k))) k
-    ESum f g -> unload env (vapp v (ESum (loadBinder env (getScope f) k) (loadBinder env (getScope g) k))) k
-    ENot r   -> load env r (k :> FLNotR v ())
-    ENeg r   -> load env r (k :> FLNegR v ())) k
-  k :> FLNotR u ()  -> unload env (vapp v (ENot u)) k
-  k :> FLNegR u ()  -> unload env (vapp v (ENeg u)) k
+  Nil                 -> v
+  k :> FRWithL () r   -> load env r (k :> FRWithR v ())
+  k :> FRWithR u ()   -> unload env (VWith u v) k
+  k :> FRSum1 ()      -> unload env (VSum1 v) k
+  k :> FRSum2 ()      -> unload env (VSum2 v) k
+  k :> FRTensorL () r -> load env r (k :> FRTensorR v ())
+  k :> FRTensorR u () -> unload env (VTensor u v) k
+  k :> FL e           -> unload env (case e of
+    EZero     -> unload env (vapp v EZero) k
+    EBottom   -> unload env (vapp v EBottom) k
+    EOne      -> unload env (vapp v EOne) k
+    EWith1 f  -> unload env (vapp v (EWith1 (loadBinder env f k))) k
+    EWith2 g  -> unload env (vapp v (EWith2 (loadBinder env g k))) k
+    ESum f g  -> unload env (vapp v (ESum (loadBinder env f k) (loadBinder env g k))) k
+    ETensor f -> unload env (vapp v (ETensor (loadBinder2 env f k))) k
+    ENot r    -> load env r (k :> FLNotR v ())
+    ENeg r    -> load env r (k :> FLNegR v ())) k
+  k :> FLNotR u ()    -> unload env (vapp v (ENot u)) k
+  k :> FLNegR u ()    -> unload env (vapp v (ENeg u)) k
