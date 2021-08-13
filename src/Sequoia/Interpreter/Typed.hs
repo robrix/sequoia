@@ -100,7 +100,7 @@ quoteVal c = \case
   VWithR a b -> XWithR (quoteVal c a) (quoteVal c b)
   VSumR1 a   -> XSumR1 (quoteVal c a)
   VSumR2 b   -> XSumR2 (quoteVal c b)
-  VFunR f    -> XFunR (quoteVal (succ c) (f (VNe (Lv c))))
+  VFunR f    -> XFunR (quoteBinder c f)
   VSubR a b  -> XSubR (quoteVal c a) (quoteCoval c b)
 
 quoteCoval :: Cardinal -> Coval a -> Coexpr a
@@ -110,6 +110,9 @@ quoteCoval c = \case
   VSumL f g -> XSumL (quoteCoval c f) (quoteCoval c g)
   VFunL a b -> XFunL (quoteVal c a) (quoteCoval c b)
   VSubL f   -> XSubL (quoteVal (succ c) (f (VNe (Lv c))))
+
+quoteBinder :: Cardinal -> (Val a -> Val b) -> Expr b
+quoteBinder c f = quoteVal (succ c) (f (VNe (Lv c)))
 
 
 -- Evaluator
