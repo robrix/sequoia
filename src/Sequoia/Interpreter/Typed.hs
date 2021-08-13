@@ -132,7 +132,7 @@ evalDef ctx = \case
   XWithR a b -> VWithR (evalDef ctx a) (evalDef ctx b)
   XSumR1 a   -> VSumR1 (evalDef ctx a)
   XSumR2 b   -> VSumR2 (evalDef ctx b)
-  XFunR f    -> VFunR (\ a -> evalDef (a :< ctx) f)
+  XFunR f    -> VFunR (evalBinder ctx f)
   XSubR a b  -> VSubR (evalDef ctx a) (coevalDef ctx b)
 
 coevalDef :: Γ Val as -> Coexpr b -> Coval b
@@ -142,6 +142,9 @@ coevalDef ctx = \case
   XSumL f g -> VSumL (coevalDef ctx f) (coevalDef ctx g)
   XFunL a b -> VFunL (evalDef ctx a) (coevalDef ctx b)
   XSubL f   -> VSubL (\ a -> evalDef (a :< ctx) f)
+
+evalBinder :: Γ Val as -> Expr b -> (Val a -> Val b)
+evalBinder ctx f a = evalDef (a :< ctx) f
 
 
 -- Execution
