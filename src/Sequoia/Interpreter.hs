@@ -212,50 +212,50 @@ data Frame
   deriving (Show)
 
 evalCK :: Env -> Expr -> Val
-evalCK env e = load env e Nil
+evalCK = load Nil
 
-load :: Env -> Expr -> Cont -> Val
-load env e k = case e of
-  Var a       -> unload env (env !! getIndex a) k
-  RTop        -> unload env VTop k
-  RBottom     -> unload env VBottom k
-  ROne        -> unload env VOne k
-  RWith a b   -> load env a (k :> FRWithL () b)
-  RSum1 a     -> load env a (k :> FRSum1 ())
-  RSum2 b     -> load env b (k :> FRSum2 ())
-  RPar a b    -> load env a (k :> FRParL () b)
-  RTensor a b -> load env a (k :> FRTensorL () b)
-  RNot f      -> unload env (VNot (loadBinder env f k)) k
-  RNeg f      -> unload env (VNeg (loadBinder env f k)) k
-  L s e       -> load env s (k :> FL e)
+load :: Cont -> Env -> Expr -> Val
+load k env = \case
+  Var a       -> unload k env (env !! getIndex a)
+  RTop        -> unload k env VTop
+  RBottom     -> unload k env VBottom
+  ROne        -> unload k env VOne
+  RWith a b   -> load (k :> FRWithL () b) env a
+  RSum1 a     -> load (k :> FRSum1 ()) env a
+  RSum2 b     -> load (k :> FRSum2 ()) env b
+  RPar a b    -> load (k :> FRParL () b) env a
+  RTensor a b -> load (k :> FRTensorL () b) env a
+  RNot f      -> unload k env (VNot (loadBinder k env f))
+  RNeg f      -> unload k env (VNeg (loadBinder k env f))
+  L s e       -> load (k :> FL e) env s
 
-loadBinder :: Env -> Scope Expr -> Cont -> (Val -> Val)
-loadBinder env f k a = bindScope load env f a k
+loadBinder :: Cont -> Env -> Scope Expr -> (Val -> Val)
+loadBinder = bindScope . load
 
-loadBinder2 :: Env -> Scope (Scope Expr) -> Cont -> (Val -> Val -> Val)
-loadBinder2 env f k a b = bindScope (bindScope load) env f a b k
+loadBinder2 :: Cont -> Env -> Scope (Scope Expr) -> (Val -> Val -> Val)
+loadBinder2 = bindScope . loadBinder
 
-unload :: Env -> Val -> Cont -> Val
-unload env v = \case
+unload :: Cont -> Env -> (Val -> Val)
+unload k env v = case k of
   Nil                 -> v
-  k :> FRWithL () r   -> load env r (k :> FRWithR v ())
-  k :> FRWithR u ()   -> unload env (VWith u v) k
-  k :> FRSum1 ()      -> unload env (VSum1 v) k
-  k :> FRSum2 ()      -> unload env (VSum2 v) k
-  k :> FRParL () r    -> load env r (k :> FRParR v ())
-  k :> FRParR u ()    -> unload env (VPar u v) k
-  k :> FRTensorL () r -> load env r (k :> FRTensorR v ())
-  k :> FRTensorR u () -> unload env (VTensor u v) k
-  k :> FL e           -> unload env (case e of
-    EZero     -> unload env (vapp v EZero) k
-    EBottom   -> unload env (vapp v EBottom) k
-    EOne      -> unload env (vapp v EOne) k
-    EWith1 f  -> unload env (vapp v (EWith1 (loadBinder env f k))) k
-    EWith2 g  -> unload env (vapp v (EWith2 (loadBinder env g k))) k
-    ESum f g  -> unload env (vapp v (ESum (loadBinder env f k) (loadBinder env g k))) k
-    EPar f g  -> unload env (vapp v (EPar (loadBinder env f k) (loadBinder env g k))) k
-    ETensor f -> unload env (vapp v (ETensor (loadBinder2 env f k))) k
-    ENot r    -> load env r (k :> FLNotR v ())
-    ENeg r    -> load env r (k :> FLNegR v ())) k
-  k :> FLNotR u ()    -> unload env (vapp v (ENot u)) k
-  k :> FLNegR u ()    -> unload env (vapp v (ENeg u)) k
+  k :> FRWithL () r   -> load (k :> FRWithR v ()) env r
+  k :> FRWithR u ()   -> unload k env (VWith u v)
+  k :> FRSum1 ()      -> unload k env (VSum1 v)
+  k :> FRSum2 ()      -> unload k env (VSum2 v)
+  k :> FRParL () r    -> load (k :> FRParR v ()) env r
+  k :> FRParR u ()    -> unload k env (VPar u v)
+  k :> FRTensorL () r -> load (k :> FRTensorR v ()) env r
+  k :> FRTensorR u () -> unload k env (VTensor u v)
+  k :> FL e           -> unload k env (case e of
+    EZero     -> unload k env (vapp v EZero)
+    EBottom   -> unload k env (vapp v EBottom)
+    EOne      -> unload k env (vapp v EOne)
+    EWith1 f  -> unload k env (vapp v (EWith1 (loadBinder k env f)))
+    EWith2 g  -> unload k env (vapp v (EWith2 (loadBinder k env g)))
+    ESum f g  -> unload k env (vapp v (ESum (loadBinder k env f) (loadBinder k env g)))
+    EPar f g  -> unload k env (vapp v (EPar (loadBinder k env f) (loadBinder k env g)))
+    ETensor f -> unload k env (vapp v (ETensor (loadBinder2 k env f)))
+    ENot r    -> load (k :> FLNotR v ()) env r
+    ENeg r    -> load (k :> FLNegR v ()) env r)
+  k :> FLNotR u ()    -> unload k env (vapp v (ENot u))
+  k :> FLNegR u ()    -> unload k env (vapp v (ENeg u))
