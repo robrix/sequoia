@@ -59,7 +59,7 @@ data Val
   | VTop
   | VBottom
   | VOne
-  | VWith Val Val
+  | VWith (forall x . Either (Val -> x) (Val -> x) -> x)
   | VSum1 Val
   | VSum2 Val
   | VPar Val Val
@@ -100,8 +100,8 @@ vapp = curry $ \case
   (v,           EZero)     -> v
   (VBottom,     EBottom)   -> VBottom
   (VOne,        EOne)      -> VOne
-  (VWith a _,   EWith1 f)  -> f a
-  (VWith _ b,   EWith2 g)  -> g b
+  (VWith r,     EWith1 f)  -> r (Left  f)
+  (VWith r,     EWith2 g)  -> r (Right g)
   (VSum1 a,     ESum f _)  -> f a
   (VSum2 b,     ESum _ g)  -> g b
   (VTensor a b, ETensor f) -> f a b
@@ -143,7 +143,7 @@ quoteVal d = \case
   VTop        -> RTop
   VBottom     -> RBottom
   VOne        -> ROne
-  VWith a b   -> RWith (quoteVal d a) (quoteVal d b)
+  VWith r     -> RWith (r (Left (quoteVal d))) (r (Right (quoteVal d)))
   VSum1 a     -> RSum1 (quoteVal d a)
   VSum2 b     -> RSum2 (quoteVal d b)
   VPar a b    -> RPar (quoteVal d a) (quoteVal d b)
@@ -162,7 +162,7 @@ evalDef env = \case
   RTop        -> VTop
   RBottom     -> VBottom
   ROne        -> VOne
-  RWith a b   -> VWith (evalDef env a) (evalDef env b)
+  RWith a b   -> VWith (either ($ evalDef env a) ($ evalDef env b))
   RSum1 a     -> VSum1 (evalDef env a)
   RSum2 b     -> VSum2 (evalDef env b)
   RPar a b    -> VPar (evalDef env a) (evalDef env b)
@@ -212,7 +212,7 @@ unload :: Cont -> Env -> (Val -> Val)
 unload k env v = case k of
   Nil                 -> v
   k :> FRWithL () r   -> load (k :> FRWithR v ()) env r
-  k :> FRWithR u ()   -> unload k env (VWith u v)
+  k :> FRWithR u ()   -> unload k env (VWith (either ($ u) ($ v)))
   k :> FRSum1 ()      -> unload k env (VSum1 v)
   k :> FRSum2 ()      -> unload k env (VSum2 v)
   k :> FRParL () r    -> load (k :> FRParR v ()) env r
