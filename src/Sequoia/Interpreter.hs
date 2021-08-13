@@ -5,8 +5,6 @@ module Sequoia.Interpreter
 ( -- * Expressions
   Expr(..)
 , EScope(..)
-  -- ** Elimination
-, bindScope
   -- * Values
 , Val(..)
 , Elim(..)
@@ -55,12 +53,6 @@ data Expr
 
 newtype EScope a = EScope { getEScope :: a }
   deriving (Show)
-
-
--- Elimination
-
-bindScope :: ([a] -> b -> c) -> ([a] -> EScope b -> (a -> c))
-bindScope with env e a = with (a : env) (getEScope e)
 
 
 -- Values
@@ -187,9 +179,9 @@ evalDef env = \case
   RSum2 b     -> VSum2 (evalDef env b)
   RPar a b    -> VPar (evalDef env a) (evalDef env b)
   RTensor a b -> VTensor (evalDef env a) (evalDef env b)
-  RNot f      -> VNot (bindScope evalDef env f)
-  RNeg f      -> VNeg (bindScope evalDef env f)
-  L s e       -> vapp (evalDef env s) (mapElim bindScope evalDef env e)
+  RNot f      -> VNot (bind evalDef env f)
+  RNeg f      -> VNeg (bind evalDef env f)
+  L s e       -> vapp (evalDef env s) (mapElim bind evalDef env e)
 
 
 -- Evaluation (CK machine)
@@ -224,8 +216,8 @@ load k env = \case
   RSum2 b     -> load (k :> FRSum2 ()) env b
   RPar a b    -> load (k :> FRParL () b) env a
   RTensor a b -> load (k :> FRTensorL () b) env a
-  RNot f      -> unload k env (VNot (bindScope (load k) env f))
-  RNeg f      -> unload k env (VNeg (bindScope (load k) env f))
+  RNot f      -> unload k env (VNot (bind (load k) env f))
+  RNeg f      -> unload k env (VNeg (bind (load k) env f))
   L s e       -> load (k :> FL e) env s
 
 unload :: Cont -> Env -> (Val -> Val)
@@ -243,11 +235,11 @@ unload k env v = case k of
     EZero     -> unload k env (vapp v EZero)
     EBottom   -> unload k env (vapp v EBottom)
     EOne      -> unload k env (vapp v EOne)
-    EWith1 f  -> unload k env (vapp v (EWith1 (bindScope (load k) env f)))
-    EWith2 g  -> unload k env (vapp v (EWith2 (bindScope (load k) env g)))
-    ESum f g  -> unload k env (vapp v (ESum (bindScope (load k) env f) (bindScope (load k) env g)))
-    EPar f g  -> unload k env (vapp v (EPar (bindScope (load k) env f) (bindScope (load k) env g)))
-    ETensor f -> unload k env (vapp v (ETensor (bindScope (bindScope (load k)) env f)))
+    EWith1 f  -> unload k env (vapp v (EWith1 (bind (load k) env f)))
+    EWith2 g  -> unload k env (vapp v (EWith2 (bind (load k) env g)))
+    ESum f g  -> unload k env (vapp v (ESum (bind (load k) env f) (bind (load k) env g)))
+    EPar f g  -> unload k env (vapp v (EPar (bind (load k) env f) (bind (load k) env g)))
+    ETensor f -> unload k env (vapp v (ETensor (bind (bind (load k)) env f)))
     ENot r    -> load (k :> FLNotR v ()) env r
     ENeg r    -> load (k :> FLNegR v ()) env r)
   k :> FLNotR u ()    -> unload k env (vapp v (ENot u))
