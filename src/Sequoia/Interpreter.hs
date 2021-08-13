@@ -127,9 +127,6 @@ vapp = curry $ \case
 bindVal :: (Level -> a -> b) -> Level -> (Val -> a) -> b
 bindVal with d b = with (succ d) (b (vvar d))
 
-bindVal2 :: (Level -> a -> b) -> Level -> (Val -> Val -> a) -> b
-bindVal2 with = bindVal (bindVal with)
-
 
 -- Computation
 
@@ -170,7 +167,7 @@ quoteBinder :: Level -> (Val -> Val) -> Scope Expr
 quoteBinder = fmap Scope . bindVal quoteVal
 
 quoteBinder2 :: Level -> (Val -> Val -> Val) -> Scope (Scope Expr)
-quoteBinder2 = fmap (Scope . Scope) . bindVal2 quoteVal
+quoteBinder2 = fmap (Scope . Scope) . bindVal (bindVal quoteVal)
 
 
 -- Evaluation (definitional)
