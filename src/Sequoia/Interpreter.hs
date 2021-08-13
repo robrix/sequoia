@@ -153,7 +153,7 @@ instance Scope Level EScope ((->) Val) where
   bind with d b = EScope (with (succ d) (b (vvar d)))
 
 instance Scope [a] ((->) a) EScope where
-  bind with env e a = with (a : env) (getEScope e)
+  bind with env (EScope e) a = with (a : env) e
 
 
 -- Quotation
