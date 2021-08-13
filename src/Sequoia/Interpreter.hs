@@ -13,8 +13,6 @@ module Sequoia.Interpreter
   -- ** Construction
 , vvar
 , vapp
-  -- ** Elimination
-, bindVal
   -- ** Computation
 , mapElim
   -- * Scopes
@@ -123,12 +121,6 @@ vapp = curry $ \case
   (v,           e)         -> error $ "cannot elim " <> show v <> " with " <> show e
 
 
--- Elimination
-
-bindVal :: (Level -> a -> b) -> (Level -> (Val -> a) -> EScope b)
-bindVal with d b = EScope (with (succ d) (b (vvar d)))
-
-
 -- Computation
 
 mapElim :: (forall a b . (env -> a -> b) -> (env -> f a -> g b)) -> (env -> a -> b) -> env -> (Elim f a -> Elim g b)
@@ -173,11 +165,11 @@ quoteVal d = \case
   VSum2 b     -> RSum2 (quoteVal d b)
   VPar a b    -> RPar (quoteVal d a) (quoteVal d b)
   VTensor a b -> RTensor (quoteVal d a) (quoteVal d b)
-  VNot f      -> RNot (bindVal quoteVal d f)
-  VNeg f      -> RNeg (bindVal quoteVal d f)
+  VNot f      -> RNot (bind quoteVal d f)
+  VNeg f      -> RNeg (bind quoteVal d f)
 
 quoteElim :: Level -> Elim ((->) Val) Val -> Elim EScope Expr
-quoteElim = mapElim bindVal quoteVal
+quoteElim = mapElim bind quoteVal
 
 
 -- Evaluation (definitional)
