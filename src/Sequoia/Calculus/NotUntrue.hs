@@ -15,12 +15,12 @@ import Sequoia.Polarity
 class Core s => NotUntrueIntro s where
   notUntrueL
     :: Neg a
-    =>     a < _Γ -|s e r|- _Δ
+    =>     a < _Γ ⊣s e r⊢ _Δ
     -- -----------------------
-    -> e ≁ a < _Γ -|s e r|- _Δ
+    -> e ≁ a < _Γ ⊣s e r⊢ _Δ
 
   notUntrueR
     :: Neg a
-    => _Γ -|s e r|- _Δ > a
+    => _Γ ⊣s e r⊢ _Δ > a
     -- -----------------------
-    -> _Γ -|s e r|- _Δ > e ≁ a
+    -> _Γ ⊣s e r⊢ _Δ > e ≁ a

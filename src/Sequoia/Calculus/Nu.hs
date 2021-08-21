@@ -20,20 +20,20 @@ import Sequoia.Polarity
 class Core s => NuIntro s where
   nuL
     :: (Pos ==> Neg) f
-    => Exists r P (NuF e r f) < _Γ -|s e r|- _Δ
+    => Exists r P (NuF e r f) < _Γ ⊣s e r⊢ _Δ
     -- ----------------------------------------
-    ->             Nu  e r f  < _Γ -|s e r|- _Δ
+    ->             Nu  e r f  < _Γ ⊣s e r⊢ _Δ
 
   nuR
     :: (Pos ==> Neg) f
-    => _Γ -|s e r|- _Δ > Exists r P (NuF e r f)
+    => _Γ ⊣s e r⊢ _Δ > Exists r P (NuF e r f)
     -- ----------------------------------------
-    -> _Γ -|s e r|- _Δ >             Nu  e r f
+    -> _Γ ⊣s e r⊢ _Δ >             Nu  e r f
 
 
 nuR'
   :: (Weaken s, Exchange s, NuIntro s, (Pos ==> Neg) f)
-  => _Γ -|s e r|- _Δ >             Nu  e r f
+  => _Γ ⊣s e r⊢ _Δ >             Nu  e r f
   -- ----------------------------------------
-  -> _Γ -|s e r|- _Δ > Exists r P (NuF e r f)
+  -> _Γ ⊣s e r⊢ _Δ > Exists r P (NuF e r f)
 nuR' p = wkR' p >>> nuL init

@@ -67,8 +67,8 @@ import Sequoia.Profunctor.Value
 -- Contextual
 
 class (Core s, forall e r a . MonadEnv e (s e r a), forall e r . Profunctor (s e r)) => Contextual s where
-  sequent :: (_Δ • r -> e ∘ _Γ -> e |-- r) -> _Γ -|s e r|- _Δ
-  appSequent :: _Γ -|s e r|- _Δ -> (_Δ • r -> e ∘ _Γ -> e |-- r)
+  sequent :: (_Δ • r -> e ∘ _Γ -> e |-- r) -> _Γ ⊣s e r⊢ _Δ
+  appSequent :: _Γ ⊣s e r⊢ _Δ -> (_Δ • r -> e ∘ _Γ -> e |-- r)
 
 
 
@@ -78,9 +78,9 @@ popΓΔ
   :: Contextual s
   => Iso' (_Δ • r) (_Δ' • r, y)
   -> Iso' (e ∘ _Γ) (x, e ∘ _Γ')
-  -> (y -> x -> _Γ' -|s e r|- _Δ')
+  -> (y -> x -> _Γ' ⊣s e r⊢ _Δ')
   -- -----------------------------
-  ->            _Γ  -|s e r|- _Δ
+  ->            _Γ  ⊣s e r⊢ _Δ
 popΓΔ oΔ oΓ f = sequent (\ _Δ _Γ ->
   let (_Δ', y) = view oΔ _Δ
       (x, _Γ') = view oΓ _Γ
@@ -97,9 +97,9 @@ popΓΔ oΔ oΓ f = sequent (\ _Δ _Γ ->
 popΓ
   :: Contextual s
   => Iso' (e ∘ _Γ) (x, e ∘ _Γ')
-  -> (x -> _Γ' -|s e r|- _Δ)
+  -> (x -> _Γ' ⊣s e r⊢ _Δ)
   -- -----------------------
-  ->       _Γ  -|s e r|- _Δ
+  ->       _Γ  ⊣s e r⊢ _Δ
 popΓ o = popΓΔ idΔ o . const
 
 -- | Pop something off the output context which can later be pushed. Used with 'pushΔ', this provides a generalized context restructuring facility.
@@ -113,9 +113,9 @@ popΓ o = popΓΔ idΔ o . const
 popΔ
   :: Contextual s
   => Iso' (_Δ • r) (_Δ' • r, y)
-  -> (y -> _Γ -|s e r|- _Δ')
+  -> (y -> _Γ ⊣s e r⊢ _Δ')
   -- -----------------------
-  ->       _Γ -|s e r|- _Δ
+  ->       _Γ ⊣s e r⊢ _Δ
 popΔ o = popΓΔ o idΓ . (const .)
 
 
@@ -129,9 +129,9 @@ popΔ o = popΓΔ o idΓ . (const .)
 -- @
 popL
   :: Contextual s
-  => (e ∘ a -> _Γ -|s e r|- _Δ)
+  => (e ∘ a -> _Γ ⊣s e r⊢ _Δ)
   -- --------------------------
-  ->      a  < _Γ -|s e r|- _Δ
+  ->      a  < _Γ ⊣s e r⊢ _Δ
 popL = popΓ consΓ
 
 -- | Pop something off the output context which can later be pushed. Used with 'pushR', this provides a generalized context restructuring facility.
@@ -144,24 +144,24 @@ popL = popΓ consΓ
 -- @
 popR
   :: Contextual s
-  => (a • r -> _Γ -|s e r|- _Δ)
+  => (a • r -> _Γ ⊣s e r⊢ _Δ)
   -- -----------------------------
-  ->           _Γ -|s e r|- _Δ > a
+  ->           _Γ ⊣s e r⊢ _Δ > a
 popR = popΔ snocΔ
 
 
 popL2
   :: Contextual s
-  => (e ∘ a -> e ∘ b -> _Γ -|s e r|- _Δ)
+  => (e ∘ a -> e ∘ b -> _Γ ⊣s e r⊢ _Δ)
   -- -----------------------------------
-  ->      a      < b  < _Γ -|s e r|- _Δ
+  ->      a      < b  < _Γ ⊣s e r⊢ _Δ
 popL2 f = popL (popL . f)
 
 popR2
   :: Contextual s
-  => (a • r -> b • r -> _Γ -|s e r|- _Δ)
+  => (a • r -> b • r -> _Γ ⊣s e r⊢ _Δ)
   -- ------------------------------------------
-  ->                    _Γ -|s e r|- _Δ > b > a
+  ->                    _Γ ⊣s e r⊢ _Δ > b > a
 popR2 f = popR (popR . f)
 
 
@@ -171,8 +171,8 @@ poppedΓ
     (e ∘ _Γ''')   (e ∘ _Γ)
     (x, e ∘ _Γ'') (x, e ∘ _Γ')
   -> Setter
-    (_Γ  -|s e r|- _Δ) (_Γ''' -|s e r|- _Δ')
-    (_Γ' -|s e r|- _Δ) (_Γ''  -|s e r|- _Δ')
+    (_Γ  ⊣s e r⊢ _Δ) (_Γ''' ⊣s e r⊢ _Δ')
+    (_Γ' ⊣s e r⊢ _Δ) (_Γ''  ⊣s e r⊢ _Δ')
 poppedΓ g = roam (\ f p -> traverseΓ g (\ h -> f (mapΓ h p)))
 
 poppedΔ
@@ -181,37 +181,37 @@ poppedΔ
     (_Δ''' • r)   (_Δ • r)
     (_Δ'' • r, y) (_Δ' • r, y)
   -> Setter
-    (_Γ -|s e r|- _Δ ) (_Γ' -|s e r|- _Δ''')
-    (_Γ -|s e r|- _Δ') (_Γ' -|s e r|- _Δ'')
+    (_Γ ⊣s e r⊢ _Δ ) (_Γ' ⊣s e r⊢ _Δ''')
+    (_Γ ⊣s e r⊢ _Δ') (_Γ' ⊣s e r⊢ _Δ'')
 poppedΔ g = roam (\ f p -> traverseΔ g (\ h -> f (mapΔ h p)))
 
 
 poppedL
   :: Contextual s
   => Setter
-    (a < _Γ -|s e r|- _Δ) (a < _Γ' -|s e r|- _Δ')
-    (    _Γ -|s e r|- _Δ) (    _Γ' -|s e r|- _Δ')
+    (a < _Γ ⊣s e r⊢ _Δ) (a < _Γ' ⊣s e r⊢ _Δ')
+    (    _Γ ⊣s e r⊢ _Δ) (    _Γ' ⊣s e r⊢ _Δ')
 poppedL = poppedΓ consΓ
 
 poppedR
   :: Contextual s
   => Setter
-    (_Γ -|s e r|- _Δ > a) (_Γ' -|s e r|- _Δ' > a)
-    (_Γ -|s e r|- _Δ    ) (_Γ' -|s e r|- _Δ'    )
+    (_Γ ⊣s e r⊢ _Δ > a) (_Γ' ⊣s e r⊢ _Δ' > a)
+    (_Γ ⊣s e r⊢ _Δ    ) (_Γ' ⊣s e r⊢ _Δ'    )
 poppedR = poppedΔ snocΔ
 
 poppedL2
   :: Contextual s
   => Setter
-    (a < b < _Γ -|s e r|- _Δ) (a < b < _Γ' -|s e r|- _Δ')
-    (        _Γ -|s e r|- _Δ) (        _Γ' -|s e r|- _Δ')
+    (a < b < _Γ ⊣s e r⊢ _Δ) (a < b < _Γ' ⊣s e r⊢ _Δ')
+    (        _Γ ⊣s e r⊢ _Δ) (        _Γ' ⊣s e r⊢ _Δ')
 poppedL2 = poppedL . poppedL
 
 poppedR2
   :: Contextual s
   => Setter
-    (_Γ -|s e r|- _Δ > a > b) (_Γ' -|s e r|- _Δ' > a > b)
-    (_Γ -|s e r|- _Δ        ) (_Γ' -|s e r|- _Δ'        )
+    (_Γ ⊣s e r⊢ _Δ > a > b) (_Γ' ⊣s e r⊢ _Δ' > a > b)
+    (_Γ ⊣s e r⊢ _Δ        ) (_Γ' ⊣s e r⊢ _Δ'        )
 poppedR2 = poppedR . poppedR
 
 
@@ -221,9 +221,9 @@ pushΓΔ
   :: Contextual s
   => Iso' (_Δ • r) (_Δ' • r, y)
   -> Iso' (e ∘ _Γ) (x, e ∘ _Γ')
-  ->            _Γ  -|s e r|- _Δ
+  ->            _Γ  ⊣s e r⊢ _Δ
   -- -----------------------------
-  -> (y -> x -> _Γ' -|s e r|- _Δ')
+  -> (y -> x -> _Γ' ⊣s e r⊢ _Δ')
 pushΓΔ oΔ oΓ s y x = sequent (\ _Δ' _Γ' -> appSequent s (review oΔ (_Δ', y)) (review oΓ (x, _Γ')))
 
 -- | Push something onto the input context which was previously popped off it. Used with 'popΓ', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
@@ -237,9 +237,9 @@ pushΓΔ oΔ oΓ s y x = sequent (\ _Δ' _Γ' -> appSequent s (review oΔ (_Δ',
 pushΓ
   :: Contextual s
   => Iso' (e ∘ _Γ) (x, e ∘ _Γ')
-  ->       _Γ  -|s e r|- _Δ
+  ->       _Γ  ⊣s e r⊢ _Δ
   -- -----------------------
-  -> (x -> _Γ' -|s e r|- _Δ)
+  -> (x -> _Γ' ⊣s e r⊢ _Δ)
 pushΓ o s = pushΓΔ idΔ o s ()
 
 -- | Push something onto the output context which was previously popped off it. Used with 'popΔ', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
@@ -253,9 +253,9 @@ pushΓ o s = pushΓΔ idΔ o s ()
 pushΔ
   :: Contextual s
   => Iso' (_Δ • r) (_Δ' • r, y)
-  ->       _Γ -|s e r|- _Δ
+  ->       _Γ ⊣s e r⊢ _Δ
   -- -----------------------
-  -> (y -> _Γ -|s e r|- _Δ')
+  -> (y -> _Γ ⊣s e r⊢ _Δ')
 pushΔ o s y = pushΓΔ o idΓ s y ()
 
 
@@ -269,9 +269,9 @@ pushΔ o s y = pushΓΔ o idΓ s y ()
 -- @
 pushL
   :: Contextual s
-  =>      a  < _Γ -|s e r|- _Δ
+  =>      a  < _Γ ⊣s e r⊢ _Δ
   -- --------------------------
-  -> (e ∘ a -> _Γ -|s e r|- _Δ)
+  -> (e ∘ a -> _Γ ⊣s e r⊢ _Δ)
 pushL = pushΓ consΓ
 
 -- | Push something onto the output context which was previously popped off it. Used with 'popR', this provides a generalized context restructuring facility. It is undefined what will happen if you push something which was not previously popped.
@@ -284,24 +284,24 @@ pushL = pushΓ consΓ
 -- @
 pushR
   :: Contextual s
-  =>           _Γ -|s e r|- _Δ > a
+  =>           _Γ ⊣s e r⊢ _Δ > a
   -- -----------------------------
-  -> (a • r -> _Γ -|s e r|- _Δ)
+  -> (a • r -> _Γ ⊣s e r⊢ _Δ)
 pushR = pushΔ snocΔ
 
 
 pushL2
   :: Contextual s
-  => a < b < _Γ -|s e r|- _Δ -> e ∘ a -> e ∘ b
+  => a < b < _Γ ⊣s e r⊢ _Δ -> e ∘ a -> e ∘ b
   -- -----------------------------------------
-  ->         _Γ -|s e r|- _Δ
+  ->         _Γ ⊣s e r⊢ _Δ
 pushL2 p = pushL . pushL p
 
 pushR2
   :: Contextual s
-  => _Γ -|s e r|- _Δ > b > a -> a • r -> b • r
+  => _Γ ⊣s e r⊢ _Δ > b > a -> a • r -> b • r
   -- -----------------------------------------
-  -> _Γ -|s e r|- _Δ
+  -> _Γ ⊣s e r⊢ _Δ
 pushR2 p = pushR . pushR p
 
 
@@ -311,59 +311,59 @@ mapΓΔ
   :: Contextual s
   => (e ∘ _Γ' -> e ∘ _Γ)
   -> (_Δ' • r -> _Δ • r)
-  -> _Γ  -|s e r|- _Δ
+  -> _Γ  ⊣s e r⊢ _Δ
   -- -----------------
-  -> _Γ' -|s e r|- _Δ'
+  -> _Γ' ⊣s e r⊢ _Δ'
 mapΓΔ f g p = sequent (\ _Δ _Γ -> appSequent p (g _Δ) (f _Γ))
 
 mapΓ
   :: Contextual s
   => (e ∘ _Γ' -> e ∘ _Γ)
-  -> _Γ  -|s e r|- _Δ
+  -> _Γ  ⊣s e r⊢ _Δ
   -- ----------------
-  -> _Γ' -|s e r|- _Δ
+  -> _Γ' ⊣s e r⊢ _Δ
 mapΓ = (`mapΓΔ` id)
 
 mapΔ
   :: Contextual s
   => (_Δ' • r -> _Δ • r)
-  -> _Γ -|s e r|- _Δ
+  -> _Γ ⊣s e r⊢ _Δ
   -- ----------------
-  -> _Γ -|s e r|- _Δ'
+  -> _Γ ⊣s e r⊢ _Δ'
 mapΔ = (id `mapΓΔ`)
 
 
 mapL
   :: Contextual s
   => (e ∘ a' -> e ∘ a)
-  -> a  < _Γ -|s e r|- _Δ
+  -> a  < _Γ ⊣s e r⊢ _Δ
   -- --------------------
-  -> a' < _Γ -|s e r|- _Δ
+  -> a' < _Γ ⊣s e r⊢ _Δ
 mapL f = mapΓ (\ v -> f (exlF v) >∘∘< exrF v)
 
 mapR
   :: Contextual s
   => (a' • r -> a • r)
-  -> _Γ -|s e r|- _Δ > a
+  -> _Γ ⊣s e r⊢ _Δ > a
   -- --------------------
-  -> _Γ -|s e r|- _Δ > a'
+  -> _Γ ⊣s e r⊢ _Δ > a'
 mapR f = mapΔ (\ k -> inlL k <••> f (inrL k))
 
 
 mapL2
  :: Contextual s
  => (e ∘ c -> Either (e ∘ b) (e ∘ a))
- -> a < _Γ -|s e r|- _Δ   ->   b < _Γ -|s e r|- _Δ
+ -> a < _Γ ⊣s e r⊢ _Δ   ->   b < _Γ ⊣s e r⊢ _Δ
  -- ----------------------------------------------
- ->            c < _Γ -|s e r|- _Δ
+ ->            c < _Γ ⊣s e r⊢ _Δ
 mapL2 f a b = popL ((pushL b <--> pushL a) . f)
 
 mapR2
   :: Contextual s
   => ((c • r -> b • r) • r -> a • r)
-  -> _Γ -|s e r|- _Δ > a   ->   _Γ -|s e r|- _Δ > b
+  -> _Γ ⊣s e r⊢ _Δ > a   ->   _Γ ⊣s e r⊢ _Δ > b
   -- ----------------------------------------------
-  ->            _Γ -|s e r|- _Δ > c
+  ->            _Γ ⊣s e r⊢ _Δ > c
 mapR2 f a b = mapR f (wkR' a) >>> popL (val (`mapR` b))
   where wkR' = popR2 . flip . const . pushR
 
@@ -376,8 +376,8 @@ traverseΓΔ
   -> Iso
     (_Δ''' • r)   (_Δ • r)
     (_Δ'' • r, y) (_Δ' • r, y)
-  -> ((e ∘ _Γ' -> e ∘ _Γ) -> (_Δ' • r -> _Δ • r) -> _Γ''  -|s e r|- _Δ'')
-  ->                                                _Γ''' -|s e r|- _Δ'''
+  -> ((e ∘ _Γ' -> e ∘ _Γ) -> (_Δ' • r -> _Δ • r) -> _Γ''  ⊣s e r⊢ _Δ'')
+  ->                                                _Γ''' ⊣s e r⊢ _Δ'''
 traverseΓΔ f g s = sequent (\ _Δ' _Γ' -> withIso f (\ saΓ btΓ -> withIso g (\ saΔ btΔ ->
   let (x, _Γ) = saΓ _Γ'
       (_Δ, y) = saΔ _Δ'
@@ -388,8 +388,8 @@ traverseΓ
   => Iso
     (e ∘ _Γ''')   (e ∘ _Γ)
     (x, e ∘ _Γ'') (x, e ∘ _Γ')
-  -> ((e ∘ _Γ' -> e ∘ _Γ) -> _Γ''  -|s e r|- _Δ)
-  ->                         _Γ''' -|s e r|- _Δ
+  -> ((e ∘ _Γ' -> e ∘ _Γ) -> _Γ''  ⊣s e r⊢ _Δ)
+  ->                         _Γ''' ⊣s e r⊢ _Δ
 traverseΓ f b = traverseΓΔ f idΔ (const . b)
 
 traverseΔ
@@ -397,8 +397,8 @@ traverseΔ
   => Iso
     (_Δ''' • r)   (_Δ • r)
     (_Δ'' • r, y) (_Δ' • r, y)
-  -> ((_Δ' • r -> _Δ • r) -> _Γ -|s e r|- _Δ'')
-  ->                         _Γ -|s e r|- _Δ'''
+  -> ((_Δ' • r -> _Δ • r) -> _Γ ⊣s e r⊢ _Δ'')
+  ->                         _Γ ⊣s e r⊢ _Δ'''
 traverseΔ f b = traverseΓΔ idΓ f (const b)
 
 
@@ -408,14 +408,14 @@ liftL
   :: Contextual s
   => a • r
   -- -----------------------
-  ->     a < _Γ -|s e r|- _Δ
+  ->     a < _Γ ⊣s e r⊢ _Δ
 liftL = pushR init
 
 liftR
   :: Contextual s
   =>               e ∘ a
   -- -------------------
-  -> _Γ -|s e r|- _Δ > a
+  -> _Γ ⊣s e r⊢ _Δ > a
 liftR = pushΓ consΓ init
 
 
@@ -423,22 +423,22 @@ liftR = pushΓ consΓ init
 
 lowerL
   :: Contextual s
-  => (a • r                   -> _Γ -|s e r|- _Δ)
+  => (a • r                   -> _Γ ⊣s e r⊢ _Δ)
   -- --------------------------------------------
-  -> (    a < _Γ -|s e r|- _Δ -> _Γ -|s e r|- _Δ)
+  -> (    a < _Γ ⊣s e r⊢ _Δ -> _Γ ⊣s e r⊢ _Δ)
 lowerL k p = popR k >>> p
 
 lowerR
   :: Contextual s
-  => (              e ∘ a -> _Γ -|s e r|- _Δ)
+  => (              e ∘ a -> _Γ ⊣s e r⊢ _Δ)
   -- ----------------------------------------
-  -> (_Γ -|s e r|- _Δ > a -> _Γ -|s e r|- _Δ)
+  -> (_Γ ⊣s e r⊢ _Δ > a -> _Γ ⊣s e r⊢ _Δ)
 lowerR k p = p >>> popΓ consΓ k
 
 
 -- Deriving
 
-newtype Contextually s e r _Γ _Δ = Contextually { getContextually :: _Γ -|s e r|- _Δ }
+newtype Contextually s e r _Γ _Δ = Contextually { getContextually :: _Γ ⊣s e r⊢ _Δ }
   deriving (Core)
 
 instance Contextual s => Weaken (Contextually s) where

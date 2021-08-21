@@ -14,4 +14,4 @@ import Sequoia.Connective.Zero
 class Core s => ZeroIntro s where
   zeroL
     -- ----------------------
-    :: Zero < _Γ -|s e r|- _Δ
+    :: Zero < _Γ ⊣s e r⊢ _Δ

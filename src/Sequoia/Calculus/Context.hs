@@ -11,8 +11,8 @@ module Sequoia.Calculus.Context
 , unsnocΔ
 , snocΔ
   -- * Mixfix syntax
-, type (|-)
-, type (-|)
+, type (⊢)
+, type (⊣)
 ) where
 
 import Control.Applicative (liftA2)
@@ -150,7 +150,7 @@ snocΔ = iso unsnocΔ (uncurry (|>))
 
 -- Mixfix syntax
 
-type l -| r = r l
-type l |- r = l r
+type l ⊢ r = l r
+type l ⊣ r = r l
 
-infixl 2 |-, -|
+infixl 2 ⊣, ⊢

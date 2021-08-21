@@ -13,4 +13,4 @@ import Sequoia.Connective.Top
 class TopIntro s where
   topR
     -- ---------------------
-    :: _Γ -|s e r|- _Δ > Top
+    :: _Γ ⊣s e r⊢ _Δ > Top

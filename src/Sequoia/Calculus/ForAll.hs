@@ -22,20 +22,20 @@ import Sequoia.Polarity
 class Core s => UniversalIntro s where
   forAllL
     :: (Polarized n x, Neg (f x))
-    => Negate e (f x) r ¬ r < _Γ -|s e r|- _Δ
+    => Negate e (f x) r ¬ r < _Γ ⊣s e r⊢ _Δ
     -- --------------------------------------
-    ->     ForAll r n f     < _Γ -|s e r|- _Δ
+    ->     ForAll r n f     < _Γ ⊣s e r⊢ _Δ
 
   forAllR
     :: (Polarized n ==> Neg) f
-    => (forall x . Polarized n x => _Γ -|s e r|- _Δ >            f x)
+    => (forall x . Polarized n x => _Γ ⊣s e r⊢ _Δ >            f x)
     -- --------------------------------------------------------------
-    ->                              _Γ -|s e r|- _Δ > ForAll r n f
+    ->                              _Γ ⊣s e r⊢ _Δ > ForAll r n f
 
 
 forAllR'
   :: (Weaken s, Exchange s, UniversalIntro s, NegationIntro s, (Polarized n ==> Neg) f)
-  =>                              _Γ -|s e r|- _Δ > ForAll r n f
+  =>                              _Γ ⊣s e r⊢ _Δ > ForAll r n f
   -- --------------------------------------------------------------
-  -> (forall x . Polarized n x => _Γ -|s e r|- _Δ >            f x)
+  -> (forall x . Polarized n x => _Γ ⊣s e r⊢ _Δ >            f x)
 forAllR' p = wkR' p >>> forAllL (dneN init)

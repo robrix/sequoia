@@ -20,20 +20,20 @@ import Sequoia.Polarity
 
 class Core s => ExistentialIntro s where
   existsL
-    :: (forall x . Polarized n x => f x < _Γ -|s e r|- _Δ)
+    :: (forall x . Polarized n x => f x < _Γ ⊣s e r⊢ _Δ)
     -- ---------------------------------------------------
-    ->                   Exists r n f   < _Γ -|s e r|- _Δ
+    ->                   Exists r n f   < _Γ ⊣s e r⊢ _Δ
 
   existsR
     :: (Polarized n x, Pos (f x))
-    => _Γ -|s e r|- _Δ >            f x
+    => _Γ ⊣s e r⊢ _Δ >            f x
     -- --------------------------------
-    -> _Γ -|s e r|- _Δ > Exists k n f
+    -> _Γ ⊣s e r⊢ _Δ > Exists k n f
 
 
 existsL'
   :: (Weaken s, Exchange s, ExistentialIntro s, (Polarized n ==> Pos) f)
-  =>                   Exists k n f   < _Γ -|s e r|- _Δ
+  =>                   Exists k n f   < _Γ ⊣s e r⊢ _Δ
   -- ---------------------------------------------------
-  -> (forall x . Polarized n x => f x < _Γ -|s e r|- _Δ)
+  -> (forall x . Polarized n x => f x < _Γ ⊣s e r⊢ _Δ)
 existsL' p = existsR init >>> wkL' p
