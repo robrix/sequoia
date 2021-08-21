@@ -107,7 +107,7 @@ a <••> b = inK ((a •) <--> (b •))
 
 infixr 3 <••>
 
-(<∘∘>) :: (Disj d, Value v) => (e `v` a -> r) -> (e `v` b -> r) -> (e `v` (a `d` b) -> e |-- r)
+(<∘∘>) :: (Disj d, Value v) => (e `v` a -> r) -> (e `v` b -> r) -> (e `v` (a `d` b) -> e |- r)
 (l <∘∘> r) ab = C ((l <--> r) . bisequenceDisjV ab)
 
 infixr 3 <∘∘>

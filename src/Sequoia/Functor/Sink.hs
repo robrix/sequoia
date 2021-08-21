@@ -33,13 +33,13 @@ import Sequoia.Profunctor.Value
 
 -- Sinks
 
-_Snk :: Iso (Snk e r a) (Snk e' r' a') (e ∘ a -> e |-- r) (e' ∘ a' -> e' |-- r')
+_Snk :: Iso (Snk e r a) (Snk e' r' a') (e ∘ a -> e |- r) (e' ∘ a' -> e' |- r')
 _Snk = coerced
 
 
 -- Construction
 
-snk :: (e ∘ a -> e |-- r) -> Snk e r a
+snk :: (e ∘ a -> e |- r) -> Snk e r a
 snk = coerce
 
 snkFn :: ((e -> a) -> (e -> r)) -> Snk e r a
@@ -53,10 +53,10 @@ infixl 2 ↓
 
 -- Elimination
 
-runSnk :: Snk e r a -> (e ∘ a -> e |-- r)
+runSnk :: Snk e r a -> (e ∘ a -> e |- r)
 runSnk = coerce . runSnk
 
-elimSnk :: Snk e r a -> Src e r a -> e |-- r
+elimSnk :: Snk e r a -> Src e r a -> e |- r
 elimSnk sn sr = env (pure . (runSrcFn sr . flip (runSnkFn sn . pure) <*> id))
 
 
@@ -68,10 +68,10 @@ mapSnkE b = over _Snk (mapSnkFnC (over _CV (view b)) . mapSnkFnV (review b))
 mapSnkR :: (forall x . x • r -> x • r') -> (Snk e r a -> Snk e r' a)
 mapSnkR f = over _Snk (mapSnkFnC (over _CK f))
 
-mapSnkFnV :: (forall x . e2 ∘ x -> e1 ∘ x) -> (e1 ∘ a -> e |-- r) -> (e2 ∘ a -> e |-- r)
+mapSnkFnV :: (forall x . e2 ∘ x -> e1 ∘ x) -> (e1 ∘ a -> e |- r) -> (e2 ∘ a -> e |- r)
 mapSnkFnV = lmap
 
-mapSnkFnC :: (e1 |-- r1 -> e2 |-- r2) -> (e ∘ a -> e1 |-- r1) -> (e ∘ a -> e2 |-- r2)
+mapSnkFnC :: (e1 |- r1 -> e2 |- r2) -> (e ∘ a -> e1 |- r1) -> (e ∘ a -> e2 |- r2)
 mapSnkFnC = rmap
 
 

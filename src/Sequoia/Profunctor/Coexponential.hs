@@ -69,7 +69,7 @@ unCoexp = flip withCoexp
 unCoexpFn :: ((e -> b) -> (a -> r) -> s) -> Coexp e r a b -> s
 unCoexpFn = flip withCoexpFn
 
-evalCoexp :: Coexp e r a a -> e |-- r
+evalCoexp :: Coexp e r a a -> e |- r
 evalCoexp c = C (\ e -> forget c • e ∘ recall c)
 
 recall :: Coexp e r a b -> e ∘ b

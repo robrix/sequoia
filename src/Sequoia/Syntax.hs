@@ -57,7 +57,7 @@ class PExpr rep where
   negateR :: rep e r (a • r) -> rep e r (Negate e a r)
 
 
-runEval :: a • r -> Eval e r a -> e |-- r
+runEval :: a • r -> Eval e r a -> e |- r
 runEval k m = getEval m k
 
 evalF :: (Eval e r a -> Eval e r b) -> Eval e r (b • r -> a • r)
@@ -66,7 +66,7 @@ evalF f = env (\ e -> pure (\ k -> K ((<== e) . runEval k . f . pure)))
 elim :: (a -> Eval e r r) -> Eval e r (a • r)
 elim f = Eval (\ k -> C (\ e -> k • K (\ a -> runEval idK (f a) <== e)))
 
-newtype Eval e r a = Eval { getEval :: a • r -> e |-- r }
+newtype Eval e r a = Eval { getEval :: a • r -> e |- r }
 
 instance Functor (Eval e r) where
   fmap f = Eval . lmap (lmap f) . getEval

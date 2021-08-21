@@ -67,8 +67,8 @@ import Sequoia.Profunctor.Value
 -- Contextual
 
 class (Core s, forall e r a . MonadEnv e (s e r a), forall e r . Profunctor (s e r)) => Contextual s where
-  sequent :: (_Δ • r -> e ∘ _Γ -> e |-- r) -> _Γ ⊣s e r⊢ _Δ
-  appSequent :: _Γ ⊣s e r⊢ _Δ -> (_Δ • r -> e ∘ _Γ -> e |-- r)
+  sequent :: (_Δ • r -> e ∘ _Γ -> e |- r) -> _Γ ⊣s e r⊢ _Δ
+  appSequent :: _Γ ⊣s e r⊢ _Δ -> (_Δ • r -> e ∘ _Γ -> e |- r)
 
 
 
