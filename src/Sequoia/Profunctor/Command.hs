@@ -2,7 +2,7 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Sequoia.Profunctor.Command
-( -- * Context & control profunctor
+( -- * Command profunctor
   _C
 , type (==>)(..)
   -- * Construction
@@ -42,7 +42,7 @@ import Sequoia.Profunctor.Continuation
 import Sequoia.Profunctor.Recall
 import Sequoia.Profunctor.Value
 
--- Context & control profunctor
+-- Command profunctor
 
 _C :: Iso (e ==> r) (e' ==> r') (e -> r) (e' -> r')
 _C = coerced
