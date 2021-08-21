@@ -55,7 +55,7 @@ import           Sequoia.Monad.Run
 import           Sequoia.Profunctor
 import           Sequoia.Profunctor.Applicative
 import           Sequoia.Profunctor.Coexponential
-import           Sequoia.Profunctor.Context
+import           Sequoia.Profunctor.Command
 import           Sequoia.Profunctor.Continuation as K
 import           Sequoia.Profunctor.Diagonal
 import qualified Sequoia.Profunctor.Exp as X

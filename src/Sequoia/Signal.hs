@@ -27,7 +27,7 @@ import           Sequoia.Calculus.Context
 import           Sequoia.Functor.Sink
 import           Sequoia.Functor.Source
 import           Sequoia.Monad.Run
-import           Sequoia.Profunctor.Context
+import           Sequoia.Profunctor.Command
 import           Sequoia.Profunctor.Continuation as K
 import           Sequoia.Profunctor.Value as V
 

@@ -23,7 +23,7 @@ module Sequoia.Profunctor.Coexponential
 import Data.Coerce
 import Data.Profunctor
 import Fresnel.Lens
-import Sequoia.Profunctor.Context
+import Sequoia.Profunctor.Command
 import Sequoia.Profunctor.Continuation
 import Sequoia.Profunctor.Value
 

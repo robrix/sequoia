@@ -49,7 +49,7 @@ import           Sequoia.Contextual
 import           Sequoia.Disjunction as Disj
 import           Sequoia.Monad.Run
 import           Sequoia.Profunctor.Coexponential
-import           Sequoia.Profunctor.Context
+import           Sequoia.Profunctor.Command
 import           Sequoia.Profunctor.Continuation as K
 import           Sequoia.Profunctor.Diagonal
 import           Sequoia.Profunctor.Exponential as Exponential hiding ((>>>), (↓))

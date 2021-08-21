@@ -26,7 +26,7 @@ import Sequoia.Connective.Negate
 import Sequoia.Connective.Negation
 import Sequoia.Contextual
 import Sequoia.Polarity
-import Sequoia.Profunctor.Context
+import Sequoia.Profunctor.Command
 import Sequoia.Profunctor.Continuation as K
 import Sequoia.Profunctor.Value
 

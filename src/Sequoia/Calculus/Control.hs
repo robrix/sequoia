@@ -22,7 +22,7 @@ import Sequoia.Calculus.Context
 import Sequoia.Calculus.Core
 import Sequoia.Calculus.Structural
 import Sequoia.Contextual
-import Sequoia.Profunctor.Context
+import Sequoia.Profunctor.Command
 import Sequoia.Profunctor.Continuation
 import Sequoia.Profunctor.Value
 

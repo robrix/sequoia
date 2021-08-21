@@ -22,7 +22,7 @@ import Sequoia.Connective.With
 import Sequoia.Connective.Zero
 import Sequoia.Disjunction
 import Sequoia.Monad.Run
-import Sequoia.Profunctor.Context
+import Sequoia.Profunctor.Command
 import Sequoia.Profunctor.Continuation
 import Sequoia.Profunctor.Value
 

@@ -60,7 +60,7 @@ import Sequoia.Calculus.Core
 import Sequoia.Calculus.Structural
 import Sequoia.Conjunction
 import Sequoia.Disjunction
-import Sequoia.Profunctor.Context
+import Sequoia.Profunctor.Command
 import Sequoia.Profunctor.Continuation
 import Sequoia.Profunctor.Value
 

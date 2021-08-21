@@ -53,7 +53,7 @@ import Data.Profunctor.Sieve
 import Fresnel.Lens
 import Fresnel.Prism
 import Sequoia.Bifunctor.Sum
-import Sequoia.Profunctor.Context
+import Sequoia.Profunctor.Command
 import Sequoia.Profunctor.Continuation
 import Sequoia.Profunctor.Diagonal
 import Sequoia.Profunctor.Value

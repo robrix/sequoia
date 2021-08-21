@@ -13,7 +13,7 @@ import Prelude hiding (exp)
 import Sequoia.Connective.Not
 import Sequoia.Connective.NotUntrue
 import Sequoia.Profunctor
-import Sequoia.Profunctor.Context
+import Sequoia.Profunctor.Command
 import Sequoia.Profunctor.Continuation
 import Sequoia.Profunctor.Value
 

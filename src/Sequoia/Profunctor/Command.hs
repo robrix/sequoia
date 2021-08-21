@@ -1,7 +1,7 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Sequoia.Profunctor.Context
+module Sequoia.Profunctor.Command
 ( -- * Context & control profunctor
   _C
 , type (==>)(..)

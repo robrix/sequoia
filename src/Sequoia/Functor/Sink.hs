@@ -26,7 +26,7 @@ import Fresnel.Review
 import Fresnel.Setter
 import Sequoia.Functor.Sink.Internal
 import Sequoia.Functor.Source.Internal
-import Sequoia.Profunctor.Context
+import Sequoia.Profunctor.Command
 import Sequoia.Profunctor.Continuation
 import Sequoia.Profunctor.Exponential as Exp
 import Sequoia.Profunctor.Value

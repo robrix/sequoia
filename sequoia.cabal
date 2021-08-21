@@ -174,7 +174,7 @@ library
     Sequoia.Profunctor.Adjunction
     Sequoia.Profunctor.Applicative
     Sequoia.Profunctor.Coexponential
-    Sequoia.Profunctor.Context
+    Sequoia.Profunctor.Command
     Sequoia.Profunctor.Continuation
     Sequoia.Profunctor.Diagonal
     Sequoia.Profunctor.Exchange
