@@ -57,7 +57,7 @@ import           Sequoia.Profunctor.Value
 
 -- Sequents
 
-newtype Seq e r _Γ _Δ = Seq { getSeq :: _Δ • r -> e ∘ _Γ -> e ==> r }
+newtype Seq e r _Γ _Δ = Seq { getSeq :: _Δ • r -> e ∘ _Γ -> e |-- r }
   deriving (Applicative, Functor, Monad, MonadEnv e, MonadRes r) via (Exp e r _Γ)
   deriving (Arrow, ArrowApply, ArrowChoice, Category, Choice, Codiagonal, Diagonal, Profunctor, Strong, Traversing) via (Exp e r)
 
@@ -78,13 +78,13 @@ lowerLR f p = seq (\ _Δ _Γ -> _Δ ↓ f (exp (\ b a -> _Δ |> b ↓ p ↑ a <|
 lowerLR' :: (((b • r) -> (a • r)) -> _Γ -|Seq e r|- _Δ) -> a < _Γ -|Seq e r|- _Δ > b -> _Γ -|Seq e r|- _Δ
 lowerLR' f p = seq (\ _Δ _Γ -> withRun (\ run -> _Δ ↓ f (\ b -> inK (\ a -> run (_Δ |> b ↓ p ↑ pure a <| _Γ))) ↑ _Γ))
 
-seq :: (_Δ • r -> e ∘ _Γ -> e ==> r) -> Seq e r _Γ _Δ
+seq :: (_Δ • r -> e ∘ _Γ -> e |-- r) -> Seq e r _Γ _Δ
 seq = Seq
 
 seqExp :: Exp e r a b -> Seq e r a b
 seqExp = seq . runExp
 
-seqCoexp :: (Coexp e r b a -> e ==> r) -> Seq e r a b
+seqCoexp :: (Coexp e r b a -> e |-- r) -> Seq e r a b
 seqCoexp = seqExp . expCoexp
 
 seqFn :: ((_Δ -> r) -> (e -> _Γ) -> (e -> r)) -> Seq e r _Γ _Δ
@@ -96,22 +96,22 @@ seqFn = coerce
 evalSeq :: _Γ -|Seq _Γ _Δ|- _Δ -> (_Γ -> _Δ)
 evalSeq = evalExp . exp . getSeq
 
-runSeq :: Seq e r _Γ _Δ -> (_Δ • r -> e ∘ _Γ -> e ==> r)
+runSeq :: Seq e r _Γ _Δ -> (_Δ • r -> e ∘ _Γ -> e |-- r)
 runSeq = coerce
 
 runSeqFn :: Seq e r _Γ _Δ -> ((_Δ -> r) -> (e -> _Γ) -> (e -> r))
 runSeqFn = coerce
 
-elimSeq :: _Γ -|Seq e r|- _Δ -> Coexp e r _Δ _Γ -> e ==> r
+elimSeq :: _Γ -|Seq e r|- _Δ -> Coexp e r _Δ _Γ -> e |-- r
 elimSeq = unCoexp . flip . getSeq
 
-(↓) :: _Δ • r -> Seq e r _Γ _Δ -> e ∘ _Γ -> e ==> r
+(↓) :: _Δ • r -> Seq e r _Γ _Δ -> e ∘ _Γ -> e |-- r
 (↓) = flip getSeq
 
 
 -- Effectful sequents
 
-runSeqT :: SeqT e r _Γ m _Δ -> (_Δ • m r -> e ∘ _Γ -> e ==> m r)
+runSeqT :: SeqT e r _Γ m _Δ -> (_Δ • m r -> e ∘ _Γ -> e |-- m r)
 runSeqT = coerce
 
 newtype SeqT e r _Γ m _Δ = SeqT { getSeqT :: Seq e (m r) _Γ _Δ }

@@ -33,13 +33,13 @@ import Sequoia.Profunctor.Value
 
 -- Sources
 
-_Src :: Iso (Src e r b) (Src e' r' b') (b • r -> e ==> r) (b' • r' -> e' ==> r')
+_Src :: Iso (Src e r b) (Src e' r' b') (b • r -> e |-- r) (b' • r' -> e' |-- r')
 _Src = coerced
 
 
 -- Construction
 
-src :: ((b • r) -> (e ==> r)) -> Src e r b
+src :: ((b • r) -> (e |-- r)) -> Src e r b
 src = coerce
 
 srcFn :: ((b -> r) -> (e -> r)) -> Src e r b
@@ -53,10 +53,10 @@ infixl 3 ↑
 
 -- Elimination
 
-runSrc :: Src e r b -> (b • r -> e ==> r)
+runSrc :: Src e r b -> (b • r -> e |-- r)
 runSrc = coerce . runSrcFn
 
-elimSrc :: Src e r a -> Snk e r a -> e ==> r
+elimSrc :: Src e r a -> Snk e r a -> e |-- r
 elimSrc sr sn = env (pure . (runSrcFn sr . flip (runSnkFn sn . pure) <*> id))
 
 
@@ -68,10 +68,10 @@ mapSrcE f = over _Src (mapSrcFnC (over _CV f))
 mapSrcR :: (forall x . Iso' (x • r) (x • r')) -> (Src e r b -> Src e r' b)
 mapSrcR b = over _Src (mapSrcFnC (over _CK (view b)) . mapSrcFnK (review b))
 
-mapSrcFnK :: (forall x . x • r2 -> x • r1) -> (b • r1 -> e ==> r) -> (b • r2 -> e ==> r)
+mapSrcFnK :: (forall x . x • r2 -> x • r1) -> (b • r1 -> e |-- r) -> (b • r2 -> e |-- r)
 mapSrcFnK = lmap
 
-mapSrcFnC :: (e1 ==> r1 -> e2 ==> r2) -> (b • r -> e1 ==> r1) -> (b • r -> e2 ==> r2)
+mapSrcFnC :: (e1 |-- r1 -> e2 |-- r2) -> (b • r -> e1 |-- r1) -> (b • r -> e2 |-- r2)
 mapSrcFnC = rmap
 
 

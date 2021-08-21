@@ -4,7 +4,7 @@
 module Sequoia.Profunctor.Command
 ( -- * Command profunctor
   _C
-, type (==>)(..)
+, type (|--)(..)
   -- * Construction
 , ckv
 , (↓↑)
@@ -44,40 +44,40 @@ import Sequoia.Profunctor.Value
 
 -- Command profunctor
 
-_C :: Iso (e ==> r) (e' ==> r') (e -> r) (e' -> r')
+_C :: Iso (e |-- r) (e' |-- r') (e -> r) (e' -> r')
 _C = coerced
 
-newtype e ==> r = C { (<==) :: e -> r }
+newtype e |-- r = C { (<==) :: e -> r }
   deriving (Applicative, Arrow, ArrowApply, ArrowChoice, ArrowLoop, Cat.Category, Choice, Closed, Cochoice, Costrong, Functor, Mapping, Monad, MonadEnv e, MonadRun, Profunctor, Co.Representable, Strong, Traversing)
 
-infix 6 ==>
+infix 6 |--
 infixl 1 <==
 
-instance Distributive ((==>) e) where
+instance Distributive ((|--) e) where
   distribute = distributeRep
   collect = collectRep
 
-instance Sieve (==>) Identity where
+instance Sieve (|--) Identity where
   sieve = fmap Identity . (<==)
 
-instance Cosieve (==>) Identity where
+instance Cosieve (|--) Identity where
   cosieve = lmap runIdentity . (<==)
 
-instance Pro.Representable (==>) where
-  type Rep (==>) = Identity
+instance Pro.Representable (|--) where
+  type Rep (|--) = Identity
   tabulate = C . fmap runIdentity
 
-instance Pro.Corepresentable (==>) where
-  type Corep (==>) = Identity
+instance Pro.Corepresentable (|--) where
+  type Corep (|--) = Identity
   cotabulate = C . lmap Identity
 
 
 -- Construction
 
-ckv :: (a -> b) -> b • r -> e ∘ a -> e ==> r
+ckv :: (a -> b) -> b • r -> e ∘ a -> e |-- r
 ckv f k v = C ((k •) . f . (∘ v))
 
-(↓↑) :: a • r -> e ∘ a -> e ==> r
+(↓↑) :: a • r -> e ∘ a -> e |-- r
 (↓↑) = ckv id
 
 infix 9 ↓↑
@@ -85,19 +85,19 @@ infix 9 ↓↑
 
 -- Composition
 
-(•<<) :: r • s -> e ==> r -> e ==> s
+(•<<) :: r • s -> e |-- r -> e |-- s
 (•<<) = rmap . (•)
 
-(>>•) :: e ==> r -> r • s -> e ==> s
+(>>•) :: e |-- r -> r • s -> e |-- s
 (>>•) = flip (•<<)
 
 infixr 1 •<<, >>•
 
 
-(∘>>) :: d ∘ e -> e ==> r -> d ==> r
+(∘>>) :: d ∘ e -> e |-- r -> d |-- r
 (∘>>) = lmap . flip (∘)
 
-(<<∘) :: e ==> r -> d ∘ e -> d ==> r
+(<<∘) :: e |-- r -> d ∘ e -> d |-- r
 (<<∘) = flip (∘>>)
 
 infixr 1 ∘>>, <<∘
@@ -106,12 +106,12 @@ infixr 1 ∘>>, <<∘
 -- Computation
 
 _CK :: Iso
-  (e1 ==> r1) (e2 ==> r2)
+  (e1 |-- r1) (e2 |-- r2)
   (e1 • r1)   (e2 • r2)
 _CK = coerced
 
 _CV :: Iso
-  (e1 ==> r1) (e2 ==> r2)
+  (e1 |-- r1) (e2 |-- r2)
   (e1 ∘ r1)   (e2 ∘ r2)
 _CV = coerced
 

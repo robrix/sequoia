@@ -65,7 +65,7 @@ import           Sequoia.Profunctor.Value as V
 
 _Exp :: Iso
   (Exp e1 r1 a1 b1)                   (Exp e2 r2 a2 b2)
-  (b1 • r1 -> e1 ∘ a1 -> e1 ==> r1)   (b2 • r2 -> e2 ∘ a2 -> e2 ==> r2)
+  (b1 • r1 -> e1 ∘ a1 -> e1 |-- r1)   (b2 • r2 -> e2 ∘ a2 -> e2 |-- r2)
 _Exp = coerced
 
 newtype Exp env res inn out = Exp ((out -> res) -> (env -> inn) -> (env -> res))
@@ -145,7 +145,7 @@ infixr 5 |->
 
 -- Construction
 
-exp :: (b • r -> e ∘ a -> e ==> r) -> Exp e r a b
+exp :: (b • r -> e ∘ a -> e |-- r) -> Exp e r a b
 exp = coerce
 
 exp' :: (a -> b) -> a --|Exp e r|-> b
@@ -160,13 +160,13 @@ expK = exp' . (•)
 expKV :: a • r -> e ∘ a -> e --|Exp e r|-> r
 expKV = fmap expC . (↓↑)
 
-expC :: e ==> r -> e --|Exp e r|-> r
+expC :: e |-- r -> e --|Exp e r|-> r
 expC = exp' . (<==)
 
 expFn :: ((b -> r) -> (e -> a) -> (e -> r)) -> Exp e r a b
 expFn = coerce
 
-expCoexp :: (Coexp e r b a -> e ==> r) -> Exp e r a b
+expCoexp :: (Coexp e r b a -> e |-- r) -> Exp e r a b
 expCoexp f = exp (fmap f . flip (-<))
 
 
@@ -175,13 +175,13 @@ expCoexp f = exp (fmap f . flip (-<))
 evalExp :: MonadEnv e m => e --|Exp e r|-> r -> m r
 evalExp f = idK ↓ f ↑ idV
 
-runExp :: a --|Exp e r|-> b -> b • r -> e ∘ a -> e ==> r
+runExp :: a --|Exp e r|-> b -> b • r -> e ∘ a -> e |-- r
 runExp = coerce
 
-runExp' :: b • r -> e ∘ a -> a --|Exp e r|-> b -> e ==> r
+runExp' :: b • r -> e ∘ a -> a --|Exp e r|-> b -> e |-- r
 runExp' k v f = runExp f k v
 
-elimExp :: a --|Exp e r|-> b -> Coexp e r b a -> e ==> r
+elimExp :: a --|Exp e r|-> b -> Coexp e r b a -> e |-- r
 elimExp = unCoexp . flip . runExp
 
 runExpFn :: Exp e r a b -> ((b -> r) -> (e -> a) -> (e -> r))
@@ -210,13 +210,13 @@ mapExpR :: (forall x . Iso' (x • r2) (x • r1)) -> (Exp e r1 i o -> Exp e r2 
 mapExpR b = exp . mapExpFnC (over _CK (review b)) . mapExpFnK (view b) . runExp
 
 
-mapExpFnK :: (forall x . x • r2 -> x • r1) -> (b • r1 -> e ∘ a -> e ==> r) -> (b • r2 -> e ∘ a -> e ==> r)
+mapExpFnK :: (forall x . x • r2 -> x • r1) -> (b • r1 -> e ∘ a -> e |-- r) -> (b • r2 -> e ∘ a -> e |-- r)
 mapExpFnK = lmap
 
-mapExpFnV :: (forall x . e2 ∘ x -> e1 ∘ x) -> (b • r -> e1 ∘ a -> e ==> r) -> (b • r -> e2 ∘ a -> e ==> r)
+mapExpFnV :: (forall x . e2 ∘ x -> e1 ∘ x) -> (b • r -> e1 ∘ a -> e |-- r) -> (b • r -> e2 ∘ a -> e |-- r)
 mapExpFnV = fmap . lmap
 
-mapExpFnC :: (e1 ==> r1 -> e2 ==> r2) -> (b • r -> e ∘ a -> e1 ==> r1) -> (b • r -> e ∘ a -> e2 ==> r2)
+mapExpFnC :: (e1 |-- r1 -> e2 |-- r2) -> (b • r -> e ∘ a -> e1 |-- r1) -> (b • r -> e ∘ a -> e2 |-- r2)
 mapExpFnC = rmap . rmap
 
 
