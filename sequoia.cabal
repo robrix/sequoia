@@ -231,3 +231,6 @@ test-suite test
     , base
     , hedgehog >= 1 && < 2
     , sequoia
+  if (impl(ghc >= 9.2))
+    ghc-options:
+      -Wno-missing-signatures
