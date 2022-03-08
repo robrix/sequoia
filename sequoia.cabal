@@ -41,6 +41,7 @@ common common
   if (impl(ghc >= 9.2))
     ghc-options:
       -Wno-missing-kind-signatures
+      -Wno-operator-whitespace
   default-extensions:
     DeriveTraversable
     DerivingStrategies
