@@ -34,6 +34,7 @@
 :seti -Wno-prepositive-qualified-module
 -- 9.2+
 :seti -Wno-missing-kind-signatures
+:seti -Wno-operator-whitespace
 
 -- We have this one on in the project but not in the REPL to reduce noise
 :seti -Wno-missing-signatures
