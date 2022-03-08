@@ -203,7 +203,7 @@ library
   -- other-extensions:
   build-depends:
     , adjunctions
-    , base ^>=4.14.1.0
+    , base >=4.14.1.0 && < 5
     , comonad
     , distributive
     , fresnel
@@ -225,5 +225,5 @@ test-suite test
     Line.Test
   build-depends:
     , base
-    , hedgehog ^>= 1
+    , hedgehog >= 1 && < 2
     , sequoia
