@@ -69,7 +69,7 @@ mapSrcR :: (forall x . Iso' (x • r) (x • r')) -> (Src e r b -> Src e r' b)
 mapSrcR b = over _Src (mapSrcFnC (over _CK (view b)) . mapSrcFnK (review b))
 
 mapSrcFnK :: (forall x . x • r2 -> x • r1) -> (b • r1 -> e |- r) -> (b • r2 -> e |- r)
-mapSrcFnK = lmap
+mapSrcFnK f = lmap f
 
 mapSrcFnC :: (e1 |- r1 -> e2 |- r2) -> (b • r -> e1 |- r1) -> (b • r -> e2 |- r2)
 mapSrcFnC = rmap

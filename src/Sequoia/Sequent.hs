@@ -246,7 +246,7 @@ instance SubtractionIntro Seq where
 -- Quantification
 
 instance UniversalIntro Seq where
-  forAllL p = mapL (fmap (notNegate . runForAll)) p
+  forAllL p = mapL (fmap (\ f -> notNegate (runForAll f))) p
   forAllR p = seq (\ _Δ _Γ -> cont (\ _K -> pure (inrL _Δ • ForAll (_K (\ k -> inlL _Δ |> k ↓ p ↑ _Γ)))))
 
 instance ExistentialIntro Seq where
@@ -261,7 +261,7 @@ instance NuIntro Seq where
   nuR s = wkR' s >>> existsL (mapL (fmap nu) init)
 
 instance MuIntro Seq where
-  muL f k = wkL (downR f) >>> exL (mapL (fmap getMu) (funL init (wkL' k)))
+  muL f k = wkL (downR f) >>> exL (mapL (fmap (\ m -> getMu m)) (funL init (wkL' k)))
   muR = mapR (lmap mu)
 
 

@@ -31,7 +31,7 @@ instance Diagonal p => Diagonal (Pastro p) where
   dup = Pastro fst dup (,())
 
 instance Diagonal p => Diagonal (Copastro p) where
-  dup = Copastro ($ dup)
+  dup = Copastro (\ f -> f dup)
 
 instance Applicative f => Diagonal (Star f) where
   dup = Star (pure . dup)
@@ -58,7 +58,7 @@ instance Codiagonal p => Codiagonal (Pastro p) where
   dedup = Pastro fst dedup (,())
 
 instance Codiagonal p => Codiagonal (Copastro p) where
-  dedup = Copastro ($ dedup)
+  dedup = Copastro (\ f -> f dedup)
 
 instance Applicative f => Codiagonal (Star f) where
   dedup = Star (pure . dedup)

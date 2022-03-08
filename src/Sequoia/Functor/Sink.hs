@@ -69,7 +69,7 @@ mapSnkR :: (forall x . x • r -> x • r') -> (Snk e r a -> Snk e r' a)
 mapSnkR f = over _Snk (mapSnkFnC (over _CK f))
 
 mapSnkFnV :: (forall x . e2 ∘ x -> e1 ∘ x) -> (e1 ∘ a -> e |- r) -> (e2 ∘ a -> e |- r)
-mapSnkFnV = lmap
+mapSnkFnV f = lmap f
 
 mapSnkFnC :: (e1 |- r1 -> e2 |- r2) -> (e ∘ a -> e1 |- r1) -> (e ∘ a -> e2 |- r2)
 mapSnkFnC = rmap

@@ -178,7 +178,7 @@ unsecondConj = unsecond . dimap coerceConj coerceConj
 
 
 lensConj :: Conj c => (s -> a) -> (s `c` b -> t) -> Lens s t a b
-lensConj get = lens get . curryConj
+lensConj get set = lens get (curryConj set)
 
 
 -- Defaults

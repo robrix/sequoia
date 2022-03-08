@@ -160,7 +160,7 @@ unrightDisj = unright . dimap coerceDisj coerceDisj
 
 
 prismDisj :: Disj d => (b -> t) -> (s -> t `d` a) -> Prism s t a b
-prismDisj inj = prism inj . (coerceDisj .)
+prismDisj inj prj = prism inj (coerceDisj . prj)
 
 
 -- Defaults

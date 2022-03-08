@@ -211,10 +211,10 @@ mapExpR b = exp . mapExpFnC (over _CK (review b)) . mapExpFnK (view b) . runExp
 
 
 mapExpFnK :: (forall x . x • r2 -> x • r1) -> (b • r1 -> e ∘ a -> e |- r) -> (b • r2 -> e ∘ a -> e |- r)
-mapExpFnK = lmap
+mapExpFnK f = lmap f
 
 mapExpFnV :: (forall x . e2 ∘ x -> e1 ∘ x) -> (b • r -> e1 ∘ a -> e |- r) -> (b • r -> e2 ∘ a -> e |- r)
-mapExpFnV = fmap . lmap
+mapExpFnV f = fmap (lmap f)
 
 mapExpFnC :: (e1 |- r1 -> e2 |- r2) -> (b • r -> e ∘ a -> e1 |- r1) -> (b • r -> e ∘ a -> e2 |- r2)
 mapExpFnC = rmap . rmap

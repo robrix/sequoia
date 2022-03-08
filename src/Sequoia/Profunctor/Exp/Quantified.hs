@@ -39,7 +39,7 @@ exp f = Exp (. f)
 -- Elimination
 
 (#) :: (a --> b) -> (a -> b)
-(#) = (`getExp` id)
+f # a = getExp f id a
 
 infixl 9 #
 
